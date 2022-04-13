@@ -1,0 +1,135 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: "flow-voting-tool-backend"
+    tier: "backend"
+    release: "prod"
+  name: flow-vt-backend-prod-dpy
+  namespace: default
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 2
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: "flow-voting-tool-backend"
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: "flow-voting-tool-backend"
+    spec:
+      containers:
+      - image: "us.gcr.io/brud-prod/flow-voting-tool-backend:test"
+        imagePullPolicy: IfNotPresent
+        name: "flow-vt-backend-prod-pod"
+        ports:
+        - containerPort: 5001
+          protocol: TCP
+        env:
+          - name: ENV_NAME
+            valueFrom:
+              secretKeyRef:
+                name: backend-prod-secrets
+                key: ENV_NAME
+          - name: DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: backend-prod-secrets
+                key: DB_USERNAME
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: backend-prod-secrets
+                key: DB_PASSWORD
+          - name: DB_NAME
+            valueFrom:
+              secretKeyRef:
+                name: backend-prod-secrets
+                key: DB_NAME
+          - name: DB_HOST
+            valueFrom:
+              secretKeyRef:
+                name: backend-prod-secrets
+                key: DB_HOST
+          - name: DB_PORT
+            valueFrom:
+              secretKeyRef:
+                name: backend-prod-secrets
+                key: DB_PORT
+          - name: IPFS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: backend-prod-secrets
+                key: IPFS_KEY
+          - name: IPFS_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: backend-prod-secrets
+                key: IPFS_SECRET
+          - name: FLOW_URL
+            valueFrom:
+              secretKeyRef:
+                name: backend-prod-secrets
+                key: FLOW_URL
+
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      imagePullSecrets:
+      - name: regcred
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "flow-vt-backend-prod-svc"
+  namespace: default
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5001
+    targetPort: 5001
+  selector:
+    app: "flow-voting-tool-backend"
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  name: flow-vt-backend-prod-ingress
+  namespace: default
+
+spec:
+  rules:
+  - host: flowvotingtool.api.gcp.dappercollectives.net
+    http:
+      paths:
+      - backend:
+          service:
+            name: snapshot-flow-balances-prod-svc
+            port:
+              number: 5001
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - flowvotingtool.api.gcp.dappercollectives.net
+    secretName: brud-prod-api-3

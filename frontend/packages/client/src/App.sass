@@ -1,0 +1,341 @@
+@import url('https://fonts.googleapis.com/css?family=Arimo:regular,bold,italic&subset=latin,latin-ext')
+@import url('https://fonts.googleapis.com/css?family=Roboto+Mono:regular,bold,italic&subset=latin,latin-ext')
+@charset "utf-8"
+
+// Set brand colors
+$green: #0E5B20
+$red: #B20D0D
+$yellow: #FBD84D
+$orange: #F4AF4A
+
+// Update Bulma's global variables
+$family-primary: "Arimo"
+$family-secondary: "Arimo"
+$family-code: "Roboto Mono"
+$family-monospace: "Roboto Mono"
+$title-family: $family-secondary
+$body-color: black
+$body-background-color: white
+$primary: $yellow
+
+// Update some of Bulma's component variables
+$control-border-width: 2px
+$input-border-color: transparent
+$input-shadow: none
+$button-background-color: transparent
+$button-border-color: black
+$button-color: black
+$button-border-width: 1px
+$button-hover-color: $yellow
+$button-hover-border-color: $yellow
+$title-size: 2.5rem
+$progress-bar-background-color: $yellow
+$input-color: black
+$white-ter: #F2F2F2	
+
+// Import only what you need from Bulma
+@import '~bulma/sass/utilities/_all.sass'
+@import '~bulma/sass/base/_all.sass'
+@import '~bulma/sass/grid/_all.sass'
+@import '~bulma/sass/elements/button.sass'
+@import '~bulma/sass/elements/container.sass'
+@import '~bulma/sass/elements/progress.sass'
+@import '~bulma/sass/elements/title.sass'
+@import '~bulma/sass/components/navbar.sass'
+@import '~bulma/sass/components/modal.sass'
+@import '~bulma/sass/components/tabs.sass'
+@import '~bulma/sass/components/dropdown.sass'
+@import '~bulma/sass/form/_all.sass'
+@import '~bulma/sass/layout/section.sass'
+@import '~bulma/sass/helpers/color.sass'
+@import '~bulma/sass/helpers/spacing.sass'
+@import '~bulma/sass/helpers/visibility.sass'
+@import '~bulma/sass/helpers/typography.sass'
+@import '~bulma/sass/helpers/flexbox.sass'
+
+$tooltip-radius: 6px
+@import '@creativebulma/bulma-tooltip'
+
+// custom css
+.App, #root
+	height: 100%
+.Body
+	padding-top: calc($navbar-height + 2rem)
+	height: 100%
+@include mobile	
+	.Body
+		padding-top: calc($navbar-height + 1.25rem)
+		height: 100%
+.full-height
+	height: 100%
+.tx 
+	border: 1px solid $yellow
+code
+	background: transparent
+.divider
+	border-bottom: 1px solid $grey-light
+.rounded-sm
+	border-radius: 8px
+.rounded-lg
+	border-radius: 20px
+.rounded-full
+	border-radius: 50%
+.border-light
+	border: 1px solid $grey-lighter
+.flex-1
+	flex: 1 0 0
+.flex-2
+	flex: 2 0 0
+.has-background-orange
+	background-color: $orange
+.has-background-yellow
+	background-color: $yellow
+	&.button
+		border: none !important
+		&:hover
+			color: black
+		&.vote-button:hover
+			color: black
+			border: 1px solid rgba(0, 0, 0, 0.4) !important
+			transform: scale(1.01)
+.button.is-disabled
+	pointer-events: none
+	opacity: 0.5
+.button.border-light:hover
+	border-color: $black
+.leading-tight
+	line-height: 1
+.cursor-pointer
+	cursor: pointer
+.header-spacing
+	padding-bottom: 1rem
+	padding-top: 1rem 
+.message-container, .communities
+	margin-bottom: 2.5rem
+@include mobile
+	.header-spacing
+		padding-bottom: 10px
+		padding-top: 10px
+	.section
+		padding-top: 1.57rem !important
+		padding-bottom: 3rem
+		padding-right: 1.5rem	  	
+		padding-left: 1.5rem
+	.message-container, .communities		
+		margin-bottom: 1.5rem		  	
+// custom radio buttons
+label > input[type="radio"]
+	display: none
+label > input[type="radio"] + *::before 
+	content: ""
+	display: inline-block
+	vertical-align: middle
+	width: 1rem
+	height: 1rem
+	margin-right: 0.5rem
+	border-radius: 50%
+	border-style: solid
+	border-width: 0.1rem
+	border-color: gray
+label > input[type="radio"]:checked + *
+	color: $yellow
+label > input[type="radio"]:checked + *::before
+	background: radial-gradient($yellow 0%, $yellow 40%, transparent 50%, transparent)
+	border-color: $yellow
+label > input[type="radio"].is-chosen + *::before
+	// green checkmark image
+	background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTIiIGZpbGw9IiMwRTVCMjAiLz4KPHBhdGggZD0iTTE4LjEyOTMgNy40NzkyOEMxNy45NjE1IDcuMzU5IDE3Ljc1MjkgNy4zMTAyOSAxNy41NDkyIDcuMzQzODZDMTcuMzQ1NSA3LjM3NzQ0IDE3LjE2MzUgNy40OTA1NCAxNy4wNDMyIDcuNjU4M0w5Ljc2MDE2IDE0LjY5OUw3LjMyOTAyIDEyLjI2NThDNy4xODMwNyAxMi4xMTk4IDYuOTg1MDkgMTIuMDM3NyA2Ljc3ODYzIDEyLjAzNzdDNi41NzIxNyAxMi4wMzc2IDYuMzc0MTUgMTIuMTE5NiA2LjIyODEzIDEyLjI2NTVDNi4wODIxMSAxMi40MTE1IDYuMDAwMDUgMTIuNjA5NSA2IDEyLjgxNTlDNS45OTk5NSAxMy4wMjI0IDYuMDgxOTIgMTMuMjIwNCA2LjIyNzg3IDEzLjM2NjRMOS4zMDc2NyAxNi40NDU3QzkuMzg4NTIgMTYuNTIzNSA5LjQ4NSAxNi41ODMyIDkuNTkwNyAxNi42MjA5QzkuNjk2NCAxNi42NTg2IDkuODA4OTEgMTYuNjczMyA5LjkyMDc1IDE2LjY2NDJDMTAuMDMyNiAxNi42NTUxIDEwLjE0MTIgMTYuNjIyMyAxMC4yMzk0IDE2LjU2OEMxMC4zMzc2IDE2LjUxMzYgMTAuNDIzMSAxNi40MzkxIDEwLjQ5MDMgMTYuMzQ5MkwxOC4zMDgzIDguNTY1MzhDMTguNDI4NiA4LjM5NzYxIDE4LjQ3NzMgOC4xODg5MyAxOC40NDM4IDcuOTg1MjVDMTguNDEwMiA3Ljc4MTU3IDE4LjI5NzEgNy41OTk1NyAxOC4xMjkzIDcuNDc5MjhaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K')
+	background-size: contain
+	width: 25px
+	height: 25px
+	background-color: white
+	border-color: transparent
+	background-repeat: no-repeat
+
+.proposal-copy
+	color: $grey
+.proposal-copy ul
+	padding-left: 2rem
+.proposal-copy ul li 
+	padding-left: .5rem
+	list-style: disc
+	margin-bottom: 1rem
+.proposal-copy a
+	text-decoration: underline
+	transition-property: all
+	transition-timing-function: cubic-bezier(.4,0,.2,1)
+	transition-duration: 0.15s
+.proposal-copy a:hover
+	filter: opacity(0.7)
+	color: $link
+.navbar
+	display: flex
+	justify-content: space-between
+.navbar-end
+	align-items: center
+	display: flex
+.navbar-item
+	align-items: center
+	display: flex
+.navbar-start
+	align-items: stretch
+	display: flex
+.navbar-burger
+	display: none
+hr
+	border: 1px solid $grey-lightest
+.vote-options.is-disabled
+	opacity: 0.5
+	pointer-events: none
+.vote-options.is-disabled.is-voted
+	opacity: 1
+.dropdown.is-disabled
+	background-color: rgba(239, 239, 239, 0.3)
+	pointer-events: none
+
+@media (min-width: 1024px)
+	.container > .navbar .navbar-brand
+		margin-left: 0 !important
+
+@media (max-width: 769px)
+	.section
+		padding-right: 1rem
+		padding-left: 1rem
+	.navbar-burger
+		display: block
+		width: 1.25rem
+	.navbar-brand
+		flex-direction: row-reverse
+	.navbar-start
+		margin-bottom: 1rem
+	a.navbar-item:hover
+		background-color: transparent
+		color:#4a4a4a
+	.is-flex-direction-column-mobile
+		flex-direction: column
+	.p-0-mobile
+		padding: 0 !important
+	.mb-4-mobile
+		margin-bottom: 1rem !important
+	.wallet-connect
+		&.button
+		padding: 0.1em 0.5em
+		height: auto
+		color: #000000 !important
+
+.tabs a 
+	border-bottom-color: #dbdbdb
+	border-bottom-style: none
+	border-bottom-width: 0px
+
+.tabs li.is-active a 
+	border-bottom-color: $yellow
+	color: $black
+	border-bottom-width: 3px
+	border-bottom-style: solid
+
+.small-text  
+	font-size: 0.88rem !important
+.smaller-text  
+	font-size: 0.75rem !important
+.has-text-back
+	color: #000000 !important	
+.has-text-red
+	color: $red
+
+@import './components/StepByStep/StepByStep.sass'	
+@import './components/Proposals/Proposals.sass'
+
+.button.dropdown-item.is-active
+	background-color: $grey
+	color: $white !important
+	border-radius: 0px
+
+.button.dropdown-item:hover
+	background-color:  $grey-lighter
+	border-radius: 0px
+
+@include desktop
+	.is-panel-fixed
+		position: fixed
+		
+@include  tablet
+	.is-panel-fixed
+		position: fixed
+
+span[data-tooltip]
+	border-bottom: 1px #dbdbdb
+
+.transition-all
+	transition-property: all
+	transition-timing-function: cubic-bezier(.4,0,.2,1)
+	transition-duration: 0.15s
+
+.wallet-connect.button.is-primary:hover, .button-vote:hover
+	border-color: rgba(0, 0, 0, 0.4) !important
+	border-width: 1px !important
+	transform: scale(1.01)
+.wallet-connect.button.is-primary	
+	color: #000000 !important
+
+.community-card:hover, .proposal-card:hover
+	border-color: rgba(0, 0, 0, 0.4)
+	border-width: 1px
+	transform: scale(1.01)
+
+.tab-link:hover
+	padding-left: 0.3rem
+	transform: scale(1.04)
+
+.back-button:hover
+	margin-left: -0.25rem
+	color: rgba(0, 0, 0, 0.7) !important
+
+.option-vote:hover
+	border-color: rgba(0, 0, 0, 0.4)
+	border-width: 1px
+
+.navbar-item-hover:hover
+	transform: scale(1.1)
+	color: rgba(0, 0, 0, 0.7)
+
+.button:hover
+	color: $black
+
+
+@keyframes pulse
+	0%
+		transform: scale(1)
+		-ms-transform: scale(1)
+		-webkit-transform: scale(1)
+	100%
+		transform: scale(1.3)
+		-ms-transform: scale(1.3)
+		-webkit-transform: scale(1.3)
+
+@mixin loader
+	transform-origin: 32px 32px
+	animation: pulse 0.9s linear infinite alternate
+
+#loader_1
+	@include loader
+	animation-delay: 0s
+#loader_2
+	@include loader
+	animation-delay: 0.3s
+#loader_3
+	@include loader
+	animation-delay: 0.6s		
+
+@keyframes fadein 
+	0% 
+		opacity: 0
+	100%
+		opacity: 1
+
+.fade-in
+	-webkit-animation: fadein 0.5s
+	-moz-animation: fadein 0.5s
+	-ms-animation: fadein 0.5s
+	-o-animation: fadein 0.5s
+	animation: fadein 0.5s

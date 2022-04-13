@@ -1,0 +1,21 @@
+.step-by-step-body
+	padding-left: 8rem
+	padding-top: 5rem
+	padding-right: 8rem
+	min-height: calc(100vh - 85px)
+
+@include desktop-only 
+	.step-by-step-body
+		padding-left: 4rem
+		padding-right: 0
+
+@include tablet-only 
+	.step-by-step-body
+		padding-left: 1rem
+		padding-right: 1rem
+
+@include mobile 
+	.step-by-step-body
+		padding-top: 1rem
+		padding-left: 1rem
+		padding-right: 1rem

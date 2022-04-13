@@ -1,0 +1,1 @@
+DELETE FROM voting_strategies WHERE key = 'staked-token-weighted-default'

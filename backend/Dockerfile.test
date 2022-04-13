@@ -1,0 +1,12 @@
+FROM golang:latest as vt-init
+# Install go modules
+WORKDIR /flow-voting-tool
+COPY ./go.mod ./
+WORKDIR /flow-voting-tool/main
+ADD ./main .
+WORKDIR /flow-voting-tool
+RUN go mod tidy
+RUN go mod download
+# COPY .env .env
+WORKDIR /flow-voting-tool/main
+ENTRYPOINT [ "go", "test", "-v" ]

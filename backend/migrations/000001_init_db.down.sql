@@ -1,0 +1,12 @@
+DROP TABLE IF EXISTS votes;
+DROP TABLE IF EXISTS proposal_results;
+DROP TABLE IF EXISTS proposals;
+DROP TABLE IF EXISTS communities;
+DROP TABLE IF EXISTS user_roles;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS snapshot_blocks;
+DROP TABLE IF EXISTS balances;
+DROP TABLE IF EXISTS voting_strategies;
+DROP TYPE IF EXISTS strategies;
+DROP TYPE IF EXISTS role_types;
+DROP TYPE IF EXISTS statuses;

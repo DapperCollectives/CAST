@@ -1,0 +1,9 @@
+{
+  "name": "@flow-voting-tool/server",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install": "go mod tidy",
+    "start": "make build_and_run"
+  }
+}

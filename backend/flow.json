@@ -1,0 +1,33 @@
+{
+	"emulators": {
+		"default": {
+			"port": 3569,
+			"serviceAccount": "emulator-account"
+		}
+	},
+	"contracts": {
+		"VotingCommunity": "./packages/cadence/V2/contracts/VotingCommunity.cdc"
+	},
+	"networks": {
+		"emulator": "127.0.0.1:3569",
+		"mainnet": "access.mainnet.nodes.onflow.org:9000",
+		"testnet": "access.devnet.nodes.onflow.org:9000"
+	},
+	"accounts": {
+    "emulator-account": {
+      "address": "0xf8d6e0586b0a20c7",
+      "key": "63bff10bd6186b7d97c8e2898941c93d5d33a830b0ac9b758e216024b7bf7957"
+    },
+		"admin-account": {
+			"address": "0x01cf0e2f2f715450",
+			"key": "a735bcdd732b2534635847209a5e3066276817193adb6d637acfda4f84840606"
+		}
+  },
+  "deployments": {
+    "emulator": {
+      "emulator-account": [
+        "VotingCommunity"
+      ]
+    }
+  }
+}

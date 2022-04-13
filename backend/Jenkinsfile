@@ -1,0 +1,112 @@
+pipeline {
+    agent {
+            kubernetes {
+      defaultContainer 'jnlp'
+      yaml """
+apiVersion: v1
+kind: Pod
+metadata:
+labels:
+  name: agentes
+spec:
+  # Use service account that can deploy to all namespaces
+  serviceAccountName: jenkins
+  containers:
+  - name: jenksgolang
+    image: mjslabs/jenkins-jnlp-golang
+    command:
+    - cat
+    tty: true
+  - name: brudbuntu
+    image: bam.brud.local:6000/brudtech/brudbuntu:v1.3
+    command:
+    - cat
+    tty: true
+    volumeMounts:
+    - mountPath: /var/run/docker.sock
+      name: docker-sock
+  - name: brudbuntu-builder
+    image: bam.brud.local:6000/brudtech/brudbuntu-builder:v1.0
+    command:
+    - cat
+    tty: true
+    volumeMounts:
+    - mountPath: /var/run/docker.sock
+      name: docker-sock
+  volumes:
+    - name: docker-sock
+      hostPath:
+        path: /var/run/docker.sock
+"""
+  }
+    }
+    environment {
+        DB_USERNAME = credentials('db-un-voting-db')
+        DB_PASSWORD = credentials('db-userp-voting')
+        IPFS_KEY = credentials('db-ipfskey-voting')
+        IPFS_SECRET = credentials('ipfs-secrets-voting')
+        FLOW_URL = credentials('db-flowurl-voting')
+        tag = sh(returnStdout: true, script: "git rev-parse --short=10 HEAD").trim()
+        longtag = sh(returnStdout: true, script: "git rev-parse HEAD").trim()
+    }
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// TEST
+//--------------------------------------------------------------------------------------------------------------------------------
+    stages {       
+        stage('SIMPLE TEST') {
+        steps {
+                container('jenksgolang') {
+                script {
+                     sh 'echo "you will need to run  go test -v ./..."'   
+                  }
+                }
+            }
+        }
+
+//--------------------------------------------------------------------------------------------------------------------------------
+// BUILD IMAGE
+//--------------------------------------------------------------------------------------------------------------------------------       
+
+        stage('BUILD IMAGE') {
+        steps {
+                container('brudbuntu-builder') {
+                script {
+                    echo "building the docker image for Voting Tool..."
+                    sh 'docker build . -t bam.brud.local:6000/brudtech/flow-voting-tool-backend:${tag}-vt'
+                    sh 'docker push bam.brud.local:6000/brudtech/flow-voting-tool-backend:${tag}-vt'  
+                  }
+                }
+            }
+        }
+//--------------------------------------------------------------------------------------------------------------------------------
+// CREATE DEVELOP ENVIRONMENT
+//--------------------------------------------------------------------------------------------------------------------------------
+        stage('BUILDING BACKEND IMAGES') {
+            steps {
+                container('brudbuntu') {
+                script {
+                      sh 'mkdir ${tag}'
+                      sh 'cp deploy/secrets.yml ${tag} -v'
+                      sh 'cp deploy/backend.yml ${tag} -v'
+                      sh 'sed -i "s/REPLACE_NAMESPACE/develop/g" ${tag}/backend.yml'
+                      sh 'sed -i "s/REPLACE_TAG/${tag}-vt/g" ${tag}/backend.yml'
+                      sh 'sed -i "s/REPLACE_HOST/${tag}/g" ${tag}/backend.yml'
+                      sh 'sed -i "s/REPLACE_SECRET_NAME/develop-secrets/g" ${tag}/backend.yml'
+                      sh 'sed -i "s/REPLACE_NAMESPACE/develop/g" ${tag}/secrets.yml'
+                      sh 'sed -i "s/REPLACE_SECRET_NAME/develop-secrets/g" ${tag}/secrets.yml'
+                      sh 'sed -i "s/REPLACE_DB_USERNAME/${DB_USERNAME}/g" ${tag}/secrets.yml'
+                      sh 'sed -i "s/REPLACE_PASSWORD/${DB_PASSWORD}/g" ${tag}/secrets.yml'
+                      sh 'sed -i "s/REPLACE_IPFS_KEY/${IPFS_KEY}/g" ${tag}/secrets.yml'
+                      sh 'sed -i "s/REPLACE_IPFS_SECRET/${IPFS_SECRET}/g" ${tag}/secrets.yml'
+                      sh 'sed -i "s/REPLACE_FLOW_URL/${FLOW_URL}/g" ${tag}/secrets.yml'
+                      sh 'kubectl apply -n develop -f ./${tag}'
+                      sh 'kubectl get all -n develop'
+                                        }
+                                    }
+                                }
+                        }
+
+
+    }
+}

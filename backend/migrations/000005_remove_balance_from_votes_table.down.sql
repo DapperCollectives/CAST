@@ -1,0 +1,2 @@
+
+ALTER TABLE votes ADD COLUMN balance BIGINT;

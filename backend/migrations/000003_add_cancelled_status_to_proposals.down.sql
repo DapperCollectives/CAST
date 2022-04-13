@@ -1,0 +1,1 @@
+-- removing a single type from an enum is not supported
