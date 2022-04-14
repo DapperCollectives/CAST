@@ -2,6 +2,8 @@ import { useReducer, useCallback } from "react";
 import { defaultReducer, INITIAL_STATE } from "../reducers";
 import { checkResponse } from "../utils";
 import { useErrorHandlerContext } from "../contexts/ErrorHandler";
+import { CODE as transferTokensCode } from "@onflow/six-transfer-tokens"
+import * as t from "@onflow/types";
 
 const mockedData = {
   votes: Array(100)
@@ -96,7 +98,111 @@ export default function useProposal() {
     [dispatch]
   );
 
-  const voteOnProposal = useCallback(
+  const voteOnProposal = useCallback(async (injectedProvider, proposal, voteData, isLedger, user) => {
+    if (isLedger) {
+      console.log('ledger is connected')
+      return voteOnProposalLedger(injectedProvider, proposal, voteData, user);
+    }
+    console.log('is blocto')
+    return voteOnProposalBlocto(injectedProvider, proposal, voteData);
+  }, []);
+
+  const voteOnProposalLedger =
+    async (injectedProvider, proposal, voteData, user) => {
+      try {
+        const timestamp = Date.now();
+        const hexChoice = Buffer.from(voteData.choice).toString("hex")
+        const message = `${proposal.id}:${hexChoice}:${timestamp}`;
+        const hexMessage = Buffer.from(message).toString("hex");
+        /*
+                const _compositeSignatures = await injectedProvider
+                  .currentUser()
+                  .signUserMessage(hexMessage);
+        */
+
+        let _compositeSignatures = "";
+        const buildAuthz = (address) => {
+          return async function authz(account) {
+            return {
+              ...account,
+              addr: injectedProvider.sansPrefix(address),
+              keyId: 0,
+              signingFunction: async (signable) => {
+                console.log('signable:', signable);
+                const result = await injectedProvider.authz();
+                const signedResult = await result.signingFunction(signable);
+                _compositeSignatures = signedResult;
+                console.log('signed:', signedResult);
+                return {
+                  addr: injectedProvider.withPrefix(address),
+                  keyId: 0,
+                  signature: signedResult.signature,
+                };
+              }
+            };
+          };
+        }
+
+        const toAddress = "0x47fd53250cc3982f"
+        // only serialize the tx not send
+        const { transactionId } = await injectedProvider.send([
+          injectedProvider.transaction(transferTokensCode),
+          injectedProvider.args([injectedProvider.arg("0.0", t.UFix64), injectedProvider.arg(toAddress, t.Address)]),
+          injectedProvider.proposer(buildAuthz(user.addr)),
+          injectedProvider.authorizations([injectedProvider.authz]),
+          injectedProvider.payer(injectedProvider.authz),
+          injectedProvider.limit(100),
+          ix => {
+            console.log('IX', ix)
+            return ix
+          }
+        ]);
+        
+        console.log('transactionId', transactionId);
+        console.log('compositeSignatures', _compositeSignatures);
+
+        // TODO: remove after this is deployed to production
+        const sig = getSig([_compositeSignatures]);
+        if (!sig) {
+          return { error: "No valid user signature found." };
+        }
+        const compositeSignatures = getCompositeSigs([_compositeSignatures]);
+        if (!compositeSignatures) {
+          return { error: "No valid user signature found." };
+        }
+
+        const fetchOptions = {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...voteData,
+            compositeSignatures,
+            message,
+            timestamp,
+            transactionId,
+            sig,
+          }),
+        };
+        const { id } = proposal;
+        const response = await fetch(
+          `${process.env.REACT_APP_BACK_END_SERVER_API}/proposals/${id}/votes`,
+          fetchOptions
+        );
+
+        if (response.json) {
+          const json = await response.json();
+          return json;
+        }
+
+        return { error: response };
+      } catch (err) {
+        return { error: String(err) };
+      }
+    };
+
+  const voteOnProposalBlocto = useCallback(
     async (injectedProvider, proposal, voteData) => {
       try {
         const timestamp = Date.now();

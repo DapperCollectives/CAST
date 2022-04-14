@@ -5,6 +5,8 @@
   "dependencies": {
     "@creativebulma/bulma-tooltip": "^1.2.0",
     "@onflow/fcl": "^0.0.77",
+    "@onflow/config": "0.0.2",
+    "@onflow/six-transfer-tokens": "0.0.8",
     "bulma": "0.9.3",
     "cookies-js": "^1.2.3",
     "draft-js": "^0.11.7",
