@@ -414,7 +414,7 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// validate user signature
-	if err := a.FlowAdapter.UserSignatureValidate(v.Addr, v.Message, v.Composite_signatures); err != nil {
+	if err := a.FlowAdapter.UserSignatureValidate(v.Addr, v.Message, v.Composite_signatures, v.TransactionId); err != nil {
 		respondWithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -924,7 +924,7 @@ func (a *App) validateAllowlistWithSig(addr string, message string, sigs *[]shar
 		return errors.New("user does not have permission")
 	}
 
-	if err := a.FlowAdapter.UserSignatureValidate(addr, message, sigs); err != nil {
+	if err := a.FlowAdapter.UserSignatureValidate(addr, message, sigs, ""); err != nil {
 		return err
 	}
 	return nil

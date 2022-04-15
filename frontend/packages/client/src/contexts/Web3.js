@@ -89,6 +89,7 @@ export function Web3Provider({ children, network = "testnet", ...props }) {
     user,
     address: user.addr,
     isLedger,
+    network,
     logOut,
     ...props,
   };

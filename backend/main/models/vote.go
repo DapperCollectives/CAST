@@ -22,6 +22,7 @@ type Vote struct {
 	Created_at           time.Time               `json:"createdAt,omitempty"`
 	Cid                  *string                 `json:"cid"`
 	Message              string                  `json:"message"`
+	TransactionId        string                  `json:"transactionId"`
 }
 
 type VoteWithBalance struct {

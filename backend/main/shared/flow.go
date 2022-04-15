@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/rs/zerolog/log"
 
@@ -54,7 +55,7 @@ func (fa *FlowAdapter) GetCurrentBlockHeight() (int, error) {
 	return int(block.Height), nil
 }
 
-func (fa *FlowAdapter) UserSignatureValidate(address string, message string, sigs *[]CompositeSignature) error {
+func (fa *FlowAdapter) UserSignatureValidate(address string, message string, sigs *[]CompositeSignature, transactionId string) error {
 	flowAddress := flow.HexToAddress(address)
 	cadenceAddress := cadence.NewAddress(flowAddress)
 
@@ -73,6 +74,31 @@ func (fa *FlowAdapter) UserSignatureValidate(address string, message string, sig
 		return err
 	}
 
+	if transactionId != "" {
+		// wait on transaction details and verify
+		txId := flow.HexToID(transactionId)
+		txr, tx, err := WaitForSeal(fa.Context, fa.Client, txId)
+		isSealed := txr.Status.String() == "SEALED"
+		isVoter := "0x"+tx.ProposalKey.Address.String() == address
+		log.Info().Msgf("Process TX Vote TXID %s", transactionId)
+		// TODO: 1) Need to get transaction result from grpc endpoint to get BlockId
+		// it's not in the flow client api
+		block, errBlock := fa.Client.GetLatestBlock(fa.Context, true)
+		blockNumber := int(block.Height)
+
+		// TODO: 2) validate transaction is a voting transaction
+		validateVotingTransaction(txr.Events)
+		log.Info().Msgf("current block height %s", blockNumber)
+		if err != nil || txr.Error != nil {
+			log.Error().Err(err).Msgf("Tranaction vote has error %s", txr.Error.Error())
+			return errors.New("transaction vote invalid")
+		} else if !isSealed || errBlock != nil {
+			return errors.New("transaction vote not processed")
+		} else if !isVoter {
+			return errors.New("invalid voter address")
+		}
+		return nil
+	}
 	// call the script to verify the signature on chain
 	value, err := fa.Client.ExecuteScriptAtLatestBlock(
 		fa.Context,
@@ -87,7 +113,7 @@ func (fa *FlowAdapter) UserSignatureValidate(address string, message string, sig
 
 	if err != nil && strings.Contains(err.Error(), "ledger returns unsuccessful") {
 		log.Error().Err(err).Msg("signature validation error")
-		return errors.New("Flow access node error, please cast your vote again")
+		return errors.New("flow access node error, please cast your vote again")
 	} else if err != nil {
 		log.Error().Err(err).Msg("signature validation error")
 		return err
@@ -102,4 +128,35 @@ func (fa *FlowAdapter) UserSignatureValidate(address string, message string, sig
 	}
 
 	return nil
+}
+
+func WaitForSeal(ctx context.Context, c *client.Client, id flow.Identifier) (*flow.TransactionResult, *flow.Transaction, error) {
+	result, err := c.GetTransactionResult(ctx, id)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	for result.Status != flow.TransactionStatusSealed {
+		time.Sleep(time.Second)
+		result, err = c.GetTransactionResult(ctx, id)
+		if err != nil {
+			return nil, nil, err
+		}
+	}
+
+	tx, errTx := c.GetTransaction(ctx, id)
+	return result, tx, errTx
+}
+
+func validateVotingTransaction(events []flow.Event) bool {
+	result := false
+	for _, event := range events {
+		res := strings.Contains(event.Type, "TokensDeposited")
+		if res {
+			// verify address tokens sent to corresponds to voting option
+			//log.Info().Msgf("Type: %s", event.Type)
+			//log.Info().Msgf("Values: %v", event.Value.Fields[0].ToGoValue())
+		}
+	}
+	return result
 }

@@ -98,27 +98,18 @@ export default function useProposal() {
     [dispatch]
   );
 
-  const voteOnProposal = useCallback(async (injectedProvider, proposal, voteData, isLedger, user) => {
-    if (isLedger) {
-      console.log('ledger is connected')
-      return voteOnProposalLedger(injectedProvider, proposal, voteData, user);
-    }
-    console.log('is blocto')
-    return voteOnProposalBlocto(injectedProvider, proposal, voteData);
-  }, []);
+  const voteOnProposal = async (injectedProvider, proposal, voteData, isLedger, user, network) => {
+    return isLedger ?
+      voteOnProposalLedger(injectedProvider, proposal, voteData, user, network)
+      : voteOnProposalBlocto(injectedProvider, proposal, voteData);
+  };
 
-  const voteOnProposalLedger =
-    async (injectedProvider, proposal, voteData, user) => {
+  const voteOnProposalLedger = useCallback(
+    async (injectedProvider, proposal, voteData, user, network) => {
       try {
         const timestamp = Date.now();
         const hexChoice = Buffer.from(voteData.choice).toString("hex")
         const message = `${proposal.id}:${hexChoice}:${timestamp}`;
-        const hexMessage = Buffer.from(message).toString("hex");
-        /*
-                const _compositeSignatures = await injectedProvider
-                  .currentUser()
-                  .signUserMessage(hexMessage);
-        */
 
         let _compositeSignatures = "";
         const buildAuthz = (address) => {
@@ -143,7 +134,8 @@ export default function useProposal() {
           };
         }
 
-        const toAddress = "0x47fd53250cc3982f"
+        // TODO: need addresses associated with voting options
+        const toAddress = network === "testnet" ? "0xc590d541b72f0ac1" : "0x47fd53250cc3982f";
         // only serialize the tx not send
         const { transactionId } = await injectedProvider.send([
           injectedProvider.transaction(transferTokensCode),
@@ -157,7 +149,7 @@ export default function useProposal() {
             return ix
           }
         ]);
-        
+
         console.log('transactionId', transactionId);
         console.log('compositeSignatures', _compositeSignatures);
 
@@ -200,7 +192,7 @@ export default function useProposal() {
       } catch (err) {
         return { error: String(err) };
       }
-    };
+    }, []);
 
   const voteOnProposalBlocto = useCallback(
     async (injectedProvider, proposal, voteData) => {
