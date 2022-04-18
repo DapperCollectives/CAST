@@ -98,14 +98,14 @@ export default function useProposal() {
     [dispatch]
   );
 
-  const voteOnProposal = async (injectedProvider, proposal, voteData, isLedger, user, network) => {
+  const voteOnProposal = async (injectedProvider, proposal, voteData, isLedger) => {
     return isLedger ?
-      voteOnProposalLedger(injectedProvider, proposal, voteData, user, network)
+      voteOnProposalLedger(injectedProvider, proposal, voteData)
       : voteOnProposalBlocto(injectedProvider, proposal, voteData);
   };
 
   const voteOnProposalLedger = useCallback(
-    async (injectedProvider, proposal, voteData, user, network) => {
+    async (injectedProvider, proposal, voteData) => {
       try {
         const timestamp = Date.now();
         const hexChoice = Buffer.from(voteData.choice).toString("hex")
@@ -142,7 +142,7 @@ export default function useProposal() {
         const { transactionId } = await injectedProvider.send([
           injectedProvider.transaction(transferTokensCode),
           injectedProvider.args([injectedProvider.arg("0.0", t.UFix64), injectedProvider.arg(toAddress, t.Address)]),
-          injectedProvider.proposer(buildAuthz(user.addr)),
+          injectedProvider.proposer(buildAuthz(voteData.addr)),
           injectedProvider.authorizations([injectedProvider.authz]),
           injectedProvider.payer(injectedProvider.authz),
           injectedProvider.limit(100),

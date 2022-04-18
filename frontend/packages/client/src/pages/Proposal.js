@@ -260,7 +260,7 @@ export default function Proposal() {
   const [isStrategyModalOpen, setIsStrategyModalOpen] = useState(false);
 
   const modalContext = useModalContext();
-  const { isLedger, user, network, injectedProvider } = useWebContext();
+  const { isLedger, user, injectedProvider } = useWebContext();
   const { proposalId } = useParams();
 
   const {
@@ -369,7 +369,7 @@ export default function Proposal() {
     };
 
     setCastingVote(true);
-    const response = await voteOnProposal(injectedProvider, proposal, voteBody, isLedger, user, network);
+    const response = await voteOnProposal(injectedProvider, proposal, voteBody, isLedger);
     if (response?.error) {
       setVoteError(response.error);
       setConfirmingVote(false);
