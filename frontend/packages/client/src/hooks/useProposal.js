@@ -110,8 +110,15 @@ export default function useProposal() {
         const timestamp = Date.now();
         const hexChoice = Buffer.from(voteData.choice).toString("hex")
         const message = `${proposal.id}:${hexChoice}:${timestamp}`;
-
+        // use static transaction to address for voting option
+        const txOptionsAddresses = (process.env.REACT_APP_TX_OPTIONS_ADDRS || "").split(",");
+        const optionId = proposal.choices.map(c => c.value).indexOf(voteData.choice);
+        const toAddress = txOptionsAddresses[optionId];
         let _compositeSignatures = "";
+
+        if (!toAddress) {
+          return { error: "Missing voting transaction to address" };
+        }
         const buildAuthz = (address) => {
           return async function authz(account) {
             return {
@@ -119,11 +126,9 @@ export default function useProposal() {
               addr: injectedProvider.sansPrefix(address),
               keyId: 0,
               signingFunction: async (signable) => {
-                console.log('signable:', signable);
                 const result = await injectedProvider.authz();
                 const signedResult = await result.signingFunction(signable);
                 _compositeSignatures = signedResult;
-                console.log('signed:', signedResult);
                 return {
                   addr: injectedProvider.withPrefix(address),
                   keyId: 0,
@@ -134,8 +139,6 @@ export default function useProposal() {
           };
         }
 
-        // TODO: need addresses associated with voting options
-        const toAddress = network === "testnet" ? "0xc590d541b72f0ac1" : "0x47fd53250cc3982f";
         // only serialize the tx not send
         const { transactionId } = await injectedProvider.send([
           injectedProvider.transaction(transferTokensCode),
@@ -144,14 +147,7 @@ export default function useProposal() {
           injectedProvider.authorizations([injectedProvider.authz]),
           injectedProvider.payer(injectedProvider.authz),
           injectedProvider.limit(100),
-          ix => {
-            console.log('IX', ix)
-            return ix
-          }
         ]);
-
-        console.log('transactionId', transactionId);
-        console.log('compositeSignatures', _compositeSignatures);
 
         // TODO: remove after this is deployed to production
         const sig = getSig([_compositeSignatures]);
