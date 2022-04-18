@@ -31,6 +31,7 @@ import (
 type Database shared.Database
 type IpfsClient shared.IpfsClient
 type SnapshotClient shared.SnapshotClient
+type TxOptionsAddresses []string
 type Allowlist shared.Allowlist
 type Vote models.Vote
 type Proposal models.Proposal
@@ -44,6 +45,7 @@ type App struct {
 	FlowAdapter *shared.FlowAdapter
 
 	SnapshotClient     *shared.SnapshotClient
+	TxOptionsAddresses []string
 	Env                string
 	AdminAllowlist     shared.Allowlist
 	CommunityBlocklist shared.Allowlist
@@ -102,6 +104,8 @@ func (a *App) Initialize(user, password, dbname, dbhost, dbport, ipfsKey, ipfsSe
 	a.FlowAdapter = shared.NewFlowClient()
 	// Snapshot
 	a.SnapshotClient = shared.NewSnapshotClient(os.Getenv("SNAPSHOT_BASE_URL"))
+	// address to vote options mapping
+	a.TxOptionsAddresses = strings.Fields(os.Getenv("TX_OPTIONS_ADDRS"))
 
 	// Router
 	a.Router = mux.NewRouter()
@@ -414,7 +418,13 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// validate user signature
-	if err := a.FlowAdapter.UserSignatureValidate(v.Addr, v.Message, v.Composite_signatures); err != nil {
+	if err := a.FlowAdapter.UserSignatureValidate(v.Addr, v.Message, v.Composite_signatures, v.TransactionId); err != nil {
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// validate user signature
+	if err := a.FlowAdapter.UserTransactionValidate(v.Addr, v.Message, v.Composite_signatures, v.TransactionId, a.TxOptionsAddresses, p.Choices); err != nil {
 		respondWithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -924,7 +934,7 @@ func (a *App) validateAllowlistWithSig(addr string, message string, sigs *[]shar
 		return errors.New("user does not have permission")
 	}
 
-	if err := a.FlowAdapter.UserSignatureValidate(addr, message, sigs); err != nil {
+	if err := a.FlowAdapter.UserSignatureValidate(addr, message, sigs, ""); err != nil {
 		return err
 	}
 	return nil

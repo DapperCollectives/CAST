@@ -1548,6 +1548,13 @@
     mkdirp "^1.0.4"
     rimraf "^3.0.2"
 
+"@onflow/config@0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@onflow/config/-/config-0.0.2.tgz#caed7df27e9258ce2d4eae43f5e6f22caa119547"
+  integrity sha512-H/+yrAalzEnMWkubiWsDdWytKSzd+OfRCddTlaRUelxfXhcfw2QWegH9N8EzeKfKXcQ6PLzvu9vQwhFxCZTE8Q==
+  dependencies:
+    "@onflow/util-actor" "0.0.2"
+
 "@onflow/fcl@^0.0.77":
   version "0.0.77"
   resolved "https://registry.yarnpkg.com/@onflow/fcl/-/fcl-0.0.77.tgz#2a2da9ec8f90e0cf012d9a459a3472b57e416549"
@@ -1595,6 +1602,11 @@
     "@onflow/util-invariant" "^0.0.0"
     "@onflow/util-template" "0.0.1"
     deepmerge "^4.2.2"
+
+"@onflow/six-transfer-tokens@0.0.8":
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/@onflow/six-transfer-tokens/-/six-transfer-tokens-0.0.8.tgz#ca34a3d68109f6c5345584c7f6b6b4c41beab7cb"
+  integrity sha512-SQvTDFB4qk3/ObfvnzDS6jArN3Nw/1k+QtQ5+fJ+8nFpT0RGGL3tH3x2zH44YzDqlIe4yKW3bYPR93yxbdo3OA==
 
 "@onflow/types@^0.0.4":
   version "0.0.4"

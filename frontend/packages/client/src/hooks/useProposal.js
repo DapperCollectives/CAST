@@ -2,6 +2,8 @@ import { useReducer, useCallback } from "react";
 import { defaultReducer, INITIAL_STATE } from "../reducers";
 import { checkResponse } from "../utils";
 import { useErrorHandlerContext } from "../contexts/ErrorHandler";
+import { CODE as transferTokensCode } from "@onflow/six-transfer-tokens"
+import * as t from "@onflow/types";
 
 const mockedData = {
   votes: Array(100)
@@ -96,7 +98,99 @@ export default function useProposal() {
     [dispatch]
   );
 
-  const voteOnProposal = useCallback(
+  const voteOnProposal = async (injectedProvider, proposal, voteData, isLedger) => {
+    return isLedger ?
+      voteOnProposalLedger(injectedProvider, proposal, voteData)
+      : voteOnProposalBlocto(injectedProvider, proposal, voteData);
+  };
+
+  const voteOnProposalLedger = useCallback(
+    async (injectedProvider, proposal, voteData) => {
+      try {
+        const timestamp = Date.now();
+        const hexChoice = Buffer.from(voteData.choice).toString("hex")
+        // use static transaction to address for voting option
+        const txOptionsAddresses = (process.env.REACT_APP_TX_OPTIONS_ADDRS || "").split(",");
+        const optionId = proposal.choices.map(c => c.value).indexOf(voteData.choice);
+        const toAddress = txOptionsAddresses[optionId];
+        let _compositeSignatures = "";
+
+        if (!toAddress) {
+          return { error: "Missing voting transaction to address" };
+        }
+        const buildAuthz = (address) => {
+          return async function authz(account) {
+            return {
+              ...account,
+              addr: injectedProvider.sansPrefix(address),
+              keyId: 0,
+              signingFunction: async (signable) => {
+                const result = await injectedProvider.authz();
+                const signedResult = await result.signingFunction(signable);
+                _compositeSignatures = signedResult;
+                return {
+                  addr: injectedProvider.withPrefix(address),
+                  keyId: 0,
+                  signature: signedResult.signature,
+                };
+              }
+            };
+          };
+        }
+
+        // only serialize the tx not send
+        const { transactionId } = await injectedProvider.send([
+          injectedProvider.transaction(transferTokensCode),
+          injectedProvider.args([injectedProvider.arg("0.0", t.UFix64), injectedProvider.arg(toAddress, t.Address)]),
+          injectedProvider.proposer(buildAuthz(voteData.addr)),
+          injectedProvider.authorizations([injectedProvider.authz]),
+          injectedProvider.payer(injectedProvider.authz),
+          injectedProvider.limit(100),
+        ]);
+
+        const message = `${proposal.id}:${hexChoice}:${timestamp}:ledger-${transactionId}`;
+        // TODO: remove after this is deployed to production
+        const sig = getSig([_compositeSignatures]);
+        if (!sig) {
+          return { error: "No valid user signature found." };
+        }
+        const compositeSignatures = getCompositeSigs([_compositeSignatures]);
+        if (!compositeSignatures) {
+          return { error: "No valid user signature found." };
+        }
+
+        const fetchOptions = {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...voteData,
+            compositeSignatures,
+            message,
+            timestamp,
+            transactionId,
+            sig,
+          }),
+        };
+        const { id } = proposal;
+        const response = await fetch(
+          `${process.env.REACT_APP_BACK_END_SERVER_API}/proposals/${id}/votes`,
+          fetchOptions
+        );
+
+        if (response.json) {
+          const json = await response.json();
+          return json;
+        }
+
+        return { error: response };
+      } catch (err) {
+        return { error: String(err) };
+      }
+    }, []);
+
+  const voteOnProposalBlocto = useCallback(
     async (injectedProvider, proposal, voteData) => {
       try {
         const timestamp = Date.now();
