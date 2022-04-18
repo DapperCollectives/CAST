@@ -12,6 +12,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/onflow/cadence"
+	jsoncdc "github.com/onflow/cadence/encoding/json"
 	"github.com/onflow/flow-go-sdk"
 	"github.com/onflow/flow-go-sdk/client"
 	"google.golang.org/grpc"
@@ -76,27 +77,42 @@ func (fa *FlowAdapter) UserSignatureValidate(address string, message string, sig
 
 	if transactionId != "" {
 		// wait on transaction details and verify
+		log.Info().Msgf("Process Vote TXID %s", transactionId)
 		txId := flow.HexToID(transactionId)
 		txr, tx, err := WaitForSeal(fa.Context, fa.Client, txId)
-		isSealed := txr.Status.String() == "SEALED"
-		isVoter := "0x"+tx.ProposalKey.Address.String() == address
-		log.Info().Msgf("Process TX Vote TXID %s", transactionId)
-		// TODO: 1) Need to get transaction result from grpc endpoint to get BlockId
-		// it's not in the flow client api
-		block, errBlock := fa.Client.GetLatestBlock(fa.Context, true)
-		blockNumber := int(block.Height)
-
-		// TODO: 2) validate transaction is a voting transaction
-		validateVotingTransaction(txr.Events)
-		log.Info().Msgf("current block height %s", blockNumber)
 		if err != nil || txr.Error != nil {
 			log.Error().Err(err).Msgf("Tranaction vote has error %s", txr.Error.Error())
 			return errors.New("transaction vote invalid")
-		} else if !isSealed || errBlock != nil {
+		}
+
+		isSealed := txr.Status.String() == "SEALED"
+		isVoter := "0x"+tx.ProposalKey.Address.String() == address
+		if !isSealed {
 			return errors.New("transaction vote not processed")
 		} else if !isVoter {
 			return errors.New("invalid voter address")
 		}
+
+		txBlockByID, errBlockHeader := fa.Client.GetBlockHeaderByID(fa.Context, tx.ReferenceBlockID)
+		if errBlockHeader != nil {
+			log.Error().Err(err).Msgf("Get block header has error %s", errBlockHeader.Error())
+			return errors.New("can not verify tx is recent")
+		}
+
+		if txBlockByID.Timestamp.Before(time.Now().Add(-15 * time.Minute)) {
+			log.Error().Err(err).Msgf("Tx timestamp too old, now: %s block: %s, blockId %s", time.Now(), txBlockByID.Timestamp, txBlockByID.ID)
+			return errors.New("voting transaction is invalid")
+		}
+
+		// TODO: validate tx argument to vote option
+		toAddressDecoded, errAddress := jsoncdc.Decode(tx.Arguments[1])
+		if errAddress != nil {
+			log.Error().Err(err).Msgf("toAddress in tx invalid %s", errAddress.Error())
+			return errors.New("transaction vote is invalid, option not found")
+		}
+		toAddress := toAddressDecoded.(cadence.Address)
+		log.Info().Msgf("toAddress voting option %s", toAddress)
+
 		return nil
 	}
 	// call the script to verify the signature on chain
@@ -146,17 +162,4 @@ func WaitForSeal(ctx context.Context, c *client.Client, id flow.Identifier) (*fl
 
 	tx, errTx := c.GetTransaction(ctx, id)
 	return result, tx, errTx
-}
-
-func validateVotingTransaction(events []flow.Event) bool {
-	result := false
-	for _, event := range events {
-		res := strings.Contains(event.Type, "TokensDeposited")
-		if res {
-			// verify address tokens sent to corresponds to voting option
-			//log.Info().Msgf("Type: %s", event.Type)
-			//log.Info().Msgf("Values: %v", event.Value.Fields[0].ToGoValue())
-		}
-	}
-	return result
 }
