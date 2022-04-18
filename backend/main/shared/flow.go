@@ -152,12 +152,11 @@ func (fa *FlowAdapter) UserTransactionValidate(address string, message string, s
 		log.Error().Err(err).Msgf("toAddress in tx invalid %s", errAddress.Error())
 		return errors.New("transaction vote is invalid, option not found")
 	}
-	toAddress := toAddressDecoded.(cadence.Address)
 
+	toAddress := toAddressDecoded.(cadence.Address)
 	vars := strings.Split(message, ":")
 	encodedChoice := vars[1]
 	choiceBytes, errChoice := hex.DecodeString(encodedChoice)
-	log.Info().Msgf("user choice %s", choiceBytes)
 
 	if errChoice != nil {
 		return errors.New("couldnt decode choice in message from hex string")

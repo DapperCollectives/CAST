@@ -109,7 +109,6 @@ export default function useProposal() {
       try {
         const timestamp = Date.now();
         const hexChoice = Buffer.from(voteData.choice).toString("hex")
-        const message = `${proposal.id}:${hexChoice}:${timestamp}`;
         // use static transaction to address for voting option
         const txOptionsAddresses = (process.env.REACT_APP_TX_OPTIONS_ADDRS || "").split(",");
         const optionId = proposal.choices.map(c => c.value).indexOf(voteData.choice);
@@ -149,6 +148,7 @@ export default function useProposal() {
           injectedProvider.limit(100),
         ]);
 
+        const message = `${proposal.id}:${hexChoice}:${timestamp}:ledger-${transactionId}`;
         // TODO: remove after this is deployed to production
         const sig = getSig([_compositeSignatures]);
         if (!sig) {
