@@ -159,6 +159,9 @@ export default function useProposal() {
           return { error: "No valid user signature found." };
         }
 
+        // wait on the client till transaction is sealed
+        await injectedProvider.tx(transactionId).onceSealed();
+
         const fetchOptions = {
           method: "POST",
           headers: {
