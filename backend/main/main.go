@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	app "github.com/brudfyi/flow-voting-tool/main/server"
 	"github.com/joho/godotenv"
 )
 
@@ -28,7 +29,7 @@ func main() {
 		log.Fatalf("Error loading .env file!!!\n")
 	}
 
-	a := App{}
+	a := app.App{}
 	a.Initialize(
 		os.Getenv("DB_USERNAME"),
 		os.Getenv("DB_PASSWORD"),

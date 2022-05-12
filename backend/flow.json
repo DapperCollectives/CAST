@@ -6,7 +6,18 @@
 		}
 	},
 	"contracts": {
-		"VotingCommunity": "./packages/cadence/V2/contracts/VotingCommunity.cdc"
+		"FungibleToken": {
+			"source": "./contracts/core/FungibleToken.cdc",
+			"aliases": {
+				"emulator": "0xee82856bf20e2aa6"
+			}
+		},
+		"FlowToken": {
+			"source": "./contracts/core/FlowToken.cdc",
+			"aliases": {
+				"emulator": "0x0ae53cb6e3f42a79"
+			}
+		}
 	},
 	"networks": {
 		"emulator": "127.0.0.1:3569",
@@ -14,20 +25,44 @@
 		"testnet": "access.devnet.nodes.onflow.org:9000"
 	},
 	"accounts": {
-    "emulator-account": {
-      "address": "0xf8d6e0586b0a20c7",
-      "key": "63bff10bd6186b7d97c8e2898941c93d5d33a830b0ac9b758e216024b7bf7957"
-    },
-		"admin-account": {
-			"address": "0x01cf0e2f2f715450",
-			"key": "a735bcdd732b2534635847209a5e3066276817193adb6d637acfda4f84840606"
+		"emulator-account": {
+			"address": "f8d6e0586b0a20c7",
+			"key": "63bff10bd6186b7d97c8e2898941c93d5d33a830b0ac9b758e216024b7bf7957"
+		},
+		"emulator-user1": {
+			"address": "01cf0e2f2f715450",
+			"key": "7bac14b66096f682a704b9d98d1fb66ae883b10acdec7caa252257ece87479d4"
+		},
+		"emulator-user2": {
+			"address": "179b6b1cb6755e31",
+			"key": "64e847c1c615c0d6e928f80c641a5974ead26293ac2a8623d6756c935be13630"
+		},
+		"emulator-user3": {
+			"address": "f3fcd2c1a78f5eee",
+			"key": "d774eb699bc67d07c8be7cbcee1acfa14e5139ac271ca697b25a081a19335efd"
+		},
+		"emulator-user4": {
+			"address": "e03daebed8ca0615",
+			"key": "843d964aefbc2b6311363551187b8241466ec02e8bc4ba5e000a8b2c02fca69f"
+		},
+		"emulator-user5": {
+			"address": "045a1763c93006ca",
+			"key": "843d964aefbc2b6311363551187b8241466ec02e8bc4ba5e000a8b2c02fca69f"
+		},
+		"emulator-user6": {
+			"address": "120e725050340cab",
+			"key": "843d964aefbc2b6311363551187b8241466ec02e8bc4ba5e000a8b2c02fca69f"
 		}
-  },
-  "deployments": {
-    "emulator": {
-      "emulator-account": [
-        "VotingCommunity"
-      ]
-    }
-  }
+	},
+	"deployments": {
+		"emulator": {
+			"emulator-account": [],
+			"emulator-user1": [],
+			"emulator-user2": [],
+			"emulator-user3": [],
+			"emulator-user4": [],
+			"emulator-user5": [],
+			"emulator-user6": []
+		}
+	}
 }

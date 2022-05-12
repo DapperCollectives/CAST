@@ -21,6 +21,7 @@ so we can connect with our application
 ```bash
 sudo -i -u postgres
 psql
+CREATE USER postgres; # if postgres user doesnt exist
 ALTER USER postgres PASSWORD 'admin';
 ```
 

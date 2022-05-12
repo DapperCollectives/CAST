@@ -18,7 +18,7 @@ type Proposal struct {
 	ID                   int                     `json:"id,omitempty"`
 	Name                 string                  `json:"name" validate:"required"`
 	Community_id         int                     `json:"communityId"`
-	Choices              []string                `json:"choices" validate:"required"`
+	Choices              []s.Choice              `json:"choices" validate:"required"`
 	Strategy             *string                 `json:"strategy,omitempty"`
 	Max_weight           *uint64                 `json:"maxWeight,omitempty"`
 	Min_balance          *uint64                 `json:"minBalance,omitempty"`
@@ -38,9 +38,9 @@ type Proposal struct {
 }
 
 type UpdateProposalRequestPayload struct {
-	Status              string                  `json:"status"`
-	Timestamp           string                  `json:"timestamp"`
-	Composite_signature *[]s.CompositeSignature `json:"compositeSignatures"`
+	Status string `json:"status"`
+
+	s.TimestampSignaturePayload
 }
 
 var computedStatusSQL = `
@@ -65,14 +65,19 @@ func GetProposalsForCommunity(db *s.Database, start, count int, communityId int,
 	// status: { pending | active | closed | cancelled }
 	switch status {
 	case "pending":
-		statusFilter = ` AND status = 'published' AND start_time > now()`
+		statusFilter = ` AND status = 'published' AND start_time > (now() at time zone 'utc')`
 	case "active":
-		statusFilter = ` AND status = 'published' AND start_time < now() AND end_time > now()`
+		statusFilter = ` AND status = 'published' AND start_time < (now() at time zone 'utc') AND end_time > (now() at time zone 'utc')`
 	case "closed":
-		statusFilter = ` AND status = 'published' AND end_time < now()`
+		statusFilter = ` AND status = 'published' AND end_time < (now() at time zone 'utc')`
 	case "cancelled":
 		statusFilter = ` AND status = 'cancelled'`
+	case "terminated":
+		statusFilter = ` AND (status = 'cancelled' OR (status = 'published' AND end_time < (now() at time zone 'utc')))`
+	case "inprogress":
+		statusFilter = ` AND status = 'published' AND end_time > (now() at time zone 'utc')`
 	}
+
 	orderBySql := fmt.Sprintf(` ORDER BY created_at %s`, order)
 	limitOffsetSql := ` LIMIT $1 OFFSET $2`
 	sql = sql + statusFilter + orderBySql + limitOffsetSql

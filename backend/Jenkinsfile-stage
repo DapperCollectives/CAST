@@ -12,13 +12,8 @@ spec:
   # Use service account that can deploy to all namespaces
   serviceAccountName: jenkins
   containers:
-  - name: jenksgolang
-    image: mjslabs/jenkins-jnlp-golang
-    command:
-    - cat
-    tty: true
   - name: brudbuntu
-    image: bam.brud.local:6000/brudtech/brudbuntu:v1.6
+    image: bam.brud.local:6000/brudtech/brudbuntu:v0.0.1
     command:
     - cat
     tty: true
@@ -69,7 +64,8 @@ spec:
             steps {
                 container('brudbuntu') {
                 script {
-                      sh 'kubectl set image -n stage deployments/flow-vt-backend-stage-dpy flow-vt-backend-stage-pod=bam.brud.local:6000/brudtech/flow-voting-tool-backend:${tag}-vt'
+                      sh 'chmod +x test_image.sh'
+                      sh "sh test_image.sh ${tag}"
                                         }
                                     }
                                 }

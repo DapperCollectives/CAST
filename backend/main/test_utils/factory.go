@@ -1,16 +1,13 @@
 package test_utils
 
 import (
-	"encoding/hex"
-	"encoding/json"
 	"fmt"
-	"log"
+	"strconv"
 	"time"
 
 	"github.com/brudfyi/flow-voting-tool/main/models"
 	"github.com/brudfyi/flow-voting-tool/main/shared"
-	"github.com/onflow/flow-go-sdk"
-	"github.com/onflow/flow-go-sdk/crypto"
+	"github.com/rs/zerolog/log"
 )
 
 // Valid/Invalid service account key is based on the flow.json file in this repo,
@@ -23,138 +20,189 @@ var InvalidServiceAccountKey = "5687d75f957bf64591b55eb19227706e3c8712c1387225b8
 // VOTES
 //////////
 
-func GenerateValidVotePayload(proposalId int, choice string) []byte {
-	timestamp := time.Now().UnixNano() / int64(time.Millisecond)
-	hexChoice := hex.EncodeToString([]byte(choice))
-	message := "1:" + hexChoice + ":" + fmt.Sprint(timestamp)
-	compositeSignatures := SignMessage(ServiceAccountAddress, ValidServiceAccountKey, message)
+// func GenerateValidVotePayload(proposalId int, choice string) []byte {
+// 	timestamp := time.Now().UnixNano() / int64(time.Millisecond)
+// 	hexChoice := hex.EncodeToString([]byte(choice))
+// 	message := "1:" + hexChoice + ":" + fmt.Sprint(timestamp)
+// 	compositeSignatures := SignMessage(ServiceAccountAddress, ValidServiceAccountKey, message)
 
-	vote := models.Vote{Proposal_id: proposalId, Addr: ServiceAccountAddress, Choice: choice,
-		Composite_signatures: compositeSignatures, Message: message}
+// 	vote := models.Vote{Proposal_id: proposalId, Addr: ServiceAccountAddress, Choice: choice,
+// 		Composite_signatures: compositeSignatures, Message: message}
 
-	jsonStr, _ := json.Marshal(vote)
-	return []byte(jsonStr)
+// 	jsonStr, _ := json.Marshal(vote)
+// 	return []byte(jsonStr)
+// }
+
+func (otu *OverflowTestUtils) AddVotes(pId int, count int) {
+	if count < 1 {
+		count = 1
+	}
+	var addr string
+	for i := 1; i < count+1; i++ {
+		accountName := "emulator-user" + strconv.Itoa(i)
+		account, _ := otu.O.State.Accounts().ByName(accountName)
+		addr = "0x" + account.Address().String()
+
+		_, err := otu.A.DB.Conn.Exec(otu.A.DB.Context, `
+			INSERT INTO votes(proposal_id, addr, choice, composite_signatures, message)
+			VALUES($1, $2, $3, $4, $5)
+			`, pId, addr, "yes", "[]", "__msg__")
+		if err != nil {
+			log.Error().Err(err).Msg("addVotes DB err")
+		}
+	}
 }
 
 //////////////
 // COMMUNITIES
 //////////////
 
-var logo = "toad.jpeg"
-var slug = "test-slug"
-var body = "<html>test body</html>"
-var ValidCommunityStruct = models.Community{
-	Name: "TestDAO", Body: &body, Creator_addr: "", Logo: &logo, Slug: &slug,
-}
-
-func GenerateValidCommunityPayload(addr string) []byte {
-	// this does a deep copy
-	community := ValidCommunityStruct
-	community.Creator_addr = addr
-	timestamp := fmt.Sprint(time.Now().UnixNano() / int64(time.Millisecond))
-	community.Timestamp = timestamp
-	compositeSignatures := SignMessage(ServiceAccountAddress, ValidServiceAccountKey, timestamp)
-
-	community.Composite_signatures = compositeSignatures
-
-	jsonStr, _ := json.Marshal(community)
-	return []byte(jsonStr)
-}
-
-//////////////
-// PROPOSALS
-//////////////
-
-var strategy = "token-weighted-default"
-var proposalBody = "<html>something</html>"
-
-var DefaultProposalStruct = models.Proposal{
-	Name:         "Test Proposal",
-	Body:         &proposalBody,
-	Choices:      []string{"a", "b", "c"},
-	Creator_addr: ServiceAccountAddress,
-	Strategy:     &strategy,
-	// Start_time:   time.Now(),
-	// End_time:     time.Now().Add(30 * 24 * time.Hour),
-	// Timestamp:    timestamp,
-	// Sig:          signature,
-}
-
-func GenerateValidProposalPayload(communityId int) []byte {
-	timestamp := fmt.Sprint(time.Now().UnixNano() / int64(time.Millisecond))
-	compositeSignatures := SignMessage(ServiceAccountAddress, ValidServiceAccountKey, timestamp)
-
-	// deep copy
-	proposal := DefaultProposalStruct
-	proposal.Community_id = communityId
-	proposal.Start_time = time.Now()
-	proposal.End_time = time.Now().Add(30 * 24 * time.Hour)
-	proposal.Timestamp = timestamp
-	proposal.Composite_signatures = compositeSignatures
-
-	jsonStr, _ := json.Marshal(proposal)
-	return []byte(jsonStr)
-}
-
-func GenerateInvalidSignatureProposalPayload(communityId int) []byte {
-	timestamp := fmt.Sprint(time.Now().UnixNano() / int64(time.Millisecond))
-	compositeSignatures := SignMessage(ServiceAccountAddress, InvalidServiceAccountKey, timestamp)
-
-	proposal := models.Proposal{
-		Name:                 "Test Proposal",
-		Body:                 &proposalBody,
-		Choices:              []string{"one", "two", "three"},
-		Creator_addr:         ServiceAccountAddress,
-		Strategy:             &strategy,
-		Start_time:           time.Now(),
-		End_time:             time.Now().Add(30 * 24 * time.Hour),
-		Timestamp:            timestamp,
-		Composite_signatures: compositeSignatures,
-		Community_id:         communityId,
+func (otu *OverflowTestUtils) AddCommunities(count int) []int {
+	if count < 1 {
+		count = 1
 	}
+	retIds := []int{}
+	for i := 0; i < count; i++ {
+		community := otu.GenerateCommunityStruct("account")
+		if err := community.CreateCommunity(otu.A.DB); err != nil {
+			fmt.Printf("error in otu.AddCommunities")
+		}
 
-	jsonStr, _ := json.Marshal(proposal)
-	return []byte(jsonStr)
-}
-
-func GenerateExpiredTimestampProposalPayload(communityId int) []byte {
-	timestamp := fmt.Sprint(time.Now().Add(-10*time.Minute).UnixNano() / int64(time.Millisecond))
-	compositeSignatures := SignMessage(ServiceAccountAddress, ValidServiceAccountKey, timestamp)
-
-	proposal := models.Proposal{
-		Name:                 "Test Proposal",
-		Body:                 &proposalBody,
-		Choices:              []string{"one", "two", "three"},
-		Creator_addr:         ValidServiceAccountKey,
-		Strategy:             &strategy,
-		Start_time:           time.Now(),
-		End_time:             time.Now().Add(30 * 24 * time.Hour),
-		Timestamp:            timestamp,
-		Composite_signatures: compositeSignatures,
-		Community_id:         communityId,
+		id := community.ID
+		retIds = append(retIds, id)
 	}
-
-	jsonStr, _ := json.Marshal(proposal)
-	return []byte(jsonStr)
+	return retIds
 }
+
+func (otu *OverflowTestUtils) AddCommunitiesWithUsers(count int, signer string) []int {
+	if count < 1 {
+		count = 1
+	}
+	retIds := []int{}
+	for i := 0; i < count; i++ {
+		community := otu.GenerateCommunityStruct(signer)
+		if err := community.CreateCommunity(otu.A.DB); err != nil {
+			fmt.Printf("error in otu.AddCommunities")
+		}
+		// Add community_user roles for the creator
+		models.GrantRolesToCommunityCreator(otu.A.DB, community.Creator_addr, community.ID)
+
+		id := community.ID
+		retIds = append(retIds, id)
+	}
+	return retIds
+}
+
+func (otu *OverflowTestUtils) AddProposals(cId int, count int) []int {
+	if count < 1 {
+		count = 1
+	}
+	retIds := []int{}
+	for i := 0; i < count; i++ {
+		proposal := otu.GenerateProposalStruct("account", cId)
+		if err := proposal.CreateProposal(otu.A.DB); err != nil {
+			fmt.Printf("error in otu.AddProposals")
+			fmt.Printf("err: %v\n", err.Error())
+		}
+
+		retIds = append(retIds, proposal.ID)
+	}
+	return retIds
+}
+
+func (otu *OverflowTestUtils) AddActiveProposals(cId int, count int) []int {
+	if count < 1 {
+		count = 1
+	}
+	retIds := []int{}
+	for i := 0; i < count; i++ {
+		proposal := otu.GenerateProposalStruct("account", cId)
+		proposal.Start_time = time.Now().AddDate(0, -1, 0)
+		if err := proposal.CreateProposal(otu.A.DB); err != nil {
+			fmt.Printf("error in otu.AddActiveProposals")
+		}
+
+		retIds = append(retIds, proposal.ID)
+	}
+	return retIds
+}
+
+func (otu *OverflowTestUtils) AddLists(cId int, count int) []int {
+	if count < 1 {
+		count = 1
+	}
+	retIds := []int{}
+	for i := 0; i < count; i++ {
+		list := otu.GenerateBlockListStruct(cId)
+		if err := list.CreateList(otu.A.DB); err != nil {
+			fmt.Printf("error in otu.AddLists: %v\n", err.Error())
+		}
+		retIds = append(retIds, list.ID)
+	}
+	return retIds
+}
+
+/////////////////////
+// COMMUNITY_USERS //
+/////////////////////
+
+// var DefaultUserType = "member"
+// var DefaultCommunityUserStruct = models.CommunityUser{
+// 	Addr:      ServiceAccountAddress,
+// 	User_type: DefaultUserType,
+// }
+
+// func (otu *OverflowTestUtils) GenerateValidCommunityUserPayload(communityId int, userAccount string, signerAccount string, userType string) []byte {
+
+// 	timestamp := fmt.Sprint(time.Now().UnixNano() / int64(time.Millisecond))
+
+// 	compositeSignatures := otu.GenerateCompositeSignatures(signerAccount, timestamp)
+
+// 	communityUser := DefaultCommunityUserStruct
+// 	communityUser.Community_id = communityId
+
+// 	payload := models.CommunityUserPayload{
+// 		CommunityUser:        communityUser,
+// 		Signing_addr:         DefaultCommunityUserStruct.Addr,
+// 		Timestamp:            timestamp,
+// 		Composite_signatures: compositeSignatures,
+// 	}
+// 	jsonStr, _ := json.Marshal(payload)
+// 	return []byte(jsonStr)
+// }
+
+// func (otu *OverflowTestUtils) CreateCommunityUser(communityId int, payload []byte) *httptest.ResponseRecorder {
+// 	req, _ := http.NewRequest("POST", "/communities/"+strconv.Itoa(communityId)+"/users", bytes.NewBuffer(payload))
+// 	req.Header.Set("Content-Type", "application/json")
+// 	response := executeRequest(req)
+// }
+
+// func GenerateValidDeleteCommunityUserPayload(communityId int) []byte {
+// 	timestamp := fmt.Sprint(time.Now().UnixNano() / int64(time.Millisecond))
+// 	compositeSignatures := SignMessage(ServiceAccountAddress, ValidServiceAccountKey, timestamp)
+
+// 	communityUser := DefaultCommunityUserStruct
+// 	communityUser.Community_id = communityId
+
+// 	payload := models.CommunityUserPayload{
+// 		CommunityUser:        communityUser,
+// 		Signing_addr:         DefaultCommunityUserStruct.Addr,
+// 		Timestamp:            timestamp,
+// 		Composite_signatures: compositeSignatures,
+// 	}
+// 	jsonStr, _ := json.Marshal(payload)
+// 	return []byte(jsonStr)
+// }
 
 //////////
 // UTILS
 //////////
 
-func SignMessage(addr string, privateKey string, message string) *[]shared.CompositeSignature {
-	// everyone has this anyway
-	decodedPrivateKey, err := crypto.DecodePrivateKeyHex(crypto.ECDSA_P256, privateKey)
-	if err != nil {
-		log.Fatal(err)
-	}
-	byteMessage := []byte(message)
-	signer := crypto.NewInMemorySigner(decodedPrivateKey, crypto.SHA3_256)
-	signature, _ := flow.SignUserMessage(signer, byteMessage)
-	sigString := hex.EncodeToString(signature)
-
+func (otu *OverflowTestUtils) GenerateCompositeSignatures(account string, message string) *[]shared.CompositeSignature {
+	sigString, _ := otu.O.SignUserMessage(account, message)
+	flowAcct, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", account))
 	compositeSignature := shared.CompositeSignature{
-		Addr:      ServiceAccountAddress,
+		Addr:      flowAcct.Address().String(),
 		Key_id:    0,
 		Signature: sigString,
 	}

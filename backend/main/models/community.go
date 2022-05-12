@@ -5,6 +5,8 @@ package models
 /////////////////
 
 import (
+	"encoding/json"
+	"fmt"
 	"time"
 
 	s "github.com/brudfyi/flow-voting-tool/main/shared"
@@ -13,20 +15,76 @@ import (
 )
 
 type Community struct {
-	ID                   int                     `json:"id,omitempty"`
-	Name                 string                  `json:"name" validate:"required"`
-	Logo                 *string                 `json:"logo,omitempty"`
-	Created_at           *time.Time              `json:"createdAt,omitempty"`
-	Cid                  *string                 `json:"cid,omitempty"`
-	Slug                 *string                 `json:"slug,omitempty" validate:"required"`
-	Strategies           *[]string               `json:"strategies,omitempty"`
-	Strategy             *string                 `json:"strategy,omitempty"`
-	Proposal_validation  *string                 `json:"proposalValidation,omitempty"`
-	Proposal_threshold   *string                 `json:"proposalThreshold,omitempty"`
-	Body                 *string                 `json:"body,omitempty" validate:"required"`
+	ID                       int       `json:"id,omitempty"`
+	Name                     string    `json:"name" validate:"required"`
+	Category                 *string   `json:"category,omitempty" validate:"required"`
+	Logo                     *string   `json:"logo,omitempty"`
+	Body                     *string   `json:"body,omitempty" validate:"required"`
+	Strategies               *[]string `json:"strategies,omitempty"`
+	Strategy                 *string   `json:"strategy,omitempty"`
+	Banner_img_url           *string   `json:"bannerImgUrl,omitempty"`
+	Website_url              *string   `json:"websiteUrl,omitempty"`
+	Twitter_url              *string   `json:"twitterUrl,omitempty"`
+	Github_url               *string   `json:"githubUrl,omitempty"`
+	Discord_url              *string   `json:"discordUrl,omitempty"`
+	Instagram_url            *string   `json:"instagramUrl,omitempty"`
+	Terms_and_conditions_url *string   `json:"termsAndConditionsUrl,omitempty"`
+	Proposal_validation      *string   `json:"proposalValidation,omitempty"`
+	Proposal_threshold       *string   `json:"proposalThreshold,omitempty"`
+	Slug                     *string   `json:"slug,omitempty" validate:"required"`
+
 	Timestamp            string                  `json:"timestamp" validate:"required"`
 	Composite_signatures *[]s.CompositeSignature `json:"compositeSignatures" validate:"required"`
 	Creator_addr         string                  `json:"creatorAddr" validate:"required"`
+	Signing_addr         *string                 `json:"signingAddr,omitempty"`
+	Created_at           *time.Time              `json:"createdAt,omitempty"`
+	Cid                  *string                 `json:"cid,omitempty"`
+}
+
+type CreateCommunityRequestPayload struct {
+	Community
+
+	Additional_authors *[]string `json:"additionalAuthors,omitempty"`
+	Additional_admins  *[]string `json:"additionalAdmins,omitempty"`
+}
+
+type UpdateCommunityRequestPayload struct {
+	Name                     *string   `json:"name,omitempty"`
+	Category                 *string   `json:"category,omitempty"`
+	Body                     *string   `json:"body,omitempty"`
+	Logo                     *string   `json:"logo,omitempty"`
+	Strategies               *[]string `json:"strategies,omitempty"`
+	Strategy                 *string   `json:"strategy,omitempty"`
+	Banner_img_url           *string   `json:"bannerImgUrl,omitempty"`
+	Website_url              *string   `json:"websiteUrl,omitempty"`
+	Twitter_url              *string   `json:"twitterUrl,omitempty"`
+	Github_url               *string   `json:"githubUrl,omitempty"`
+	Discord_url              *string   `json:"discordUrl,omitempty"`
+	Instagram_url            *string   `json:"instagramUrl,omitempty"`
+	Terms_and_conditions_url *string   `json:"termsAndConditionsUrl,omitempty"`
+	Proposal_validation      *string   `json:"proposalValidation,omitempty"`
+	Proposal_threshold       *string   `json:"proposalThreshold,omitempty"`
+
+	s.TimestampSignaturePayload
+}
+
+type CommunityType struct {
+	Key         string `json:"key" validate:"required"`
+	Name        string `json:"name" validate:"required"`
+	Description string `json:"description,omitempty"`
+}
+
+func GetCommunityTypes(db *s.Database) ([]*CommunityType, error) {
+	var communityTypes []*CommunityType
+	err := pgxscan.Select(db.Context, db.Conn, &communityTypes,
+		`
+		SELECT * FROM community_types
+		`)
+
+	if err != nil {
+		return nil, err
+	}
+	return communityTypes, nil
 }
 
 func (c *Community) GetCommunity(db *s.Database) error {
@@ -62,21 +120,45 @@ func GetCommunities(db *s.Database, start, count int) ([]*Community, int, error)
 func (c *Community) CreateCommunity(db *s.Database) error {
 	err := db.Conn.QueryRow(db.Context,
 		`
-	INSERT INTO communities(name, logo, slug, strategies, strategy, proposal_validation, proposal_threshold, body, cid, creator_addr)
-	VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+	INSERT INTO communities(
+		name, category, logo, slug, strategies, strategy, banner_img_url, website_url, twitter_url, github_url, discord_url, instagram_url, terms_and_conditions_url, proposal_validation, proposal_threshold, body, cid, creator_addr
+	)
+	VALUES(
+		$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18
+	)
 	RETURNING id, created_at
-	`, c.Name, c.Logo, c.Slug, c.Strategies, c.Strategy, c.Proposal_validation, c.Proposal_threshold, c.Body, c.Cid, c.Creator_addr).Scan(&c.ID, &c.Created_at)
+	`, c.Name, c.Category, c.Logo, c.Slug, c.Strategies, c.Strategy, c.Banner_img_url, c.Website_url, c.Twitter_url, c.Github_url, c.Discord_url, c.Instagram_url, c.Terms_and_conditions_url, c.Proposal_validation, c.Proposal_threshold, c.Body, c.Cid, c.Creator_addr).Scan(&c.ID, &c.Created_at)
 
 	return err // will be nil unless something went wrong
 }
 
-func (c *Community) UpdateCommunity(db *s.Database) error {
-	_, err := db.Conn.Exec(db.Context,
+func (c *Community) UpdateCommunity(db *s.Database, payload *UpdateCommunityRequestPayload) error {
+	// First, merge the CommunityRequst
+	data, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
+
+	json.Unmarshal(data, c)
+
+	_, err = db.Conn.Exec(db.Context,
 		`
 	UPDATE communities
-	SET name = $1, body = $2, logo = $3, slug = $4, strategies = $5, strategy = $6, proposal_validation = $7, proposal_threshold = $8
-	WHERE id = $9
-	`, c.Name, c.Body, c.Logo, c.Slug, c.Strategies, c.Strategy, c.Proposal_validation, c.Proposal_threshold, c.ID)
+	SET name = $1, body = $2, logo = $3, strategies = $4, strategy = $5, 
+		banner_img_url = $6, website_url = $7, twitter_url = $8, github_url = $9,
+		discord_url = $10, instagram_url = $11, proposal_validation = $12, proposal_threshold = $13, category = $14, terms_and_conditions_url = $15
+	WHERE id = $16
+	`, c.Name, c.Body, c.Logo, c.Strategies, c.Strategy, c.Banner_img_url, c.Website_url,
+		c.Twitter_url, c.Github_url, c.Discord_url, c.Instagram_url, c.Proposal_validation, c.Proposal_threshold, c.Category, c.Terms_and_conditions_url, c.ID)
 
 	return err // will be nil unless something went wrong
+}
+
+func (c *Community) CanUpdateCommunity(db *s.Database, addr string) error {
+	// Check if address has admin role
+	admin := CommunityUser{Addr: addr, Community_id: c.ID, User_type: "admin"}
+	if err := admin.GetCommunityUser(db); err != nil {
+		return fmt.Errorf("address %s does not have permission to update community with ID %d", addr, c.ID)
+	}
+	return nil
 }

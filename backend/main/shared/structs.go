@@ -7,6 +7,10 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
+type Config struct {
+	Features map[string]bool `default:"useCorsMiddleware:false,validateTimestamps:true,validateAllowlist:true,validateBlocklist:true,validateSigs:true"`
+}
+
 type Database struct {
 	Conn    *pgxpool.Pool
 	Context context.Context
@@ -32,6 +36,18 @@ type CompositeSignature struct {
 	Signature string  `json:"signature"`
 	F_type    *string `json:"f_type,omitempty"`
 	F_vsn     *string `json:"f_vsn,omitempty"`
+}
+
+type TimestampSignaturePayload struct {
+	Composite_signatures *[]CompositeSignature `json:"compositeSignatures" validate:"required"`
+	Signing_addr         string                `json:"signingAddr" validate:"required"`
+	Timestamp            string                `json:"timestamp" validate:"required"`
+}
+
+// used in models/proposal.go
+type Choice struct {
+	Choice_text    string  `json:"choiceText"`
+	Choice_img_url *string `json:"choiceImgUrl"`
 }
 
 // Underlying value of payload needs to be a slice

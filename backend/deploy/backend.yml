@@ -1,0 +1,91 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "backend-qa-dpy"
+  namespace: REPLACE_NAMESPACE
+spec:
+  selector:
+    matchLabels:
+      app: "flow-voting-tool"
+      tier: "backend"
+      release: "qa"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: "flow-voting-tool"
+        tier: "backend"
+        release: "qa"
+    spec:
+      containers:
+      - name: "flow-voting-tool-backend"
+        image: bam.brud.local:6000/brudtech/flow-voting-tool-backend:REPLACE_TAG
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5001
+        env:
+          - name: ENV_NAME
+            valueFrom:
+              secretKeyRef:
+                name: REPLACE_SECRET_NAME
+                key: ENV_NAME
+          - name: DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: REPLACE_SECRET_NAME
+                key: DB_USERNAME
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: REPLACE_SECRET_NAME
+                key: DB_PASSWORD
+          - name: DB_NAME
+            valueFrom:
+              secretKeyRef:
+                name: REPLACE_SECRET_NAME
+                key: DB_NAME
+          - name: DB_HOST
+            valueFrom:
+              secretKeyRef:
+                name: REPLACE_SECRET_NAME
+                key: DB_HOST
+          - name: DB_PORT
+            valueFrom:
+              secretKeyRef:
+                name: REPLACE_SECRET_NAME
+                key: DB_PORT
+          - name: IPFS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: REPLACE_SECRET_NAME
+                key: IPFS_KEY
+          - name: IPFS_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: REPLACE_SECRET_NAME
+                key: IPFS_SECRET
+          - name: FLOW_URL
+            valueFrom:
+              secretKeyRef:
+                name: REPLACE_SECRET_NAME
+                key: FLOW_URL
+
+      imagePullSecrets:
+      - name: regcred
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "backend-qa-svc"
+  namespace: REPLACE_NAMESPACE
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5001
+    targetPort: 5001
+  selector:
+    app: "flow-voting-tool"
+    tier: "backend"
+    release: "qa"

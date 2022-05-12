@@ -9,4 +9,5 @@ RUN go mod tidy
 RUN go mod download
 # COPY .env .env
 WORKDIR /flow-voting-tool/main
+ENV ENV_NAME="TEST"
 ENTRYPOINT [ "go", "test", "-v" ]

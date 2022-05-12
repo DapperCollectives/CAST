@@ -31,7 +31,7 @@ func (r *ProposalResults) Tally(db *s.Database, p *Proposal) error {
 	// Create results map from proposal choices
 	r.Results = map[string]int{}
 	for i := 0; i < len(p.Choices); i++ {
-		r.Results[p.Choices[i]] = 0
+		r.Results[p.Choices[i].Choice_text] = 0
 	}
 	// Fetch vote tallys & iterate through them, saving on results.
 
