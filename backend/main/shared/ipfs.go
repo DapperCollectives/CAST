@@ -51,8 +51,8 @@ func NewIpfsClient(apiKey string, apiSecret string) *IpfsClient {
 }
 
 func (c *IpfsClient) sendRequest(req *http.Request, v interface{}) error {
-	req.Header.Set("pinata_api_key", "c63e755ac2650e32aeb4")
-	req.Header.Set("pinata_secret_api_key", "12e61330988a819b5771416e8698a6b9e2550b5be99fad79b9213192b7e97073")
+	req.Header.Set("pinata_api_key", c.apiKey)
+	req.Header.Set("pinata_secret_api_key", c.apiSecret)
 
 	res, err := c.HTTPClient.Do(req)
 	if err != nil {
