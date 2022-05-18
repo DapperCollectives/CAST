@@ -20,15 +20,12 @@ const TooltipWrapper = ({ isOpen, children }) => {
 const DropDownFilter = ({ value, filterValues, setFilterValues }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const openCloseDropdown = () => {
+  const openCloseDrowdown = () => {
     setIsOpen((status) => !status);
   };
 
   const setValue = (value) => () => {
     setFilterValues(value);
-    if (isOpen) {
-      setIsOpen(false);
-    }
   };
 
   // use for click out on dropdown
@@ -50,7 +47,7 @@ const DropDownFilter = ({ value, filterValues, setFilterValues }) => {
           className="button rounded-sm is-outlined border-light column m-0 py-0 px-3 is-full-mobile"
           aria-haspopup="true"
           aria-controls="dropdown-menu"
-          onClick={openCloseDropdown}
+          onClick={openCloseDrowdown}
         >
           <TooltipWrapper isOpen={isOpen}>
             <div className="is-flex is-flex-grow-1 is-align-items-center is-justify-content-space-between has-text-grey small-text">

@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import millify from "millify";
 import { AngleDown, AngleUp } from "./Svg";
 import Blockies from "react-blockies";
-import {useProposalVotes} from "hooks";
+import { useProposalVotes } from "hooks";
 
 const Core = () => (
   <div className="subtitle small-text p-2 rounded-sm has-background-white-ter has-text-black is-family-monospace">
@@ -15,7 +15,7 @@ const ShowMoreOrLess = ({ showMore, showLess, enableMore, enableLess }) => (
   <>
     {enableLess && (
       <button
-        className="button is-white is-text-grey small-text"
+        className="button is-white has-text-grey small-text"
         onClick={showLess}
       >
         <AngleUp />
@@ -24,7 +24,7 @@ const ShowMoreOrLess = ({ showMore, showLess, enableMore, enableLess }) => (
     )}
     {enableMore && (
       <button
-        className="button is-white is-text-grey small-text"
+        className="button is-white has-text-grey small-text"
         onClick={showMore}
       >
         View more <AngleDown />

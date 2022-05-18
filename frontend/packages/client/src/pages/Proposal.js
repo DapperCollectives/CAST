@@ -404,7 +404,7 @@ export default function ProposalPage() {
             {showCancelButton && isAdmin && (
               <div className="is-flex is-align-items-center">
                 <button
-                  className="button is-white is-text-grey small-text"
+                  className="button is-white has-text-grey small-text"
                   onClick={onCancelProposal}
                 >
                   <div className="mr-2 is-flex is-align-items-center">

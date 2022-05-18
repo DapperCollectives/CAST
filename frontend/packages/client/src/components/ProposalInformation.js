@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import Blockies from "react-blockies";
-import { LinkOut, StrategyIcon } from "./Svg";
+import { LinkOut } from "./Svg";
 import { parseDateFromServer } from "../utils";
 import { useVotingResults, useWindowDimensions } from "../hooks";
 import useMediaQuery, { mediaMatchers } from "../hooks/useMediaQuery";
@@ -248,20 +248,6 @@ const ProposalInformation = ({
           isTabletOnly={isTabletOnly}
         >
           <p className="mb-5">Information</p>
-          <InfoBlock
-            title={"Stategie(s)"}
-            content={
-              <div className="is-flex flex-1" onClick={openStrategyModal}>
-                {strategies.map((st, index) => {
-                  return (
-                    <div className="pr-2" key={`${st}-${index}`}>
-                      <StrategyIcon className="cursor-pointer" />
-                    </div>
-                  );
-                })}
-              </div>
-            }
-          />
           <InfoBlock
             title={"Author"}
             content={

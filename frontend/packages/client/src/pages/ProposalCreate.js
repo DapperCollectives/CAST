@@ -98,7 +98,8 @@ export default function ProposalCreatePage() {
   const props = {
     finalLabel: "Publish",
     onSubmit,
-    creatingProposal: loading && !error,
+    isSubmitting: loading && !error,
+    submittingMessage: 'Creating Proposal...',
     steps: [
       {
         label: "Draft Proposal",

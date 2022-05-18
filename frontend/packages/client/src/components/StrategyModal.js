@@ -6,26 +6,22 @@ const StrategyModal = ({ isOpen, closeModal, strategies }) => {
       <div className="modal-background" onClick={closeModal} />
       <div className="modal-card rounded-sm px-4">
         <header
-          className="modal-card-head is-flex-direction-column is-align-items-stretch has-background-white columns is-mobile m-0 pb-2 pt-3"
+          className="modal-card-head is-flex-direction-column has-background-white columns is-mobile m-0 py-2"
           style={{
             borderBottom: "none",
           }}
         >
-          <div className="columns is-mobile m-0 flex-1">
-            <div className="column is-flex is-align-items-center px-4 has-text-left">
-              <p className="modal-card-title">Strategies</p>
-            </div>
-            <div className="column is-narrow">
-              <div
-                className="is-size-2 p-0 leading-tight cursor-pointer"
-                onClick={closeModal}
-              >
-                &times;
-              </div>
-            </div>
+          <div
+            className="column is-full has-text-right is-size-2 p-0 leading-tight cursor-pointer"
+            onClick={closeModal}
+          >
+            &times;
+          </div>
+          <div className="column px-4 is-full has-text-left">
+            <p className="modal-card-title">Strategies</p>
           </div>
         </header>
-        <section className="modal-card-body pb-4 pt-2">
+        <section className="modal-card-body py-4">
           {strategies.map((strategy, index) => {
             return (
               <div className="columns m-0 is-mobile" key={`strategy-${index}`}>
