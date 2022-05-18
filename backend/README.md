@@ -8,6 +8,16 @@
 
 ## Local Development
 
+### Environment Variables
+
+Copy `.env.example` to a new file `.env`.
+
+```bash
+cp .env.example .env
+```
+
+The correct values for `IPFS_KEY` and `IPFS_SECRET` can be found in the Dapper Collectives 1password, or you you can use your own by creating an account with [Pinata](https://www.pinata.cloud/).
+
 ### Database
 
 #### Install psql
