@@ -8,7 +8,11 @@ export default function useUserRoleOnCommunity({
   const { data: communityUser, loading } = useUserCommunities({
     addr,
   });
-  if (addr === null) {
+
+  if (
+    addr === null ||
+    (Array.isArray(communityUser) && communityUser.length === 0)
+  ) {
     return false;
   }
   if (loading || roles.length === 0) {

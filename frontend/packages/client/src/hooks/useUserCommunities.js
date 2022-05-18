@@ -21,6 +21,11 @@ export default function useUserCommunities({
     },
   });
   const { notifyError } = useErrorHandlerContext();
+
+  const resetResults = useCallback(() => {
+    dispatch({ type: "RESET_RESULTS" });
+  }, []);
+
   const getCommunityUser = useCallback(async () => {
     dispatch({ type: "PROCESSING" });
     const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/users/${addr}/communities?count=${count}&start=${start}`;
@@ -56,11 +61,15 @@ export default function useUserCommunities({
     if (addr) {
       getCommunityUser();
     }
-  }, [getCommunityUser, addr]);
+    if (addr === null) {
+      resetResults();
+    }
+  }, [getCommunityUser, resetResults, addr]);
 
   return {
     ...state,
     getCommunityUser,
+    resetResults,
     fetchMore,
   };
 }

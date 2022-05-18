@@ -101,7 +101,7 @@ const CommunityCard = ({
   }
 
   return (
-    <Link to={`/community/${id}?tab=proposals`} style={{ color: "inherit" }}>
+    <Link to={`/community/${id}?tab=about`} style={{ color: "inherit" }}>
       {Body}
     </Link>
   );

@@ -2,7 +2,10 @@ import React, { useState } from "react";
 import { Add } from "components/Svg";
 import { Link } from "react-router-dom";
 import { useCommunityProposalsWithVotes, useAllowlist } from "hooks";
-import ProposalList, { AboutCommunity, Tablink } from "components/ProposalsList/index";
+import ProposalList, {
+  AboutCommunity,
+  Tablink,
+} from "components/ProposalsList/index";
 import { FilterValues } from "const";
 
 const Community = ({ community, activeTab, enableJoin = false }) => {

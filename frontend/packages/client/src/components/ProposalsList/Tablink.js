@@ -9,8 +9,12 @@ const Tablink = ({
   onlyLink,
   onClick = () => {},
   animateHover = false,
+  className = "",
 }) => {
-  const textClass = isActive ? "has-text-black" : "has-text-grey";
+  const textClass = `${className} ${
+    isActive ? "has-text-black" : "has-text-grey"
+  }`;
+
   if (!linkUrl) {
     return (
       // eslint-disable-next-line jsx-a11y/anchor-is-valid

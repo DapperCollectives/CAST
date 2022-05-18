@@ -38,9 +38,7 @@ const DropDownFilter = ({ value, filterValues, setFilterValues }) => {
 
   return (
     <div
-      className={`dropdown is-right is-flex is-flex-grow-1${
-        isOpen ? " is-active" : ""
-      }`}
+      className={`dropdown is-flex is-flex-grow-1${isOpen ? " is-active" : ""}`}
       onBlur={closeOnBlur}
       aria-haspopup="true"
       aria-controls="dropdown-menu"

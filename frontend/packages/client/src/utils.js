@@ -36,6 +36,15 @@ export const checkResponse = async (response) => {
 export const isNotEmptyArray = (array) =>
   Array.isArray(array) && array.length > 0;
 
+export function debounce(e, waitingTime = 300) {
+  let timer;
+  return (...i) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      e.apply(this, i);
+    }, waitingTime);
+  };
+}
 // for some reason, in emulator fcl this signature is nested two levels
 // deep but on testnet fcl this is only nested one level deep
 export const getSig = (sigArr) =>

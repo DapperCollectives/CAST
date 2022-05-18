@@ -4,9 +4,11 @@
 
 // Set brand colors
 $green: #0E5B20
+$light-green: #00EF8B
 $red: #B20D0D
 $yellow: #FBD84D
 $orange: #F4AF4A
+$light-gray: #DCDCDC
 
 // Update Bulma's global variables
 $family-primary: "Arimo"
@@ -34,6 +36,7 @@ $input-color: black
 $white-ter: #F2F2F2
 $border-color-light: #DBDBDB
 
+
 // Import only what you need from Bulma
 @import '~bulma/sass/utilities/_all.sass'
 @import '~bulma/sass/base/_all.sass'
@@ -42,6 +45,7 @@ $border-color-light: #DBDBDB
 @import '~bulma/sass/elements/container.sass'
 @import '~bulma/sass/elements/progress.sass'
 @import '~bulma/sass/elements/title.sass'
+@import '~bulma/sass/elements/table.sass'
 @import '~bulma/sass/components/navbar.sass'
 @import '~bulma/sass/components/modal.sass'
 @import '~bulma/sass/components/tabs.sass'
@@ -77,6 +81,10 @@ code
 	border-bottom: 1px solid $grey-light
 .rounded-sm
 	border-radius: 8px
+.rounded-sm-tl
+	border-top-left-radius: 8px
+.rounded-sm-bl
+	border-bottom-left-radius: 8px
 .rounded-lg
 	border-radius: 20px
 .rounded-full
@@ -223,19 +231,31 @@ hr
 		padding: 0.1em 0.5em
 		height: auto
 		color: #000000 !important
-
-.tabs a
+.tabs
+	&.tabs-community
+		margin-bottom: 0px
+.tabs a 
 	border-bottom-color: #dbdbdb
 	border-bottom-style: none
 	border-bottom-width: 0px
+	&.tab-community
+		border-bottom-width: 2px
+		&:hover
+			transform: scale(1.04)
+
 
 .tabs li.is-active a
 	border-bottom-color: $yellow
 	color: $black
 	border-bottom-width: 3px
 	border-bottom-style: solid
-
-.small-text
+	&.tab-community
+			border-bottom-color: $light-green
+			color: $black
+			border-bottom-width: 2px
+			border-bottom-style: solid
+		
+.small-text  
 	font-size: 0.88rem !important
 .smaller-text
 	font-size: 0.75rem !important
@@ -346,6 +366,47 @@ span[data-tooltip]
 
 .word-break
 	word-break: break-word
+
+// styles for comminity members
+.table
+	border-radius: 8px
+	border-style: hidden
+	box-shadow: 0 0 0 1px $light-gray
+	td
+		vertical-align: middle !important
+		height: 64px !important
+	.has-background-light-gray
+		background-color: $light-gray		
+	thead th 
+		border-width: 0 0 1px !important
+	.index-cell
+		max-width: 44px	
+		width: 44px	
+		text-align: center !important
+.word-break-all
+	word-break: break-all	
+
+.pulse
+	.title-text
+		font-size: 18px
+	.cell
+		min-height: 215px
+		display: flex
+		flex-direction: column
+		align-items: center
+		justify-content: center
+		background-color: $white-ter
+		border-width: 3px
+		border-style: solid
+		border-color: white
+		&.top-left
+			border-top-left-radius: 24px
+		&.top-right
+			border-top-right-radius: 24px
+		&.bottom-left
+			border-bottom-left-radius: 24px
+		&.bottom-right
+			border-bottom-right-radius: 24px
 
 .text-area
 	resize: none
