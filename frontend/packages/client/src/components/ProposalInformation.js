@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import Blockies from "react-blockies";
-import { LinkOut } from "./Svg";
+import { LinkOut, StrategyIcon } from "./Svg";
 import { parseDateFromServer } from "../utils";
 import { useVotingResults, useWindowDimensions } from "../hooks";
+import useMediaQuery, { mediaMatchers } from "../hooks/useMediaQuery";
 import Tooltip from "./Tooltip";
 
 const InfoBlock = ({ title, content }) => {
@@ -40,11 +41,16 @@ const Results = ({ voteResults }) => {
           totalVotes === 0 || voteResults[option] === 0
             ? 0
             : ((100 * voteResults[option]) / totalVotes).toFixed(2);
+
+        const optionText =
+          option.length > 120 ? `${option.substring(0, 120)}...` : option;
         return (
           <div key={`result-item-${index}`} style={{ marginBottom: "2.5rem" }}>
-            <div className="is-flex mb-2">
-              <div className="flex-1 small-text has-text-grey">{option}</div>
-              <div className="is-flex flex-1 is-justify-content-flex-end small-text has-text-grey">
+            <div className="columns is-mobile mb-2">
+              <div className="column small-text has-text-grey has-text-justified word-break">
+                {optionText}
+              </div>
+              <div className="column is-3 is-flex is-justify-content-flex-end small-text has-text-grey">
                 {`${percentage}%`}
               </div>
             </div>
@@ -75,35 +81,42 @@ const Results = ({ voteResults }) => {
   );
 };
 
-const WrapperSpacingTop = ({ children }) => {
-  return (
-    <>
-      {/* Desktop and bigger screens */}
-      <div className="is-hidden-tablet-only is-hidden-mobile px-6 pb-0 pt-6">
-        {children}
-      </div>
-      {/* Tablet view */}
-      <div className="is-hidden-desktop is-hidden-mobile px-5 pb-0 pt-5">
-        {children}
-      </div>
-      {/* Mobile only  */}
-      <div className="is-hidden-tablet px-1 pb-0 pt-1">{children}</div>
-    </>
-  );
+const WrapperSpacingTop = ({
+  isMobileOnly,
+  isTabletOnly,
+  isDesktopOnly,
+  children,
+}) => {
+  let classNames = "";
+  if (isMobileOnly) {
+    classNames = "px-1 pb-0 pt-1";
+  }
+  if (isTabletOnly) {
+    classNames = "px-5 pb-0 pt-5";
+  }
+  if (isDesktopOnly) {
+    classNames = "px-6 pb-0 pt-6";
+  }
+  return <div className={classNames}>{children}</div>;
 };
 
-const WrapperSpacingBottom = ({ children }) => {
-  return (
-    <>
-      <div className="is-hidden-desktop is-hidden-mobile px-5 pt-3 pb-4">
-        {children}
-      </div>
-      <div className="is-hidden-tablet-only is-hidden-mobile px-6 pt-2 pb-6">
-        {children}
-      </div>
-      <div className="is-hidden-tablet px-1 pt-1 pb-1">{children}</div>
-    </>
-  );
+const WrapperSpacingBottom = ({
+  isMobileOnly,
+  isTabletOnly,
+  isDesktopOnly,
+  children,
+}) => {
+  let classNames = "";
+  if (isMobileOnly) {
+    classNames = "px-1 pt-1 pb-1";
+  }
+  if (isTabletOnly) {
+    classNames = "px-5 pt-3 pb-4";
+  }
+  if (isDesktopOnly) {
+    classNames = "px-6 pt-2 pb-6";
+  }
+  return <div className={classNames}>{children}</div>;
 };
 
 const ProposalInformation = ({
@@ -128,6 +141,9 @@ const ProposalInformation = ({
   };
   // stores navbar height calculated after component is mounted
   const [navbarHeight, setNavbarHeight] = useState(0);
+
+  const isNotMobile = useMediaQuery();
+  const isTabletOnly = useMediaQuery(mediaMatchers.tabletOnly);
 
   useEffect(() => {
     setNavbarHeight(document.querySelector("header").offsetHeight);
@@ -202,20 +218,21 @@ const ProposalInformation = ({
         setFixedStyle((state) => ({
           ...state,
           windowWidth,
-          style: { ...state.style, width },
+          style: { ...(state?.style ?? {}), width },
         }));
       }
     }
   }, [fixedStyle, windowWidth, navbarHeight]);
 
-  const handleScroll = () => {
+  function handleScroll() {
     setScroll(document.body.scrollTop || document.documentElement.scrollTop);
-  };
+  }
 
   // this effect watches for window scrolling
   useEffect(() => {
     document.addEventListener("scroll", handleScroll);
     return () => document.removeEventListener("scroll", handleScroll);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -225,8 +242,26 @@ const ProposalInformation = ({
         ref={ref}
         style={fixedStyle?.style || {}}
       >
-        <WrapperSpacingTop>
+        <WrapperSpacingTop
+          isMobileOnly={!isNotMobile}
+          isDesktopOnly={isNotMobile && !isTabletOnly}
+          isTabletOnly={isTabletOnly}
+        >
           <p className="mb-5">Information</p>
+          <InfoBlock
+            title={"Stategie(s)"}
+            content={
+              <div className="is-flex flex-1" onClick={openStrategyModal}>
+                {strategies.map((st, index) => {
+                  return (
+                    <div className="pr-2" key={`${st}-${index}`}>
+                      <StrategyIcon className="cursor-pointer" />
+                    </div>
+                  );
+                })}
+              </div>
+            }
+          />
           <InfoBlock
             title={"Author"}
             content={
@@ -292,7 +327,11 @@ const ProposalInformation = ({
           />
         </WrapperSpacingTop>
         <hr />
-        <WrapperSpacingBottom>
+        <WrapperSpacingBottom
+          isMobileOnly={!isNotMobile}
+          isDesktopOnly={isNotMobile && !isTabletOnly}
+          isTabletOnly={isTabletOnly}
+        >
           <p className="mb-5">Current Results</p>
           {!loadingVotingResults && (
             <Results voteResults={votingResults?.results || []} />

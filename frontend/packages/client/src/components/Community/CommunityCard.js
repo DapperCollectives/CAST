@@ -1,7 +1,7 @@
 import React, { useCallback } from "react";
 import { Link, useHistory } from "react-router-dom";
-import { useWebContext } from "../contexts/Web3";
-import WrapperResponsive from "./WrapperResponsive";
+import { useWebContext } from "contexts/Web3";
+import { WrapperResponsive } from "components";
 
 const CommingSoon = () => {
   return (
@@ -66,7 +66,7 @@ const CommunityCard = ({
         </div>
         <div className="column">
           <WrapperResponsive
-            commonClasses="title mb-2"
+            classNames="title mb-2"
             extraClasses="is-4 pt-1"
             extraClassesMobile="is-6 pt-2"
           >

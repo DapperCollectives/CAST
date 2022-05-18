@@ -11,7 +11,8 @@ export const defaultReducer = (state, action) => {
         ...state,
         loading: false,
         error: false,
-        data: action.payload,
+        // do not update state if no payload is passed
+        ...(action?.payload ? { data: action.payload } : undefined),
       };
     case "ERROR":
       return {

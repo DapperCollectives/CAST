@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
-import millify from "millify";
+import { Link, useParams, useLocation } from "react-router-dom";
 import {
   Message,
   VotesList,
@@ -9,222 +8,30 @@ import {
   WalletConnect,
   Error,
   Loader,
-  WrapperResponsive as Wrapper,
   WrapperResponsive,
 } from "../components";
 import { CheckMark, ArrowLeft, Bin } from "../components/Svg";
-import { parseDateFromServer, isNotEmptyArray } from "../utils";
-import {
-  useProposal,
-  useProposalVotes,
-  useVotesForAddress,
-  useVotingStrategies,
-} from "../hooks";
+import { useProposal, useVotingStrategies, useMediaQuery } from "../hooks";
 import { useModalContext } from "../contexts/NotificationModal";
 import { useWebContext } from "../contexts/Web3";
-import { getStatus } from "../components/Proposals/ProposalHeader";
-import { FilterValues } from "../components/Proposals";
-// @todo: move this import and component to components folder
-import StatusLabel from "../components/Proposals/StatusLabel";
-import Tablink from "../components/Proposals/Tablink";
-import { CancelProposalModalConfirmation } from "../components/Proposal";
+import { FilterValues } from "../const";
+import { Tablink } from "../components/ProposalsList";
+import {
+  CancelProposalModalConfirmation,
+  ProposalStatus,
+  VoteOptions,
+} from "../components/Proposal";
+import { getProposalType } from "../utils";
 
-export const ProposalStatus = ({ proposal, className = "" }) => {
-  const { diffFromNow: endDiff, diffDays } = parseDateFromServer(
-    proposal.endTime
-  );
-  const { diffFromNow: startDiff } = parseDateFromServer(proposal.startTime);
-
-  const calculatedStatus = getStatus(
-    startDiff,
-    endDiff,
-    proposal?.computedStatus
-  );
-
-  if (
-    calculatedStatus === FilterValues.active ||
-    calculatedStatus === FilterValues.pending
-  ) {
-    return (
-      <div className={className}>
-        <code className="has-text-grey pl-0">
-          {calculatedStatus === FilterValues.active && (
-            <StatusLabel
-              margin="mr-3"
-              status={<b>Active</b>}
-              color="has-background-orange"
-              className="smaller-text"
-            />
-          )}
-          {calculatedStatus === FilterValues.pending && (
-            <StatusLabel
-              margin="mr-3"
-              status={<b>Pending</b>}
-              color="has-background-grey-light"
-              className="smaller-text"
-            />
-          )}
-          <span style={{ lineHeight: "18.8px" }} className="smaller-text">
-            Ends in {diffDays} days
-          </span>
-        </code>
-      </div>
-    );
-  }
-
-  if (calculatedStatus === FilterValues.cancelled) {
-    return (
-      <div className={className}>
-        <code className="has-text-grey pl-0">
-          <StatusLabel
-            status={<b>Cancelled</b>}
-            color="has-background-grey"
-            className="smaller-text"
-          />
-        </code>
-      </div>
-    );
-  }
-
-  return (
-    <div className={className}>
-      <code className="has-text-grey pl-0 smaller-text">
-        ✓ Closed - Final Decision {millify(proposal?.winCount || 0)}
-      </code>
-    </div>
-  );
-};
-
-export const VoteOptions = ({
-  labelType,
-  proposal,
-  onOptionSelect,
-  optionChosen,
-  castVote,
-  onConfirmVote,
-  addr,
-  readOnly = false,
-}) => {
-  const { diffFromNow: endDiff } = parseDateFromServer(proposal.endTime);
-  const { diffFromNow: startDiff } = parseDateFromServer(proposal.startTime);
-
-  const status = getStatus(startDiff, endDiff, proposal?.computedStatus);
-
-  const isActive = status === FilterValues.active;
-
-  const { getVotesForAddress, data, loading } = useVotesForAddress();
-
-  const votesFromAddress = data?.[addr];
-  const checkedVotes = Array.isArray(votesFromAddress);
-
-  useEffect(() => {
-    async function getVotes() {
-      getVotesForAddress([proposal.id], addr);
-    }
-    if (addr && !loading && proposal.id && !checkedVotes) {
-      getVotes();
-    }
-  }, [addr, proposal, loading, getVotesForAddress, checkedVotes]);
-
-  const hasntVoted =
-    !castVote &&
-    checkedVotes &&
-    votesFromAddress.every(
-      (voteObj) => String(proposal.id) !== Object.keys(voteObj)[0]
-    );
-  const canVote = addr && isActive && checkedVotes && hasntVoted;
-
-  const voteClasses = `vote-options border-light rounded-sm mb-6 ${
-    !canVote && "is-disabled"
-  } ${!hasntVoted && "is-voted"}`;
-
-  let previousVote = castVote;
-  let currentOption = optionChosen;
-  if (
-    !hasntVoted &&
-    Array.isArray(votesFromAddress) &&
-    votesFromAddress.length
-  ) {
-    const previousVoteObj = votesFromAddress.find(
-      (voteObj) => Object.keys(voteObj)[0] === String(proposal.id)
-    );
-    const voteOption = previousVoteObj?.[String(proposal.id)];
-    previousVote = voteOption;
-    currentOption = voteOption;
-  }
-  return (
-    <div className={voteClasses}>
-      <Wrapper
-        extraClasses="px-6 pt-5 pb-6"
-        extraClassesMobile="px-4 pt-5 pb-6"
-      >
-        <h3 className="is-size-5" style={{ lineHeight: "24px" }}>
-          Cast your vote
-        </h3>
-        <p
-          className="has-text-grey small-text pt-2"
-          style={{ lineHeight: "19.6px" }}
-        >
-          Secondary information about voting.
-        </p>
-      </Wrapper>
-
-      <Wrapper
-        extraClasses="has-background-white-ter p-6"
-        extraClassesMobile="has-background-white-ter p-4"
-      >
-        {proposal.choices.map((opt, i) => (
-          <Wrapper
-            key={`proposal-option-${i}`}
-            commonClasses="has-background-white border-light option-vote transition-all rounded-sm py-5 px-4"
-            extraClasses={proposal?.choices?.length !== i + 1 ? "mb-5" : {}}
-            extraStylesMobile={
-              proposal?.choices?.length !== i + 1
-                ? { marginBottom: "14px" }
-                : {}
-            }
-          >
-            <label className="radio is-flex">
-              <input
-                type="radio"
-                name={`${labelType}-${opt.value}`}
-                value={opt.value}
-                className={`mr-3 ${
-                  String(currentOption) === String(opt.value) &&
-                  String(previousVote) === String(opt.value) &&
-                  "is-chosen"
-                }`}
-                onChange={readOnly ? () => {} : onOptionSelect}
-                checked={currentOption === String(opt.value)}
-              />
-              <span />
-              <div className="has-text-black" style={{ lineHeight: "22.4px" }}>
-                {opt.label}
-              </div>
-            </label>
-          </Wrapper>
-        ))}
-      </Wrapper>
-      {!previousVote && (
-        <Wrapper
-          commonClasses="py-5"
-          extraClasses="px-6"
-          extraClassesMobile="px-4"
-        >
-          <button
-            style={{ height: 48, width: "100%" }}
-            className={`button vote-button transition-all is-flex has-background-yellow rounded-sm is-${
-              currentOption && !readOnly ? "enabled" : "disabled"
-            }`}
-            onClick={readOnly ? () => {} : onConfirmVote}
-          >
-            VOTE
-          </button>
-        </Wrapper>
-      )}
-    </div>
-  );
-};
+function useQueryParams() {
+  const { search } = useLocation();
+  return React.useMemo(() => {
+    const params = new URLSearchParams(search);
+    return {
+      forceLedger: params.get("ledger") === "true",
+    };
+  }, [search]);
+}
 
 const VoteUserError = () => (
   <div className="columns m-0 p-0 is-multiline is-mobile">
@@ -245,7 +52,8 @@ const VoteUserError = () => (
   </div>
 );
 
-export default function Proposal() {
+export default function ProposalPage() {
+  const isNotMobile = useMediaQuery();
   const [optionChosen, setOptionChosen] = useState(null);
   const [confirmingVote, setConfirmingVote] = useState(false);
   const [castingVote, setCastingVote] = useState(false);
@@ -259,8 +67,21 @@ export default function Proposal() {
   });
   const [isStrategyModalOpen, setIsStrategyModalOpen] = useState(false);
 
+  // setting this manually for users that do not have a ledger device
+  const { forceLedger } = useQueryParams();
+
   const modalContext = useModalContext();
-  const { user, injectedProvider } = useWebContext();
+
+  const { user, injectedProvider, isLedger, setWebContextConfig } =
+    useWebContext();
+
+  // setting this manually for users that do not have a ledger device
+  useEffect(() => {
+    if (forceLedger) {
+      setWebContextConfig({ forceLedger: true });
+    }
+  }, [forceLedger, setWebContextConfig]);
+
   const { proposalId } = useParams();
 
   const {
@@ -269,7 +90,9 @@ export default function Proposal() {
     updateProposal,
     loading,
     data: proposal,
+    error,
   } = useProposal();
+
   const {
     loading: loadingStrategies,
     data: votingStrategies,
@@ -310,8 +133,8 @@ export default function Proposal() {
     setIsStrategyModalOpen(false);
   };
 
-  const onOptionSelect = (event) => {
-    setOptionChosen(event?.target?.value);
+  const onOptionSelect = (value) => {
+    setOptionChosen(value);
   };
 
   const onConfirmVote = () => {
@@ -319,6 +142,10 @@ export default function Proposal() {
   };
 
   const onCancelVote = () => {
+    // clean option selected only if it's image based option
+    if (getProposalType(proposal.choices) === "image") {
+      setOptionChosen(null);
+    }
     setConfirmingVote(false);
   };
 
@@ -336,6 +163,7 @@ export default function Proposal() {
     const onCancelProposal = async () => {
       const response = await updateProposal(injectedProvider, proposal, {
         status: "cancelled",
+        signingAddr: user?.addr,
       });
       if (response.error) {
         return;
@@ -369,7 +197,12 @@ export default function Proposal() {
     };
 
     setCastingVote(true);
-    const response = await voteOnProposal(injectedProvider, proposal, voteBody);
+    const response = await voteOnProposal(
+      injectedProvider,
+      proposal,
+      voteBody,
+      isLedger
+    );
     if (response?.error) {
       setVoteError(response.error);
       setConfirmingVote(false);
@@ -381,7 +214,10 @@ export default function Proposal() {
             </p>
           ),
           errorTitle: "Something went wrong with your vote.",
-        })
+        }),
+        {
+          classNameModalContent: "rounded-sm",
+        }
       );
       setCastingVote(false);
       return;
@@ -422,44 +258,16 @@ export default function Proposal() {
   const isClosed =
     proposal?.computedStatus === FilterValues.closed.toLocaleLowerCase();
 
-  const {
-    getAllProposalVotes,
-    resetResults,
-    loading: loadingVotes,
-    data: votes,
-  } = useProposalVotes({ proposalId });
-
-  useEffect(() => {
-    if (isClosed) {
-      (async () => {
-        resetResults();
-        await getAllProposalVotes();
-      })();
-    }
-  }, [getAllProposalVotes, resetResults, isClosed]);
-
-  if (loading || loadingVotes) {
+  if (error) {
     return null;
   }
 
-  let optionsReadOnly = false;
-  let optionToUse = optionChosen;
-  let voteToUse = castVote;
-
-  if (isClosed && isNotEmptyArray(votes)) {
-    const optionMap = {};
-    votes.forEach((vote) => {
-      if (!optionMap[vote.choice]) {
-        optionMap[vote.choice] = 0;
-      }
-      optionMap[vote.choice] += 1;
-    });
-    const sortedChoices = Object.keys(optionMap).sort(
-      (a, b) => optionMap[a] - optionMap[b]
+  if (loading || !proposal) {
+    return (
+      <section className="section full-height">
+        <Loader fullHeight />
+      </section>
     );
-    optionsReadOnly = true;
-    optionToUse = sortedChoices[0];
-    voteToUse = sortedChoices[0];
   }
 
   const htmlBody = proposal?.body
@@ -610,132 +418,138 @@ export default function Proposal() {
             )}
           </div>
           {/* Mobile version for tabs */}
-          <div className="is-hidden-tablet">
-            <WrapperResponsive
-              as="h2"
-              commonClasses="title mt-5 is-4 has-text-back has-text-weight-normal"
-              extraStylesMobile={{ marginBottom: "30px" }}
-            >
-              {proposal.name}
-            </WrapperResponsive>
-            <div className="tabs is-medium">
-              <ul>
-                <li className={`${visibleTab.proposal ? "is-active" : ""}`}>
-                  <Tablink
-                    linkText="Proposal"
-                    onClick={setTab("proposal")}
-                    isActive={visibleTab.proposal}
-                    onlyLink
-                  />
-                </li>
-                <li className={`${visibleTab.summary ? "is-active" : ""}`}>
-                  <Tablink
-                    linkText="Summary"
-                    onClick={setTab("summary")}
-                    isActive={visibleTab.summary}
-                    onlyLink
-                  />
-                </li>
-              </ul>
-            </div>
-            <div className="columns is-mobile m-0">
-              {visibleTab.proposal && (
-                <div
-                  className={`column is-full p-0 is-flex is-flex-direction-column`}
-                >
-                  {proposal.body && (
-                    <div
-                      className="mt-4 mb-6 proposal-copy"
-                      dangerouslySetInnerHTML={{
-                        __html: htmlBody,
-                      }}
+          {!isNotMobile && (
+            <div>
+              <WrapperResponsive
+                as="h2"
+                classNames="title mt-5 is-4 has-text-back has-text-weight-normal"
+                extraStylesMobile={{ marginBottom: "30px" }}
+              >
+                {proposal.name}
+              </WrapperResponsive>
+              <div className="tabs is-medium">
+                <ul>
+                  <li className={`${visibleTab.proposal ? "is-active" : ""}`}>
+                    <Tablink
+                      linkText="Proposal"
+                      onClick={setTab("proposal")}
+                      isActive={visibleTab.proposal}
+                      onlyLink
                     />
-                  )}
-                  {proposal.strategy === "bpt" && (
-                    <div className="mt-6 mb-6 has-background-white-ter has-text-grey p-5 rounded-sm">
-                      This snapshot was re-uploaded with the BPT token strategy,
-                      allowing for BANK holders to vote with tokens held in
-                      Balancer's liquidity pools.
-                    </div>
-                  )}
-                  <VoteOptions
-                    labelType="mobile"
-                    readOnly={optionsReadOnly}
-                    addr={user?.addr}
-                    proposal={proposal}
-                    onOptionSelect={onOptionSelect}
-                    optionChosen={optionToUse}
-                    castVote={voteToUse}
-                    onConfirmVote={onConfirmVote}
-                  />
-                  <VotesList proposalId={proposalId} castVote={castVote} />
-                </div>
-              )}
-              {visibleTab.summary && (
-                <div
-                  className={`column is-full p-0 is-flex is-flex-direction-column`}
-                >
-                  <ProposalInformation
-                    proposalId={proposal.id}
-                    creatorAddr={proposal.creatorAddr}
-                    isCoreCreator={proposal.isCore}
-                    strategies={[proposalStrategy]}
-                    ipfs={proposal.ipfs}
-                    ipfsUrl={proposal.ipfsUrl}
-                    startTime={proposal.startTime}
-                    endTime={proposal.endTime}
-                    openStrategyModal={openStrategyModal}
-                  />
-                </div>
-              )}
+                  </li>
+                  <li className={`${visibleTab.summary ? "is-active" : ""}`}>
+                    <Tablink
+                      linkText="Summary"
+                      onClick={setTab("summary")}
+                      isActive={visibleTab.summary}
+                      onlyLink
+                    />
+                  </li>
+                </ul>
+              </div>
+              <div className="columns is-mobile m-0">
+                {visibleTab.proposal && (
+                  <div
+                    className={`column is-full p-0 is-flex is-flex-direction-column`}
+                  >
+                    {proposal.body && (
+                      <div
+                        className="mt-4 mb-6 proposal-copy"
+                        dangerouslySetInnerHTML={{
+                          __html: htmlBody,
+                        }}
+                      />
+                    )}
+                    {proposal.strategy === "bpt" && (
+                      <div className="mt-6 mb-6 has-background-white-ter has-text-grey p-5 rounded-sm">
+                        This snapshot was re-uploaded with the BPT token
+                        strategy, allowing for BANK holders to vote with tokens
+                        held in Balancer's liquidity pools.
+                      </div>
+                    )}
+                    <VoteOptions
+                      labelType="mobile"
+                      readOnly={isClosed}
+                      addr={user?.addr}
+                      proposal={proposal}
+                      optionChosen={optionChosen}
+                      castVote={castVote}
+                      onOptionSelect={onOptionSelect}
+                      onConfirmVote={onConfirmVote}
+                    />
+                    <VotesList proposalId={proposalId} castVote={castVote} />
+                  </div>
+                )}
+                {visibleTab.summary && (
+                  <div
+                    className={`column is-full p-0 is-flex is-flex-direction-column`}
+                  >
+                    <ProposalInformation
+                      proposalId={proposal.id}
+                      creatorAddr={proposal.creatorAddr}
+                      isCoreCreator={proposal.isCore}
+                      strategies={[proposalStrategy]}
+                      ipfs={proposal.ipfs}
+                      ipfsUrl={proposal.ipfsUrl}
+                      startTime={proposal.startTime}
+                      endTime={proposal.endTime}
+                      openStrategyModal={openStrategyModal}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          )}
           {/* Desktop version with no tabs */}
-          <div className="is-hidden-mobile columns m-0 is-justify-content-space-between">
-            <div className={`column is-7 p-0 is-flex is-flex-direction-column`}>
-              <h1 className="title mt-5 is-3">{proposal.name}</h1>
-              {proposal.body && (
-                <div
-                  className="mt-6 mb-6 proposal-copy transition-all"
-                  dangerouslySetInnerHTML={{
-                    __html: htmlBody,
-                  }}
+          {isNotMobile && (
+            <div className="columns m-0 is-justify-content-space-between">
+              <div
+                className={`column is-7 p-0 is-flex is-flex-direction-column`}
+              >
+                <h1 className="title mt-5 is-3">{proposal.name}</h1>
+                {proposal.body && (
+                  <div
+                    className="mt-6 mb-6 proposal-copy transition-all word-break-all"
+                    dangerouslySetInnerHTML={{
+                      __html: htmlBody,
+                    }}
+                  />
+                )}
+                {proposal.strategy === "bpt" && (
+                  <div className="mt-6 mb-6 has-background-white-ter has-text-grey p-5 rounded-sm">
+                    This snapshot was re-uploaded with the BPT token strategy,
+                    allowing for BANK holders to vote with tokens held in
+                    Balancer's liquidity pools.
+                  </div>
+                )}
+                <VoteOptions
+                  labelType="desktop"
+                  readOnly={isClosed}
+                  addr={user?.addr}
+                  proposal={proposal}
+                  onOptionSelect={onOptionSelect}
+                  optionChosen={optionChosen}
+                  castVote={castVote}
+                  onConfirmVote={onConfirmVote}
                 />
-              )}
-              {proposal.strategy === "bpt" && (
-                <div className="mt-6 mb-6 has-background-white-ter has-text-grey p-5 rounded-sm">
-                  This snapshot was re-uploaded with the BPT token strategy,
-                  allowing for BANK holders to vote with tokens held in
-                  Balancer's liquidity pools.
-                </div>
-              )}
-              <VoteOptions
-                labelType="desktop"
-                readOnly={optionsReadOnly}
-                addr={user?.addr}
-                proposal={proposal}
-                onOptionSelect={onOptionSelect}
-                optionChosen={optionToUse}
-                castVote={voteToUse}
-                onConfirmVote={onConfirmVote}
-              />
-              <VotesList proposalId={proposalId} castVote={castVote} />
+                <VotesList proposalId={proposalId} castVote={castVote} />
+              </div>
+              <div className="column p-0 is-4">
+                <ProposalInformation
+                  proposalId={proposal.id}
+                  creatorAddr={proposal.creatorAddr}
+                  isCoreCreator={proposal.isCore}
+                  strategies={[proposalStrategy]}
+                  ipfs={proposal.ipfs}
+                  ipfsUrl={proposal.ipfsUrl}
+                  startTime={proposal.startTime}
+                  endTime={proposal.endTime}
+                  openStrategyModal={openStrategyModal}
+                  className="has-background-white-ter"
+                />
+              </div>
             </div>
-            <div className="column p-0 is-4">
-              <ProposalInformation
-                proposalId={proposal.id}
-                creatorAddr={proposal.creatorAddr}
-                isCoreCreator={proposal.isCore}
-                strategies={[proposalStrategy]}
-                ipfs={proposal.ipfs}
-                ipfsUrl={proposal.ipfsUrl}
-                startTime={proposal.startTime}
-                endTime={proposal.endTime}
-                openStrategyModal={openStrategyModal}
-                className="has-background-white-ter"
-              />
-            </div>
-          </div>
+          )}
         </div>
       </section>
     </>

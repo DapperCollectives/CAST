@@ -66,37 +66,7 @@ export default function useProposalVotes({
         payload: { errorData: err.message },
       });
     }
-  }, [dispatch, proposalId, count, start, notifyError]);
-
-  const getAllProposalVotes = useCallback(async () => {
-    dispatch({ type: "PROCESSING" });
-    let page = 0;
-    const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/proposals/${proposalId}/votes?count=25`;
-    try {
-      let response = await fetch(`${url}&start=${page}`);
-      let proposalVotes = await checkResponse(response);
-
-      const votesArray = [...proposalVotes.data];
-
-      while (proposalVotes?.next !== -1) {
-        page = proposalVotes?.next;
-        response = await fetch(`${url}&start=${page}`);
-        proposalVotes = await checkResponse(response);
-        votesArray.push(...proposalVotes.data);
-      }
-
-      dispatch({
-        type: "SUCCESS",
-        payload: { ...proposalVotes, data: votesArray },
-      });
-    } catch (err) {
-      notifyError(err, url);
-      dispatch({
-        type: "ERROR",
-        payload: { errorData: err.message },
-      });
-    }
-  }, [dispatch, proposalId, notifyError]);
+  }, [proposalId, count, start, notifyError]);
 
   // Initial Load to fetch from API
   useEffect(() => {
@@ -108,7 +78,6 @@ export default function useProposalVotes({
   return {
     ...state,
     getProposalVotes,
-    getAllProposalVotes,
     resetResults,
     fetchMore,
   };

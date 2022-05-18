@@ -1,10 +1,10 @@
 import React from "react";
 
-const StartLoader = ({ pathId, className = "" }) => {
+const StartLoader = ({ pathId, className = "", width = 35, height = 35 }) => {
   return (
     <svg
-      width={35}
-      height={35}
+      width={width}
+      height={height}
       viewBox="0 0 70 70"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -32,7 +32,12 @@ const StartLoader = ({ pathId, className = "" }) => {
   );
 };
 
-export default function Loader({ fullHeight = false, className = "" }) {
+export default function Loader({
+  fullHeight = false,
+  className = "",
+  size,
+  spacing,
+}) {
   const style = fullHeight ? { height: "100%" } : {};
   return (
     <div
@@ -40,9 +45,24 @@ export default function Loader({ fullHeight = false, className = "" }) {
       style={style}
     >
       <div className="is-flex is-align-items-center">
-        <StartLoader pathId="loader_1" className="mx-3" />
-        <StartLoader pathId="loader_2" className="mx-3" />
-        <StartLoader pathId="loader_3" className="mx-3" />
+        <StartLoader
+          width={size}
+          height={size}
+          pathId="loader_1"
+          className={spacing ?? "mx-3"}
+        />
+        <StartLoader
+          width={size}
+          height={size}
+          pathId="loader_2"
+          className={spacing ?? "mx-3"}
+        />
+        <StartLoader
+          width={size}
+          height={size}
+          pathId="loader_3"
+          className={spacing ?? "mx-3"}
+        />
       </div>
     </div>
   );
