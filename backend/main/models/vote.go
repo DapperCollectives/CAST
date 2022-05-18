@@ -83,7 +83,7 @@ func GetVotesForProposal(db *s.Database, start, count int, order string, proposa
 		orderBySql = "ORDER BY created_at ASC"
 	}
 	sql := `SELECT v.*, p.block_height,
-		COALESCE(b.staking_balance,0) as balance 
+		COALESCE(b.primary_account_balance) as balance 
 		FROM votes v
 		JOIN proposals p ON p.id = $3
 		LEFT JOIN balances b ON b.addr = v.addr and p.block_height = b.block_height

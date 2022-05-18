@@ -17,6 +17,7 @@ import (
 	"github.com/brudfyi/flow-voting-tool/main/middleware"
 	"github.com/brudfyi/flow-voting-tool/main/models"
 	"github.com/brudfyi/flow-voting-tool/main/shared"
+	"github.com/brudfyi/flow-voting-tool/main/strategies"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v4"
@@ -60,6 +61,16 @@ type App struct {
 }
 
 var allowedFileTypes = []string{"image/jpg", "image/jpeg", "image/png", "image/gif"}
+
+type allStrategies struct {
+	TokenWeightedDefault       *strategies.TokenWeightedDefault
+	StakedTokenWeightedDefault *strategies.StakedTokenWeightedDefault
+}
+
+var strategyMap = map[string]interface{}{
+	"token-weighted-default":        strategies.TokenWeightedDefault{},
+	"staked-token-weighted-default": strategies.StakedTokenWeightedDefault{},
+}
 
 const (
 	maxFileSize = 5 * 1024 * 1024 // 5MB
@@ -171,6 +182,7 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/proposals/{proposalId:[0-9]+}/votes/{addr:0x[a-zA-Z0-9]{16}}", a.getVoteForAddress).Methods("GET")
 	a.Router.HandleFunc("/proposals/{proposalId:[0-9]+}/votes", a.createVoteForProposal).Methods("POST", "OPTIONS")
 	a.Router.HandleFunc("/votes/{addr:0x[a-zA-Z0-9]{16}}", a.getVotesForAddress).Methods("GET")
+	//Strategies
 	// a.Router.HandleFunc("/proposals/{proposalId:[0-9]+}/votes/{addr:0x[a-zA-Z0-9]{16}}", a.updateVoteForProposal).Methods("PUT", "OPTIONS")
 	a.Router.HandleFunc("/proposals/{proposalId:[0-9]+}/results", a.getResultsForProposal)
 	// Types
@@ -303,6 +315,26 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	p := models.Proposal{ID: proposalId}
+	if err := p.GetProposalById(a.DB); err != nil {
+		switch err.Error() {
+		case pgx.ErrNoRows.Error():
+			respondWithError(w, http.StatusNotFound, "Proposal not found")
+		default:
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+		}
+		return
+	}
+
+	s := strategyMap[*p.Strategy]
+	if s == nil {
+		respondWithError(w, http.StatusInternalServerError, "Proposal strategy not found")
+		return
+	}
+
+	//s.Name()
+
 	response := shared.GetPaginatedResponseWithPayload(votes, start, count, totalRecords)
 	respondWithJSON(w, http.StatusOK, response)
 }
@@ -329,6 +361,7 @@ func (a *App) getVoteForAddress(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
+
 	respondWithJSON(w, http.StatusOK, v)
 }
 
