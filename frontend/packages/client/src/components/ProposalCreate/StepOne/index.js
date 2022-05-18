@@ -9,7 +9,7 @@ import { Editor } from "react-draft-wysiwyg";
 import { EditorState, AtomicBlockUtils } from "draft-js";
 import { useVotingStrategies } from "hooks";
 import { useModalContext } from "contexts/NotificationModal";
-import { Dropdown, Error } from "components";
+import { Dropdown, Error, UploadImageModal } from "components";
 import TextBasedChoices from "./TextBasedChoices";
 import ImageChoices from "./ImageChoices";
 import { Image } from "components/Svg";
