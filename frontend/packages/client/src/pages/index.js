@@ -10,6 +10,7 @@ const Proposal = lazy(() => import("./Proposal"));
 const About = lazy(() => import("./About"));
 const Debug = lazy(() => import("./Debug"));
 const ProposalCreate = lazy(() => import("./ProposalCreate"));
+const CommunityEditor = lazy(() => import("./CommunityEditor"));
 
 export default function AppPages() {
   return (
@@ -23,6 +24,9 @@ export default function AppPages() {
               <Home />
             </Route>
             <Route exact path="/about" component={About} />
+            <Route path="/community/:communityId/edit" exact={true}>
+              <CommunityEditor />
+            </Route>
             <Route path="/community/:communityId">
               <Community />
             </Route>

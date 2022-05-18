@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { ArrowLeft, CheckMark } from "../Svg";
 import Loader from "../Loader";
 
@@ -6,10 +6,15 @@ function StepByStep({ finalLabel, steps, onSubmit, creatingProposal }) {
   const [currentStep, setCurrentStep] = useState(0);
   const [isStepValid, setStepValid] = useState(false);
   const [stepsData, setStepsData] = useState({});
+  const refs = React.useRef();
 
   const onStepAdvance = (direction = "next") => {
     if (direction === "next") {
       if (currentStep + 1 <= steps.length - 1) {
+        const enableAdvance = runPreCheckStepAdvance();
+        if (!enableAdvance) {
+          return;
+        }
         setCurrentStep(currentStep + 1);
       }
     } else if (direction === "prev") {
@@ -18,6 +23,24 @@ function StepByStep({ finalLabel, steps, onSubmit, creatingProposal }) {
       }
     }
   };
+  const runPreCheckStepAdvance = () => {
+    if (refs.current) {
+      const runCheckResult = refs.current();
+      if (!runCheckResult) {
+        return false;
+      }
+      refs.current = null;
+    }
+    return true;
+  };
+
+  const setPreCheckStepAdvance = useCallback(
+    (fnCheck) => {
+      // this is overwritten per component on the set
+      refs.current = fnCheck;
+    },
+    [refs]
+  );
 
   const getStepIcon = (stepIdx, stepLabel) => {
     const stepClasses = [];
@@ -92,7 +115,7 @@ function StepByStep({ finalLabel, steps, onSubmit, creatingProposal }) {
   );
 
   const getNextButton = () => (
-    <div className="mt-6">
+    <div className="my-6">
       <div
         className={`button is-block has-background-yellow rounded-sm py-2 px-4 has-text-centered ${
           !isStepValid && "is-disabled"
@@ -105,7 +128,7 @@ function StepByStep({ finalLabel, steps, onSubmit, creatingProposal }) {
   );
 
   const getSubmitButton = () => (
-    <div className="mt-6">
+    <div className="my-6">
       <div
         className={`button is-block has-background-yellow rounded-sm py-2 px-4 has-text-centered ${
           !isStepValid && "is-disabled"
@@ -134,7 +157,7 @@ function StepByStep({ finalLabel, steps, onSubmit, creatingProposal }) {
         {/* left panel */}
         <div
           style={{
-            paddingTop: "5rem",
+            paddingTop: "3rem",
             paddingRight: "5rem",
             minWidth: 280,
           }}
@@ -184,6 +207,7 @@ function StepByStep({ finalLabel, steps, onSubmit, creatingProposal }) {
               setStepValid,
               stepData: stepsData[currentStep],
               stepsData,
+              setPreCheckStepAdvance,
             })}
           <div className="is-hidden-tablet">
             {currentStep < steps.length - 1 && getNextButton()}

@@ -1,20 +1,11 @@
 import React, { useState } from "react";
-import { Add } from "../../components/Svg";
+import { Add } from "components/Svg";
 import { Link } from "react-router-dom";
-import AboutCommunity from "./AboutCommunity";
-import ProposalList from "./ProposalList";
-import { useCommunityProposalsWithVotes, useAllowlist } from "../../hooks";
-import Tablink from "./Tablink";
+import { useCommunityProposalsWithVotes, useAllowlist } from "hooks";
+import ProposalList, { AboutCommunity, Tablink } from "components/ProposalsList/index";
+import { FilterValues } from "const";
 
-export const FilterValues = {
-  all: "All",
-  active: "Active",
-  pending: "Pending",
-  closed: "Closed",
-  cancelled: "Cancelled",
-};
-
-const Proposals = ({ community, activeTab, enableJoin = false }) => {
+const Community = ({ community, activeTab, enableJoin = false }) => {
   const activeTabMap = {
     proposals: activeTab === "proposals",
     about: activeTab === "about",
@@ -185,4 +176,4 @@ const Proposals = ({ community, activeTab, enableJoin = false }) => {
   );
 };
 
-export default Proposals;
+export default Community;

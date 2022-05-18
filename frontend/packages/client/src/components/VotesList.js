@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import millify from "millify";
 import { AngleDown, AngleUp } from "./Svg";
 import Blockies from "react-blockies";
-import useProposalVotes from "../hooks/useProposalVotes";
+import {useProposalVotes} from "hooks";
 
 const Core = () => (
   <div className="subtitle small-text p-2 rounded-sm has-background-white-ter has-text-black is-family-monospace">
@@ -44,10 +44,14 @@ const VotesList = ({ proposalId, castVote }) => {
   } = useProposalVotes({ proposalId, count: 10 });
 
   useEffect(() => {
-    (async () => {
-      resetResults();
-      await getProposalVotes();
-    })();
+    // user just voted on proposal request again
+    // results to show address first on the list
+    if (castVote) {
+      (async () => {
+        resetResults();
+        await getProposalVotes();
+      })();
+    }
   }, [castVote, getProposalVotes, resetResults]);
 
   const scrollToBottom = () => {
@@ -117,16 +121,16 @@ const VotesList = ({ proposalId, castVote }) => {
                       <hr />
                     </div>
                   )}
-                  {loadingVotes && (
-                    <div
-                      className={`column p-0 is-full is-flex is-align-items-center is-justify-content-center`}
-                    >
-                      <h5>Loading more ...</h5>
-                    </div>
-                  )}
                 </React.Fragment>
               );
             })}
+          {loadingVotes && next > 0 && (
+            <div
+              className={`column p-0 is-full is-flex is-align-items-center is-justify-content-center mb-5`}
+            >
+              <p className="smaller-text">Loading more ...</p>
+            </div>
+          )}
           {hasMoreThanTen && (
             <div className="column p-0 mb-5 is-full is-flex is-align-items-center is-justify-content-center">
               <ShowMoreOrLess

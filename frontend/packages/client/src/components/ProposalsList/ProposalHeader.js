@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useEffect, useMemo } from "react";
 import millify from "millify";
 import { Active, CheckCircle } from "../Svg";
-import { parseDateFromServer } from "../../utils";
-import { FilterValues } from "./Proposals";
-import StatusLabel from "./StatusLabel";
+import { parseDateFromServer } from "utils";
+import { FilterValues } from "const";
+import StatusLabel from "../StatusLabel";
+import { useVotingResults } from "hooks";
 
 export const getStatus = (startDiff, endDiff, status) => {
   // get status from backend
@@ -21,29 +22,64 @@ export const getStatus = (startDiff, endDiff, status) => {
   return FilterValues.closed;
 };
 
-const ProposalHeader = ({
-  textDecision,
-  winCount,
-  voted,
-  endTime,
-  computedStatus,
-}) => {
+const ProposalHeader = ({ id: proposalId, voted, endTime, computedStatus }) => {
+  const { getVotingResults, data: votingResults } = useVotingResults();
+
   const { diffDays } = parseDateFromServer(endTime);
 
   const status = FilterValues[computedStatus] ?? FilterValues.closed;
+
+  useEffect(() => {
+    if (FilterValues[computedStatus] === FilterValues.closed) {
+      async function _getVotingResults() {
+        return getVotingResults(proposalId);
+      }
+      _getVotingResults();
+    }
+  }, [computedStatus, getVotingResults, proposalId]);
+
+  const { textDecision, winCount } = useMemo(() => {
+    if (votingResults?.results) {
+      const { results } = votingResults;
+      const resultsArray = Object.entries(results);
+      const sortedResults = resultsArray.sort((a, b) => {
+        if (Number(b[1]) < Number(a[1])) {
+          return -1;
+        }
+        return 1;
+      });
+
+      const textDecision = sortedResults[0][0];
+      const winCount = Number(sortedResults[0][1]);
+
+      // no winner
+      if (sortedResults.every((e) => Number(e[1]) === winCount)) {
+        return { textDecision: "", winCount: 0 };
+      }
+
+      return {
+        textDecision,
+        winCount,
+      };
+    }
+    return { textDecision: "", winCount: 0 };
+  }, [votingResults]);
+
   const isClosedOrCancelled =
     status === FilterValues.closed || status === FilterValues.cancelled;
 
   const iconStatusMap = {
     [FilterValues.active]: <Active />,
-    [FilterValues.closed]: <CheckCircle width="15" height="15" />,
+    [FilterValues.closed]:
+      textDecision !== "" ? <CheckCircle width="15" height="15" /> : null,
   };
 
   const textDescriptionMap = {
     [FilterValues.active]: `Active: Ends in ${diffDays} days`,
-    [FilterValues.closed]: textDecision
-      ? `${textDecision} ${winCount ? `(${millify(winCount)})` : ""}`
-      : "",
+    [FilterValues.closed]:
+      textDecision !== ""
+        ? `${textDecision} ${winCount !== 0 ? `(${millify(winCount)})` : ""}`
+        : "",
   };
 
   const statusLabelMap = {
@@ -76,7 +112,10 @@ const ProposalHeader = ({
               {textDescriptionMap[status] ?? null}
             </code>
           </div>
-          <div className="column is-flex is-align-items-center is-justify-content-end proposal-status p-0">
+          <div
+            className="column is-flex is-align-items-center proposal-status p-0"
+            style={{ justifyContent: "flex-end" }}
+          >
             <code className="has-text-grey px-0 smaller-text">
               {statusLabelMap[status] ?? null}
             </code>

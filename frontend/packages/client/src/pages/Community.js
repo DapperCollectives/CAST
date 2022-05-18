@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams, useHistory, useLocation } from "react-router-dom";
-import Proposals from "../components/Proposals";
+import Community from "../components/Community";
 import useCommunityDetails from "../hooks/useCommunityDetails";
 
 function useQueryParams() {
@@ -13,7 +13,7 @@ function useQueryParams() {
   }, [search]);
 }
 
-export default function Community() {
+export default function CommunityPage() {
   const { communityId } = useParams();
   const history = useHistory();
   const { activeTab } = useQueryParams();
@@ -33,7 +33,7 @@ export default function Community() {
 
   return (
     <section className="container is-flex full-height">
-      {!loading && <Proposals community={community} activeTab={activeTab} />}
+      {!loading && <Community community={community} activeTab={activeTab} />}
     </section>
   );
 }
