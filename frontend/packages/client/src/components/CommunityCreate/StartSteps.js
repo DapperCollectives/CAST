@@ -2,7 +2,7 @@ import React from "react";
 
 export default function StartSteps({ dismissPreStep }) {
   return (
-    <div className="columns is-multiline border-light rounded-sm p-6">
+    <div className="columns is-multiline border-light rounded-sm p-6 m-0">
       <div className="column is-12">
         <h4 className="has-text-weight-bold is-size-5">
           Let's create a community

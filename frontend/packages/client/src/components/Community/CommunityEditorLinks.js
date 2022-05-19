@@ -39,7 +39,7 @@ export const CommunityLinksForm = ({
       </div>
       <div
         style={{ position: "relative" }}
-        className="is-flex is-align-items-center mt-3"
+        className="is-flex is-align-items-center mt-4"
       >
         <input
           type="text"
@@ -68,7 +68,7 @@ export const CommunityLinksForm = ({
       </div>
       <div
         style={{ position: "relative" }}
-        className="is-flex is-align-items-center mt-3"
+        className="is-flex is-align-items-center mt-4"
       >
         <input
           type="text"
@@ -97,7 +97,7 @@ export const CommunityLinksForm = ({
       </div>
       <div
         style={{ position: "relative" }}
-        className="is-flex is-align-items-center mt-3"
+        className="is-flex is-align-items-center mt-4"
       >
         <input
           type="text"
@@ -126,7 +126,7 @@ export const CommunityLinksForm = ({
       </div>
       <div
         style={{ position: "relative" }}
-        className="is-flex is-align-items-center mt-3"
+        className="is-flex is-align-items-center mt-4"
       >
         <input
           type="text"
@@ -155,12 +155,12 @@ export const CommunityLinksForm = ({
       </div>
       <div
         style={{ position: "relative" }}
-        className="is-flex is-align-items-center mt-3"
+        className="is-flex is-align-items-center mt-4"
       >
         <input
           type="text"
           name="instagram"
-          className="rounded-sm border-light py-3 pr-3 column is-full "
+          className="rounded-sm border-light py-3 pr-3 column is-full"
           value={fields["instagramUrl"]}
           maxLength={200}
           onChange={(event) =>
