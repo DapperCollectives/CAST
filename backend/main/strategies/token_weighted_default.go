@@ -1,9 +1,12 @@
 package strategies
 
+import "github.com/brudfyi/flow-voting-tool/main/models"
+
 type TokenWeightedDefault struct{}
 
-func (s *TokenWeightedDefault) TallyVotes(votes []int, proposalId int) ([]int, error) {
-	return votes, nil
+func (s *TokenWeightedDefault) TallyVotes(votes []*models.VoteWithBalance, proposalId int) (models.ProposalResults, error) {
+	var r models.ProposalResults
+	return r, nil
 }
 
 func (s *TokenWeightedDefault) GetStrategyVotesForProposal(proposalId int) ([]int, error) {
