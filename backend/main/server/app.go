@@ -63,7 +63,7 @@ type App struct {
 var allowedFileTypes = []string{"image/jpg", "image/jpeg", "image/png", "image/gif"}
 
 type Strategy interface {
-	TallyVotes(votes []int, proposalId int) ([]int, error)
+	TallyVotes(votes []*models.VoteWithBalance, proposalId int) ([]*models.VoteWithBalance, error)
 	GetStrategyVotesForProposal(proposalId int) ([]int, error)
 	GetWeightForAddress(addr string, proposalId int) (int, error)
 	GetWeightsForAddress(addr string, proposalId int) ([]int, error)
@@ -330,14 +330,22 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//print votes to the console
+	for _, v := range votes {
+		log.Info().Msgf("%+v\n", v)
+	}
+
 	s := strategyMap[*p.Strategy]
 	if s == nil {
 		respondWithError(w, http.StatusInternalServerError, "Invalid Strategy")
 		return
 	}
 
-	var v = []int{0, 1, 2, 3}
-	tally, _ := s.TallyVotes(v, proposalId)
+	tally, err := s.TallyVotes(votes, proposalId)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
 
 	fmt.Printf("tally: %+v", tally)
 

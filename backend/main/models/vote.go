@@ -93,7 +93,8 @@ func GetVotesForProposal(db *s.Database, start, count int, order string, proposa
 								as balance
                 from votes v
                 join proposals p on p.id = $3
-                left join balances b on b.addr = v.addr and p.block_height = b.block_height
+                left join balances b on b.addr = v.addr 
+								and p.block_height = b.block_height
                 where proposal_id = $3`
 
 	sql = sql + orderBySql
