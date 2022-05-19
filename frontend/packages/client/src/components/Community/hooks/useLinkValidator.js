@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 
-const urlPatternValidation = (url) => {
+export const urlPatternValidation = (url) => {
   const regex = new RegExp(
     "^(https?:\\/\\/)?" + // protocol
       "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" + // domain name
