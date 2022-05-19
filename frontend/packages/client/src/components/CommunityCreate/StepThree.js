@@ -8,7 +8,11 @@ export default function StepThree({
   onSubmit,
   isStepValid,
 }) {
-  const { proposalThreshold = "", contractAddress = "" } = stepData || {};
+  const {
+    proposalThreshold = "",
+    contractAddress = "",
+    onlyAuthorsToSubmitProposals = false,
+  } = stepData || {};
 
   useEffect(() => {
     const requiredFields = {
@@ -19,7 +23,7 @@ export default function StepThree({
       (field) => stepData && requiredFields[field](stepData[field])
     );
     setStepValid(isValid);
-  }, [stepData]);
+  }, [stepData, setStepValid]);
   return (
     <>
       <WrapperResponsive
@@ -27,14 +31,18 @@ export default function StepThree({
         extraClasses="p-6 mb-5"
         extraClassesMobile="p-4 mb-4"
       >
-        <div className="column is-12">
-          <h4 className="has-text-weight-bold is-size-5">Proposal Threshold</h4>
-        </div>
-        <div className="column is-12 ">
-          <p className="small-text has-text-grey">
-            Proposal threshold is the minimum number of tokens required to
-            create a proposal.
-          </p>
+        <div className="columns is-multiline">
+          <div className="column is-12">
+            <h4 className="has-text-weight-bold is-size-5">
+              Proposal Threshold
+            </h4>
+          </div>
+          <div className="column is-12">
+            <p className="small-text has-text-grey">
+              Proposal threshold is the minimum number of tokens required to
+              create a proposal.
+            </p>
+          </div>
         </div>
         <input
           type="text"
@@ -57,15 +65,26 @@ export default function StepThree({
           }
         />
 
-        <label className="checkbox column is-full is-full-mobile  mt-4">
-          <input type="checkbox" className="mr-2" />
+        <label className="checkbox column is-full is-full-mobile px-0 mt-4">
+          <input
+            type="checkbox"
+            className="mr-2"
+            checked={onlyAuthorsToSubmitProposals}
+            onClick={(e) => {
+              onDataChange({
+                onlyAuthorsToSubmitProposals: !onlyAuthorsToSubmitProposals,
+              });
+            }}
+          />
           Allow only authors to submit a proposal
         </label>
       </WrapperResponsive>
       <div className="column p-0 is-12 mt-4">
         <button
           style={{ height: 48, width: "100%" }}
-          className="button vote-button transition-all is-flex has-background-yellow rounded-sm is-enabled is-size-6"
+          className={`button vote-button transition-all is-flex has-background-yellow rounded-sm is-enabled is-size-6 ${
+            !isStepValid ? "is-disabled" : ""
+          }`}
           onClick={isStepValid ? () => onSubmit() : () => {}}
         >
           CREATE COMMUNITY
