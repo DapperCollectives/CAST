@@ -28,8 +28,11 @@ type VoteWithBalance struct {
 	// Extend Vote
 	Vote
 	// Balance
-	BlockHeight uint64  `json:"blockHeight"`
-	Balance     *uint64 `json:"balance"`
+	BlockHeight             uint64  `json:"blockHeight"`
+	Balance                 *uint64 `json:"balance"`
+	PrimaryAccountBalance   *uint64 `json:"primaryAccountBalance"`
+	SecondaryAccountBalance *uint64 `json:"secondaryAccountBalance"`
+	StakingBalance          *uint64 `json:"stakingBalance"`
 }
 
 const (
@@ -78,24 +81,21 @@ func GetVotesForProposal(db *s.Database, start, count int, order string, proposa
 	var votes []*VoteWithBalance
 	var orderBySql string
 	if order == "desc" {
-		orderBySql = "ORDER BY created_at DESC"
+		orderBySql = "ORDER BY b.created_at DESC"
 	} else {
-		orderBySql = "ORDER BY created_at ASC"
+		orderBySql = "ORDER BY b.created_at ASC"
 	}
 
 	//return all balances, strategy will do rest of the work
-	sql := `select v.*, p.block_height,
-                coalesce(
-									b.primary_account_balance, 
-									b.secondary_account_balance, 
-									b.staking_balance
-								) 
-								as balance
-                from votes v
-                join proposals p on p.id = $3
-                left join balances b on b.addr = v.addr 
-								and p.block_height = b.block_height
-                where proposal_id = $3`
+	sql := `select v.*, p.block_height, 
+		b.primary_account_balance,
+		b.secondary_account_balance,
+		b.staking_balance
+    from votes v
+    join proposals p on p.id = $3
+  	left join balances b on b.addr = v.addr 
+		and p.block_height = b.block_height
+    where proposal_id = $3`
 
 	sql = sql + orderBySql
 	sql = sql + " LIMIT $1 OFFSET $2"

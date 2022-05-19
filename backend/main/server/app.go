@@ -332,7 +332,7 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 
 	//print votes to the console
 	for _, v := range votes {
-		log.Info().Msgf("%+v\n", v)
+		log.Info().Msgf(" votes %+v\n", v)
 	}
 
 	s := strategyMap[*p.Strategy]
