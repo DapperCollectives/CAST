@@ -1,20 +1,23 @@
 import React, { useEffect } from "react";
 import ImageChoiceUploader from "./ImageChoiceUploader";
+import { getProposalType } from "../../../utils";
 
 const ImageChoices = ({ choices = [], onChoiceChange, initChoices } = {}) => {
   useEffect(() => {
-    initChoices([
-      {
-        id: 1,
-        value: "",
-        choiceImgUrl: "",
-      },
-      {
-        id: 2,
-        value: "",
-        choiceImgUrl: "",
-      },
-    ]);
+    if (getProposalType(choices) !== "image") {
+      initChoices([
+        {
+          id: 1,
+          value: "",
+          choiceImgUrl: "",
+        },
+        {
+          id: 2,
+          value: "",
+          choiceImgUrl: "",
+        },
+      ]);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

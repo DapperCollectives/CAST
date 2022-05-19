@@ -82,6 +82,21 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
   const startDateIsToday = isToday(stepData?.startDate);
   const timeIntervals = getTimeIntervals(startDateIsToday ? Date.now() : 0);
 
+  const onSetStartTimeOpen = () => setStartTimeOpen(true);
+
+  const setStartTime = (itemValue) => () => {
+    onDataChange({
+      startTime: itemValue,
+    });
+    setStartTimeOpen(false);
+  };
+  const setEndTime = (itemValue) => () => {
+    onDataChange({
+      endTime: itemValue,
+    });
+    setEndTimeOpen(false);
+  };
+
   return (
     <div>
       <div className="border-light rounded-lg is-flex-direction-column is-mobile m-0 p-6 mb-6">
@@ -132,7 +147,7 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
                   className="button rounded-sm is-outlined border-light column m-0 py-0 px-3 is-full-mobile"
                   aria-haspopup="true"
                   aria-controls="dropdown-menu"
-                  onClick={() => setStartTimeOpen(true)}
+                  onClick={onSetStartTimeOpen}
                 >
                   <div className="is-flex is-flex-grow-1 is-align-items-center is-justify-content-space-between has-text-grey small-text">
                     {stepData?.startTime
@@ -156,11 +171,7 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
                       className={`button is-white dropdown-item has-text-grey${
                         itemValue === stepData?.startTime ? " is-active" : ""
                       }`}
-                      onMouseDown={() =>
-                        onDataChange({
-                          startTime: itemValue,
-                        })
-                      }
+                      onMouseDown={setStartTime(itemValue)}
                       key={`drop-down-${index}`}
                     >
                       {formatTime(itemValue)}
@@ -243,11 +254,7 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
                       className={`button is-white dropdown-item has-text-grey${
                         itemValue === stepData?.endTime ? " is-active" : ""
                       }`}
-                      onMouseDown={() =>
-                        onDataChange({
-                          endTime: itemValue,
-                        })
-                      }
+                      onMouseDown={setEndTime(itemValue)}
                       key={`drop-down-${index}`}
                     >
                       {formatTime(itemValue)}

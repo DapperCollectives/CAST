@@ -112,7 +112,10 @@ const ProposalHeader = ({ id: proposalId, voted, endTime, computedStatus }) => {
               {textDescriptionMap[status] ?? null}
             </code>
           </div>
-          <div className="column is-flex is-align-items-center is-justify-content-end proposal-status p-0">
+          <div
+            className="column is-flex is-align-items-center proposal-status p-0"
+            style={{ justifyContent: "flex-end" }}
+          >
             <code className="has-text-grey px-0 smaller-text">
               {statusLabelMap[status] ?? null}
             </code>
