@@ -71,7 +71,7 @@ type Strategy interface {
 
 var strategyMap = map[string]Strategy{
 	"token-weighted-default":        &strategies.TokenWeightedDefault{},
-	"staked-toked-weighted-default": &strategies.StakedTokenWeightedDefault{},
+	"staked-token-weighted-default": &strategies.StakedTokenWeightedDefault{},
 }
 
 const (
@@ -318,10 +318,8 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//get the proposal by Id
 	p := models.Proposal{ID: proposalId}
-
-	fmt.Printf("proposal %+v", p)
-
 	if err := p.GetProposalById(a.DB); err != nil {
 		switch err.Error() {
 		case pgx.ErrNoRows.Error():
@@ -332,18 +330,16 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Printf("proposalId: %d\n", proposalId)
-
 	s := strategyMap[*p.Strategy]
 	if s == nil {
-		respondWithError(w, http.StatusInternalServerError, "Proposal strategy not found")
+		respondWithError(w, http.StatusInternalServerError, "Invalid Strategy")
 		return
 	}
 
 	var v = []int{0, 1, 2, 3}
 	tally, _ := s.TallyVotes(v, proposalId)
 
-	fmt.Printf("tally: %v", tally)
+	fmt.Printf("tally: %+v", tally)
 
 	response := shared.GetPaginatedResponseWithPayload(votes, start, count, totalRecords)
 	respondWithJSON(w, http.StatusOK, response)
