@@ -63,7 +63,7 @@ type App struct {
 var allowedFileTypes = []string{"image/jpg", "image/jpeg", "image/png", "image/gif"}
 
 type Strategy interface {
-	TallyVotes(votes []*models.VoteWithBalance, proposalId int) ([]*models.VoteWithBalance, error)
+	TallyVotes(votes []*models.VoteWithBalance, proposalId int) (models.ProposalResults, error)
 	GetStrategyVotesForProposal(proposalId int) ([]int, error)
 	GetWeightForAddress(addr string, proposalId int) (int, error)
 	GetWeightsForAddress(addr string, proposalId int) ([]int, error)
