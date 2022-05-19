@@ -33,6 +33,28 @@ var InvalidServiceAccountKey = "5687d75f957bf64591b55eb19227706e3c8712c1387225b8
 // 	return []byte(jsonStr)
 // }
 
+func (otu *OverflowTestUtils) AddDummyVotesAndBalances(votes *[]VoteWithBalance) {
+	for _, vote := range *votes {
+		// Insert Vote
+		_, err := otu.A.DB.Conn.Exec(otu.A.DB.Context, `
+			INSERT INTO votes(proposal_id, addr, choice, composite_signatures, message)
+			VALUES($1, $2, $3, $4, $5)
+		`, vote.Vote.Proposal_id, vote.Vote.Addr, vote.Vote.Choice, "[]", "__msg__")
+		if err != nil {
+			log.Error().Err(err).Msg("AddDummyVotesAndBalances DB err - votes")
+		}
+
+		// Insert Balance
+		_, err = otu.A.DB.Conn.Exec(otu.A.DB.Context, `
+			INSERT INTO balances(addr, primary_account_balance, staking_balance, block_height)
+			VALUES($1, $2, $3, $4)
+		`, vote.Addr, vote.Primary_account_balance, vote.Staking_balance, vote.Block_height)
+		if err != nil {
+			log.Error().Err(err).Msg("AddDummyVotesAndBalances DB err - balances")
+		}
+	}
+}
+
 func (otu *OverflowTestUtils) AddVotes(pId int, count int) {
 	if count < 1 {
 		count = 1

@@ -45,7 +45,7 @@ func (r *ProposalResults) Tally(db *s.Database, p *Proposal) error {
 	case "token-weighted-default":
 		log.Debug().Msgf("Proposal Results: %s", "token-weighted-default")
 		sql = `
-			SELECT v.choice, SUM(b.staking_balance + b.primary_account_balance) as tally FROM votes v
+			SELECT v.choice, SUM(b.primary_account_balance) as tally FROM votes v
 			JOIN proposals p ON p.id = $1
 			JOIN balances b ON b.addr = v.addr AND b.block_height = p.block_height
 			WHERE v.proposal_id = $1
