@@ -3,7 +3,9 @@ import { useDropzone } from "react-dropzone";
 import { Upload } from "components/Svg";
 import { WrapperResponsive, Dropdown } from "components";
 import { CommunityLinksForm } from "components/Community/CommunityEditorLinks";
-import useLinkValidator from "../Community/hooks/useLinkValidator";
+import useLinkValidator, {
+  urlPatternValidation,
+} from "../Community/hooks/useLinkValidator";
 import { getReducedImg } from "utils";
 import { useErrorHandlerContext } from "contexts/ErrorHandler";
 import { MAX_FILE_SIZE } from "const";
@@ -32,8 +34,6 @@ export default function StepOne({
   const { notifyError } = useErrorHandlerContext();
 
   const { data: communityCategory } = useCommunityCategory();
-
-  console.log("communityCategory", communityCategory);
 
   const setData = (data) => {
     onDataChange(data);
@@ -115,11 +115,14 @@ export default function StepOne({
     links: linksFieldsObj,
   });
 
+  // handles form validation
   useEffect(() => {
     const requiredFields = {
       communityName: (name) => name?.trim().length > 0,
       communityDescription: (desc) => desc?.trim().length > 0,
       logo: (logo) => logo?.file && logo?.imageUrl,
+      communityTerms: (termsUrl) =>
+        termsUrl?.length > 0 && urlPatternValidation(termsUrl),
     };
     const isValid = Object.keys(requiredFields).every(
       (field) => stepData && requiredFields[field](stepData[field])
@@ -227,12 +230,12 @@ export default function StepOne({
           }
         />
         <Dropdown
-          margin="mt-4"
           label="Category"
-          values={[
-            { label: "Category One", value: "category_one" },
-            { label: "Category Two", value: "category_two" },
-          ]}
+          margin="mt-4"
+          values={(communityCategory ?? []).map((cat) => ({
+            label: cat.description,
+            value: cat.name,
+          }))}
           onSelectValue={(value) => setData({ category: value })}
         />
         <input
