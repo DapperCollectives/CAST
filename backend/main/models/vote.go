@@ -82,12 +82,12 @@ func GetVotesForProposal(db *s.Database, start, count int, order string, proposa
 	} else {
 		orderBySql = "ORDER BY created_at ASC"
 	}
-	sql := `SELECT v.*, p.block_height,
-		COALESCE(b.primary_account_balance) as balance 
-		FROM votes v
-		JOIN proposals p ON p.id = $3
-		LEFT JOIN balances b ON b.addr = v.addr and p.block_height = b.block_height
-		WHERE proposal_id = $3 `
+	sql := `select v.*, p.block_height,
+		coalesce(b.primary_account_balance) as balance 
+		from votes v
+		join proposals p on p.id = $3
+		left join balances b on b.addr = v.addr and p.block_height = b.block_height
+		where proposal_id = $3 `
 	sql = sql + orderBySql
 	sql = sql + " LIMIT $1 OFFSET $2"
 

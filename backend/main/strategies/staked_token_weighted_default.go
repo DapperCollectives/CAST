@@ -1,12 +1,19 @@
 package strategies
 
-type StakedTokenWeightedDefault struct {
+type StakedTokenWeightedDefault struct{}
+
+func (s *StakedTokenWeightedDefault) TallyVotes(votes []int, proposalId int) ([]int, error) {
+	return nil, nil
 }
 
-func (s *StakedTokenWeightedDefault) Name() string {
-	return "staked_token_weighted_default"
+func (s *StakedTokenWeightedDefault) GetStrategyVotesForProposal(proposalId int) ([]int, error) {
+	return nil, nil
 }
 
-func (s *StakedTokenWeightedDefault) GetVotes(votes []string, stake int64) []string {
-	return votes
+func (s *StakedTokenWeightedDefault) GetWeightForAddress(addr string, proposalId int) (int, error) {
+	return 0, nil
+}
+
+func (s *StakedTokenWeightedDefault) GetWeightsForAddress(addr string, proposalId int) ([]int, error) {
+	return nil, nil
 }
