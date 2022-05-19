@@ -70,7 +70,7 @@ export default function StepThree({
             type="checkbox"
             className="mr-2"
             checked={onlyAuthorsToSubmitProposals}
-            onClick={(e) => {
+            onChange={(e) => {
               onDataChange({
                 onlyAuthorsToSubmitProposals: !onlyAuthorsToSubmitProposals,
               });

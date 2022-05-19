@@ -8,6 +8,7 @@ import { getReducedImg } from "utils";
 import { useErrorHandlerContext } from "contexts/ErrorHandler";
 import { MAX_FILE_SIZE } from "const";
 import { pick } from "lodash";
+import { useCommunityCategory } from "hooks";
 
 const linksFields = [
   "websiteUrl",
@@ -29,6 +30,10 @@ export default function StepOne({
   isStepValid,
 }) {
   const { notifyError } = useErrorHandlerContext();
+
+  const { data: communityCategory } = useCommunityCategory();
+
+  console.log("communityCategory", communityCategory);
 
   const setData = (data) => {
     onDataChange(data);
