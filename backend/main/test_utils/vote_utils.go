@@ -22,7 +22,7 @@ type PaginatedResponseWithVotes struct {
 }
 
 func (otu *OverflowTestUtils) GetVotesForProposalAPI(proposalId int) *httptest.ResponseRecorder {
-	req, _ := http.NewRequest("GET", "/proposals/"+strconv.Itoa(proposalId)+"/votes", nil)
+	req, _ := http.NewRequest("GET", "/proposals/"+strconv.Itoa(proposalId)+"/votes?order=asc", nil)
 	return otu.ExecuteRequest(req)
 }
 

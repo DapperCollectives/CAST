@@ -28,12 +28,12 @@ type VoteWithBalance struct {
 	// Extend Vote
 	Vote
 	// Balance
-	BlockHeight             uint64  `json:"blockHeight"`
-	Balance                 *uint64 `json:"balance"`
-	PrimaryAccountBalance   *uint64 `json:"primaryAccountBalance"`
-	SecondaryAccountBalance *uint64 `json:"secondaryAccountBalance"`
-	StakingBalance          *uint64 `json:"stakingBalance"`
-	Weight                  *uint64 `json:"weight"`
+	BlockHeight             uint64   `json:"blockHeight"`
+	Balance                 *uint64  `json:"balance"`
+	PrimaryAccountBalance   *uint64  `json:"primaryAccountBalance"`
+	SecondaryAccountBalance *uint64  `json:"secondaryAccountBalance"`
+	StakingBalance          *uint64  `json:"stakingBalance"`
+	Weight                  *float64 `json:"weight"`
 }
 
 const (

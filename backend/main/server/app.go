@@ -65,8 +65,8 @@ var allowedFileTypes = []string{"image/jpg", "image/jpeg", "image/png", "image/g
 type Strategy interface {
 	TallyVotes(votes []*models.VoteWithBalance, proposalId int) (models.ProposalResults, error)
 	GetVotes(votes []*models.VoteWithBalance) ([]*models.VoteWithBalance, error)
-	GetWeightForAddress(balance *models.Balance, proposal *models.Proposal) (uint64, error)
-	GetWeightsForAddress(addr string, proposalId int) ([]int, error)
+	GetVoteWeightForBalance(balance *models.Balance, proposal *models.Proposal) (float64, error)
+	GetVoteWeightsForBalances(addr string, proposalId int) ([]int, error)
 }
 
 var strategyMap = map[string]Strategy{
@@ -181,9 +181,9 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/lists/{id:[0-9]+}/remove", a.removeAddressesFromList).Methods("POST", "OPTIONS")
 	// Votes
 	a.Router.HandleFunc("/proposals/{proposalId:[0-9]+}/votes", a.getVotesForProposal).Methods("GET")
-	a.Router.HandleFunc("/proposals/{proposalId:[0-9]+}/votes/{addr:0x[a-zA-Z0-9]{16}}", a.getVoteForAddress).Methods("GET")
+	a.Router.HandleFunc("/proposals/{proposalId:[0-9]+}/votes/{addr:0x[a-zA-Z0-9]+}", a.getVoteForAddress).Methods("GET")
 	a.Router.HandleFunc("/proposals/{proposalId:[0-9]+}/votes", a.createVoteForProposal).Methods("POST", "OPTIONS")
-	a.Router.HandleFunc("/votes/{addr:0x[a-zA-Z0-9]{16}}", a.getVotesForAddress).Methods("GET")
+	a.Router.HandleFunc("/votes/{addr:0x[a-zA-Z0-9]+", a.getVotesForAddress).Methods("GET")
 	//Strategies
 	// a.Router.HandleFunc("/proposals/{proposalId:[0-9]+}/votes/{addr:0x[a-zA-Z0-9]{16}}", a.updateVoteForProposal).Methods("PUT", "OPTIONS")
 	a.Router.HandleFunc("/proposals/{proposalId:[0-9]+}/results", a.getResultsForProposal)
@@ -330,7 +330,6 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 		start = 0
 	}
 
-	log.Info().Msgf("order: %s\n", order)
 	totalVotes, totalRecords, err := models.GetVotesForProposal(a.DB, start, count, order, proposalId)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
@@ -366,7 +365,6 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) getVoteForAddress(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("getVoteForAddress")
 	vars := mux.Vars(r)
 	proposalId, err := strconv.Atoi(vars["proposalId"])
 	addr := vars["addr"]
@@ -389,7 +387,6 @@ func (a *App) getVoteForAddress(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//print the proposal to the console
-	fmt.Printf("Proposal: %+v\n", p)
 	//create balance struct
 	b := &models.Balance{
 		Addr:        addr,
@@ -403,8 +400,6 @@ func (a *App) getVoteForAddress(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Printf("Balance: %+v\n", b)
-
 	//lookup the strategy for proposal
 	s := strategyMap[*p.Strategy]
 	if s == nil {
@@ -413,7 +408,7 @@ func (a *App) getVoteForAddress(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get the vote weight
-	weight, err := s.GetWeightForAddress(b, &p)
+	weight, err := s.GetVoteWeightForBalance(b, &p)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return

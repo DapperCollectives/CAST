@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/brudfyi/flow-voting-tool/main/models"
-	"github.com/rs/zerolog/log"
 )
 
 type VoteWithBalance struct {
@@ -44,7 +43,6 @@ func (otu *OverflowTestUtils) TallyResultsForStakedTokenWeightedDefault(proposal
 	for _, v := range *votes {
 		choice := v.Choice
 		r.Results_float[choice] += float64(v.Staking_balance) * math.Pow(10, -8)
-		log.Info().Msgf("%d", v.Staking_balance)
 	}
 
 	// r.Results_float["a"] = float64(r.Results_float["a"]) * math.Pow(10, -8)
