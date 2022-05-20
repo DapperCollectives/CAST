@@ -390,14 +390,11 @@ func (a *App) getVoteForAddress(w http.ResponseWriter, r *http.Request) {
 
 	//print the proposal to the console
 	fmt.Printf("Proposal: %+v\n", p)
-
 	//create balance struct
-	b := models.Balance{
+	b := &models.Balance{
 		Addr:        addr,
 		BlockHeight: p.Block_height,
 	}
-
-	fmt.Printf("Balance: %+v\n", b)
 
 	// get the user balance at blockheight
 	if err := b.GetBalanceByAddressAndBlockHeight(a.DB); err != nil && err.Error() != pgx.ErrNoRows.Error() {
@@ -405,6 +402,8 @@ func (a *App) getVoteForAddress(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	fmt.Printf("Balance: %+v\n", b)
 
 	//lookup the strategy for proposal
 	s := strategyMap[*p.Strategy]
@@ -414,7 +413,7 @@ func (a *App) getVoteForAddress(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get the vote weight
-	weight, err := s.GetWeightForAddress(&b, &p)
+	weight, err := s.GetWeightForAddress(b, &p)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return

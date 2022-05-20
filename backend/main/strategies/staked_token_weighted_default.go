@@ -40,7 +40,7 @@ func (s *StakedTokenWeightedDefault) GetVotes(votes []*models.VoteWithBalance) (
 
 func (s *StakedTokenWeightedDefault) GetWeightForAddress(balance *models.Balance, proposal *models.Proposal) (uint64, error) {
 	var weight uint64
-	var ERROR error = fmt.Errorf("no weight found, address: %s", balance.Addr)
+	var ERROR error = fmt.Errorf("no weight found, address: %s, strategy: %s", balance.Addr, *proposal.Strategy)
 
 	weight = balance.StakingBalance
 

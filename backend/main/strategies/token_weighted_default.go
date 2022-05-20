@@ -38,7 +38,10 @@ func (s *TokenWeightedDefault) GetVotes(votes []*models.VoteWithBalance) ([]*mod
 
 func (s *TokenWeightedDefault) GetWeightForAddress(balance *models.Balance, proposal *models.Proposal) (uint64, error) {
 	var weight uint64
-	var ERROR error = fmt.Errorf("no weight found, address: %s", balance.Addr)
+	var ERROR error = fmt.Errorf("no weight found, address: %s, strategy: %s", balance.Addr, *proposal.Strategy)
+
+	//log the balance
+	fmt.Printf("balance: %+v\n", balance)
 
 	weight = balance.StakingBalance + balance.PrimaryAccountBalance
 
