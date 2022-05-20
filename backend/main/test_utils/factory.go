@@ -7,6 +7,7 @@ import (
 
 	"github.com/brudfyi/flow-voting-tool/main/models"
 	"github.com/brudfyi/flow-voting-tool/main/shared"
+	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 )
 
@@ -46,9 +47,9 @@ func (otu *OverflowTestUtils) AddDummyVotesAndBalances(votes *[]VoteWithBalance)
 
 		// Insert Balance
 		_, err = otu.A.DB.Conn.Exec(otu.A.DB.Context, `
-			INSERT INTO balances(addr, primary_account_balance, staking_balance, block_height)
-			VALUES($1, $2, $3, $4)
-		`, vote.Addr, vote.Primary_account_balance, vote.Staking_balance, vote.Block_height)
+			INSERT INTO balances(id, addr, primary_account_balance, secondary_address, secondary_account_balance, staking_balance, script_result, stakes, block_height)
+			VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)
+		`, uuid.New(), vote.Addr, vote.Primary_account_balance, "0x0", 0, vote.Staking_balance, "SUCCESS", []string{}, vote.Block_height)
 		if err != nil {
 			log.Error().Err(err).Msg("AddDummyVotesAndBalances DB err - balances")
 		}
