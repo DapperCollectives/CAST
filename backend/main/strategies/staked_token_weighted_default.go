@@ -9,6 +9,7 @@ import (
 
 type StakedTokenWeightedDefault struct{}
 
+// should handle and return error case here
 func (s *StakedTokenWeightedDefault) TallyVotes(votes []*models.VoteWithBalance, proposalId int) (models.ProposalResults, error) {
 	var r models.ProposalResults
 	r.Results = map[string]int{}
@@ -31,12 +32,26 @@ func (s *StakedTokenWeightedDefault) TallyVotes(votes []*models.VoteWithBalance,
 	return r, nil
 }
 
-func (s *StakedTokenWeightedDefault) GetStrategyVotesForProposal(proposalId int) ([]int, error) {
-	return nil, nil
+// for some strategies unique logic may want to be implemented here
+func (s *StakedTokenWeightedDefault) GetVotes(votes []*models.VoteWithBalance) ([]*models.VoteWithBalance, error) {
+	fmt.Printf("len(votes): %d\n", len(votes))
+	return votes, nil
 }
 
-func (s *StakedTokenWeightedDefault) GetWeightForAddress(addr string, proposalId int) (int, error) {
-	return 0, nil
+func (s *StakedTokenWeightedDefault) GetWeightForAddress(balance *models.Balance, proposal *models.Proposal) (uint64, error) {
+	var weight uint64
+	var ERROR error = fmt.Errorf("no weight found, address: %s", balance.Addr)
+
+	weight = balance.StakingBalance
+
+	if weight == 0 {
+		return 0, ERROR
+	}
+	if proposal.Min_balance != nil && *proposal.Min_balance > 0 && weight < *proposal.Min_balance {
+		return 0, ERROR
+	}
+
+	return weight, nil
 }
 
 func (s *StakedTokenWeightedDefault) GetWeightsForAddress(addr string, proposalId int) ([]int, error) {

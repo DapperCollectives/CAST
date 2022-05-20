@@ -33,6 +33,7 @@ type VoteWithBalance struct {
 	PrimaryAccountBalance   *uint64 `json:"primaryAccountBalance"`
 	SecondaryAccountBalance *uint64 `json:"secondaryAccountBalance"`
 	StakingBalance          *uint64 `json:"stakingBalance"`
+	Weight                  *uint64 `json:"weight"`
 }
 
 const (
