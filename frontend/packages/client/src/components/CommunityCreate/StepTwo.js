@@ -2,6 +2,9 @@ import React, { useEffect } from "react";
 import { CommunityUsersForm } from "../Community/CommunityEditorDetails";
 import useFlowAddrValidator from "../Community/hooks/useFlowAddrValidator";
 
+const isInitialList = (listAddr) => {
+  return listAddr?.length === 1 && listAddr[0].addr === "";
+};
 export default function StepTwo({
   stepData,
   setStepValid,
@@ -19,9 +22,17 @@ export default function StepTwo({
     addrList: listAddrAuthors,
   });
 
+  // enable move to next step if both lists are empty with one element
+  const initialLists =
+    isInitialList(listAddrAdmins) && isInitialList(listAddrAuthors);
+
   useEffect(() => {
+    if (initialLists) {
+      setStepValid(true);
+      return;
+    }
     setStepValid(isValidAuthors && isValidAdmins);
-  }, [isValidAuthors, isValidAdmins, setStepValid]);
+  }, [isValidAuthors, isValidAdmins, setStepValid, initialLists]);
 
   const onAdminAddressChange = (index, value) => {
     const addrListUpdated = listAddrAdmins.map((addr, idx) => {
