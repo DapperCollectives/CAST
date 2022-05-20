@@ -252,12 +252,13 @@ export default function Community({ enableJoin = false }) {
                 </div>
               </div>
             </div>
-            <JoinCommunityButton
-              enableJoin={enableJoin}
-              communityId={communityId}
-              alignment="center"
-              setTotalMembers={setTotalMembers}
-            />
+            {enableJoin && (
+              <JoinCommunityButton
+                communityId={communityId}
+                alignment="center"
+                setTotalMembers={setTotalMembers}
+              />
+            )}
           </div>
         </div>
       ) : null}

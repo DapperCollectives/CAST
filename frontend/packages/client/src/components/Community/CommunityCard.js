@@ -79,7 +79,7 @@ const CommunityCard = ({
       <div
         style={{ position: "absolute", margin: 0, top: "50px", right: "50px" }}
       >
-        <JoinCommunityButton enableJoin={enableJoin} communityId={id} />
+        {enableJoin && (<JoinCommunityButton communityId={id} />)}
       </div>
     </>
   );
