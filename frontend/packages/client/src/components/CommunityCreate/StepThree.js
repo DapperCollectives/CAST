@@ -16,8 +16,10 @@ export default function StepThree({
 
   useEffect(() => {
     const requiredFields = {
-      contractAddress: (addr) => addr?.trim().length > 0,
-      proposalThreshold: (threshold) => threshold?.trim().length > 0,
+      // not currently used
+      // contractAddress: (addr) => addr?.trim().length > 0,
+      proposalThreshold: (threshold) =>
+        threshold?.trim().length > 0 && /^[0-9]+$/.test(threshold),
     };
     const isValid = Object.keys(requiredFields).every(
       (field) => stepData && requiredFields[field](stepData[field])

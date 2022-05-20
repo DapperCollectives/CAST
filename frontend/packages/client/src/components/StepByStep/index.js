@@ -7,12 +7,12 @@ const defaultStyles = {
   currentStep: {
     icon: {
       textColor: "has-text-black",
-      backgroundColor: "has-background-orange",
+      hexBackgroundColor: "has-background-orange",
     },
   },
   completeStep: {
     icon: {
-      hexBackgroundColor: undefined,
+      hexBackgroundColor: "#44C42F",
     },
   },
 };

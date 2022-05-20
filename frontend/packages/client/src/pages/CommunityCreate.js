@@ -3,7 +3,6 @@ import { useHistory } from "react-router-dom";
 import { StepByStep, WalletConnect, Error } from "components";
 import { useWebContext } from "contexts/Web3";
 import { useModalContext } from "contexts/NotificationModal";
-
 import {
   StartSteps,
   StepOne,
@@ -11,6 +10,7 @@ import {
   StepThree,
 } from "components/CommunityCreate";
 import useCommunity from "hooks/useCommunity";
+import { generateSlug } from "utils";
 
 export default function CommunityCreate() {
   const [modalError, setModalError] = useState(false);
@@ -19,7 +19,12 @@ export default function CommunityCreate() {
     injectedProvider,
   } = useWebContext();
 
-  const { createCommunity, data } = useCommunity();
+  const {
+    createCommunity,
+    data,
+    loading: creatingCommunity,
+    error,
+  } = useCommunity();
 
   const history = useHistory();
 
@@ -58,12 +63,13 @@ export default function CommunityCreate() {
       setModalError(true);
       return;
     }
-
+    // create one object from steps data
     const fields = Object.assign({}, ...Object.values(stepsData));
 
     const proposalData = {
       creatorAddr,
       ...fields,
+      slug: generateSlug(),
     };
 
     await createCommunity(injectedProvider, proposalData);
@@ -72,17 +78,12 @@ export default function CommunityCreate() {
   const props = {
     finalLabel: "Publish",
     onSubmit,
-    isSubmitting: false,
+    isSubmitting: creatingCommunity && !error,
     styleConfig: {
       currentStep: {
         icon: {
           textColor: "has-text-white",
           backgroundColor: "has-background-black",
-        },
-      },
-      completeStep: {
-        icon: {
-          hexBackgroundColor: "#44C42F",
         },
       },
     },

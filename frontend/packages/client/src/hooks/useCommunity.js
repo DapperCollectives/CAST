@@ -2,7 +2,7 @@ import { useReducer, useEffect, useCallback } from "react";
 import { defaultReducer, INITIAL_STATE } from "../reducers";
 import { checkResponse, getCompositeSigs } from "utils";
 import { useErrorHandlerContext } from "../contexts/ErrorHandler";
-
+import { useFileUploader } from "hooks";
 const mockData = {
   createdAt: new Date().toISOString(),
   creatorAddr: "0xf8d6e0586b0a20c7",
@@ -18,8 +18,13 @@ const mockData = {
 const addMockData = (data) => [...data, mockData];
 
 export default function useCommunity() {
-  const [state, dispatch] = useReducer(defaultReducer, INITIAL_STATE);
+  const [state, dispatch] = useReducer(defaultReducer, {
+    ...INITIAL_STATE,
+    loading: false,
+  });
   const { notifyError } = useErrorHandlerContext();
+  // for now not using modal notification if there was an error uploading image
+  const { uploadFile } = useFileUploader({ useModalNotifications: false });
 
   const getCommunities = useCallback(async () => {
     dispatch({ type: "PROCESSING" });
@@ -40,7 +45,6 @@ export default function useCommunity() {
 
   const createCommunity = useCallback(
     async (injectedProvider, communityData) => {
-      console.log("here A");
       dispatch({ type: "PROCESSING" });
       const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities`;
       try {
@@ -68,32 +72,36 @@ export default function useCommunity() {
           });
           return;
         }
-        
+
         const {
           communityName: name,
           communityDescription: body,
           category,
-          communityTerms: terms_and_conditions_url,
+          communityTerms: termsAndConditionsUrl,
           listAddrAdmins,
           listAddrAuthors,
           creatorAddr,
+          slug,
+          proposalThreshold,
+          discordUrl,
+          githubUrl,
+          instagramUrl,
+          twitterUrl,
+          websiteUrl,
+          logo,
           ...rest
         } = communityData;
-        
-        console.log("...communityData", communityData);
-        
-        const payload = {
-          name,
-          body,
-          category,
-          terms_and_conditions_url,
-          creatorAddr,
-          additional_authors: listAddrAuthors?.map((ele) => ele.addr),
-          additional_admins: listAddrAdmins?.map((ele) => ele.addr),
-          slug: "AAAA",
-          proposal_threshold: '200'
-        };
 
+        let communityLogo;
+        // not handling upload error: there's a default image
+        // admins can edit later the image
+        if (logo.file) {
+          try {
+            communityLogo = await uploadFile(logo.file);
+          } catch (err) {
+            communityLogo = undefined;
+          }
+        }
 
         const fetchOptions = {
           method: "POST",
@@ -101,14 +109,25 @@ export default function useCommunity() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            ...payload,
+            name,
+            body,
+            category,
+            termsAndConditionsUrl,
+            creatorAddr,
+            additionalAuthors: listAddrAuthors?.map((ele) => ele.addr),
+            additionalAdmins: listAddrAdmins?.map((ele) => ele.addr),
+            proposalThreshold,
+            slug,
+            githubUrl,
+            instagramUrl,
+            twitterUrl,
+            websiteUrl,
+            discordUrl,
+            logo: communityLogo?.fileUrl,
             timestamp,
             compositeSignatures,
           }),
         };
-
-        console.log("fetch", fetchOptions);
-
         const response = await fetch(url, fetchOptions);
         const json = await checkResponse(response);
         dispatch({ type: "SUCCESS", payload: json });

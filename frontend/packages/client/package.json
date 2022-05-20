@@ -4,8 +4,8 @@
   "private": true,
   "dependencies": {
     "@creativebulma/bulma-tooltip": "^1.2.0",
-    "@onflow/fcl": "^0.0.77",
     "@onflow/config": "0.0.2",
+    "@onflow/fcl": "^0.0.77",
     "@onflow/six-transfer-tokens": "0.0.8",
     "bulma": "0.9.3",
     "cookies-js": "^1.2.3",
@@ -13,6 +13,7 @@
     "draftjs-to-html": "^0.9.1",
     "lodash": "4.17.21",
     "millify": "^4.0.0",
+    "nanoid": "^3.3.4",
     "prettier": "^2.0.5",
     "react": "^17.0.2",
     "react-blockies": "^1.4.1",

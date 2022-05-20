@@ -1,3 +1,9 @@
+import { customAlphabet } from "nanoid";
+
+const nanoid = customAlphabet("1234567890abcdef", 10);
+
+export const generateSlug = nanoid;
+
 export const parseDateFromServer = (endTime) => {
   const dateTime = new Date(endTime);
   const diffFromNow = dateTime.getTime() - Date.now();
