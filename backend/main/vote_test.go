@@ -36,7 +36,7 @@ func TestGetVotes(t *testing.T) {
 
 	t.Run("Should throw an error if vote for address doesnt exist", func(t *testing.T) {
 		clearTable("votes")
-		response := otu.GetVoteForProposalByAddressAPI(proposalId, "user1")
+		response := otu.GetVoteForProposalByAccountNameAPI(proposalId, "user1")
 
 		CheckResponseCode(t, http.StatusNotFound, response.Code)
 
@@ -49,7 +49,7 @@ func TestGetVotes(t *testing.T) {
 		clearTable("votes")
 		voteCount := 1
 		otu.AddVotes(1, voteCount)
-		response := otu.GetVoteForProposalByAddressAPI(proposalId, "user1")
+		response := otu.GetVoteForProposalByAccountNameAPI(proposalId, "user1")
 
 		checkResponseCode(t, http.StatusOK, response.Code)
 
@@ -90,7 +90,7 @@ func TestCreateVote(t *testing.T) {
 
 	CheckResponseCode(t, http.StatusCreated, response.Code)
 
-	response = otu.GetVoteForProposalByAddressAPI(proposalId, "user1")
+	response = otu.GetVoteForProposalByAccountNameAPI(proposalId, "user1")
 
 	var createdVote models.Vote
 	json.Unmarshal(response.Body.Bytes(), &createdVote)

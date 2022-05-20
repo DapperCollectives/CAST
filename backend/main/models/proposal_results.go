@@ -11,10 +11,11 @@ import (
 )
 
 type ProposalResults struct {
-	Proposal_id int            `json:"proposalId" validate:"required"`
-	Results     map[string]int `json:"results" validate:"required"`
-	Updated_at  time.Time      `json:"updatedAt" validate:"required"`
-	Cid         *string        `json:"cid,omitempty"`
+	Proposal_id   int                `json:"proposalId" validate:"required"`
+	Results       map[string]int     `json:"results" validate:"required"`
+	Results_float map[string]float64 `json:"resultsFloat" validate:"required"`
+	Updated_at    time.Time          `json:"updatedAt" validate:"required"`
+	Cid           *string            `json:"cid,omitempty"`
 }
 
 func (r *ProposalResults) GetLatestProposalResultsById(db *s.Database) error {
