@@ -180,6 +180,9 @@ label > input[type="radio"].is-chosen + *::before
 .navbar
 	display: flex
 	justify-content: space-between
+	@include mobile
+	.divider
+		max-height: calc($navbar-height + 1.25rem) // prevent mismatch due to border
 .navbar-end
 	align-items: center
 	display: flex
@@ -228,9 +231,9 @@ hr
 		margin-bottom: 1rem !important
 	.wallet-connect
 		&.button
-		padding: 0.1em 0.5em
-		height: auto
-		color: #000000 !important
+			padding: 0.1em 0.5em
+			height: auto
+			color: #000000 !important
 .tabs
 	&.tabs-community
 		margin-bottom: 0px

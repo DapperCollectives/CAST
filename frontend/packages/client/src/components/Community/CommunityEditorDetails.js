@@ -7,7 +7,9 @@ import { useWebContext } from "contexts/Web3";
 import { getCompositeSigs } from "utils";
 
 const uniqueElements = (adminList) => {
-  const setList = new Set([...adminList.map((e) => e.addr.toLocaleLowerCase())]);
+  const setList = new Set([
+    ...adminList.map((e) => e.addr.toLocaleLowerCase()),
+  ]);
   return adminList.length === setList.size;
 };
 

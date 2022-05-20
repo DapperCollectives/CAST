@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useHistory, useParams, Link } from "react-router-dom";
 import { Tablink } from "components/ProposalsList";
 import {
@@ -9,7 +9,8 @@ import {
   CommunityAbout,
   CommunityProposals,
   LeaderBoard,
-} from "components";
+  JoinCommunityButton,
+} from "../components";
 import {
   useMediaQuery,
   useCommunityDetails,
@@ -17,8 +18,11 @@ import {
   useCommunityUsers,
   useVotingStrategies,
   useUserRoleOnCommunity,
-} from "hooks";
-import { useWebContext } from "contexts/Web3";
+  useAllowlist,
+  useCommunityMembers,
+} from "../hooks";
+import { useWebContext } from "../contexts/Web3";
+import Blockies from "react-blockies";
 
 const AboutLayout = ({
   isMobile,
@@ -33,17 +37,15 @@ const AboutLayout = ({
     return (
       <div className="columns mt-0">
         {communityPulse && <div className="column">{communityPulse}</div>}
-        <div className="column" style={{ paddingTop: "12px" }}>
-          {communityAbout}
-        </div>
+        <div className="column pt-3">{communityAbout}</div>
         {leaderBoard && (
           <>
-            <hr style={{ marginTop: "20px", marginBottom: "0px" }} />
+            <hr className="mb-0" style={{ marginTop: "20px" }} />
             <div className="column pt-0">{leaderBoard}</div>
           </>
         )}
 
-        <hr style={{ marginTop: "12px", marginBottom: "12px" }} />
+        <hr className="my-3" />
         <div className="column">{communityLinks}</div>
         <div className="column">
           <p className="smaller-text has-text-grey">Founded 2022</p>
@@ -132,7 +134,7 @@ const MembersLayout = ({
   );
 };
 
-export default function CommunityPage() {
+export default function Community({ enableJoin = false }) {
   const { communityId } = useParams();
 
   const history = useHistory();
@@ -156,6 +158,17 @@ export default function CommunityPage() {
 
   const { data: strategies } = useVotingStrategies();
 
+  const {
+    pagination: { totalRecords },
+  } = useCommunityMembers({ communityId });
+  const [totalMembers, setTotalMembers] = useState();
+  useEffect(() => {
+    setTotalMembers(totalRecords);
+  }, [totalRecords]);
+
+  // for now allowList just returns admin addresses
+  const { data: adminAddrs } = useAllowlist();
+
   // these two fields should be coming from backend as configuration
   const showPulse = false;
   const showLeaderBoard = false;
@@ -177,8 +190,6 @@ export default function CommunityPage() {
 
   const notMobile = useMediaQuery();
 
-  const ulClassName = !notMobile ? "is-justify-content-space-around" : "";
-
   if (error) {
     // modal will show error message
     // but page cannot render
@@ -189,102 +200,168 @@ export default function CommunityPage() {
   const { instagramUrl, twitterUrl, websiteUrl, discordUrl } = community ?? {};
 
   return (
-    <section className="section full-height">
-      <div className="container full-height">
-        {loading && <Loader fullHeight />}
-        {!loading && (
-          <div className="columns m-0 p-0">
-            <div className="column p-0">
-              <div className="tabs tabs-community is-medium small-text">
-                <ul className={ulClassName}>
-                  <li className={`${activeTabMap["about"] ? "is-active" : ""}`}>
-                    <Tablink
-                      linkText="About"
-                      linkUrl={`/community/${community.id}?tab=about`}
-                      isActive={activeTabMap["about"]}
-                      className="tab-community pb-4 pl-2 pr-0 mr-4"
-                    />
-                  </li>
-                  <li
-                    className={`${
-                      activeTabMap["proposals"] ? "is-active" : ""
-                    }`}
-                  >
-                    <Tablink
-                      linkText="Proposals"
-                      linkUrl={`/community/${community.id}?tab=proposals`}
-                      isActive={activeTabMap["proposals"]}
-                      className="tab-community pb-4 pr-1 pl-0 mx-4"
-                    />
-                  </li>
-                  <li
-                    className={`${activeTabMap["members"] ? "is-active" : ""}`}
-                  >
-                    <Tablink
-                      linkText="Members"
-                      linkUrl={`/community/${community.id}?tab=members`}
-                      isActive={activeTabMap["members"]}
-                      className="tab-community pb-4 pr-1 pl-0 ml-4"
-                    />
-                  </li>
-                </ul>
+    <section className="full-height pt-0">
+      {community ? (
+        <div className="is-flex community-header-wrapper">
+          <div className="is-flex container community-header section">
+            <div className="is-flex community-specific">
+              <div className="is-hidden-tablet is-mobile is-flex is-flex-direction-column is-justify-content-center community-logo-wrapper">
+                <img
+                  className="community-logo-mobile"
+                  alt="community banner"
+                  src={community.logo}
+                  height="85px"
+                  width="85px"
+                />
               </div>
-              {activeTabMap["about"] && (
-                <AboutLayout
-                  isMobile={!notMobile}
-                  communityPulse={showPulse && <CommunityPulse />}
-                  leaderBoard={
-                    showLeaderBoard && (
-                      <LeaderBoard onClickViewMore={onClickViewMore} />
-                    )
-                  }
-                  communityLinks={
-                    <CommunityLinks
-                      instagramUrl={instagramUrl}
-                      twitterUrl={twitterUrl}
-                      websiteUrl={websiteUrl}
-                      discordUrl={discordUrl}
-                    />
-                  }
-                  communityAbout={
-                    <CommunityAbout
-                      isMobile={!notMobile}
-                      textAbout={community?.about?.textAbout || community?.body}
-                      adminMembers={(admins ?? []).map((admin) => ({
-                        name: admin.addr,
-                      }))}
-                      authorsMembers={(authors ?? []).map((admin) => ({
-                        name: admin.addr,
-                      }))}
-                      strategies={(strategies ?? []).map((strategy) => ({
-                        name: strategy.name,
-                      }))}
-                    />
-                  }
-                  showEdit={isAdmin}
-                  communityId={communityId}
+              <div className="is-hidden-mobile">
+                <img
+                  alt="community banner"
+                  className="community-logo"
+                  src={community.logo}
+                  height="149px"
+                  width="149px"
                 />
-              )}
-              {activeTabMap["proposals"] && <CommunityProposals />}
-              {activeTabMap["members"] && (
-                <MembersLayout
-                  isMobile={!notMobile}
-                  communityLinks={
-                    <CommunityLinks
-                      instagramUrl={instagramUrl}
-                      twitterUrl={twitterUrl}
-                      websiteUrl={websiteUrl}
-                      discordUrl={discordUrl}
-                    />
-                  }
-                  communityMemberList={
-                    <CommunityMemberList communityId={community.id} />
-                  }
-                />
-              )}
+              </div>
+              <div className="column community-info is-justify-content-space-evenly">
+                <h2 className="title is-4 mb-2">
+                  <span className="community-name">{community.name}</span>
+                </h2>
+                <p>
+                  <span className="community-numbers">
+                    {totalMembers} members
+                  </span>
+                </p>
+                <div className="is-flex">
+                  {adminAddrs
+                    ? adminAddrs.slice(0, 5).map((adminAddr, idx) => (
+                      <div
+                        key={`${idx}`}
+                        className="blockies-wrapper"
+                        style={{ right: `${idx * 12}px` }}
+                      >
+                        <Blockies
+                          seed={adminAddr}
+                          size={10}
+                          scale={4}
+                          className="blockies"
+                        />
+                      </div>
+                    ))
+                    : null}
+                </div>
+              </div>
             </div>
+            <JoinCommunityButton
+              enableJoin={enableJoin}
+              communityId={communityId}
+              alignment="center"
+              setTotalMembers={setTotalMembers}
+            />
           </div>
-        )}
+        </div>
+      ) : null}
+      <div className="section pt-0">
+        <div className="container full-height community-content">
+          {loading && <Loader fullHeight />}
+          {!loading && (
+            <div className="columns m-0 p-0">
+              <div className="column p-0">
+                <div className="tabs tabs-community is-medium small-text">
+                  <ul className="tabs-community-list">
+                    <li
+                      className={`${activeTabMap["about"] ? "is-active" : ""}`}
+                    >
+                      <Tablink
+                        linkText="About"
+                        linkUrl={`/community/${community.id}?tab=about`}
+                        isActive={activeTabMap["about"]}
+                        className="tab-community pb-4 pl-2 pr-0 mr-4"
+                      />
+                    </li>
+                    <li
+                      className={`${activeTabMap["proposals"] ? "is-active" : ""
+                        }`}
+                    >
+                      <Tablink
+                        linkText="Proposals"
+                        linkUrl={`/community/${community.id}?tab=proposals`}
+                        isActive={activeTabMap["proposals"]}
+                        className="tab-community pb-4 pr-1 pl-0 mx-4"
+                      />
+                    </li>
+                    <li
+                      className={`${activeTabMap["members"] ? "is-active" : ""
+                        }`}
+                    >
+                      <Tablink
+                        linkText="Members"
+                        linkUrl={`/community/${community.id}?tab=members`}
+                        isActive={activeTabMap["members"]}
+                        className="tab-community pb-4 pr-1 pl-0 ml-4"
+                      />
+                    </li>
+                  </ul>
+                </div>
+                {activeTabMap["about"] && (
+                  <AboutLayout
+                    isMobile={!notMobile}
+                    communityPulse={showPulse && <CommunityPulse />}
+                    leaderBoard={
+                      showLeaderBoard && (
+                        <LeaderBoard onClickViewMore={onClickViewMore} />
+                      )
+                    }
+                    communityLinks={
+                      <CommunityLinks
+                        instagramUrl={instagramUrl}
+                        twitterUrl={twitterUrl}
+                        websiteUrl={websiteUrl}
+                        discordUrl={discordUrl}
+                      />
+                    }
+                    communityAbout={
+                      <CommunityAbout
+                        isMobile={!notMobile}
+                        textAbout={
+                          community?.about?.textAbout || community?.body
+                        }
+                        adminMembers={(admins ?? []).map((admin) => ({
+                          name: admin.addr,
+                        }))}
+                        authorsMembers={(authors ?? []).map((admin) => ({
+                          name: admin.addr,
+                        }))}
+                        strategies={(strategies ?? []).map((strategy) => ({
+                          name: strategy.name,
+                        }))}
+                      />
+                    }
+                    showEdit={isAdmin}
+                    communityId={communityId}
+                  />
+                )}
+                {activeTabMap["proposals"] && <CommunityProposals />}
+                {activeTabMap["members"] && (
+                  <MembersLayout
+                    isMobile={!notMobile}
+                    communityLinks={
+                      <CommunityLinks
+                        instagramUrl={instagramUrl}
+                        twitterUrl={twitterUrl}
+                        websiteUrl={websiteUrl}
+                        discordUrl={discordUrl}
+                      />
+                    }
+                    communityMemberList={
+                      <CommunityMemberList communityId={community.id} />
+                    }
+                  />
+                )}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </section>
   );

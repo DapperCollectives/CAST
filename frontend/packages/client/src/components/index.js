@@ -18,6 +18,7 @@ export { default as CommunityLinks } from "./CommunityLinks";
 export { default as CommunityPulse } from "./CommunityPulse";
 export { default as CommunityMemberList } from "./CommunityMembersList";
 export { default as CommunityAbout } from "./CommunityAbout";
+export { default as JoinCommunityButton } from "./Community/JoinCommunityButton";
 export { default as CommunityEditorProfile } from "./Community/CommunityEditorProfile";
 export { default as CommunityEditorLinks } from "./Community/CommunityEditorLinks";
 export { default as CommunityEditorDetails } from "./Community/CommunityEditorDetails";

@@ -16,4 +16,5 @@ export { default as useQueryParams } from "./useQueryParams";
 export { default as useFileUploader } from "./useFileUploader";
 export { default as useUserCommunities } from "./useUserCommunities";
 export { default as useUserRoleOnCommunity } from "./useUserRoleOnCommunity";
+export { default as useJoinCommunity } from "./useJoinCommunity";
 export { default as useCommunityUsers } from "./useCommunityUsers";

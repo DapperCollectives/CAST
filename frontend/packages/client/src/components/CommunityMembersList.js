@@ -8,11 +8,10 @@ export default function CommunityMembersList({ communityId } = {}) {
   // number of users brought at each pull based on design
   const pageSize = 18;
 
-  const { data, pagination, loading, fetchMore } =
-    useCommunityMembers({
-      communityId,
-      count: pageSize,
-    });
+  const { data, pagination, loading, fetchMore } = useCommunityMembers({
+    communityId,
+    count: pageSize,
+  });
 
   const hasMore = pagination.next > 0;
 

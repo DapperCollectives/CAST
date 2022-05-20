@@ -1,11 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import {
-  Website,
-  Instagram,
-  Twitter,
-  Discord,
-  Github,
-} from "components/Svg";
+import { Website, Instagram, Twitter, Discord, Github } from "components/Svg";
 import { WrapperResponsive, Loader } from "components";
 
 export default function CommunityEditorLinks(props = {}) {
