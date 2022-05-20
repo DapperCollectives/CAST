@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import { StepByStep, WalletConnect, Error } from "components";
 import { useWebContext } from "contexts/Web3";
@@ -10,19 +10,63 @@ import {
   StepTwo,
   StepThree,
 } from "components/CommunityCreate";
+import useCommunity from "hooks/useCommunity";
 
 export default function CommunityCreate() {
+  const [modalError, setModalError] = useState(false);
   const {
     user: { addr: creatorAddr },
     injectedProvider,
   } = useWebContext();
 
+  const { createCommunity, data } = useCommunity();
+
   const history = useHistory();
 
   const modalContext = useModalContext();
 
+  useEffect(() => {
+    if (data?.id) {
+      history.push(`/community/${data.id}`);
+    }
+  }, [data, history]);
+
+  // closes modal when user is connected with wallet
+  useEffect(() => {
+    if (modalContext.isOpen && creatorAddr && modalError) {
+      setModalError(false);
+      modalContext.closeModal();
+    }
+  }, [modalContext, creatorAddr, modalError]);
+
   const onSubmit = async (stepsData) => {
-    console.log("on sumibt called", stepsData);
+    console.log(stepsData);
+    // opens modal and makes user to connect with wallet
+    if (!creatorAddr) {
+      modalContext.openModal(
+        React.createElement(Error, {
+          error: (
+            <div className="mt-5">
+              <WalletConnect />
+            </div>
+          ),
+
+          errorTitle: "Please connect a wallet to create a community.",
+        }),
+        { classNameModalContent: "rounded-sm" }
+      );
+      setModalError(true);
+      return;
+    }
+
+    const fields = Object.assign({}, ...Object.values(stepsData));
+
+    const proposalData = {
+      creatorAddr,
+      ...fields,
+    };
+
+    await createCommunity(injectedProvider, proposalData);
   };
 
   const props = {

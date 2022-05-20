@@ -20,3 +20,4 @@ export {
   PropCreateStepTwo,
   PropCreateStepThree,
 } from "./ProposalCreate";
+export { default as FadeIn } from "./FadeIn";

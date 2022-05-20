@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Plus, Bin } from "components/Svg";
+import { Plus, Bin, ValidCheckMark, InvalidCheckMark } from "components/Svg";
 import { WrapperResponsive, Loader } from "components";
 import { useCommunityUsers } from "hooks";
 import { useErrorHandlerContext } from "contexts/ErrorHandler";
 import { useWebContext } from "contexts/Web3";
 import { getCompositeSigs } from "utils";
-import useFlowAddrValidator from "./hooks/useFlowAddrValidator";
+import useFlowAddrValidator, {
+  validateAddrInList,
+} from "./hooks/useFlowAddrValidator";
+import FadeIn from "components/FadeIn";
 
 export const CommunityUsersForm = ({
   title,
@@ -18,6 +21,8 @@ export const CommunityUsersForm = ({
   addrType = "Admins",
   label,
   submitComponent,
+  validateEachAddress = false,
+  onClearField = () => {},
 } = {}) => {
   const canDeleteAddress = addrList.length > 1;
   return (
@@ -45,37 +50,85 @@ export const CommunityUsersForm = ({
       {loadingUsers && <Loader className="py-5" />}
       {!loadingUsers && (
         <div className="columns is-multiline p-0 m-0">
-          {addrList.map(({ addr, fromServer }, index) => (
-            <div
-              key={`index-${index}`}
-              className="column is-12 is-mobile p-0 m-0 fade-in"
-              style={{ position: "relative" }}
-            >
-              <input
-                type="text"
-                placeholder={label || `Enter ${title}`}
-                className="border-light rounded-sm p-3 mb-4 column is-full pr-6"
-                value={addr || ""}
-                onChange={(event) => onAddressChange(index, event.target.value)}
-                autoFocus={addrList.length === index + 1 && addr === ""}
-                disabled={fromServer ?? false}
-                style={{ width: "100%" }}
-              />
-              {canDeleteAddress && (
-                <div
-                  className="cursor-pointer"
+          {addrList.map(({ addr, fromServer }, index) => {
+            const validateAddr =
+              validateEachAddress &&
+              addr?.length > 0 &&
+              validateAddrInList(addrList, addr);
+
+            const isValid = validateAddr && validateAddr.isValid;
+            const isInvalid = validateAddr && !validateAddr.isValid;
+
+            const inputStyle = validateAddr
+              ? `form-error-input-icon ${
+                  isInvalid ? "form-error-input-border" : ""
+                }`
+              : "pr-6";
+            return (
+              <div
+                key={`index-${index}`}
+                className="column is-12 is-mobile p-0 m-0 mb-4 fade-in"
+                style={{ position: "relative" }}
+              >
+                <input
+                  type="text"
+                  placeholder={label || `Enter ${title}`}
+                  className={`border-light rounded-sm p-3 column is-full ${inputStyle}`}
+                  value={addr || ""}
+                  onChange={(event) =>
+                    onAddressChange(index, event.target.value)
+                  }
+                  autoFocus={addrList.length === index + 1 && addr === ""}
+                  disabled={fromServer ?? false}
                   style={{
+                    width: "100%",
+                    ...(isInvalid ? {} : undefined),
+                  }}
+                />
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    alignContent: "center",
                     position: "absolute",
                     right: 15,
-                    top: 7,
+                    top: 9,
                   }}
-                  onClick={() => onDeleteAddress(index)}
                 >
-                  <Bin />
+                  {isValid && (
+                    <div className="is-flex is-align-items-center mr-2">
+                      <ValidCheckMark />
+                    </div>
+                  )}
+                  {isInvalid && (
+                    <div
+                      className="cursor-pointer is-flex is-align-items-center mr-2"
+                      onClick={() => onClearField(index)}
+                    >
+                      <InvalidCheckMark />
+                    </div>
+                  )}
+                  {canDeleteAddress && (
+                    <div
+                      className="cursor-pointer is-flex is-align-items-center"
+                      onClick={() => onDeleteAddress(index)}
+                    >
+                      <Bin />
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          ))}
+                {isInvalid && (
+                  <FadeIn>
+                    <div className="pl-1 mt-2">
+                      <p className="smaller-text has-text-red">
+                        {validateAddr.error}
+                      </p>
+                    </div>
+                  </FadeIn>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
       <div
@@ -253,34 +306,6 @@ const CommunityMembersEditor = ({
     const newList = addrList.filter((_, idx) => idx !== index);
     setAddrList(newList);
   };
-
-  // useEffect(() => {
-  //   if (
-  //     addrList.length === 0 ||
-  //     !notEmptyAddr(addrList) ||
-  //     !uniqueElements(addrList) ||
-  //     !hasValidAddresses(addrList) ||
-  //     !listHasChanged(
-  //       addrList,
-  //       userAddrList.map((e) => e.addr)
-  //     )
-  //   ) {
-  //     setEnableSave(false);
-  //   }
-  //   if (
-  //     addrList.length > 0 &&
-  //     listHasChanged(
-  //       addrList,
-  //       userAddrList.map((e) => e.addr)
-  //     ) &&
-  //     uniqueElements(addrList) &&
-  //     notEmptyAddr(addrList) &&
-  //     hasValidAddresses(addrList)
-  //   ) {
-  //     setEnableSave(true);
-  //   }
-  // }, [addrList, setEnableSave, userAddrList]);
-
   const { isValid } = useFlowAddrValidator({
     addrList,
     initialList: userAddrList,

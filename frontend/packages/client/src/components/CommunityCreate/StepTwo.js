@@ -71,6 +71,8 @@ export default function StepTwo({
         onAddAddress={onAdminAddressAdd}
         addrType="Admins"
         label="Domain name or wallet address"
+        validateEachAddress
+        onClearField={(index) => onAdminAddressChange(index, "")}
       />
       <CommunityUsersForm
         title="Authors"
@@ -81,6 +83,8 @@ export default function StepTwo({
         onAddAddress={onAuthorAddressAdd}
         addrType="Authors"
         label="Domain name or wallet address"
+        validateEachAddress
+        onClearField={(index) => onAuthorAddressChange(index, "")}
       />
       <div className="columns mb-5">
         <div className="column is-12">

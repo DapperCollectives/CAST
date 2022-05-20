@@ -234,7 +234,7 @@ export default function StepOne({
           margin="mt-4"
           values={(communityCategory ?? []).map((cat) => ({
             label: cat.description,
-            value: cat.name,
+            value: cat.key,
           }))}
           onSelectValue={(value) => setData({ category: value })}
         />
