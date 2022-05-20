@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Website, Instagram, Twitter, Discord, Github } from "components/Svg";
 import { WrapperResponsive, Loader } from "components";
 import useLinkValidator from "./hooks/useLinkValidator";

@@ -20,9 +20,8 @@ export default function StepTwo({
   });
 
   useEffect(() => {
-    console.log("setting is step valid", isValidAuthors, isValidAdmins);
     setStepValid(isValidAuthors && isValidAdmins);
-  }, [isValidAuthors, isValidAdmins]);
+  }, [isValidAuthors, isValidAdmins, setStepValid]);
 
   const onAdminAddressChange = (index, value) => {
     const addrListUpdated = listAddrAdmins.map((addr, idx) => {

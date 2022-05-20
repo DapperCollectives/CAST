@@ -1,4 +1,4 @@
-import { useReducer, useEffect, useCallback } from "react";
+import { useReducer, useCallback } from "react";
 import { defaultReducer, INITIAL_STATE } from "../reducers";
 import { checkResponse, getCompositeSigs } from "utils";
 import { useErrorHandlerContext } from "../contexts/ErrorHandler";
@@ -136,7 +136,7 @@ export default function useCommunity() {
         dispatch({ type: "ERROR", payload: { errorData: err.message } });
       }
     },
-    [dispatch, notifyError]
+    [dispatch, notifyError, uploadFile]
   );
 
   return {
