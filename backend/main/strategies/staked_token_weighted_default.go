@@ -26,7 +26,6 @@ func (s *StakedTokenWeightedDefault) TallyVotes(votes []*models.VoteWithBalance,
 
 // for some strategies unique logic may want to be implemented here
 func (s *StakedTokenWeightedDefault) GetVotes(votes []*models.VoteWithBalance) ([]*models.VoteWithBalance, error) {
-	fmt.Printf("len(votes): %d\n", len(votes))
 	return votes, nil
 }
 

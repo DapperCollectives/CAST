@@ -22,8 +22,6 @@ type Balance struct {
 }
 
 func (b *Balance) GetBalanceByAddressAndBlockHeight(db *s.Database) error {
-	// log balance to the console
-	log.Debug().Msgf("Balance Struct : %+v", b)
 	sql := `
 	SELECT * from balances as b
 	WHERE b.addr = $1 and b.block_height = $2

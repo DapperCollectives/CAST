@@ -25,7 +25,6 @@ func (s *TokenWeightedDefault) TallyVotes(votes []*models.VoteWithBalance, propo
 }
 
 func (s *TokenWeightedDefault) GetVotes(votes []*models.VoteWithBalance) ([]*models.VoteWithBalance, error) {
-	fmt.Printf("len(votes): %d\n", len(votes))
 	return votes, nil
 }
 

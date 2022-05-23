@@ -183,7 +183,7 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/proposals/{proposalId:[0-9]+}/votes", a.getVotesForProposal).Methods("GET")
 	a.Router.HandleFunc("/proposals/{proposalId:[0-9]+}/votes/{addr:0x[a-zA-Z0-9]+}", a.getVoteForAddress).Methods("GET")
 	a.Router.HandleFunc("/proposals/{proposalId:[0-9]+}/votes", a.createVoteForProposal).Methods("POST", "OPTIONS")
-	a.Router.HandleFunc("/votes/{addr:0x[a-zA-Z0-9]+", a.getVotesForAddress).Methods("GET")
+	a.Router.HandleFunc("/votes/{addr:0x[a-zA-Z0-9]+}", a.getVotesForAddress).Methods("GET")
 	//Strategies
 	// a.Router.HandleFunc("/proposals/{proposalId:[0-9]+}/votes/{addr:0x[a-zA-Z0-9]{16}}", a.updateVoteForProposal).Methods("PUT", "OPTIONS")
 	a.Router.HandleFunc("/proposals/{proposalId:[0-9]+}/results", a.getResultsForProposal)
@@ -263,6 +263,10 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID")
 		return
 	}
+
+	//print the propsalId to the console
+	log.Info().Msgf("proposalId: %d", proposalId)
+
 	// First, get the proposal by proposalId
 	p := models.Proposal{ID: proposalId}
 	if err := p.GetProposalById(a.DB); err != nil {
@@ -275,12 +279,11 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//dummy values for now
-	start := 0
-	count := 1000
 	order := "desc"
+	count := 25
+	start := 0
 
-	//now get the votes for proposal
+	// get the votes for proposal
 	votes, _, err := models.GetVotesForProposal(a.DB, start, count, order, proposalId)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
@@ -294,12 +297,15 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// tally using strategy function
 	proposalResults, err := s.TallyVotes(votes, proposalId)
-	//tallyErr := proposalResults.Tally(a.DB, &p)
-	//if err != nil {
-	//	respondWithError(w, http.StatusInternalServerError, tallyErr.Error())
-	//	return
-	//}
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	// print the proposal results
+	log.Info().Msgf("Proposal Results: %+v", proposalResults)
 
 	// Send Proposal Results
 	respondWithJSON(w, http.StatusOK, proposalResults)
@@ -356,7 +362,7 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 
 	votes, err := s.GetVotes(totalVotes)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		respondWithError(w, http.StatusNotFound, err.Error())
 		return
 	}
 
@@ -386,7 +392,6 @@ func (a *App) getVoteForAddress(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//print the proposal to the console
 	//create balance struct
 	b := &models.Balance{
 		Addr:        addr,
@@ -394,9 +399,9 @@ func (a *App) getVoteForAddress(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get the user balance at blockheight
-	if err := b.GetBalanceByAddressAndBlockHeight(a.DB); err != nil && err.Error() != pgx.ErrNoRows.Error() {
-		log.Error().Err(err).Msg("error querying address balance at blockheight")
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+	if err := b.GetBalanceByAddressAndBlockHeight(a.DB); err != nil {
+		log.Error().Err(err).Msg(err.Error())
+		respondWithError(w, http.StatusNotFound, "Vote not found")
 		return
 	}
 
@@ -415,25 +420,13 @@ func (a *App) getVoteForAddress(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//create the VoteWithBalance struct
-	v := models.Vote{Proposal_id: proposalId, Addr: addr}
-	vb := models.VoteWithBalance{
-		Vote:                    v,
+	v := &models.Vote{Proposal_id: proposalId, Addr: addr}
+	vb := &models.VoteWithBalance{
+		Vote:                    *v,
 		PrimaryAccountBalance:   &b.PrimaryAccountBalance,
 		SecondaryAccountBalance: &b.SecondaryAccountBalance,
 		StakingBalance:          &b.StakingBalance,
 		Weight:                  &weight,
-	}
-
-	if err := v.GetVote(a.DB); err != nil {
-		// TODO: for some reason switch err doesn't match pgx.ErrNoRows.
-		// So I've added .Error() to convert to a string comparison
-		switch err.Error() {
-		case pgx.ErrNoRows.Error():
-			respondWithError(w, http.StatusNotFound, "Vote not found")
-		default:
-			respondWithError(w, http.StatusInternalServerError, err.Error())
-		}
-		return
 	}
 
 	respondWithJSON(w, http.StatusOK, vb)
@@ -577,13 +570,19 @@ func (a *App) getVotesForAddress(w http.ResponseWriter, r *http.Request) {
 	var proposalIds []int
 
 	vars := mux.Vars(r)
-	address := vars["addr"]
+	addr := vars["addr"]
 	// Parse proposalIds array
 	json.Unmarshal([]byte(r.FormValue("proposalIds")), &proposalIds)
 
 	// Params for pagination
 	count, _ := strconv.Atoi(r.FormValue("count"))
 	start, _ := strconv.Atoi(r.FormValue("start"))
+
+	if len(proposalIds) == 0 {
+		log.Info().Msg("no proposalIds provided")
+		respondWithError(w, http.StatusBadRequest, "no proposalIds provided")
+		return
+	}
 
 	if count > 25 || count < 1 {
 		count = 25
@@ -592,16 +591,64 @@ func (a *App) getVotesForAddress(w http.ResponseWriter, r *http.Request) {
 		start = 0
 	}
 
-	// Get votes
-	votes, totalRecords, err := models.GetVotesForAddress(a.DB, start, count, address, &proposalIds)
-	if err != nil {
-		log.Error().Err(err).Msg("error querying votes for address")
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
+	votes := []*models.VoteWithBalance{}
+
+	for i := start; i < count; i++ {
+
+		//get proposal to get blockheight
+		p := models.Proposal{ID: proposalIds[i]}
+		if err := p.GetProposalById(a.DB); err != nil {
+			switch err.Error() {
+			case pgx.ErrNoRows.Error():
+				respondWithError(w, http.StatusNotFound, "Proposal not found")
+			default:
+				respondWithError(w, http.StatusInternalServerError, err.Error())
+			}
+			return
+		}
+
+		//create balance struct
+		b := &models.Balance{
+			Addr:        addr,
+			BlockHeight: p.Block_height,
+		}
+
+		//get the user balance at block height
+		if err := b.GetBalanceByAddressAndBlockHeight(a.DB); err != nil {
+			log.Error().Err(err).Msg("error querying address balance at blockheight")
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		//lookup the strategy for proposal
+		s := strategyMap[*p.Strategy]
+		if s == nil {
+			respondWithError(w, http.StatusInternalServerError, "Strategy not found")
+			return
+		}
+
+		//get the weight for the proposal
+		weight, err := s.GetVoteWeightForBalance(b, &p)
+		if err != nil {
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		// create the VoteWithBalanceStruct
+		v := &models.Vote{Proposal_id: proposalIds[i], Addr: addr}
+		vb := &models.VoteWithBalance{
+			Vote:                    *v,
+			PrimaryAccountBalance:   &b.PrimaryAccountBalance,
+			SecondaryAccountBalance: &b.SecondaryAccountBalance,
+			StakingBalance:          &b.StakingBalance,
+			Weight:                  &weight,
+		}
+
+		votes = append(votes, vb)
 	}
 
 	// Transpose into PaginatedResponse struct
-	response := shared.GetPaginatedResponseWithPayload(votes, start, count, totalRecords)
+	response := shared.GetPaginatedResponseWithPayload(votes, start, count, len(votes))
 
 	respondWithJSON(w, http.StatusOK, response)
 }

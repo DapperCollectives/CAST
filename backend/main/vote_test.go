@@ -53,7 +53,7 @@ func TestGetVotes(t *testing.T) {
 
 		checkResponseCode(t, http.StatusOK, response.Code)
 
-		var vote models.Vote
+		var vote models.VoteWithBalance
 		json.Unmarshal(response.Body.Bytes(), &vote)
 
 		assert.NotNil(t, vote.ID)
