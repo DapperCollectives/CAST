@@ -3,6 +3,28 @@ import { Website, Instagram, Twitter, Discord, Github } from "components/Svg";
 import { WrapperResponsive, Loader } from "components";
 import useLinkValidator from "./hooks/useLinkValidator";
 
+const FormFields = [
+  {
+    fieldName: "websiteUrl",
+    iconComponent: <Website width="16px" height="16px" />,
+  },
+  {
+    fieldName: "twitterUrl",
+    iconComponent: <Twitter width="16px" height="16px" />,
+  },
+  {
+    fieldName: "githubUrl",
+    iconComponent: <Github width="16px" height="16px" />,
+  },
+  {
+    fieldName: "discordUrl",
+    iconComponent: <Discord width="16px" height="16px" />,
+  },
+  {
+    fieldName: "instagramUrl",
+    iconComponent: <Instagram width="16px" height="16px" />,
+  },
+];
 export const CommunityLinksForm = ({
   submitComponent,
   onChangeHandler,
@@ -37,149 +59,37 @@ export const CommunityLinksForm = ({
           </div>
         </div>
       </div>
-      <div
-        style={{ position: "relative" }}
-        className="is-flex is-align-items-center mt-4"
-      >
-        <input
-          type="text"
-          name="web"
-          className="rounded-sm border-light py-3 pr-3 column is-full"
-          value={fields["websiteUrl"]}
-          maxLength={200}
-          onChange={(event) =>
-            onChangeHandler["websiteUrl"](event.target.value)
-          }
-          style={{
-            paddingLeft: "34px",
-          }}
-          disabled={isUpdating}
-        />
+      {FormFields.map((formField) => (
         <div
-          className="pl-3"
-          style={{
-            position: "absolute",
-            height: 18,
-            opacity: 0.3,
-          }}
+          style={{ position: "relative" }}
+          className="is-flex is-align-items-center mt-4"
         >
-          <Website width="16px" height="16px" />
+          <input
+            type="text"
+            name="web"
+            className="rounded-sm border-light py-3 pr-3 column is-full"
+            value={fields[formField.fieldName]}
+            maxLength={200}
+            onChange={(event) =>
+              onChangeHandler(formField.fieldName)(event.target.value)
+            }
+            style={{
+              paddingLeft: "34px",
+            }}
+            disabled={isUpdating}
+          />
+          <div
+            className="pl-3"
+            style={{
+              position: "absolute",
+              height: 18,
+              opacity: 0.3,
+            }}
+          >
+            {formField.iconComponent}
+          </div>
         </div>
-      </div>
-      <div
-        style={{ position: "relative" }}
-        className="is-flex is-align-items-center mt-4"
-      >
-        <input
-          type="text"
-          name="twitter"
-          className="rounded-sm border-light py-3 pr-3  column is-full"
-          value={fields["twitterUrl"]}
-          maxLength={200}
-          onChange={(event) =>
-            onChangeHandler["twitterUrl"](event.target.value)
-          }
-          style={{
-            paddingLeft: "34px",
-          }}
-          disabled={isUpdating}
-        />
-        <div
-          className="pl-3"
-          style={{
-            position: "absolute",
-            height: 18,
-            opacity: 0.3,
-          }}
-        >
-          <Twitter width="16px" height="16px" />
-        </div>
-      </div>
-      <div
-        style={{ position: "relative" }}
-        className="is-flex is-align-items-center mt-4"
-      >
-        <input
-          type="text"
-          name="github"
-          className="rounded-sm border-light py-3 pr-3 column is-full"
-          value={fields["githubUrl"]}
-          maxLength={200}
-          onChange={(event) => onChangeHandler["githubUrl"](event.target.value)}
-          style={{
-            paddingLeft: "34px",
-          }}
-          disabled={isUpdating}
-        />
-        <div
-          className="pl-3"
-          style={{
-            position: "absolute",
-            height: 18,
-            opacity: 0.3,
-          }}
-        >
-          <Github width="16px" height="16px" />
-        </div>
-      </div>
-      <div
-        style={{ position: "relative" }}
-        className="is-flex is-align-items-center mt-4"
-      >
-        <input
-          type="text"
-          name="discord"
-          className="rounded-sm border-light py-3 pr-3  column is-full"
-          value={fields["discordUrl"]}
-          maxLength={200}
-          onChange={(event) =>
-            onChangeHandler["discordUrl"](event.target.value)
-          }
-          style={{
-            paddingLeft: "34px",
-          }}
-          disabled={isUpdating}
-        />
-        <div
-          className="pl-3"
-          style={{
-            position: "absolute",
-            height: 18,
-            opacity: 0.3,
-          }}
-        >
-          <Discord width="16px" height="16px" />
-        </div>
-      </div>
-      <div
-        style={{ position: "relative" }}
-        className="is-flex is-align-items-center mt-4"
-      >
-        <input
-          type="text"
-          name="instagram"
-          className="rounded-sm border-light py-3 pr-3 column is-full"
-          value={fields["instagramUrl"]}
-          maxLength={200}
-          onChange={(event) =>
-            onChangeHandler["instagramUrl"](event.target.value)
-          }
-          style={{
-            paddingLeft: "34px",
-          }}
-          disabled={isUpdating}
-        />
-        <div
-          className="pl-3"
-          style={{
-            position: "absolute",
-            height: 18,
-            opacity: 0.3,
-          }}
-        >
-          <Instagram width="16px" height="16px" />
-        </div>
-      </div>
+      ))}
       {submitComponent}
     </WrapperResponsive>
   );
