@@ -123,6 +123,18 @@ func (v *Vote) GetVote(db *s.Database) error {
 		v.Proposal_id, v.Addr)
 }
 
+func (vb *VoteWithBalance) GetVote(db *s.Database) error {
+	return pgxscan.Get(db.Context, db.Conn, vb,
+		`select v.*, 
+		b.primary_account_balance,
+		b.secondary_account_balance,
+		b.staking_balance
+		from votes v
+		left join balances b on b.addr = v.addr
+		WHERE proposal_id = $1 AND v.addr = $2`,
+		vb.Proposal_id, vb.Addr)
+}
+
 func (v *Vote) GetVoteById(db *s.Database) error {
 	return pgxscan.Get(db.Context, db.Conn, v,
 		`SELECT * from votes

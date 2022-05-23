@@ -65,7 +65,7 @@ var allowedFileTypes = []string{"image/jpg", "image/jpeg", "image/png", "image/g
 type Strategy interface {
 	TallyVotes(votes []*models.VoteWithBalance, proposalId int) (models.ProposalResults, error)
 	GetVotes(votes []*models.VoteWithBalance) ([]*models.VoteWithBalance, error)
-	GetVoteWeightForBalance(balance *models.Balance, proposal *models.Proposal) (float64, error)
+	GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error)
 }
 
 var strategyMap = map[string]Strategy{
@@ -372,7 +372,23 @@ func (a *App) getVoteForAddress(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//get proposal to get blockheight
+	vote := &models.VoteWithBalance{
+		Vote: models.Vote{
+			Addr:        addr,
+			Proposal_id: proposalId,
+		}}
+
+	if err := vote.GetVote(a.DB); err != nil {
+		switch err.Error() {
+		case pgx.ErrNoRows.Error():
+			respondWithError(w, http.StatusNotFound, "Vote not found")
+		default:
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+		}
+		return
+	}
+
+	//get proposal
 	p := models.Proposal{ID: proposalId}
 	if err := p.GetProposalById(a.DB); err != nil {
 		switch err.Error() {
@@ -384,19 +400,6 @@ func (a *App) getVoteForAddress(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//create balance struct
-	b := &models.Balance{
-		Addr:        addr,
-		BlockHeight: p.Block_height,
-	}
-
-	// get the user balance at blockheight
-	if err := b.GetBalanceByAddressAndBlockHeight(a.DB); err != nil {
-		log.Error().Err(err).Msg(err.Error())
-		respondWithError(w, http.StatusNotFound, "Vote not found")
-		return
-	}
-
 	//lookup the strategy for proposal
 	s := strategyMap[*p.Strategy]
 	if s == nil {
@@ -405,23 +408,14 @@ func (a *App) getVoteForAddress(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get the vote weight
-	weight, err := s.GetVoteWeightForBalance(b, &p)
+	weight, err := s.GetVoteWeightForBalance(vote, &p)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	//create the VoteWithBalance struct
-	v := &models.Vote{Proposal_id: proposalId, Addr: addr}
-	vb := &models.VoteWithBalance{
-		Vote:                    *v,
-		PrimaryAccountBalance:   &b.PrimaryAccountBalance,
-		SecondaryAccountBalance: &b.SecondaryAccountBalance,
-		StakingBalance:          &b.StakingBalance,
-		Weight:                  &weight,
-	}
-
-	respondWithJSON(w, http.StatusOK, vb)
+	vote.Weight = &weight
+	respondWithJSON(w, http.StatusOK, vote)
 }
 
 func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
@@ -587,6 +581,22 @@ func (a *App) getVotesForAddress(w http.ResponseWriter, r *http.Request) {
 
 	for i := start; i < count; i++ {
 
+		vote := &models.VoteWithBalance{
+			Vote: models.Vote{
+				Addr:        addr,
+				Proposal_id: proposalIds[i],
+			}}
+
+		if err := vote.GetVote(a.DB); err != nil {
+			switch err.Error() {
+			case pgx.ErrNoRows.Error():
+				respondWithError(w, http.StatusNotFound, "Vote not found")
+			default:
+				respondWithError(w, http.StatusInternalServerError, err.Error())
+			}
+			return
+		}
+
 		//get proposal to get blockheight
 		p := models.Proposal{ID: proposalIds[i]}
 		if err := p.GetProposalById(a.DB); err != nil {
@@ -599,19 +609,6 @@ func (a *App) getVotesForAddress(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		//create balance struct
-		b := &models.Balance{
-			Addr:        addr,
-			BlockHeight: p.Block_height,
-		}
-
-		//get the user balance at block height
-		if err := b.GetBalanceByAddressAndBlockHeight(a.DB); err != nil {
-			log.Error().Err(err).Msg("error querying address balance at blockheight")
-			respondWithError(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-
 		//lookup the strategy for proposal
 		s := strategyMap[*p.Strategy]
 		if s == nil {
@@ -620,23 +617,14 @@ func (a *App) getVotesForAddress(w http.ResponseWriter, r *http.Request) {
 		}
 
 		//get the weight for the proposal
-		weight, err := s.GetVoteWeightForBalance(b, &p)
+		weight, err := s.GetVoteWeightForBalance(vote, &p)
 		if err != nil {
 			respondWithError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 
-		// create the VoteWithBalanceStruct
-		v := &models.Vote{Proposal_id: proposalIds[i], Addr: addr}
-		vb := &models.VoteWithBalance{
-			Vote:                    *v,
-			PrimaryAccountBalance:   &b.PrimaryAccountBalance,
-			SecondaryAccountBalance: &b.SecondaryAccountBalance,
-			StakingBalance:          &b.StakingBalance,
-			Weight:                  &weight,
-		}
-
-		votes = append(votes, vb)
+		vote.Weight = &weight
+		votes = append(votes, vote)
 	}
 
 	// Transpose into PaginatedResponse struct
