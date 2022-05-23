@@ -34,6 +34,10 @@ func (s *TokenWeightedDefault) GetVoteWeightForBalance(vote *models.VoteWithBala
 
 	weight = float64(*vote.PrimaryAccountBalance) * math.Pow(10, -8)
 
+	if vote.PrimaryAccountBalance == nil {
+		return 0.00, nil
+	}
+
 	if weight == 0 {
 		return 0, ERROR
 	}

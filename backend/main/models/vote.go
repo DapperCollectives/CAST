@@ -45,12 +45,16 @@ const (
 ///////////
 
 // TODO: make the proposalIds optional
-func GetVotesForAddress(db *s.Database, start, count int, address string, proposalIds *[]int) ([]*Vote, int, error) {
-	var votes []*Vote
+func GetVotesForAddress(db *s.Database, start, count int, address string, proposalIds *[]int) ([]*VoteWithBalance, int, error) {
+	var votes []*VoteWithBalance
 	var err error
-	sql := `
-		SELECT * FROM votes
-		WHERE addr = $3`
+	sql := `select v.*, 
+		b.primary_account_balance,
+		b.secondary_account_balance,
+		b.staking_balance
+		from votes v
+		left join balances b on b.addr = v.addr
+		WHERE v.addr = $2`
 	// Conditionally add proposal_id condition
 	if len(*proposalIds) > 0 {
 		sql = sql + " AND proposal_id = ANY($4)"
@@ -66,7 +70,7 @@ func GetVotesForAddress(db *s.Database, start, count int, address string, propos
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		return nil, 0, err
 	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
-		return []*Vote{}, 0, nil
+		return []*VoteWithBalance{}, 0, nil
 	}
 
 	// Get total number of votes on proposal

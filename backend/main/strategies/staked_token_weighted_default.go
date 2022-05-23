@@ -30,8 +30,13 @@ func (s *StakedTokenWeightedDefault) GetVotes(votes []*models.VoteWithBalance) (
 }
 
 func (s *StakedTokenWeightedDefault) GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error) {
+
 	var weight float64
 	var ERROR error = fmt.Errorf("no weight found, address: %s, strategy: %s", vote.Addr, *proposal.Strategy)
+
+	if vote.StakingBalance == nil {
+		return 0.00, nil
+	}
 
 	weight = float64(*vote.StakingBalance) * math.Pow(10, -8)
 
