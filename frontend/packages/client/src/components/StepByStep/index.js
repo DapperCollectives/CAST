@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react";
 import { ArrowLeft, CheckMark } from "../Svg";
 import Loader from "../Loader";
-import { defaultsDeep } from "lodash";
+import defaultsDeep from "lodash/defaultsDeep";
 
 const defaultStyles = {
   currentStep: {

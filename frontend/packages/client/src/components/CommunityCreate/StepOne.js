@@ -9,7 +9,7 @@ import useLinkValidator, {
 import { getReducedImg } from "utils";
 import { useErrorHandlerContext } from "contexts/ErrorHandler";
 import { MAX_FILE_SIZE } from "const";
-import { pick } from "lodash";
+import pick from "lodash/pick";
 import { useCommunityCategory } from "hooks";
 
 const linksFields = [
