@@ -66,7 +66,6 @@ type Strategy interface {
 	TallyVotes(votes []*models.VoteWithBalance, proposalId int) (models.ProposalResults, error)
 	GetVotes(votes []*models.VoteWithBalance) ([]*models.VoteWithBalance, error)
 	GetVoteWeightForBalance(balance *models.Balance, proposal *models.Proposal) (float64, error)
-	GetVoteWeightsForBalances(addr string, proposalId int) ([]int, error)
 }
 
 var strategyMap = map[string]Strategy{

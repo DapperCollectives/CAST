@@ -41,7 +41,3 @@ func (s *StakedTokenWeightedDefault) GetVoteWeightForBalance(balance *models.Bal
 
 	return weight, nil
 }
-
-func (s *StakedTokenWeightedDefault) GetVoteWeightsForBalances(addr string, proposalId int) ([]int, error) {
-	return nil, nil
-}
