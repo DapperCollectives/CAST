@@ -5,11 +5,14 @@ import { useCommunityProposalsWithVotes, useMediaQuery } from "../hooks";
 import { FilterValues } from "../const";
 import DropDownFilter from "./ProposalsList/DropdownFilter";
 import WrapperResponsive from "./WrapperResponsive";
+import { omit } from "lodash";
 
 export default function CommunityProposals({ community = { id: 1 } }) {
   const notMobile = useMediaQuery();
 
-  const proposalFilterValues = Object.values(FilterValues);
+  const proposalFilterValues = Object.values(
+    omit(FilterValues, ["inprogress", "terminated"])
+  );
 
   const [filterValue, setFilterValues] = useState(FilterValues["all"]);
 
@@ -19,7 +22,7 @@ export default function CommunityProposals({ community = { id: 1 } }) {
       count: 10,
       status:
         filterValue.toLocaleLowerCase() === "all"
-          ? FilterValues["closed"].toLocaleLowerCase()
+          ? FilterValues.terminated.toLocaleLowerCase()
           : filterValue.toLocaleLowerCase(),
     });
 
@@ -28,7 +31,7 @@ export default function CommunityProposals({ community = { id: 1 } }) {
     useCommunityProposalsWithVotes({
       communityId: community.id,
       count: 25,
-      status: "active",
+      status: "inprogress",
       scrollToFetchMore: false,
     });
 

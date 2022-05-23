@@ -7,4 +7,8 @@ export const FilterValues = {
   pending: "Pending",
   closed: "Closed",
   cancelled: "Cancelled",
+  // group of active and pending
+  inprogress: "In Progress",
+  // group of closed and canceled
+  terminated: "Terminated",
 };

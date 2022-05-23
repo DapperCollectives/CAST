@@ -37,7 +37,15 @@ const CommunityProposalList = ({
         <div className="has-text-weight-bold is-uppercase mb-5">Closed</div>
         <div className="is-flex is-flex-direction-column">
           {(proposalsList ?? []).map((pr, i) => (
-            <Link to={`/proposal/${pr.id}`} key={i}>
+            <Link
+              to={`/proposal/${pr.id}`}
+              key={i}
+              style={
+                ["closed", "cancelled"].includes(pr.computedStatus)
+                  ? { opacity: 0.6 }
+                  : {}
+              }
+            >
               <div
                 className="border-light rounded-sm mb-5 proposal-card transition-all"
                 key={i}
