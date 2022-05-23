@@ -264,9 +264,6 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//print the propsalId to the console
-	log.Info().Msgf("proposalId: %d", proposalId)
-
 	// First, get the proposal by proposalId
 	p := models.Proposal{ID: proposalId}
 	if err := p.GetProposalById(a.DB); err != nil {
@@ -297,15 +294,11 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// tally using strategy function
 	proposalResults, err := s.TallyVotes(votes, proposalId)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-
-	// print the proposal results
-	log.Info().Msgf("Proposal Results: %+v", proposalResults)
 
 	// Send Proposal Results
 	respondWithJSON(w, http.StatusOK, proposalResults)
