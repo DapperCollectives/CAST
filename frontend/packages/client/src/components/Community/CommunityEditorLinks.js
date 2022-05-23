@@ -3,7 +3,7 @@ import { Website, Instagram, Twitter, Discord, Github } from "components/Svg";
 import { WrapperResponsive, Loader } from "components";
 import useLinkValidator from "./hooks/useLinkValidator";
 
-const FormFields = [
+const FormFieldsConfig = [
   {
     fieldName: "websiteUrl",
     iconComponent: <Website width="16px" height="16px" />,
@@ -26,6 +26,7 @@ const FormFields = [
   },
 ];
 export const CommunityLinksForm = ({
+  formFields = FormFieldsConfig,
   submitComponent,
   onChangeHandler,
   fields,
@@ -59,7 +60,7 @@ export const CommunityLinksForm = ({
           </div>
         </div>
       </div>
-      {FormFields.map((formField) => (
+      {formFields.map((formField) => (
         <div
           style={{ position: "relative" }}
           className="is-flex is-align-items-center mt-4"
