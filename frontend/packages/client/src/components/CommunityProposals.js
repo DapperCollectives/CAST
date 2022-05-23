@@ -5,13 +5,12 @@ import { useCommunityProposalsWithVotes, useMediaQuery } from "../hooks";
 import { FilterValues } from "../const";
 import DropDownFilter from "./ProposalsList/DropdownFilter";
 import WrapperResponsive from "./WrapperResponsive";
-import omit from "lodash/omit";
 
 export default function CommunityProposals({ community = { id: 1 } }) {
   const notMobile = useMediaQuery();
 
-  const proposalFilterValues = Object.values(
-    omit(FilterValues, ["inprogress", "terminated"])
+  const proposalFilterValues = Object.values(FilterValues).filter(
+    (value) => "In Progress" !== value && "Terminated" !== value
   );
 
   const [filterValue, setFilterValues] = useState(FilterValues["all"]);
