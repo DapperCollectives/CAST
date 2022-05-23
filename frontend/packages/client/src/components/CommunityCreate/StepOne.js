@@ -145,16 +145,14 @@ export default function StepOne({
           </div>
           <div className="column is-narrow">
             <div
-              className={`is-flex is-flex-direction-column is-align-items-center is-justify-content-center ${
-                !logo ? "cursor-pointer" : ""
-              }`}
+              className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center cursor-pointer"
               style={{
                 borderRadius: "50px",
-                border: "1px dashed #757575",
                 height: "90px",
                 width: "90px",
                 overflow: "hidden",
                 position: "relative",
+                ...(!logo ? { border: "1px dashed #757575" } : undefined),
               }}
               {...getRootProps()}
             >
