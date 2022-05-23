@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useMemo } from "react";
+import React, { useEffect, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { Upload } from "components/Svg";
 import { WrapperResponsive, Dropdown } from "components";
@@ -97,19 +97,7 @@ export default function StepOne({
     pick(stepData || {}, linksFields)
   );
 
-  const changeHandlers = useMemo(
-    () =>
-      Object.assign(
-        {},
-        ...linksFields.map((field) => ({
-          [field]: (value) =>
-            onDataChange({
-              [field]: value,
-            }),
-        }))
-      ),
-    [onDataChange]
-  );
+  const changeHandler = (field) => (value) => onDataChange({ [field]: value });
 
   const { isValid: isCommunityLinksValid } = useLinkValidator({
     links: linksFieldsObj,
@@ -248,7 +236,7 @@ export default function StepOne({
         />
       </WrapperResponsive>
       <CommunityLinksForm
-        onChangeHandlers={changeHandlers}
+        onChangeHandler={changeHandler}
         fields={linksFieldsObj}
         wrapperMargin="mb-4"
         wrapperMarginMobile="mb-3"

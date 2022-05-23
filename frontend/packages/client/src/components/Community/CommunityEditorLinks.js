@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { Website, Instagram, Twitter, Discord, Github } from "components/Svg";
 import { WrapperResponsive, Loader } from "components";
 import useLinkValidator from "./hooks/useLinkValidator";
 
 export const CommunityLinksForm = ({
   submitComponent,
-  onChangeHandlers,
+  onChangeHandler,
   fields,
   isUpdating = false,
   wrapperMargin = "mb-6",
@@ -48,7 +48,7 @@ export const CommunityLinksForm = ({
           value={fields["websiteUrl"]}
           maxLength={200}
           onChange={(event) =>
-            onChangeHandlers["websiteUrl"](event.target.value)
+            onChangeHandler["websiteUrl"](event.target.value)
           }
           style={{
             paddingLeft: "34px",
@@ -77,7 +77,7 @@ export const CommunityLinksForm = ({
           value={fields["twitterUrl"]}
           maxLength={200}
           onChange={(event) =>
-            onChangeHandlers["twitterUrl"](event.target.value)
+            onChangeHandler["twitterUrl"](event.target.value)
           }
           style={{
             paddingLeft: "34px",
@@ -105,9 +105,7 @@ export const CommunityLinksForm = ({
           className="rounded-sm border-light py-3 pr-3 column is-full"
           value={fields["githubUrl"]}
           maxLength={200}
-          onChange={(event) =>
-            onChangeHandlers["githubUrl"](event.target.value)
-          }
+          onChange={(event) => onChangeHandler["githubUrl"](event.target.value)}
           style={{
             paddingLeft: "34px",
           }}
@@ -135,7 +133,7 @@ export const CommunityLinksForm = ({
           value={fields["discordUrl"]}
           maxLength={200}
           onChange={(event) =>
-            onChangeHandlers["discordUrl"](event.target.value)
+            onChangeHandler["discordUrl"](event.target.value)
           }
           style={{
             paddingLeft: "34px",
@@ -164,7 +162,7 @@ export const CommunityLinksForm = ({
           value={fields["instagramUrl"]}
           maxLength={200}
           onChange={(event) =>
-            onChangeHandlers["instagramUrl"](event.target.value)
+            onChangeHandler["instagramUrl"](event.target.value)
           }
           style={{
             paddingLeft: "34px",
@@ -225,26 +223,11 @@ export default function CommunityEditorLinks(props = {}) {
     setEnableSave(isValid);
   }, [isValid]);
 
-  const changeHandlers = useMemo(
-    () =>
-      Object.assign(
-        {},
-        ...[
-          "websiteUrl",
-          "twitterUrl",
-          "instagramUrl",
-          "discordUrl",
-          "githubUrl",
-        ].map((field) => ({
-          [field]: (value) =>
-            setLinks((state) => ({
-              ...state,
-              [field]: value,
-            })),
-        }))
-      ),
-    [setLinks]
-  );
+  const changeHandler = (field) => (value) =>
+    setLinks((state) => ({
+      ...state,
+      [field]: value,
+    }));
 
   return (
     <CommunityLinksForm
@@ -260,7 +243,7 @@ export default function CommunityEditorLinks(props = {}) {
           {isUpdating && <Loader size={18} spacing="mx-button-loader" />}
         </button>
       }
-      onChangeHandlers={changeHandlers}
+      changeHandler={changeHandler}
       fields={links}
       isUpdating={isUpdating}
     />
