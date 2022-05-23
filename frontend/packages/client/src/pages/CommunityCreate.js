@@ -45,7 +45,6 @@ export default function CommunityCreate() {
   }, [modalContext, creatorAddr, modalError]);
 
   const onSubmit = async (stepsData) => {
-    console.log(stepsData);
     // opens modal and makes user to connect with wallet
     if (!creatorAddr) {
       modalContext.openModal(

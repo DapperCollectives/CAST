@@ -38,7 +38,6 @@ export default function useUserRoleOnCommunity({
   const rolesInCommunity =
     communityUser
       ?.filter((datum) => {
-        console.log(datum.id.toString(), communityId.toString());
         return datum.id.toString() === communityId.toString();
       })
       .map((community) => community?.membershipType) ?? [];
