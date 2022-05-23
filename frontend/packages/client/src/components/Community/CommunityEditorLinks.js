@@ -60,10 +60,11 @@ export const CommunityLinksForm = ({
           </div>
         </div>
       </div>
-      {formFields.map((formField) => (
+      {formFields.map((formField, index) => (
         <div
           style={{ position: "relative" }}
           className="is-flex is-align-items-center mt-4"
+          key={`form-field-${index}`}
         >
           <input
             type="text"
