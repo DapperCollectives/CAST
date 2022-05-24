@@ -117,6 +117,45 @@ func GetCommunities(db *s.Database, start, count int) ([]*Community, int, error)
 	return communities, totalRecords, nil
 }
 
+func GetCommunitiesForHomePage(db *s.Database, start, count int) ([]*Community, int, error) {
+	var communities []*Community
+
+	err := pgxscan.Select(db.Context, db.Conn, &communities,
+		`
+		SELECT
+  	*
+		FROM communities WHERE discord_url IS NOT NULL
+		AND twitter_url IS NOT NULL
+  	AND id IN (
+    	SELECT community_id
+    	FROM community_users
+    	GROUP BY community_id
+    	HAVING COUNT(*) > 500
+  	)
+  	AND id IN (
+    	SELECT community_id
+    	FROM proposals
+    	WHERE status = 'published' AND end_time < (NOW() AT TIME ZONE 'UTC')
+    	GROUP BY community_id
+    	HAVING COUNT(*) >= 2
+  	)
+		LIMIT $1 OFFSET $2
+		`, count, start)
+
+	// If we get pgx.ErrNoRows, just return an empty array
+	// and obfuscate error
+	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
+		return nil, 0, err
+	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
+		return []*Community{}, 0, nil
+	}
+
+	var totalRecords int
+	countSql := `SELECT COUNT(*) FROM communities`
+	db.Conn.QueryRow(db.Context, countSql).Scan(&totalRecords)
+	return communities, totalRecords, nil
+}
+
 func (c *Community) CreateCommunity(db *s.Database) error {
 	err := db.Conn.QueryRow(db.Context,
 		`
