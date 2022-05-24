@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"math"
 	"net/http"
 	"testing"
@@ -72,6 +73,24 @@ func TestTokenWeightedDefaultStrategy(t *testing.T) {
 
 		_expectedWeight := float64(_vote.Primary_account_balance) * math.Pow(10, -8)
 		assert.Equal(t, _expectedWeight, *vote.Weight)
+	})
+
+	t.Run("Test Fetching Votes For Address", func(t *testing.T) {
+		_vote := (*votes)[0]
+		proposalIdTwo := otu.AddProposalsForStrategy(communityId, "token-weighted-default", 1)[0]
+		proposalIds := []int{proposalId, proposalIdTwo}
+
+		response := otu.GetVotesForAddressAPI(_vote.Addr, proposalIds)
+		fmt.Printf("Response : %v", response)
+		CheckResponseCode(t, http.StatusOK, response.Code)
+
+		var votes []models.VoteWithBalance
+		json.Unmarshal(response.Body.Bytes(), &votes)
+
+		for _, v := range votes {
+			_expectedWeight := float64(_vote.Primary_account_balance) * math.Pow(10, -8)
+			assert.Equal(t, _expectedWeight, *v.Weight)
+		}
 	})
 }
 

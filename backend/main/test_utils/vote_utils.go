@@ -40,6 +40,18 @@ func (otu *OverflowTestUtils) GetVoteForProposalByAddressAPI(proposalId int, add
 	return otu.ExecuteRequest(req)
 }
 
+func (otu *OverflowTestUtils) GetVotesForAddressAPI(address string, proposalIds []int) *httptest.ResponseRecorder {
+	// convert proposalIds to string
+	var proposalIdsString []string
+	for _, id := range proposalIds {
+		proposalIdsString = append(proposalIdsString, strconv.Itoa(id))
+	}
+	url := fmt.Sprintf("/votes/%s?proposalIds=%s", address, proposalIdsString)
+	fmt.Println("url : ", url)
+	req, _ := http.NewRequest("GET", url, nil)
+	return otu.ExecuteRequest(req)
+}
+
 func (otu *OverflowTestUtils) CreateVoteAPI(proposalId int, payload *models.Vote) *httptest.ResponseRecorder {
 	json, _ := json.Marshal(payload)
 	req, _ := http.NewRequest("POST", "/proposals/"+strconv.Itoa(proposalId)+"/votes", bytes.NewBuffer(json))

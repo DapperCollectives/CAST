@@ -54,7 +54,7 @@ func GetVotesForAddress(db *s.Database, start, count int, address string, propos
 		b.staking_balance
 		from votes v
 		left join balances b on b.addr = v.addr
-		WHERE v.addr = $2`
+		WHERE v.addr = $3`
 	// Conditionally add proposal_id condition
 	if len(*proposalIds) > 0 {
 		sql = sql + " AND proposal_id = ANY($4)"

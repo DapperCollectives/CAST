@@ -32,15 +32,23 @@ func (s *TokenWeightedDefault) GetVoteWeightForBalance(vote *models.VoteWithBala
 	var weight float64
 	var ERROR error = fmt.Errorf("no weight found, address: %s, strategy: %s", vote.Addr, *proposal.Strategy)
 
-	weight = float64(*vote.PrimaryAccountBalance) * math.Pow(10, -8)
-
 	if vote.PrimaryAccountBalance == nil {
 		return 0.00, nil
 	}
 
-	if weight == 0 {
-		return 0, ERROR
-	}
+	weight = float64(*vote.PrimaryAccountBalance) * math.Pow(10, -8)
 
-	return weight, nil
+	switch {
+	case proposal.Max_weight != nil && weight > *proposal.Max_weight:
+		weight = *proposal.Max_weight
+		return weight, nil
+	case proposal.Max_weight != nil && weight < *proposal.Max_weight:
+		return weight, nil
+	case weight == 0.00:
+		return 0.00, nil
+	case weight > 0.00:
+		return weight, nil
+	default:
+		return weight, ERROR
+	}
 }

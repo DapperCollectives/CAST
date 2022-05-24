@@ -328,7 +328,7 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 		start = 0
 	}
 
-	totalVotes, totalRecords, err := models.GetVotesForProposal(a.DB, start, count, order, proposalId)
+	votes, totalRecords, err := models.GetVotesForProposal(a.DB, start, count, order, proposalId)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -352,13 +352,13 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	votes, err := s.GetVotes(totalVotes)
+	votesWithBalances, err := s.GetVotes(votes)
 	if err != nil {
 		respondWithError(w, http.StatusNotFound, err.Error())
 		return
 	}
 
-	response := shared.GetPaginatedResponseWithPayload(votes, start, count, totalRecords)
+	response := shared.GetPaginatedResponseWithPayload(votesWithBalances, start, count, totalRecords)
 	respondWithJSON(w, http.StatusOK, response)
 }
 
@@ -372,13 +372,13 @@ func (a *App) getVoteForAddress(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	vote := &models.VoteWithBalance{
+	voteWithBalance := &models.VoteWithBalance{
 		Vote: models.Vote{
 			Addr:        addr,
 			Proposal_id: proposalId,
 		}}
 
-	if err := vote.GetVote(a.DB); err != nil {
+	if err := voteWithBalance.GetVote(a.DB); err != nil {
 		switch err.Error() {
 		case pgx.ErrNoRows.Error():
 			respondWithError(w, http.StatusNotFound, "Vote not found")
@@ -408,14 +408,91 @@ func (a *App) getVoteForAddress(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get the vote weight
-	weight, err := s.GetVoteWeightForBalance(vote, &proposal)
+	weight, err := s.GetVoteWeightForBalance(voteWithBalance, &proposal)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	vote.Weight = &weight
-	respondWithJSON(w, http.StatusOK, vote)
+	voteWithBalance.Weight = &weight
+	respondWithJSON(w, http.StatusOK, voteWithBalance)
+}
+
+func (a *App) getVotesForAddress(w http.ResponseWriter, r *http.Request) {
+	var proposalIds []int
+
+	vars := mux.Vars(r)
+	addr := vars["addr"]
+	count, _ := strconv.Atoi(r.FormValue("count"))
+	start, _ := strconv.Atoi(r.FormValue("start"))
+
+	fmt.Println("proposalIds :", r.FormValue("proposalIds"))
+
+	err := json.Unmarshal([]byte(r.FormValue("proposalIds")), &proposalIds)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID")
+		return
+	}
+
+	//Printf proposalIds
+	fmt.Printf("proposalIds: %v", proposalIds)
+
+	if count > 25 || count < 1 {
+		count = 25
+	}
+	if start < 0 {
+		start = 0
+	}
+
+	if len(proposalIds) == 0 {
+		log.Info().Msg("no proposalIds provided")
+		respondWithError(w, http.StatusBadRequest, "No proposalIds provided")
+		return
+	}
+
+	votes, totalRecords, err := models.GetVotesForAddress(a.DB, start, count, addr, &proposalIds)
+	if err != nil {
+		log.Error().Err(err).Msg("error getting votes for address")
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+	}
+
+	var votesWithBalances []*models.VoteWithBalance
+
+	for _, vote := range votes {
+
+		//get proposal
+		proposal := models.Proposal{ID: vote.Proposal_id}
+		if err := proposal.GetProposalById(a.DB); err != nil {
+			switch err.Error() {
+			case pgx.ErrNoRows.Error():
+				respondWithError(w, http.StatusNotFound, "Proposal not found")
+			default:
+				respondWithError(w, http.StatusInternalServerError, err.Error())
+			}
+			return
+		}
+
+		//lookup the stratefy for this proposal
+		s := strategyMap[*proposal.Strategy]
+		if s == nil {
+			respondWithError(w, http.StatusInternalServerError, "Strategy not found")
+			return
+		}
+
+		//get the vote weight
+		weight, err := s.GetVoteWeightForBalance(vote, &proposal)
+		if err != nil {
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		vote.Weight = &weight
+		votesWithBalances = append(votesWithBalances, vote)
+	}
+
+	// Transpose into PaginatedResponse struct
+	response := shared.GetPaginatedResponseWithPayload(votesWithBalances, start, count, totalRecords)
+	respondWithJSON(w, http.StatusOK, response)
 }
 
 func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
@@ -552,80 +629,7 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusCreated, v)
 }
 
-func (a *App) getVotesForAddress(w http.ResponseWriter, r *http.Request) {
-	var proposalIds []int
-	fmt.Println("getVotesForAddress")
-
-	vars := mux.Vars(r)
-	addr := vars["addr"]
-	// Parse proposalIds array
-	json.Unmarshal([]byte(r.FormValue("proposalIds")), &proposalIds)
-
-	// Params for pagination
-	count, _ := strconv.Atoi(r.FormValue("count"))
-	start, _ := strconv.Atoi(r.FormValue("start"))
-
-	if len(proposalIds) == 0 {
-		log.Info().Msg("no proposalIds provided")
-		respondWithError(w, http.StatusBadRequest, "no proposalIds provided")
-		return
-	}
-
-	if count > 25 || count < 1 {
-		count = 25
-	}
-	if start < 0 {
-		start = 0
-	}
-
-	votes, totalRecords, err := models.GetVotesForAddress(a.DB, start, count, addr, &proposalIds)
-	if err != nil {
-		log.Error().Err(err).Msg("error getting votes for address")
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-	}
-
-	var voteWithWeights []*models.VoteWithBalance
-
-	for _, vote := range votes {
-
-		//get proposal
-		proposal := models.Proposal{ID: vote.Proposal_id}
-		if err := proposal.GetProposalById(a.DB); err != nil {
-			switch err.Error() {
-			case pgx.ErrNoRows.Error():
-				respondWithError(w, http.StatusNotFound, "Proposal not found")
-			default:
-				respondWithError(w, http.StatusInternalServerError, err.Error())
-			}
-			return
-		}
-
-		//lookup the stratefy for this proposal
-		s := strategyMap[*proposal.Strategy]
-		if s == nil {
-			respondWithError(w, http.StatusInternalServerError, "Strategy not found")
-			return
-		}
-
-		//get the vote weight
-		weight, err := s.GetVoteWeightForBalance(vote, &proposal)
-		if err != nil {
-			respondWithError(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-
-		vote.Weight = &weight
-		voteWithWeights = append(voteWithWeights, vote)
-	}
-
-	// Transpose into PaginatedResponse struct
-	response := shared.GetPaginatedResponseWithPayload(voteWithWeights, start, count, totalRecords)
-
-	respondWithJSON(w, http.StatusOK, response)
-}
-
 // Proposals
-
 func (a *App) getProposalsForCommunity(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	communityId, err := strconv.Atoi(vars["communityId"])
