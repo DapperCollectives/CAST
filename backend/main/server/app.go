@@ -426,16 +426,11 @@ func (a *App) getVotesForAddress(w http.ResponseWriter, r *http.Request) {
 	count, _ := strconv.Atoi(r.FormValue("count"))
 	start, _ := strconv.Atoi(r.FormValue("start"))
 
-	fmt.Println("proposalIds :", r.FormValue("proposalIds"))
-
 	err := json.Unmarshal([]byte(r.FormValue("proposalIds")), &proposalIds)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID")
 		return
 	}
-
-	//Printf proposalIds
-	fmt.Printf("proposalIds: %v", proposalIds)
 
 	if count > 25 || count < 1 {
 		count = 25

@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"math"
 	"net/http"
 	"testing"
@@ -81,7 +80,6 @@ func TestTokenWeightedDefaultStrategy(t *testing.T) {
 		proposalIds := []int{proposalId, proposalIdTwo}
 
 		response := otu.GetVotesForAddressAPI(_vote.Addr, proposalIds)
-		fmt.Printf("Response : %v", response)
 		CheckResponseCode(t, http.StatusOK, response.Code)
 
 		var votes []models.VoteWithBalance

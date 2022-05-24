@@ -41,11 +41,16 @@ func (otu *OverflowTestUtils) GetVoteForProposalByAddressAPI(proposalId int, add
 }
 
 func (otu *OverflowTestUtils) GetVotesForAddressAPI(address string, proposalIds []int) *httptest.ResponseRecorder {
-	// convert proposalIds to string
 	var proposalIdsString []string
-	for _, id := range proposalIds {
+
+	//comma has to be manually inserted as a string to be a valid query param
+	for i, id := range proposalIds {
 		proposalIdsString = append(proposalIdsString, strconv.Itoa(id))
+		if i != len(proposalIds)-1 {
+			proposalIdsString = append(proposalIdsString, ",")
+		}
 	}
+
 	url := fmt.Sprintf("/votes/%s?proposalIds=%s", address, proposalIdsString)
 	fmt.Println("url : ", url)
 	req, _ := http.NewRequest("GET", url, nil)
