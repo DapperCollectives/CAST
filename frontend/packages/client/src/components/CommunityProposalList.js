@@ -2,7 +2,6 @@ import React from "react";
 import { Link } from "react-router-dom";
 import ProposalHeader from "./ProposalsList/ProposalHeader";
 import Loader from "./Loader";
-import { FilterValues } from "../const";
 
 const StyleForStatus = {
   closed: { opacity: 0.6 },
@@ -14,8 +13,8 @@ const CommunityProposalList = ({
   activeProposals = [],
   filterValue,
 } = {}) => {
-  // filter with active
-  if (filterValue === FilterValues["all"]) {
+  // filter with all value should show active and pending in one group and closed and cancelled in another group
+  if (filterValue === "all") {
     return (
       <>
         {initialLoading && <Loader fullHeight />}
