@@ -89,7 +89,10 @@ export default function useCommunity() {
           twitterUrl,
           websiteUrl,
           logo,
-          ...rest
+          contractAddress,
+          contractName,
+          storagePath,
+          onlyAuthorsToSubmitProposals,
         } = communityData;
 
         let communityLogo;
@@ -124,6 +127,10 @@ export default function useCommunity() {
             websiteUrl,
             discordUrl,
             logo: communityLogo?.fileUrl,
+            contractAddress,
+            contractName,
+            storagePath,
+            onlyAuthorsToSubmitProposals,
             timestamp,
             compositeSignatures,
           }),
