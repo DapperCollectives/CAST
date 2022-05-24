@@ -11,6 +11,8 @@ export default function StepThree({
   const {
     proposalThreshold = "",
     contractAddress = "",
+    contractName = "",
+    storagePath = "",
     onlyAuthorsToSubmitProposals = false,
   } = stepData || {};
 
@@ -58,6 +60,26 @@ export default function StepThree({
         />
         <input
           type="text"
+          placeholder="Contract Name"
+          name="contract_name"
+          className="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
+          value={contractName}
+          onChange={(event) =>
+            onDataChange({ contractName: event.target.value })
+          }
+        />
+        <input
+          type="text"
+          placeholder="Storage Path"
+          name="storage_path"
+          className="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
+          value={storagePath}
+          onChange={(event) =>
+            onDataChange({ storagePath: event.target.value })
+          }
+        />
+        <input
+          type="text"
           placeholder="Proposal threshold"
           name="proposal_threshold"
           className="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
@@ -67,10 +89,10 @@ export default function StepThree({
           }
         />
 
-        <label className="checkbox column is-full is-full-mobile px-0 mt-4">
+        <label className="checkbox column is-flex is-align-items-center is-full is-full-mobile px-0 mt-4">
           <input
             type="checkbox"
-            className="mr-2"
+            className="mr-2 form-checkbox"
             checked={onlyAuthorsToSubmitProposals}
             onChange={(e) => {
               onDataChange({
@@ -78,7 +100,9 @@ export default function StepThree({
               });
             }}
           />
-          Allow only authors to submit a proposal
+          <p className="has-text-grey small-text">
+            Allow only authors to submit a proposal
+          </p>
         </label>
       </WrapperResponsive>
       <div className="column p-0 is-12 mt-4">
