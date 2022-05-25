@@ -1,6 +1,8 @@
 package models
 
 import (
+	"fmt"
+
 	s "github.com/brudfyi/flow-voting-tool/main/shared"
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/jackc/pgx/v4"
@@ -208,4 +210,21 @@ func GrantRolesToCommunityCreator(db *s.Database, addr string, communityId int) 
 func EnsureRoleForCommunity(db *s.Database, addr string, communityId int, userType string) error {
 	user := CommunityUser{Addr: addr, Community_id: communityId, User_type: userType}
 	return user.GetCommunityUser(db)
+}
+
+func EnforceTokenThreshold(db *s.Database, addr string, communityId int) error {
+
+	c := Community{ID: communityId}
+	if err := c.GetCommunity(db); err != nil {
+		switch err.Error() {
+		case pgx.ErrNoRows.Error():
+			ERROR := fmt.Errorf("community %d does not exist", communityId)
+			return ERROR
+		default:
+			ERROR := fmt.Errorf("db error getting community %d: %s", communityId, err.Error())
+			return ERROR
+		}
+	}
+
+	return nil
 }

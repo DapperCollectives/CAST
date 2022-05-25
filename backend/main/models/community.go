@@ -39,6 +39,8 @@ type Community struct {
 	Signing_addr         *string                 `json:"signingAddr,omitempty"`
 	Created_at           *time.Time              `json:"createdAt,omitempty"`
 	Cid                  *string                 `json:"cid,omitempty"`
+
+	ContractDetails
 }
 
 type CreateCommunityRequestPayload struct {
@@ -72,6 +74,13 @@ type CommunityType struct {
 	Key         string `json:"key" validate:"required"`
 	Name        string `json:"name" validate:"required"`
 	Description string `json:"description,omitempty"`
+}
+
+type ContractDetails struct {
+	Contract_name *string `json:"contract_name"`
+	Contract_addr *string `json:"contract_addr"`
+	Storage_path  *string `json:"storage_path"`
+	Vault_uuid    *string `json:"vault_uuid"`
 }
 
 func GetCommunityTypes(db *s.Database) ([]*CommunityType, error) {
