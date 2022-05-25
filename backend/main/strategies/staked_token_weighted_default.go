@@ -24,8 +24,16 @@ func (s *StakedTokenWeightedDefault) TallyVotes(votes []*models.VoteWithBalance,
 	return r, nil
 }
 
-// for some strategies unique logic may want to be implemented here
-func (s *StakedTokenWeightedDefault) GetVotes(votes []*models.VoteWithBalance) ([]*models.VoteWithBalance, error) {
+func (s *StakedTokenWeightedDefault) GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error) {
+
+	for _, vote := range votes {
+		weight, err := s.GetVoteWeightForBalance(vote, proposal)
+		if err != nil {
+			return nil, err
+		}
+		vote.Weight = &weight
+	}
+
 	return votes, nil
 }
 

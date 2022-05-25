@@ -24,7 +24,16 @@ func (s *TokenWeightedDefault) TallyVotes(votes []*models.VoteWithBalance, propo
 	return r, nil
 }
 
-func (s *TokenWeightedDefault) GetVotes(votes []*models.VoteWithBalance) ([]*models.VoteWithBalance, error) {
+func (s *TokenWeightedDefault) GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error) {
+
+	for _, vote := range votes {
+		weight, err := s.GetVoteWeightForBalance(vote, proposal)
+		if err != nil {
+			return nil, err
+		}
+		vote.Weight = &weight
+	}
+
 	return votes, nil
 }
 

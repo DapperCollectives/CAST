@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/brudfyi/flow-voting-tool/main/models"
+	utils "github.com/brudfyi/flow-voting-tool/main/test_utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -44,23 +45,21 @@ func TestTokenWeightedDefaultStrategy(t *testing.T) {
 		assert.Equal(t, _results.Results_float["b"], results.Results_float["b"])
 	})
 
-	// t.Run("Test Fetching Votes for Proposal", func(t *testing.T) {
-	// 	response := otu.GetVotesForProposalAPI(proposalId)
+	t.Run("Test Fetching Votes for Proposal", func(t *testing.T) {
+		response := otu.GetVotesForProposalAPI(proposalId)
 
-	// 	CheckResponseCode(t, http.StatusOK, response.Code)
+		CheckResponseCode(t, http.StatusOK, response.Code)
 
-	// 	var body utils.PaginatedResponseWithVotes
-	// 	json.Unmarshal(response.Body.Bytes(), &body)
+		var body utils.PaginatedResponseWithVotes
+		json.Unmarshal(response.Body.Bytes(), &body)
 
-	// 	// Validate vote weights are returned correctly
-	// 	for i, v := range body.Data {
-	// 		_vote := (*votes)[i]
-	// 		log.Info().Msgf("Expected Vote: %v", _vote)
-	// 		log.Info().Msgf("Vote: %v", v)
-	// 		expectedWeight := float64(_vote.Primary_account_balance) * math.Pow(10, -8)
-	// 		assert.Equal(t, expectedWeight, v.Weight)
-	// 	}
-	// })
+		// Validate vote weights are returned correctly
+		for i, v := range body.Data {
+			_vote := (*votes)[i]
+			expectedWeight := float64(_vote.Primary_account_balance) * math.Pow(10, -8)
+			assert.Equal(t, &expectedWeight, v.Weight)
+		}
+	})
 
 	t.Run("Test Fetching Vote for Address", func(t *testing.T) {
 		_vote := (*votes)[0]
@@ -122,21 +121,21 @@ func TestStakedTokenWeightedDefaultStrategy(t *testing.T) {
 		assert.Equal(t, _results.Results_float["b"], results.Results_float["b"])
 	})
 
-	// t.Run("Test Fetching Votes for Proposal", func(t *testing.T) {
-	// 	response := otu.GetVotesForProposalAPI(proposalId)
+	t.Run("Test Fetching Votes for Proposal", func(t *testing.T) {
+		response := otu.GetVotesForProposalAPI(proposalId)
 
-	// 	CheckResponseCode(t, http.StatusOK, response.Code)
+		CheckResponseCode(t, http.StatusOK, response.Code)
 
-	// 	var body utils.PaginatedResponseWithVotes
-	// 	json.Unmarshal(response.Body.Bytes(), &body)
+		var body utils.PaginatedResponseWithVotes
+		json.Unmarshal(response.Body.Bytes(), &body)
 
-	// 	// Validate vote weights are returned correctly
-	// 	for i, v := range body.Data {
-	// 		_vote := (*votes)[i]
-	// 		expectedWeight := float64(_vote.Staking_balance) * math.Pow(10, -8)
-	// 		assert.Equal(t, expectedWeight, *v.Weight)
-	// 	}
-	// })
+		// Validate vote weights are returned correctly
+		for i, v := range body.Data {
+			_vote := (*votes)[i]
+			expectedWeight := float64(_vote.Staking_balance) * math.Pow(10, -8)
+			assert.Equal(t, expectedWeight, *v.Weight)
+		}
+	})
 
 	t.Run("Test Fetching Vote for Address", func(t *testing.T) {
 		_vote := (*votes)[0]

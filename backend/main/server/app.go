@@ -64,7 +64,7 @@ var allowedFileTypes = []string{"image/jpg", "image/jpeg", "image/png", "image/g
 
 type Strategy interface {
 	TallyVotes(votes []*models.VoteWithBalance, proposalId int) (models.ProposalResults, error)
-	GetVotes(votes []*models.VoteWithBalance) ([]*models.VoteWithBalance, error)
+	GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error)
 	GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error)
 }
 
@@ -317,8 +317,6 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 	start, _ := strconv.Atoi(r.FormValue("start"))
 	order := r.FormValue("order")
 
-	// Default order is reverse-chronological order
-	// chronological order, use order=asc
 	if order == "" {
 		order = "desc"
 	}
@@ -336,8 +334,8 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//get the proposal by Id
-	p := models.Proposal{ID: proposalId}
-	if err := p.GetProposalById(a.DB); err != nil {
+	proposal := models.Proposal{ID: proposalId}
+	if err := proposal.GetProposalById(a.DB); err != nil {
 		switch err.Error() {
 		case pgx.ErrNoRows.Error():
 			respondWithError(w, http.StatusNotFound, "Proposal not found")
@@ -347,19 +345,19 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s := strategyMap[*p.Strategy]
+	s := strategyMap[*proposal.Strategy]
 	if s == nil {
 		respondWithError(w, http.StatusInternalServerError, "Invalid Strategy")
 		return
 	}
 
-	votesWithBalances, err := s.GetVotes(votes)
+	votesWithWeights, err := s.GetVotes(votes, &proposal)
 	if err != nil {
 		respondWithError(w, http.StatusNotFound, err.Error())
 		return
 	}
 
-	response := shared.GetPaginatedResponseWithPayload(votesWithBalances, start, count, totalRecords)
+	response := shared.GetPaginatedResponseWithPayload(votesWithWeights, start, count, totalRecords)
 	respondWithJSON(w, http.StatusOK, response)
 }
 
@@ -438,12 +436,6 @@ func (a *App) getVotesForAddress(w http.ResponseWriter, r *http.Request) {
 	}
 	if start < 0 {
 		start = 0
-	}
-
-	if len(proposalIds) == 0 {
-		log.Info().Msg("no proposalIds provided")
-		respondWithError(w, http.StatusBadRequest, "No proposalIds provided")
-		return
 	}
 
 	votes, totalRecords, err := models.GetVotesForAddress(a.DB, start, count, addr, &proposalIds)
