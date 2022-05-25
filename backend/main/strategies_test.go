@@ -148,6 +148,23 @@ func TestStakedTokenWeightedDefaultStrategy(t *testing.T) {
 		_expectedWeight := float64(_vote.Staking_balance) * math.Pow(10, -8)
 		assert.Equal(t, _expectedWeight, *vote.Weight)
 	})
+
+	t.Run("Test Fetching Votes For Address", func(t *testing.T) {
+		_vote := (*votes)[0]
+		proposalIdTwo := otu.AddProposalsForStrategy(communityId, "staked-token-weighted-default", 1)[0]
+		proposalIds := []int{proposalId, proposalIdTwo}
+
+		response := otu.GetVotesForAddressAPI(_vote.Addr, proposalIds)
+		CheckResponseCode(t, http.StatusOK, response.Code)
+
+		var votes []models.VoteWithBalance
+		json.Unmarshal(response.Body.Bytes(), &votes)
+
+		for _, v := range votes {
+			_expectedWeight := float64(_vote.Staking_balance) * math.Pow(10, -8)
+			assert.Equal(t, _expectedWeight, *v.Weight)
+		}
+	})
 }
 
 /* One Token One Vote */
@@ -205,6 +222,23 @@ func TestOneTokenOneVoteStrategy(t *testing.T) {
 
 		expectedWeight := float64(1.00)
 		assert.Equal(t, expectedWeight, *vote.Weight)
+	})
+
+	t.Run("Test Fetching Votes for Address", func(t *testing.T) {
+		_vote := (*votes)[0]
+		proposalIdTwo := otu.AddProposalsForStrategy(communityId, "one-address-one-vote", 1)[0]
+		proposalIds := []int{proposalId, proposalIdTwo}
+		response := otu.GetVotesForAddressAPI(_vote.Addr, proposalIds)
+
+		CheckResponseCode(t, http.StatusOK, response.Code)
+
+		var votes []models.VoteWithBalance
+		json.Unmarshal(response.Body.Bytes(), &votes)
+
+		for _, v := range votes {
+			expectedWeight := float64(1.00)
+			assert.Equal(t, expectedWeight, *v.Weight)
+		}
 	})
 }
 
