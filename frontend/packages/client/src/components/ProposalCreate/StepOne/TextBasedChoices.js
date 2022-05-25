@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { Plus, Bin } from "components/Svg";
+import { getProposalType } from "utils";
 
 const TextBasedChoices = ({
   choices = [],
@@ -9,7 +10,10 @@ const TextBasedChoices = ({
   initChoices,
 } = {}) => {
   useEffect(() => {
-    initChoices([]);
+    console.log({ type: getProposalType(choices) });
+    if (getProposalType(choices) !== "text-based") {
+      initChoices([]);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
