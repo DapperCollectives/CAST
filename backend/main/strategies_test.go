@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"math"
 	"net/http"
 	"testing"
@@ -119,7 +120,6 @@ func TestStakedTokenWeightedDefaultStrategy(t *testing.T) {
 		assert.Equal(t, _results.Proposal_id, results.Proposal_id)
 		assert.Equal(t, _results.Results_float["a"], results.Results_float["a"])
 		assert.Equal(t, _results.Results_float["b"], results.Results_float["b"])
-
 	})
 
 	// t.Run("Test Fetching Votes for Proposal", func(t *testing.T) {
@@ -149,6 +149,37 @@ func TestStakedTokenWeightedDefaultStrategy(t *testing.T) {
 
 		_expectedWeight := float64(_vote.Staking_balance) * math.Pow(10, -8)
 		assert.Equal(t, _expectedWeight, *vote.Weight)
+	})
+}
+
+/* One Token One Vote */
+func TestOneTokenOneVoteStrategy(t *testing.T) {
+	clearTable("communities")
+	clearTable("community_users")
+	clearTable("proposals")
+	clearTable("votes")
+	clearTable("balances")
+
+	communityId := otu.AddCommunities(1)[0]
+	proposalId := otu.AddProposalsForStrategy(communityId, "one-address-one-vote", 1)[0]
+	votes := otu.GenerateListOfVotes(proposalId, 10)
+	otu.AddDummyVotesAndBalances(votes)
+
+	t.Run("Test Tallying Results", func(t *testing.T) {
+		//Tally Results
+		_results := otu.TallyResultsForOneAddressOneVote(proposalId, votes)
+		fmt.Printf("_results %+v\n", _results)
+
+		// Fetch Proposal Results
+		response := otu.GetProposalResultsAPI(proposalId)
+		CheckResponseCode(t, http.StatusOK, response.Code)
+
+		var results models.ProposalResults
+		json.Unmarshal(response.Body.Bytes(), &results)
+
+		assert.Equal(t, _results.Proposal_id, results.Proposal_id)
+		assert.Equal(t, _results.Results["a"], results.Results["a"])
+		assert.Equal(t, _results.Results["b"], results.Results["b"])
 	})
 }
 

@@ -24,12 +24,9 @@ func (otu *OverflowTestUtils) TallyResultsForTokenWeightedDefault(proposalId int
 	r.Results_float["b"] = 0
 
 	for _, v := range *votes {
-		choice := v.Choice
-		r.Results_float[choice] += float64(v.Primary_account_balance) * math.Pow(10, -8)
+		r.Results_float[v.Choice] += float64(v.Primary_account_balance) * math.Pow(10, -8)
 	}
 
-	// r.Results_float["a"] = float64(r.Results_float["a"]) * math.Pow(10, -8)
-	// r.Results_float["b"] = float64(r.Results_float["b"]) * math.Pow(10, -8)
 	return &r
 }
 
@@ -41,12 +38,23 @@ func (otu *OverflowTestUtils) TallyResultsForStakedTokenWeightedDefault(proposal
 	r.Results_float["b"] = 0
 
 	for _, v := range *votes {
-		choice := v.Choice
-		r.Results_float[choice] += float64(v.Staking_balance) * math.Pow(10, -8)
+		r.Results_float[v.Choice] += float64(v.Staking_balance) * math.Pow(10, -8)
 	}
 
-	// r.Results_float["a"] = float64(r.Results_float["a"]) * math.Pow(10, -8)
-	// r.Results_float["b"] = float64(r.Results_float["b"]) * math.Pow(10, -8)
+	return &r
+}
+
+func (otu *OverflowTestUtils) TallyResultsForOneAddressOneVote(proposalId int, votes *[]VoteWithBalance) *models.ProposalResults {
+	r := models.ProposalResults{Proposal_id: proposalId}
+
+	r.Results = map[string]int{}
+	r.Results["a"] = 0
+	r.Results["b"] = 0
+
+	for _, v := range *votes {
+		r.Results[v.Choice]++
+	}
+
 	return &r
 }
 

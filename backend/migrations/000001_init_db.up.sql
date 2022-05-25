@@ -59,7 +59,7 @@ CREATE TABLE votes (
 );
 
 -- Strategies
-CREATE TYPE strategies AS enum ('token-weighted-default', 'token-weighted-capped');
+CREATE TYPE strategies AS enum ('token-weighted-default', 'token-weighted-capped', 'one-address-one-vote');
 
 CREATE TABLE voting_strategies (
   key strategies primary key,
@@ -71,6 +71,8 @@ INSERT INTO voting_strategies (key, name, description)
 VALUES ('token-weighted-default', 'Token Weighted', 'Number of tokens held directly corresponds to the weight of the vote');
 INSERT INTO voting_strategies (key, name, description)
 VALUES ('token-weighted-capped', 'Token Weighted - Capped', 'Number of tokens held directly corresponds to the weight of the vote, up to the specified cap.');
+INSERT INTO voting_strategies (key, name, description)
+VALUES ('one-address-one-vote', 'One Address One Vote', 'one address is simply only allowed one vote, assets do not come into play.');
 
 -- Proposal Results
 CREATE TABLE proposal_results (

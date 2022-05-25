@@ -52,7 +52,6 @@ func (otu *OverflowTestUtils) GetVotesForAddressAPI(address string, proposalIds 
 	}
 
 	url := fmt.Sprintf("/votes/%s?proposalIds=%s", address, proposalIdsString)
-	fmt.Println("url : ", url)
 	req, _ := http.NewRequest("GET", url, nil)
 	return otu.ExecuteRequest(req)
 }
