@@ -3,32 +3,39 @@ import { Link } from "react-router-dom";
 import CommunityProposalList from "./CommunityProposalList";
 import { useCommunityProposalsWithVotes, useMediaQuery } from "../hooks";
 import { FilterValues } from "../const";
-import DropDownFilter from "./ProposalsList/DropdownFilter";
+import DropDown from "./Dropdown";
 import WrapperResponsive from "./WrapperResponsive";
 
 export default function CommunityProposals({ community = { id: 1 } }) {
   const notMobile = useMediaQuery();
 
-  const proposalFilterValues = Object.values(FilterValues);
+  const proposalFilterValues = Object.entries(FilterValues)
+    .filter(
+      ([, value]) =>
+        FilterValues.inProgress !== value && FilterValues.terminated !== value
+    )
+    .map(([key, value]) => ({ value: key, label: value }));
 
-  const [filterValue, setFilterValues] = useState(FilterValues["all"]);
+  const [filterValue, setFilterValues] = useState("all");
 
+  // When filter has all values two requests are made to the backend:
+  // one will bring all active and pending proposals: "inprogress"
+  // the other will bring all closed and cancelled proposals: "terminated"
+  // if status is any other value there will be only
+  // one request to bring proposals with the selected status
   const { data: proposals, loading: loadingProposals } =
     useCommunityProposalsWithVotes({
       communityId: community.id,
       count: 10,
-      status:
-        filterValue.toLocaleLowerCase() === "all"
-          ? FilterValues["closed"].toLocaleLowerCase()
-          : filterValue.toLocaleLowerCase(),
+      status: filterValue === "all" ? "terminated" : filterValue,
     });
 
-  // used to load active proposals without pulling data on scrolling
+  // used to load active and pending proposals without pulling data on scrolling
   const { data: activeProposals, loading: loadingActiveProposals } =
     useCommunityProposalsWithVotes({
       communityId: community.id,
       count: 25,
-      status: "active",
+      status: "inprogress",
       scrollToFetchMore: false,
     });
 
@@ -38,7 +45,7 @@ export default function CommunityProposals({ community = { id: 1 } }) {
   }`;
 
   const initialLoading =
-    filterValue !== FilterValues["all"]
+    filterValue !== "all"
       ? loadingProposals && !proposals
       : loadingProposals &&
         !proposals &&
@@ -54,10 +61,12 @@ export default function CommunityProposals({ community = { id: 1 } }) {
             extraClasses="is-5"
             extraClassesMobile="mt-2 mb-5 is-8 pr-2"
           >
-            <DropDownFilter
-              value={filterValue}
-              filterValues={proposalFilterValues}
-              setFilterValues={setFilterValues}
+            <DropDown
+              defaultValue={{ value: "all", label: "All" }}
+              values={proposalFilterValues}
+              onSelectValue={(value) => {
+                setFilterValues(value);
+              }}
             />
           </WrapperResponsive>
           {!notMobile && (
@@ -108,8 +117,6 @@ export default function CommunityProposals({ community = { id: 1 } }) {
         <CommunityProposalList
           proposalsList={proposals}
           activeProposals={activeProposals}
-          proposalFilterValues={proposalFilterValues}
-          setFilterValues={setFilterValues}
           filterValue={filterValue}
           initialLoading={initialLoading}
         />
