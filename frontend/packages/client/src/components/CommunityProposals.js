@@ -6,7 +6,7 @@ import { FilterValues } from "../const";
 import DropDown from "./Dropdown";
 import WrapperResponsive from "./WrapperResponsive";
 
-export default function CommunityProposals({ community = { id: 1 } }) {
+export default function CommunityProposals({ communityId = 1 } = {}) {
   const notMobile = useMediaQuery();
 
   const proposalFilterValues = Object.entries(FilterValues)
@@ -25,7 +25,7 @@ export default function CommunityProposals({ community = { id: 1 } }) {
   // one request to bring proposals with the selected status
   const { data: proposals, loading: loadingProposals } =
     useCommunityProposalsWithVotes({
-      communityId: community.id,
+      communityId,
       count: 10,
       status: filterValue === "all" ? "terminated" : filterValue,
     });
@@ -33,7 +33,7 @@ export default function CommunityProposals({ community = { id: 1 } }) {
   // used to load active and pending proposals without pulling data on scrolling
   const { data: activeProposals, loading: loadingActiveProposals } =
     useCommunityProposalsWithVotes({
-      communityId: community.id,
+      communityId,
       count: 25,
       status: "inprogress",
       scrollToFetchMore: false,
@@ -119,6 +119,7 @@ export default function CommunityProposals({ community = { id: 1 } }) {
           activeProposals={activeProposals}
           filterValue={filterValue}
           initialLoading={initialLoading}
+          communityId={communityId}
         />
       </div>
     </div>
