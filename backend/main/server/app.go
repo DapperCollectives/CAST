@@ -316,8 +316,6 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 	start, _ := strconv.Atoi(r.FormValue("start"))
 	order := r.FormValue("order")
 
-	// Default order is reverse-chronological order
-	// chronological order, use order=asc
 	if order == "" {
 		order = "desc"
 	}
@@ -437,12 +435,6 @@ func (a *App) getVotesForAddress(w http.ResponseWriter, r *http.Request) {
 	}
 	if start < 0 {
 		start = 0
-	}
-
-	if len(proposalIds) == 0 {
-		log.Info().Msg("no proposalIds provided")
-		respondWithError(w, http.StatusBadRequest, "No proposalIds provided")
-		return
 	}
 
 	votes, totalRecords, err := models.GetVotesForAddress(a.DB, start, count, addr, &proposalIds)
