@@ -10,7 +10,6 @@ const TextBasedChoices = ({
   initChoices,
 } = {}) => {
   useEffect(() => {
-    console.log({ type: getProposalType(choices) });
     if (getProposalType(choices) !== "text-based") {
       initChoices([]);
     }
