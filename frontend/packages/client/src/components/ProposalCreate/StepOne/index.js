@@ -232,16 +232,18 @@ const StepOne = ({
     return newEditorState;
   }
 
-  const addImagesToEditor = (images, captionValue) => {
+  const addImagesToEditor = (images, captionValues) => {
+    // captionValue
     let tempEditorState = localEditorState;
 
     for (let index = 0; index < images.length; index++) {
       const image = images[index];
+      const caption = captionValues[index];
       tempEditorState = updateEditorState(tempEditorState, {
         src: image.imageUrl,
         height: "auto",
-        width: "auto",
-        alt: captionValue,
+        width: "100%",
+        alt: caption,
       });
     }
     setLocalEditorState(tempEditorState);

@@ -123,7 +123,6 @@ const UploadArea = ({ getRootProps, getInputProps, enableUpload }) => {
       )}
       {!enableUpload && (
         <div className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center">
-          <span className="smaller-text pt-3 pb-1">Up to 4 images</span>
           <span className="smaller-text pt-3 pb-1">Click on Done</span>
         </div>
       )}
@@ -135,9 +134,10 @@ export default function UploadImageModal({
   isCancelling = false,
   onDone,
 }) {
-  const MAX_IMAGE_FILES = 4;
+  const MAX_IMAGE_FILES = 1;
   const [images, setImages] = useState([]);
-  const [captionValue, setCaptionValue] = useState("");
+  // when more than one image is added this will be an array mapping the images array
+  const [captionValues, setCaptionValues] = useState([""]);
 
   const _onDismiss = () => {
     onDismiss();
@@ -151,7 +151,7 @@ export default function UploadImageModal({
   );
   const _onDone = () => {
     if (enableDone) {
-      onDone(images, captionValue);
+      onDone(images, captionValues);
     }
   };
 
@@ -238,7 +238,7 @@ export default function UploadImageModal({
           style={{ borderBottom: "none" }}
         >
           <div className="column px-0 is-flex flex-1 ">
-            <h2 className="is-size-4">Upload Images</h2>
+            <h2 className="is-size-4">Upload Image</h2>
           </div>
           <div
             className={`column is-narrow px-0 has-text-right is-size-2 leading-tight cursor-pointer ${
@@ -271,7 +271,7 @@ export default function UploadImageModal({
                   />
                 </div>
                 <div className="column pt-0 is-6">
-                  <p className="has-text-weight-bold pb-5">Uploaded files</p>
+                  <p className="has-text-weight-bold pb-5">Uploaded file</p>
                   <div className="columns is-multiline m-0 is-mobile">
                     {images.map((image, i) => {
                       return (
@@ -294,12 +294,13 @@ export default function UploadImageModal({
                 Accepted files: PNG, JPG, GIF
               </p>
             </div>
+            {/* For now this is a single input */}
             <input
               type="text"
               placeholder="Caption"
-              value={captionValue}
+              value={captionValues[0]}
               className="border-light rounded-sm p-3 column is-full pr-6"
-              onChange={(e) => setCaptionValue(e.target.value)}
+              onChange={(e) => setCaptionValues([`${e.target.value}`])}
               autoFocus
             />
           </div>
