@@ -26,3 +26,4 @@ export {
   PropCreateStepTwo,
   PropCreateStepThree,
 } from "./ProposalCreate";
+export { default as UploadImageModal } from "./UploadImageModal";
