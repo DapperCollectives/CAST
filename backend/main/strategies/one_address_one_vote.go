@@ -2,7 +2,6 @@ package strategies
 
 import (
 	"fmt"
-	"math"
 
 	"github.com/brudfyi/flow-voting-tool/main/models"
 )
@@ -22,7 +21,16 @@ func (s *OneAddressOneVote) TallyVotes(votes []*models.VoteWithBalance, proposal
 	return r, nil
 }
 
-func (s *OneAddressOneVote) GetVotes(votes []*models.VoteWithBalance) ([]*models.VoteWithBalance, error) {
+func (s *OneAddressOneVote) GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error) {
+
+	for _, vote := range votes {
+		weight, err := s.GetVoteWeightForBalance(vote, proposal)
+		if err != nil {
+			return nil, err
+		}
+		vote.Weight = &weight
+	}
+
 	return votes, nil
 }
 
@@ -33,8 +41,7 @@ func (s *OneAddressOneVote) GetVoteWeightForBalance(vote *models.VoteWithBalance
 	if vote.Addr == "" {
 		return 0.00, ERROR
 	}
+	weight = 0.00000001
 
-	weight = 1 * math.Pow(10, -8)
 	return weight, nil
-
 }

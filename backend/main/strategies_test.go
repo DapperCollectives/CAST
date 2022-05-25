@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"math"
 	"net/http"
 	"testing"
@@ -167,7 +166,6 @@ func TestOneTokenOneVoteStrategy(t *testing.T) {
 	t.Run("Test Tallying Results", func(t *testing.T) {
 		//Tally Results
 		_results := otu.TallyResultsForOneAddressOneVote(proposalId, votes)
-		fmt.Printf("_results %+v\n", _results)
 
 		// Fetch Proposal Results
 		response := otu.GetProposalResultsAPI(proposalId)
@@ -179,6 +177,34 @@ func TestOneTokenOneVoteStrategy(t *testing.T) {
 		assert.Equal(t, _results.Proposal_id, results.Proposal_id)
 		assert.Equal(t, _results.Results["a"], results.Results["a"])
 		assert.Equal(t, _results.Results["b"], results.Results["b"])
+	})
+
+	t.Run("Test Fetching Votes for Proposal", func(t *testing.T) {
+		response := otu.GetVotesForProposalAPI(proposalId)
+
+		CheckResponseCode(t, http.StatusOK, response.Code)
+
+		var body utils.PaginatedResponseWithVotes
+		json.Unmarshal(response.Body.Bytes(), &body)
+
+		// Validate vote weights are returned correctly
+		for _, v := range body.Data {
+			expectedWeight := float64(0.00000001)
+			assert.Equal(t, expectedWeight, *v.Weight)
+		}
+	})
+
+	t.Run("Test Fetching Vote for Address", func(t *testing.T) {
+		_vote := (*votes)[0]
+		response := otu.GetVoteForProposalByAddressAPI(proposalId, _vote.Addr)
+
+		CheckResponseCode(t, http.StatusOK, response.Code)
+
+		var vote models.VoteWithBalance
+		json.Unmarshal(response.Body.Bytes(), &vote)
+
+		expectedWeight := float64(0.00000001)
+		assert.Equal(t, expectedWeight, *vote.Weight)
 	})
 }
 
