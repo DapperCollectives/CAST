@@ -189,7 +189,7 @@ func TestOneTokenOneVoteStrategy(t *testing.T) {
 
 		// Validate vote weights are returned correctly
 		for _, v := range body.Data {
-			expectedWeight := float64(0.00000001)
+			expectedWeight := float64(1.00)
 			assert.Equal(t, expectedWeight, *v.Weight)
 		}
 	})
@@ -203,7 +203,7 @@ func TestOneTokenOneVoteStrategy(t *testing.T) {
 		var vote models.VoteWithBalance
 		json.Unmarshal(response.Body.Bytes(), &vote)
 
-		expectedWeight := float64(0.00000001)
+		expectedWeight := float64(1.00)
 		assert.Equal(t, expectedWeight, *vote.Weight)
 	})
 }

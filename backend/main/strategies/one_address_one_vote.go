@@ -41,7 +41,7 @@ func (s *OneAddressOneVote) GetVoteWeightForBalance(vote *models.VoteWithBalance
 	if vote.Addr == "" {
 		return 0.00, ERROR
 	}
-	weight = 0.00000001
+	weight = 1.00
 
 	return weight, nil
 }
