@@ -12,6 +12,17 @@ import (
 	"github.com/brudfyi/flow-voting-tool/main/models"
 )
 
+type PaginatedResponseWithUser struct {
+	Data         []models.CommunityUser `json:"data"`
+	Start        int                    `json:"start"`
+	Count        int                    `json:"count"`
+	TotalRecords int                    `json:"totalRecords"`
+	Next         int                    `json:"next"`
+}
+
+var AdminAddr = "0xf8d6e0586b0a20c7"
+var UserOneAddr = "0x01cf0e2f2f715450"
+
 var nameUpdated = "TestDAO - updated"
 var category = "dao"
 var logo = "toad.jpeg"
@@ -30,6 +41,7 @@ var termsAndConditions = "termsAndConditions"
 var DefaultCommunity = models.Community{
 	Name: "TestDAO", Category: &category, Body: &body, Creator_addr: "<replace>", Logo: &logo, Slug: &slug,
 }
+
 var UpdatedCommunity = models.Community{
 	Name: nameUpdated, Logo: &logoUpdated, Banner_img_url: &banner,
 	Website_url: &website, Twitter_url: &twitter, Github_url: &github, Discord_url: &discord,
@@ -88,6 +100,12 @@ func (otu *OverflowTestUtils) GetCommunityAPI(id int) *httptest.ResponseRecorder
 	return response
 }
 
+func (otu *OverflowTestUtils) GetCommunityUsersAPI(id int) *httptest.ResponseRecorder {
+	req, _ := http.NewRequest("GET", "/communities/"+strconv.Itoa(id)+"/users", nil)
+	response := otu.ExecuteRequest(req)
+	return response
+}
+
 // func GenerateValidUpdateCommunityPayload(addr string) []byte {
 // 	// this does a deep copy
 // 	community := ValidUpdateCommunityStruct
@@ -102,4 +120,3 @@ func (otu *OverflowTestUtils) GetCommunityAPI(id int) *httptest.ResponseRecorder
 // 	jsonStr, _ := json.Marshal(community)
 // 	fmt.Printf("payload: %v\n", string(jsonStr))
 // 	return []byte(jsonStr)
-// }
