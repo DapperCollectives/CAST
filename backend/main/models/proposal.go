@@ -147,8 +147,7 @@ func (p *Proposal) IsLive() bool {
 
 // Returns an error if the account's balance is insufficient to cast
 // a vote on the proposal.
-func (p *Proposal) ValidateBalance(balance *Balance) error {
-	var weight float64
+func (p *Proposal) ValidateBalance(weight float64) error {
 	var Min_balance = float64(*p.Min_balance)
 	var ERROR error = fmt.Errorf("insufficient balance for strategy: %s", *p.Strategy)
 
@@ -158,7 +157,7 @@ func (p *Proposal) ValidateBalance(balance *Balance) error {
 		return nil
 	}
 
-	if weight == 0 {
+	if weight == 0.00 {
 		return ERROR
 	}
 

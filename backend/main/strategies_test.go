@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"math"
 	"net/http"
 	"testing"
@@ -37,6 +38,7 @@ func TestTokenWeightedDefaultStrategy(t *testing.T) {
 		CheckResponseCode(t, http.StatusOK, response.Code)
 
 		var results models.ProposalResults
+		fmt.Printf("%+v\n", results)
 		json.Unmarshal(response.Body.Bytes(), &results)
 
 		assert.Equal(t, _results.Proposal_id, results.Proposal_id)
