@@ -4,6 +4,7 @@ build:
 	GOARCH=amd64 GOOS=linux go build -o ${BINARY_NAME} ./main
 
 build_macos:
+	make dev_run_migrate
 	GOARCH=amd64 GOOS=darwin go build -o ${BINARY_NAME} ./main
 
 run:
@@ -20,6 +21,7 @@ macdev:
 	APP_ENV=DEV make macrun
 
 dev:
+	make dev_run_migrate
 	APP_ENV=DEV make build_and_run
 
 migrateup:
@@ -33,6 +35,11 @@ testmigrateup:
 
 testmigratedown:
 	migrate -path ./migrations -database "postgres://postgres:admin@localhost:5432/flow_snapshot_test?sslmode=disable" -verbose down
+
+dev_run_migrate:
+	@echo Running migrations...
+	make --ignore-errors migrateup &>/dev/null
+	make --ignore-errors testmigrateup &>/dev/null
 
 # Docker stuff
 # NOTE: to run docker locally, you need to change DB_HOST
