@@ -61,6 +61,8 @@ func TestCreateProposal(t *testing.T) {
 	t.Run("Should be able to create a valid proposal", func(t *testing.T) {
 		proposalStruct := otu.GenerateProposalStruct("user1", communityId)
 		payload := otu.GenerateProposalPayload("user1", proposalStruct)
+
+		fmt.Printf("payload %+v\n", payload)
 		response := otu.CreateProposalAPI(payload)
 
 		CheckResponseCode(t, http.StatusCreated, response.Code)
