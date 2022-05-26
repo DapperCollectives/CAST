@@ -22,17 +22,23 @@ export default function StepTwo({
     addrList: listAddrAuthors,
   });
 
-  // enable move to next step if both lists are empty with one element
-  const initialLists =
-    isInitialList(listAddrAdmins) && isInitialList(listAddrAuthors);
-
   useEffect(() => {
-    if (initialLists) {
+    if (
+      (isInitialList(listAddrAdmins) && isInitialList(listAddrAuthors)) ||
+      (isInitialList(listAddrAdmins) && isValidAuthors) ||
+      (isInitialList(listAddrAuthors) && isValidAdmins)
+    ) {
       setStepValid(true);
       return;
     }
     setStepValid(isValidAuthors && isValidAdmins);
-  }, [isValidAuthors, isValidAdmins, setStepValid, initialLists]);
+  }, [
+    isValidAuthors,
+    isValidAdmins,
+    setStepValid,
+    listAddrAdmins,
+    listAddrAuthors,
+  ]);
 
   const onAdminAddressChange = (index, value) => {
     const addrListUpdated = listAddrAdmins.map((addr, idx) => {
