@@ -155,7 +155,7 @@ export default function CommunityEditorLinks(props = {}) {
           {isUpdating && <Loader size={18} spacing="mx-button-loader" />}
         </button>
       }
-      changeHandler={changeHandler}
+      onChangeHandler={changeHandler}
       fields={links}
       isUpdating={isUpdating}
     />
