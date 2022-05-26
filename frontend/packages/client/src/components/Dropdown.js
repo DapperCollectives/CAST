@@ -10,6 +10,7 @@ const DropDown = forwardRef(
       disabled = false,
       label = "Select option",
       dropdownFull = true,
+      isRight = false,
     } = {},
     ref
   ) => {
@@ -41,9 +42,9 @@ const DropDown = forwardRef(
 
     return (
       <div
-        className={`dropdown is-right is-flex is-flex-grow-1${
-          isOpen ? " is-active" : ""
-        }`}
+        className={`dropdown ${
+          isRight ? "is-right " : ""
+        }is-flex is-flex-grow-1${isOpen ? " is-active" : ""}`}
         onBlur={closeOnBlur}
         aria-haspopup="true"
         aria-controls="dropdown-menu"

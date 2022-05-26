@@ -2,16 +2,19 @@ import React from "react";
 import { Link } from "react-router-dom";
 import ProposalHeader from "./ProposalsList/ProposalHeader";
 import Loader from "./Loader";
-import { FilterValues } from "../const";
 
+const StyleForStatus = {
+  closed: { opacity: 0.6 },
+  cancelled: { opacity: 0.6 },
+};
 const CommunityProposalList = ({
   proposalsList,
   initialLoading,
   activeProposals = [],
   filterValue,
 } = {}) => {
-  // filter with active
-  if (filterValue === FilterValues["all"]) {
+  // filter with all value should show active and pending in one group and closed and cancelled in another group
+  if (filterValue === "all") {
     return (
       <>
         {initialLoading && <Loader fullHeight />}
@@ -37,7 +40,11 @@ const CommunityProposalList = ({
         <div className="has-text-weight-bold is-uppercase mb-5">Closed</div>
         <div className="is-flex is-flex-direction-column">
           {(proposalsList ?? []).map((pr, i) => (
-            <Link to={`/proposal/${pr.id}`} key={i}>
+            <Link
+              to={`/proposal/${pr.id}`}
+              key={i}
+              style={StyleForStatus[pr.computedStatus] ?? {}}
+            >
               <div
                 className="border-light rounded-sm mb-5 proposal-card transition-all"
                 key={i}
@@ -63,7 +70,11 @@ const CommunityProposalList = ({
       {initialLoading && <Loader fullHeight />}
       <div className="is-flex is-flex-direction-column">
         {(proposalsList ?? []).map((pr, i) => (
-          <Link to={`/proposal/${pr.id}`} key={i}>
+          <Link
+            to={`/proposal/${pr.id}`}
+            key={i}
+            style={StyleForStatus[pr.computedStatus] ?? {}}
+          >
             <div
               className="border-light rounded-sm mb-5 proposal-card transition-all"
               key={i}
