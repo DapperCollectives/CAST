@@ -80,7 +80,6 @@ type ContractDetails struct {
 	Contract_name *string `json:"contract_name"`
 	Contract_addr *string `json:"contract_addr"`
 	Storage_path  *string `json:"storage_path"`
-	Vault_uuid    *string `json:"vault_uuid"`
 }
 
 func GetCommunityTypes(db *s.Database) ([]*CommunityType, error) {

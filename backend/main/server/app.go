@@ -728,6 +728,13 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 	}
 	p.Block_height = snapshot.Block_height
 
+	err = models.EnforceTokenThreshold(a.DB, p.Creator_addr, p.Community_id)
+	if err != nil {
+		log.Error().Err(err).Msg("error enforcing token threshold")
+		respondWithError(w, http.StatusForbidden, err.Error())
+		return
+	}
+
 	// pin to ipfs
 	pin, err := a.IpfsClient.PinJson(p)
 	if err != nil {

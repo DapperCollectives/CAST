@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 
+	"github.com/bjartek/overflow/overflow"
 	s "github.com/brudfyi/flow-voting-tool/main/shared"
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/jackc/pgx/v4"
@@ -225,6 +226,10 @@ func EnforceTokenThreshold(db *s.Database, addr string, communityId int) error {
 			return ERROR
 		}
 	}
+
+	g := overflow.NewOverflow().Start()
+	result := g.ScriptFromFile("./scripts/get_balance.cdc")
+	fmt.Println(result)
 
 	return nil
 }
