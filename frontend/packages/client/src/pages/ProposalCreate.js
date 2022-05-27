@@ -1,3 +1,4 @@
+/* global plausible */
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { convertToRaw } from "draft-js";
@@ -107,6 +108,7 @@ export default function ProposalCreatePage() {
     };
 
     await createProposal(injectedProvider, proposalData);
+    plausible("Proposal Created");
   };
 
   const props = {

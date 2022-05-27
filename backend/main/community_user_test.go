@@ -1,127 +1,147 @@
 package main
 
+import (
+	"encoding/json"
+	"net/http"
+	"testing"
+
+	"github.com/brudfyi/flow-voting-tool/main/models"
+	"github.com/brudfyi/flow-voting-tool/main/shared"
+	"github.com/brudfyi/flow-voting-tool/main/test_utils"
+	utils "github.com/brudfyi/flow-voting-tool/main/test_utils"
+	"github.com/stretchr/testify/assert"
+)
+
 ////////////////////
 // CommunityUsers //
 ////////////////////
 
-// func TestCommunityUsersCreateCommunity(t *testing.T) {
-// 	clearTable("communities")
-// 	clearTable("community_users")
-// 	communityId := addCommunities(1)[0]
+func TestCreateCommunityUsers(t *testing.T) {
+	clearTable("communities")
+	clearTable("community_users")
 
-// 	req, _ := http.NewRequest("GET", "/communities/"+strconv.Itoa(communityId)+"/users", nil)
-// 	response := executeRequest(req)
+	communityStruct := otu.GenerateCommunityStruct("account")
 
-// 	checkResponseCode(t, http.StatusOK, response.Code)
+	//create the author before generating the payload
+	var createCommunityStruct models.CreateCommunityRequestPayload
+	createCommunityStruct.Community = *communityStruct
+	author := []string{"0x01cf0e2f2f715450"}
+	createCommunityStruct.Additional_authors = &author
 
-// 	var payload shared.PaginatedResponse
-// 	json.Unmarshal(response.Body.Bytes(), &payload)
+	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
 
-// 	assert.Equal(t, 3, payload.Count)
-// }
+	response := otu.CreateCommunityAPI(communityPayload)
+	checkResponseCode(t, http.StatusCreated, response.Code)
 
-// func TestAddAuthorAdmin(t *testing.T) {
-// 	clearTable("communities")
-// 	clearTable("community_users")
-// 	otu := utils.NewOverflowTest(t, &A)
-// 	communityId := addCommunities(1)[0]
+	//Parse Community
+	var community models.Community
+	json.Unmarshal(response.Body.Bytes(), &community)
 
-// 	// emulator-account is the community admin by default
-// 	payload := otu.GenerateValidCommunityUserPayload(communityId, "user1", "account", "author")
-// 	response := otu.CreateCommunityUser(1, payload)
-// 	checkResponseCode(t, http.StatusCreated, response.Code)
+	//Query the community
+	response = otu.GetCommunityUsersAPI(community.ID)
+	checkResponseCode(t, http.StatusOK, response.Code)
 
-// 	var m map[string]interface{}
-// 	json.Unmarshal(response.Body.Bytes(), &m)
+	//Parse the response
+	var p test_utils.PaginatedResponseWithUser
+	json.Unmarshal(response.Body.Bytes(), &p)
 
-// 	if m["error"] != nil {
-// 		t.Errorf("Error msg: %v\n", m["error"])
-// 	}
-// 	if m["communityId"] == nil {
-// 		t.Errorf("Expected community_user communityId to exist. Got '%v'", m["communityId"])
-// 	}
-// 	if m["addr"] != utils.DefaultCommunityUserStruct.Addr {
-// 		t.Errorf("Expected community_user addr to be '%s'. Got '%v'", utils.DefaultCommunityUserStruct.Addr, m["addr"])
-// 	}
-// 	if m["userType"] != utils.DefaultUserType {
-// 		t.Errorf("Expected community_user userType to be '%s'. Got '%v'", *&utils.DefaultUserType, m["userType"])
-// 	}
+	for _, user := range p.Data {
+		if utils.DefaultAuthor == user {
+			assert.Equal(t, utils.DefaultAuthor, user)
+		}
+	}
+}
 
-// 	// the id is compared to 1.0 because JSON unmarshaling converts numbers to
-// 	// floats, when the target is a map[string]interface{}
-// 	if m["communityId"] != 1.0 {
-// 		t.Errorf("Expected communityId to be '1'. Got '%v'", m["communityId"])
-// 	}
-// }
+func TestGetCommunityUsers(t *testing.T) {
+	clearTable("communities")
+	clearTable("community_users")
 
-// func TestGetCommunityUsers(t *testing.T) {
-// 	clearTable("communities")
-// 	clearTable("community_users")
-// 	communityId := addCommunities(1)[0]
-// 	addCommunityUsers(communityId, 1)
+	communityStruct := otu.GenerateCommunityStruct("account")
+	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
 
-// 	req, _ := http.NewRequest("GET", "/communities/"+strconv.Itoa(communityId)+"/users", nil)
-// 	response := executeRequest(req)
+	response := otu.CreateCommunityAPI(communityPayload)
+	checkResponseCode(t, http.StatusCreated, response.Code)
 
-// 	checkResponseCode(t, http.StatusOK, response.Code)
+	var community models.Community
+	json.Unmarshal(response.Body.Bytes(), &community)
 
-// 	var m shared.PaginatedResponse
-// 	json.Unmarshal(response.Body.Bytes(), &m)
+	response = otu.GetCommunityUsersAPI(community.ID)
+	checkResponseCode(t, http.StatusOK, response.Code)
 
-// 	if m.Count != 1 {
-// 		t.Errorf("Expected count to be '1'. Got '%v'", m.Count)
-// 	}
-// 	if m.TotalRecords != 1 {
-// 		t.Errorf("Expected totalRecords to be '1'. Got '%v'", m.TotalRecords)
-// 	}
-// 	if len(m.Data.([]interface{})) != 1 {
-// 		actual := len(m.Data.([]interface{}))
-// 		t.Errorf("Expected len of Data to be '1'. Got '%v'", actual)
-// 	}
-// }
+	var p test_utils.PaginatedResponseWithUser
+	json.Unmarshal(response.Body.Bytes(), &p)
 
-// func TestGetUserCommunities(t *testing.T) {
-// 	clearTable("communities")
-// 	clearTable("community_users")
-// 	communityId := addCommunities(1)[0]
-// 	addCommunityUsers(communityId, 1)
+	// three user roles created by default
+	// admin, author and member
+	assert.Equal(t, 3, len(p.Data))
+}
 
-// 	req, _ := http.NewRequest("GET", "/users/"+utils.ServiceAccountAddress+"/communities", nil)
-// 	response := executeRequest(req)
+func TestGetUserCommunities(t *testing.T) {
+	clearTable("communities")
+	clearTable("community_users")
 
-// 	checkResponseCode(t, http.StatusOK, response.Code)
+	communityStruct := otu.GenerateCommunityStruct("account")
+	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
 
-// 	var m shared.PaginatedResponse
-// 	json.Unmarshal(response.Body.Bytes(), &m)
+	response := otu.CreateCommunityAPI(communityPayload)
+	checkResponseCode(t, http.StatusCreated, response.Code)
 
-// 	if m.Count != 1 {
-// 		t.Errorf("Expected count to be '1'. Got '%v'", m.Count)
-// 	}
-// 	if m.TotalRecords != 1 {
-// 		t.Errorf("Expected totalRecords to be '1'. Got '%v'", m.TotalRecords)
-// 	}
-// 	if len(m.Data.([]interface{})) != 1 {
-// 		actual := len(m.Data.([]interface{}))
-// 		t.Errorf("Expected len of Data to be '1'. Got '%v'", actual)
-// 	}
-// }
+	var community models.Community
+	json.Unmarshal(response.Body.Bytes(), &community)
 
-// func TestDeleteUserFromCommunity(t *testing.T) {
-// 	clearTable("communities")
-// 	clearTable("community_users")
-// 	communityId := addCommunities(1)[0]
-// 	addCommunityUsers(communityId, 1)
+	response = otu.GetUserCommunitiesAPI(utils.AdminAddr)
+	checkResponseCode(t, http.StatusOK, response.Code)
 
-// 	payload := utils.GenerateValidDeleteCommunityUserPayload(communityId)
-// 	req, _ := http.NewRequest("DELETE", "/communities/"+strconv.Itoa(communityId)+"/users/"+utils.ServiceAccountAddress, bytes.NewBuffer(payload))
-// 	response := executeRequest(req)
+	var p shared.PaginatedResponse
+	json.Unmarshal(response.Body.Bytes(), &p)
 
-// 	checkResponseCode(t, http.StatusOK, response.Code)
+	assert.Equal(t, 3, p.TotalRecords)
+}
 
-// 	var m map[string]interface{}
-// 	json.Unmarshal(response.Body.Bytes(), &m)
+func TestDeleteUserFromCommunity(t *testing.T) {
+	clearTable("communities")
+	clearTable("community_users")
 
-// 	if m["status"] != "ok" {
-// 		t.Errorf("Expected status to be 'ok'. Got '%v'", m["status"])
-// 	}
-// }
+	communityStruct := otu.GenerateCommunityStruct("account")
+
+	//create the author before generating the payload
+	var createCommunityStruct models.CreateCommunityRequestPayload
+	createCommunityStruct.Community = *communityStruct
+	author := []string{"0x01cf0e2f2f715450"}
+	createCommunityStruct.Additional_authors = &author
+
+	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
+
+	response := otu.CreateCommunityAPI(communityPayload)
+	checkResponseCode(t, http.StatusCreated, response.Code)
+
+	var community models.Community
+	json.Unmarshal(response.Body.Bytes(), &community)
+
+	//generate the user, admin must be the signer
+	userStruct := otu.GenerateCommunityUserStruct("user1", "author")
+	userPayload := otu.GenerateCommunityUserPayload("account", userStruct)
+
+	response = otu.DeleteUserFromCommunityAPI(
+		community.ID,
+		utils.UserOneAddr,
+		"author",
+		userPayload,
+	)
+	checkResponseCode(t, http.StatusOK, response.Code)
+
+	//Query the community
+	response = otu.GetCommunityUsersAPI(community.ID)
+	checkResponseCode(t, http.StatusOK, response.Code)
+
+	//Parse the response
+	var p test_utils.PaginatedResponseWithUser
+	json.Unmarshal(response.Body.Bytes(), &p)
+
+	// assert that the user does not have the role of author
+	for _, user := range p.Data {
+		if user.Addr == utils.UserOneAddr {
+			assert.False(t, user.User_type == "author")
+		}
+	}
+}

@@ -6,7 +6,12 @@ import React, {
   useRef,
 } from "react";
 import { Editor } from "react-draft-wysiwyg";
-import { EditorState, AtomicBlockUtils } from "draft-js";
+import {
+  EditorState,
+  ContentBlock,
+  AtomicBlockUtils,
+  Modifier,
+} from "draft-js";
 import { useVotingStrategies } from "hooks";
 import { useModalContext } from "contexts/NotificationModal";
 import { Dropdown, Error, UploadImageModal } from "components";
@@ -116,6 +121,15 @@ const StepOne = ({
     defaultTargetOption: "_blank",
   };
 
+  const styleMap = {
+    IMAGE_CAPTION: {
+      fontFamily: "Arimo",
+      fontStyle: "normal",
+      fontWeight: 400,
+      fontSize: "12px",
+    },
+  };
+
   const { strategy } = stepData ?? {};
 
   useEffect(() => {
@@ -213,7 +227,11 @@ const StepOne = ({
 
   // function to update editor state
   // used to insert more than one image at the time
-  function updateEditorState(editorState, { src, height, width, alt }) {
+  function updateEditorState(
+    editorState,
+    { src, height, width, alt },
+    caption
+  ) {
     const entityKey = editorState
       .getCurrentContent()
       .createEntity("IMAGE", "MUTABLE", {
@@ -223,26 +241,47 @@ const StepOne = ({
         alt,
       })
       .getLastCreatedEntityKey();
-    // new Editor State
-    const newEditorState = AtomicBlockUtils.insertAtomicBlock(
+
+    const newEditorStateWidthImage = AtomicBlockUtils.insertAtomicBlock(
       editorState,
       entityKey,
       " "
     );
+
+    const contentState = newEditorStateWidthImage.getCurrentContent();
+    const selectionState = newEditorStateWidthImage.getSelection();
+
+    const contentStateWithCaption = Modifier.insertText(
+      contentState,
+      selectionState,
+      caption,
+      ["IMAGE_CAPTION"]
+    );
+
+    const newEditorState = EditorState.set(newEditorStateWidthImage, {
+      currentContent: contentStateWithCaption,
+    });
+
     return newEditorState;
   }
 
-  const addImagesToEditor = (images, captionValue) => {
+  const addImagesToEditor = (images, captionValues) => {
+    // captionValue
     let tempEditorState = localEditorState;
 
     for (let index = 0; index < images.length; index++) {
       const image = images[index];
-      tempEditorState = updateEditorState(tempEditorState, {
-        src: image.imageUrl,
-        height: "auto",
-        width: "auto",
-        alt: captionValue,
-      });
+      const caption = captionValues[index];
+      tempEditorState = updateEditorState(
+        tempEditorState,
+        {
+          src: image.imageUrl,
+          height: "auto",
+          width: "100%",
+          alt: caption,
+        },
+        caption
+      );
     }
     setLocalEditorState(tempEditorState);
     setShowUploadImagesModal(false);
@@ -297,6 +336,7 @@ const StepOne = ({
             editorClassName="px-4"
             onEditorStateChange={onEditorChange}
             toolbarCustomButtons={[<AddImageOption addImage={addImage} />]}
+            customStyleMap={styleMap}
           />
         </div>
         <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6">
