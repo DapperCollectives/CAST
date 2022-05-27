@@ -75,7 +75,7 @@ const Community = ({ community, activeTab, enableJoin = false }) => {
             </div>
           )}
           <div className={`column py-0 ${enableJoin ? "pl-1 pr-0" : "px-0"}`}>
-            <Link to="/proposal/create">
+            <Link to={`/proposal/create?communityId=${community.id}`}>
               <div className="button rounded-sm is-outlined is-uppercase is-flex is-9 small-text has-text-black">
                 Create Proposal
               </div>

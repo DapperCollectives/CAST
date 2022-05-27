@@ -108,9 +108,7 @@ export function getReducedImg(image, newImageWidth = 150, fileName) {
 export const getProposalType = (choices) => {
   if (
     choices.length === 2 &&
-    choices.every(
-      (choice) => choice?.choiceImgUrl && choice.choiceImgUrl !== ""
-    )
+    choices.every((choice) => choice.choiceImgUrl !== undefined)
   ) {
     return "image";
   }

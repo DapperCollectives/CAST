@@ -86,7 +86,7 @@ export default function CommunityProposals({ communityId = 1 } = {}) {
         {notMobile && (
           <div className="columns m-0">
             <div className="column p-0 is-10">
-              <Link to="/proposal/create">
+              <Link to={`/proposal/create?communityId=${communityId}`}>
                 <div
                   className="button is-fullwidth rounded-sm is-uppercase is-flex small-text has-text-white has-background-black"
                   style={{ minHeight: "40px" }}
