@@ -341,7 +341,7 @@ export default function Community({ enableJoin = false }) {
                     communityId={communityId}
                   />
                 )}
-                {activeTabMap["proposals"] && <CommunityProposals />}
+                {activeTabMap["proposals"] && <CommunityProposals communityId={community.id} />}
                 {activeTabMap["members"] && (
                   <MembersLayout
                     isMobile={!notMobile}

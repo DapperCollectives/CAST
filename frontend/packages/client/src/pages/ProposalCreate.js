@@ -1,3 +1,4 @@
+/* global plausible */
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { convertToRaw } from "draft-js";
@@ -5,7 +6,8 @@ import draftToHtml from "draftjs-to-html";
 import { StepByStep, WalletConnect, Error } from "../components";
 import { useWebContext } from "../contexts/Web3";
 import { useModalContext } from "../contexts/NotificationModal";
-import { useProposal } from "../hooks";
+import { useErrorHandlerContext } from "../contexts/ErrorHandler";
+import { useProposal, useQueryParams } from "../hooks";
 import { parseDateToServer } from "../utils";
 import {
   PropCreateStepOne,
@@ -23,6 +25,10 @@ export default function ProposalCreatePage() {
   const history = useHistory();
 
   const modalContext = useModalContext();
+
+  const { notifyError } = useErrorHandlerContext();
+
+  const { communityId } = useQueryParams({ communityId: "communityId" });
 
   useEffect(() => {
     if (data?.id) {
@@ -55,6 +61,14 @@ export default function ProposalCreatePage() {
       return;
     }
 
+    if (!communityId) {
+      notifyError({
+        status: "No community information provided",
+        statusText:
+          "Please restart the proposal creation from the community page",
+      });
+      return;
+    }
     const name = stepsData[0].title;
 
     const rawContentState = convertToRaw(
@@ -90,9 +104,11 @@ export default function ProposalCreatePage() {
       startTime,
       strategy: strategy?.value,
       status: "published",
+      communityId,
     };
 
     await createProposal(injectedProvider, proposalData);
+    plausible("Proposal Created");
   };
 
   const props = {

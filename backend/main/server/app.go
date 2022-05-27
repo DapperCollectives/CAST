@@ -149,6 +149,7 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/upload", a.upload).Methods("POST", "OPTIONS")
 	// Communities
 	a.Router.HandleFunc("/communities", a.getCommunities).Methods("GET")
+	a.Router.HandleFunc("/communities-for-homepage", a.getCommunitiesForHomePage).Methods("GET")
 	a.Router.HandleFunc("/communities/{id:[0-9]+}", a.getCommunity).Methods("GET")
 	a.Router.HandleFunc("/communities/{id:[0-9]+}", a.updateCommunity).Methods("PATCH", "OPTIONS")
 	a.Router.HandleFunc("/communities", a.createCommunity).Methods("POST", "OPTIONS")
@@ -760,6 +761,27 @@ func (a *App) getCommunity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondWithJSON(w, http.StatusOK, c)
+}
+
+func (a *App) getCommunitiesForHomePage(w http.ResponseWriter, r *http.Request) {
+	count, _ := strconv.Atoi(r.FormValue("count"))
+	start, _ := strconv.Atoi(r.FormValue("start"))
+
+	if count > 25 || count < 1 {
+		count = 25
+	}
+	if start < 0 {
+		start = 0
+	}
+
+	communities, totalRecords, err := models.GetCommunitiesForHomePage(a.DB, start, count)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	response := shared.GetPaginatedResponseWithPayload(communities, start, count, totalRecords)
+
+	respondWithJSON(w, http.StatusOK, response)
 }
 
 func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
