@@ -48,7 +48,8 @@ function ImageUploader({
     uploadFile,
   ]);
 
-  const fileName = image?.name ?? image.file.name;
+  const fileName = image?.name ?? image?.file.name;
+
   const reducedFileName =
     fileName.length > 20 ? `${fileName.slice(0, 25)}...` : fileName;
   return (
