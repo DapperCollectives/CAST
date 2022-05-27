@@ -24,7 +24,7 @@ const CommunityProposalList = ({
               >
                 <ProposalHeader {...pr} />
                 <div className="px-6 py-5 proposal-body-spacing">
-                  <h4 className="proposal-title is-4 mt-1 mb-2">{pr.name}</h4>
+                  <h4 className="proposal-title has-text-black is-size-5 is-4 mt-1 mb-2">{pr.name}</h4>
                   <p className="has-text-grey mb-4 small-text">
                     by {pr.creatorAddr}
                   </p>
@@ -44,7 +44,7 @@ const CommunityProposalList = ({
               >
                 <ProposalHeader {...pr} />
                 <div className="px-6 py-5 proposal-body-spacing">
-                  <h4 className="proposal-title is-4 mt-1 mb-2">{pr.name}</h4>
+                  <h4 className="proposal-title has-text-black is-size-5 is-4 mt-1 mb-2">{pr.name}</h4>
                   <p className="has-text-grey mb-4 small-text">
                     by {pr.creatorAddr}
                   </p>
@@ -70,7 +70,7 @@ const CommunityProposalList = ({
             >
               <ProposalHeader {...pr} />
               <div className="px-6 py-5 proposal-body-spacing">
-                <h4 className="proposal-title is-4 mt-1 mb-2">{pr.name}</h4>
+                <h4 className="proposal-title has-text-black is-size-5 is-4 mt-1 mb-2">{pr.name}</h4>
                 <p className="has-text-grey mb-4 small-text">
                   by {pr.creatorAddr}
                 </p>

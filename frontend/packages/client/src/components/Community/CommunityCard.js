@@ -63,6 +63,7 @@ const CommunityCard = ({
             </p>
           )}
         </div>
+        {enableJoin && (<JoinCommunityButton communityId={id} />)}
       </div>
     </div>
   );
@@ -76,11 +77,6 @@ const CommunityCard = ({
       <Link to={`/community/${id}?tab=about`} style={{ color: "inherit" }}>
         {Body}
       </Link>
-      <div
-        style={{ position: "absolute", margin: 0, top: "50px", right: "50px" }}
-      >
-        {enableJoin && (<JoinCommunityButton communityId={id} />)}
-      </div>
     </>
   );
 };

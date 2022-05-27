@@ -203,11 +203,11 @@ export default function Community({ enableJoin = false }) {
     <section className="full-height pt-0">
       {community ? (
         <div className="is-flex community-header-wrapper">
-          <div className="is-flex container community-header section">
+          <div className="is-flex container community-header section is-justify-content-space-between">
             <div className="is-flex community-specific">
-              <div className="is-hidden-tablet is-mobile is-flex is-flex-direction-column is-justify-content-center community-logo-wrapper">
+              <div className="is-hidden-tablet is-mobile is-flex is-flex-direction-column is-justify-content-center m-0 community-logo-wrapper">
                 <img
-                  className="community-logo-mobile"
+                  className="rounded-full community-logo-mobile"
                   alt="community banner"
                   src={community.logo}
                   height="85px"
@@ -217,7 +217,7 @@ export default function Community({ enableJoin = false }) {
               <div className="is-hidden-mobile">
                 <img
                   alt="community banner"
-                  className="community-logo"
+                  className="rounded-full"
                   src={community.logo}
                   height="149px"
                   width="149px"
@@ -225,7 +225,7 @@ export default function Community({ enableJoin = false }) {
               </div>
               <div className="column community-info is-justify-content-space-evenly">
                 <h2 className="title is-4 mb-2">
-                  <span className="community-name">{community.name}</span>
+                  <span className="is-size-5 has-text-weight-bold">{community.name}</span>
                 </h2>
                 <p>
                   <span className="community-numbers">
@@ -237,7 +237,7 @@ export default function Community({ enableJoin = false }) {
                     ? adminAddrs.slice(0, 5).map((adminAddr, idx) => (
                       <div
                         key={`${idx}`}
-                        className="blockies-wrapper"
+                        className="blockies-wrapper is-relative has-background-white"
                         style={{ right: `${idx * 12}px` }}
                       >
                         <Blockies
@@ -255,7 +255,6 @@ export default function Community({ enableJoin = false }) {
             {enableJoin && (
               <JoinCommunityButton
                 communityId={communityId}
-                alignment="center"
                 setTotalMembers={setTotalMembers}
               />
             )}

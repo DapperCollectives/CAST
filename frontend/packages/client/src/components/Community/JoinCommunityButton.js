@@ -3,7 +3,6 @@ import { useWebContext } from "contexts/Web3";
 import { useJoinCommunity, useUserRoleOnCommunity } from "hooks";
 
 export default function JoinCommunityButton({
-  alignment = "flex-end",
   communityId,
   setTotalMembers = () => { },
 }) {
@@ -49,7 +48,7 @@ export default function JoinCommunityButton({
   return (
     <>
       <div
-        className={`column is-narrow-tablet is-full-mobile is-align-self-${alignment}`}
+        className="column is-narrow-tablet is-full-mobile is-align-self-center"
         style={{ minWidth: "117px" }}
       >
         <button
