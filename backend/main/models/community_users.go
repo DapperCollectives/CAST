@@ -215,6 +215,12 @@ func EnsureRoleForCommunity(db *s.Database, addr string, communityId int, userTy
 
 func EnforceTokenThreshold(db *s.Database, addr string, communityId int) error {
 
+	emulator := overflow.NewOverflowEmulator()
+	emulator.Config("../../flow.json")
+	o := emulator.Start()
+
+	fmt.Println("Starting overflow")
+
 	c := Community{ID: communityId}
 	if err := c.GetCommunity(db); err != nil {
 		switch err.Error() {
@@ -227,9 +233,14 @@ func EnforceTokenThreshold(db *s.Database, addr string, communityId int) error {
 		}
 	}
 
-	g := overflow.NewOverflow().Start()
-	result := g.ScriptFromFile("./scripts/get_balance.cdc")
-	fmt.Println(result)
+	result := o.ScriptFromFile("get_balance").
+		Args(
+			o.Arguments().
+				Account("emulator"),
+		).
+		RunFailOnError()
+
+	fmt.Println("result :", result)
 
 	return nil
 }
