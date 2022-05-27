@@ -53,7 +53,7 @@ export default function CommunityProposals({ communityId }) {
         loadingActiveProposals;
 
   return (
-    <div className={`columns ${classesContainer}`}>
+    <div className={`columns mx-0 ${classesContainer}`}>
       <div className="column is-3-desktop is-4-tablet">
         <div className="columns is-mobile m-0">
           <WrapperResponsive

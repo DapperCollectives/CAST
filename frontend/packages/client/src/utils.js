@@ -1,11 +1,17 @@
+import { formatDistance } from 'date-fns'
+
 export const parseDateFromServer = (endTime) => {
   const dateTime = new Date(endTime);
-  const diffFromNow = dateTime.getTime() - Date.now();
+  const end = dateTime.getTime();
+  const now = Date.now();
+  const diffFromNow = end - now;
   const diffDays = Math.ceil(Math.abs(diffFromNow) / (1000 * 60 * 60 * 24));
+  const diffDuration = formatDistance(now, end); // for the proposalCardFooter
   return {
     date: dateTime,
     diffFromNow,
     diffDays,
+    diffDuration,
   };
 };
 
@@ -115,4 +121,27 @@ export const getProposalType = (choices) => {
     return "image";
   }
   return "text-based";
+};
+
+// Note: Does not currently return children
+export const parseHTML = (body, tag, all) => {
+  const parser = new DOMParser();
+  const bodyDoc = parser.parseFromString(body, "text/html");
+  const elsFound = bodyDoc.getElementsByTagName(tag);
+
+  if (all) {
+    const elArr = Array.from(elsFound);
+    if (elArr.length === 0) return {};
+    return elArr.map(el => el.getAttributeNames().reduce((acc, attr) => {
+      acc[attr] = el.getAttribute(attr);
+      return acc;
+    }, {}));
+  } else {
+    const firstEl = Array.from(elsFound)[0];
+    if (!firstEl) return {};
+    return firstEl.getAttributeNames().reduce((acc, attr) => {
+      acc[attr] = firstEl.getAttribute(attr);
+      return acc;
+    }, {});
+  }
 };
