@@ -37,7 +37,6 @@ const CommunitiesPresenter = ({
           return (
             <div
               className={`column ${columnSize} is-12-tablet`}
-              style={{ position: "relative" }}
               key={`community-${index}`}
             >
               <CommunityCard

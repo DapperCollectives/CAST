@@ -8,7 +8,6 @@ import React, {
 import { Editor } from "react-draft-wysiwyg";
 import {
   EditorState,
-  ContentBlock,
   AtomicBlockUtils,
   Modifier,
 } from "draft-js";
