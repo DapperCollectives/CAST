@@ -7,6 +7,7 @@ import (
 
 	"github.com/brudfyi/flow-voting-tool/main/models"
 	"github.com/brudfyi/flow-voting-tool/main/shared"
+	"github.com/brudfyi/flow-voting-tool/main/test_utils"
 	utils "github.com/brudfyi/flow-voting-tool/main/test_utils"
 	"github.com/stretchr/testify/assert"
 )
@@ -67,8 +68,83 @@ func TestCreateCommunity(t *testing.T) {
 	assert.NotNil(t, community.ID)
 }
 
+func TestCommunityAdminRoles(t *testing.T) {
+	clearTable("communities")
+	clearTable("community_users")
+
+	//CreateCommunity
+	communityStruct := otu.GenerateCommunityStruct("account")
+	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
+
+	response := otu.CreateCommunityAPI(communityPayload)
+	checkResponseCode(t, http.StatusCreated, response.Code)
+
+	// Parse Community
+	var community models.Community
+	json.Unmarshal(response.Body.Bytes(), &community)
+
+	response = otu.GetCommunityUsersAPI(community.ID)
+	checkResponseCode(t, http.StatusOK, response.Code)
+
+	var p test_utils.PaginatedResponseWithUser
+	json.Unmarshal(response.Body.Bytes(), &p)
+
+	//loop through response, validate user types for specific index
+	for i, u := range p.Data {
+		if i == 0 && u.Addr == test_utils.AdminAddr {
+			assert.Equal(t, "member", u.User_type)
+		}
+		if i == 1 && u.Addr == test_utils.AdminAddr {
+			assert.Equal(t, "author", u.User_type)
+		}
+		if i == 2 && u.Addr == test_utils.AdminAddr {
+			assert.Equal(t, "admin", u.User_type)
+		}
+	}
+}
+
+func TestCommunityAuthorRoles(t *testing.T) {
+	clearTable("communities")
+	clearTable("community_users")
+
+	//CreateCommunity
+	communityStruct := otu.GenerateCommunityStruct("account")
+	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
+
+	response := otu.CreateCommunityAPI(communityPayload)
+	checkResponseCode(t, http.StatusCreated, response.Code)
+
+	// Parse Community
+	var community models.Community
+	json.Unmarshal(response.Body.Bytes(), &community)
+
+	//Generate the user, admin must be the signer
+	userStruct := otu.GenerateCommunityUserStruct("user1", "author")
+	userPayload := otu.GenerateCommunityUserPayload("account", userStruct)
+
+	response = otu.CreateCommunityUserAPI(community.ID, userPayload)
+	checkResponseCode(t, http.StatusCreated, response.Code)
+
+	// Query the community
+	response = otu.GetCommunityUsersAPI(community.ID)
+	checkResponseCode(t, http.StatusOK, response.Code)
+
+	var p test_utils.PaginatedResponseWithUser
+	json.Unmarshal(response.Body.Bytes(), &p)
+
+	//loop through response, validate user types for specific index
+	for i, u := range p.Data {
+		if i == 3 && u.Addr == test_utils.UserOneAddr {
+			assert.Equal(t, "author", u.User_type)
+		}
+		if i == 4 && u.Addr == test_utils.UserOneAddr {
+			assert.Equal(t, "member", u.User_type)
+		}
+	}
+}
+
 // func TestCreateCommunityAllowlist(t *testing.T) {
-// 	_ = utils.NewOverflowTest(t, &A)
+// 	_ = utils.NewOverflowTest(t,: &A)
 // 	clearTable("communities")
 // 	clearTable("community_users")
 

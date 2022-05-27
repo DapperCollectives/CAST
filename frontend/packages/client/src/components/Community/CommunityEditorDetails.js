@@ -7,7 +7,9 @@ import { useWebContext } from "contexts/Web3";
 import { getCompositeSigs } from "utils";
 
 const uniqueElements = (adminList) => {
-  const setList = new Set([...adminList.map((e) => e.addr.toLocaleLowerCase())]);
+  const setList = new Set([
+    ...adminList.map((e) => e.addr.toLocaleLowerCase()),
+  ]);
   return adminList.length === setList.size;
 };
 
@@ -47,6 +49,8 @@ const CommunityMembersEditor = ({
   } = useCommunityUsers({
     communityId,
     type: addrType.toLocaleLowerCase(),
+    // if list goes up from 100 we need to add a fetch more button
+    count: 100,
   });
 
   const [userAddrList, setUserAddrList] = useState([]);
