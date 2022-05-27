@@ -167,6 +167,8 @@ const CommunityMembersEditor = ({
   } = useCommunityUsers({
     communityId,
     type: addrType.toLocaleLowerCase(),
+    // if list goes up from 100 we need to add a fetch more button
+    count: 100,
   });
 
   const [userAddrList, setUserAddrList] = useState([]);

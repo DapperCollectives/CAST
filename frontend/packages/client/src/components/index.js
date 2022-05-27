@@ -21,3 +21,4 @@ export {
   PropCreateStepThree,
 } from "./ProposalCreate";
 export { default as FadeIn } from "./FadeIn";
+export { default as UploadImageModal } from "./UploadImageModal";

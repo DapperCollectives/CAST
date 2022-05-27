@@ -1,10 +1,11 @@
-# flow-snapshot
+# CAST Backend
 
 ## Prerequisites
 
 - [GoLang 1.6](https://golang.org/doc/install)
-- [PostgreSQL 14.1] (https://www.postgresql.org/download/)
-- [Flow CLI] (https://docs.onflow.org/flow-cli/install/)
+- [PostgreSQL 14.1](https://www.postgresql.org/download/)
+- [Flow CLI](https://docs.onflow.org/flow-cli/install/)
+  - Note: See below for how install v0.30.2 (required)
 
 ## Local Development
 
@@ -20,9 +21,9 @@ The correct values for `IPFS_KEY` and `IPFS_SECRET` can be found in the Dapper C
 
 ### Database
 
-#### Install psql
-
-- [PostgreSQL 14.1] (https://www.postgresql.org/download/)
+#### Install PSQL
+- [PostgreSQL 14.1](https://www.postgresql.org/download/)
+- via homebrew `brew install postgresql`
 
 #### Configure Postgres DB User/PW
 
@@ -139,7 +140,14 @@ make image # create the Docker image
 make container # spin up a container from Docker image
 ```
 
-### Deploy to Staging/Prod
+## Troubleshooting
 
-Deploy via `https://brunkins.brud.dev/`
+### Install Flow v0.30.2
 
+Currently you need to run Flow v0.30.2 for local development. Follow the commands below to install the specific version of Flow needed.
+
+```sh
+> curl --progress-bar "https://storage.googleapis.com/flow-cli/flow-x86_64-darwin-v0.30.2" --output flow && mv flow /usr/local/bin
+
+> chmod +x /usr/local/bin/flow
+```
