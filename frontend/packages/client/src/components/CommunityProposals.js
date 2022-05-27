@@ -6,7 +6,7 @@ import { FilterValues } from "../const";
 import DropDown from "./Dropdown";
 import WrapperResponsive from "./WrapperResponsive";
 
-export default function CommunityProposals({ communityId }) {
+export default function CommunityProposals({ communityId = 1 } = {}) {
   const notMobile = useMediaQuery();
 
   const proposalFilterValues = Object.entries(FilterValues)
@@ -119,6 +119,7 @@ export default function CommunityProposals({ communityId }) {
           activeProposals={activeProposals}
           filterValue={filterValue}
           initialLoading={initialLoading}
+          communityId={communityId}
         />
       </div>
     </div>
