@@ -1,31 +1,16 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import millify from "millify";
 import { Active, CheckCircle } from "../Svg";
 import { parseDateFromServer } from "utils";
 import StatusLabel from "../StatusLabel";
 import { useVotingResults } from "hooks";
 import { FilterValues } from "const";
+import WrapperResponsive from "components/WrapperResponsive";
 
 const ProposalCardFooter = ({ id, voted, endTime, computedStatus, isDesktopOnly }) => {
-  const [justMounted, setJustMounted] = useState(true);
-
-  const { getVotingResults, data: votingResults } = useVotingResults();
-
+  const { data: votingResults } = useVotingResults();
   const { diffDuration } = parseDateFromServer(endTime);
-
   const status = FilterValues[computedStatus] ?? FilterValues.closed;
-
-  useEffect(() => {
-    if (justMounted && (FilterValues[computedStatus] === FilterValues.closed)) {
-      async function _getVotingResults() {
-        return getVotingResults(id);
-      }
-      _getVotingResults();
-    }
-  }, [computedStatus, getVotingResults, id, justMounted]);
-
-  // prevents memory leak in above useEffect for getVotingResults
-  useEffect(() => () => { setJustMounted(false) }, []);
 
   const { textDecision, winCount } = useMemo(() => {
     if (votingResults?.results) {
@@ -76,70 +61,54 @@ const ProposalCardFooter = ({ id, voted, endTime, computedStatus, isDesktopOnly 
     [FilterValues.pending]: <StatusLabel status="Pending" voted={voted} rounder
       color="has-background-grey-light"
     />,
-    [FilterValues.closed]: <StatusLabel status="Cancelled" voted={voted} rounder />,
+    [FilterValues.closed]: <StatusLabel status="Closed" voted={voted} rounder />,
     [FilterValues.cancelled]: <StatusLabel status="Cancelled" voted={voted} rounder />,
   };
 
-  // gross section to handle styling
-  let extraClasses1 = "";
-  let extraClasses2 = "";
-  let extraStyles1 = {};
-  let extraClasses3 = "";
-  let extraClasses4 = "";
-
-  if (isDesktopOnly) {
-    extraClasses1 = "columns ";
-    extraClasses2 = "p-0 is-justify-content-flex-end";
-    extraClasses3 = "column is-narrow is-flex is-align-items-center pl-4 pr-1 py-0";
-    extraClasses4 = "column pl-1 pr-1 is-flex is-align-items-center py-0";
-  } else {
-    extraClasses4 = "pl-1 pr-1 is-flex is-align-items-center"
-    if (voted) {
-      extraClasses1 = "is-flex ";
-      extraClasses3 = "is-narrow is-flex is-align-items-center ml-3 mr-1";
-    } else {
-      extraClasses3 = "is-narrow is-flex is-align-items-center mr-1";
-      if (status === FilterValues.active) {
-        extraClasses2 = "px-0 pt-0 pb-3";
-        extraStyles1 = { minHeight: "50px" };
-      } else {
-        extraClasses2 = "p-0";
-      }
-    }
-  }
-
   const IconAndText = () => (
     <>
-      <div className={extraClasses3}>
+      <WrapperResponsive
+        classNames="is-narrow is-flex is-align-items-center"
+        extraClasses="column pl-4 pr-1 py-0"
+        extraClassesMobile={`mr-1${voted && " ml-3"}`}
+      >
         {iconStatusMap[status] ?? null}
-      </div>
-      <div
-        className={extraClasses4}
-        style={{ flexBasis: "content" }}
+      </WrapperResponsive>
+      <WrapperResponsive
+        styles={{ flexBasis: "content" }}
+        classNames="pl-1 pr-1 is-flex is-align-items-center"
+        extraClasses="column py-0"
       >
         <p className="has-text-black has-text-weight-bold p-0 is-size-7">
           {textDescriptionMap[status] ?? null}
         </p>
-      </div>
+      </WrapperResponsive>
     </>
   );
 
   return (
-    <div className={`${extraClasses1}flex-1 has-text-grey m-0 px-0 pb-0 proposal-card-footer`}>
-      <div className={`is-flex is-align-items-center proposal-status ${extraClasses2}`}
-        style={extraStyles1}
+    <WrapperResponsive
+      classNames="flex-1 has-text-grey m-0 px-0 pb-0 proposal-card-footer"
+      extraClasses="columns"
+      extraClassesMobile={voted && "is-flex"}
+    >
+      <WrapperResponsive
+        classNames="is-flex is-align-items-center proposal-status"
+        extraClasses="p-0 is-justify-content-flex-end"
+        extraStylesMobile={!voted && (status === FilterValues.active) ? { minHeight: "50px" } : {}}
+        extraClassesMobile={!voted ? (status === FilterValues.active) ? "px-0 pt-0 pb-3" : "p-0" : ""}
       >
         <p className="has-text-grey px-0 smaller-text">
           {statusLabelMap[status] ?? null}
         </p>
-      </div>
+      </WrapperResponsive>
       {(!isDesktopOnly && !voted)
         ? <div className="is-flex">
           <IconAndText />
         </div>
         : <IconAndText />
       }
-    </div>
+    </WrapperResponsive>
   );
 };
 

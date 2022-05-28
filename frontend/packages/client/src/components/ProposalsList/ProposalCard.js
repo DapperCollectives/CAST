@@ -1,5 +1,5 @@
 import { useMediaQuery } from "hooks";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
 import ProposalCardBody from "./ProposalCardBody";
 import ProposalCardFooter from "./ProposalCardFooter";
@@ -11,15 +11,6 @@ const ProposalCard = ({ pr, style = {} }) => {
   const isNotMobile = useMediaQuery();
   const isTabletOnly = useMediaQuery(mediaMatchers.tabletOnly);
   const isDesktopOnly = isNotMobile && !isTabletOnly;
-
-  const cardRef = useRef();
-  const [cardWidth, setCardWidth] = useState();
-  useEffect(() => {
-    // used for wrapping proposal body text
-    if (cardRef.current) {
-      setCardWidth(cardRef.current.offsetWidth);
-    }
-  }, [cardRef])
 
   const { body } = pr;
   const imgProps = useMemo(() => parseHTML(body, "img"), [body]);
@@ -49,9 +40,7 @@ const ProposalCard = ({ pr, style = {} }) => {
   const MainContent = () => (
     <div className={`is-flex column is-flex-direction-column p-${isDesktopOnly ? "0" : "5"}`}>
       <ProposalCardHeader {...pr} />
-      <ProposalCardBody {...pr} cardWidth={cardWidth}
-        inlineImage={Boolean(src && isDesktopOnly)}
-      />
+      <ProposalCardBody {...pr} inlineImage={Boolean(src && isDesktopOnly)} />
       <ProposalCardFooter {...pr} isDesktopOnly={isDesktopOnly} />
     </div>
   );
@@ -61,7 +50,6 @@ const ProposalCard = ({ pr, style = {} }) => {
       <div
         className="border-light rounded-sm mb-5 proposal-card transition-all is-flex columns p-5"
         style={style}
-        ref={cardRef}
       >
         <MainContent />
         {src && <ImageContentDesktop />}
