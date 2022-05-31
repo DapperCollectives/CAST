@@ -17,7 +17,7 @@ const Message = ({ messageText = "", labelText = null, icon = null } = {}) => {
         <div className="columns m-0 p-0">
           {labelText && (
             <WrapperResponsive
-              commonClasses="column is-flex is-flex-grow-0 is-align-items-center pr-2"
+              classNames="column is-flex is-flex-grow-0 is-align-items-center pr-2"
               extraClasses="pl-3 py-3"
               extraStylesMobile={{
                 paddingTop: "20px",
@@ -30,7 +30,7 @@ const Message = ({ messageText = "", labelText = null, icon = null } = {}) => {
           )}
 
           <WrapperResponsive
-            commonClasses="column is-flex is-flex-grow-1 is-align-items-center pl-2"
+            classNames="column is-flex is-flex-grow-1 is-align-items-center pl-2"
             extraClasses="pr-3 py-3"
             extraStylesMobile={{
               paddingTop: "10px",

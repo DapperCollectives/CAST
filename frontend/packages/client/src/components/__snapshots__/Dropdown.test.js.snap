@@ -1,0 +1,207 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Dropdown UI Component renders correctly 1`] = `
+<div
+  aria-controls="dropdown-menu"
+  aria-haspopup="true"
+  className="dropdown is-right is-flex is-flex-grow-1"
+  data-testid="dropdown-menu"
+  onBlur={[Function]}
+>
+  <div
+    className="dropdown-trigger columns m-0 is-flex-grow-1"
+  >
+    <button
+      aria-controls="dropdown-menu"
+      aria-haspopup="true"
+      className="button rounded-sm is-outlined border-light column m-0 py-0 px-3 is-full-mobile "
+      data-testid="dropdown-button"
+      onClick={[Function]}
+    >
+      <div
+        className="is-flex is-flex-grow-1 is-align-items-center is-justify-content-space-between has-text-grey small-text"
+      >
+        Select an option
+        <svg
+          aria-hidden="true"
+          className="svg-inline--fa fa-caret-down has-text-black"
+          data-icon="caret-down"
+          data-prefix="fas"
+          focusable="false"
+          height="15"
+          role="img"
+          viewBox="0 0 320 512"
+          width="30"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"
+            fill="currentColor"
+          />
+        </svg>
+      </div>
+    </button>
+  </div>
+  <div
+    className="dropdown-menu column p-0 is-full"
+    id="dropdown-menu"
+    role="menu"
+  >
+    <div
+      className="dropdown-content"
+    >
+      <button
+        className="button is-white dropdown-item has-text-grey"
+        data-testid="item-option-a"
+        onMouseDown={[Function]}
+      >
+        Option A
+      </button>
+      <button
+        className="button is-white dropdown-item has-text-grey"
+        data-testid="item-option-b"
+        onMouseDown={[Function]}
+      >
+        Option B
+      </button>
+      <button
+        className="button is-white dropdown-item has-text-grey"
+        data-testid="item-option-c"
+        onMouseDown={[Function]}
+      >
+        Option C
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Dropdown UI Component renders correctly with default prop 1`] = `
+<div
+  aria-controls="dropdown-menu"
+  aria-haspopup="true"
+  className="dropdown is-right is-flex is-flex-grow-1"
+  data-testid="dropdown-menu"
+  onBlur={[Function]}
+>
+  <div
+    className="dropdown-trigger columns m-0 is-flex-grow-1"
+  >
+    <button
+      aria-controls="dropdown-menu"
+      aria-haspopup="true"
+      className="button rounded-sm is-outlined border-light column m-0 py-0 px-3 is-full-mobile "
+      data-testid="dropdown-button"
+      onClick={[Function]}
+    >
+      <div
+        className="is-flex is-flex-grow-1 is-align-items-center is-justify-content-space-between has-text-grey small-text"
+      >
+        Option A
+        <svg
+          aria-hidden="true"
+          className="svg-inline--fa fa-caret-down has-text-black"
+          data-icon="caret-down"
+          data-prefix="fas"
+          focusable="false"
+          height="15"
+          role="img"
+          viewBox="0 0 320 512"
+          width="30"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"
+            fill="currentColor"
+          />
+        </svg>
+      </div>
+    </button>
+  </div>
+  <div
+    className="dropdown-menu column p-0 is-full"
+    id="dropdown-menu"
+    role="menu"
+  >
+    <div
+      className="dropdown-content"
+    >
+      <button
+        className="button is-white dropdown-item has-text-grey"
+        data-testid="item-option-a"
+        onMouseDown={[Function]}
+      >
+        Option A
+      </button>
+      <button
+        className="button is-white dropdown-item has-text-grey"
+        data-testid="item-option-b"
+        onMouseDown={[Function]}
+      >
+        Option B
+      </button>
+      <button
+        className="button is-white dropdown-item has-text-grey"
+        data-testid="item-option-c"
+        onMouseDown={[Function]}
+      >
+        Option C
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Dropdown UI Component renders correctly with no props 1`] = `
+<div
+  aria-controls="dropdown-menu"
+  aria-haspopup="true"
+  className="dropdown is-right is-flex is-flex-grow-1"
+  data-testid="dropdown-menu"
+  onBlur={[Function]}
+>
+  <div
+    className="dropdown-trigger columns m-0 is-flex-grow-1"
+  >
+    <button
+      aria-controls="dropdown-menu"
+      aria-haspopup="true"
+      className="button rounded-sm is-outlined border-light column m-0 py-0 px-3 is-full-mobile "
+      data-testid="dropdown-button"
+      onClick={[Function]}
+    >
+      <div
+        className="is-flex is-flex-grow-1 is-align-items-center is-justify-content-space-between has-text-grey small-text"
+      >
+        Select option
+        <svg
+          aria-hidden="true"
+          className="svg-inline--fa fa-caret-down has-text-black"
+          data-icon="caret-down"
+          data-prefix="fas"
+          focusable="false"
+          height="15"
+          role="img"
+          viewBox="0 0 320 512"
+          width="30"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"
+            fill="currentColor"
+          />
+        </svg>
+      </div>
+    </button>
+  </div>
+  <div
+    className="dropdown-menu column p-0 is-full"
+    id="dropdown-menu"
+    role="menu"
+  >
+    <div
+      className="dropdown-content"
+    />
+  </div>
+</div>
+`;

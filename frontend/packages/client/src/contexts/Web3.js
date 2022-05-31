@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import * as fcl from "@onflow/fcl";
 import networks from "../networks";
 import { useFclUser } from "../hooks";
@@ -20,6 +20,7 @@ export function Web3Provider({ children, network = "testnet", ...props }) {
   const [transactionStatus, setTransactionStatus] = useState(null);
   const [transactionError, setTransactionError] = useState("");
   const [txId, setTxId] = useState(null);
+  const [extraConfig, setExtraConfig] = useState({ forceLedger: false });
 
   const executeTransaction = async (cadence, args, options = {}) => {
     setTransactionInProgress(true);
@@ -55,7 +56,10 @@ export function Web3Provider({ children, network = "testnet", ...props }) {
   useEffect(() => {
     const { accessApi, walletDiscovery } = networks[network];
     fcl
-      .config()
+      .config({
+        "0xFUNGIBLETOKENADDRESS":
+          network === "testnet" ? "0x9a0766d93b6608b7" : "0xf233dcee88fe0abe",
+      })
       .put("accessNode.api", accessApi) // connect to Flow
       .put("discovery.wallet", walletDiscovery); // use Blocto wallet
 
@@ -67,7 +71,11 @@ export function Web3Provider({ children, network = "testnet", ...props }) {
     } catch (e) {}
   }, [network]);
 
-  const user = useFclUser(fcl);
+  const setWebContextConfig = useCallback((config) => {
+    setExtraConfig(config);
+  }, []);
+
+  const { user, isLedger } = useFclUser(fcl, extraConfig.forceLedger);
 
   // for Nextjs Builds, return null until "window" is available
   if (!global.window) {
@@ -77,6 +85,7 @@ export function Web3Provider({ children, network = "testnet", ...props }) {
   // use props as a way to pass configuration values
   const providerProps = {
     executeTransaction,
+    setWebContextConfig,
     transaction: {
       id: txId,
       inProgress: transactionInProgress,
@@ -86,6 +95,8 @@ export function Web3Provider({ children, network = "testnet", ...props }) {
     injectedProvider: fcl,
     user,
     address: user.addr,
+    isLedger,
+    network,
     logOut,
     ...props,
   };

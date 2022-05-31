@@ -1,0 +1,863 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ProposalList UI Component renders correctly with empty proposal list 1`] = `
+Array [
+  <div
+    className="columns m-0"
+  >
+    <div
+      className="column p-0 is-10-tablet is-hidden-mobile"
+    >
+      <h1
+        className="title is-4 mb-6"
+        style={
+          Object {
+            "lineHeight": "1.67",
+          }
+        }
+      >
+        Proposals
+      </h1>
+    </div>
+    <div
+      className="is-hidden-mobile column p-0"
+    >
+      <div
+        aria-controls="dropdown-menu"
+        aria-haspopup="true"
+        className="dropdown is-right is-flex is-flex-grow-1"
+        onBlur={[Function]}
+      >
+        <div
+          className="dropdown-trigger columns m-0 is-flex-grow-1"
+        >
+          <button
+            aria-controls="dropdown-menu"
+            aria-haspopup="true"
+            className="button rounded-sm is-outlined border-light column m-0 py-0 px-3 is-full-mobile"
+            onClick={[Function]}
+          >
+            <span
+              className="has-tooltip-arrow has-tooltip-top is-flex is-flex-grow-1"
+              data-tooltip="Filter proposals based on status"
+            >
+              <div
+                className="is-flex is-flex-grow-1 is-align-items-center is-justify-content-space-between has-text-grey small-text"
+              >
+                All
+                <svg
+                  aria-hidden="true"
+                  className="svg-inline--fa fa-caret-down has-text-black"
+                  data-icon="caret-down"
+                  data-prefix="fas"
+                  focusable="false"
+                  height="15"
+                  role="img"
+                  viewBox="0 0 320 512"
+                  width="30"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"
+                    fill="currentColor"
+                  />
+                </svg>
+              </div>
+            </span>
+          </button>
+        </div>
+        <div
+          className="dropdown-menu column p-0 is-full-mobile"
+          id="dropdown-menu"
+          role="menu"
+        >
+          <div
+            className="dropdown-content"
+          >
+            <button
+              className="button is-white dropdown-item has-text-grey is-active"
+              data-testid="drop-down-item-All"
+              onMouseDown={[Function]}
+            >
+              All
+            </button>
+            <button
+              className="button is-white dropdown-item has-text-grey"
+              data-testid="drop-down-item-Active"
+              onMouseDown={[Function]}
+            >
+              Active
+            </button>
+            <button
+              className="button is-white dropdown-item has-text-grey"
+              data-testid="drop-down-item-Pending"
+              onMouseDown={[Function]}
+            >
+              Pending
+            </button>
+            <button
+              className="button is-white dropdown-item has-text-grey"
+              data-testid="drop-down-item-Closed"
+              onMouseDown={[Function]}
+            >
+              Closed
+            </button>
+            <button
+              className="button is-white dropdown-item has-text-grey"
+              data-testid="drop-down-item-Cancelled"
+              onMouseDown={[Function]}
+            >
+              Cancelled
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="is-hidden-tablet column p-0 mt-2 mb-5"
+    >
+      <div
+        aria-controls="dropdown-menu"
+        aria-haspopup="true"
+        className="dropdown is-right is-flex is-flex-grow-1"
+        onBlur={[Function]}
+      >
+        <div
+          className="dropdown-trigger columns m-0 is-flex-grow-1"
+        >
+          <button
+            aria-controls="dropdown-menu"
+            aria-haspopup="true"
+            className="button rounded-sm is-outlined border-light column m-0 py-0 px-3 is-full-mobile"
+            onClick={[Function]}
+          >
+            <span
+              className="has-tooltip-arrow has-tooltip-top is-flex is-flex-grow-1"
+              data-tooltip="Filter proposals based on status"
+            >
+              <div
+                className="is-flex is-flex-grow-1 is-align-items-center is-justify-content-space-between has-text-grey small-text"
+              >
+                All
+                <svg
+                  aria-hidden="true"
+                  className="svg-inline--fa fa-caret-down has-text-black"
+                  data-icon="caret-down"
+                  data-prefix="fas"
+                  focusable="false"
+                  height="15"
+                  role="img"
+                  viewBox="0 0 320 512"
+                  width="30"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"
+                    fill="currentColor"
+                  />
+                </svg>
+              </div>
+            </span>
+          </button>
+        </div>
+        <div
+          className="dropdown-menu column p-0 is-full-mobile"
+          id="dropdown-menu"
+          role="menu"
+        >
+          <div
+            className="dropdown-content"
+          >
+            <button
+              className="button is-white dropdown-item has-text-grey is-active"
+              data-testid="drop-down-item-All"
+              onMouseDown={[Function]}
+            >
+              All
+            </button>
+            <button
+              className="button is-white dropdown-item has-text-grey"
+              data-testid="drop-down-item-Active"
+              onMouseDown={[Function]}
+            >
+              Active
+            </button>
+            <button
+              className="button is-white dropdown-item has-text-grey"
+              data-testid="drop-down-item-Pending"
+              onMouseDown={[Function]}
+            >
+              Pending
+            </button>
+            <button
+              className="button is-white dropdown-item has-text-grey"
+              data-testid="drop-down-item-Closed"
+              onMouseDown={[Function]}
+            >
+              Closed
+            </button>
+            <button
+              className="button is-white dropdown-item has-text-grey"
+              data-testid="drop-down-item-Cancelled"
+              onMouseDown={[Function]}
+            >
+              Cancelled
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>,
+  <div
+    className="is-flex is-flex-direction-column"
+  />,
+]
+`;
+
+exports[`ProposalList UI Component renders correctly with no params 1`] = `
+Array [
+  <div
+    className="columns m-0"
+  >
+    <div
+      className="column p-0 is-10-tablet is-hidden-mobile"
+    >
+      <h1
+        className="title is-4 mb-6"
+        style={
+          Object {
+            "lineHeight": "1.67",
+          }
+        }
+      >
+        Proposals
+      </h1>
+    </div>
+    <div
+      className="is-hidden-mobile column p-0"
+    >
+      <div
+        aria-controls="dropdown-menu"
+        aria-haspopup="true"
+        className="dropdown is-right is-flex is-flex-grow-1"
+        onBlur={[Function]}
+      >
+        <div
+          className="dropdown-trigger columns m-0 is-flex-grow-1"
+        >
+          <button
+            aria-controls="dropdown-menu"
+            aria-haspopup="true"
+            className="button rounded-sm is-outlined border-light column m-0 py-0 px-3 is-full-mobile"
+            onClick={[Function]}
+          >
+            <span
+              className="has-tooltip-arrow has-tooltip-top is-flex is-flex-grow-1"
+              data-tooltip="Filter proposals based on status"
+            >
+              <div
+                className="is-flex is-flex-grow-1 is-align-items-center is-justify-content-space-between has-text-grey small-text"
+              >
+                <svg
+                  aria-hidden="true"
+                  className="svg-inline--fa fa-caret-down has-text-black"
+                  data-icon="caret-down"
+                  data-prefix="fas"
+                  focusable="false"
+                  height="15"
+                  role="img"
+                  viewBox="0 0 320 512"
+                  width="30"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"
+                    fill="currentColor"
+                  />
+                </svg>
+              </div>
+            </span>
+          </button>
+        </div>
+        <div
+          className="dropdown-menu column p-0 is-full-mobile"
+          id="dropdown-menu"
+          role="menu"
+        >
+          <div
+            className="dropdown-content"
+          />
+        </div>
+      </div>
+    </div>
+    <div
+      className="is-hidden-tablet column p-0 mt-2 mb-5"
+    >
+      <div
+        aria-controls="dropdown-menu"
+        aria-haspopup="true"
+        className="dropdown is-right is-flex is-flex-grow-1"
+        onBlur={[Function]}
+      >
+        <div
+          className="dropdown-trigger columns m-0 is-flex-grow-1"
+        >
+          <button
+            aria-controls="dropdown-menu"
+            aria-haspopup="true"
+            className="button rounded-sm is-outlined border-light column m-0 py-0 px-3 is-full-mobile"
+            onClick={[Function]}
+          >
+            <span
+              className="has-tooltip-arrow has-tooltip-top is-flex is-flex-grow-1"
+              data-tooltip="Filter proposals based on status"
+            >
+              <div
+                className="is-flex is-flex-grow-1 is-align-items-center is-justify-content-space-between has-text-grey small-text"
+              >
+                <svg
+                  aria-hidden="true"
+                  className="svg-inline--fa fa-caret-down has-text-black"
+                  data-icon="caret-down"
+                  data-prefix="fas"
+                  focusable="false"
+                  height="15"
+                  role="img"
+                  viewBox="0 0 320 512"
+                  width="30"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"
+                    fill="currentColor"
+                  />
+                </svg>
+              </div>
+            </span>
+          </button>
+        </div>
+        <div
+          className="dropdown-menu column p-0 is-full-mobile"
+          id="dropdown-menu"
+          role="menu"
+        >
+          <div
+            className="dropdown-content"
+          />
+        </div>
+      </div>
+    </div>
+  </div>,
+  <div
+    className="is-flex is-flex-direction-column"
+  />,
+]
+`;
+
+exports[`ProposalList UI Component renders correctly with regular params 1`] = `
+Array [
+  <div
+    className="columns m-0"
+  >
+    <div
+      className="column p-0 is-10-tablet is-hidden-mobile"
+    >
+      <h1
+        className="title is-4 mb-6"
+        style={
+          Object {
+            "lineHeight": "1.67",
+          }
+        }
+      >
+        Proposals
+      </h1>
+    </div>
+    <div
+      className="is-hidden-mobile column p-0"
+    >
+      <div
+        aria-controls="dropdown-menu"
+        aria-haspopup="true"
+        className="dropdown is-right is-flex is-flex-grow-1"
+        onBlur={[Function]}
+      >
+        <div
+          className="dropdown-trigger columns m-0 is-flex-grow-1"
+        >
+          <button
+            aria-controls="dropdown-menu"
+            aria-haspopup="true"
+            className="button rounded-sm is-outlined border-light column m-0 py-0 px-3 is-full-mobile"
+            onClick={[Function]}
+          >
+            <span
+              className="has-tooltip-arrow has-tooltip-top is-flex is-flex-grow-1"
+              data-tooltip="Filter proposals based on status"
+            >
+              <div
+                className="is-flex is-flex-grow-1 is-align-items-center is-justify-content-space-between has-text-grey small-text"
+              >
+                All
+                <svg
+                  aria-hidden="true"
+                  className="svg-inline--fa fa-caret-down has-text-black"
+                  data-icon="caret-down"
+                  data-prefix="fas"
+                  focusable="false"
+                  height="15"
+                  role="img"
+                  viewBox="0 0 320 512"
+                  width="30"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"
+                    fill="currentColor"
+                  />
+                </svg>
+              </div>
+            </span>
+          </button>
+        </div>
+        <div
+          className="dropdown-menu column p-0 is-full-mobile"
+          id="dropdown-menu"
+          role="menu"
+        >
+          <div
+            className="dropdown-content"
+          >
+            <button
+              className="button is-white dropdown-item has-text-grey is-active"
+              data-testid="drop-down-item-All"
+              onMouseDown={[Function]}
+            >
+              All
+            </button>
+            <button
+              className="button is-white dropdown-item has-text-grey"
+              data-testid="drop-down-item-Active"
+              onMouseDown={[Function]}
+            >
+              Active
+            </button>
+            <button
+              className="button is-white dropdown-item has-text-grey"
+              data-testid="drop-down-item-Pending"
+              onMouseDown={[Function]}
+            >
+              Pending
+            </button>
+            <button
+              className="button is-white dropdown-item has-text-grey"
+              data-testid="drop-down-item-Closed"
+              onMouseDown={[Function]}
+            >
+              Closed
+            </button>
+            <button
+              className="button is-white dropdown-item has-text-grey"
+              data-testid="drop-down-item-Cancelled"
+              onMouseDown={[Function]}
+            >
+              Cancelled
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="is-hidden-tablet column p-0 mt-2 mb-5"
+    >
+      <div
+        aria-controls="dropdown-menu"
+        aria-haspopup="true"
+        className="dropdown is-right is-flex is-flex-grow-1"
+        onBlur={[Function]}
+      >
+        <div
+          className="dropdown-trigger columns m-0 is-flex-grow-1"
+        >
+          <button
+            aria-controls="dropdown-menu"
+            aria-haspopup="true"
+            className="button rounded-sm is-outlined border-light column m-0 py-0 px-3 is-full-mobile"
+            onClick={[Function]}
+          >
+            <span
+              className="has-tooltip-arrow has-tooltip-top is-flex is-flex-grow-1"
+              data-tooltip="Filter proposals based on status"
+            >
+              <div
+                className="is-flex is-flex-grow-1 is-align-items-center is-justify-content-space-between has-text-grey small-text"
+              >
+                All
+                <svg
+                  aria-hidden="true"
+                  className="svg-inline--fa fa-caret-down has-text-black"
+                  data-icon="caret-down"
+                  data-prefix="fas"
+                  focusable="false"
+                  height="15"
+                  role="img"
+                  viewBox="0 0 320 512"
+                  width="30"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M310.6 246.6l-127.1 128C176.4 380.9 168.2 384 160 384s-16.38-3.125-22.63-9.375l-127.1-128C.2244 237.5-2.516 223.7 2.438 211.8S19.07 192 32 192h255.1c12.94 0 24.62 7.781 29.58 19.75S319.8 237.5 310.6 246.6z"
+                    fill="currentColor"
+                  />
+                </svg>
+              </div>
+            </span>
+          </button>
+        </div>
+        <div
+          className="dropdown-menu column p-0 is-full-mobile"
+          id="dropdown-menu"
+          role="menu"
+        >
+          <div
+            className="dropdown-content"
+          >
+            <button
+              className="button is-white dropdown-item has-text-grey is-active"
+              data-testid="drop-down-item-All"
+              onMouseDown={[Function]}
+            >
+              All
+            </button>
+            <button
+              className="button is-white dropdown-item has-text-grey"
+              data-testid="drop-down-item-Active"
+              onMouseDown={[Function]}
+            >
+              Active
+            </button>
+            <button
+              className="button is-white dropdown-item has-text-grey"
+              data-testid="drop-down-item-Pending"
+              onMouseDown={[Function]}
+            >
+              Pending
+            </button>
+            <button
+              className="button is-white dropdown-item has-text-grey"
+              data-testid="drop-down-item-Closed"
+              onMouseDown={[Function]}
+            >
+              Closed
+            </button>
+            <button
+              className="button is-white dropdown-item has-text-grey"
+              data-testid="drop-down-item-Cancelled"
+              onMouseDown={[Function]}
+            >
+              Cancelled
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>,
+  <div
+    className="is-flex is-flex-direction-column"
+  >
+    <a
+      data-testid="proposal-card"
+      href="/proposal/1"
+      onClick={[Function]}
+    >
+      <div
+        className="border-light rounded-sm mb-5 proposal-card transition-all"
+      >
+        <div
+          className="is-flex proposal-header-spacing "
+        >
+          <div
+            className="columns flex-1 is-mobile has-text-grey m-0 p-0"
+          >
+            <div
+              className="column is-narrow is-flex is-align-items-center pl-0"
+            >
+              <svg
+                fill="none"
+                height="15"
+                viewBox="0 0 14 15"
+                width="14"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <title>
+                  Active
+                </title>
+                <circle
+                  cx="7"
+                  cy="7.5"
+                  fill="#F4AF4A"
+                  opacity="0.5"
+                  r="7"
+                />
+                <circle
+                  cx="7"
+                  cy="7.5"
+                  fill="#F4AF4A"
+                  r="3"
+                />
+              </svg>
+            </div>
+            <div
+              className="column pl-1 pr-1 is-flex is-align-items-center"
+              style={
+                Object {
+                  "flexBasis": "content",
+                }
+              }
+            >
+              <code
+                className="has-text-grey"
+              >
+                Active: Ends in 1 days
+              </code>
+            </div>
+            <div
+              className="column is-flex is-align-items-center is-justify-content-end proposal-status p-0"
+            >
+              <code
+                className="has-text-grey px-0 smaller-text"
+              />
+            </div>
+          </div>
+        </div>
+        <hr
+          className="my-0"
+        />
+        <div
+          className="px-6 py-5 proposal-body-spacing"
+        >
+          <h4
+            className="proposal-title is-4 mt-1 mb-2"
+          >
+            test proposal
+          </h4>
+          <p
+            className="has-text-grey mb-4 small-text"
+          >
+            by 
+            0xf8d6e0586b0a20c7
+          </p>
+          <p
+            className="has-text-grey small-text"
+          >
+            test description
+          </p>
+        </div>
+      </div>
+    </a>
+    <a
+      data-testid="proposal-card"
+      href="/proposal/2"
+      onClick={[Function]}
+    >
+      <div
+        className="border-light rounded-sm mb-5 proposal-card transition-all"
+      >
+        <div
+          className="is-flex proposal-header-spacing "
+        >
+          <div
+            className="columns flex-1 is-mobile has-text-grey m-0 p-0"
+          >
+            <div
+              className="column is-narrow is-flex is-align-items-center pl-0"
+            />
+            <div
+              className="column pl-1 pr-1 is-flex is-align-items-center"
+              style={
+                Object {
+                  "flexBasis": "content",
+                }
+              }
+            >
+              <code
+                className="has-text-grey"
+              />
+            </div>
+            <div
+              className="column is-flex is-align-items-center is-justify-content-end proposal-status p-0"
+            >
+              <code
+                className="has-text-grey px-0 smaller-text"
+              >
+                <span
+                  className="has-text-white rounded-sm px-2 py-1 has-background-grey-light"
+                >
+                  Pending
+                </span>
+              </code>
+            </div>
+          </div>
+        </div>
+        <hr
+          className="my-0"
+        />
+        <div
+          className="px-6 py-5 proposal-body-spacing"
+        >
+          <h4
+            className="proposal-title is-4 mt-1 mb-2"
+          >
+            test proposal
+          </h4>
+          <p
+            className="has-text-grey mb-4 small-text"
+          >
+            by 
+            0xf8d6e0586b0a20c7
+          </p>
+          <p
+            className="has-text-grey small-text"
+          >
+            test description
+          </p>
+        </div>
+      </div>
+    </a>
+    <a
+      data-testid="proposal-card"
+      href="/proposal/3"
+      onClick={[Function]}
+    >
+      <div
+        className="border-light rounded-sm mb-5 proposal-card transition-all"
+      >
+        <div
+          className="is-flex proposal-header-spacing has-background-white-ter rounded-top"
+        >
+          <div
+            className="columns flex-1 is-mobile has-text-grey m-0 p-0"
+          >
+            <div
+              className="column is-narrow is-flex is-align-items-center pl-0"
+            />
+            <div
+              className="column pl-1 pr-1 is-flex is-align-items-center"
+              style={
+                Object {
+                  "flexBasis": "content",
+                }
+              }
+            >
+              <code
+                className="has-text-grey"
+              >
+                
+              </code>
+            </div>
+            <div
+              className="column is-flex is-align-items-center is-justify-content-end proposal-status p-0"
+            >
+              <code
+                className="has-text-grey px-0 smaller-text"
+              >
+                <span
+                  className="has-text-white rounded-sm px-2 py-1 has-background-grey"
+                >
+                  Closed
+                </span>
+              </code>
+            </div>
+          </div>
+        </div>
+        <div
+          className="px-6 py-5 proposal-body-spacing"
+        >
+          <h4
+            className="proposal-title is-4 mt-1 mb-2"
+          >
+            test proposal
+          </h4>
+          <p
+            className="has-text-grey mb-4 small-text"
+          >
+            by 
+            0xf8d6e0586b0a20c7
+          </p>
+          <p
+            className="has-text-grey small-text"
+          >
+            test description
+          </p>
+        </div>
+      </div>
+    </a>
+    <a
+      data-testid="proposal-card"
+      href="/proposal/4"
+      onClick={[Function]}
+    >
+      <div
+        className="border-light rounded-sm mb-5 proposal-card transition-all"
+      >
+        <div
+          className="is-flex proposal-header-spacing has-background-white-ter rounded-top"
+        >
+          <div
+            className="columns flex-1 is-mobile has-text-grey m-0 p-0"
+          >
+            <div
+              className="column is-narrow is-flex is-align-items-center pl-0"
+            />
+            <div
+              className="column pl-1 pr-1 is-flex is-align-items-center"
+              style={
+                Object {
+                  "flexBasis": "content",
+                }
+              }
+            >
+              <code
+                className="has-text-grey"
+              />
+            </div>
+            <div
+              className="column is-flex is-align-items-center is-justify-content-end proposal-status p-0"
+            >
+              <code
+                className="has-text-grey px-0 smaller-text"
+              >
+                <span
+                  className="has-text-white rounded-sm px-2 py-1 has-background-grey"
+                >
+                  Cancelled
+                </span>
+              </code>
+            </div>
+          </div>
+        </div>
+        <div
+          className="px-6 py-5 proposal-body-spacing"
+        >
+          <h4
+            className="proposal-title is-4 mt-1 mb-2"
+          >
+            test proposal
+          </h4>
+          <p
+            className="has-text-grey mb-4 small-text"
+          >
+            by 
+            0xf8d6e0586b0a20c7
+          </p>
+          <p
+            className="has-text-grey small-text"
+          >
+            test description
+          </p>
+        </div>
+      </div>
+    </a>
+  </div>,
+]
+`;

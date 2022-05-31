@@ -276,13 +276,11 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	order := "desc"
-	count := 25
-	start := 0
-
 	// get the votes for proposal
-	votes, _, err := models.GetVotesForProposal(a.DB, start, count, order, proposalId)
+	votes, err := models.GetAllVotesForProposal(a.DB, proposalId)
 	if err != nil {
+		// print the error to the console
+		log.Error().Err(err).Msg("Error getting votes for proposal")
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -356,7 +354,6 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusNotFound, err.Error())
 		return
 	}
-
 	response := shared.GetPaginatedResponseWithPayload(votesWithWeights, start, count, totalRecords)
 	respondWithJSON(w, http.StatusOK, response)
 }
@@ -591,14 +588,36 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	s := strategyMap[*p.Strategy]
+	if s == nil {
+		respondWithError(w, http.StatusInternalServerError, "Strategy not found")
+		return
+	}
+
+	// create the voteWithBalance struct
+	vb := models.VoteWithBalance{
+		Vote:                    v,
+		PrimaryAccountBalance:   &balance.PrimaryAccountBalance,
+		SecondaryAccountBalance: &balance.SecondaryAccountBalance,
+		StakingBalance:          &balance.StakingBalance,
+	}
+
+	//get the vote weight
+	weight, err := s.GetVoteWeightForBalance(&vb, &p)
+	if err != nil {
+		log.Error().Err(err).Msg("error getting vote weight")
+		respondWithError(w, http.StatusInternalServerError, "error getting vote weight")
+		return
+	}
+
 	// Validate balance is sufficient to cast vote
-	if err = p.ValidateBalance(balance); err != nil {
+	if err = p.ValidateBalance(weight); err != nil {
 		log.Error().Err(err).Msg("Account may not vote on proposal: insufficient balance")
 		respondWithError(w, http.StatusForbidden, err.Error())
 		return
 	}
 
-	// pin to ipfs
+	//pin to ipfs
 	pin, err := a.IpfsClient.PinJson(v)
 	// If request fails, it may be because of an issue with Pinata.
 	// Continue on, and worker will retroactively populate

@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Star } from "../../components/Svg";
+import { Star } from "components/Svg";
 
 const Tablink = ({
   linkText,

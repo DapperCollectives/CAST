@@ -21,6 +21,13 @@ func TestCreateCommunityUsers(t *testing.T) {
 	clearTable("community_users")
 
 	communityStruct := otu.GenerateCommunityStruct("account")
+
+	//create the author before generating the payload
+	var createCommunityStruct models.CreateCommunityRequestPayload
+	createCommunityStruct.Community = *communityStruct
+	author := []string{"0x01cf0e2f2f715450"}
+	createCommunityStruct.Additional_authors = &author
+
 	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
 
 	response := otu.CreateCommunityAPI(communityPayload)
@@ -29,13 +36,6 @@ func TestCreateCommunityUsers(t *testing.T) {
 	//Parse Community
 	var community models.Community
 	json.Unmarshal(response.Body.Bytes(), &community)
-
-	//Generate the user, admin must be the signer
-	userStruct := otu.GenerateCommunityUserStruct("user1", "author")
-	userPayload := otu.GenerateCommunityUserPayload("account", userStruct)
-
-	response = otu.CreateCommunityUserAPI(community.ID, userPayload)
-	checkResponseCode(t, http.StatusCreated, response.Code)
 
 	//Query the community
 	response = otu.GetCommunityUsersAPI(community.ID)
@@ -103,6 +103,13 @@ func TestDeleteUserFromCommunity(t *testing.T) {
 	clearTable("community_users")
 
 	communityStruct := otu.GenerateCommunityStruct("account")
+
+	//create the author before generating the payload
+	var createCommunityStruct models.CreateCommunityRequestPayload
+	createCommunityStruct.Community = *communityStruct
+	author := []string{"0x01cf0e2f2f715450"}
+	createCommunityStruct.Additional_authors = &author
+
 	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
 
 	response := otu.CreateCommunityAPI(communityPayload)
@@ -115,10 +122,6 @@ func TestDeleteUserFromCommunity(t *testing.T) {
 	userStruct := otu.GenerateCommunityUserStruct("user1", "author")
 	userPayload := otu.GenerateCommunityUserPayload("account", userStruct)
 
-	response = otu.CreateCommunityUserAPI(community.ID, userPayload)
-	checkResponseCode(t, http.StatusCreated, response.Code)
-
-	//use same userPayload previously generated
 	response = otu.DeleteUserFromCommunityAPI(
 		community.ID,
 		utils.UserOneAddr,

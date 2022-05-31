@@ -4,6 +4,16 @@ import { PAGINATION_INITIAL_STATE } from "../reducers";
 import { useWebContext } from "../contexts/Web3";
 import { useEffect, useMemo } from "react";
 
+function debounce(e, waitingTime = 300) {
+  let timer;
+  return (...i) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      e.apply(this, i);
+    }, waitingTime);
+  };
+}
+
 export default function useCommunityProposalsWithVotes({
   communityId,
   start = PAGINATION_INITIAL_STATE.start,
@@ -49,31 +59,24 @@ export default function useCommunityProposalsWithVotes({
     document.fetchMore = fetchMore;
   }, [hasMore, loading, fetchMore]);
 
-  useEffect(() => {
-    const pullDataFromApi = () =>
-      debounce(() => {
-        if (
-          document.documentElement.scrollHeight <=
-          window.pageYOffset + window.innerHeight
-        ) {
-          if (document.hasMore && !document.loadingProposals) {
-            document.fetchMore();
-          }
+  function pullDataFromApi() {
+    return debounce(() => {
+      if (
+        document.documentElement.scrollHeight <=
+        window.pageYOffset + window.innerHeight
+      ) {
+        if (document.hasMore && !document.loadingProposals) {
+          document.fetchMore();
         }
-      }, 500);
+      }
+    }, 500);
+  }
+
+  useEffect(() => {
     document.addEventListener("scroll", pullDataFromApi());
     return () => document.removeEventListener("scroll", pullDataFromApi());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  function debounce(e, waitingTime = 300) {
-    let timer;
-    return (...i) => {
-      clearTimeout(timer);
-      timer = setTimeout(() => {
-        e.apply(this, i);
-      }, waitingTime);
-    };
-  }
 
   // merges user votes with list of proposals
   const mergedData = useMemo(() => {

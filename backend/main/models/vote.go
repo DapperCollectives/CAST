@@ -82,6 +82,31 @@ func GetVotesForAddress(db *s.Database, start, count int, address string, propos
 	return votes, totalRecords, nil
 }
 
+func GetAllVotesForProposal(db *s.Database, proposalId int) ([]*VoteWithBalance, error) {
+	var votes []*VoteWithBalance
+
+	//return all balances, strategy will do rest of the work
+	sql := `select v.*, 
+		p.block_height, 
+		b.primary_account_balance,
+		b.secondary_account_balance,
+		b.staking_balance
+    from votes v
+    join proposals p on p.id = $1
+  	left join balances b on b.addr = v.addr 
+		and p.block_height = b.block_height
+    where proposal_id = $1`
+
+	err := pgxscan.Select(db.Context, db.Conn, &votes, sql, proposalId)
+	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
+		return nil, err
+	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
+		return []*VoteWithBalance{}, nil
+	}
+
+	return votes, nil
+}
+
 func GetVotesForProposal(db *s.Database, start, count int, order string, proposalId int) ([]*VoteWithBalance, int, error) {
 	var votes []*VoteWithBalance
 	var orderBySql string
