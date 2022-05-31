@@ -595,11 +595,19 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 
 	// create the voteWithBalance struct
 	vb := models.VoteWithBalance{
-		Vote: v,
+		Vote:                    v,
+		PrimaryAccountBalance:   &balance.PrimaryAccountBalance,
+		SecondaryAccountBalance: &balance.SecondaryAccountBalance,
+		StakingBalance:          &balance.StakingBalance,
 	}
 
 	//get the vote weight
 	weight, err := s.GetVoteWeightForBalance(&vb, &p)
+	if err != nil {
+		log.Error().Err(err).Msg("error getting vote weight")
+		respondWithError(w, http.StatusInternalServerError, "error getting vote weight")
+		return
+	}
 
 	// Validate balance is sufficient to cast vote
 	if err = p.ValidateBalance(weight); err != nil {
@@ -608,7 +616,7 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// pin to ipfs
+	//pin to ipfs
 	pin, err := a.IpfsClient.PinJson(v)
 	// If request fails, it may be because of an issue with Pinata.
 	// Continue on, and worker will retroactively populate
