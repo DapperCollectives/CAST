@@ -60,6 +60,7 @@ func TestMain(m *testing.M) {
 	clearTable("proposals")
 	clearTable("community_users")
 	clearTable("votes")
+	clearTable("balances")
 	clearTable("lists")
 	code := m.Run()
 	// Clear DB tables after running tests

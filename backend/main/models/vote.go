@@ -28,8 +28,12 @@ type VoteWithBalance struct {
 	// Extend Vote
 	Vote
 	// Balance
-	BlockHeight uint64  `json:"blockHeight"`
-	Balance     *uint64 `json:"balance"`
+	BlockHeight             uint64   `json:"blockHeight"`
+	Balance                 *uint64  `json:"balance"`
+	PrimaryAccountBalance   *uint64  `json:"primaryAccountBalance"`
+	SecondaryAccountBalance *uint64  `json:"secondaryAccountBalance"`
+	StakingBalance          *uint64  `json:"stakingBalance"`
+	Weight                  *float64 `json:"weight"`
 }
 
 const (
@@ -41,12 +45,16 @@ const (
 ///////////
 
 // TODO: make the proposalIds optional
-func GetVotesForAddress(db *s.Database, start, count int, address string, proposalIds *[]int) ([]*Vote, int, error) {
-	var votes []*Vote
+func GetVotesForAddress(db *s.Database, start, count int, address string, proposalIds *[]int) ([]*VoteWithBalance, int, error) {
+	var votes []*VoteWithBalance
 	var err error
-	sql := `
-		SELECT * FROM votes
-		WHERE addr = $3`
+	sql := `select v.*, 
+		b.primary_account_balance,
+		b.secondary_account_balance,
+		b.staking_balance
+		from votes v
+		left join balances b on b.addr = v.addr
+		WHERE v.addr = $3`
 	// Conditionally add proposal_id condition
 	if len(*proposalIds) > 0 {
 		sql = sql + " AND proposal_id = ANY($4)"
@@ -62,7 +70,7 @@ func GetVotesForAddress(db *s.Database, start, count int, address string, propos
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		return nil, 0, err
 	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
-		return []*Vote{}, 0, nil
+		return []*VoteWithBalance{}, 0, nil
 	}
 
 	// Get total number of votes on proposal
@@ -74,20 +82,51 @@ func GetVotesForAddress(db *s.Database, start, count int, address string, propos
 	return votes, totalRecords, nil
 }
 
+func GetAllVotesForProposal(db *s.Database, proposalId int) ([]*VoteWithBalance, error) {
+	var votes []*VoteWithBalance
+
+	//return all balances, strategy will do rest of the work
+	sql := `select v.*, 
+		p.block_height, 
+		b.primary_account_balance,
+		b.secondary_account_balance,
+		b.staking_balance
+    from votes v
+    join proposals p on p.id = $1
+  	left join balances b on b.addr = v.addr 
+		and p.block_height = b.block_height
+    where proposal_id = $1`
+
+	err := pgxscan.Select(db.Context, db.Conn, &votes, sql, proposalId)
+	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
+		return nil, err
+	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
+		return []*VoteWithBalance{}, nil
+	}
+
+	return votes, nil
+}
+
 func GetVotesForProposal(db *s.Database, start, count int, order string, proposalId int) ([]*VoteWithBalance, int, error) {
 	var votes []*VoteWithBalance
 	var orderBySql string
 	if order == "desc" {
-		orderBySql = "ORDER BY created_at DESC"
+		orderBySql = "ORDER BY b.created_at DESC"
 	} else {
-		orderBySql = "ORDER BY created_at ASC"
+		orderBySql = "ORDER BY b.created_at ASC"
 	}
-	sql := `SELECT v.*, p.block_height,
-		COALESCE(b.staking_balance,0) as balance 
-		FROM votes v
-		JOIN proposals p ON p.id = $3
-		LEFT JOIN balances b ON b.addr = v.addr and p.block_height = b.block_height
-		WHERE proposal_id = $3 `
+
+	//return all balances, strategy will do rest of the work
+	sql := `select v.*, p.block_height, 
+		b.primary_account_balance,
+		b.secondary_account_balance,
+		b.staking_balance
+    from votes v
+    join proposals p on p.id = $3
+  	left join balances b on b.addr = v.addr 
+		and p.block_height = b.block_height
+    where proposal_id = $3`
+
 	sql = sql + orderBySql
 	sql = sql + " LIMIT $1 OFFSET $2"
 
@@ -111,6 +150,18 @@ func (v *Vote) GetVote(db *s.Database) error {
 		`SELECT * from votes
 		WHERE proposal_id = $1 AND addr = $2`,
 		v.Proposal_id, v.Addr)
+}
+
+func (vb *VoteWithBalance) GetVote(db *s.Database) error {
+	return pgxscan.Get(db.Context, db.Conn, vb,
+		`select v.*, 
+		b.primary_account_balance,
+		b.secondary_account_balance,
+		b.staking_balance
+		from votes v
+		left join balances b on b.addr = v.addr
+		WHERE proposal_id = $1 AND v.addr = $2`,
+		vb.Proposal_id, vb.Addr)
 }
 
 func (v *Vote) GetVoteById(db *s.Database) error {

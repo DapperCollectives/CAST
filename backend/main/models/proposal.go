@@ -20,7 +20,7 @@ type Proposal struct {
 	Community_id         int                     `json:"communityId"`
 	Choices              []s.Choice              `json:"choices" validate:"required"`
 	Strategy             *string                 `json:"strategy,omitempty"`
-	Max_weight           *uint64                 `json:"maxWeight,omitempty"`
+	Max_weight           *float64                `json:"maxWeight,omitempty"`
 	Min_balance          *uint64                 `json:"minBalance,omitempty"`
 	Creator_addr         string                  `json:"creatorAddr" validate:"required"`
 	Start_time           time.Time               `json:"startTime" validate:"required"`
@@ -147,8 +147,12 @@ func (p *Proposal) IsLive() bool {
 
 // Returns an error if the account's balance is insufficient to cast
 // a vote on the proposal.
-func (p *Proposal) ValidateBalance(balance *Balance) error {
-	var weight uint64
+func (p *Proposal) ValidateBalance(weight float64) error {
+	if p.Min_balance == nil {
+		return nil
+	}
+
+	var Min_balance = float64(*p.Min_balance)
 	var ERROR error = fmt.Errorf("insufficient balance for strategy: %s", *p.Strategy)
 
 	// TODO: Feature flag
@@ -157,22 +161,11 @@ func (p *Proposal) ValidateBalance(balance *Balance) error {
 		return nil
 	}
 
-	switch *p.Strategy {
-	case "token-weighted-default":
-		weight = balance.StakingBalance + balance.PrimaryAccountBalance
-	case "staked-token-weighted-default":
-		weight = balance.StakingBalance
-	case "token-weighted-capped":
-		weight = balance.StakingBalance + balance.PrimaryAccountBalance
-	default:
-		return fmt.Errorf("validateBalance err - Strategy not implemented: %s", *p.Strategy)
-	}
-
-	if weight == 0 {
+	if weight == 0.00 {
 		return ERROR
 	}
 
-	if p.Min_balance != nil && *p.Min_balance > 0 && weight < *p.Min_balance {
+	if Min_balance != 0.00 && Min_balance > 0.00 && weight < Min_balance {
 		return ERROR
 	}
 	return nil
