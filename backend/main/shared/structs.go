@@ -50,12 +50,6 @@ type Choice struct {
 	Choice_img_url *string `json:"choiceImgUrl"`
 }
 
-type ContractDetails struct {
-	Contract_name *string `json:"contract_name"`
-	Contract_addr *string `json:"contract_addr"`
-	Storage_path  *string `json:"storage_path"`
-}
-
 // Underlying value of payload needs to be a slice
 func GetPaginatedResponseWithPayload(payload interface{}, start, count, totalRecords int) *PaginatedResponse {
 	// Tricky way of getting the length of a slice

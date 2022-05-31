@@ -20,9 +20,6 @@ import (
 var strategy = "token-weighted-default"
 var proposalBody = "<html>something</html>"
 var published = "published"
-var contractName = "Proposal"
-var contradAddr = "0x0000000000000000000000000000000000000000"
-var stroagePath = "./storage"
 
 var DefaultProposalStruct = models.Proposal{
 	Name: "Test Proposal",
@@ -34,11 +31,6 @@ var DefaultProposalStruct = models.Proposal{
 	Creator_addr: ServiceAccountAddress,
 	Strategy:     &strategy,
 	Status:       &published,
-	ContractDetails: &shared.ContractDetails{
-		Contract_name: &contractName,
-		Contract_addr: &contradAddr,
-		Storage_path:  &stroagePath,
-	},
 }
 
 func (otu *OverflowTestUtils) GetProposalsForCommunityAPI(communityId int) *httptest.ResponseRecorder {

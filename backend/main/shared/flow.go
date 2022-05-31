@@ -26,6 +26,13 @@ type FlowAdapter struct {
 	URL     string
 }
 
+type Contract struct {
+	Name        *string
+	Addr        *string
+	Public_path *string
+	Threshold   *int
+}
+
 func NewFlowClient() *FlowAdapter {
 	adapter := FlowAdapter{}
 	adapter.Context = context.Background()
@@ -182,12 +189,12 @@ func (fa *FlowAdapter) UserTransactionValidate(address string, message string, s
 	return nil
 }
 
-func (fa *FlowAdapter) EnforceTokenThreshold(address string, path string, threshold int) (bool, error) {
-	flowAddress := flow.HexToAddress(address)
+func (fa *FlowAdapter) EnforceTokenThreshold(c *Contract) (bool, error) {
+	flowAddress := flow.HexToAddress(*c.Addr)
 	cadenceAddress := cadence.NewAddress(flowAddress)
-	cadencePath := cadence.Path{Domain: "public", Identifier: path}
+	cadencePath := cadence.Path{Domain: "public", Identifier: *c.Public_path}
 
-	fmt.Printf("EnforceTokenThreshold: %s %s %d\n", cadenceAddress, cadencePath, threshold)
+	fmt.Printf("EnforceTokenThreshold: %s %s %d\n", cadenceAddress, cadencePath, c.Threshold)
 
 	// Load script
 	script, err := ioutil.ReadFile("./main/cadence/get_balance.cdc")

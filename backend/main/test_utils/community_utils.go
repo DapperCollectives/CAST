@@ -37,6 +37,10 @@ var github = "github"
 var discord = "discord"
 var instagram = "instagram"
 var termsAndConditions = "termsAndConditions"
+var contractName = "FlowToken"
+var contractAddr = "0x0ae53cb6e3f42a79"
+var publicPath = "flowTokenBalance"
+var threshold = 100
 
 var DefaultCommunity = models.Community{
 	Name:         "TestDAO",
@@ -45,6 +49,21 @@ var DefaultCommunity = models.Community{
 	Creator_addr: "<replace>",
 	Logo:         &logo,
 	Slug:         &slug,
+}
+
+var CommunityWithThreshold = models.Community{
+	Name:         "With Threshold",
+	Category:     &category,
+	Body:         &body,
+	Creator_addr: "<replace>",
+	Logo:         &logo,
+	Slug:         &slug,
+	ContractDetails: models.ContractDetails{
+		Name:        contractName,
+		Addr:        contractAddr,
+		Public_path: publicPath,
+		Threshold:   threshold,
+	},
 }
 
 var UpdatedCommunity = models.Community{
@@ -74,6 +93,15 @@ func (otu *OverflowTestUtils) GenerateCommunityStruct(accountName string) *model
 	community := DefaultCommunity
 	community.Creator_addr = "0x" + account.Address().String()
 
+	return &community
+}
+
+func (otu *OverflowTestUtils) GenerateCommunityWithThresholdStruct(accountName string) *models.Community {
+	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", accountName))
+
+	// this does a deep copy
+	community := CommunityWithThreshold
+	community.Creator_addr = "0x" + account.Address().String()
 	return &community
 }
 

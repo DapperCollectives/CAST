@@ -32,6 +32,7 @@ type Community struct {
 	Proposal_validation      *string   `json:"proposalValidation,omitempty"`
 	Proposal_threshold       *string   `json:"proposalThreshold,omitempty"`
 	Slug                     *string   `json:"slug,omitempty" validate:"required"`
+	ContractDetails
 
 	Timestamp            string                  `json:"timestamp" validate:"required"`
 	Composite_signatures *[]s.CompositeSignature `json:"compositeSignatures" validate:"required"`
@@ -66,6 +67,13 @@ type UpdateCommunityRequestPayload struct {
 	Proposal_threshold       *string   `json:"proposalThreshold,omitempty"`
 
 	s.TimestampSignaturePayload
+}
+
+type ContractDetails struct {
+	Name        string `json:"contract_name"`
+	Addr        string `json:"contract_addr"`
+	Public_path string `json:"public_path"`
+	Threshold   int    `json:"threshold"`
 }
 
 type CommunityType struct {
@@ -156,7 +164,9 @@ func GetCommunitiesForHomePage(db *s.Database, start, count int) ([]*Community, 
 	return communities, totalRecords, nil
 }
 
+//@TODO update to accept Contract columns
 func (c *Community) CreateCommunity(db *s.Database) error {
+
 	err := db.Conn.QueryRow(db.Context,
 		`
 	INSERT INTO communities(
@@ -166,7 +176,25 @@ func (c *Community) CreateCommunity(db *s.Database) error {
 		$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18
 	)
 	RETURNING id, created_at
-	`, c.Name, c.Category, c.Logo, c.Slug, c.Strategies, c.Strategy, c.Banner_img_url, c.Website_url, c.Twitter_url, c.Github_url, c.Discord_url, c.Instagram_url, c.Terms_and_conditions_url, c.Proposal_validation, c.Proposal_threshold, c.Body, c.Cid, c.Creator_addr).Scan(&c.ID, &c.Created_at)
+	`,
+		c.Name,
+		c.Category,
+		c.Logo,
+		c.Slug,
+		c.Strategies,
+		c.Strategy,
+		c.Banner_img_url,
+		c.Website_url,
+		c.Twitter_url,
+		c.Github_url,
+		c.Discord_url,
+		c.Instagram_url,
+		c.Terms_and_conditions_url,
+		c.Proposal_validation,
+		c.Proposal_threshold,
+		c.Body,
+		c.Cid,
+	).Scan(&c.ID, &c.Created_at)
 
 	return err // will be nil unless something went wrong
 }
@@ -187,8 +215,24 @@ func (c *Community) UpdateCommunity(db *s.Database, payload *UpdateCommunityRequ
 		banner_img_url = $6, website_url = $7, twitter_url = $8, github_url = $9,
 		discord_url = $10, instagram_url = $11, proposal_validation = $12, proposal_threshold = $13, category = $14, terms_and_conditions_url = $15
 	WHERE id = $16
-	`, c.Name, c.Body, c.Logo, c.Strategies, c.Strategy, c.Banner_img_url, c.Website_url,
-		c.Twitter_url, c.Github_url, c.Discord_url, c.Instagram_url, c.Proposal_validation, c.Proposal_threshold, c.Category, c.Terms_and_conditions_url, c.ID)
+	`,
+		c.Name,
+		c.Body,
+		c.Logo,
+		c.Strategies,
+		c.Strategy,
+		c.Banner_img_url,
+		c.Website_url,
+		c.Twitter_url,
+		c.Github_url,
+		c.Discord_url,
+		c.Instagram_url,
+		c.Proposal_validation,
+		c.Proposal_threshold,
+		c.Category,
+		c.Terms_and_conditions_url,
+		c.ID,
+	)
 
 	return err // will be nil unless something went wrong
 }

@@ -744,17 +744,39 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 	}
 	p.Block_height = snapshot.Block_height
 
-	address := "0xf8d6e0586b0a20c7"
-	path := "flowTokenBalance"
-
-	hasBalance, err := a.FlowAdapter.EnforceTokenThreshold(address, path, 100)
-	if err != nil {
-		log.Error().Err(err).Msg("error enforcing token threshold")
+	var community models.Community
+	community.ID = communityId
+	if err := community.GetCommunity(a.DB); err != nil {
+		log.Error().Err(err).Msg("error fetching community")
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	fmt.Printf("has balance: %t\n", hasBalance)
+	fmt.Printf("community: %+v\n", community)
+
+	if community.Threshold > 0 {
+		c := shared.Contract{
+			Name:        &community.ContractDetails.Name,
+			Addr:        &community.ContractDetails.Addr,
+			Public_path: &community.ContractDetails.Public_path,
+			Threshold:   &community.ContractDetails.Threshold,
+		}
+
+		hasBalance, err := a.FlowAdapter.EnforceTokenThreshold(&c)
+		if err != nil {
+			log.Error().Err(err).Msg("error enforcing token threshold")
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		if !hasBalance {
+			errMsg := "insufficient token balance to create proposal"
+			log.Error().Err(err).Msg(errMsg)
+			respondWithError(w, http.StatusForbidden, errMsg)
+			return
+		}
+		fmt.Printf("has balance: %t\n", hasBalance)
+	}
 
 	// pin to ipfs
 	pin, err := a.IpfsClient.PinJson(p)
