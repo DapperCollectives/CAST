@@ -1,9 +1,6 @@
 package models
 
 import (
-	"fmt"
-
-	"github.com/bjartek/overflow/overflow"
 	s "github.com/brudfyi/flow-voting-tool/main/shared"
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/jackc/pgx/v4"
@@ -211,36 +208,4 @@ func GrantRolesToCommunityCreator(db *s.Database, addr string, communityId int) 
 func EnsureRoleForCommunity(db *s.Database, addr string, communityId int, userType string) error {
 	user := CommunityUser{Addr: addr, Community_id: communityId, User_type: userType}
 	return user.GetCommunityUser(db)
-}
-
-func EnforceTokenThreshold(db *s.Database, addr string, communityId int) error {
-
-	emulator := overflow.NewOverflowEmulator()
-	emulator.Config("../../flow.json")
-	o := emulator.Start()
-
-	fmt.Println("Starting overflow")
-
-	c := Community{ID: communityId}
-	if err := c.GetCommunity(db); err != nil {
-		switch err.Error() {
-		case pgx.ErrNoRows.Error():
-			ERROR := fmt.Errorf("community %d does not exist", communityId)
-			return ERROR
-		default:
-			ERROR := fmt.Errorf("db error getting community %d: %s", communityId, err.Error())
-			return ERROR
-		}
-	}
-
-	result := o.ScriptFromFile("get_balance").
-		Args(
-			o.Arguments().
-				Account("emulator"),
-		).
-		RunFailOnError()
-
-	fmt.Println("result :", result)
-
-	return nil
 }

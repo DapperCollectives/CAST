@@ -38,10 +38,6 @@ var discord = "discord"
 var instagram = "instagram"
 var termsAndConditions = "termsAndConditions"
 
-var contractAddress = "0xee82856bf20e2aa6"
-var contractName = "With Fungible Token"
-var storagePath = "/storage/MainVault"
-
 var DefaultCommunity = models.Community{
 	Name:         "TestDAO",
 	Category:     &category,
@@ -49,11 +45,6 @@ var DefaultCommunity = models.Community{
 	Creator_addr: "<replace>",
 	Logo:         &logo,
 	Slug:         &slug,
-	ContractDetails: models.ContractDetails{
-		Contract_name: &contractName,
-		Contract_addr: &contractAddress,
-		Storage_path:  &storagePath,
-	},
 }
 
 var UpdatedCommunity = models.Community{

@@ -744,12 +744,17 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 	}
 	p.Block_height = snapshot.Block_height
 
-	err = models.EnforceTokenThreshold(a.DB, p.Creator_addr, p.Community_id)
+	address := "0xf8d6e0586b0a20c7"
+	path := "flowTokenBalance"
+
+	hasBalance, err := a.FlowAdapter.EnforceTokenThreshold(address, path, 100)
 	if err != nil {
 		log.Error().Err(err).Msg("error enforcing token threshold")
-		respondWithError(w, http.StatusForbidden, err.Error())
+		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	fmt.Printf("has balance: %t\n", hasBalance)
 
 	// pin to ipfs
 	pin, err := a.IpfsClient.PinJson(p)

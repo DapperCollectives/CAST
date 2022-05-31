@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -179,6 +180,39 @@ func (fa *FlowAdapter) UserTransactionValidate(address string, message string, s
 		return errors.New("transaction to address not recognized")
 	}
 	return nil
+}
+
+func (fa *FlowAdapter) EnforceTokenThreshold(address string, path string, threshold int) (bool, error) {
+	flowAddress := flow.HexToAddress(address)
+	cadenceAddress := cadence.NewAddress(flowAddress)
+	cadencePath := cadence.Path{Domain: "public", Identifier: path}
+
+	fmt.Printf("EnforceTokenThreshold: %s %s %d\n", cadenceAddress, cadencePath, threshold)
+
+	// Load script
+	script, err := ioutil.ReadFile("./main/cadence/get_balance.cdc")
+	if err != nil {
+		log.Error().Err(err).Msgf("error reading cadence script file")
+		return false, err
+	}
+	//call the script to verify balance
+	value, err := fa.Client.ExecuteScriptAtLatestBlock(
+		fa.Context,
+		script,
+		[]cadence.Value{
+			cadencePath,
+			cadenceAddress,
+		},
+	)
+
+	if err != nil {
+		log.Error().Err(err).Msg("error executing script")
+		return false, err
+	}
+
+	fmt.Printf("value: %s\n", value.String())
+
+	return true, nil
 }
 
 func WaitForSeal(ctx context.Context, c *client.Client, id flow.Identifier) (*flow.TransactionResult, *flow.Transaction, error) {
