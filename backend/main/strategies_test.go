@@ -11,10 +11,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-/*********************/
-/*     COMMUNITIES   */
-/*********************/
-
 /* Token Weighted Default */
 func TestTokenWeightedDefaultStrategy(t *testing.T) {
 	clearTable("communities")
