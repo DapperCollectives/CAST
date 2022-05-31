@@ -262,7 +262,6 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID")
 		return
 	}
-	count, _ := strconv.Atoi(r.FormValue("count"))
 
 	// First, get the proposal by proposalId
 	p := models.Proposal{ID: proposalId}
@@ -277,7 +276,7 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get the votes for proposal
-	votes, err := models.GetAllVotesForProposal(a.DB, count, proposalId)
+	votes, err := models.GetAllVotesForProposal(a.DB, proposalId)
 	if err != nil {
 		// print the error to the console
 		log.Error().Err(err).Msg("Error getting votes for proposal")
