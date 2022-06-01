@@ -36,8 +36,8 @@ type Contract struct {
 
 var (
 	placeholderTokenName         = regexp.MustCompile(`"[^"\s]*TOKEN_NAME"`)
-	placeholderTokenAddr         = regexp.MustCompile(`"[^"\s]*FUNGIBLE_TOKEN"`)
-	placeholderFungibleTokenAddr = regexp.MustCompile(`"[^"\s]*EXAMPLE_TOKEN"`)
+	placeholderTokenAddr         = regexp.MustCompile(`"[^"\s]*TOKEN_ADDRESS"`)
+	placeholderFungibleTokenAddr = regexp.MustCompile(`"[^"\s]*FUNGIBLE_TOKEN_ADDRESS"`)
 )
 
 func NewFlowClient() *FlowAdapter {
@@ -237,12 +237,9 @@ func (fa *FlowAdapter) EnforceTokenThreshold(c *Contract) (bool, error) {
 // Fungible Token Address here is hardcoded to emulator address, this should
 // be set based on environment
 func replaceContractPlaceholders(code string, c *Contract) []byte {
-	//print all the placeholder variables
-	fmt.Printf("placeholderTokenName: %s\n", placeholderTokenName)
-	fmt.Printf("placeholderTokenAddress: %s\n", placeholderFungibleTokenAddr)
+	code = placeholderFungibleTokenAddr.ReplaceAllString(code, "0xee82856bf20e2aa6")
 	code = placeholderTokenName.ReplaceAllString(code, *c.Name)
 	code = placeholderTokenAddr.ReplaceAllString(code, *c.Addr)
-	code = placeholderFungibleTokenAddr.ReplaceAllString(code, "0xee82856bf20e2aa6")
 	return []byte(code)
 }
 
