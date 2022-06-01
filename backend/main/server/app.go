@@ -726,19 +726,19 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//TODO Put this back
-
-	// if err := models.EnsureRoleForCommunity(a.DB, p.Creator_addr, communityId, "author"); err != nil {
-	// 	errMsg := fmt.Sprintf("account %s is not an author for community %d", p.Creator_addr, p.Community_id)
-	// 	log.Error().Err(err).Msg(errMsg)
-	// 	respondWithError(w, http.StatusForbidden, errMsg)
-	// 	return
-	//}
+	if err := models.EnsureRoleForCommunity(a.DB, p.Creator_addr, communityId, "author"); err != nil {
+		errMsg := fmt.Sprintf("account %s is not an author for community %d", p.Creator_addr, p.Community_id)
+		log.Error().Err(err).Msg(errMsg)
+		respondWithError(w, http.StatusForbidden, errMsg)
+		return
+	}
 	if err := a.validateSignature(p.Creator_addr, p.Timestamp, p.Composite_signatures); err != nil {
 		log.Error().Err(err)
 		respondWithError(w, http.StatusForbidden, err.Error())
 		return
 	}
+
+	fmt.Printf("proposal, %+v\n", p)
 
 	// get latest snapshotted blockheight
 	snapshot, err := a.SnapshotClient.GetLatestSnapshot()
@@ -759,15 +759,16 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Printf("community: %+v\n", community)
 
-	if community.Threshold > 0 {
-		c := shared.Contract{
-			Name:        &community.ContractDetails.Name,
-			Addr:        &community.ContractDetails.Addr,
-			Public_path: &community.ContractDetails.Public_path,
-			Threshold:   &community.ContractDetails.Threshold,
+	if community.Contract_name != nil {
+
+		var contract = &shared.Contract{
+			Name:        community.Contract_name,
+			Addr:        community.Contract_addr,
+			Public_path: community.Public_path,
+			Threshold:   community.Threshold,
 		}
 
-		hasBalance, err := a.FlowAdapter.EnforceTokenThreshold(&c)
+		hasBalance, err := a.FlowAdapter.EnforceTokenThreshold(contract)
 		if err != nil {
 			log.Error().Err(err).Msg("error enforcing token threshold")
 			respondWithError(w, http.StatusInternalServerError, err.Error())

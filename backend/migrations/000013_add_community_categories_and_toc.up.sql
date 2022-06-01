@@ -23,4 +23,4 @@ VALUES ('service', 'Service', 'Service Community');
 
 ALTER TABLE communities ADD COLUMN category community_type;
 ALTER TABLE communities ADD COLUMN terms_and_conditions_url VARCHAR(256);
-ALTER TABLE communities ADD COLUMN only_authors_to_submit BOOLEAN DEFAULT FALSE;
+ALTER TABLE communities ADD COLUMN only_authors_to_submit BOOLEAN;

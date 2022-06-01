@@ -52,18 +52,16 @@ var DefaultCommunity = models.Community{
 }
 
 var CommunityWithThreshold = models.Community{
-	Name:         "With Threshold",
-	Category:     &category,
-	Body:         &body,
-	Creator_addr: "<replace>",
-	Logo:         &logo,
-	Slug:         &slug,
-	ContractDetails: models.ContractDetails{
-		Name:        contractName,
-		Addr:        contractAddr,
-		Public_path: publicPath,
-		Threshold:   threshold,
-	},
+	Name:          "With Threshold",
+	Category:      &category,
+	Body:          &body,
+	Creator_addr:  "<replace>",
+	Logo:          &logo,
+	Slug:          &slug,
+	Contract_name: &contractName,
+	Contract_addr: &contractAddr,
+	Public_path:   &publicPath,
+	Threshold:     &threshold,
 }
 
 var UpdatedCommunity = models.Community{
@@ -92,7 +90,6 @@ func (otu *OverflowTestUtils) GenerateCommunityStruct(accountName string) *model
 	// this does a deep copy
 	community := DefaultCommunity
 	community.Creator_addr = "0x" + account.Address().String()
-
 	return &community
 }
 

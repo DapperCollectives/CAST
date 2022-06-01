@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -32,6 +33,12 @@ type Contract struct {
 	Public_path *string
 	Threshold   *int
 }
+
+var (
+	placeholderTokenName         = regexp.MustCompile(`"[^"\s]*TOKEN_NAME"`)
+	placeholderTokenAddr         = regexp.MustCompile(`"[^"\s]*FUNGIBLE_TOKEN"`)
+	placeholderFungibleTokenAddr = regexp.MustCompile(`"[^"\s]*EXAMPLE_TOKEN"`)
+)
 
 func NewFlowClient() *FlowAdapter {
 	adapter := FlowAdapter{}
@@ -190,6 +197,7 @@ func (fa *FlowAdapter) UserTransactionValidate(address string, message string, s
 }
 
 func (fa *FlowAdapter) EnforceTokenThreshold(c *Contract) (bool, error) {
+
 	flowAddress := flow.HexToAddress(*c.Addr)
 	cadenceAddress := cadence.NewAddress(flowAddress)
 	cadencePath := cadence.Path{Domain: "public", Identifier: *c.Public_path}
@@ -202,6 +210,10 @@ func (fa *FlowAdapter) EnforceTokenThreshold(c *Contract) (bool, error) {
 		log.Error().Err(err).Msgf("error reading cadence script file")
 		return false, err
 	}
+
+	script = replaceContractPlaceholders(string(script[:]), c)
+
+	fmt.Printf("script %s\n", script)
 	//call the script to verify balance
 	value, err := fa.Client.ExecuteScriptAtLatestBlock(
 		fa.Context,
@@ -220,6 +232,18 @@ func (fa *FlowAdapter) EnforceTokenThreshold(c *Contract) (bool, error) {
 	fmt.Printf("value: %s\n", value.String())
 
 	return true, nil
+}
+
+// Fungible Token Address here is hardcoded to emulator address, this should
+// be set based on environment
+func replaceContractPlaceholders(code string, c *Contract) []byte {
+	//print all the placeholder variables
+	fmt.Printf("placeholderTokenName: %s\n", placeholderTokenName)
+	fmt.Printf("placeholderTokenAddress: %s\n", placeholderFungibleTokenAddr)
+	code = placeholderTokenName.ReplaceAllString(code, *c.Name)
+	code = placeholderTokenAddr.ReplaceAllString(code, *c.Addr)
+	code = placeholderFungibleTokenAddr.ReplaceAllString(code, "0xee82856bf20e2aa6")
+	return []byte(code)
 }
 
 func WaitForSeal(ctx context.Context, c *client.Client, id flow.Identifier) (*flow.TransactionResult, *flow.Transaction, error) {
