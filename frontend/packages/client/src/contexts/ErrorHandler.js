@@ -31,20 +31,31 @@ const ErrorHandlerProvider = ({ children }) => {
       openModal(
         React.createElement(Error, {
           error: (
-            <p className="has-text-red">
+            <p className="has-text-red p-3 has-text-justified">
               <b>{error.statusText}</b>
             </p>
           ),
-          errorTitle: `Error code: ${error.errorCode}`,
+          errorTitle:
+            typeof error.status === "number"
+              ? `Error code: ${error.status}`
+              : error?.status,
         }),
         {
           onClose: closeError,
+          classNameModalContent: "rounded-sm",
         }
       );
       setErrorOpened(true);
     }
   }, [openModal, error, closeError, isOpen, errorOpened]);
 
+  /**
+   * Hook to call modal error and show a message
+   * @param  {Object | Error} err
+   *    Object { status: number | string, statusText: string } or
+   *    Error object with message that contains a string that will be parsed to get status and statusText
+   * @param  {string} url indicates the url request that generated the error
+   */
   const notifyError = useCallback((err, url) => {
     try {
       const response = JSON.parse(err.message);
@@ -53,8 +64,8 @@ const ErrorHandlerProvider = ({ children }) => {
       }
     } catch (error) {
       setError({
-        status: 500,
-        statusText: `Server not available: ${err.message}`,
+        status: err?.status ?? 500,
+        statusText: err?.statusText || `Server not available: ${err?.message}`,
         url,
       });
     }

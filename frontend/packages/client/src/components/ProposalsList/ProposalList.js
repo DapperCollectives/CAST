@@ -17,10 +17,10 @@ const PaddingWrapper = ({ children }) => {
 const ProposalList = ({
   proposalsList,
   proposalFilterValues,
-  setFilterValues,
+  setFilterValues = () => {},
   filterValue,
   initialLoading,
-}) => {
+} = {}) => {
   return (
     <>
       <div className="columns m-0">
@@ -41,7 +41,7 @@ const ProposalList = ({
       {initialLoading && <Loader fullHeight />}
       <div className="is-flex is-flex-direction-column">
         {(proposalsList ?? []).map((pr, i) => (
-          <Link to={`/proposal/${pr.id}`} key={i}>
+          <Link to={`/proposal/${pr.id}`} key={i} data-testid="proposal-card">
             <div
               className="border-light rounded-sm mb-5 proposal-card transition-all"
               key={i}

@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"math"
 	"net/http"
 	"testing"
@@ -11,10 +10,6 @@ import (
 	utils "github.com/brudfyi/flow-voting-tool/main/test_utils"
 	"github.com/stretchr/testify/assert"
 )
-
-/*********************/
-/*     COMMUNITIES   */
-/*********************/
 
 /* Token Weighted Default */
 func TestTokenWeightedDefaultStrategy(t *testing.T) {
@@ -38,7 +33,6 @@ func TestTokenWeightedDefaultStrategy(t *testing.T) {
 		CheckResponseCode(t, http.StatusOK, response.Code)
 
 		var results models.ProposalResults
-		fmt.Printf("%+v\n", results)
 		json.Unmarshal(response.Body.Bytes(), &results)
 
 		assert.Equal(t, _results.Proposal_id, results.Proposal_id)

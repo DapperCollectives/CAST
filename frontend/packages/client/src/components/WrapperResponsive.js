@@ -1,46 +1,49 @@
-import React from "react";
+import React, { useCallback } from "react";
+import { useMediaQuery } from "../hooks";
 
 export default function WrapperResponsive({
   as: Tag = "div",
   children,
-  commonClasses = "",
+  classNames = "",
+  styles = {},
   extraClasses = "",
   extraClassesMobile = "",
   extraStyles,
   extraStylesMobile,
 } = {}) {
-  const classesForMobile = "is-hidden-tablet"
-    .concat(" " + commonClasses)
-    .concat(" " + extraClassesMobile)
-    .trim();
+  const notMobile = useMediaQuery();
 
-  const classes = "is-hidden-mobile"
-    .concat(" " + commonClasses)
-    .concat(" " + extraClasses)
-    .trim();
-
-  const component =
-    typeof extraStyles === "object" ? (
-      <Tag className={classes} style={extraStyles}>
-        {children}
-      </Tag>
-    ) : (
-      <Tag className={classes}>{children}</Tag>
-    );
-
-  const mobileComponent =
-    typeof extraStylesMobile === "object" ? (
-      <Tag className={classesForMobile} style={extraStylesMobile}>
-        {children}
-      </Tag>
-    ) : (
-      <Tag className={classesForMobile}>{children}</Tag>
-    );
-
-  return (
-    <>
-      {component}
-      {mobileComponent}
-    </>
+  const component = useCallback(
+    (children) => {
+      const classes = `${classNames} ${extraClasses}`.trim();
+      const stylesObj = Object.assign({}, styles, extraStyles ?? {});
+      return (
+        <Tag className={classes} style={stylesObj}>
+          {children}
+        </Tag>
+      );
+    },
+    [styles, extraStyles, classNames, extraClasses]
   );
+
+  const mobileComponent = useCallback(
+    (children) => {
+      const classesForMobile = `${classNames} ${extraClassesMobile}`.trim();
+      const stylesObjMob = Object.assign({}, styles, extraStylesMobile ?? {});
+      return (
+        <Tag className={classesForMobile} style={stylesObjMob}>
+          {children}
+        </Tag>
+      );
+    },
+    [styles, classNames, extraClassesMobile, extraStylesMobile]
+  );
+
+  const returnComponent = useCallback(
+    (children) => {
+      return notMobile ? component(children) : mobileComponent(children);
+    },
+    [notMobile, component, mobileComponent]
+  );
+  return returnComponent(children);
 }

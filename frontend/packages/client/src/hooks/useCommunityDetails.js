@@ -1,9 +1,14 @@
 import { useReducer, useEffect, useCallback } from "react";
 import { defaultReducer, INITIAL_STATE } from "../reducers";
-import { checkResponse } from "../utils";
+import { checkResponse, getCompositeSigs } from "../utils";
 import { useErrorHandlerContext } from "../contexts/ErrorHandler";
+import { useWebContext } from "../contexts/Web3";
 
 export default function useCommunityDetails(id) {
+  const {
+    user: { addr },
+    injectedProvider,
+  } = useWebContext();
   const { notifyError } = useErrorHandlerContext();
   const [state, dispatch] = useReducer(defaultReducer, INITIAL_STATE);
   const getCommunityDetails = useCallback(async () => {
@@ -19,8 +24,7 @@ export default function useCommunityDetails(id) {
         description:
           "Flow's decentralized governance and node operations community.",
         about: {
-          textAbout:
-            "The Flow community is a steward of the platform and ecosystem: taking an active role in building and improving everything from the node software to the tools that developers use to create amazing experiences, exercising agency to make decisions, in a fair and open process, that set Flow's trajectory.",
+          textAbout: details.body,
         },
         ...details,
       };
@@ -36,8 +40,62 @@ export default function useCommunityDetails(id) {
     getCommunityDetails();
   }, [getCommunityDetails]);
 
+  const updateCommunityDetails = useCallback(
+    async (communityId, update) => {
+      const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}`;
+      try {
+        const timestamp = Date.now().toString();
+        const hexTime = Buffer.from(timestamp).toString("hex");
+        const _compositeSignatures = await injectedProvider
+          .currentUser()
+          .signUserMessage(hexTime);
+
+        const compositeSignatures = getCompositeSigs(_compositeSignatures);
+
+        if (!compositeSignatures) {
+          return { error: "No valid user signature found." };
+        }
+
+        const fetchOptions = {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...update,
+            signingAddr: addr,
+            timestamp,
+            compositeSignatures,
+          }),
+        };
+        dispatch({ type: "PROCESSING" });
+        const response = await fetch(url, fetchOptions);
+        const json = await checkResponse(response);
+        const wait = async () =>
+          new Promise((resolve) => {
+            setTimeout(() => {
+              resolve(true);
+            }, 4000);
+          });
+
+        await wait();
+        dispatch({
+          type: "SUCCESS",
+          payload: json,
+        });
+        return json;
+      } catch (err) {
+        notifyError(err, url);
+        dispatch({ type: "ERROR", payload: { errorData: err.message } });
+        return { error: err.message };
+      }
+    },
+    [dispatch, notifyError, addr, injectedProvider]
+  );
+
   return {
     ...state,
+    updateCommunityDetails,
     getCommunityDetails,
   };
 }

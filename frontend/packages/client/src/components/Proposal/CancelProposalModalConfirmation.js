@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { Loader } from "../../components";
+import { Loader } from "components";
 
 const CancelProposalModalConfirmation = ({
   proposalName,

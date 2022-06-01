@@ -263,7 +263,6 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID")
 		return
 	}
-	count, _ := strconv.Atoi(r.FormValue("count"))
 
 	// First, get the proposal by proposalId
 	p := models.Proposal{ID: proposalId}
@@ -278,15 +277,13 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get the votes for proposal
-	votes, err := models.GetVotesForProposal(a.DB, count, proposalId)
+	votes, err := models.GetAllVotesForProposal(a.DB, proposalId)
 	if err != nil {
 		// print the error to the console
 		log.Error().Err(err).Msg("Error getting votes for proposal")
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-
-	fmt.Printf("votes for proposal %d: %+v\n", proposalId, votes)
 
 	// look up the strategy for proposal
 	s := strategyMap[*p.Strategy]
@@ -328,7 +325,7 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 		start = 0
 	}
 
-	votes, err := models.GetVotesForProposal(a.DB, count, proposalId)
+	votes, totalRecords, err := models.GetVotesForProposal(a.DB, start, count, order, proposalId)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -357,8 +354,8 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusNotFound, err.Error())
 		return
 	}
-
-	respondWithJSON(w, http.StatusOK, votesWithWeights)
+	response := shared.GetPaginatedResponseWithPayload(votesWithWeights, start, count, totalRecords)
+	respondWithJSON(w, http.StatusOK, response)
 }
 
 func (a *App) getVoteForAddress(w http.ResponseWriter, r *http.Request) {
@@ -599,11 +596,19 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 
 	// create the voteWithBalance struct
 	vb := models.VoteWithBalance{
-		Vote: v,
+		Vote:                    v,
+		PrimaryAccountBalance:   &balance.PrimaryAccountBalance,
+		SecondaryAccountBalance: &balance.SecondaryAccountBalance,
+		StakingBalance:          &balance.StakingBalance,
 	}
 
 	//get the vote weight
 	weight, err := s.GetVoteWeightForBalance(&vb, &p)
+	if err != nil {
+		log.Error().Err(err).Msg("error getting vote weight")
+		respondWithError(w, http.StatusInternalServerError, "error getting vote weight")
+		return
+	}
 
 	// Validate balance is sufficient to cast vote
 	if err = p.ValidateBalance(weight); err != nil {
@@ -612,7 +617,7 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// pin to ipfs
+	//pin to ipfs
 	pin, err := a.IpfsClient.PinJson(v)
 	// If request fails, it may be because of an issue with Pinata.
 	// Continue on, and worker will retroactively populate

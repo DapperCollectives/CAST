@@ -31,7 +31,8 @@ $button-hover-border-color: $yellow
 $title-size: 2.5rem
 $progress-bar-background-color: $yellow
 $input-color: black
-$white-ter: #F2F2F2	
+$white-ter: #F2F2F2
+$border-color-light: #DBDBDB
 
 // Import only what you need from Bulma
 @import '~bulma/sass/utilities/_all.sass'
@@ -62,13 +63,13 @@ $tooltip-radius: 6px
 .Body
 	padding-top: calc($navbar-height + 2rem)
 	height: 100%
-@include mobile	
+@include mobile
 	.Body
 		padding-top: calc($navbar-height + 1.25rem)
 		height: 100%
 .full-height
 	height: 100%
-.tx 
+.tx
 	border: 1px solid $yellow
 code
 	background: transparent
@@ -109,7 +110,7 @@ code
 	cursor: pointer
 .header-spacing
 	padding-bottom: 1rem
-	padding-top: 1rem 
+	padding-top: 1rem
 .message-container, .communities
 	margin-bottom: 2.5rem
 @include mobile
@@ -119,14 +120,14 @@ code
 	.section
 		padding-top: 1.57rem !important
 		padding-bottom: 3rem
-		padding-right: 1.5rem	  	
+		padding-right: 1.5rem
 		padding-left: 1.5rem
-	.message-container, .communities		
-		margin-bottom: 1.5rem		  	
+	.message-container, .communities
+		margin-bottom: 1.5rem
 // custom radio buttons
 label > input[type="radio"]
 	display: none
-label > input[type="radio"] + *::before 
+label > input[type="radio"] + *::before
 	content: ""
 	display: inline-block
 	vertical-align: middle
@@ -142,21 +143,21 @@ label > input[type="radio"]:checked + *
 label > input[type="radio"]:checked + *::before
 	background: radial-gradient($yellow 0%, $yellow 40%, transparent 50%, transparent)
 	border-color: $yellow
-label > input[type="radio"].is-chosen + *::before
+label > input[type="radio"].is-chosen + *::before, .is-button-chosen
 	// green checkmark image
 	background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTIiIGZpbGw9IiMwRTVCMjAiLz4KPHBhdGggZD0iTTE4LjEyOTMgNy40NzkyOEMxNy45NjE1IDcuMzU5IDE3Ljc1MjkgNy4zMTAyOSAxNy41NDkyIDcuMzQzODZDMTcuMzQ1NSA3LjM3NzQ0IDE3LjE2MzUgNy40OTA1NCAxNy4wNDMyIDcuNjU4M0w5Ljc2MDE2IDE0LjY5OUw3LjMyOTAyIDEyLjI2NThDNy4xODMwNyAxMi4xMTk4IDYuOTg1MDkgMTIuMDM3NyA2Ljc3ODYzIDEyLjAzNzdDNi41NzIxNyAxMi4wMzc2IDYuMzc0MTUgMTIuMTE5NiA2LjIyODEzIDEyLjI2NTVDNi4wODIxMSAxMi40MTE1IDYuMDAwMDUgMTIuNjA5NSA2IDEyLjgxNTlDNS45OTk5NSAxMy4wMjI0IDYuMDgxOTIgMTMuMjIwNCA2LjIyNzg3IDEzLjM2NjRMOS4zMDc2NyAxNi40NDU3QzkuMzg4NTIgMTYuNTIzNSA5LjQ4NSAxNi41ODMyIDkuNTkwNyAxNi42MjA5QzkuNjk2NCAxNi42NTg2IDkuODA4OTEgMTYuNjczMyA5LjkyMDc1IDE2LjY2NDJDMTAuMDMyNiAxNi42NTUxIDEwLjE0MTIgMTYuNjIyMyAxMC4yMzk0IDE2LjU2OEMxMC4zMzc2IDE2LjUxMzYgMTAuNDIzMSAxNi40MzkxIDEwLjQ5MDMgMTYuMzQ5MkwxOC4zMDgzIDguNTY1MzhDMTguNDI4NiA4LjM5NzYxIDE4LjQ3NzMgOC4xODg5MyAxOC40NDM4IDcuOTg1MjVDMTguNDEwMiA3Ljc4MTU3IDE4LjI5NzEgNy41OTk1NyAxOC4xMjkzIDcuNDc5MjhaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K')
 	background-size: contain
 	width: 25px
 	height: 25px
-	background-color: white
 	border-color: transparent
 	background-repeat: no-repeat
-
+label > input[type="radio"].is-chosen + *::before
+	background-color: white
 .proposal-copy
 	color: $grey
 .proposal-copy ul
 	padding-left: 2rem
-.proposal-copy ul li 
+.proposal-copy ul li
 	padding-left: .5rem
 	list-style: disc
 	margin-bottom: 1rem
@@ -223,28 +224,28 @@ hr
 		height: auto
 		color: #000000 !important
 
-.tabs a 
+.tabs a
 	border-bottom-color: #dbdbdb
 	border-bottom-style: none
 	border-bottom-width: 0px
 
-.tabs li.is-active a 
+.tabs li.is-active a
 	border-bottom-color: $yellow
 	color: $black
 	border-bottom-width: 3px
 	border-bottom-style: solid
 
-.small-text  
+.small-text
 	font-size: 0.88rem !important
-.smaller-text  
+.smaller-text
 	font-size: 0.75rem !important
 .has-text-back
-	color: #000000 !important	
+	color: #000000 !important
 .has-text-red
 	color: $red
 
-@import './components/StepByStep/StepByStep.sass'	
-@import './components/Proposals/Proposals.sass'
+@import './components/StepByStep/StepByStep.sass'
+@import './components/ProposalsList/ProposalList.sass'
 
 .button.dropdown-item.is-active
 	background-color: $grey
@@ -258,13 +259,13 @@ hr
 @include desktop
 	.is-panel-fixed
 		position: fixed
-		
+
 @include  tablet
 	.is-panel-fixed
 		position: fixed
 
 span[data-tooltip]
-	border-bottom: 1px #dbdbdb
+	border-bottom: 1px $border-color-light
 
 .transition-all
 	transition-property: all
@@ -275,7 +276,7 @@ span[data-tooltip]
 	border-color: rgba(0, 0, 0, 0.4) !important
 	border-width: 1px !important
 	transform: scale(1.01)
-.wallet-connect.button.is-primary	
+.wallet-connect.button.is-primary
 	color: #000000 !important
 
 .community-card:hover, .proposal-card:hover
@@ -325,10 +326,10 @@ span[data-tooltip]
 	animation-delay: 0.3s
 #loader_3
 	@include loader
-	animation-delay: 0.6s		
+	animation-delay: 0.6s
 
-@keyframes fadein 
-	0% 
+@keyframes fadein
+	0%
 		opacity: 0
 	100%
 		opacity: 1
@@ -339,3 +340,44 @@ span[data-tooltip]
 	-ms-animation: fadein 0.5s
 	-o-animation: fadein 0.5s
 	animation: fadein 0.5s
+
+.word-break-all
+	word-break: break-all
+
+.word-break
+	word-break: break-word
+.mx-loader
+	margin-left: 0.1rem !important
+	margin-right: 0.1rem !important
+	word-break: break-all
+
+.text-area
+	resize: none
+
+.mx-loader
+	margin-left: 0.1rem !important
+	margin-right: 0.1rem !important
+
+.mx-button-loader
+	margin-left: 0.3rem !important
+	.button
+		&.is-black
+			border-width: 0px
+		&.right
+			border-bottom-right-radius: 8px
+			border-top-right-radius: 8px
+			border-bottom-left-radius: 0px
+			border-top-left-radius: 0px
+		&.left
+			border-bottom-left-radius: 8px
+			border-top-left-radius: 8px
+			border-bottom-right-radius: 0px
+			border-top-right-radius: 0px
+		&.outlined
+			color: grey
+			border-color: grey
+		&.outlined:hover
+			color: black
+			border-color: black
+	.button:focus:not(:active), .button.is-focused:not(:active)
+		box-shadow: none
