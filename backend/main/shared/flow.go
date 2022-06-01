@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"flag"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -226,8 +225,6 @@ func (fa *FlowAdapter) EnforceTokenThreshold(c *Contract) (bool, error) {
 	}
 
 	value := CadenceValueToInterface(cadenceValue)
-	fmt.Printf("result: %v\n", value)
-
 	balance, err := strconv.ParseFloat(value.(string), 64)
 	if err != nil {
 		log.Error().Err(err).Msg("error converting cadence value to float")
