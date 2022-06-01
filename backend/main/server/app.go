@@ -71,6 +71,7 @@ type Strategy interface {
 var strategyMap = map[string]Strategy{
 	"token-weighted-default":        &strategies.TokenWeightedDefault{},
 	"staked-token-weighted-default": &strategies.StakedTokenWeightedDefault{},
+	"one-address-one-vote":          &strategies.OneAddressOneVote{},
 }
 
 const (

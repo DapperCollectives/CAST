@@ -33,7 +33,6 @@ func (s *TokenWeightedDefault) GetVotes(votes []*models.VoteWithBalance, proposa
 		}
 		vote.Weight = &weight
 	}
-
 	return votes, nil
 }
 
