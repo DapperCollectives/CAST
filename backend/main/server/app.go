@@ -738,8 +738,6 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Printf("proposal, %+v\n", p)
-
 	// get latest snapshotted blockheight
 	snapshot, err := a.SnapshotClient.GetLatestSnapshot()
 	if err != nil {
@@ -756,8 +754,6 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-
-	fmt.Printf("community: %+v\n", community)
 
 	if community.Contract_name != nil {
 
@@ -781,17 +777,16 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 			respondWithError(w, http.StatusForbidden, errMsg)
 			return
 		}
-		fmt.Printf("has balance: %t\n", hasBalance)
 	}
 
 	// pin to ipfs
-	pin, err := a.IpfsClient.PinJson(p)
-	if err != nil {
-		log.Error().Err(err).Msg("error pinning proposal to IPFS")
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-	p.Cid = &pin.IpfsHash
+	// pin, err := a.IpfsClient.PinJson(p)
+	// if err != nil {
+	// 	log.Error().Err(err).Msg("error pinning proposal to IPFS")
+	// 	respondWithError(w, http.StatusInternalServerError, err.Error())
+	// 	return
+	// }
+	// p.Cid = &pin.IpfsHash
 
 	// validate proposal fields
 	validate := validator.New()

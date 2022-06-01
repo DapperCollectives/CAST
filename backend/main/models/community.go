@@ -34,10 +34,10 @@ type Community struct {
 	Proposal_threshold       *string   `json:"proposalThreshold,omitempty"`
 	Slug                     *string   `json:"slug,omitempty" validate:"required"`
 
-	Contract_name *string `json:"contract_name,omitempty"`
-	Contract_addr *string `json:"contract_addr,omitempty"`
-	Public_path   *string `json:"public_path,omitempty"`
-	Threshold     *int    `json:"threshold,omitempty"`
+	Contract_name *string  `json:"contract_name,omitempty"`
+	Contract_addr *string  `json:"contract_addr,omitempty"`
+	Public_path   *string  `json:"public_path,omitempty"`
+	Threshold     *float64 `json:"threshold,omitempty"`
 
 	Timestamp            string                  `json:"timestamp" validate:"required"`
 	Composite_signatures *[]s.CompositeSignature `json:"compositeSignatures" validate:"required"`

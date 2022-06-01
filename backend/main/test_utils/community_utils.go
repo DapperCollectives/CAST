@@ -40,7 +40,7 @@ var termsAndConditions = "termsAndConditions"
 var contractName = "FlowToken"
 var contractAddr = "0x0ae53cb6e3f42a79"
 var publicPath = "flowTokenBalance"
-var threshold = 100
+var threshold = 0.0000069
 
 var DefaultCommunity = models.Community{
 	Name:         "TestDAO",

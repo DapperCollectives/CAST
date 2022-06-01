@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -31,7 +32,7 @@ type Contract struct {
 	Name        *string
 	Addr        *string
 	Public_path *string
-	Threshold   *int
+	Threshold   *float64
 }
 
 var (
@@ -202,9 +203,6 @@ func (fa *FlowAdapter) EnforceTokenThreshold(c *Contract) (bool, error) {
 	cadenceAddress := cadence.NewAddress(flowAddress)
 	cadencePath := cadence.Path{Domain: "public", Identifier: *c.Public_path}
 
-	fmt.Printf("EnforceTokenThreshold: %s %s %d\n", cadenceAddress, cadencePath, c.Threshold)
-
-	// Load script
 	script, err := ioutil.ReadFile("./main/cadence/get_balance.cdc")
 	if err != nil {
 		log.Error().Err(err).Msgf("error reading cadence script file")
@@ -213,9 +211,8 @@ func (fa *FlowAdapter) EnforceTokenThreshold(c *Contract) (bool, error) {
 
 	script = replaceContractPlaceholders(string(script[:]), c)
 
-	fmt.Printf("script %s\n", script)
 	//call the script to verify balance
-	value, err := fa.Client.ExecuteScriptAtLatestBlock(
+	cadenceValue, err := fa.Client.ExecuteScriptAtLatestBlock(
 		fa.Context,
 		script,
 		[]cadence.Value{
@@ -223,13 +220,23 @@ func (fa *FlowAdapter) EnforceTokenThreshold(c *Contract) (bool, error) {
 			cadenceAddress,
 		},
 	)
-
 	if err != nil {
 		log.Error().Err(err).Msg("error executing script")
 		return false, err
 	}
 
-	fmt.Printf("value: %s\n", value.String())
+	value := CadenceValueToInterface(cadenceValue)
+	fmt.Printf("result: %v\n", value)
+
+	balance, err := strconv.ParseFloat(value.(string), 64)
+	if err != nil {
+		log.Error().Err(err).Msg("error converting cadence value to float")
+		return false, err
+	}
+
+	if balance < *c.Threshold {
+		return false, errors.New("balance is below threshold")
+	}
 
 	return true, nil
 }
@@ -259,4 +266,47 @@ func WaitForSeal(ctx context.Context, c *client.Client, id flow.Identifier) (*fl
 
 	tx, errTx := c.GetTransaction(ctx, id)
 	return result, tx, errTx
+}
+
+func CadenceValueToInterface(field cadence.Value) interface{} {
+	if field == nil {
+		return ""
+	}
+
+	switch field := field.(type) {
+	case cadence.Optional:
+		return CadenceValueToInterface(field.Value)
+	case cadence.Dictionary:
+		result := map[string]interface{}{}
+		for _, item := range field.Pairs {
+			key, err := strconv.Unquote(item.Key.String())
+			if err != nil {
+				result[item.Key.String()] = CadenceValueToInterface(item.Value)
+				continue
+			}
+
+			result[key] = CadenceValueToInterface(item.Value)
+		}
+		return result
+	case cadence.Struct:
+		result := map[string]interface{}{}
+		subStructNames := field.StructType.Fields
+
+		for j, subField := range field.Fields {
+			result[subStructNames[j].Identifier] = CadenceValueToInterface(subField)
+		}
+		return result
+	case cadence.Array:
+		var result []interface{}
+		for _, item := range field.Values {
+			result = append(result, CadenceValueToInterface(item))
+		}
+		return result
+	default:
+		result, err := strconv.Unquote(field.String())
+		if err != nil {
+			return field.String()
+		}
+		return result
+	}
 }
