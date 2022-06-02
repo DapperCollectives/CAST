@@ -237,3 +237,58 @@ func TestOneTokenOneVoteStrategy(t *testing.T) {
 		}
 	})
 }
+
+func TestBalanceOfNftsStrategy(t *testing.T) {
+	clearTable("communities")
+	clearTable("community_users")
+	clearTable("proposals")
+	clearTable("votes")
+	clearTable("balances")
+
+	communityId := otu.AddCommunities(1)[0]
+	proposalId := otu.AddProposalsForStrategy(communityId, "balance-of-nfts", 1)[0]
+	votes := otu.GenerateListOfVotes(proposalId, 10)
+	otu.AddDummyVotesAndBalances(votes)
+
+	t.Run("Test Tallying Results", func(t *testing.T) {
+		_results := otu.TallyResultsForBalanceOfNfts(proposalId, votes)
+
+		response := otu.GetProposalResultsAPI(proposalId)
+		CheckResponseCode(t, http.StatusOK, response.Code)
+
+		var results models.ProposalResults
+		json.Unmarshal(response.Body.Bytes(), &results)
+
+		assert.Equal(t, _results.Proposal_id, results.Proposal_id)
+		assert.Equal(t, _results.Results_float["a"], results.Results_float["a"])
+		assert.Equal(t, _results.Results_float["b"], results.Results_float["b"])
+	})
+
+	t.Run("Test Fetching Votes for Proposal", func(t *testing.T) {
+		response := otu.GetVotesForProposalAPI(proposalId)
+
+		CheckResponseCode(t, http.StatusOK, response.Code)
+
+		var body utils.PaginatedResponseWithVotes
+		json.Unmarshal(response.Body.Bytes(), &body)
+
+		// Validate vote weights are returned correctly
+		for _, v := range body.Data {
+			expectedWeight := float64(1.00)
+			assert.Equal(t, expectedWeight, *v.Weight)
+		}
+	})
+
+	t.Run("Test Fetching Vote for Address", func(t *testing.T) {
+		_vote := (*votes)[0]
+		response := otu.GetVoteForProposalByAddressAPI(proposalId, _vote.Addr)
+
+		CheckResponseCode(t, http.StatusOK, response.Code)
+
+		var vote models.VoteWithBalance
+		json.Unmarshal(response.Body.Bytes(), &vote)
+
+		expectedWeight := float64(1.00)
+		assert.Equal(t, expectedWeight, *vote.Weight)
+	})
+}

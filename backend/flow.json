@@ -17,6 +17,24 @@
 			"aliases": {
 				"emulator": "0x0ae53cb6e3f42a79"
 			}
+		},
+		"NonFungibleToken": {
+			"source": "./cadence/contracts/NonFungibleToken.cdc",
+			"aliases": {
+				"emulator": "0x0ae53cb6e3f42a79"
+			}
+		},
+		"ExampleNFT": {
+			"source": "./cadence/contracts/ExampleNFT.cdc",
+			"aliases": {
+				"emulator": "0x0ae53cb6e3f42a79" 
+			}
+		},
+		"MetadataViews": {
+			"source": "./cadence/contracts/MetadataViews.cdc",
+			"aliases": {
+				"emulator": "0x0ae53cb6e3f42a79"
+			}
 		}
 	},
 	"networks": {
@@ -56,7 +74,7 @@
 	},
 	"deployments": {
 		"emulator": {
-			"emulator-account": [],
+			"emulator-account": ["NonFungibleToken", "ExampleNFT", "MetadataViews"],
 			"emulator-user1": [],
 			"emulator-user2": [],
 			"emulator-user3": [],

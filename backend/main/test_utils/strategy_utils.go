@@ -58,6 +58,16 @@ func (otu *OverflowTestUtils) TallyResultsForOneAddressOneVote(proposalId int, v
 	return &r
 }
 
+func (otu *OverflowTestUtils) TallyResultsForBalanceOfNfts(proposalId int, votes *[]VoteWithBalance) *models.ProposalResults {
+	r := models.ProposalResults{Proposal_id: proposalId}
+
+	r.Results = map[string]int{}
+	r.Results["a"] = 0
+	r.Results["b"] = 0
+
+	return &r
+}
+
 func (otu *OverflowTestUtils) GenerateListOfVotes(proposalId int, count int) *[]VoteWithBalance {
 	votes := make([]VoteWithBalance, count)
 	choices := []string{"a", "b"}
