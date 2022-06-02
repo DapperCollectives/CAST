@@ -5,11 +5,36 @@ import (
 	"math"
 
 	"github.com/brudfyi/flow-voting-tool/main/models"
+	s "github.com/brudfyi/flow-voting-tool/main/shared"
+	"github.com/jackc/pgx/v4"
+	"github.com/rs/zerolog/log"
 )
 
 type StakedTokenWeightedDefault struct{}
 
-// should handle and return error case here
+func (s *StakedTokenWeightedDefault) FetchBalance(db *s.Database, b *models.Balance, sc *s.SnapshotClient) (*models.Balance, error) {
+
+	if err := b.GetBalanceByAddressAndBlockHeight(db); err != nil && err.Error() != pgx.ErrNoRows.Error() {
+		log.Error().Err(err).Msg("error querying address b at blockheight")
+		return nil, err
+	}
+
+	if b.ID == "" {
+		err := b.FetchAddressBalanceAtBlockHeight(sc, b.Addr, b.BlockHeight)
+		if err != nil {
+			log.Error().Err(err).Msg("error fetching address b at blockheight.")
+			return nil, err
+		}
+
+		if err = b.CreateBalance(db); err != nil {
+			log.Error().Err(err).Msg("error saving b to DB")
+			return nil, err
+		}
+	}
+
+	return b, nil
+}
+
 func (s *StakedTokenWeightedDefault) TallyVotes(votes []*models.VoteWithBalance, proposalId int) (models.ProposalResults, error) {
 	var r models.ProposalResults
 	r.Results = map[string]int{}
@@ -22,19 +47,6 @@ func (s *StakedTokenWeightedDefault) TallyVotes(votes []*models.VoteWithBalance,
 	}
 
 	return r, nil
-}
-
-func (s *StakedTokenWeightedDefault) GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error) {
-
-	for _, vote := range votes {
-		weight, err := s.GetVoteWeightForBalance(vote, proposal)
-		if err != nil {
-			return nil, err
-		}
-		vote.Weight = &weight
-	}
-
-	return votes, nil
 }
 
 func (s *StakedTokenWeightedDefault) GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error) {
@@ -60,4 +72,17 @@ func (s *StakedTokenWeightedDefault) GetVoteWeightForBalance(vote *models.VoteWi
 	default:
 		return weight, ERROR
 	}
+}
+
+func (s *StakedTokenWeightedDefault) GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error) {
+
+	for _, vote := range votes {
+		weight, err := s.GetVoteWeightForBalance(vote, proposal)
+		if err != nil {
+			return nil, err
+		}
+		vote.Weight = &weight
+	}
+
+	return votes, nil
 }
