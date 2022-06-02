@@ -1,4 +1,4 @@
-pCommunity Creation: Enforce Token Threshold for Proposal Creationackage main
+package main
 
 import (
 	"encoding/json"
