@@ -59,7 +59,7 @@ CREATE TABLE votes (
 );
 
 -- Strategies
-CREATE TYPE strategies AS enum ('token-weighted-default', 'token-weighted-capped', 'one-address-one-vote');
+CREATE TYPE strategies AS enum ('token-weighted-default', 'token-weighted-capped');
 
 CREATE TABLE voting_strategies (
   key strategies primary key,
