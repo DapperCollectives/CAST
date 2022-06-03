@@ -198,9 +198,9 @@ func (fa *FlowAdapter) UserTransactionValidate(address string, message string, s
 	return nil
 }
 
-func (fa *FlowAdapter) EnforceTokenThreshold(c *Contract) (bool, error) {
+func (fa *FlowAdapter) EnforceTokenThreshold(creatorAddr string, c *Contract) (bool, error) {
 
-	flowAddress := flow.HexToAddress(*c.Addr)
+	flowAddress := flow.HexToAddress(creatorAddr)
 	cadenceAddress := cadence.NewAddress(flowAddress)
 	cadencePath := cadence.Path{Domain: "public", Identifier: *c.Public_path}
 
