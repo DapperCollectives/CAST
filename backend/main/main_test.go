@@ -25,6 +25,7 @@ func TestMain(m *testing.M) {
 
 	emulator := overflow.NewOverflowEmulator()
 	emulator.Config("../flow.json")
+	emulator.BasePath("./main/cadence")
 	O = emulator.Start()
 
 	CWD := "../"
