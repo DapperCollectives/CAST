@@ -10,6 +10,7 @@
     "bulma": "0.9.3",
     "cookies-js": "^1.2.3",
     "draft-js": "^0.11.7",
+    "draft-js-export-html": "^1.4.1",
     "draftjs-to-html": "^0.9.1",
     "immutable": "^4.1.0",
     "lodash": "4.17.21",
