@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import Loader from "./Loader";
-import ProposalCard from "./ProposalsList/ProposalCard";
+import ProposalCard from "./ProposalCard";
 
 const EmptyPlaceHolder = ({ communityId }) => {
   return (
@@ -33,6 +33,7 @@ const CommunityProposalList = ({
   activeProposals = [],
   filterValue,
   communityId,
+  admins,
 } = {}) => {
   // filter with all value should show active and pending in one group and closed and cancelled in another group
   if (filterValue === "all") {
@@ -44,13 +45,26 @@ const CommunityProposalList = ({
         {listIsEmpty && <EmptyPlaceHolder communityId={communityId} />}
         {/* If there's an element in any of the two lists they will render */}
         <div className="is-flex is-flex-direction-column">
-          {(activeProposals ?? []).map((pr, i) => (<ProposalCard pr={pr} key={i} />))}
+          {(activeProposals ?? []).map((pr, i) => (
+            <ProposalCard
+              pr={pr}
+              key={i}
+              isAdminProposal={admins.includes(pr.creatorAddr)}
+            />
+          ))}
         </div>
         {proposalsList?.length !== 0 && (
           <div className="has-text-weight-bold is-uppercase mb-5">Closed</div>
         )}
         <div className="is-flex is-flex-direction-column">
-          {(proposalsList ?? []).map((pr, i) => (<ProposalCard pr={pr} style={{ opacity: "50%" }} key={i} />))}
+          {(proposalsList ?? []).map((pr, i) => (
+            <ProposalCard
+              pr={pr}
+              key={i}
+              isAdminProposal={admins.includes(pr.creatorAddr)}
+              style={{ opacity: "50%" }}
+            />
+          ))}
         </div>
       </>
     );

@@ -1,16 +1,13 @@
 import React, { useMemo } from "react";
 import millify from "millify";
-import { Active, CheckCircle } from "../Svg";
+import { Active, CheckCircle } from "components/Svg";
 import { parseDateFromServer } from "utils";
-import StatusLabel from "../StatusLabel";
+import { StatusLabel, WrapperResponsive } from "components";
 import { useVotingResults } from "hooks";
 import { FilterValues } from "const";
-import WrapperResponsive from "components/WrapperResponsive";
 
-const ProposalCardFooter = ({ id, voted, endTime, computedStatus, isDesktopOnly }) => {
+const IconAndText = ({ endTime, voted, status }) => {
   const { data: votingResults } = useVotingResults();
-  const { diffDuration } = parseDateFromServer(endTime);
-  const status = FilterValues[computedStatus] ?? FilterValues.closed;
 
   const { textDecision, winCount } = useMemo(() => {
     if (votingResults?.results) {
@@ -45,6 +42,8 @@ const ProposalCardFooter = ({ id, voted, endTime, computedStatus, isDesktopOnly 
       textDecision !== "" ? <CheckCircle width="15" height="15" /> : null,
   };
 
+  const { diffDuration } = parseDateFromServer(endTime);
+
   const textDescriptionMap = {
     [FilterValues.active]: `${diffDuration} left`,
     [FilterValues.closed]:
@@ -53,19 +52,7 @@ const ProposalCardFooter = ({ id, voted, endTime, computedStatus, isDesktopOnly 
         : "",
   };
 
-  const statusLabelMap = {
-    [FilterValues.active]: <StatusLabel status="Active" voted={voted} rounder
-      color="has-background-orange"
-      className="proposal-status-label has-text-weight-bold has-text-black"
-    />,
-    [FilterValues.pending]: <StatusLabel status="Pending" voted={voted} rounder
-      color="has-background-grey-light"
-    />,
-    [FilterValues.closed]: <StatusLabel status="Closed" voted={voted} rounder />,
-    [FilterValues.cancelled]: <StatusLabel status="Cancelled" voted={voted} rounder />,
-  };
-
-  const IconAndText = () => (
+  return (
     <>
       <WrapperResponsive
         classNames="is-narrow is-flex is-align-items-center"
@@ -85,6 +72,22 @@ const ProposalCardFooter = ({ id, voted, endTime, computedStatus, isDesktopOnly 
       </WrapperResponsive>
     </>
   );
+};
+
+const ProposalCardFooter = ({ id, voted, endTime, computedStatus, isDesktopOnly }) => {
+  const status = FilterValues[computedStatus] ?? FilterValues.closed;
+
+  const statusLabelMap = {
+    [FilterValues.active]: <StatusLabel status="Active" voted={voted} rounder
+      color="has-background-orange"
+      className="proposal-status-label has-text-weight-bold has-text-black"
+    />,
+    [FilterValues.pending]: <StatusLabel status="Pending" voted={voted} rounder
+      color="has-background-grey-light"
+    />,
+    [FilterValues.closed]: <StatusLabel status="Closed" voted={voted} rounder />,
+    [FilterValues.cancelled]: <StatusLabel status="Cancelled" voted={voted} rounder />,
+  };
 
   return (
     <WrapperResponsive
@@ -102,12 +105,13 @@ const ProposalCardFooter = ({ id, voted, endTime, computedStatus, isDesktopOnly 
           {statusLabelMap[status] ?? null}
         </p>
       </WrapperResponsive>
-      {(!isDesktopOnly && !voted)
-        ? <div className="is-flex">
-          <IconAndText />
+      {!isDesktopOnly && !voted ? (
+        <div className="is-flex">
+          <IconAndText voted={voted} endTime={endTime} status={status} />
         </div>
-        : <IconAndText />
-      }
+      ) : (
+        <IconAndText voted={voted} endTime={endTime} status={status} />
+      )}
     </WrapperResponsive>
   );
 };

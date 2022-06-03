@@ -27,3 +27,4 @@ export {
   PropCreateStepThree,
 } from "./ProposalCreate";
 export { default as UploadImageModal } from "./UploadImageModal";
+export { default as Tablink } from "./Tablink";

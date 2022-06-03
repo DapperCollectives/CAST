@@ -9,13 +9,13 @@ import {
   Error,
   Loader,
   WrapperResponsive,
+  Tablink,
 } from "components";
 import { CheckMark, ArrowLeft, Bin } from "components/Svg";
 import { useProposal, useVotingStrategies, useMediaQuery } from "hooks";
 import { useModalContext } from "contexts/NotificationModal";
 import { useWebContext } from "contexts/Web3";
 import { FilterValues } from "const";
-import { Tablink } from "components/ProposalsList";
 import {
   CancelProposalModalConfirmation,
   ProposalStatus,
