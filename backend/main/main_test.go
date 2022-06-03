@@ -8,6 +8,7 @@ import (
 
 	"github.com/bjartek/overflow/overflow"
 	"github.com/brudfyi/flow-voting-tool/main/server"
+	"github.com/brudfyi/flow-voting-tool/main/shared"
 	utils "github.com/brudfyi/flow-voting-tool/main/test_utils"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
@@ -52,8 +53,10 @@ func TestMain(m *testing.M) {
 		os.Getenv("IPFS_SECRET"),
 	)
 
+	adapter := shared.NewFlowClient()
+
 	// Setup overflow test utils struct
-	otu = &utils.OverflowTestUtils{T: nil, A: &A, O: O}
+	otu = &utils.OverflowTestUtils{T: nil, A: &A, O: O, Adapter: adapter}
 
 	ensureTableExists()
 	// Clear DB tables before running tests

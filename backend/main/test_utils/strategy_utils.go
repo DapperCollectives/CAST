@@ -1,7 +1,6 @@
 package test_utils
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
 	"strconv"
@@ -96,15 +95,13 @@ func (otu *OverflowTestUtils) GenerateListOfVotes(proposalId int, count int) *[]
 	return &votes
 }
 
-func (otu *OverflowTestUtils) CreateNFTCollection(account string) *OverflowTestUtils {
+func (otu *OverflowTestUtils) CreateNFTCollection(account string) {
 	otu.O.TransactionFromFile("create_collection").
 		SignProposeAndPayAs(account).
 		RunPrintEventsFull()
-
-	return otu
 }
 
-func (otu *OverflowTestUtils) MintNFT(account string) *OverflowTestUtils {
+func (otu *OverflowTestUtils) MintNFT(account string) {
 	otu.O.TransactionFromFile("mint_nft").
 		SignProposeAndPayAsService().
 		Args(otu.O.Arguments().
@@ -113,16 +110,4 @@ func (otu *OverflowTestUtils) MintNFT(account string) *OverflowTestUtils {
 			String("description").
 			String("thumbnail")).
 		RunPrintEventsFull()
-
-	return otu
-}
-
-func (otu *OverflowTestUtils) GetNFTs(account string) {
-	result := otu.O.ScriptFromFile("get_nfts").
-		Args(otu.O.Arguments().Account(account)).
-		RunFailOnError()
-
-	fmt.Printf("get NFTs result :  %+v\n", result)
-
-	return
 }

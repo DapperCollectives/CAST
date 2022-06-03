@@ -7,12 +7,14 @@ import (
 
 	"github.com/bjartek/overflow/overflow"
 	"github.com/brudfyi/flow-voting-tool/main/server"
+	"github.com/brudfyi/flow-voting-tool/main/shared"
 )
 
 type OverflowTestUtils struct {
-	O *overflow.Overflow
-	T *testing.T
-	A *server.App
+	O       *overflow.Overflow
+	T       *testing.T
+	A       *server.App
+	Adapter *shared.FlowAdapter
 }
 
 func (otu *OverflowTestUtils) SetTest(t *testing.T) *OverflowTestUtils {

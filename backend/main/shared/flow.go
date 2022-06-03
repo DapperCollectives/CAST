@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -35,9 +36,10 @@ type Contract struct {
 }
 
 var (
-	placeholderTokenName         = regexp.MustCompile(`"[^"\s]*TOKEN_NAME"`)
-	placeholderTokenAddr         = regexp.MustCompile(`"[^"\s]*TOKEN_ADDRESS"`)
-	placeholderFungibleTokenAddr = regexp.MustCompile(`"[^"\s]*FUNGIBLE_TOKEN_ADDRESS"`)
+	placeholderTokenName            = regexp.MustCompile(`"[^"\s]*TOKEN_NAME"`)
+	placeholderTokenAddr            = regexp.MustCompile(`"[^"\s]*TOKEN_ADDRESS"`)
+	placeholderFungibleTokenAddr    = regexp.MustCompile(`"[^"\s]*FUNGIBLE_TOKEN_ADDRESS"`)
+	placeholderNonFungibleTokenAddr = regexp.MustCompile(`"[^"\s]*NON_FUNGIBLE_TOKEN_ADDRESS"`)
 )
 
 func NewFlowClient() *FlowAdapter {
@@ -208,7 +210,7 @@ func (fa *FlowAdapter) EnforceTokenThreshold(c *Contract) (bool, error) {
 		return false, err
 	}
 
-	script = replaceContractPlaceholders(string(script[:]), c)
+	script = replaceContractPlaceholders(string(script[:]), c, true)
 
 	//call the script to verify balance
 	cadenceValue, err := fa.Client.ExecuteScriptAtLatestBlock(
@@ -238,12 +240,55 @@ func (fa *FlowAdapter) EnforceTokenThreshold(c *Contract) (bool, error) {
 	return true, nil
 }
 
+func (fa *FlowAdapter) GetNFTIds(voterAddr string, c *Contract) ([]interface{}, error) {
+	flowAddress := flow.HexToAddress(voterAddr)
+	cadenceAddress := cadence.NewAddress(flowAddress)
+
+	fmt.Printf("Voter Address %s\n", cadenceAddress.String())
+
+	script, err := ioutil.ReadFile("./main/cadence/scripts/get_nfts_ids.cdc")
+	if err != nil {
+		log.Error().Err(err).Msgf("error reading cadence script file")
+		return nil, err
+	}
+
+	script = replaceContractPlaceholders(string(script[:]), c, false)
+
+	fmt.Printf("script: %s\n", script)
+	fmt.Printf("flow adapter Client: %+v\n", fa.Client)
+
+	//call the script to verify balance
+	cadenceValue, err := fa.Client.ExecuteScriptAtLatestBlock(
+		fa.Context,
+		script,
+		[]cadence.Value{
+			cadenceAddress,
+		},
+	)
+	if err != nil {
+		log.Error().Err(err).Msg("error executing script")
+		return nil, err
+	}
+
+	fmt.Printf("cadenceValue: %s\n", cadenceValue)
+
+	value := CadenceValueToInterface(cadenceValue)
+	nfts := value.([]interface{})
+
+	return nfts, nil
+}
+
 // Fungible Token Address here is hardcoded to emulator address, this should
 // be set based on environment
-func replaceContractPlaceholders(code string, c *Contract) []byte {
-	code = placeholderFungibleTokenAddr.ReplaceAllString(code, "0xee82856bf20e2aa6")
+func replaceContractPlaceholders(code string, c *Contract, isFungible bool) []byte {
+	if isFungible {
+		code = placeholderFungibleTokenAddr.ReplaceAllString(code, "0xee82856bf20e2aa6")
+	} else {
+		code = placeholderNonFungibleTokenAddr.ReplaceAllString(code, "0xf8d6e0586b0a20c7")
+	}
 	code = placeholderTokenName.ReplaceAllString(code, *c.Name)
 	code = placeholderTokenAddr.ReplaceAllString(code, *c.Addr)
+
 	return []byte(code)
 }
 
