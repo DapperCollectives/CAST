@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useWebContext } from "contexts/Web3";
 import { useJoinCommunity, useUserRoleOnCommunity } from "hooks";
 
@@ -8,61 +8,63 @@ export default function JoinCommunityButton({
 }) {
   const { createCommunityUser, deleteUserFromCommunity } = useJoinCommunity();
   const { injectedProvider, user } = useWebContext();
-  const { addr } = user;
+  const [addr, setAddr] = useState();
   const memberState = useUserRoleOnCommunity({
     addr,
     communityId,
     roles: ["member"],
   });
-  const [isMember, setMemberState] = useState(memberState);
-  const [btnText, setBtnText] = useState(isMember ? "Leave" : "Join");
+  const [isMember, setIsMember] = useState();
 
-  const joinCommunity = async () => {
-    const { success } = await createCommunityUser(
-      communityId,
-      user,
-      injectedProvider
-    );
-    if (success) {
-      setMemberState(true);
-      setBtnText("Leave");
-      setTotalMembers((totalMembers) => ++totalMembers);
-    }
+  useEffect(() => {
+    setAddr(user.addr);
+    setIsMember(memberState)
+  }, [user.addr, memberState]);
+
+  const refresh = (updateFn) => {
+    setAddr(null);
+    setAddr(user.addr);
+    setTotalMembers(updateFn);
   };
 
-  const leaveCommunity = async () => {
-    const { success } = await deleteUserFromCommunity(
-      communityId,
-      user,
-      injectedProvider
-    );
+  const joinCommunity = () => createCommunityUser(
+    communityId,
+    user,
+    injectedProvider
+  ).then(({ success }) => {
     if (success) {
-      setMemberState(false);
-      setBtnText("Join");
-      setTotalMembers((totalMembers) => --totalMembers);
+      refresh((totalMembers) => ++totalMembers);
     }
-  };
+  });
 
-  const handleMembership = () => isMember ? leaveCommunity() : joinCommunity();
+  const leaveCommunity = () => deleteUserFromCommunity(
+    communityId,
+    user,
+    injectedProvider
+  ).then(({ success }) => {
+    if (success) {
+      refresh((totalMembers) => --totalMembers);
+    }
+  });
+
+  if (isMember !== true && isMember !== false) return null;
 
   return (
-    <>
-      <div
-        className="column is-narrow-tablet is-full-mobile is-align-self-center"
-        style={{ minWidth: "117px" }}
+    <div
+      className="column is-narrow-tablet is-full-mobile is-align-self-center"
+      style={{ minWidth: "117px" }}
+    >
+      <button
+        className="button is-uppercase is-fullwidth"
+        style={{
+          backgroundColor: "black",
+          borderRadius: "200px",
+          color: "white",
+        }}
+        onClick={isMember ? leaveCommunity : joinCommunity}
       >
-        <button
-          className="button is-uppercase is-fullwidth"
-          style={{
-            backgroundColor: "black",
-            borderRadius: "200px",
-            color: "white",
-          }}
-          onClick={handleMembership}
-        >
-          {btnText}
-        </button>
-      </div>
-    </>
+        {isMember ? "Leave" : "Join"}
+      </button>
+    </div>
   );
 }

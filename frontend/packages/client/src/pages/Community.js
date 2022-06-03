@@ -134,7 +134,7 @@ const MembersLayout = ({
   );
 };
 
-export default function Community({ enableJoin = false }) {
+export default function Community() {
   const { communityId } = useParams();
 
   const history = useHistory();
@@ -252,12 +252,10 @@ export default function Community({ enableJoin = false }) {
                 </div>
               </div>
             </div>
-            {enableJoin && (
-              <JoinCommunityButton
-                communityId={communityId}
-                setTotalMembers={setTotalMembers}
-              />
-            )}
+            <JoinCommunityButton
+              communityId={communityId}
+              setTotalMembers={setTotalMembers}
+            />
           </div>
         </div>
       ) : null}

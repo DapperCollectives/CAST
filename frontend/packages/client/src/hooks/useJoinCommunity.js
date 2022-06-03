@@ -1,13 +1,7 @@
 import { useReducer, useCallback } from "react";
 import { defaultReducer, INITIAL_STATE } from "../reducers";
 import { useErrorHandlerContext } from "../contexts/ErrorHandler";
-
-const getCompositeSigs = (sigArr) => {
-  if (sigArr[0]?.signature?.signature) {
-    return [sigArr[0].signature];
-  }
-  return sigArr;
-};
+import { getCompositeSigs } from "utils";
 
 export default function useJoinCommunity() {
   const [state, dispatch] = useReducer(defaultReducer, {

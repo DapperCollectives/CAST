@@ -26,15 +26,15 @@ export default function useUserCommunities({
     dispatch({ type: "RESET_RESULTS" });
   }, []);
 
-  const getCommunityUser = useCallback(async () => {
+  const getUserCommunities = useCallback(async () => {
     dispatch({ type: "PROCESSING" });
     const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/users/${addr}/communities?count=${count}&start=${start}`;
     try {
       const response = await fetch(url);
-      const communityUser = await checkResponse(response);
+      const userCommunities = await checkResponse(response);
       dispatch({
         type: "SUCCESS",
-        payload: communityUser,
+        payload: userCommunities
       });
     } catch (err) {
       // notify user of error
@@ -43,33 +43,18 @@ export default function useUserCommunities({
     }
   }, [dispatch, notifyError, addr, count, start]);
 
-  const fetchMore = useCallback(async () => {
-    dispatch({ type: "PROCESSING" });
-    const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/users/${addr}/communities?count=${state.pagination.count}&start=${state.pagination.start}`;
-    try {
-      const response = await fetch(url);
-      const proposalVotes = await response.json();
-
-      dispatch({ type: "SUCCESS", payload: proposalVotes });
-    } catch (err) {
-      notifyError(err, url);
-      dispatch({ type: "ERROR", payload: { errorData: err.message } });
-    }
-  }, [state.pagination, addr, notifyError]);
-
   useEffect(() => {
     if (addr) {
-      getCommunityUser();
+      getUserCommunities();
     }
     if (addr === null) {
       resetResults();
     }
-  }, [getCommunityUser, resetResults, addr]);
+  }, [getUserCommunities, resetResults, addr]);
 
   return {
     ...state,
-    getCommunityUser,
+    getUserCommunities,
     resetResults,
-    fetchMore,
   };
 }

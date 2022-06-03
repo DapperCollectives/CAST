@@ -20,8 +20,6 @@ const CommunityCard = ({
   description,
   id,
   isComingSoon = false,
-  isMember = false,
-  enableJoin = false,
 }) => {
   const descriptionStyle = {
     lineHeight: "1.5em",
@@ -63,7 +61,7 @@ const CommunityCard = ({
             </p>
           )}
         </div>
-        {enableJoin && (<JoinCommunityButton communityId={id} />)}
+        <JoinCommunityButton communityId={id} />
       </div>
     </div>
   );
