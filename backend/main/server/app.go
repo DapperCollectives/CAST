@@ -729,14 +729,46 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 	}
 	p.Block_height = snapshot.Block_height
 
-	// pin to ipfs
-	pin, err := a.IpfsClient.PinJson(p)
-	if err != nil {
-		log.Error().Err(err).Msg("error pinning proposal to IPFS")
+	var community models.Community
+	community.ID = communityId
+	if err := community.GetCommunity(a.DB); err != nil {
+		log.Error().Err(err).Msg("error fetching community")
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	p.Cid = &pin.IpfsHash
+
+	if community.Contract_name != nil {
+
+		var contract = &shared.Contract{
+			Name:        community.Contract_name,
+			Addr:        community.Contract_addr,
+			Public_path: community.Public_path,
+			Threshold:   community.Threshold,
+		}
+
+		hasBalance, err := a.FlowAdapter.EnforceTokenThreshold(contract)
+		if err != nil {
+			log.Error().Err(err).Msg("error enforcing token threshold")
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		if !hasBalance {
+			errMsg := "insufficient token balance to create proposal"
+			log.Error().Err(err).Msg(errMsg)
+			respondWithError(w, http.StatusForbidden, errMsg)
+			return
+		}
+	}
+
+	// pin to ipfs
+	// pin, err := a.IpfsClient.PinJson(p)
+	// if err != nil {
+	// 	log.Error().Err(err).Msg("error pinning proposal to IPFS")
+	// 	respondWithError(w, http.StatusInternalServerError, err.Error())
+	// 	return
+	// }
+	// p.Cid = &pin.IpfsHash
 
 	// validate proposal fields
 	validate := validator.New()

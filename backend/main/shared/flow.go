@@ -7,6 +7,8 @@ import (
 	"flag"
 	"io/ioutil"
 	"os"
+	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -24,6 +26,19 @@ type FlowAdapter struct {
 	Context context.Context
 	URL     string
 }
+
+type Contract struct {
+	Name        *string
+	Addr        *string
+	Public_path *string
+	Threshold   *float64
+}
+
+var (
+	placeholderTokenName         = regexp.MustCompile(`"[^"\s]*TOKEN_NAME"`)
+	placeholderTokenAddr         = regexp.MustCompile(`"[^"\s]*TOKEN_ADDRESS"`)
+	placeholderFungibleTokenAddr = regexp.MustCompile(`"[^"\s]*FUNGIBLE_TOKEN_ADDRESS"`)
+)
 
 func NewFlowClient() *FlowAdapter {
 	adapter := FlowAdapter{}
@@ -181,6 +196,57 @@ func (fa *FlowAdapter) UserTransactionValidate(address string, message string, s
 	return nil
 }
 
+func (fa *FlowAdapter) EnforceTokenThreshold(c *Contract) (bool, error) {
+
+	flowAddress := flow.HexToAddress(*c.Addr)
+	cadenceAddress := cadence.NewAddress(flowAddress)
+	cadencePath := cadence.Path{Domain: "public", Identifier: *c.Public_path}
+
+	script, err := ioutil.ReadFile("./main/cadence/get_balance.cdc")
+	if err != nil {
+		log.Error().Err(err).Msgf("error reading cadence script file")
+		return false, err
+	}
+
+	script = replaceContractPlaceholders(string(script[:]), c)
+
+	//call the script to verify balance
+	cadenceValue, err := fa.Client.ExecuteScriptAtLatestBlock(
+		fa.Context,
+		script,
+		[]cadence.Value{
+			cadencePath,
+			cadenceAddress,
+		},
+	)
+	if err != nil {
+		log.Error().Err(err).Msg("error executing script")
+		return false, err
+	}
+
+	value := CadenceValueToInterface(cadenceValue)
+	balance, err := strconv.ParseFloat(value.(string), 64)
+	if err != nil {
+		log.Error().Err(err).Msg("error converting cadence value to float")
+		return false, err
+	}
+
+	if balance < *c.Threshold {
+		return false, errors.New("balance is below threshold")
+	}
+
+	return true, nil
+}
+
+// Fungible Token Address here is hardcoded to emulator address, this should
+// be set based on environment
+func replaceContractPlaceholders(code string, c *Contract) []byte {
+	code = placeholderFungibleTokenAddr.ReplaceAllString(code, "0xee82856bf20e2aa6")
+	code = placeholderTokenName.ReplaceAllString(code, *c.Name)
+	code = placeholderTokenAddr.ReplaceAllString(code, *c.Addr)
+	return []byte(code)
+}
+
 func WaitForSeal(ctx context.Context, c *client.Client, id flow.Identifier) (*flow.TransactionResult, *flow.Transaction, error) {
 	result, err := c.GetTransactionResult(ctx, id)
 	if err != nil {
@@ -197,4 +263,47 @@ func WaitForSeal(ctx context.Context, c *client.Client, id flow.Identifier) (*fl
 
 	tx, errTx := c.GetTransaction(ctx, id)
 	return result, tx, errTx
+}
+
+func CadenceValueToInterface(field cadence.Value) interface{} {
+	if field == nil {
+		return ""
+	}
+
+	switch field := field.(type) {
+	case cadence.Optional:
+		return CadenceValueToInterface(field.Value)
+	case cadence.Dictionary:
+		result := map[string]interface{}{}
+		for _, item := range field.Pairs {
+			key, err := strconv.Unquote(item.Key.String())
+			if err != nil {
+				result[item.Key.String()] = CadenceValueToInterface(item.Value)
+				continue
+			}
+
+			result[key] = CadenceValueToInterface(item.Value)
+		}
+		return result
+	case cadence.Struct:
+		result := map[string]interface{}{}
+		subStructNames := field.StructType.Fields
+
+		for j, subField := range field.Fields {
+			result[subStructNames[j].Identifier] = CadenceValueToInterface(subField)
+		}
+		return result
+	case cadence.Array:
+		var result []interface{}
+		for _, item := range field.Values {
+			result = append(result, CadenceValueToInterface(item))
+		}
+		return result
+	default:
+		result, err := strconv.Unquote(field.String())
+		if err != nil {
+			return field.String()
+		}
+		return result
+	}
 }

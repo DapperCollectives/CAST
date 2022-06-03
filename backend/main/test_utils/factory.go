@@ -116,6 +116,25 @@ func (otu *OverflowTestUtils) AddCommunitiesWithUsers(count int, signer string) 
 	return retIds
 }
 
+func (otu *OverflowTestUtils) AddCommunitiesWithUsersAndThreshold(count int, signer string) []int {
+	if count < 1 {
+		count = 1
+	}
+	retIds := []int{}
+	for i := 0; i < count; i++ {
+		community := otu.GenerateCommunityWithThresholdStruct(signer)
+		if err := community.CreateCommunityWithContract(otu.A.DB); err != nil {
+			fmt.Printf("error in otu.AddCommunities")
+		}
+		// Add community_user roles for the creator
+		models.GrantRolesToCommunityCreator(otu.A.DB, community.Creator_addr, community.ID)
+
+		id := community.ID
+		retIds = append(retIds, id)
+	}
+	return retIds
+}
+
 func (otu *OverflowTestUtils) AddProposals(cId int, count int) []int {
 	if count < 1 {
 		count = 1
