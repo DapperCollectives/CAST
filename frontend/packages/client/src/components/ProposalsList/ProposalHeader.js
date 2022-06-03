@@ -42,6 +42,12 @@ const ProposalHeader = ({ id: proposalId, voted, endTime, computedStatus }) => {
     if (votingResults?.results) {
       const { results } = votingResults;
       const resultsArray = Object.entries(results);
+
+      // result object comes empty from backend
+      if (resultsArray.length === 0) {
+        return { textDecision: "", winCount: 0 };
+      }
+
       const sortedResults = resultsArray.sort((a, b) => {
         if (Number(b[1]) < Number(a[1])) {
           return -1;
