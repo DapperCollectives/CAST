@@ -28,7 +28,7 @@ const ImageCaptionCustomBlock = (props) => {
   return <div className="image-caption-draft-js">{props.children}</div>;
 };
 const blockRenderMap = Map({
-  "image-caption": {
+  "image-caption-block": {
     // element is used during paste or html conversion to auto match your component;
     // it is also retained as part of this.props.children and not stripped out. Example:
     // element: "section",
@@ -297,7 +297,7 @@ const StepOne = ({
     const csWithUpdatedBlock = Modifier.setBlockType(
       ContentState.createFromBlockArray([tempBlockArray]),
       SelectionState.createEmpty(tempBlockArray.key),
-      "image-caption"
+      "image-caption-block"
     );
     // get the block with custom type and with text
     const [updatedBlock] = csWithUpdatedBlock.getBlocksAsArray();
