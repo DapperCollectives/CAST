@@ -274,7 +274,8 @@ const StepOne = ({
     // using cs: content state
     const contentState = newESWidthImageAndExtraBlock.getCurrentContent();
 
-    const lastBlockAddedKey = contentState.getLastBlock().getKey();
+    const lastBlockAdded = contentState.getLastBlock();
+    const lastBlockAddedKey = lastBlockAdded.getKey();
 
     // filter and remove the last block added bc it's not necessary
     const contentStateUpdated = ContentState.createFromBlockArray(
@@ -301,10 +302,12 @@ const StepOne = ({
     // get the block with custom type and with text
     const [updatedBlock] = csWithUpdatedBlock.getBlocksAsArray();
 
+    // add block updated and concat empty block at the end
     const newContentState = ContentState.createFromBlockArray(
-      blockMapArray.concat(updatedBlock),
+      blockMapArray.concat(updatedBlock).concat(lastBlockAdded),
       contentStateUpdated.getEntityMap()
     );
+
     // this keeps the history of the action
     const editorStateWithImageAndCaption = EditorState.push(
       newESWidthImageAndExtraBlock,
@@ -312,12 +315,10 @@ const StepOne = ({
       "insert-fragment"
     );
 
-    // adding new extra line
-    const tempNewState = EditorState.moveSelectionToEnd(
+    // move cursor to the end
+    const newState = EditorState.moveSelectionToEnd(
       editorStateWithImageAndCaption
     );
-    const newState = RichUtils.insertSoftNewline(tempNewState);
-
     return newState;
   }
 
