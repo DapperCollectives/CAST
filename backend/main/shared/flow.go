@@ -273,9 +273,13 @@ func (fa *FlowAdapter) GetNFTIds(voterAddr string, c *Contract) ([]interface{}, 
 	fmt.Printf("cadenceValue: %s\n", cadenceValue)
 
 	value := CadenceValueToInterface(cadenceValue)
-	nfts := value.([]interface{})
 
-	return nfts, nil
+	// we can cast cadence type [Uint64] as Go type []interface{}
+	// with type assertion yay
+	// In the case where ids are of string type we need an if statement somewhere to handle
+	nftIds := value.([]interface{})
+
+	return nftIds, nil
 }
 
 // Fungible Token Address here is hardcoded to emulator address, this should
