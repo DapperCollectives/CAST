@@ -12,6 +12,11 @@ const options = {
 
       return "<p>" + block.getText() + "</p>";
     },
+    unstyled: (block) => {
+      let data = block.getData();
+
+      return "<p>" + block.getText() + "</p>";
+    },
   },
 };
 
