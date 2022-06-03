@@ -764,7 +764,7 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 			Threshold:   community.Threshold,
 		}
 
-		hasBalance, err := a.FlowAdapter.EnforceTokenThreshold(contract)
+		hasBalance, err := a.FlowAdapter.EnforceTokenThreshold(p.Creator_addr, contract)
 		if err != nil {
 			log.Error().Err(err).Msg("error enforcing token threshold")
 			respondWithError(w, http.StatusInternalServerError, err.Error())

@@ -124,7 +124,7 @@ func (otu *OverflowTestUtils) AddCommunitiesWithUsersAndThreshold(count int, sig
 	for i := 0; i < count; i++ {
 		community := otu.GenerateCommunityWithThresholdStruct(signer)
 		if err := community.CreateCommunityWithContract(otu.A.DB); err != nil {
-			fmt.Printf("error in otu.AddCommunities")
+			fmt.Printf("error in otu.CreateCommunityWithContract: %v", err)
 		}
 		// Add community_user roles for the creator
 		models.GrantRolesToCommunityCreator(otu.A.DB, community.Creator_addr, community.ID)
