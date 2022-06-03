@@ -3,6 +3,17 @@ import { convertToRaw } from "draft-js";
 import draftToHtml from "draftjs-to-html";
 import { ProposalStatus, VoteOptions } from "../Proposal";
 import { parseDateToServer } from "utils";
+import { stateToHTML } from "draft-js-export-html";
+
+const options = {
+  blockRenderers: {
+    "image-caption-block": (block) => {
+      let data = block.getData();
+
+      return "<p>" + block.getText() + "</p>";
+    },
+  },
+};
 
 const StepThree = ({ stepsData, setStepValid }) => {
   const setPreviewValid = useCallback(() => {
@@ -28,11 +39,16 @@ const StepThree = ({ stepsData, setStepValid }) => {
       })),
   };
 
-  const rawContentState = convertToRaw(
-    stepsData[0]?.description?.getCurrentContent()
-  );
+  // const rawContentState = convertToRaw(
+  //   stepsData[0]?.description?.getCurrentContent()
+  // );
 
-  const markup = draftToHtml(rawContentState);
+  // const markup = draftToHtml(rawContentState);
+
+  const markup = stateToHTML(
+    stepsData[0]?.description?.getCurrentContent(),
+    options
+  );
 
   const htmlBody = markup
     .replace(/target="_self"/g, 'target="_blank" rel="noopener noreferrer"')
