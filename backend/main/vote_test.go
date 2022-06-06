@@ -78,7 +78,7 @@ func TestGetVotes(t *testing.T) {
 	t.Run("Requesting results for a proposal where no votes exist should return default results object", func(t *testing.T) {
 		clearTable("votes")
 		defaultResults := models.NewProposalResults(proposalId)
-		response := otu.GetResultsForProposalAPI(proposalId)
+		response := otu.GetProposalResultsAPI(proposalId)
 		CheckResponseCode(t, http.StatusOK, response.Code)
 
 		var body *models.ProposalResults
