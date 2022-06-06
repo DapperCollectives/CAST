@@ -56,15 +56,20 @@ func (otu *OverflowTestUtils) AddDummyVotesAndBalances(votes *[]VoteWithBalance)
 	}
 }
 
+func (otu *OverflowTestUtils) ResolveUser(user int) string {
+	accountName := "emulator-user" + strconv.Itoa(user)
+	account, _ := otu.O.State.Accounts().ByName(accountName)
+	addr := "0x" + account.Address().String()
+	return addr
+}
+
 func (otu *OverflowTestUtils) AddVotes(pId int, count int) {
 	if count < 1 {
 		count = 1
 	}
 	var addr string
 	for i := 1; i < count+1; i++ {
-		accountName := "emulator-user" + strconv.Itoa(i)
-		account, _ := otu.O.State.Accounts().ByName(accountName)
-		addr = "0x" + account.Address().String()
+		addr = otu.ResolveUser(i)
 
 		_, err := otu.A.DB.Conn.Exec(otu.A.DB.Context, `
 			INSERT INTO votes(proposal_id, addr, choice, composite_signatures, message)

@@ -40,6 +40,7 @@ var (
 	placeholderTokenAddr            = regexp.MustCompile(`"[^"\s]*TOKEN_ADDRESS"`)
 	placeholderFungibleTokenAddr    = regexp.MustCompile(`"[^"\s]*FUNGIBLE_TOKEN_ADDRESS"`)
 	placeholderNonFungibleTokenAddr = regexp.MustCompile(`"[^"\s]*NON_FUNGIBLE_TOKEN_ADDRESS"`)
+	placeholderMetadataViewsAddr    = regexp.MustCompile(`"[^"\s]*METADATA_VIEWS_ADDRESS"`)
 )
 
 func NewFlowClient() *FlowAdapter {
@@ -240,6 +241,35 @@ func (fa *FlowAdapter) EnforceTokenThreshold(creatorAddr string, c *Contract) (b
 	return true, nil
 }
 
+func (fa *FlowAdapter) SetupAccount(addr string, c *Contract) error {
+	flowAddress := flow.HexToAddress(addr)
+	cadenceAddress := cadence.NewAddress(flowAddress)
+
+	script, err := ioutil.ReadFile("./main/cadence/scripts/setup_account.cdc")
+	if err != nil {
+		log.Error().Err(err).Msgf("error reading cadence script file")
+		return err
+	}
+
+	script = replaceContractPlaceholders(string(script[:]), c, true)
+	fmt.Print("SCRIPT : ", script)
+
+	//call the script to verify balance
+	_, err = fa.Client.ExecuteScriptAtLatestBlock(
+		fa.Context,
+		script,
+		[]cadence.Value{
+			cadenceAddress,
+		},
+	)
+	if err != nil {
+		log.Error().Err(err).Msg("error executing script")
+		return err
+	}
+
+	return nil
+}
+
 func (fa *FlowAdapter) GetNFTIds(voterAddr string, c *Contract) ([]interface{}, error) {
 	flowAddress := flow.HexToAddress(voterAddr)
 	cadenceAddress := cadence.NewAddress(flowAddress)
@@ -282,14 +312,16 @@ func (fa *FlowAdapter) GetNFTIds(voterAddr string, c *Contract) ([]interface{}, 
 	return nftIds, nil
 }
 
-// Fungible Token Address here is hardcoded to emulator address, this should
-// be set based on environment
+// @TODO
+// Hard coded Addresses here are for emulator dev only this should
+// be set based on environment var
 func replaceContractPlaceholders(code string, c *Contract, isFungible bool) []byte {
 	if isFungible {
 		code = placeholderFungibleTokenAddr.ReplaceAllString(code, "0xee82856bf20e2aa6")
 	} else {
 		code = placeholderNonFungibleTokenAddr.ReplaceAllString(code, "0xf8d6e0586b0a20c7")
 	}
+	code = placeholderMetadataViewsAddr.ReplaceAllString(code, "0xf8d6e0586b0a20c7")
 	code = placeholderTokenName.ReplaceAllString(code, *c.Name)
 	code = placeholderTokenAddr.ReplaceAllString(code, *c.Addr)
 

@@ -21,29 +21,34 @@ func TestBalanceOfNFTsStrategy(t *testing.T) {
 	clearTable("votes")
 	clearTable("balances")
 
+	otu.CreateNFTCollection("user1")
 	communityId, community := otu.AddCommunitiesWithNFTContract(1, "user1")
 	proposalId := otu.AddProposalsForStrategy(communityId[0], "balance-of-nfts", 1)[0]
-	votes := otu.GenerateListOfVotes(proposalId, 10)
-	//otu.AddDummyVotesAndBalances(votes)
-
-	fmt.Printf("Community: %+v\n", community)
+	fmt.Printf("proposalId: %d\n", proposalId)
 
 	var contract = &shared.Contract{
 		Name: community.Contract_name,
 		Addr: community.Contract_addr,
 	}
+	fmt.Printf("contract: %+v\n", contract)
 
-	otu.CreateNFTCollection("user1")
-	otu.MintNFT("user1")
-	nfts, err := otu.Adapter.GetNFTIds("0x01cf0e2f2f715450", contract)
-
+	votes, err := otu.GenerateListOfVotesWithNFTs(proposalId, 10, contract)
 	if err != nil {
-		log.Error().Err(err).Msg("Failed to get NFTs")
+		log.Fatal().Err(err).Msg("Failed to generate list of votes")
 	}
-	fmt.Printf("NFTs: %+v\n", nfts)
+	// otu.AddDummyVotesAndBalances(votes)
+
+	// fmt.Printf("Community: %+v\n", community)
 
 	// t.Run("Test Tallying Results", func(t *testing.T) {
-	// 	otu.Adapter.GetNFTs(contract)
+	// 	// user1 address as arg
+	// 	nfts, err := otu.Adapter.GetNFTIds("0x01cf0e2f2f715450", contract)
+	// 	if err != nil {
+	// 		log.Error().Err(err).Msg("Failed to get NFTs")
+	// 	}
+
+	// 	fmt.Printf("NFTs: %+v\n", nfts)
+	// 	fmt.Printf("Votes:"+"%+v\n", votes)
 	// 	_results := otu.TallyResultsForBalanceOfNfts(proposalId, votes)
 
 	// 	response := otu.GetProposalResultsAPI(proposalId)
