@@ -119,12 +119,20 @@ export const customDraftToHTML = (content) => {
         );
       },
     },
+    entityStyleFn: (entity) => {
+      const entityType = entity.get("type").toLowerCase();
+      if (entityType === "link") {
+        const data = entity.getData();
+        return {
+          element: "a",
+          attributes: {
+            href: data.url,
+            target: "_blank",
+            rel: "noopener noreferrer",
+          },
+        };
+      }
+    },
   };
-  const markup = stateToHTML(content, options);
-
-  const htmlBody = markup.replace(
-    /target="_self"/g,
-    'target="_blank" rel="noopener noreferrer"'
-  );
-  return htmlBody;
+  return stateToHTML(content, options);
 };
