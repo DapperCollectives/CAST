@@ -42,6 +42,7 @@ $border-color-light: #DBDBDB
 @import '~bulma/sass/elements/container.sass'
 @import '~bulma/sass/elements/progress.sass'
 @import '~bulma/sass/elements/title.sass'
+@import '~bulma/sass/elements/content.sass'
 @import '~bulma/sass/components/navbar.sass'
 @import '~bulma/sass/components/modal.sass'
 @import '~bulma/sass/components/tabs.sass'
@@ -391,3 +392,13 @@ span[data-tooltip]
 		font-size: 12px
 		line-height: 140%
 		color: #757575
+
+// overwrite default conent from bulma
+.content 
+	figure
+		margin-left: 0em
+		margin-right: 0em
+		&:not(:first-child)
+			margin-top: 0.5em
+		&:not(:last-child)
+			margin-bottom: 0.5em

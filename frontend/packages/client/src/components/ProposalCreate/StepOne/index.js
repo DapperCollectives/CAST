@@ -389,7 +389,7 @@ const StepOne = ({
             editorState={localEditorState}
             toolbarClassName="toolbarClassName"
             wrapperClassName="border-light rounded-sm word-break-all"
-            editorClassName="px-4"
+            editorClassName="px-4 content"
             onEditorStateChange={onEditorChange}
             toolbarCustomButtons={[<AddImageOption addImage={addImage} />]}
             customStyleMap={styleMap}

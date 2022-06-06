@@ -36,7 +36,7 @@ const StepThree = ({ stepsData, setStepValid }) => {
       <ProposalStatus proposal={proposal} />
       <h1 className="title mt-5 is-3">{stepsData[0]?.title}</h1>
       <div
-        className="mt-6 mb-5 proposal-copy word-break-all"
+        className="mt-6 mb-5 proposal-copy word-break-all content"
         dangerouslySetInnerHTML={{
           __html: htmlBody,
         }}
