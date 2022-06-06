@@ -270,6 +270,8 @@ export default function ProposalPage() {
     );
   }
 
+  // this is for existing proposals that have the target="_self" from the db
+  // bc we want all links to open in new tabs
   const htmlBody = proposal?.body?.replace(
     /target="_self"/g,
     'target="_blank" rel="noopener noreferrer"'
