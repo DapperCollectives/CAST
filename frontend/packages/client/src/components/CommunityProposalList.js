@@ -33,7 +33,7 @@ const CommunityProposalList = ({
   activeProposals = [],
   filterValue,
   communityId,
-  admins,
+  admins = [],
 } = {}) => {
   // filter with all value should show active and pending in one group and closed and cancelled in another group
   if (filterValue === "all") {
@@ -45,26 +45,19 @@ const CommunityProposalList = ({
         {listIsEmpty && <EmptyPlaceHolder communityId={communityId} />}
         {/* If there's an element in any of the two lists they will render */}
         <div className="is-flex is-flex-direction-column">
-          {(activeProposals ?? []).map((pr, i) => (
-            <ProposalCard
-              pr={pr}
-              key={i}
-              isAdminProposal={admins.includes(pr.creatorAddr)}
-            />
-          ))}
+          {(activeProposals ?? []).map((pr, i) => {
+            pr.isAdminProposal = admins.some(({ addr }) => addr === pr.creatorAddr);
+            return <ProposalCard pr={pr} key={i} />
+          })}
         </div>
         {proposalsList?.length !== 0 && (
           <div className="has-text-weight-bold is-uppercase mb-5">Closed</div>
         )}
         <div className="is-flex is-flex-direction-column">
-          {(proposalsList ?? []).map((pr, i) => (
-            <ProposalCard
-              pr={pr}
-              key={i}
-              isAdminProposal={admins.includes(pr.creatorAddr)}
-              style={{ opacity: "50%" }}
-            />
-          ))}
+          {(proposalsList ?? []).map((pr, i) => {
+            pr.isAdminProposal = admins.some(({ addr }) => addr === pr.creatorAddr);
+            return <ProposalCard pr={pr} key={i} style={{ opacity: "50%" }} />
+          })}
         </div>
       </>
     );
