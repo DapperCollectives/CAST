@@ -1,13 +1,11 @@
 /* global plausible */
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
-import { convertToRaw } from "draft-js";
-import draftToHtml from "draftjs-to-html";
 import { StepByStep, WalletConnect, Error } from "../components";
 import { useWebContext } from "../contexts/Web3";
 import { useModalContext } from "../contexts/NotificationModal";
 import { useProposal } from "../hooks";
-import { parseDateToServer } from "../utils";
+import { parseDateToServer, customDraftToHTML } from "utils";
 import {
   PropCreateStepOne,
   PropCreateStepTwo,
@@ -58,12 +56,9 @@ export default function ProposalCreatePage() {
 
     const name = stepsData[0].title;
 
-    const rawContentState = convertToRaw(
-      stepsData[0]?.description?.getCurrentContent()
-    );
-    const body = draftToHtml(rawContentState)
-      .replace(/target="_self"/g, 'target="_blank" rel="noopener noreferrer"')
-      .replace(/(?:\r\n|\r|\n)/g, "<br>");
+    const currentContent = stepsData[0]?.description?.getCurrentContent();
+
+    const body = customDraftToHTML(currentContent);
 
     const startTime = parseDateToServer(
       stepsData[1].startDate,

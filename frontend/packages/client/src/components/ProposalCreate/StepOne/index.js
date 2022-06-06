@@ -13,7 +13,6 @@ import {
   ContentState,
   DefaultDraftBlockRenderMap,
   SelectionState,
-  RichUtils,
 } from "draft-js";
 import { Map } from "immutable";
 import { useVotingStrategies } from "hooks";

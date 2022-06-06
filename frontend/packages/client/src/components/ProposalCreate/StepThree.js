@@ -1,24 +1,7 @@
 import React, { useEffect, useCallback } from "react";
-import { convertToRaw } from "draft-js";
-import draftToHtml from "draftjs-to-html";
 import { ProposalStatus, VoteOptions } from "../Proposal";
 import { parseDateToServer } from "utils";
-import { stateToHTML } from "draft-js-export-html";
-
-const options = {
-  blockRenderers: {
-    "image-caption-block": (block) => {
-      let data = block.getData();
-
-      return "<p>" + block.getText() + "</p>";
-    },
-    unstyled: (block) => {
-      let data = block.getData();
-
-      return "<p>" + block.getText() + "</p>";
-    },
-  },
-};
+import { customDraftToHTML } from "utils";
 
 const StepThree = ({ stepsData, setStepValid }) => {
   const setPreviewValid = useCallback(() => {
@@ -44,20 +27,9 @@ const StepThree = ({ stepsData, setStepValid }) => {
       })),
   };
 
-  // const rawContentState = convertToRaw(
-  //   stepsData[0]?.description?.getCurrentContent()
-  // );
+  const currentContent = stepsData[0]?.description?.getCurrentContent();
 
-  // const markup = draftToHtml(rawContentState);
-
-  const markup = stateToHTML(
-    stepsData[0]?.description?.getCurrentContent(),
-    options
-  );
-
-  const htmlBody = markup
-    .replace(/target="_self"/g, 'target="_blank" rel="noopener noreferrer"')
-    .replace(/(?:\r\n|\r|\n)/g, "<br>");
+  const htmlBody = customDraftToHTML(currentContent);
 
   return (
     <div>
