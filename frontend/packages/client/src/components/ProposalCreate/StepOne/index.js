@@ -261,6 +261,10 @@ const StepOne = ({
       })
       .getLastCreatedEntityKey();
 
+    const selection = editorState.getSelection();
+
+    const currentFocusKey = selection.getFocusKey();
+
     const newESWidthImageAndExtraBlock = AtomicBlockUtils.insertAtomicBlock(
       editorState,
       entityKey,
@@ -273,19 +277,21 @@ const StepOne = ({
     // using cs: content state
     const contentState = newESWidthImageAndExtraBlock.getCurrentContent();
 
-    const lastBlockAdded = contentState.getLastBlock();
-    const lastBlockAddedKey = lastBlockAdded.getKey();
+    const atomicBlockInserted = contentState.getBlockAfter(currentFocusKey);
 
-    // filter and remove the last block added bc it's not necessary
-    const contentStateUpdated = ContentState.createFromBlockArray(
-      contentState
-        .getBlocksAsArray()
-        .filter((block) => block.getKey() !== lastBlockAddedKey),
-      contentState.getEntityMap()
+    // AtomicBlockUtils.insertAtomicBlock inserts an empty block right after the cursor position
+    const emptyBlockInserted = contentState.getBlockAfter(
+      atomicBlockInserted.getKey()
     );
 
-    // get existing blocks
-    const blockMapArray = contentStateUpdated.getBlocksAsArray();
+    const lastBlockAddedKey = emptyBlockInserted.getKey();
+    
+    // get existing blocks and
+    // filter and remove the last block added
+    // bc it's not necessary and caption block goes right after it
+    const blockMapArray = contentState
+      .getBlocksAsArray()
+      .filter((block) => block.getKey() !== lastBlockAddedKey);
 
     // create new temporal content state to extract block with text
     const tempCSWithCaption = ContentState.createFromText(caption);
@@ -301,10 +307,24 @@ const StepOne = ({
     // get the block with custom type and with text
     const [updatedBlock] = csWithUpdatedBlock.getBlocksAsArray();
 
+    const newBlockMapArray = blockMapArray.reduce(
+      (accumulator, currentValue) => {
+        if (currentValue.getKey() === atomicBlockInserted.getKey()) {
+          return [
+            ...accumulator,
+            currentValue,
+            updatedBlock,
+            emptyBlockInserted,
+          ];
+        }
+        return [...accumulator, currentValue];
+      },
+      []
+    );
     // add block updated and concat empty block at the end
     const newContentState = ContentState.createFromBlockArray(
-      blockMapArray.concat(updatedBlock).concat(lastBlockAdded),
-      contentStateUpdated.getEntityMap()
+      newBlockMapArray,
+      contentState.getEntityMap()
     );
 
     // this keeps the history of the action
