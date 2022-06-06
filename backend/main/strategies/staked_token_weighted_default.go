@@ -11,17 +11,14 @@ type StakedTokenWeightedDefault struct{}
 
 // should handle and return error case here
 func (s *StakedTokenWeightedDefault) TallyVotes(votes []*models.VoteWithBalance, proposalId int) (models.ProposalResults, error) {
-	var r models.ProposalResults
-	r.Results = map[string]int{}
-	r.Results_float = map[string]float64{}
-	r.Proposal_id = proposalId
+	r := models.NewProposalResults(proposalId)
 
 	for _, vote := range votes {
 		r.Results[vote.Choice] += int(float64(*vote.StakingBalance) * math.Pow(10, -8))
 		r.Results_float[vote.Choice] += float64(*vote.StakingBalance) * math.Pow(10, -8)
 	}
 
-	return r, nil
+	return *r, nil
 }
 
 func (s *StakedTokenWeightedDefault) GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error) {

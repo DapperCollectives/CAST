@@ -10,10 +10,7 @@ import (
 type TokenWeightedDefault struct{}
 
 func (s *TokenWeightedDefault) TallyVotes(votes []*models.VoteWithBalance, proposalId int) (models.ProposalResults, error) {
-	var r models.ProposalResults
-	r.Results = map[string]int{}
-	r.Results_float = map[string]float64{}
-	r.Proposal_id = proposalId
+	r := models.NewProposalResults(proposalId)
 
 	//tally votes
 	for _, vote := range votes {
@@ -21,7 +18,7 @@ func (s *TokenWeightedDefault) TallyVotes(votes []*models.VoteWithBalance, propo
 		r.Results_float[vote.Choice] += float64(*vote.PrimaryAccountBalance) * math.Pow(10, -8)
 	}
 
-	return r, nil
+	return *r, nil
 }
 
 func (s *TokenWeightedDefault) GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error) {

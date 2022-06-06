@@ -9,16 +9,14 @@ import (
 type OneAddressOneVote struct{}
 
 func (s *OneAddressOneVote) TallyVotes(votes []*models.VoteWithBalance, proposalId int) (models.ProposalResults, error) {
-	var r models.ProposalResults
-	r.Results = map[string]int{}
-	r.Proposal_id = proposalId
+	r := models.NewProposalResults(proposalId)
 
 	//tally votes
 	for _, vote := range votes {
 		r.Results[vote.Choice]++
 	}
 
-	return r, nil
+	return *r, nil
 }
 
 func (s *OneAddressOneVote) GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error) {

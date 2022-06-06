@@ -74,6 +74,18 @@ func TestGetVotes(t *testing.T) {
 
 		assert.Equal(t, voteCount, body.Count)
 	})
+
+	t.Run("Requesting results for a proposal where no votes exist should return default results object", func(t *testing.T) {
+		clearTable("votes")
+		defaultResults := models.NewProposalResults(proposalId)
+		response := otu.GetResultsForProposalAPI(proposalId)
+		CheckResponseCode(t, http.StatusOK, response.Code)
+
+		var body *models.ProposalResults
+		json.Unmarshal(response.Body.Bytes(), &body)
+
+		assert.Equal(t, defaultResults, body)
+	})
 }
 
 func TestCreateVote(t *testing.T) {

@@ -15,6 +15,20 @@ type ProposalResults struct {
 	Cid           *string            `json:"cid,omitempty"`
 }
 
+func NewProposalResults(id int) *ProposalResults {
+	p := new(ProposalResults)
+	p.Results = map[string]int{
+		"a": 0,
+		"b": 0,
+	}
+	p.Results_float = map[string]float64{
+		"a": 0.00,
+		"b": 0.00,
+	}
+	p.Proposal_id = id
+	return p
+}
+
 func (r *ProposalResults) GetLatestProposalResultsById(db *s.Database) error {
 	return pgxscan.Get(db.Context, db.Conn, r,
 		`

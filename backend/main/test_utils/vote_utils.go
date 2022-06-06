@@ -26,6 +26,11 @@ func (otu *OverflowTestUtils) GetVotesForProposalAPI(proposalId int) *httptest.R
 	return otu.ExecuteRequest(req)
 }
 
+func (otu *OverflowTestUtils) GetResultsForProposalAPI(proposalId int) *httptest.ResponseRecorder {
+	req, _ := http.NewRequest("GET", "/proposals/"+strconv.Itoa(proposalId)+"/results", nil)
+	return otu.ExecuteRequest(req)
+}
+
 func (otu *OverflowTestUtils) GetVoteForProposalByAccountNameAPI(proposalId int, accountName string) *httptest.ResponseRecorder {
 	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", accountName))
 	addr := fmt.Sprintf("0x%s", account.Address().String())
