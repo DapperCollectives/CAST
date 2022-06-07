@@ -42,6 +42,7 @@ $border-color-light: #DBDBDB
 @import '~bulma/sass/elements/container.sass'
 @import '~bulma/sass/elements/progress.sass'
 @import '~bulma/sass/elements/title.sass'
+@import '~bulma/sass/elements/content.sass'
 @import '~bulma/sass/components/navbar.sass'
 @import '~bulma/sass/components/modal.sass'
 @import '~bulma/sass/components/tabs.sass'
@@ -381,3 +382,23 @@ span[data-tooltip]
 			border-color: black
 	.button:focus:not(:active), .button.is-focused:not(:active)
 		box-shadow: none
+
+.image-caption-draft-js
+	.public-DraftStyleDefault-block.public-DraftStyleDefault-ltr
+		margin: 0px !important
+		font-family: 'Arimo'
+		font-style: normal
+		font-weight: 400
+		font-size: 12px
+		line-height: 140%
+		color: #757575
+
+// overwrite default conent from bulma
+.content 
+	figure
+		margin-left: 0em
+		margin-right: 0em
+		&:not(:first-child)
+			margin-top: 0.5em
+		&:not(:last-child)
+			margin-bottom: 0.5em

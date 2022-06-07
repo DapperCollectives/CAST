@@ -1,3 +1,5 @@
+import { stateToHTML } from "draft-js-export-html";
+
 export const parseDateFromServer = (endTime) => {
   const dateTime = new Date(endTime);
   const diffFromNow = dateTime.getTime() - Date.now();
@@ -104,4 +106,33 @@ export const getProposalType = (choices) => {
     return "image";
   }
   return "text-based";
+};
+
+export const customDraftToHTML = (content) => {
+  const options = {
+    blockRenderers: {
+      "image-caption-block": (block) => {
+        return (
+          "<p style='font-size: 12px; color: #757575;' class='image-caption'>" +
+          block.getText() +
+          "</p>"
+        );
+      },
+    },
+    entityStyleFn: (entity) => {
+      const entityType = entity.get("type").toLowerCase();
+      if (entityType === "link") {
+        const data = entity.getData();
+        return {
+          element: "a",
+          attributes: {
+            href: data.url,
+            target: "_blank",
+            rel: "noopener noreferrer",
+          },
+        };
+      }
+    },
+  };
+  return stateToHTML(content, options);
 };

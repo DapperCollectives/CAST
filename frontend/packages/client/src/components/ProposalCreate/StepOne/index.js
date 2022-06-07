@@ -8,16 +8,35 @@ import React, {
 import { Editor } from "react-draft-wysiwyg";
 import {
   EditorState,
-  ContentBlock,
   AtomicBlockUtils,
   Modifier,
+  ContentState,
+  DefaultDraftBlockRenderMap,
+  SelectionState,
 } from "draft-js";
+import { Map } from "immutable";
 import { useVotingStrategies } from "hooks";
 import { useModalContext } from "contexts/NotificationModal";
 import { Dropdown, Error, UploadImageModal } from "components";
 import TextBasedChoices from "./TextBasedChoices";
 import ImageChoices from "./ImageChoices";
 import { Image } from "components/Svg";
+
+// using a React component to render custom blocks
+const ImageCaptionCustomBlock = (props) => {
+  return <div className="image-caption-draft-js">{props.children}</div>;
+};
+const blockRenderMap = Map({
+  "image-caption-block": {
+    // element is used during paste or html conversion to auto match your component;
+    // it is also retained as part of this.props.children and not stripped out. Example:
+    // element: "section",
+    wrapper: <ImageCaptionCustomBlock />,
+  },
+});
+
+// keep support for other draft default block types and add our image-caption type
+const extendedBlockRenderMap = DefaultDraftBlockRenderMap.merge(blockRenderMap);
 
 function AddImageOption({ addImage }) {
   return (
@@ -242,27 +261,84 @@ const StepOne = ({
       })
       .getLastCreatedEntityKey();
 
-    const newEditorStateWidthImage = AtomicBlockUtils.insertAtomicBlock(
+    const selection = editorState.getSelection();
+
+    const currentFocusKey = selection.getFocusKey();
+
+    const newESWidthImageAndExtraBlock = AtomicBlockUtils.insertAtomicBlock(
       editorState,
       entityKey,
       " "
     );
+    // user did not add caption text
+    if (caption.length === 0) {
+      return newESWidthImageAndExtraBlock;
+    }
+    // using cs: content state
+    const contentState = newESWidthImageAndExtraBlock.getCurrentContent();
 
-    const contentState = newEditorStateWidthImage.getCurrentContent();
-    const selectionState = newEditorStateWidthImage.getSelection();
+    const atomicBlockInserted = contentState.getBlockAfter(currentFocusKey);
 
-    const contentStateWithCaption = Modifier.insertText(
-      contentState,
-      selectionState,
-      caption,
-      ["IMAGE_CAPTION"]
+    // AtomicBlockUtils.insertAtomicBlock inserts an empty block right after the cursor position
+    const emptyBlockInserted = contentState.getBlockAfter(
+      atomicBlockInserted.getKey()
     );
 
-    const newEditorState = EditorState.set(newEditorStateWidthImage, {
-      currentContent: contentStateWithCaption,
-    });
+    const lastBlockAddedKey = emptyBlockInserted.getKey();
+    
+    // get existing blocks and
+    // filter and remove the last block added
+    // bc it's not necessary and caption block goes right after it
+    const blockMapArray = contentState
+      .getBlocksAsArray()
+      .filter((block) => block.getKey() !== lastBlockAddedKey);
 
-    return newEditorState;
+    // create new temporal content state to extract block with text
+    const tempCSWithCaption = ContentState.createFromText(caption);
+    // get the block with the text from temp content
+    const [tempBlockArray] = tempCSWithCaption.getBlocksAsArray();
+
+    // update block type so it's a custom type: image-caption
+    const csWithUpdatedBlock = Modifier.setBlockType(
+      ContentState.createFromBlockArray([tempBlockArray]),
+      SelectionState.createEmpty(tempBlockArray.key),
+      "image-caption-block"
+    );
+    // get the block with custom type and with text
+    const [updatedBlock] = csWithUpdatedBlock.getBlocksAsArray();
+
+    const newBlockMapArray = blockMapArray.reduce(
+      (accumulator, currentValue) => {
+        if (currentValue.getKey() === atomicBlockInserted.getKey()) {
+          return [
+            ...accumulator,
+            currentValue,
+            updatedBlock,
+            emptyBlockInserted,
+          ];
+        }
+        return [...accumulator, currentValue];
+      },
+      []
+    );
+    // add block updated and concat empty block at the end
+    const newContentState = ContentState.createFromBlockArray(
+      newBlockMapArray,
+      contentState.getEntityMap()
+    );
+
+    // this keeps the history of the action
+    const editorStateWithImageAndCaption = EditorState.push(
+      newESWidthImageAndExtraBlock,
+      newContentState,
+      "insert-fragment"
+    );
+
+    // move cursor to the end
+    const newState = EditorState.moveSelectionToEnd(
+      editorStateWithImageAndCaption
+    );
+    return newState;
   }
 
   const addImagesToEditor = (images, captionValues) => {
@@ -333,10 +409,11 @@ const StepOne = ({
             editorState={localEditorState}
             toolbarClassName="toolbarClassName"
             wrapperClassName="border-light rounded-sm word-break-all"
-            editorClassName="px-4"
+            editorClassName="px-4 content"
             onEditorStateChange={onEditorChange}
             toolbarCustomButtons={[<AddImageOption addImage={addImage} />]}
             customStyleMap={styleMap}
+            blockRenderMap={extendedBlockRenderMap}
           />
         </div>
         <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6">
