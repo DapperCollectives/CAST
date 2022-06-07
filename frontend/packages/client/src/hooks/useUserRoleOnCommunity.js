@@ -1,5 +1,3 @@
-import { useCallback, useEffect, useState } from "react";
-import { isEmptyArray } from "utils";
 import useUserCommunities from "./useUserCommunities";
 
 export default function useUserRoleOnCommunity({
@@ -7,29 +5,23 @@ export default function useUserRoleOnCommunity({
   communityId,
   roles = [],
 } = {}) {
-
-  const [hasRole, setHasRole] = useState();
-  const { data: userCommunities, loading } = useUserCommunities({
-    addr
+  const { data: communityUser, loading } = useUserCommunities({
+    addr,
   });
 
-  const getUserRole = useCallback(() => {
-    if (loading || isEmptyArray(roles) || !userCommunities) {
-      return setHasRole(null);
-    } else if (isEmptyArray(userCommunities)) {
-      return setHasRole(false);
-    } else {
-      const rolesInCommunity = userCommunities
-        .filter(({ id }) => id.toString() === communityId.toString())
-        .map(({ membershipType }) => membershipType);
-      const included = roles.every((role) => rolesInCommunity.includes(role));
-      setHasRole(included);
-    }
-  }, [communityId, loading, roles, userCommunities]);
+  if (
+    addr === null ||
+    (Array.isArray(communityUser) && communityUser.length === 0)
+  ) {
+    return false;
+  }
+  if (loading || roles.length === 0) {
+    return null;
+  }
+  const rolesInCommunity =
+    communityUser
+      ?.filter((datum) => datum.id.toString() === communityId.toString())
+      .map((community) => community?.membershipType) ?? [];
 
-  useEffect(() => {
-    getUserRole();
-  }, [getUserRole]);
-
-  return hasRole;
+  return roles.every((role) => rolesInCommunity.includes(role));
 }

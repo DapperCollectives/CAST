@@ -38,6 +38,7 @@ const CommunitiesPresenter = ({
             <div
               className={`column ${columnSize} is-12-tablet`}
               key={`community-${index}`}
+              style={{ position: "relative" }} // bulma class did not override
             >
               <CommunityCard
                 logo={logo}

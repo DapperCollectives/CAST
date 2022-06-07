@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import JoinCommunityButton from "./JoinCommunityButton";
 import WrapperResponsive from "components/WrapperResponsive";
+import { useWindowDimensions } from "hooks";
 
 const ComingSoon = () => {
   return (
@@ -29,9 +30,31 @@ const CommunityCard = ({
 
   const hoverClasses = !isComingSoon ? " transition-all community-card" : "";
 
+  const { width: windowWidth } = useWindowDimensions();
+  const joinBtnPositions = useMemo(() => ({
+    bigger: { top: "52px", right: "74px" },
+    smaller: { top: "144px", right: "332px" }
+  }), []);
+  const joinBtnDefault = windowWidth >= 500 ? joinBtnPositions.bigger : joinBtnPositions.smaller;
+  const [joinBtnTopRight, setJoinBtnTopRight] = useState(joinBtnDefault);
+  const [bottomSpacer, setBottomSpacer] = useState();
+
+  useEffect(() => {
+    if (windowWidth < 500 && joinBtnTopRight.top !== joinBtnPositions.smaller.top && bottomSpacer === false) {
+      setJoinBtnTopRight({
+        top: joinBtnPositions.smaller.top,
+        right: joinBtnPositions.smaller.top - windowWidth + 500
+      });
+      setBottomSpacer(true);
+    } else if (windowWidth >= 500 && joinBtnTopRight.top !== joinBtnPositions.bigger.top && bottomSpacer) {
+      setJoinBtnTopRight(joinBtnPositions.bigger);
+      setBottomSpacer(false);
+    }
+  }, [joinBtnTopRight.top, windowWidth, bottomSpacer, joinBtnPositions]);
+
   const Body = (
     <div
-      className={`is-flex is-flex-grow-1 rounded-sm border-light p-5${hoverClasses}`}
+      className={`is-flex is-flex-grow-1 rounded-sm border-light p-5 is-flex-direction-column${hoverClasses}`}
     >
       <div className="columns is-multiline is-flex-grow-1 is-mobile">
         <div className="column is-narrow">
@@ -61,8 +84,15 @@ const CommunityCard = ({
             </p>
           )}
         </div>
-        <JoinCommunityButton communityId={id} />
       </div>
+      {bottomSpacer ? (
+        <div
+          className="columns is-flex-grow-1 is-mobile"
+          style={{ minHeight: "64px" }}
+        />
+      ) : (
+        null
+      )}
     </div>
   );
 
@@ -75,6 +105,11 @@ const CommunityCard = ({
       <Link to={`/community/${id}?tab=about`} style={{ color: "inherit" }}>
         {Body}
       </Link>
+      <div
+        style={{ position: "absolute", margin: 0, ...joinBtnTopRight }}
+      >
+        <JoinCommunityButton communityId={id} />
+      </div>
     </>
   );
 };

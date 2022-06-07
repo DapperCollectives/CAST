@@ -36,8 +36,6 @@ export const checkResponse = async (response) => {
 export const isEmptyArray = (array) =>
   Array.isArray(array) && array.length === 0;
 
-export const isNotEmptyArray = (array) => !isEmptyArray(array);
-
 export function debounce(e, waitingTime = 300) {
   let timer;
   return (...i) => {

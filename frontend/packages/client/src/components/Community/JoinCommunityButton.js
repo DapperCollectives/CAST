@@ -47,7 +47,7 @@ export default function JoinCommunityButton({
     }
   });
 
-  if (isMember !== true && isMember !== false) return null;
+  if (!addr || (isMember !== true && isMember !== false)) return null;
 
   return (
     <div

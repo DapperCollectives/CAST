@@ -18,7 +18,6 @@ import {
   useCommunityUsers,
   useVotingStrategies,
   useUserRoleOnCommunity,
-  useAllowlist,
   useCommunityMembers,
 } from "../hooks";
 import { useWebContext } from "../contexts/Web3";
@@ -166,9 +165,6 @@ export default function Community() {
     setTotalMembers(totalRecords);
   }, [totalRecords]);
 
-  // for now allowList just returns admin addresses
-  const { data: adminAddrs } = useAllowlist();
-
   // these two fields should be coming from backend as configuration
   const showPulse = false;
   const showLeaderBoard = false;
@@ -233,8 +229,8 @@ export default function Community() {
                   </span>
                 </p>
                 <div className="is-flex">
-                  {adminAddrs
-                    ? adminAddrs.slice(0, 5).map((adminAddr, idx) => (
+                  {admins
+                    ? admins.slice(0, 5).map(({ addr: adminAddr }, idx) => (
                       <div
                         key={`${idx}`}
                         className="blockies-wrapper is-relative has-background-white"
