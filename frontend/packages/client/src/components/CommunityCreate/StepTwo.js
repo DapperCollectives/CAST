@@ -25,7 +25,6 @@ const HelpModal = () => {
 };
 
 const buttonStyle = {
-  padding: "1px 4px",
   border: "none",
   fontSize: "12px",
   marginLeft: "4px",
@@ -117,7 +116,7 @@ export default function StepTwo({
           <>
             Admins
             <button
-              className="delete has-text-grey rounded-lg cursor-pointer"
+              className="delete has-text-grey rounded-full cursor-pointer"
               style={buttonStyle}
               onClick={openModalHelp}
             >
