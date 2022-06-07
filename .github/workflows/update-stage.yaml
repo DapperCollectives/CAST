@@ -14,7 +14,9 @@ env:
   db_name: ${{ secrets.DB_NAME }}
   dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
   dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
-
+  argo_repo: ${{ secrets.ARGO_REPO }}
+  argo_ref: ${{ secrets.ARGO_REF }}
+  argo_token: ${{ secrets.ARGO_TOKEN }}
 
 jobs:
 
@@ -68,3 +70,29 @@ jobs:
       run: |
         cd backend && docker build . -t bruddev/cast-backend-stage:$TAG
         docker push bruddev/cast-backend-stage:$TAG
+
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##  UPDATE STAGE ENVIRONMENT - ARGO TIME!
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  update-stage-via-argocd:
+    name: ArgoCD update Stage
+    runs-on: ubuntu-20.04
+    needs: build-and-push
+    steps:
+
+    - name: Clone ArgoManifests
+      run: |
+        mkdir -p ./argo
+
+    - name: Checkout ArgoManifests
+      uses: actions/checkout@v3
+      with:
+        repository: ${{ env.argo_repo }}
+        ref: ${{ env.argo_ref }}
+        token: ${{ env.argo_token }}
+        path: /argo
+
+    - name: LS Argo
+      run: |
+        ls -la ./argo
