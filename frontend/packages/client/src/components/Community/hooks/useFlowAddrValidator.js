@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { isValidAddress } from "utils";
 
 const uniqueElements = (adminList) => {
   const setList = new Set([
@@ -8,7 +9,7 @@ const uniqueElements = (adminList) => {
 };
 
 const hasValidAddresses = (list) => {
-  return list.every((el) => /0[x,X][a-zA-Z0-9]{16}$/gim.test(el.addr));
+  return list.every((el) => isValidAddress(el.addr));
 };
 const listHasChanged = (adminList, admins) => {
   const setList = new Set([...adminList.map((e) => e.addr)]);
