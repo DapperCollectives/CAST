@@ -17,3 +17,4 @@ export { default as useFileUploader } from "./useFileUploader";
 export { default as useUserCommunities } from "./useUserCommunities";
 export { default as useUserRoleOnCommunity } from "./useUserRoleOnCommunity";
 export { default as useCommunityUsers } from "./useCommunityUsers";
+export { default as useCommunityCategory } from "./useCommunityCategory";

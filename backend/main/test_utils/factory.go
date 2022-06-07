@@ -7,6 +7,7 @@ import (
 
 	"github.com/brudfyi/flow-voting-tool/main/models"
 	"github.com/brudfyi/flow-voting-tool/main/shared"
+	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 )
 
@@ -32,6 +33,28 @@ var InvalidServiceAccountKey = "5687d75f957bf64591b55eb19227706e3c8712c1387225b8
 // 	jsonStr, _ := json.Marshal(vote)
 // 	return []byte(jsonStr)
 // }
+
+func (otu *OverflowTestUtils) AddDummyVotesAndBalances(votes *[]VoteWithBalance) {
+	for _, vote := range *votes {
+		// Insert Vote
+		_, err := otu.A.DB.Conn.Exec(otu.A.DB.Context, `
+			INSERT INTO votes(proposal_id, addr, choice, composite_signatures, message)
+			VALUES($1, $2, $3, $4, $5)
+		`, vote.Vote.Proposal_id, vote.Vote.Addr, vote.Vote.Choice, "[]", "__msg__")
+		if err != nil {
+			log.Error().Err(err).Msg("AddDummyVotesAndBalances DB err - votes")
+		}
+
+		// Insert Balance
+		_, err = otu.A.DB.Conn.Exec(otu.A.DB.Context, `
+			INSERT INTO balances(id, addr, primary_account_balance, secondary_address, secondary_account_balance, staking_balance, script_result, stakes, block_height)
+			VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)
+		`, uuid.New(), vote.Addr, vote.Primary_account_balance, "0x0", 0, vote.Staking_balance, "SUCCESS", []string{}, vote.Block_height)
+		if err != nil {
+			log.Error().Err(err).Msg("AddDummyVotesAndBalances DB err - balances")
+		}
+	}
+}
 
 func (otu *OverflowTestUtils) AddVotes(pId int, count int) {
 	if count < 1 {
@@ -100,6 +123,24 @@ func (otu *OverflowTestUtils) AddProposals(cId int, count int) []int {
 	retIds := []int{}
 	for i := 0; i < count; i++ {
 		proposal := otu.GenerateProposalStruct("account", cId)
+		if err := proposal.CreateProposal(otu.A.DB); err != nil {
+			fmt.Printf("error in otu.AddProposals")
+			fmt.Printf("err: %v\n", err.Error())
+		}
+
+		retIds = append(retIds, proposal.ID)
+	}
+	return retIds
+}
+
+func (otu *OverflowTestUtils) AddProposalsForStrategy(cId int, strategy string, count int) []int {
+	if count < 1 {
+		count = 1
+	}
+	retIds := []int{}
+	for i := 0; i < count; i++ {
+		proposal := otu.GenerateProposalStruct("account", cId)
+		proposal.Strategy = &strategy
 		if err := proposal.CreateProposal(otu.A.DB); err != nil {
 			fmt.Printf("error in otu.AddProposals")
 			fmt.Printf("err: %v\n", err.Error())

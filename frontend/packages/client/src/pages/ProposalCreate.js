@@ -1,19 +1,17 @@
 /* global plausible */
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
-import { convertToRaw } from "draft-js";
-import draftToHtml from "draftjs-to-html";
-import { StepByStep, WalletConnect, Error } from "../components";
-import { useWebContext } from "../contexts/Web3";
-import { useModalContext } from "../contexts/NotificationModal";
-import { useErrorHandlerContext } from "../contexts/ErrorHandler";
-import { useProposal, useQueryParams } from "../hooks";
-import { parseDateToServer } from "../utils";
+import { StepByStep, WalletConnect, Error } from "components";
+import { useWebContext } from "contexts/Web3";
+import { useModalContext } from "contexts/NotificationModal";
+import { useErrorHandlerContext } from "contexts/ErrorHandler";
+import { useProposal, useQueryParams } from "hooks";
+import { parseDateToServer, customDraftToHTML } from "utils";
 import {
   PropCreateStepOne,
   PropCreateStepTwo,
   PropCreateStepThree,
-} from "../components/ProposalCreate";
+} from "components/ProposalCreate";
 
 export default function ProposalCreatePage() {
   const { createProposal, data, loading, error } = useProposal();
@@ -71,12 +69,9 @@ export default function ProposalCreatePage() {
     }
     const name = stepsData[0].title;
 
-    const rawContentState = convertToRaw(
-      stepsData[0]?.description?.getCurrentContent()
-    );
-    const body = draftToHtml(rawContentState)
-      .replace(/target="_self"/g, 'target="_blank" rel="noopener noreferrer"')
-      .replace(/(?:\r\n|\r|\n)/g, "<br>");
+    const currentContent = stepsData[0]?.description?.getCurrentContent();
+
+    const body = customDraftToHTML(currentContent);
 
     const startTime = parseDateToServer(
       stepsData[1].startDate,
@@ -114,7 +109,8 @@ export default function ProposalCreatePage() {
   const props = {
     finalLabel: "Publish",
     onSubmit,
-    creatingProposal: loading && !error,
+    isSubmitting: loading && !error,
+    submittingMessage: "Creating Proposal...",
     steps: [
       {
         label: "Draft Proposal",

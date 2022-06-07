@@ -6,6 +6,7 @@
 $green: #0E5B20
 $light-green: #00EF8B
 $red: #B20D0D
+$error-red: #B20D0D
 $yellow: #FBD84D
 $orange: #F4AF4A
 $light-gray: #DCDCDC
@@ -46,6 +47,7 @@ $border-color-light: #DBDBDB
 @import '~bulma/sass/elements/progress.sass'
 @import '~bulma/sass/elements/title.sass'
 @import '~bulma/sass/elements/table.sass'
+@import '~bulma/sass/elements/content.sass'
 @import '~bulma/sass/components/navbar.sass'
 @import '~bulma/sass/components/modal.sass'
 @import '~bulma/sass/components/tabs.sass'
@@ -520,3 +522,42 @@ span[data-tooltip]
 			border-color: black
 	.button:focus:not(:active), .button.is-focused:not(:active)
 		box-shadow: none
+
+.form-error-input-icon
+	padding-right: 4.5rem !important	
+.form-error-input-border
+	border-color: $error-red  !important
+
+.form-checkbox
+	-webkit-appearance: none
+	background-color: #fafafa
+	border: 2px solid #757575
+	padding: 7px
+	border-radius: 3px
+
+.form-checkbox:checked:after
+	content: '\2714'
+	font-size: 14px
+	position: absolute
+	top: 13px
+	left: 3px
+	color: rgb(74 74 74 / 90%)
+.image-caption-draft-js
+	.public-DraftStyleDefault-block.public-DraftStyleDefault-ltr
+		margin: 0px !important
+		font-family: 'Arimo'
+		font-style: normal
+		font-weight: 400
+		font-size: 12px
+		line-height: 140%
+		color: #757575
+
+// overwrite default conent from bulma
+.content 
+	figure
+		margin-left: 0em
+		margin-right: 0em
+		&:not(:first-child)
+			margin-top: 0.5em
+		&:not(:last-child)
+			margin-bottom: 0.5em
