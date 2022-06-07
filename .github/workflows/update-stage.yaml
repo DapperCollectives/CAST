@@ -1,0 +1,35 @@
+name: UPDATE STAGE
+
+on:
+  # Trigger the workflow on push or pull request merge
+  push:
+    branches:
+      - FerSanchez/PipelinesChanges
+
+env:
+  TAG: ${{ github.sha }}
+  db_username: ${{ secrets.DB_USERNAME }}
+  db_password: ${{ secrets.DB_PASSWORD }}
+  db_hostname: ${{ secrets.DB_HOSTNAME }}
+  db_port: ${{ secrets.DB_PORT }}
+  db_name: ${{ secrets.DB_NAME }}
+
+
+jobs:
+  build:
+    name: Migration
+    runs-on: self-hosted
+    steps:
+    - name: checkout
+      uses: actions/checkout@v3
+      with:
+        ref: stage
+    
+    - name: Install and run migrations
+      run: |
+        curl -L https://packagecloud.io/golang-migrate/migrate/gpgkey | apt-key add -
+        echo "deb https://packagecloud.io/golang-migrate/migrate/ubuntu/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/migrate.list
+        apt-get update
+        apt-get install -y migrate
+        migrate -path ./CAST/backend/migrations -database 'postgres://${{ env.db_username }}:${{ env.db_password }}@${{ env.db_hostname }}:${{ env.db_port }}/${{ env.db_name }}?sslmode=disable' -verbose up
+
