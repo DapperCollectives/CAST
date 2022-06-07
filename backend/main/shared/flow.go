@@ -232,7 +232,7 @@ func (fa *FlowAdapter) EnforceTokenThreshold(creatorAddr string, c *Contract) (b
 	}
 
 	if balance < *c.Threshold {
-		return false, errors.New("balance is below threshold")
+		return false, nil
 	}
 
 	return true, nil
