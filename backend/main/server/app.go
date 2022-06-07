@@ -63,9 +63,10 @@ type App struct {
 var allowedFileTypes = []string{"image/jpg", "image/jpeg", "image/png", "image/gif"}
 
 type Strategy interface {
+	FetchBalance(db *shared.Database, b *models.Balance, sc *shared.SnapshotClient) (*models.Balance, error)
 	TallyVotes(votes []*models.VoteWithBalance, proposalId int) (models.ProposalResults, error)
-	GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error)
 	GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error)
+	GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error)
 }
 
 var strategyMap = map[string]Strategy{
@@ -558,40 +559,20 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 
 	v.Proposal_id = proposalId
 
-	// Fetch account balance at blockheight
-	balance := &models.Balance{
-		Addr:        v.Addr,
-		BlockHeight: p.Block_height,
-	}
-
-	// First, check if we already have a balance for this blockheight's address
-	if err = balance.GetBalanceByAddressAndBlockHeight(a.DB); err != nil && err.Error() != pgx.ErrNoRows.Error() {
-		log.Error().Err(err).Msg("error querying address balance at blockheight")
-		respondWithError(w, http.StatusInternalServerError, "error querying address balance at blockheight")
-		return
-	}
-
-	// If balance doesnt exist, fetch it and save it
-	if balance.ID == "" {
-		// TODO: dont throw error, retroactively fix data
-		err = balance.FetchAddressBalanceAtBlockHeight(a.SnapshotClient, v.Addr, p.Block_height)
-		if err != nil {
-			log.Error().Err(err).Msg("error fetching address balance at blockheight.")
-			respondWithError(w, http.StatusInternalServerError, "Error fetching address balance at blockheight")
-			return
-		}
-
-		if err = balance.CreateBalance(a.DB); err != nil {
-			log.Error().Err(err).Msg("error saving balance to DB")
-			respondWithError(w, http.StatusInternalServerError, "error saving balance to DB")
-			return
-		}
-	}
-
 	s := strategyMap[*p.Strategy]
 	if s == nil {
 		respondWithError(w, http.StatusInternalServerError, "Strategy not found")
 		return
+	}
+
+	emptyBalance := &models.Balance{
+		Addr:        v.Addr,
+		BlockHeight: p.Block_height,
+	}
+
+	balance, err := s.FetchBalance(a.DB, emptyBalance, a.SnapshotClient)
+	if err != nil {
+		log.Error().Err(err).Msgf("error fetching balance for address %v", v.Addr)
 	}
 
 	// create the voteWithBalance struct
