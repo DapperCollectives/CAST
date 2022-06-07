@@ -7,7 +7,6 @@ on:
       - FerSanchez/PipelinesChanges
 
 env:
-  TAG: ${{ github.sha }}
   db_username: ${{ secrets.DB_USERNAME }}
   db_password: ${{ secrets.DB_PASSWORD }}
   db_hostname: ${{ secrets.DB_HOSTNAME }}
@@ -58,8 +57,14 @@ jobs:
       with:
         username: ${{ env.dockerhub_username }}
         password: ${{ env.dockerhub_token }}
-      
+
+    - name: Get short SHA
+      id: short
+      run: echo "::set-output name=sha7::$(echo ${GITHUB_SHA} | cut -c1-7)"
+
     - name: build and push backend - stage -
+      env:
+        TAG: ${{ steps.short.outputs.sha7 }}
       run: |
-        cd backend && docker build . -t bruddev/cast-backend-stage:${{ env.TAG }}
-        docker push bruddev/cast-backend-stage:tagname
+        cd backend && docker build . -t bruddev/cast-backend-stage:$TAG
+        docker push bruddev/cast-backend-stage:$TAG
