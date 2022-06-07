@@ -124,7 +124,7 @@ export default function StepTwo({
             </button>
           </>
         }
-        description="The admins will be able to edit the space settings and moderate proposals. You must add one address per line. You must add one address per line."
+        description="The admins will be able to edit the space settings and moderate proposals. You must add one address per line."
         addrList={listAddrAdmins}
         onAddressChange={onAdminAddressChange}
         onDeleteAddress={onAdminAddressDelete}
