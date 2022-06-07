@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { WrapperResponsive } from "components";
+import { isValidAddress } from "utils";
 
 export default function StepThree({
   stepData,
@@ -18,11 +19,14 @@ export default function StepThree({
 
   useEffect(() => {
     const requiredFields = {
-      contractAddress: (addr) => addr?.trim().length > 0,
+      contractAddress: (addr) =>
+        addr?.trim().length > 0 && isValidAddress(addr),
       proposalThreshold: (threshold) =>
         threshold?.trim().length > 0 && /^[0-9]+$/.test(threshold),
-      contractName: (name) => name?.trim().length > 0,
-      storagePath: (path) => path?.trim().length > 0,
+      contractName: (name) =>
+        name?.trim().length > 0 && name?.trim().length <= 150,
+      storagePath: (path) =>
+        path?.trim().length > 0 && path?.trim().length <= 150,
     };
     const isValid = Object.keys(requiredFields).every(
       (field) => stepData && requiredFields[field](stepData[field])
