@@ -14,84 +14,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestBalanceOfNFTsStrategy(t *testing.T) {
-	clearTable("communities")
-	clearTable("community_users")
-	clearTable("proposals")
-	clearTable("votes")
-	clearTable("balances")
-
-	otu.CreateNFTCollection("user1")
-	communityId, community := otu.AddCommunitiesWithNFTContract(1, "user1")
-	proposalId := otu.AddProposalsForStrategy(communityId[0], "balance-of-nfts", 1)[0]
-
-	var contract = &shared.Contract{
-		Name: community.Contract_name,
-		Addr: community.Contract_addr,
-	}
-
-	votes, err := otu.GenerateListOfVotesWithNFTs(proposalId, 5, contract)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to generate list of votes")
-	}
-
-	//print out all the votes
-	for _, v := range *votes {
-		fmt.Printf("%+v\n", v)
-	}
-
-	otu.AddDummyVotesAndNFTs(votes)
-
-	t.Run("Test Tallying Results For NFT Balance Strategy", func(t *testing.T) {
-		// user1 address as arg
-		if err != nil {
-			log.Error().Err(err).Msg("Failed to get NFTs")
-		}
-
-		_results := otu.TallyResultsForBalanceOfNfts(proposalId, votes)
-		fmt.Printf("RESULTS %+v\n", _results)
-
-		response := otu.GetProposalResultsAPI(proposalId)
-		CheckResponseCode(t, http.StatusOK, response.Code)
-
-		var results models.ProposalResults
-		json.Unmarshal(response.Body.Bytes(), &results)
-
-		assert.Equal(t, _results.Proposal_id, results.Proposal_id)
-		assert.Equal(t, _results.Results_float["a"], results.Results_float["a"])
-		assert.Equal(t, _results.Results_float["b"], results.Results_float["b"])
-	})
-
-	t.Run("Test Fetching Votes for Proposal", func(t *testing.T) {
-		response := otu.GetVotesForProposalAPI(proposalId)
-
-		CheckResponseCode(t, http.StatusOK, response.Code)
-
-		var body utils.PaginatedResponseWithVotes
-		json.Unmarshal(response.Body.Bytes(), &body)
-
-		// Validate vote weights are returned correctly
-		for _, v := range body.Data {
-			expectedWeight := float64(1.00)
-			assert.Equal(t, expectedWeight, *v.Weight)
-		}
-	})
-
-	t.Run("Test Fetching Vote for Address", func(t *testing.T) {
-		_vote := (*votes)[0]
-		response := otu.GetVoteForProposalByAddressAPI(proposalId, _vote.Addr)
-
-		CheckResponseCode(t, http.StatusOK, response.Code)
-
-		var vote models.VoteWithBalance
-		json.Unmarshal(response.Body.Bytes(), &vote)
-
-		expectedWeight := float64(1.00)
-		assert.Equal(t, expectedWeight, *vote.Weight)
-	})
-}
-
-/* Token Weighted Default */
 func TestTokenWeightedDefaultStrategy(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")
@@ -101,7 +23,12 @@ func TestTokenWeightedDefaultStrategy(t *testing.T) {
 
 	communityId := otu.AddCommunities(1)[0]
 	proposalId := otu.AddProposalsForStrategy(communityId, "token-weighted-default", 1)[0]
+	fmt.Printf("proposalId %+v\n", proposalId)
 	votes := otu.GenerateListOfVotes(proposalId, 10)
+	//loop through the votes and print them
+	for _, v := range *votes {
+		fmt.Printf("%+v\n", v)
+	}
 	otu.AddDummyVotesAndBalances(votes)
 
 	t.Run("Test Tallying Results", func(t *testing.T) {
@@ -167,6 +94,86 @@ func TestTokenWeightedDefaultStrategy(t *testing.T) {
 	})
 }
 
+func TestBalanceOfNFTsStrategy(t *testing.T) {
+	clearTable("communities")
+	clearTable("community_users")
+	clearTable("proposals")
+	clearTable("votes")
+	clearTable("balances")
+
+	otu.CreateNFTCollection("user1")
+
+	//@TODO Debug the error here
+	communityId, community := otu.AddCommunitiesWithNFTContract(1, "user1")
+	proposalId := otu.AddProposalsForStrategy(communityId[0], "balance-of-nfts", 1)[0]
+
+	var contract = &shared.Contract{
+		Name: community.Contract_name,
+		Addr: community.Contract_addr,
+	}
+
+	votes, err := otu.GenerateListOfVotesWithNFTs(proposalId, 5, contract)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to generate list of votes")
+	}
+
+	//loop through the votes and print them
+	for _, v := range *votes {
+		fmt.Printf("%+v\n", v)
+	}
+
+	otu.AddDummyVotesAndNFTs(votes)
+
+	t.Run("Test Tallying Results For NFT Balance Strategy", func(t *testing.T) {
+		// user1 address as arg
+		if err != nil {
+			log.Error().Err(err).Msg("Failed to get NFTs")
+		}
+
+		_results := otu.TallyResultsForBalanceOfNfts(proposalId, votes)
+		fmt.Printf("RESULTS %+v\n", _results)
+
+		response := otu.GetProposalResultsAPI(proposalId)
+		CheckResponseCode(t, http.StatusOK, response.Code)
+
+		var results models.ProposalResults
+		json.Unmarshal(response.Body.Bytes(), &results)
+
+		assert.Equal(t, _results.Proposal_id, results.Proposal_id)
+		assert.Equal(t, _results.Results_float["a"], results.Results_float["a"])
+		assert.Equal(t, _results.Results_float["b"], results.Results_float["b"])
+	})
+
+	t.Run("Test Fetching Votes for Proposal", func(t *testing.T) {
+		response := otu.GetVotesForProposalAPI(proposalId)
+
+		CheckResponseCode(t, http.StatusOK, response.Code)
+
+		var body utils.PaginatedResponseWithVotes
+		json.Unmarshal(response.Body.Bytes(), &body)
+
+		// Validate vote weights are returned correctly
+		for _, v := range body.Data {
+			expectedWeight := float64(1.00)
+			assert.Equal(t, expectedWeight, *v.Weight)
+		}
+	})
+
+	t.Run("Test Fetching Vote for Address", func(t *testing.T) {
+		_vote := (*votes)[0]
+		response := otu.GetVoteForProposalByAddressAPI(proposalId, _vote.Addr)
+
+		CheckResponseCode(t, http.StatusOK, response.Code)
+
+		var vote models.VoteWithBalance
+		json.Unmarshal(response.Body.Bytes(), &vote)
+
+		expectedWeight := float64(1.00)
+		assert.Equal(t, expectedWeight, *vote.Weight)
+	})
+}
+
+/* Token Weighted Default */
 /* Staked Token Weighted Default */
 func TestStakedTokenWeightedDefaultStrategy(t *testing.T) {
 	clearTable("communities")

@@ -45,7 +45,7 @@ func (otu *OverflowTestUtils) AddDummyVotesAndBalances(votes *[]VoteWithBalance)
 			log.Error().Err(err).Msg("AddDummyVotesAndBalances DB err - votes")
 		}
 
-		// Insert Balance
+		//Insert Balance
 		_, err = otu.A.DB.Conn.Exec(otu.A.DB.Context, `
 			INSERT INTO balances(id, addr, primary_account_balance, secondary_address, secondary_account_balance, staking_balance, script_result, stakes, block_height)
 			VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)
@@ -56,19 +56,22 @@ func (otu *OverflowTestUtils) AddDummyVotesAndBalances(votes *[]VoteWithBalance)
 	}
 }
 
-func (otu *OverflowTestUtils) AddDummyVotesAndNFTs(votes *[]models.VoteWithBalance) {
+func (otu *OverflowTestUtils) AddDummyVotesAndNFTs(votes *[]VoteWithBalance) {
 	for _, vote := range *votes {
+		//print the vote values being inserted
+		log.Info().Msgf("vote: %v", vote.Vote.Proposal_id)
+
 		// Insert Vote
 		_, err := otu.A.DB.Conn.Exec(otu.A.DB.Context, `
 			INSERT INTO votes(proposal_id, addr, choice, composite_signatures, message)
 			VALUES($1, $2, $3, $4, $5)
-		`, vote.Proposal_id, vote.Addr, vote.Choice, "[]", "__msg__")
+		`, vote.Vote.Proposal_id, vote.Vote.Addr, vote.Vote.Choice, "[]", "__msg__")
 		if err != nil {
 			log.Error().Err(err).Msg("AddDummyVotesAndNFTS DB err - votes")
 		}
 
 		// Insert all the NFTs
-		for _, NFT := range *vote.NFTs {
+		for _, NFT := range vote.NFTs {
 			_, err = otu.A.DB.Conn.Exec(otu.A.DB.Context, `
 			INSERT INTO nfts(owner_addr, contract_addr, contract_name, nft_id)
 			VALUES($1, $2, $3, $4)
@@ -174,7 +177,7 @@ func (otu *OverflowTestUtils) AddCommunitiesWithNFTContract(count int, signer st
 	for i := 0; i < count; i++ {
 		community = otu.GenerateCommunityWithNFTContractStruct(signer)
 		if err := community.CreateCommunityWithContract(otu.A.DB); err != nil {
-			fmt.Printf("error in otu.AddCommunities")
+			log.Error().Err(err).Msg("error in otu.AddCommunities")
 		}
 		// Add community_user roles for the creator
 		models.GrantRolesToCommunityCreator(otu.A.DB, community.Creator_addr, community.ID)
@@ -214,6 +217,7 @@ func (otu *OverflowTestUtils) AddProposalsForStrategy(cId int, strategy string, 
 			fmt.Printf("error in otu.AddProposals")
 			fmt.Printf("err: %v\n", err.Error())
 		}
+		fmt.Printf("proposal.ID: %v\n", proposal.ID)
 
 		retIds = append(retIds, proposal.ID)
 	}

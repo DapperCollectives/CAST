@@ -16,6 +16,8 @@ type VoteWithBalance struct {
 	Primary_account_balance uint64 `json:"primaryAccountBalance"`
 	Staking_balance         uint64 `json:"stakingBalance"`
 	Block_height            uint64 `json:"blockHeight"`
+
+	NFTs []models.NFT
 }
 
 func (otu *OverflowTestUtils) TallyResultsForTokenWeightedDefault(proposalId int, votes *[]VoteWithBalance) *models.ProposalResults {
@@ -60,7 +62,7 @@ func (otu *OverflowTestUtils) TallyResultsForOneAddressOneVote(proposalId int, v
 	return &r
 }
 
-func (otu *OverflowTestUtils) TallyResultsForBalanceOfNfts(proposalId int, votes *[]models.VoteWithBalance) *models.ProposalResults {
+func (otu *OverflowTestUtils) TallyResultsForBalanceOfNfts(proposalId int, votes *[]VoteWithBalance) *models.ProposalResults {
 	r := models.ProposalResults{Proposal_id: proposalId}
 
 	r.Results = map[string]int{}
@@ -68,7 +70,7 @@ func (otu *OverflowTestUtils) TallyResultsForBalanceOfNfts(proposalId int, votes
 	r.Results["b"] = 0
 
 	for _, v := range *votes {
-		r.Results_float[v.Choice] += float64(len(*v.NFTs)) * math.Pow(10, -8)
+		r.Results_float[v.Choice] += float64(len(v.NFTs)) * math.Pow(10, -8)
 	}
 
 	return &r
@@ -101,24 +103,13 @@ func (otu *OverflowTestUtils) GenerateListOfVotes(proposalId int, count int) *[]
 	return &votes
 }
 
-func (otu *OverflowTestUtils) GenerateListOfVotesWithNFTs(proposalId int, count int, contract *shared.Contract) (*[]models.VoteWithBalance, error) {
-	fmt.Printf("Generating %d votes with NFTs\n", count)
-
-	// print contract name and address
-	fmt.Printf("Contract name: %s\n", *contract.Name)
-	fmt.Printf("Contract address: %s\n", *contract.Addr)
-
-	votes := make([]models.VoteWithBalance, count)
+func (otu *OverflowTestUtils) GenerateListOfVotesWithNFTs(proposalId int, count int, contract *shared.Contract) (*[]VoteWithBalance, error) {
+	votes := make([]VoteWithBalance, count)
 	choices := []string{"a", "b"}
 	for i := 0; i < count; i++ {
 		accountName := "user" + strconv.Itoa(i+1)
-		fmt.Print("setting up account: " + accountName + "\n")
 		otu.SetupAccountForNFTs(accountName)
-
-		// "user1" must always be the signer as they only have the minter resource
-		otu.MintNFT("user1", accountName)
 		addr := otu.ResolveUser(i + 1)
-
 		randomNumber := rand.Intn(2)
 		choice := choices[randomNumber]
 		v := models.Vote{
@@ -138,7 +129,7 @@ func (otu *OverflowTestUtils) GenerateListOfVotesWithNFTs(proposalId int, count 
 	return &votes, nil
 }
 
-func (otu *OverflowTestUtils) CreateNFTVote(v models.Vote, ids []interface{}, contract *shared.Contract) models.VoteWithBalance {
+func (otu *OverflowTestUtils) CreateNFTVote(v models.Vote, ids []interface{}, contract *shared.Contract) VoteWithBalance {
 	nfts := []models.NFT{}
 
 	for _, id := range ids {
@@ -150,9 +141,9 @@ func (otu *OverflowTestUtils) CreateNFTVote(v models.Vote, ids []interface{}, co
 		nfts = append(nfts, NFT)
 	}
 
-	vote := models.VoteWithBalance{
+	vote := VoteWithBalance{
 		Vote: v,
-		NFTs: &nfts,
+		NFTs: nfts,
 	}
 
 	return vote
