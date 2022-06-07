@@ -1,6 +1,5 @@
 import React from "react";
 import { useHistory, useParams, Link } from "react-router-dom";
-import { Tablink } from "components/ProposalsList";
 import {
   Loader,
   CommunityPulse,
@@ -9,6 +8,7 @@ import {
   CommunityAbout,
   CommunityProposals,
   LeaderBoard,
+  Tablink,
 } from "components";
 import {
   useMediaQuery,
@@ -206,9 +206,8 @@ export default function CommunityPage() {
                     />
                   </li>
                   <li
-                    className={`${
-                      activeTabMap["proposals"] ? "is-active" : ""
-                    }`}
+                    className={`${activeTabMap["proposals"] ? "is-active" : ""
+                      }`}
                   >
                     <Tablink
                       linkText="Proposals"
@@ -266,7 +265,7 @@ export default function CommunityPage() {
                 />
               )}
               {activeTabMap["proposals"] && (
-                <CommunityProposals communityId={community.id} />
+                <CommunityProposals communityId={community.id} admins={admins} />
               )}
               {activeTabMap["members"] && (
                 <MembersLayout

@@ -265,7 +265,85 @@ hr
 	color: $red
 
 @import './components/StepByStep/StepByStep.sass'
-@import './components/ProposalsList/ProposalList.sass'
+
+// Styles for CommunityProposalList - begin
+.blockies
+	border-radius: 50px
+.rounded-top
+	border-top-left-radius: 8px
+	border-top-right-radius: 8px
+.proposal-title
+	font-size: 18px
+	line-height: 120%
+.proposal-body-text
+	min-height: 92px
+	height: 92px
+.proposal-text-truncated
+	line-height: 140%
+	display: -webkit-box
+	-webkit-box-orient: vertical
+	-webkit-line-clamp: 3
+	overflow: hidden
+.proposal-status-label
+	padding: 10px 20px !important
+.proposal-body-spacing
+	margin-bottom: 1.5rem !important
+
+@include desktop
+	.spacing-left-panel
+		padding-top: 5rem !important
+		padding-right: 5rem !important
+		padding-left: 0px
+	.spacing-right-panel
+		padding-left: 8rem
+		padding-top: 5rem
+		padding-right: 8rem
+	.text-description
+		max-width: 260px
+
+@include tablet-only
+	.spacing-left-panel
+		padding-top: 2rem !important
+		padding-right: 2rem !important
+		padding-left: 1.5rem !important
+	.spacing-right-panel
+		padding-left: 2.5rem !important
+		padding-top: 2rem !important
+		padding-right: 2.5rem !important
+	.proposal-card-footer
+		padding-top: 0
+	.proposal-status
+		padding-right: 0 !important
+		code span
+			margin-right: 0 !important
+	.mobile-status-label
+		padding: 8px 20px !important
+	.proposal-body-spacing
+		margin-bottom: 0.75rem !important
+	.proposal-body-text
+		min-height: unset
+		height: unset
+
+@include mobile
+	.spacing-left-panel
+		padding: 40px 20px 0px 20px
+	.spacing-right-panel
+		padding: 24px 24px 0px 24px
+	.proposal-title
+		color: #000000
+		font-weight: 400
+		font-size: 18px
+		line-height: 120%
+	.proposal-card-footer
+		padding-top: 0
+	.proposal-status-label
+		padding: 8px 20px !important
+	.proposal-body-spacing
+		margin-bottom: 0.75rem !important
+	.proposal-body-text
+		min-height: unset
+		height: unset
+// Styles for CommunityProposalList - end
 
 .button.dropdown-item.is-active
 	background-color: $grey

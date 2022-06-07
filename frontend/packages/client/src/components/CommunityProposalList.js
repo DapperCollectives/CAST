@@ -1,12 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import ProposalHeader from "./ProposalsList/ProposalHeader";
 import Loader from "./Loader";
-
-const StyleForStatus = {
-  closed: { opacity: 0.6 },
-  cancelled: { opacity: 0.6 },
-};
+import ProposalCard from "./ProposalCard";
 
 const EmptyPlaceHolder = ({ communityId }) => {
   return (
@@ -38,6 +33,7 @@ const CommunityProposalList = ({
   activeProposals = [],
   filterValue,
   communityId,
+  admins = [],
 } = {}) => {
   // filter with all value should show active and pending in one group and closed and cancelled in another group
   if (filterValue === "all") {
@@ -49,49 +45,19 @@ const CommunityProposalList = ({
         {listIsEmpty && <EmptyPlaceHolder communityId={communityId} />}
         {/* If there's an element in any of the two lists they will render */}
         <div className="is-flex is-flex-direction-column">
-          {(activeProposals ?? []).map((pr, i) => (
-            <Link to={`/proposal/${pr.id}`} key={i}>
-              <div
-                className="border-light rounded-sm mb-5 proposal-card transition-all"
-                key={i}
-              >
-                <ProposalHeader {...pr} />
-                <div className="px-6 py-5 proposal-body-spacing">
-                  <h4 className="proposal-title is-4 mt-1 mb-2">{pr.name}</h4>
-                  <p className="has-text-grey mb-4 small-text">
-                    by {pr.creatorAddr}
-                  </p>
-                  <p className="has-text-grey small-text">{pr.description}</p>
-                </div>
-              </div>
-            </Link>
-          ))}
+          {(activeProposals ?? []).map((pr, i) => {
+            pr.isAdminProposal = admins.some(({ addr }) => addr === pr.creatorAddr);
+            return <ProposalCard pr={pr} key={i} />
+          })}
         </div>
         {proposalsList?.length !== 0 && (
           <div className="has-text-weight-bold is-uppercase mb-5">Closed</div>
         )}
         <div className="is-flex is-flex-direction-column">
-          {(proposalsList ?? []).map((pr, i) => (
-            <Link
-              to={`/proposal/${pr.id}`}
-              key={i}
-              style={StyleForStatus[pr.computedStatus] ?? {}}
-            >
-              <div
-                className="border-light rounded-sm mb-5 proposal-card transition-all"
-                key={i}
-              >
-                <ProposalHeader {...pr} />
-                <div className="px-6 py-5 proposal-body-spacing">
-                  <h4 className="proposal-title is-4 mt-1 mb-2">{pr.name}</h4>
-                  <p className="has-text-grey mb-4 small-text">
-                    by {pr.creatorAddr}
-                  </p>
-                  <p className="has-text-grey small-text">{pr.description}</p>
-                </div>
-              </div>
-            </Link>
-          ))}
+          {(proposalsList ?? []).map((pr, i) => {
+            pr.isAdminProposal = admins.some(({ addr }) => addr === pr.creatorAddr);
+            return <ProposalCard pr={pr} key={i} style={{ opacity: "50%" }} />
+          })}
         </div>
       </>
     );
@@ -101,27 +67,7 @@ const CommunityProposalList = ({
     <>
       {initialLoading && <Loader fullHeight />}
       <div className="is-flex is-flex-direction-column">
-        {(proposalsList ?? []).map((pr, i) => (
-          <Link
-            to={`/proposal/${pr.id}`}
-            key={i}
-            style={StyleForStatus[pr.computedStatus] ?? {}}
-          >
-            <div
-              className="border-light rounded-sm mb-5 proposal-card transition-all"
-              key={i}
-            >
-              <ProposalHeader {...pr} />
-              <div className="px-6 py-5 proposal-body-spacing">
-                <h4 className="proposal-title is-4 mt-1 mb-2">{pr.name}</h4>
-                <p className="has-text-grey mb-4 small-text">
-                  by {pr.creatorAddr}
-                </p>
-                <p className="has-text-grey small-text">{pr.description}</p>
-              </div>
-            </div>
-          </Link>
-        ))}
+        {(proposalsList ?? []).map((pr, i) => (<ProposalCard pr={pr} key={i} />))}
       </div>
     </>
   );

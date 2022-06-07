@@ -1,6 +1,6 @@
 import React from "react";
 import { parseDateFromServer } from "utils";
-import { getStatus } from "../ProposalsList/ProposalHeader";
+import { getStatus } from "./getStatus";
 import { FilterValues } from "const";
 import { StatusLabel } from "components";
 

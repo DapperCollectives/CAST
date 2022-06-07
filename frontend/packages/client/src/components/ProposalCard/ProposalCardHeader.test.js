@@ -2,7 +2,7 @@ import React from "react";
 import { cleanup, render } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import renderer from "react-test-renderer";
-import ProposalHeader from "./ProposalHeader";
+import ProposalCardHeader from "./ProposalCardHeader";
 
 const date = new Date();
 let pendingProposalProps = {
@@ -45,11 +45,11 @@ const propsArray = [
 ];
 afterEach(cleanup);
 
-describe("ProposalHeader UI Component", () => {
+describe("ProposalCardHeader UI Component", () => {
   propsArray.forEach((props) => {
     it(`renders correctly on  ${props.computedStatus} computedStatus`, () => {
       const component = renderer.create(
-        <ProposalHeader
+        <ProposalCardHeader
           textDecision={props.textDecision}
           winCount={props.winCount}
           voted={props.voted}
@@ -64,11 +64,11 @@ describe("ProposalHeader UI Component", () => {
   });
 });
 
-describe("ProposalHeader computedStatus 'pending'", () => {
+describe("ProposalCardHeader computedStatus 'pending'", () => {
   let rendered;
   beforeEach(() => {
     rendered = render(
-      <ProposalHeader
+      <ProposalCardHeader
         textDecision={pendingProposalProps.textDecision}
         winCount={pendingProposalProps.winCount}
         voted={pendingProposalProps.voted}
@@ -91,14 +91,14 @@ describe("ProposalHeader computedStatus 'pending'", () => {
   });
 });
 
-describe("ProposalHeader computedStatus 'active' without vote", () => {
+describe("ProposalCardHeader computedStatus 'active' without vote", () => {
   let daysToClose = 10;
   let endTime = new Date().setDate(date.getDate() + daysToClose);
   let startTime = new Date().setDate(date.getDate() - 2);
   let rendered;
   beforeEach(() => {
     rendered = render(
-      <ProposalHeader
+      <ProposalCardHeader
         textDecision={activeProposalProps.textDecision}
         winCount={activeProposalProps.winCount}
         voted={false}
@@ -124,14 +124,14 @@ describe("ProposalHeader computedStatus 'active' without vote", () => {
   });
 });
 
-describe("ProposalHeader computedStatus 'active' with user vote", () => {
+describe("ProposalCardHeader computedStatus 'active' with user vote", () => {
   let daysToClose = 10;
   let endTime = new Date().setDate(date.getDate() + daysToClose);
   let startTime = new Date().setDate(date.getDate() - 2);
   let rendered;
   beforeEach(() => {
     rendered = render(
-      <ProposalHeader
+      <ProposalCardHeader
         textDecision={activeProposalProps.textDecision}
         winCount={activeProposalProps.winCount}
         voted={activeProposalProps.voted}
@@ -157,11 +157,11 @@ describe("ProposalHeader computedStatus 'active' with user vote", () => {
   });
 });
 
-describe("ProposalHeader computedStatus 'closed'", () => {
+describe("ProposalCardHeader computedStatus 'closed'", () => {
   let rendered;
   beforeEach(() => {
     rendered = render(
-      <ProposalHeader
+      <ProposalCardHeader
         textDecision={closedProposalProps.textDecision}
         winCount={closedProposalProps.winCount}
         voted={closedProposalProps.voted}
@@ -196,10 +196,10 @@ describe("ProposalHeader computedStatus 'closed'", () => {
   });
 });
 
-describe("ProposalHeader defaults to closed when no props are passed", () => {
+describe("ProposalCardHeader defaults to closed when no props are passed", () => {
   let rendered;
   beforeEach(() => {
-    rendered = render(<ProposalHeader />);
+    rendered = render(<ProposalCardHeader />);
   });
   it("should display 'Closed' label with grey color", () => {
     const { getByText } = rendered;

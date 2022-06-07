@@ -6,7 +6,7 @@ import { FilterValues } from "../const";
 import DropDown from "./Dropdown";
 import WrapperResponsive from "./WrapperResponsive";
 
-export default function CommunityProposals({ communityId = 1 } = {}) {
+export default function CommunityProposals({ communityId = 1, admins } = {}) {
   const notMobile = useMediaQuery();
 
   const proposalFilterValues = Object.entries(FilterValues)
@@ -40,17 +40,16 @@ export default function CommunityProposals({ communityId = 1 } = {}) {
     });
 
   const classesContainer = notMobile ? "mt-6" : "mt-5";
-  const classesAboutContainer = `columns is-multiline m-0 ${
-    notMobile ? "mt-5 pt-2" : "mt-4"
-  }`;
+  const classesAboutContainer = `columns is-multiline m-0 ${notMobile ? "mt-5 pt-2" : "mt-4"
+    }`;
 
   const initialLoading =
     filterValue !== "all"
       ? loadingProposals && !proposals
       : loadingProposals &&
-        !proposals &&
-        !activeProposals &&
-        loadingActiveProposals;
+      !proposals &&
+      !activeProposals &&
+      loadingActiveProposals;
 
   return (
     <div className={`columns ${classesContainer}`}>
@@ -120,6 +119,7 @@ export default function CommunityProposals({ communityId = 1 } = {}) {
           filterValue={filterValue}
           initialLoading={initialLoading}
           communityId={communityId}
+          admins={admins}
         />
       </div>
     </div>
