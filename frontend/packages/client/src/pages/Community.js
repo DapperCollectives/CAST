@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useHistory, useParams, Link } from "react-router-dom";
-import { Tablink } from "components/ProposalsList";
 import {
   Loader,
   CommunityPulse,
@@ -10,7 +9,8 @@ import {
   CommunityProposals,
   LeaderBoard,
   JoinCommunityButton,
-} from "../components";
+  Tablink,
+} from "components";
 import {
   useMediaQuery,
   useCommunityDetails,
@@ -335,7 +335,9 @@ export default function Community() {
                     communityId={communityId}
                   />
                 )}
-                {activeTabMap["proposals"] && <CommunityProposals communityId={community.id} />}
+                {activeTabMap["proposals"] && (
+                  <CommunityProposals communityId={community.id} admins={admins} />
+                )}
                 {activeTabMap["members"] && (
                   <MembersLayout
                     isMobile={!notMobile}
