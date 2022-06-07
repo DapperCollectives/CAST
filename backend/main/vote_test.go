@@ -2,12 +2,14 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"testing"
 
 	"github.com/brudfyi/flow-voting-tool/main/models"
 	"github.com/brudfyi/flow-voting-tool/main/shared"
+	"github.com/jackc/pgx/v4"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -77,7 +79,21 @@ func TestGetVotes(t *testing.T) {
 
 	t.Run("Requesting results for a proposal where no votes exist should return default results object", func(t *testing.T) {
 		clearTable("votes")
-		defaultResults := models.NewProposalResults(proposalId)
+
+		p := models.Proposal{ID: proposalId}
+		if err := p.GetProposalById(otu.A.DB); err != nil {
+			switch err.Error() {
+			case pgx.ErrNoRows.Error():
+				t.Errorf("Proposal not found")
+			default:
+				t.Errorf("Unexpected error: %v", err)
+			}
+			return
+		}
+
+		fmt.Printf("Proposal: %+v", p)
+
+		defaultResults := models.NewProposalResults(proposalId, p.Choices)
 		response := otu.GetProposalResultsAPI(proposalId)
 		CheckResponseCode(t, http.StatusOK, response.Code)
 

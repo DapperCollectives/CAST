@@ -63,7 +63,7 @@ type App struct {
 var allowedFileTypes = []string{"image/jpg", "image/jpeg", "image/png", "image/gif"}
 
 type Strategy interface {
-	TallyVotes(votes []*models.VoteWithBalance, proposalId int) (models.ProposalResults, error)
+	TallyVotes(votes []*models.VoteWithBalance, p *models.ProposalResults) (models.ProposalResults, error)
 	GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error)
 	GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error)
 }
@@ -292,7 +292,8 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	proposalResults, err := s.TallyVotes(votes, proposalId)
+	proposalWithChoices := models.NewProposalResults(proposalId, p.Choices)
+	proposalResults, err := s.TallyVotes(votes, proposalWithChoices)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return

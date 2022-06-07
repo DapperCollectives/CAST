@@ -15,16 +15,22 @@ type ProposalResults struct {
 	Cid           *string            `json:"cid,omitempty"`
 }
 
-func NewProposalResults(id int) *ProposalResults {
+func NewProposalResults(id int, choices []s.Choice) *ProposalResults {
+
 	p := new(ProposalResults)
-	p.Results = map[string]int{
-		"a": 0,
-		"b": 0,
+	p.Results = make(map[string]int)
+	p.Results_float = make(map[string]float64)
+
+	for _, choice := range choices {
+		if choice.Choice_img_url == nil {
+			p.Results[choice.Choice_text] = 0
+			p.Results_float[choice.Choice_text] = 0.0
+		} else {
+			p.Results[*choice.Choice_img_url] = 0
+			p.Results_float[*choice.Choice_img_url] = 0.0
+		}
 	}
-	p.Results_float = map[string]float64{
-		"a": 0.00,
-		"b": 0.00,
-	}
+
 	p.Proposal_id = id
 	return p
 }

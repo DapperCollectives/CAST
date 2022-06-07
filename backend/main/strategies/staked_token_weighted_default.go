@@ -10,15 +10,14 @@ import (
 type StakedTokenWeightedDefault struct{}
 
 // should handle and return error case here
-func (s *StakedTokenWeightedDefault) TallyVotes(votes []*models.VoteWithBalance, proposalId int) (models.ProposalResults, error) {
-	r := models.NewProposalResults(proposalId)
+func (s *StakedTokenWeightedDefault) TallyVotes(votes []*models.VoteWithBalance, p *models.ProposalResults) (models.ProposalResults, error) {
 
 	for _, vote := range votes {
-		r.Results[vote.Choice] += int(float64(*vote.StakingBalance) * math.Pow(10, -8))
-		r.Results_float[vote.Choice] += float64(*vote.StakingBalance) * math.Pow(10, -8)
+		p.Results[vote.Choice] += int(float64(*vote.StakingBalance) * math.Pow(10, -8))
+		p.Results_float[vote.Choice] += float64(*vote.StakingBalance) * math.Pow(10, -8)
 	}
 
-	return *r, nil
+	return *p, nil
 }
 
 func (s *StakedTokenWeightedDefault) GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error) {
