@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"time"
 
-	s "github.com/brudfyi/flow-voting-tool/main/shared"
+	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/jackc/pgx/v4"
 )
