@@ -13,13 +13,21 @@ env:
   db_hostname: ${{ secrets.DB_HOSTNAME }}
   db_port: ${{ secrets.DB_PORT }}
   db_name: ${{ secrets.DB_NAME }}
+  dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+  dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
 
 
 jobs:
-  build:
+
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##  MIGRATIONS
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  migrations:
     name: Migrations
     runs-on: self-hosted
+    if: "!contains(github.event.head_commit.message, 'cancel migrations')"
     steps:
+
     - name: checkout
       uses: actions/checkout@v3
       with:
@@ -30,3 +38,28 @@ jobs:
         curl -L https://github.com/golang-migrate/migrate/releases/download/v4.15.2/migrate.linux-amd64.tar.gz | tar xvz && sudo mv migrate /usr/local/bin && sudo chmod +x /usr/local/bin/migrate
         sudo migrate -path ./backend/migrations -database 'postgres://${{ env.db_username }}:${{ env.db_password }}@${{ env.db_hostname }}:${{ env.db_port }}/${{ env.db_name }}?sslmode=disable' -verbose up
 
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##  BUILD AND PUSH BACKEND STAGE
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  build-and-push:
+    name: Build and push
+    runs-on: ubuntu-20.04
+    if: "!contains(github.event.head_commit.message, 'cancel build')"
+    steps:
+
+    - name: checkout
+      uses: actions/checkout@v3
+      with:
+        ref: FerSanchez/PipelinesChanges
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ env.dockerhub_username }}
+        password: ${{ env.dockerhub_token }}
+      
+    - name: build and push backend - stage -
+      run: |
+        cd backend && docker build . -t bruddev/cast-backend-stage:${{ env.TAG }}
+        docker push bruddev/cast-backend-stage:tagname
