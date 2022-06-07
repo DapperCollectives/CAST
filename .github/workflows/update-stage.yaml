@@ -93,13 +93,19 @@ jobs:
         token: ${{ env.argo_token }}
         path: ./argo
 
+    - name: time
+      id: time
+      run: echo "::set-output name=time::$(date "+%T")"
+
     - name: Install Kustomize and update tag
+      env:
+        TIME: ${{ time.time.outputs.time }}
       run: |
         curl -fL https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v4.5.5/kustomize_v4.5.5_linux_amd64.tar.gz| tar xz && \
         chmod +x kustomize
         cd ./argo/voting-tool/backend/environments/stage && kustomize edit set image bruddev/cast-backend-stage:ROBERT
         git config --global user.email "brunkins@brudfyi.com"
         git config --global user.name "Brunkins" 
-        git commit -am 'Added New Value From GHA' && git push
+        git commit -am "Added New Value From GHA $TIME" && git push
 
     
