@@ -78,7 +78,7 @@ jobs:
   update-stage-via-argocd:
     name: ArgoCD update Stage
     runs-on: ubuntu-20.04
-    #needs: build-and-push
+    needs: build-and-push
     steps:
 
     - name: Clone ArgoManifests
@@ -97,13 +97,18 @@ jobs:
       id: time
       run: echo "::set-output name=time::$(date "+%T")"
 
+    - name: Get short SHA
+      id: short
+      run: echo "::set-output name=sha7::$(echo ${GITHUB_SHA} | cut -c1-7)"
+
     - name: Install Kustomize and update tag
       env:
         TIME: ${{ steps.time.outputs.time }}
+        TAG: ${{ steps.short.outputs.sha7 }}
       run: |
         curl -fL https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v4.5.5/kustomize_v4.5.5_linux_amd64.tar.gz| tar xz && \
         chmod +x kustomize
-        cd ./argo/voting-tool/backend/environments/stage && kustomize edit set image bruddev/cast-backend-stage:ROBERT2
+        cd ./argo/voting-tool/backend/environments/stage && kustomize edit set image bruddev/cast-backend-stage:$TAG
         git config --global user.email "brunkins@brudfyi.com"
         git config --global user.name "Brunkins" 
         git commit -am "Added New Value From GHA $TIME" && git push
