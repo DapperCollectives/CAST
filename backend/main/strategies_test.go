@@ -32,7 +32,7 @@ func TestBalanceOfNFTsStrategy(t *testing.T) {
 	}
 	fmt.Printf("contract: %+v\n", contract)
 
-	votes, err := otu.GenerateListOfVotesWithNFTs(proposalId, 10, contract)
+	votes, err := otu.GenerateListOfVotesWithNFTs(proposalId, 5, contract)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to generate list of votes")
 	}

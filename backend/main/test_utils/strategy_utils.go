@@ -107,17 +107,13 @@ func (otu *OverflowTestUtils) GenerateListOfVotesWithNFTs(proposalId int, count 
 	votes := make([]VoteWithBalance, count)
 	choices := []string{"a", "b"}
 	for i := 0; i < count; i++ {
-		addr := otu.ResolveUser(i + 1)
-		err := otu.Adapter.SetupAccount(addr, contract)
-		if err != nil {
-			return nil, err
-		}
-		fmt.Printf("Successfully setup account %s\n", addr)
-
 		accountName := "user" + strconv.Itoa(i+1)
-		fmt.Printf("Creating account %s\n", accountName)
-		otu.MintNFT("user1")
-		fmt.Printf("addr : %s\n", addr)
+		fmt.Print("setting up account: " + accountName + "\n")
+		otu.SetupAccountForNFTs(accountName)
+
+		// "user1" must always be the signer as they only have the minter resource
+		otu.MintNFT("user1", accountName)
+		addr := otu.ResolveUser(i + 1)
 
 		randomNumber := rand.Intn(2)
 		choice := choices[randomNumber]
@@ -125,13 +121,14 @@ func (otu *OverflowTestUtils) GenerateListOfVotesWithNFTs(proposalId int, count 
 			Proposal_id: proposalId, Addr: addr, Choice: choice,
 		}
 
-		// Balance is 1 FLOW * index
-		balance := 100000000 * (i + 1)
 		nftIds, err := otu.Adapter.GetNFTIds(addr, contract)
 		if err != nil {
 			return nil, err
 		}
 		fmt.Printf("%v\n", nftIds)
+
+		// Balance is 1 FLOW * index
+		balance := 100000000 * (i + 1)
 		vote := VoteWithBalance{
 			Vote:                    v,
 			Primary_account_balance: uint64(balance),
@@ -150,13 +147,20 @@ func (otu *OverflowTestUtils) CreateNFTCollection(account string) {
 		RunPrintEventsFull()
 }
 
-func (otu *OverflowTestUtils) MintNFT(account string) {
+func (otu *OverflowTestUtils) MintNFT(signer string, recipient string) {
 	otu.O.TransactionFromFile("mint_nft").
 		SignProposeAndPayAsService().
 		Args(otu.O.Arguments().
-			Account(account).
+			Account(recipient).
 			String("name").
 			String("description").
 			String("thumbnail")).
+		RunPrintEventsFull()
+}
+
+func (otu *OverflowTestUtils) SetupAccountForNFTs(account string) {
+	fmt.Printf("Setting up account %s for NFTs\n", account)
+	otu.O.TransactionFromFile("setup_account").
+		SignProposeAndPayAs(account).
 		RunPrintEventsFull()
 }
