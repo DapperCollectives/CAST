@@ -27,9 +27,6 @@ jobs:
     
     - name: Install and run migrations
       run: |
-        curl -L https://packagecloud.io/golang-migrate/migrate/gpgkey | apt-key add -
-        sudo echo "deb https://packagecloud.io/golang-migrate/migrate/ubuntu/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/migrate.list
-        sudo apt-get update
-        sudo apt-get install -y migrate
+        curl -L https://github.com/golang-migrate/migrate/releases/download/v4.15.2/migrate.linux-amd64.tar.gz | tar xvz && sudo mv migrate /usr/local/bin && sudo chmod +x /usr/local/bin/migrate
         sudo migrate -path ./CAST/backend/migrations -database 'postgres://${{ env.db_username }}:${{ env.db_password }}@${{ env.db_hostname }}:${{ env.db_port }}/${{ env.db_name }}?sslmode=disable' -verbose up
 
