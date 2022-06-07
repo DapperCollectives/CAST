@@ -56,6 +56,30 @@ func (otu *OverflowTestUtils) AddDummyVotesAndBalances(votes *[]VoteWithBalance)
 	}
 }
 
+func (otu *OverflowTestUtils) AddDummyVotesAndNFTs(votes *[]models.VoteWithBalance) {
+	for _, vote := range *votes {
+		// Insert Vote
+		_, err := otu.A.DB.Conn.Exec(otu.A.DB.Context, `
+			INSERT INTO votes(proposal_id, addr, choice, composite_signatures, message)
+			VALUES($1, $2, $3, $4, $5)
+		`, vote.Proposal_id, vote.Addr, vote.Choice, "[]", "__msg__")
+		if err != nil {
+			log.Error().Err(err).Msg("AddDummyVotesAndNFTS DB err - votes")
+		}
+
+		// Insert all the NFTs
+		for _, NFT := range *vote.NFTs {
+			_, err = otu.A.DB.Conn.Exec(otu.A.DB.Context, `
+			INSERT INTO nfts(owner_addr, contract_addr, contract_name, nft_id)
+			VALUES($1, $2, $3, $4)
+		`, vote.Addr, NFT.Contract_addr, NFT.Contract_name, NFT.ID)
+		}
+		if err != nil {
+			log.Error().Err(err).Msg("error inserting NFTs to the DB")
+		}
+	}
+}
+
 func (otu *OverflowTestUtils) ResolveUser(user int) string {
 	accountName := "emulator-user" + strconv.Itoa(user)
 	account, _ := otu.O.State.Accounts().ByName(accountName)

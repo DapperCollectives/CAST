@@ -35,12 +35,11 @@ type VoteWithBalance struct {
 	StakingBalance          *uint64  `json:"stakingBalance"`
 	Weight                  *float64 `json:"weight"`
 
-	NFT
+	NFTs *[]NFT
 }
 
 type NFT struct {
-	NFT_ID        int       `json:"nft_id"`
-	NFT_uuid      string    `json:"nft_uuid"`
+	ID            string    `json:"nft_id"`
 	Contract_addr string    `json:"contract_addr"`
 	Contract_name string    `json:"contract_name"`
 	Public_path   string    `json:"public_path"`

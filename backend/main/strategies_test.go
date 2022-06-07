@@ -24,43 +24,43 @@ func TestBalanceOfNFTsStrategy(t *testing.T) {
 	otu.CreateNFTCollection("user1")
 	communityId, community := otu.AddCommunitiesWithNFTContract(1, "user1")
 	proposalId := otu.AddProposalsForStrategy(communityId[0], "balance-of-nfts", 1)[0]
-	fmt.Printf("proposalId: %d\n", proposalId)
 
 	var contract = &shared.Contract{
 		Name: community.Contract_name,
 		Addr: community.Contract_addr,
 	}
-	fmt.Printf("contract: %+v\n", contract)
 
 	votes, err := otu.GenerateListOfVotesWithNFTs(proposalId, 5, contract)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to generate list of votes")
 	}
-	// otu.AddDummyVotesAndBalances(votes)
 
-	// fmt.Printf("Community: %+v\n", community)
+	//print out all the votes
+	for _, v := range *votes {
+		fmt.Printf("%+v\n", v)
+	}
 
-	// t.Run("Test Tallying Results", func(t *testing.T) {
-	// 	// user1 address as arg
-	// 	nfts, err := otu.Adapter.GetNFTIds("0x01cf0e2f2f715450", contract)
-	// 	if err != nil {
-	// 		log.Error().Err(err).Msg("Failed to get NFTs")
-	// 	}
+	otu.AddDummyVotesAndNFTs(votes)
 
-	// 	fmt.Printf("NFTs: %+v\n", nfts)
-	// 	fmt.Printf("Votes:"+"%+v\n", votes)
-	// 	_results := otu.TallyResultsForBalanceOfNfts(proposalId, votes)
+	t.Run("Test Tallying Results For NFT Balance Strategy", func(t *testing.T) {
+		// user1 address as arg
+		if err != nil {
+			log.Error().Err(err).Msg("Failed to get NFTs")
+		}
 
-	// 	response := otu.GetProposalResultsAPI(proposalId)
-	// 	CheckResponseCode(t, http.StatusOK, response.Code)
+		_results := otu.TallyResultsForBalanceOfNfts(proposalId, votes)
+		fmt.Printf("RESULTS %+v\n", _results)
 
-	// 	var results models.ProposalResults
-	// 	json.Unmarshal(response.Body.Bytes(), &results)
+		response := otu.GetProposalResultsAPI(proposalId)
+		CheckResponseCode(t, http.StatusOK, response.Code)
 
-	// 	assert.Equal(t, _results.Proposal_id, results.Proposal_id)
-	// 	assert.Equal(t, _results.Results_float["a"], results.Results_float["a"])
-	// 	assert.Equal(t, _results.Results_float["b"], results.Results_float["b"])
-	// })
+		var results models.ProposalResults
+		json.Unmarshal(response.Body.Bytes(), &results)
+
+		assert.Equal(t, _results.Proposal_id, results.Proposal_id)
+		assert.Equal(t, _results.Results_float["a"], results.Results_float["a"])
+		assert.Equal(t, _results.Results_float["b"], results.Results_float["b"])
+	})
 
 	t.Run("Test Fetching Votes for Proposal", func(t *testing.T) {
 		response := otu.GetVotesForProposalAPI(proposalId)
