@@ -7,6 +7,7 @@ require (
 	github.com/bjartek/overflow v0.0.0-20220421162831-bed308def2ad
 	github.com/georgysavva/scany v0.3.0
 	github.com/go-playground/validator/v10 v10.10.0
+	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/mux v1.8.0
 	github.com/jackc/pgx/v4 v4.14.1
 	github.com/joho/godotenv v1.4.0

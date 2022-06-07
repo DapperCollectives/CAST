@@ -17,6 +17,7 @@ import (
 	"github.com/brudfyi/flow-voting-tool/main/middleware"
 	"github.com/brudfyi/flow-voting-tool/main/models"
 	"github.com/brudfyi/flow-voting-tool/main/shared"
+	"github.com/brudfyi/flow-voting-tool/main/strategies"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v4"
@@ -60,6 +61,18 @@ type App struct {
 }
 
 var allowedFileTypes = []string{"image/jpg", "image/jpeg", "image/png", "image/gif"}
+
+type Strategy interface {
+	TallyVotes(votes []*models.VoteWithBalance, proposalId int) (models.ProposalResults, error)
+	GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error)
+	GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error)
+}
+
+var strategyMap = map[string]Strategy{
+	"token-weighted-default":        &strategies.TokenWeightedDefault{},
+	"staked-token-weighted-default": &strategies.StakedTokenWeightedDefault{},
+	"one-address-one-vote":          &strategies.OneAddressOneVote{},
+}
 
 const (
 	maxFileSize = 5 * 1024 * 1024 // 5MB
@@ -168,9 +181,10 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/lists/{id:[0-9]+}/remove", a.removeAddressesFromList).Methods("POST", "OPTIONS")
 	// Votes
 	a.Router.HandleFunc("/proposals/{proposalId:[0-9]+}/votes", a.getVotesForProposal).Methods("GET")
-	a.Router.HandleFunc("/proposals/{proposalId:[0-9]+}/votes/{addr:0x[a-zA-Z0-9]{16}}", a.getVoteForAddress).Methods("GET")
+	a.Router.HandleFunc("/proposals/{proposalId:[0-9]+}/votes/{addr:0x[a-zA-Z0-9]+}", a.getVoteForAddress).Methods("GET")
 	a.Router.HandleFunc("/proposals/{proposalId:[0-9]+}/votes", a.createVoteForProposal).Methods("POST", "OPTIONS")
-	a.Router.HandleFunc("/votes/{addr:0x[a-zA-Z0-9]{16}}", a.getVotesForAddress).Methods("GET")
+	a.Router.HandleFunc("/votes/{addr:0x[a-zA-Z0-9]+}", a.getVotesForAddress).Methods("GET")
+	//Strategies
 	// a.Router.HandleFunc("/proposals/{proposalId:[0-9]+}/votes/{addr:0x[a-zA-Z0-9]{16}}", a.updateVoteForProposal).Methods("PUT", "OPTIONS")
 	a.Router.HandleFunc("/proposals/{proposalId:[0-9]+}/results", a.getResultsForProposal)
 	// Types
@@ -249,6 +263,7 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID")
 		return
 	}
+
 	// First, get the proposal by proposalId
 	p := models.Proposal{ID: proposalId}
 	if err := p.GetProposalById(a.DB); err != nil {
@@ -261,10 +276,25 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	proposalResults := models.ProposalResults{Proposal_id: p.ID}
-	tallyErr := proposalResults.Tally(a.DB, &p)
+	// get the votes for proposal
+	votes, err := models.GetAllVotesForProposal(a.DB, proposalId)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, tallyErr.Error())
+		// print the error to the console
+		log.Error().Err(err).Msg("Error getting votes for proposal")
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	// look up the strategy for proposal
+	s := strategyMap[*p.Strategy]
+	if s == nil {
+		respondWithError(w, http.StatusInternalServerError, "Strategy not found")
+		return
+	}
+
+	proposalResults, err := s.TallyVotes(votes, proposalId)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -285,8 +315,6 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 	start, _ := strconv.Atoi(r.FormValue("start"))
 	order := r.FormValue("order")
 
-	// Default order is reverse-chronological order
-	// chronological order, use order=asc
 	if order == "" {
 		order = "desc"
 	}
@@ -297,13 +325,36 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 		start = 0
 	}
 
-	log.Info().Msgf("order: %s\n", order)
 	votes, totalRecords, err := models.GetVotesForProposal(a.DB, start, count, order, proposalId)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	response := shared.GetPaginatedResponseWithPayload(votes, start, count, totalRecords)
+
+	//get the proposal by Id
+	proposal := models.Proposal{ID: proposalId}
+	if err := proposal.GetProposalById(a.DB); err != nil {
+		switch err.Error() {
+		case pgx.ErrNoRows.Error():
+			respondWithError(w, http.StatusNotFound, "Proposal not found")
+		default:
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+		}
+		return
+	}
+
+	s := strategyMap[*proposal.Strategy]
+	if s == nil {
+		respondWithError(w, http.StatusInternalServerError, "Invalid Strategy")
+		return
+	}
+
+	votesWithWeights, err := s.GetVotes(votes, &proposal)
+	if err != nil {
+		respondWithError(w, http.StatusNotFound, err.Error())
+		return
+	}
+	response := shared.GetPaginatedResponseWithPayload(votesWithWeights, start, count, totalRecords)
 	respondWithJSON(w, http.StatusOK, response)
 }
 
@@ -317,10 +368,13 @@ func (a *App) getVoteForAddress(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	v := models.Vote{Proposal_id: proposalId, Addr: addr}
-	if err := v.GetVote(a.DB); err != nil {
-		// TODO: for some reason switch err doesn't match pgx.ErrNoRows.
-		// So I've added .Error() to convert to a string comparison
+	voteWithBalance := &models.VoteWithBalance{
+		Vote: models.Vote{
+			Addr:        addr,
+			Proposal_id: proposalId,
+		}}
+
+	if err := voteWithBalance.GetVote(a.DB); err != nil {
 		switch err.Error() {
 		case pgx.ErrNoRows.Error():
 			respondWithError(w, http.StatusNotFound, "Vote not found")
@@ -329,7 +383,101 @@ func (a *App) getVoteForAddress(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	respondWithJSON(w, http.StatusOK, v)
+
+	//get proposal
+	proposal := models.Proposal{ID: proposalId}
+	if err := proposal.GetProposalById(a.DB); err != nil {
+		switch err.Error() {
+		case pgx.ErrNoRows.Error():
+			respondWithError(w, http.StatusNotFound, "Proposal not found")
+		default:
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+		}
+		return
+	}
+
+	//lookup the strategy for proposal
+	s := strategyMap[*proposal.Strategy]
+	if s == nil {
+		respondWithError(w, http.StatusInternalServerError, "Strategy not found")
+		return
+	}
+
+	// get the vote weight
+	weight, err := s.GetVoteWeightForBalance(voteWithBalance, &proposal)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	voteWithBalance.Weight = &weight
+	respondWithJSON(w, http.StatusOK, voteWithBalance)
+}
+
+func (a *App) getVotesForAddress(w http.ResponseWriter, r *http.Request) {
+	var proposalIds []int
+
+	vars := mux.Vars(r)
+	addr := vars["addr"]
+	count, _ := strconv.Atoi(r.FormValue("count"))
+	start, _ := strconv.Atoi(r.FormValue("start"))
+
+	err := json.Unmarshal([]byte(r.FormValue("proposalIds")), &proposalIds)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID")
+		return
+	}
+
+	if count > 25 || count < 1 {
+		count = 25
+	}
+	if start < 0 {
+		start = 0
+	}
+
+	votes, totalRecords, err := models.GetVotesForAddress(a.DB, start, count, addr, &proposalIds)
+	if err != nil {
+		log.Error().Err(err).Msg("error getting votes for address")
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+	}
+
+	var votesWithBalances []*models.VoteWithBalance
+
+	for _, vote := range votes {
+
+		//get proposal
+		proposal := models.Proposal{ID: vote.Proposal_id}
+		if err := proposal.GetProposalById(a.DB); err != nil {
+			switch err.Error() {
+			case pgx.ErrNoRows.Error():
+				respondWithError(w, http.StatusNotFound, "Proposal not found")
+			default:
+				respondWithError(w, http.StatusInternalServerError, err.Error())
+			}
+			return
+		}
+
+		//lookup the stratefy for this proposal
+		s := strategyMap[*proposal.Strategy]
+		if s == nil {
+			respondWithError(w, http.StatusInternalServerError, "Strategy not found")
+			return
+		}
+
+		//get the vote weight
+		weight, err := s.GetVoteWeightForBalance(vote, &proposal)
+		if err != nil {
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		vote.Weight = &weight
+		votesWithBalances = append(votesWithBalances, vote)
+	}
+
+	// Transpose into PaginatedResponse struct
+	response := shared.GetPaginatedResponseWithPayload(votesWithBalances, start, count, totalRecords)
+	respondWithJSON(w, http.StatusOK, response)
 }
 
 func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
@@ -440,14 +588,36 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	s := strategyMap[*p.Strategy]
+	if s == nil {
+		respondWithError(w, http.StatusInternalServerError, "Strategy not found")
+		return
+	}
+
+	// create the voteWithBalance struct
+	vb := models.VoteWithBalance{
+		Vote:                    v,
+		PrimaryAccountBalance:   &balance.PrimaryAccountBalance,
+		SecondaryAccountBalance: &balance.SecondaryAccountBalance,
+		StakingBalance:          &balance.StakingBalance,
+	}
+
+	//get the vote weight
+	weight, err := s.GetVoteWeightForBalance(&vb, &p)
+	if err != nil {
+		log.Error().Err(err).Msg("error getting vote weight")
+		respondWithError(w, http.StatusInternalServerError, "error getting vote weight")
+		return
+	}
+
 	// Validate balance is sufficient to cast vote
-	if err = p.ValidateBalance(balance); err != nil {
+	if err = p.ValidateBalance(weight); err != nil {
 		log.Error().Err(err).Msg("Account may not vote on proposal: insufficient balance")
 		respondWithError(w, http.StatusForbidden, err.Error())
 		return
 	}
 
-	// pin to ipfs
+	//pin to ipfs
 	pin, err := a.IpfsClient.PinJson(v)
 	// If request fails, it may be because of an issue with Pinata.
 	// Continue on, and worker will retroactively populate
@@ -466,41 +636,7 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusCreated, v)
 }
 
-func (a *App) getVotesForAddress(w http.ResponseWriter, r *http.Request) {
-	var proposalIds []int
-
-	vars := mux.Vars(r)
-	address := vars["addr"]
-	// Parse proposalIds array
-	json.Unmarshal([]byte(r.FormValue("proposalIds")), &proposalIds)
-
-	// Params for pagination
-	count, _ := strconv.Atoi(r.FormValue("count"))
-	start, _ := strconv.Atoi(r.FormValue("start"))
-
-	if count > 25 || count < 1 {
-		count = 25
-	}
-	if start < 0 {
-		start = 0
-	}
-
-	// Get votes
-	votes, totalRecords, err := models.GetVotesForAddress(a.DB, start, count, address, &proposalIds)
-	if err != nil {
-		log.Error().Err(err).Msg("error querying votes for address")
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	// Transpose into PaginatedResponse struct
-	response := shared.GetPaginatedResponseWithPayload(votes, start, count, totalRecords)
-
-	respondWithJSON(w, http.StatusOK, response)
-}
-
 // Proposals
-
 func (a *App) getProposalsForCommunity(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	communityId, err := strconv.Atoi(vars["communityId"])

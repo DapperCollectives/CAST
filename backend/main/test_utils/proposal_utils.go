@@ -17,7 +17,7 @@ import (
 // PROPOSALS
 //////////////
 
-var strategy = "staked-token-weighted-default"
+var strategy = "token-weighted-default"
 var proposalBody = "<html>something</html>"
 var published = "published"
 
@@ -60,6 +60,11 @@ func (otu *OverflowTestUtils) UpdateProposalAPI(proposalId int, payload *models.
 	json, _ := json.Marshal(payload)
 	req, _ := http.NewRequest("PUT", "/proposals/"+strconv.Itoa(proposalId), bytes.NewBuffer(json))
 	req.Header.Set("Content-Type", "application/json")
+	return otu.ExecuteRequest(req)
+}
+
+func (otu *OverflowTestUtils) GetProposalResultsAPI(proposalId int) *httptest.ResponseRecorder {
+	req, _ := http.NewRequest("GET", "/proposals/"+strconv.Itoa(proposalId)+"/results", nil)
 	return otu.ExecuteRequest(req)
 }
 

@@ -13,15 +13,45 @@ import (
 	"github.com/brudfyi/flow-voting-tool/main/models"
 )
 
+type PaginatedResponseWithVotes struct {
+	Data         []models.VoteWithBalance `json:"data"`
+	Start        int                      `json:"start"`
+	Count        int                      `json:"count"`
+	TotalRecords int                      `json:"totalRecords"`
+	Next         int                      `json:"next"`
+}
+
 func (otu *OverflowTestUtils) GetVotesForProposalAPI(proposalId int) *httptest.ResponseRecorder {
-	req, _ := http.NewRequest("GET", "/proposals/"+strconv.Itoa(proposalId)+"/votes", nil)
+	req, _ := http.NewRequest("GET", "/proposals/"+strconv.Itoa(proposalId)+"/votes?order=asc", nil)
 	return otu.ExecuteRequest(req)
 }
 
-func (otu *OverflowTestUtils) GetVoteForProposalByAddressAPI(proposalId int, accountName string) *httptest.ResponseRecorder {
+func (otu *OverflowTestUtils) GetVoteForProposalByAccountNameAPI(proposalId int, accountName string) *httptest.ResponseRecorder {
 	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", accountName))
 	addr := fmt.Sprintf("0x%s", account.Address().String())
 	url := fmt.Sprintf("/proposals/%s/votes/%s", strconv.Itoa(proposalId), addr)
+	req, _ := http.NewRequest("GET", url, nil)
+	return otu.ExecuteRequest(req)
+}
+
+func (otu *OverflowTestUtils) GetVoteForProposalByAddressAPI(proposalId int, address string) *httptest.ResponseRecorder {
+	url := fmt.Sprintf("/proposals/%s/votes/%s", strconv.Itoa(proposalId), address)
+	req, _ := http.NewRequest("GET", url, nil)
+	return otu.ExecuteRequest(req)
+}
+
+func (otu *OverflowTestUtils) GetVotesForAddressAPI(address string, proposalIds []int) *httptest.ResponseRecorder {
+	var proposalIdsString []string
+
+	//comma has to be manually inserted as a string to be a valid query param
+	for i, id := range proposalIds {
+		proposalIdsString = append(proposalIdsString, strconv.Itoa(id))
+		if i != len(proposalIds)-1 {
+			proposalIdsString = append(proposalIdsString, ",")
+		}
+	}
+
+	url := fmt.Sprintf("/votes/%s?proposalIds=%s", address, proposalIdsString)
 	req, _ := http.NewRequest("GET", url, nil)
 	return otu.ExecuteRequest(req)
 }

@@ -36,7 +36,7 @@ func TestGetVotes(t *testing.T) {
 
 	t.Run("Should throw an error if vote for address doesnt exist", func(t *testing.T) {
 		clearTable("votes")
-		response := otu.GetVoteForProposalByAddressAPI(proposalId, "user1")
+		response := otu.GetVoteForProposalByAccountNameAPI(proposalId, "user1")
 
 		CheckResponseCode(t, http.StatusNotFound, response.Code)
 
@@ -49,11 +49,11 @@ func TestGetVotes(t *testing.T) {
 		clearTable("votes")
 		voteCount := 1
 		otu.AddVotes(1, voteCount)
-		response := otu.GetVoteForProposalByAddressAPI(proposalId, "user1")
+		response := otu.GetVoteForProposalByAccountNameAPI(proposalId, "user1")
 
 		checkResponseCode(t, http.StatusOK, response.Code)
 
-		var vote models.Vote
+		var vote models.VoteWithBalance
 		json.Unmarshal(response.Body.Bytes(), &vote)
 
 		assert.NotNil(t, vote.ID)
@@ -77,27 +77,30 @@ func TestGetVotes(t *testing.T) {
 }
 
 func TestCreateVote(t *testing.T) {
-	clearTable("communities")
-	clearTable("community_users")
-	clearTable("proposals")
-	clearTable("votes")
-	communityId := otu.AddCommunities(1)[0]
-	proposalId := otu.AddActiveProposals(communityId, 1)[0]
-	voteChoice := "a"
 
-	votePayload := otu.GenerateValidVotePayload("user1", proposalId, voteChoice)
-	response := otu.CreateVoteAPI(proposalId, votePayload)
+	t.Run("should successfully create a vote", func(t *testing.T) {
+		clearTable("communities")
+		clearTable("community_users")
+		clearTable("proposals")
+		clearTable("votes")
+		communityId := otu.AddCommunities(1)[0]
+		proposalId := otu.AddActiveProposals(communityId, 1)[0]
+		voteChoice := "a"
 
-	CheckResponseCode(t, http.StatusCreated, response.Code)
+		votePayload := otu.GenerateValidVotePayload("user1", proposalId, voteChoice)
 
-	response = otu.GetVoteForProposalByAddressAPI(proposalId, "user1")
+		response := otu.CreateVoteAPI(proposalId, votePayload)
+		CheckResponseCode(t, http.StatusCreated, response.Code)
 
-	var createdVote models.Vote
-	json.Unmarshal(response.Body.Bytes(), &createdVote)
+		response = otu.GetVoteForProposalByAccountNameAPI(proposalId, "user1")
+		CheckResponseCode(t, http.StatusOK, response.Code)
 
-	assert.NotNil(t, createdVote.Cid)
-	// assert.Equal(t, "user1", createdVote.Addr)
-	assert.Equal(t, voteChoice, createdVote.Choice)
-	assert.Equal(t, proposalId, createdVote.Proposal_id)
-	assert.Equal(t, 1, createdVote.ID)
+		var createdVote models.Vote
+		json.Unmarshal(response.Body.Bytes(), &createdVote)
+
+		// assert.Equal(t, "user1", createdVote.Addr)
+		assert.Equal(t, voteChoice, createdVote.Choice)
+		assert.Equal(t, proposalId, createdVote.Proposal_id)
+		assert.Equal(t, 1, createdVote.ID)
+	})
 }
