@@ -91,7 +91,7 @@ jobs:
         repository: ${{ env.argo_repo }}
         ref: ${{ env.argo_ref }}
         token: ${{ env.argo_token }}
-        path: /argo
+        path: ./argo
 
     - name: LS Argo
       run: |
