@@ -1,11 +1,14 @@
-import React from "react";
-import { Message, Loader } from "../components";
-import CommunitiesPresenter from "../components/Community/CommunitiesPresenter";
-import FadeIn from "../components/FadeIn";
-import useCommunity from "../hooks/useCommunity";
+import React, { useEffect } from "react";
+import { Message, Loader, FadeIn } from "components";
+import CommunitiesPresenter from "components/Community/CommunitiesPresenter";
+import useCommunity from "hooks/useCommunity";
 
 export default function HomePage() {
-  const { data, loading } = useCommunity();
+  const { data, loading, getCommunities } = useCommunity();
+
+  useEffect(() => {
+    getCommunities();
+  }, [getCommunities]);
 
   const communities = loading
     ? []

@@ -10,6 +10,8 @@ const DropDown = forwardRef(
       disabled = false,
       label = "Select option",
       dropdownFull = true,
+      padding = "",
+      margin = "",
     } = {},
     ref
   ) => {
@@ -39,9 +41,10 @@ const DropDown = forwardRef(
       setIsOpen(false);
     };
 
+    const spacingStyle = `${padding} ${margin}`.trim();
     return (
       <div
-        className={`dropdown is-right is-flex is-flex-grow-1${
+        className={`dropdown is-right is-flex is-flex-grow-1 ${spacingStyle}${
           isOpen ? " is-active" : ""
         }`}
         onBlur={closeOnBlur}

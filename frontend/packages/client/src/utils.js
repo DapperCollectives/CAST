@@ -1,4 +1,9 @@
+import { customAlphabet } from "nanoid";
 import { stateToHTML } from "draft-js-export-html";
+
+const nanoid = customAlphabet("1234567890abcdef", 10);
+
+export const generateSlug = nanoid;
 
 export const parseDateFromServer = (endTime) => {
   const dateTime = new Date(endTime);
@@ -101,7 +106,10 @@ export function getReducedImg(image, newImageWidth = 150, fileName) {
 export const getProposalType = (choices) => {
   if (
     choices.length === 2 &&
-    choices.every((choice) => choice.choiceImgUrl !== undefined)
+    choices.every(
+      (choice) =>
+        choice.choiceImgUrl !== undefined && choice.choiceImgUrl !== null
+    )
   ) {
     return "image";
   }
@@ -136,3 +144,5 @@ export const customDraftToHTML = (content) => {
   };
   return stateToHTML(content, options);
 };
+
+export const isValidAddress = (addr) => /0[x,X][a-zA-Z0-9]{16}$/gim.test(addr);

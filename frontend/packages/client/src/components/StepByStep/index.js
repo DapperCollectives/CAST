@@ -1,9 +1,37 @@
 import React, { useState, useCallback } from "react";
 import { ArrowLeft, CheckMark } from "../Svg";
 import Loader from "../Loader";
+import defaultsDeep from "lodash/defaultsDeep";
 
-function StepByStep({ finalLabel, steps, onSubmit, creatingProposal }) {
+const defaultStyles = {
+  currentStep: {
+    icon: {
+      textColor: "has-text-black",
+      hexBackgroundColor: "has-background-orange",
+    },
+  },
+  completeStep: {
+    icon: {
+      hexBackgroundColor: "#44C42F",
+    },
+  },
+};
+
+function StepByStep({
+  finalLabel,
+  preStep,
+  steps,
+  onSubmit,
+  isSubmitting,
+  submittingMessage,
+  passNextToComp = false,
+  passSubmitToComp = false,
+  styleConfig = {},
+} = {}) {
+  const customStyle = defaultsDeep(styleConfig, defaultStyles);
+
   const [currentStep, setCurrentStep] = useState(0);
+  const [showPreStep, setShowPreStep] = useState(!!preStep);
   const [isStepValid, setStepValid] = useState(false);
   const [stepsData, setStepsData] = useState({});
   const refs = React.useRef();
@@ -23,6 +51,9 @@ function StepByStep({ finalLabel, steps, onSubmit, creatingProposal }) {
       }
     }
   };
+
+  const dismissPreStep = () => setShowPreStep(false);
+
   const runPreCheckStepAdvance = () => {
     if (refs.current) {
       const runCheckResult = refs.current();
@@ -62,11 +93,19 @@ function StepByStep({ finalLabel, steps, onSubmit, creatingProposal }) {
     if (stepLabel) {
       stepClasses.push("mb-6");
     }
-    if (stepIdx === currentStep) {
+
+    const currentStepIconStyle = Object.values(
+      customStyle.currentStep.icon
+    ).join(" ");
+
+    if (!showPreStep && stepIdx === currentStep) {
       return (
-        <div className={`is-flex ${stepClasses.join(" ")}`} key={stepIdx}>
+        <div
+          className={`is-flex is-align-items-center ${stepClasses.join(" ")}`}
+          key={stepIdx}
+        >
           <div
-            className="rounded-full has-background-orange is-flex is-align-items-center is-justify-content-center"
+            className={`rounded-full ${currentStepIconStyle} is-flex is-align-items-center is-justify-content-center`}
             style={{
               width: 30,
               height: 30,
@@ -77,10 +116,10 @@ function StepByStep({ finalLabel, steps, onSubmit, creatingProposal }) {
           {stepLabel ? <b className="ml-4">{stepLabel}</b> : divider}
         </div>
       );
-    } else if (currentStep > stepIdx) {
+    } else if (!showPreStep && currentStep > stepIdx) {
       return (
         <div className={`is-flex ${stepClasses.join(" ")}`} key={stepIdx}>
-          <CheckMark />
+          <CheckMark color={customStyle.completeStep.icon.hexBackgroundColor} />
           {stepLabel ? <span className="ml-4">{stepLabel}</span> : divider}
         </div>
       );
@@ -102,7 +141,7 @@ function StepByStep({ finalLabel, steps, onSubmit, creatingProposal }) {
     }
   };
 
-  const child = steps[currentStep].component;
+  const child = showPreStep ? preStep : steps[currentStep].component;
 
   const getBackLabel = () => (
     <div
@@ -114,13 +153,20 @@ function StepByStep({ finalLabel, steps, onSubmit, creatingProposal }) {
     </div>
   );
 
+  const moveToNextStep = () => onStepAdvance("next");
+
+  const _onSubmit = useCallback(
+    () => onSubmit(stepsData),
+    [onSubmit, stepsData]
+  );
+
   const getNextButton = () => (
     <div className="my-6">
       <div
         className={`button is-block has-background-yellow rounded-sm py-2 px-4 has-text-centered ${
           !isStepValid && "is-disabled"
         }`}
-        onClick={() => onStepAdvance("next")}
+        onClick={moveToNextStep}
       >
         Next
       </div>
@@ -133,7 +179,7 @@ function StepByStep({ finalLabel, steps, onSubmit, creatingProposal }) {
         className={`button is-block has-background-yellow rounded-sm py-2 px-4 has-text-centered ${
           !isStepValid && "is-disabled"
         }`}
-        onClick={() => onSubmit(stepsData)}
+        onClick={_onSubmit}
       >
         {finalLabel}
       </div>
@@ -167,8 +213,10 @@ function StepByStep({ finalLabel, steps, onSubmit, creatingProposal }) {
             {currentStep > 0 && getBackLabel()}
           </div>
           <div>{steps.map((step, i) => getStepIcon(i, step.label))}</div>
-          {currentStep < steps.length - 1 && getNextButton()}
-          {currentStep === steps.length - 1 && getSubmitButton()}
+          {currentStep < steps.length - 1 && !passNextToComp && getNextButton()}
+          {currentStep === steps.length - 1 &&
+            !passSubmitToComp &&
+            getSubmitButton()}
         </div>
         {/* left panel mobile */}
         <div className="is-hidden-tablet has-background-white-ter p-4">
@@ -183,17 +231,17 @@ function StepByStep({ finalLabel, steps, onSubmit, creatingProposal }) {
         </div>
         {/* right panel */}
         <div className="step-by-step-body flex-1 has-background-white px-4-mobile pt-0-mobile">
-          {creatingProposal && (
+          {isSubmitting && (
             <div
               className="is-flex flex-1 is-flex-direction-column is-align-items-center is-justify-content-center"
               style={{ height: "100%" }}
             >
               <Loader className="mb-4" />
-              <p className="has-text-grey">Creating Proposal...</p>
+              <p className="has-text-grey">{submittingMessage}</p>
             </div>
           )}
 
-          {!creatingProposal &&
+          {!isSubmitting &&
             React.cloneElement(child, {
               onDataChange: (stepData) => {
                 setStepsData({
@@ -205,13 +253,25 @@ function StepByStep({ finalLabel, steps, onSubmit, creatingProposal }) {
                 });
               },
               setStepValid,
+              isStepValid,
               stepData: stepsData[currentStep],
               stepsData,
               setPreCheckStepAdvance,
+              ...(currentStep < steps.length - 1 && passNextToComp
+                ? { moveToNextStep }
+                : undefined),
+              ...(currentStep === steps.length - 1 && passSubmitToComp
+                ? { onSubmit: _onSubmit }
+                : undefined),
+              ...(showPreStep ? { dismissPreStep } : undefined),
             })}
           <div className="is-hidden-tablet">
-            {currentStep < steps.length - 1 && getNextButton()}
-            {currentStep === steps.length - 1 && getSubmitButton()}
+            {currentStep < steps.length - 1 &&
+              !passNextToComp &&
+              getNextButton()}
+            {currentStep === steps.length - 1 &&
+              !passSubmitToComp &&
+              getSubmitButton()}
           </div>
         </div>
       </div>

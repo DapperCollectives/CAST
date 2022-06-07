@@ -5,6 +5,7 @@
 // Set brand colors
 $green: #0E5B20
 $red: #B20D0D
+$error-red: #B20D0D
 $yellow: #FBD84D
 $orange: #F4AF4A
 
@@ -383,6 +384,25 @@ span[data-tooltip]
 	.button:focus:not(:active), .button.is-focused:not(:active)
 		box-shadow: none
 
+.form-error-input-icon
+	padding-right: 4.5rem !important	
+.form-error-input-border
+	border-color: $error-red  !important
+
+.form-checkbox
+	-webkit-appearance: none
+	background-color: #fafafa
+	border: 2px solid #757575
+	padding: 7px
+	border-radius: 3px
+
+.form-checkbox:checked:after
+	content: '\2714'
+	font-size: 14px
+	position: absolute
+	top: 13px
+	left: 3px
+	color: rgb(74 74 74 / 90%)
 .image-caption-draft-js
 	.public-DraftStyleDefault-block.public-DraftStyleDefault-ltr
 		margin: 0px !important
