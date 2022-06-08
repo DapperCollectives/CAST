@@ -35,14 +35,12 @@ type VoteWithBalance struct {
 	StakingBalance          *uint64  `json:"stakingBalance"`
 	Weight                  *float64 `json:"weight"`
 
-	NFTs *[]NFT
+	NFTs []*NFT
 }
 
 type NFT struct {
-	ID            string    `json:"nft_id"`
+	ID            uint64    `json:"id"`
 	Contract_addr string    `json:"contract_addr"`
-	Contract_name string    `json:"contract_name"`
-	Public_path   string    `json:"public_path"`
 	Created_at    time.Time `json:"created_at"`
 }
 
@@ -92,7 +90,7 @@ func GetVotesForAddress(db *s.Database, start, count int, address string, propos
 	return votes, totalRecords, nil
 }
 
-func GetAllVotesForProposal(db *s.Database, proposalId int) ([]*VoteWithBalance, error) {
+func GetAllVotesForProposal(db *s.Database, proposalId int, strategy string) ([]*VoteWithBalance, error) {
 	var votes []*VoteWithBalance
 
 	//return all balances, strategy will do rest of the work
@@ -105,13 +103,22 @@ func GetAllVotesForProposal(db *s.Database, proposalId int) ([]*VoteWithBalance,
     join proposals p on p.id = $1
   	left join balances b on b.addr = v.addr 
 		and p.block_height = b.block_height
-    where proposal_id = $1`
-
+    where proposal_id = $1
+`
 	err := pgxscan.Select(db.Context, db.Conn, &votes, sql, proposalId)
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		return nil, err
 	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
 		return []*VoteWithBalance{}, nil
+	}
+
+	if strategy == "balance-of-nfts" {
+		votesWithNFTs, err := getUserNFTs(db, votes)
+		if err != nil {
+			return nil, err
+		}
+
+		return votesWithNFTs, nil
 	}
 
 	return votes, nil
@@ -237,4 +244,25 @@ func (v *Vote) ValidateChoice(proposal Proposal) error {
 		return errors.New("invalid choice for proposal")
 	}
 	return nil
+}
+
+func getUserNFTs(db *s.Database, votes []*VoteWithBalance) ([]*VoteWithBalance, error) {
+
+	//scan the NFTs into the vote struct
+	for _, vote := range votes {
+		var voteNFTs []*NFT
+		sql := `select id from nfts
+			where proposal_id = $1 and owner_addr = $2
+			`
+		err := pgxscan.Select(db.Context, db.Conn, &voteNFTs, sql, vote.Proposal_id, vote.Addr)
+		if err != nil && err.Error() != pgx.ErrNoRows.Error() {
+			return nil, err
+		} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
+			return []*VoteWithBalance{}, nil
+		}
+
+		vote.NFTs = voteNFTs
+	}
+
+	return votes, nil
 }

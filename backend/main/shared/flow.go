@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"flag"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -245,8 +244,6 @@ func (fa *FlowAdapter) GetNFTIds(voterAddr string, c *Contract) ([]interface{}, 
 	flowAddress := flow.HexToAddress(voterAddr)
 	cadenceAddress := cadence.NewAddress(flowAddress)
 
-	fmt.Printf("Voter Address %s\n", cadenceAddress.String())
-
 	script, err := ioutil.ReadFile("./main/cadence/scripts/get_nfts_ids.cdc")
 	if err != nil {
 		log.Error().Err(err).Msgf("error reading cadence script file")
@@ -255,10 +252,6 @@ func (fa *FlowAdapter) GetNFTIds(voterAddr string, c *Contract) ([]interface{}, 
 
 	script = replaceContractPlaceholders(string(script[:]), c, false)
 
-	fmt.Printf("script: %s\n", script)
-	fmt.Printf("flow adapter Client: %+v\n", fa.Client)
-
-	//call the script to verify balance
 	cadenceValue, err := fa.Client.ExecuteScriptAtLatestBlock(
 		fa.Context,
 		script,
@@ -271,12 +264,9 @@ func (fa *FlowAdapter) GetNFTIds(voterAddr string, c *Contract) ([]interface{}, 
 		return nil, err
 	}
 
-	fmt.Printf("cadenceValue: %s\n", cadenceValue)
-
 	value := CadenceValueToInterface(cadenceValue)
 
 	// we can cast cadence type [Uint64] as Go type []interface{}
-	// with type assertion yay
 	// In the case where ids are of string type we need an if statement somewhere to handle
 	nftIds := value.([]interface{})
 
@@ -287,7 +277,6 @@ func (fa *FlowAdapter) GetNFTIds(voterAddr string, c *Contract) ([]interface{}, 
 // Hard coded Addresses here are for emulator dev only this should
 // be set based on environment var
 func replaceContractPlaceholders(code string, c *Contract, isFungible bool) []byte {
-	fmt.Printf("isFungible %t\n", isFungible)
 	if isFungible {
 		code = placeholderFungibleTokenAddr.ReplaceAllString(code, "0xee82856bf20e2aa6")
 	} else {

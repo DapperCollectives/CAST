@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"math"
 	"net/http"
 	"testing"
@@ -23,12 +22,8 @@ func TestTokenWeightedDefaultStrategy(t *testing.T) {
 
 	communityId := otu.AddCommunities(1)[0]
 	proposalId := otu.AddProposalsForStrategy(communityId, "token-weighted-default", 1)[0]
-	fmt.Printf("proposalId %+v\n", proposalId)
 	votes := otu.GenerateListOfVotes(proposalId, 10)
-	//loop through the votes and print them
-	for _, v := range *votes {
-		fmt.Printf("%+v\n", v)
-	}
+
 	otu.AddDummyVotesAndBalances(votes)
 
 	t.Run("Test Tallying Results", func(t *testing.T) {
@@ -117,21 +112,10 @@ func TestBalanceOfNFTsStrategy(t *testing.T) {
 		log.Fatal().Err(err).Msg("Failed to generate list of votes")
 	}
 
-	//loop through the votes and print them
-	for _, v := range *votes {
-		fmt.Printf("%+v\n", v)
-	}
-
 	otu.AddDummyVotesAndNFTs(votes)
-
 	t.Run("Test Tallying Results For NFT Balance Strategy", func(t *testing.T) {
-		// user1 address as arg
-		if err != nil {
-			log.Error().Err(err).Msg("Failed to get NFTs")
-		}
 
 		_results := otu.TallyResultsForBalanceOfNfts(proposalId, votes)
-		fmt.Printf("RESULTS %+v\n", _results)
 
 		response := otu.GetProposalResultsAPI(proposalId)
 		CheckResponseCode(t, http.StatusOK, response.Code)

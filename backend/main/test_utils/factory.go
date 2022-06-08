@@ -58,13 +58,6 @@ func (otu *OverflowTestUtils) AddDummyVotesAndBalances(votes *[]VoteWithBalance)
 
 func (otu *OverflowTestUtils) AddDummyVotesAndNFTs(votes *[]VoteWithBalance) {
 	for _, vote := range *votes {
-
-		if vote.Vote.Proposal_id == 0 {
-			continue
-		}
-		fmt.Printf("ProposalId %d", vote.Vote.Proposal_id)
-		fmt.Printf("Proposal Address and Choice, %s %s", vote.Vote.Addr, vote.Vote.Choice)
-
 		// Insert Vote
 		_, err := otu.A.DB.Conn.Exec(otu.A.DB.Context, `
 			INSERT INTO votes(proposal_id, addr, choice, composite_signatures, message)
@@ -78,7 +71,7 @@ func (otu *OverflowTestUtils) AddDummyVotesAndNFTs(votes *[]VoteWithBalance) {
 		// Insert all the NFTs
 		for _, NFT := range vote.NFTs {
 			_, err = otu.A.DB.Conn.Exec(otu.A.DB.Context, `
-			INSERT INTO nfts(id, owner_addr, proposal_id, nft_id)
+			INSERT INTO nfts(uuid, owner_addr, proposal_id, id)
 			VALUES($1, $2, $3, $4)
 		`, uuid.New(), vote.Addr, vote.Vote.Proposal_id, NFT.ID)
 		}

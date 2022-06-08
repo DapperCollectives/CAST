@@ -65,14 +65,14 @@ func (otu *OverflowTestUtils) TallyResultsForOneAddressOneVote(proposalId int, v
 func (otu *OverflowTestUtils) TallyResultsForBalanceOfNfts(proposalId int, votes *[]VoteWithBalance) *models.ProposalResults {
 	r := models.ProposalResults{Proposal_id: proposalId}
 
-	r.Results = map[string]int{}
-	r.Results["a"] = 0
-	r.Results["b"] = 0
+	r.Results_float = map[string]float64{}
+	r.Results_float["a"] = 0
+	r.Results_float["b"] = 0
 
 	for _, v := range *votes {
-		r.Results_float[v.Choice] += float64(len(v.NFTs)) * math.Pow(10, -8)
+		nfts := len(v.NFTs)
+		r.Results_float[v.Choice] += float64(nfts) * math.Pow(10, -8)
 	}
-
 	return &r
 }
 
@@ -104,7 +104,7 @@ func (otu *OverflowTestUtils) GenerateListOfVotes(proposalId int, count int) *[]
 }
 
 func (otu *OverflowTestUtils) GenerateListOfVotesWithNFTs(proposalId int, count int, contract *shared.Contract) (*[]VoteWithBalance, error) {
-	votes := make([]VoteWithBalance, count)
+	var votes []VoteWithBalance
 	choices := []string{"a", "b"}
 	for i := 0; i < count; i++ {
 		accountName := "user" + strconv.Itoa(i+1)
@@ -122,7 +122,6 @@ func (otu *OverflowTestUtils) GenerateListOfVotesWithNFTs(proposalId int, count 
 		if err != nil {
 			return nil, err
 		}
-		fmt.Printf("%v\n", nftIds)
 
 		vote := otu.CreateNFTVote(v, nftIds, contract)
 		votes = append(votes, vote)
@@ -135,10 +134,15 @@ func (otu *OverflowTestUtils) CreateNFTVote(v models.Vote, ids []interface{}, co
 	nfts := []models.NFT{}
 
 	for _, id := range ids {
+		idUint, err := strconv.ParseUint(id.(string), 10, 64)
+		if err != nil {
+			fmt.Println(err)
+			return VoteWithBalance{}
+		}
+
 		NFT := models.NFT{
-			ID:            id.(string),
+			ID:            idUint,
 			Contract_addr: *contract.Addr,
-			Contract_name: *contract.Name,
 		}
 		nfts = append(nfts, NFT)
 	}
@@ -169,7 +173,6 @@ func (otu *OverflowTestUtils) MintNFT(signer string, recipient string) {
 }
 
 func (otu *OverflowTestUtils) SetupAccountForNFTs(account string) {
-	fmt.Printf("Setting up account %s for NFTs\n", account)
 	otu.O.TransactionFromFile("setup_account").
 		SignProposeAndPayAs(account).
 		RunPrintEventsFull()

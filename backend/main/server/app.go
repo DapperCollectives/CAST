@@ -279,7 +279,7 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get the votes for proposal
-	votes, err := models.GetAllVotesForProposal(a.DB, proposalId)
+	votes, err := models.GetAllVotesForProposal(a.DB, proposalId, *p.Strategy)
 	if err != nil {
 		// print the error to the console
 		log.Error().Err(err).Msg("Error getting votes for proposal")

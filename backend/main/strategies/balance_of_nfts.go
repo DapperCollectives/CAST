@@ -37,12 +37,17 @@ func (s *BalanceOfNfts) FetchBalance(db *s.Database, b *models.Balance, sc *s.Sn
 
 func (s *BalanceOfNfts) TallyVotes(votes []*models.VoteWithBalance, proposalId int) (models.ProposalResults, error) {
 	var r models.ProposalResults
-	r.Results = map[string]int{}
-	r.Proposal_id = proposalId
+	r.Results_float = map[string]float64{}
+	r.Results_float["a"] = 0
+	r.Results_float["b"] = 0
 
 	for _, v := range votes {
-		r.Results_float[v.Choice] += float64(len(*v.NFTs)) * math.Pow(10, -8)
+		//print the length of v.NFTs
+		nftCount := len(v.NFTs)
+		r.Results_float[v.Choice] += float64(nftCount) * math.Pow(10, -8)
 	}
+
+	r.Proposal_id = proposalId
 
 	return r, nil
 }
