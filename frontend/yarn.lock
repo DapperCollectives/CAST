@@ -3245,6 +3245,11 @@ builtin-status-codes@^3.0.0:
   resolved "https://registry.yarnpkg.com/builtin-status-codes/-/builtin-status-codes-3.0.0.tgz#85982878e21b98e1c66425e03d0174788f569ee8"
   integrity sha1-hZgoeOIbmOHGZCXgPQF0eI9Wnug=
 
+bulma-popover@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/bulma-popover/-/bulma-popover-1.1.1.tgz#93a4e910514b121490663c3aa309705c40b69c86"
+  integrity sha512-QvYJq04usgiCvTwnEZr/xtStkKRTToO/tc7JVcdtRBIBBWNaUu4tfHAOFXDMav8NFIvN8JOiQEtHO1dHNvVr1Q==
+
 bulma@0.9.3:
   version "0.9.3"
   resolved "https://registry.yarnpkg.com/bulma/-/bulma-0.9.3.tgz#ddccb7436ebe3e21bf47afe01d3c43a296b70243"
