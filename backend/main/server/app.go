@@ -115,7 +115,10 @@ func (a *App) Initialize(user, password, dbname, dbhost, dbport, ipfsKey, ipfsSe
 	// IPFS
 	a.IpfsClient = shared.NewIpfsClient(ipfsKey, ipfsSecret)
 	// Flow
-	a.FlowAdapter = shared.NewFlowClient()
+	if os.Getenv("FLOW_ENV") == "" {
+		os.Setenv("FLOW_ENV", "emulator")
+	}
+	a.FlowAdapter = shared.NewFlowClient(os.Getenv("FLOW_ENV"))
 	// Snapshot
 	a.SnapshotClient = shared.NewSnapshotClient(os.Getenv("SNAPSHOT_BASE_URL"))
 	// address to vote options mapping
