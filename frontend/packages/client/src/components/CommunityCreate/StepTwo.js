@@ -1,27 +1,9 @@
 import React, { useEffect } from "react";
 import { CommunityUsersForm } from "../Community/CommunityEditorDetails";
 import useFlowAddrValidator from "../Community/hooks/useFlowAddrValidator";
-import { useModalContext } from "contexts/NotificationModal";
 
 const isInitialList = (listAddr) => {
   return listAddr?.length === 1 && listAddr[0].addr === "";
-};
-
-const HelpModal = () => {
-  return (
-    <div className="columns m-5 p-2 is-multiline is-mobile">
-      <div className="column is-full p-0 m-0 is-flex is-flex-direction-column is-align-items-flex-start is-justify-content-center">
-        <p className="has-text-grey small-text has-text-justified mb-2">
-          Admin addresses will be added automatically as authors and members for
-          the community.
-        </p>
-        <p className="has-text-grey small-text has-text-justified">
-          In addition, community creator address will be set as admin and member
-          by default.
-        </p>
-      </div>
-    </div>
-  );
 };
 
 const buttonStyle = {
@@ -37,8 +19,6 @@ export default function StepTwo({
   moveToNextStep,
   isStepValid,
 }) {
-  const { openModal } = useModalContext();
-
   const { listAddrAdmins = [{ addr: "" }], listAddrAuthors = [{ addr: "" }] } =
     stepData || {};
 
@@ -103,25 +83,34 @@ export default function StepTwo({
     onDataChange({ listAddrAuthors: [...listAddrAuthors, { addr: "" }] });
   };
 
-  const openModalHelp = () => {
-    openModal(<HelpModal />, {
-      classNameModalContent: "rounded-sm",
-    });
-  };
-
   return (
     <>
       <CommunityUsersForm
         title={
           <>
             Admins
-            <button
-              className="delete has-text-grey rounded-full cursor-pointer"
-              style={buttonStyle}
-              onClick={openModalHelp}
-            >
-              ?
-            </button>
+            <div className="popover is-popover-bottom">
+              <button
+                className="delete has-text-grey rounded-full cursor-pointer popover-trigger"
+                style={buttonStyle}
+              >
+                ?
+              </button>
+              <div className="popover-content">
+                <div className="columns m-3">
+                  <div className="column is-12">
+                    <p className="small-text has-text-weight-normal has-text-grey small-text has-text-justified mb-1">
+                      Admin addresses will be added automatically as authors and
+                      members for the community.
+                    </p>
+                    <p className="small-text has-text-weight-normal has-text-grey small-text has-text-justified">
+                      In addition, community creator address will be set as
+                      admin and member by default.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </>
         }
         description="The admins will be able to edit the space settings and moderate proposals. You must add one address per line."
