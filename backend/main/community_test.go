@@ -143,27 +143,6 @@ func TestCommunityAuthorRoles(t *testing.T) {
 	}
 }
 
-// func TestCreateCommunityAllowlist(t *testing.T) {
-// 	_ = utils.NewOverflowTest(t,: &A)
-// 	clearTable("communities")
-// 	clearTable("community_users")
-
-// 	communityPayload := utils.GenerateValidCommunityPayload("0x01")
-
-// 	req, _ := http.NewRequest("POST", "/communities", bytes.NewBuffer(communityPayload))
-// 	req.Header.Set("Content-Type", "application/json")
-
-// 	response := executeRequest(req)
-// 	checkResponseCode(t, http.StatusForbidden, response.Code)
-
-// 	var m map[string]interface{}
-// 	json.Unmarshal(response.Body.Bytes(), &m)
-
-// 	if m["error"] != "user does not have permission" {
-// 		t.Errorf("Expected err to be 'user does not have permission'. Got '%v'", m["error"])
-// 	}
-// }
-
 func TestGetCommunityAPI(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")

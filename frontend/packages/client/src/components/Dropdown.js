@@ -11,6 +11,8 @@ const DropDown = forwardRef(
       label = "Select option",
       dropdownFull = true,
       isRight = false,
+      padding = "",
+      margin = "",
     } = {},
     ref
   ) => {
@@ -40,6 +42,7 @@ const DropDown = forwardRef(
       setIsOpen(false);
     };
 
+    const spacingStyle = `${padding} ${margin}`.trim();
     return (
       <div
         className={`dropdown ${

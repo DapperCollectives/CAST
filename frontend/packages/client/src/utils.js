@@ -1,4 +1,10 @@
 import { formatDistance } from 'date-fns'
+import { customAlphabet } from "nanoid";
+import { stateToHTML } from "draft-js-export-html";
+
+const nanoid = customAlphabet("1234567890abcdef", 10);
+
+export const generateSlug = nanoid;
 
 export const parseDateFromServer = (endTime) => {
   const dateTime = new Date(endTime);
@@ -114,7 +120,10 @@ export function getReducedImg(image, newImageWidth = 150, fileName) {
 export const getProposalType = (choices) => {
   if (
     choices.length === 2 &&
-    choices.every((choice) => choice.choiceImgUrl !== undefined)
+    choices.every(
+      (choice) =>
+        choice.choiceImgUrl !== undefined && choice.choiceImgUrl !== null
+    )
   ) {
     return "image";
   }
@@ -143,3 +152,33 @@ export const parseHTML = (body, tag, all) => {
     }, {});
   }
 };
+export const customDraftToHTML = (content) => {
+  const options = {
+    blockRenderers: {
+      "image-caption-block": (block) => {
+        return (
+          "<p style='font-size: 12px; color: #757575;' class='image-caption'>" +
+          block.getText() +
+          "</p>"
+        );
+      },
+    },
+    entityStyleFn: (entity) => {
+      const entityType = entity.get("type").toLowerCase();
+      if (entityType === "link") {
+        const data = entity.getData();
+        return {
+          element: "a",
+          attributes: {
+            href: data.url,
+            target: "_blank",
+            rel: "noopener noreferrer",
+          },
+        };
+      }
+    },
+  };
+  return stateToHTML(content, options);
+};
+
+export const isValidAddress = (addr) => /0[x,X][a-zA-Z0-9]{16}$/gim.test(addr);

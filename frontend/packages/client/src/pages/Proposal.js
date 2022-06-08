@@ -270,9 +270,12 @@ export default function ProposalPage() {
     );
   }
 
-  const htmlBody = proposal?.body
-    ?.replace(/target="_self"/g, 'target="_blank" rel="noopener noreferrer"')
-    .replace(/(?:\r\n|\r|\n)/g, "<br>");
+  // this is for existing proposals that have the target="_self" from the db
+  // bc we want all links to open in new tabs
+  const htmlBody = proposal?.body?.replace(
+    /target="_self"/g,
+    'target="_blank" rel="noopener noreferrer"'
+  );
 
   return (
     <>
@@ -404,7 +407,7 @@ export default function ProposalPage() {
             {showCancelButton && isAdmin && (
               <div className="is-flex is-align-items-center">
                 <button
-                  className="button is-white is-text-grey small-text"
+                  className="button is-white has-text-grey small-text"
                   onClick={onCancelProposal}
                 >
                   <div className="mr-2 is-flex is-align-items-center">
@@ -454,7 +457,7 @@ export default function ProposalPage() {
                   >
                     {proposal.body && (
                       <div
-                        className="mt-4 mb-6 proposal-copy"
+                        className="mt-4 mb-6 proposal-copy content"
                         dangerouslySetInnerHTML={{
                           __html: htmlBody,
                         }}
@@ -509,7 +512,7 @@ export default function ProposalPage() {
                 <h1 className="title mt-5 is-3">{proposal.name}</h1>
                 {proposal.body && (
                   <div
-                    className="mt-6 mb-6 proposal-copy transition-all word-break-all"
+                    className="mt-6 mb-6 proposal-copy transition-all word-break-all content"
                     dangerouslySetInnerHTML={{
                       __html: htmlBody,
                     }}

@@ -1,8 +1,7 @@
 import React, { useEffect, useCallback } from "react";
-import { convertToRaw } from "draft-js";
-import draftToHtml from "draftjs-to-html";
 import { ProposalStatus, VoteOptions } from "../Proposal";
 import { parseDateToServer } from "utils";
+import { customDraftToHTML } from "utils";
 
 const StepThree = ({ stepsData, setStepValid }) => {
   const setPreviewValid = useCallback(() => {
@@ -28,22 +27,16 @@ const StepThree = ({ stepsData, setStepValid }) => {
       })),
   };
 
-  const rawContentState = convertToRaw(
-    stepsData[0]?.description?.getCurrentContent()
-  );
+  const currentContent = stepsData[0]?.description?.getCurrentContent();
 
-  const markup = draftToHtml(rawContentState);
-
-  const htmlBody = markup
-    .replace(/target="_self"/g, 'target="_blank" rel="noopener noreferrer"')
-    .replace(/(?:\r\n|\r|\n)/g, "<br>");
+  const htmlBody = customDraftToHTML(currentContent);
 
   return (
     <div>
       <ProposalStatus proposal={proposal} />
       <h1 className="title mt-5 is-3">{stepsData[0]?.title}</h1>
       <div
-        className="mt-6 mb-5 proposal-copy word-break-all"
+        className="mt-6 mb-5 proposal-copy word-break-all content"
         dangerouslySetInnerHTML={{
           __html: htmlBody,
         }}
