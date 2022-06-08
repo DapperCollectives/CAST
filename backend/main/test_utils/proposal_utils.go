@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/brudfyi/flow-voting-tool/main/models"
-	"github.com/brudfyi/flow-voting-tool/main/shared"
+	"github.com/DapperCollectives/CAST/backend/main/models"
+	"github.com/DapperCollectives/CAST/backend/main/shared"
 )
 
 //////////////
