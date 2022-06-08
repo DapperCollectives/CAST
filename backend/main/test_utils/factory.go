@@ -58,8 +58,12 @@ func (otu *OverflowTestUtils) AddDummyVotesAndBalances(votes *[]VoteWithBalance)
 
 func (otu *OverflowTestUtils) AddDummyVotesAndNFTs(votes *[]VoteWithBalance) {
 	for _, vote := range *votes {
-		//print the vote values being inserted
-		log.Info().Msgf("vote: %v", vote.Vote.Proposal_id)
+
+		if vote.Vote.Proposal_id == 0 {
+			continue
+		}
+		fmt.Printf("ProposalId %d", vote.Vote.Proposal_id)
+		fmt.Printf("Proposal Address and Choice, %s %s", vote.Vote.Addr, vote.Vote.Choice)
 
 		// Insert Vote
 		_, err := otu.A.DB.Conn.Exec(otu.A.DB.Context, `
@@ -68,17 +72,19 @@ func (otu *OverflowTestUtils) AddDummyVotesAndNFTs(votes *[]VoteWithBalance) {
 		`, vote.Vote.Proposal_id, vote.Vote.Addr, vote.Vote.Choice, "[]", "__msg__")
 		if err != nil {
 			log.Error().Err(err).Msg("AddDummyVotesAndNFTS DB err - votes")
+			return
 		}
 
 		// Insert all the NFTs
 		for _, NFT := range vote.NFTs {
 			_, err = otu.A.DB.Conn.Exec(otu.A.DB.Context, `
-			INSERT INTO nfts(owner_addr, contract_addr, contract_name, nft_id)
+			INSERT INTO nfts(id, owner_addr, proposal_id, nft_id)
 			VALUES($1, $2, $3, $4)
-		`, vote.Addr, NFT.Contract_addr, NFT.Contract_name, NFT.ID)
+		`, uuid.New(), vote.Addr, vote.Vote.Proposal_id, NFT.ID)
 		}
 		if err != nil {
 			log.Error().Err(err).Msg("error inserting NFTs to the DB")
+			return
 		}
 	}
 }

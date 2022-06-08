@@ -100,6 +100,7 @@ func TestBalanceOfNFTsStrategy(t *testing.T) {
 	clearTable("proposals")
 	clearTable("votes")
 	clearTable("balances")
+	clearTable("nfts")
 
 	otu.CreateNFTCollection("user1")
 
