@@ -103,7 +103,6 @@ func TestBalanceOfNFTsStrategy(t *testing.T) {
 
 	otu.CreateNFTCollection("user1")
 
-	//@TODO Debug the error here
 	communityId, community := otu.AddCommunitiesWithNFTContract(1, "user1")
 	proposalId := otu.AddProposalsForStrategy(communityId[0], "balance-of-nfts", 1)[0]
 

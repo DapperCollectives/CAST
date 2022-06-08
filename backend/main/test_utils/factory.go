@@ -179,7 +179,7 @@ func (otu *OverflowTestUtils) AddCommunitiesWithNFTContract(count int, signer st
 		if err := community.CreateCommunityWithContract(otu.A.DB); err != nil {
 			log.Error().Err(err).Msg("error in otu.AddCommunities")
 		}
-		// Add community_user roles for the creator
+
 		models.GrantRolesToCommunityCreator(otu.A.DB, community.Creator_addr, community.ID)
 
 		id := community.ID

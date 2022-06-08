@@ -109,7 +109,9 @@ func (otu *OverflowTestUtils) GenerateListOfVotesWithNFTs(proposalId int, count 
 	for i := 0; i < count; i++ {
 		accountName := "user" + strconv.Itoa(i+1)
 		otu.SetupAccountForNFTs(accountName)
+		otu.MintNFT("user1", accountName)
 		addr := otu.ResolveUser(i + 1)
+
 		randomNumber := rand.Intn(2)
 		choice := choices[randomNumber]
 		v := models.Vote{
