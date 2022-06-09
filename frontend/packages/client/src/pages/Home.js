@@ -13,12 +13,11 @@ export default function HomePage() {
   const communities = loading
     ? []
     : (data || []).map((datum) => ({
-        ...datum,
-        // missing fields
-        logo: datum.logo || "https://i.imgur.com/RMKXPCw.png",
-        isComingSoon: datum.isComingSoon || false,
-        isMember: false,
-      }));
+      ...datum,
+      // missing fields
+      logo: datum.logo || "https://i.imgur.com/RMKXPCw.png",
+      isComingSoon: datum.isComingSoon || false,
+    }));
 
   return (
     <section className="section">
