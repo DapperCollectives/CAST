@@ -29,9 +29,15 @@ type Community struct {
 	Discord_url              *string   `json:"discordUrl,omitempty"`
 	Instagram_url            *string   `json:"instagramUrl,omitempty"`
 	Terms_and_conditions_url *string   `json:"termsAndConditionsUrl,omitempty"`
+	Only_authors_to_submit   *bool     `json:"onlyAuthorsToSubmit,omitempty"`
 	Proposal_validation      *string   `json:"proposalValidation,omitempty"`
 	Proposal_threshold       *string   `json:"proposalThreshold,omitempty"`
 	Slug                     *string   `json:"slug,omitempty" validate:"required"`
+
+	Contract_name *string  `json:"contract_name,omitempty"`
+	Contract_addr *string  `json:"contract_addr,omitempty"`
+	Public_path   *string  `json:"public_path,omitempty"`
+	Threshold     *float64 `json:"threshold,omitempty"`
 
 	Timestamp            string                  `json:"timestamp" validate:"required"`
 	Composite_signatures *[]s.CompositeSignature `json:"compositeSignatures" validate:"required"`
@@ -160,14 +166,13 @@ func (c *Community) CreateCommunity(db *s.Database) error {
 	err := db.Conn.QueryRow(db.Context,
 		`
 	INSERT INTO communities(
-		name, category, logo, slug, strategies, strategy, banner_img_url, website_url, twitter_url, github_url, discord_url, instagram_url, terms_and_conditions_url, proposal_validation, proposal_threshold, body, cid, creator_addr
+		name, category, logo, slug, strategies, strategy, banner_img_url, website_url, twitter_url, github_url, discord_url, instagram_url, terms_and_conditions_url, proposal_validation, proposal_threshold, body, cid, creator_addr, contract_name, contract_addr, public_path, threshold
 	)
 	VALUES(
-		$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18
+		$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22
 	)
 	RETURNING id, created_at
-	`, c.Name, c.Category, c.Logo, c.Slug, c.Strategies, c.Strategy, c.Banner_img_url, c.Website_url, c.Twitter_url, c.Github_url, c.Discord_url, c.Instagram_url, c.Terms_and_conditions_url, c.Proposal_validation, c.Proposal_threshold, c.Body, c.Cid, c.Creator_addr).Scan(&c.ID, &c.Created_at)
-
+	`, c.Name, c.Category, c.Logo, c.Slug, c.Strategies, c.Strategy, c.Banner_img_url, c.Website_url, c.Twitter_url, c.Github_url, c.Discord_url, c.Instagram_url, c.Terms_and_conditions_url, c.Proposal_validation, c.Proposal_threshold, c.Body, c.Cid, c.Creator_addr, c.Contract_name, c.Contract_addr, c.Public_path, c.Threshold).Scan(&c.ID, &c.Created_at)
 	return err // will be nil unless something went wrong
 }
 

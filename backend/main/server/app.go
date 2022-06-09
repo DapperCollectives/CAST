@@ -116,7 +116,10 @@ func (a *App) Initialize(user, password, dbname, dbhost, dbport, ipfsKey, ipfsSe
 	// IPFS
 	a.IpfsClient = shared.NewIpfsClient(ipfsKey, ipfsSecret)
 	// Flow
-	a.FlowAdapter = shared.NewFlowClient()
+	if os.Getenv("FLOW_ENV") == "" {
+		os.Setenv("FLOW_ENV", "emulator")
+	}
+	a.FlowAdapter = shared.NewFlowClient(os.Getenv("FLOW_ENV"))
 	// Snapshot
 	a.SnapshotClient = shared.NewSnapshotClient(os.Getenv("SNAPSHOT_BASE_URL"))
 	// address to vote options mapping
@@ -727,6 +730,44 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	p.Block_height = snapshot.Block_height
+
+	var community models.Community
+	community.ID = communityId
+	if err := community.GetCommunity(a.DB); err != nil {
+		log.Error().Err(err).Msg("error fetching community")
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if *community.Only_authors_to_submit {
+		if err := models.EnsureRoleForCommunity(a.DB, p.Creator_addr, communityId, "author"); err != nil {
+			errMsg := fmt.Sprintf("account %s is not an author for community %d", p.Creator_addr, p.Community_id)
+			log.Error().Err(err).Msg(errMsg)
+			respondWithError(w, http.StatusForbidden, errMsg)
+			return
+		}
+	} else {
+		var contract = &shared.Contract{
+			Name:        community.Contract_name,
+			Addr:        community.Contract_addr,
+			Public_path: community.Public_path,
+			Threshold:   community.Threshold,
+		}
+
+		hasBalance, err := a.FlowAdapter.EnforceTokenThreshold(p.Creator_addr, contract)
+		if err != nil {
+			log.Error().Err(err).Msg("error enforcing token threshold")
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		if !hasBalance {
+			errMsg := "insufficient token balance to create proposal"
+			log.Error().Err(err).Msg(errMsg)
+			respondWithError(w, http.StatusForbidden, errMsg)
+			return
+		}
+	}
 
 	// pin to ipfs
 	pin, err := a.IpfsClient.PinJson(p)

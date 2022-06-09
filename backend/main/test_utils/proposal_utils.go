@@ -31,10 +31,6 @@ var DefaultProposalStruct = models.Proposal{
 	Creator_addr: ServiceAccountAddress,
 	Strategy:     &strategy,
 	Status:       &published,
-	// Start_time:   time.Now(),
-	// End_time:     time.Now().Add(30 * 24 * time.Hour),
-	// Timestamp:    timestamp,
-	// Sig:          signature,
 }
 
 func (otu *OverflowTestUtils) GetProposalsForCommunityAPI(communityId int) *httptest.ResponseRecorder {

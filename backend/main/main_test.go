@@ -19,7 +19,6 @@ var otu *utils.OverflowTestUtils
 
 const ServiceAddress = "0xf8d6e0586b0a20c7"
 
-//
 func TestMain(m *testing.M) {
 	var err error
 
