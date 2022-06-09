@@ -16,9 +16,9 @@ type CommunityUser struct {
 type CommunityUserType struct {
 	Community_id int    `json:"communityId" validate:"required"`
 	Addr         string `json:"addr" validate:"required"`
-	Admin     bool 	`json:"admin" validate:"required"`
-	Author    bool 	`json:"author" validate:"required"`
-	Member    bool 	`json:"member" validate:"required"`
+	Is_admin     bool 	`json:"isAdmin" validate:"required"`
+	Is_author    bool 	`json:"isAuthor" validate:"required"`
+	Is_member    bool 	`json:"isMember" validate:"required"`
 }
 
 type UserTypes []string
@@ -44,13 +44,13 @@ func GetUsersForCommunity(db *s.Database, communityId, start, count int) ([]Comm
 		SELECT
  				(CASE WHEN 
 					(EXISTS (SELECT community_users.addr FROM community_users WHERE community_users.addr = temp_user_addrs.addr AND community_users.user_type = 'admin')) 
-					THEN '1' else '0' end)::boolean AS admin,
+					THEN '1' else '0' end)::boolean AS is_admin,
  				(CASE WHEN 
 					(EXISTS (SELECT community_users.addr FROM community_users WHERE community_users.addr = temp_user_addrs.addr AND community_users.user_type = 'author')) 
-				THEN '1' else '0' end)::boolean AS author,
+				THEN '1' else '0' end)::boolean AS is_author,
  				(CASE WHEN 
 					(EXISTS (SELECT community_users.addr FROM community_users WHERE community_users.addr = temp_user_addrs.addr AND community_users.user_type = 'member')) 
-				THEN '1' else '0' end)::boolean AS member,
+				THEN '1' else '0' end)::boolean AS is_member,
 				temp_user_addrs.addr AS addr,
 				$1 as community_id
 		FROM 
