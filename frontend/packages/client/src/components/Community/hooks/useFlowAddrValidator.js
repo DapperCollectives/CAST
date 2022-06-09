@@ -26,7 +26,7 @@ const notEmptyAddr = (list) => {
 };
 
 export default function useFlowAddrValidator({ addrList, initialList }) {
-  const [isValid, setIsValid] = useState({
+  const [validations, setValidations] = useState({
     isValid: false,
     hasChangedFromOriginal: false,
   });
@@ -43,15 +43,15 @@ export default function useFlowAddrValidator({ addrList, initialList }) {
       initialList.map((e) => e.addr)
     );
     if (initialList && hasChangedFromOriginal && baseValidation) {
-      setIsValid({ isValid: true, hasChangedFromOriginal });
+      setValidations({ isValid: true, hasChangedFromOriginal });
     } else if (baseValidation) {
-      setIsValid({ isValid: true, hasChangedFromOriginal });
+      setValidations({ isValid: true, hasChangedFromOriginal });
     } else {
-      setIsValid({ isValid: false, hasChangedFromOriginal });
+      setValidations({ isValid: false, hasChangedFromOriginal });
     }
-  }, [addrList, setIsValid, initialList]);
+  }, [addrList, setValidations, initialList]);
 
-  return isValid;
+  return validations;
 }
 
 export const validateAddrInList = (addrList, addr) => {
