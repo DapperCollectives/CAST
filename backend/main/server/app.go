@@ -789,13 +789,13 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// pin to ipfs
-	// pin, err := a.IpfsClient.PinJson(p)
-	// if err != nil {
-	// 	log.Error().Err(err).Msg("error pinning proposal to IPFS")
-	// 	respondWithError(w, http.StatusInternalServerError, err.Error())
-	// 	return
-	// }
-	// p.Cid = &pin.IpfsHash
+	pin, err := a.IpfsClient.PinJson(p)
+	if err != nil {
+		log.Error().Err(err).Msg("error pinning proposal to IPFS")
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	p.Cid = &pin.IpfsHash
 
 	// validate proposal fields
 	validate := validator.New()

@@ -68,7 +68,7 @@ func TestCreateProposal(t *testing.T) {
 		var p models.Proposal
 		json.Unmarshal(response.Body.Bytes(), &p)
 
-		//assert.NotNil(t, p.Cid)
+		assert.NotNil(t, p.Cid)
 
 		assert.Equal(t, proposalStruct.Name, p.Name)
 		assert.Equal(t, *proposalStruct.Body, *p.Body)
@@ -130,7 +130,7 @@ func TestCreateProposalThreshold(t *testing.T) {
 		var p models.Proposal
 		json.Unmarshal(response.Body.Bytes(), &p)
 
-		//assert.NotNil(t, p.Cid)
+		assert.NotNil(t, p.Cid)
 
 		assert.Equal(t, proposalStruct.Name, p.Name)
 		assert.Equal(t, *proposalStruct.Body, *p.Body)
