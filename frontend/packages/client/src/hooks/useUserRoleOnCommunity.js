@@ -13,7 +13,7 @@ export default function useUserRoleOnCommunity({
     fetchMore,
   } = useUserCommunities({
     addr,
-    count: 25,
+    count: 100,
   });
 
   useEffect(() => {
@@ -25,9 +25,17 @@ export default function useUserRoleOnCommunity({
     }
   }, [fetchMore, pagination.next]);
 
+  if (
+    addr === null ||
+    (Array.isArray(communityUser) && communityUser.length === 0)
+  ) {
+    return false;
+  }
+
   if (addr === null) {
     return false;
   }
+
   if (loading || roles.length === 0) {
     return null;
   }

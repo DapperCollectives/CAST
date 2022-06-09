@@ -3,22 +3,14 @@ import useVotesForAddress from "./useVotesForAddress";
 import { PAGINATION_INITIAL_STATE } from "../reducers";
 import { useWebContext } from "../contexts/Web3";
 import { useEffect, useMemo } from "react";
-
-function debounce(e, waitingTime = 300) {
-  let timer;
-  return (...i) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => {
-      e.apply(this, i);
-    }, waitingTime);
-  };
-}
+import { debounce } from "../utils";
 
 export default function useCommunityProposalsWithVotes({
   communityId,
   start = PAGINATION_INITIAL_STATE.start,
   count = PAGINATION_INITIAL_STATE.count,
   status,
+  scrollToFetchMore = true,
 } = {}) {
   const {
     data,
@@ -54,10 +46,12 @@ export default function useCommunityProposalsWithVotes({
   const hasMore = pagination.next > 0;
 
   useEffect(() => {
-    document.hasMore = hasMore;
-    document.loadingProposals = loading;
-    document.fetchMore = fetchMore;
-  }, [hasMore, loading, fetchMore]);
+    if (scrollToFetchMore) {
+      document.hasMore = hasMore;
+      document.loadingProposals = loading;
+      document.fetchMore = fetchMore;
+    }
+  }, [hasMore, loading, fetchMore, scrollToFetchMore]);
 
   function pullDataFromApi() {
     return debounce(() => {
@@ -73,10 +67,13 @@ export default function useCommunityProposalsWithVotes({
   }
 
   useEffect(() => {
-    document.addEventListener("scroll", pullDataFromApi());
-    return () => document.removeEventListener("scroll", pullDataFromApi());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (scrollToFetchMore) {
+      document.addEventListener("scroll", pullDataFromApi());
+    }
+    return () =>
+      scrollToFetchMore &&
+      document.removeEventListener("scroll", pullDataFromApi());
+  }, [scrollToFetchMore]);
 
   // merges user votes with list of proposals
   const mergedData = useMemo(() => {

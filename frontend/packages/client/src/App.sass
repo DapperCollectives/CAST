@@ -4,10 +4,12 @@
 
 // Set brand colors
 $green: #0E5B20
+$light-green: #00EF8B
 $red: #B20D0D
 $error-red: #B20D0D
 $yellow: #FBD84D
 $orange: #F4AF4A
+$light-gray: #DCDCDC
 
 // Update Bulma's global variables
 $family-primary: "Arimo"
@@ -43,6 +45,7 @@ $border-color-light: #DBDBDB
 @import '~bulma/sass/elements/container.sass'
 @import '~bulma/sass/elements/progress.sass'
 @import '~bulma/sass/elements/title.sass'
+@import '~bulma/sass/elements/table.sass'
 @import '~bulma/sass/elements/content.sass'
 @import '~bulma/sass/components/navbar.sass'
 @import '~bulma/sass/components/modal.sass'
@@ -79,6 +82,10 @@ code
 	border-bottom: 1px solid $grey-light
 .rounded-sm
 	border-radius: 8px
+.rounded-sm-tl
+	border-top-left-radius: 8px
+.rounded-sm-bl
+	border-bottom-left-radius: 8px
 .rounded-lg
 	border-radius: 20px
 .rounded-full
@@ -174,6 +181,9 @@ label > input[type="radio"].is-chosen + *::before
 .navbar
 	display: flex
 	justify-content: space-between
+	@include mobile
+		.divider
+			max-height: calc($navbar-height + 1.25rem) // prevent mismatch due to border
 .navbar-end
 	align-items: center
 	display: flex
@@ -213,7 +223,7 @@ hr
 		margin-bottom: 1rem
 	a.navbar-item:hover
 		background-color: transparent
-		color:#4a4a4a
+		color: #4a4a4a
 	.is-flex-direction-column-mobile
 		flex-direction: column
 	.p-0-mobile
@@ -222,20 +232,31 @@ hr
 		margin-bottom: 1rem !important
 	.wallet-connect
 		&.button
-		padding: 0.1em 0.5em
-		height: auto
-		color: #000000 !important
-
+			padding: 0.1em 0.5em
+			height: auto
+			color: #000000 !important
+.tabs
+	&.tabs-community
+		margin-bottom: 0px
 .tabs a
 	border-bottom-color: #dbdbdb
 	border-bottom-style: none
 	border-bottom-width: 0px
+	&.tab-community
+		border-bottom-width: 2px
+		&:hover
+			transform: scale(1.04)
 
 .tabs li.is-active a
 	border-bottom-color: $yellow
 	color: $black
 	border-bottom-width: 3px
 	border-bottom-style: solid
+	&.tab-community
+		border-bottom-color: $light-green
+		color: $black
+		border-bottom-width: 2px
+		border-bottom-style: solid
 
 .small-text
 	font-size: 0.88rem !important
@@ -247,7 +268,136 @@ hr
 	color: $red
 
 @import './components/StepByStep/StepByStep.sass'
-@import './components/ProposalsList/ProposalList.sass'
+
+// Styles for CommunityProposalList - begin
+.blockies-wrapper
+	border-radius: 133.333px
+	max-height: 40px
+.blockies
+	border-radius: 133.333px
+	border: 4px solid #F2F2F2
+.rounded-top
+	border-top-left-radius: 8px
+	border-top-right-radius: 8px
+.community-header-wrapper
+	background-color: #F2F2F2
+	width: 100%
+	max-height: 248px
+.community-logo-mobile
+	max-height: 85px
+	max-width: 85px
+.community-info
+	padding: 19.5px 24px
+	max-width: 225px
+.community-numbers
+	color: #757575
+	font-size: 14px
+.community-content
+	padding-top: 31px
+.proposal-title
+	font-size: 18px
+	line-height: 120%
+.proposal-body-text
+	min-height: 92px
+	height: 92px
+.proposal-text-truncated
+	line-height: 140%
+	display: -webkit-box
+	-webkit-box-orient: vertical
+	-webkit-line-clamp: 3
+	overflow: hidden
+.proposal-status-label
+	padding: 10px 20px !important
+.proposal-body-spacing
+	margin-bottom: 1.5rem !important
+.proposal-status
+	padding-right: 0 !important
+	code span
+		margin-right: 0 !important
+
+@include desktop
+	.spacing-left-panel
+		padding-top: 2rem !important
+		padding-right: 5rem !important
+		padding-left: 5rem !important
+	.spacing-right-panel
+		padding-left: 8rem
+		padding-top: 5rem
+		padding-right: 8rem
+	.text-description
+		max-width: 260px
+	.community-header
+		width: 100%
+		max-width: 960px
+		padding-left: 0
+		padding-right: 0
+
+@include tablet-only
+	.spacing-left-panel
+		padding-top: 2rem !important
+		padding-right: 2rem !important
+		padding-left: 2rem !important
+	.spacing-right-panel
+		padding-left: 2.5rem !important
+		padding-top: 2rem !important
+		padding-right: 2.5rem !important
+	.community-content
+		margin-top: 0
+		padding-top: 40px
+	.proposal-card-footer
+		padding-top: 0
+	.mobile-status-label
+		padding: 8px 20px !important
+	.proposal-body-spacing
+		margin-bottom: 0.75rem !important
+	.proposal-body-text
+		min-height: unset
+		height: unset
+
+@include mobile
+	.spacing-left-panel
+		padding: 40px 20px 0px 20px
+	.spacing-right-panel
+		padding: 24px 24px 0px 24px
+	.community-numbers
+		font-size: 16px
+	.community-content
+		padding-top: 0
+		margin-top: -70px
+	.community-header-wrapper
+		max-height: 268px
+	.community-header
+		flex-direction: column
+		min-height: 268px
+		padding-top: 40px !important // override App.sass !important
+		padding-bottom: 40px
+		justify-content: normal
+	.community-logo-wrapper
+		align-self: flex-start
+	.community-info
+		padding: 0px 24px 0px 24px
+	.community-specific
+		flex-grow: 0
+		margin: 0
+		margin-bottom: 12px
+	.tabs-community-list
+		justify-content: space-around !important
+		border-bottom: none !important
+	.proposal-title
+		color: #000000
+		font-weight: 400
+		font-size: 18px
+		line-height: 120%
+	.proposal-card-footer
+		padding-top: 0
+	.proposal-status-label
+		padding: 8px 20px !important
+	.proposal-body-spacing
+		margin-bottom: 0.75rem !important
+	.proposal-body-text
+		min-height: unset
+		height: unset
+// Styles for CommunityProposalList - end
 
 .button.dropdown-item.is-active
 	background-color: $grey
@@ -255,14 +405,14 @@ hr
 	border-radius: 0px
 
 .button.dropdown-item:hover
-	background-color:  $grey-lighter
+	background-color: $grey-lighter
 	border-radius: 0px
 
 @include desktop
 	.is-panel-fixed
 		position: fixed
 
-@include  tablet
+@include	tablet
 	.is-panel-fixed
 		position: fixed
 
@@ -304,7 +454,6 @@ span[data-tooltip]
 
 .button:hover
 	color: $black
-
 
 @keyframes pulse
 	0%
@@ -352,6 +501,47 @@ span[data-tooltip]
 	margin-left: 0.1rem !important
 	margin-right: 0.1rem !important
 	word-break: break-all
+
+// styles for comminity members
+.table
+	border-radius: 8px
+	border-style: hidden
+	box-shadow: 0 0 0 1px $light-gray
+	td
+		vertical-align: middle !important
+		height: 64px !important
+	.has-background-light-gray
+		background-color: $light-gray
+	thead th
+		border-width: 0 0 1px !important
+	.index-cell
+		max-width: 44px
+		width: 44px
+		text-align: center !important
+.word-break-all
+	word-break: break-all
+
+.pulse
+	.title-text
+		font-size: 18px
+	.cell
+		min-height: 215px
+		display: flex
+		flex-direction: column
+		align-items: center
+		justify-content: center
+		background-color: $white-ter
+		border-width: 3px
+		border-style: solid
+		border-color: white
+		&.top-left
+			border-top-left-radius: 24px
+		&.top-right
+			border-top-right-radius: 24px
+		&.bottom-left
+			border-bottom-left-radius: 24px
+		&.bottom-right
+			border-bottom-right-radius: 24px
 
 .text-area
 	resize: none
