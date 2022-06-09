@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+/* Token Weighted Default */
 func TestTokenWeightedDefaultStrategy(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")
@@ -89,6 +90,7 @@ func TestTokenWeightedDefaultStrategy(t *testing.T) {
 	})
 }
 
+/* Balance of NFT */
 func TestBalanceOfNFTsStrategy(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")
@@ -157,7 +159,6 @@ func TestBalanceOfNFTsStrategy(t *testing.T) {
 	})
 }
 
-/* Token Weighted Default */
 /* Staked Token Weighted Default */
 func TestStakedTokenWeightedDefaultStrategy(t *testing.T) {
 	clearTable("communities")
