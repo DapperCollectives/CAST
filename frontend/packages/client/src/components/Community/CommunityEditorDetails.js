@@ -284,14 +284,15 @@ const CommunityMembersEditor = ({
     const newList = addrList.filter((_, idx) => idx !== index);
     setAddrList(newList);
   };
-  const { isValid } = useFlowAddrValidator({
+
+  const { isValid, hasChangedFromOriginal } = useFlowAddrValidator({
     addrList,
     initialList: userAddrList,
   });
 
   useEffect(() => {
-    setEnableSave(isValid);
-  }, [isValid]);
+    setEnableSave(isValid && hasChangedFromOriginal);
+  }, [isValid, hasChangedFromOriginal]);
 
   return (
     <CommunityUsersForm

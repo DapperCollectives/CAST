@@ -8,10 +8,14 @@ export { default as useCommunityProposalsWithVotes } from "./useCommunityProposa
 export { default as useVotingStrategies } from "./useVotingStrategies";
 export { default as useWindowDimensions } from "./useWindowDimension";
 export { default as useAllowlist } from "./useAllowlist";
+export { default as useCommunityMembers } from "./useCommunityMembers";
 export { default as useMediaQuery } from "./useMediaQuery";
+export { default as useLeaderBoard } from "./useLeaderBoard";
 export { default as useCommunityDetails } from "./useCommunityDetails";
+export { default as useQueryParams } from "./useQueryParams";
 export { default as useFileUploader } from "./useFileUploader";
 export { default as useUserCommunities } from "./useUserCommunities";
 export { default as useUserRoleOnCommunity } from "./useUserRoleOnCommunity";
+export { default as useJoinCommunity } from "./useJoinCommunity";
 export { default as useCommunityUsers } from "./useCommunityUsers";
 export { default as useCommunityCategory } from "./useCommunityCategory";

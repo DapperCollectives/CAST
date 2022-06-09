@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/brudfyi/flow-voting-tool/main/models"
-	"github.com/brudfyi/flow-voting-tool/main/shared"
+	"github.com/DapperCollectives/CAST/backend/main/models"
+	"github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 )
@@ -106,6 +106,25 @@ func (otu *OverflowTestUtils) AddCommunitiesWithUsers(count int, signer string) 
 		community := otu.GenerateCommunityStruct(signer)
 		if err := community.CreateCommunity(otu.A.DB); err != nil {
 			fmt.Printf("error in otu.AddCommunities")
+		}
+		// Add community_user roles for the creator
+		models.GrantRolesToCommunityCreator(otu.A.DB, community.Creator_addr, community.ID)
+
+		id := community.ID
+		retIds = append(retIds, id)
+	}
+	return retIds
+}
+
+func (otu *OverflowTestUtils) AddCommunitiesWithUsersAndThreshold(count int, signer string) []int {
+	if count < 1 {
+		count = 1
+	}
+	retIds := []int{}
+	for i := 0; i < count; i++ {
+		community := otu.GenerateCommunityWithThresholdStruct(signer)
+		if err := community.CreateCommunity(otu.A.DB); err != nil {
+			fmt.Printf("error in otu.CreateCommunityWithContract: %v", err)
 		}
 		// Add community_user roles for the creator
 		models.GrantRolesToCommunityCreator(otu.A.DB, community.Creator_addr, community.ID)

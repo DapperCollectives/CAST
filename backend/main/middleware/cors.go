@@ -3,7 +3,7 @@ package middleware
 import (
 	"net/http"
 
-	"github.com/brudfyi/flow-voting-tool/main/shared"
+	"github.com/DapperCollectives/CAST/backend/main/shared"
 )
 
 func UseCors(c shared.Config) func(http.Handler) http.Handler {

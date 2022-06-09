@@ -206,6 +206,8 @@ function StepByStep({
             paddingTop: "3rem",
             paddingRight: "5rem",
             minWidth: 280,
+            position: "fixed",
+            minHeight: "100%",
           }}
           className="has-background-white-ter pl-4 is-hidden-mobile"
         >
@@ -219,7 +221,10 @@ function StepByStep({
             getSubmitButton()}
         </div>
         {/* left panel mobile */}
-        <div className="is-hidden-tablet has-background-white-ter p-4">
+        <div
+          className="is-hidden-tablet has-background-white-ter p-4"
+          style={{ position: "fixed", minWidth: "100%", zIndex: 1 }}
+        >
           <div className="is-flex is-justify-content-space-between is-align-items-center">
             <div style={{ minHeight: 24 }}>
               {currentStep > 0 && getBackLabel()}

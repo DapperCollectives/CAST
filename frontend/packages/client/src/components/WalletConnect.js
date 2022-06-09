@@ -8,7 +8,7 @@ const SignInOutButton = ({ user: { loggedIn, addr }, injectedProvider }) => {
       injectedProvider.unauthenticate();
     } else {
       injectedProvider.authenticate();
-      injectedProvider.logIn()
+      injectedProvider.logIn();
     }
   };
   return (

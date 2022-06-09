@@ -5,11 +5,11 @@ import Loader from "../components/Loader";
 const Header = lazy(() => import("../components/Header"));
 const Transactions = lazy(() => import("../components/Transactions"));
 const Home = lazy(() => import("./Home"));
-const Community = lazy(() => import("./Community"));
 const Proposal = lazy(() => import("./Proposal"));
 const About = lazy(() => import("./About"));
 const Debug = lazy(() => import("./Debug"));
 const ProposalCreate = lazy(() => import("./ProposalCreate"));
+const Community = lazy(() => import("./Community"));
 const CommunityEditor = lazy(() => import("./CommunityEditor"));
 const CommunityCreate = lazy(() => import("./CommunityCreate"));
 

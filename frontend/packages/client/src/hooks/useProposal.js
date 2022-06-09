@@ -13,9 +13,10 @@ export default function useProposal() {
   const { notifyError } = useErrorHandlerContext();
 
   const createProposal = useCallback(
-    async (injectedProvider, proposalData) => {
+    async (injectedProvider, data) => {
       dispatch({ type: "PROCESSING" });
-      const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/1/proposals`;
+      const { communityId, ...proposalData } = data;
+      const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}/proposals`;
       try {
         const timestamp = Date.now().toString();
         const hexTime = Buffer.from(timestamp).toString("hex");

@@ -3,10 +3,12 @@ package shared
 import (
 	"context"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"flag"
 	"io/ioutil"
-	"os"
+	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -20,23 +22,62 @@ import (
 )
 
 type FlowAdapter struct {
+	Config  FlowConfig
 	Client  *client.Client
 	Context context.Context
 	URL     string
+	Env     string
 }
 
-func NewFlowClient() *FlowAdapter {
+type FlowContract struct {
+	Source  string            `json:"source,omitempty"`
+	Aliases map[string]string `json:"aliases"`
+}
+
+type FlowConfig struct {
+	Contracts map[string]FlowContract `json:"contracts"`
+	Networks  map[string]string       `json:"networks"`
+}
+
+type Contract struct {
+	Name        *string
+	Addr        *string
+	Public_path *string
+	Threshold   *float64
+}
+
+var (
+	placeholderTokenName         = regexp.MustCompile(`{{TOKEN_NAME}}`)
+	placeholderTokenAddr         = regexp.MustCompile(`{{TOKEN_ADDRESS}}`)
+	placeholderFungibleTokenAddr = regexp.MustCompile(`{{FUNGIBLE_TOKEN_ADDRESS}}`)
+)
+
+func NewFlowClient(flowEnv string) *FlowAdapter {
 	adapter := FlowAdapter{}
 	adapter.Context = context.Background()
-	// any reason to pass this as an arg instead?
-	if flag.Lookup("test.v") == nil {
-		adapter.URL = os.Getenv("FLOW_URL")
-	} else {
-		adapter.URL = os.Getenv("FLOW_EMULATOR_URL")
+	adapter.Env = flowEnv
+
+	content, err := ioutil.ReadFile("./flow.json")
+	if err != nil {
+		log.Fatal().Msgf("Error when opening file: %+v", err)
+	}
+
+	var config FlowConfig
+	err = json.Unmarshal(content, &config)
+	if err != nil {
+		log.Fatal().Msgf("Error parsing flow.json: %+v", err)
+	}
+
+	adapter.Config = config
+	adapter.URL = config.Networks[adapter.Env]
+
+	// Explicitly set when running test suite
+	if flag.Lookup("test.v") != nil {
+		adapter.URL = "127.0.0.1:3569"
 	}
 
 	// create flow client
-	FlowClient, err := client.New(strings.TrimSpace(adapter.URL), grpc.WithInsecure())
+	FlowClient, err := client.New(adapter.URL, grpc.WithInsecure())
 	if err != nil {
 		log.Panic().Msgf("failed to connect to %s", adapter.URL)
 	}
@@ -77,7 +118,7 @@ func (fa *FlowAdapter) UserSignatureValidate(address string, message string, sig
 	}
 
 	// Load script
-	script, err := ioutil.ReadFile("./main/cadence/validate_signature_v2.cdc")
+	script, err := ioutil.ReadFile("./main/cadence/scripts/validate_signature_v2.cdc")
 	if err != nil {
 		log.Error().Err(err).Msgf("error reading cadence script file")
 		return err
@@ -181,6 +222,59 @@ func (fa *FlowAdapter) UserTransactionValidate(address string, message string, s
 	return nil
 }
 
+func (fa *FlowAdapter) EnforceTokenThreshold(creatorAddr string, c *Contract) (bool, error) {
+
+	flowAddress := flow.HexToAddress(creatorAddr)
+	cadenceAddress := cadence.NewAddress(flowAddress)
+	cadencePath := cadence.Path{Domain: "public", Identifier: *c.Public_path}
+
+	script, err := ioutil.ReadFile("./main/cadence/scripts/get_balance.cdc")
+	if err != nil {
+		log.Error().Err(err).Msgf("error reading cadence script file")
+		return false, err
+	}
+
+	script = fa.ReplaceContractPlaceholders(string(script[:]), c)
+
+	//call the script to verify balance
+	cadenceValue, err := fa.Client.ExecuteScriptAtLatestBlock(
+		fa.Context,
+		script,
+		[]cadence.Value{
+			cadencePath,
+			cadenceAddress,
+		},
+	)
+	if err != nil {
+		log.Error().Err(err).Msg("error executing script")
+		return false, err
+	}
+
+	value := CadenceValueToInterface(cadenceValue)
+	balance, err := strconv.ParseFloat(value.(string), 64)
+	if err != nil {
+		log.Error().Err(err).Msg("error converting cadence value to float")
+		return false, err
+	}
+
+	if balance < *c.Threshold {
+		return false, nil
+	}
+
+	return true, nil
+}
+
+// Fungible Token Address here is hardcoded to emulator address, this should
+// be set based on environment
+func (fa *FlowAdapter) ReplaceContractPlaceholders(code string, c *Contract) []byte {
+	fungibleTokenAddr := fa.Config.Contracts["FungibleToken"].Aliases[fa.Env]
+
+	code = placeholderFungibleTokenAddr.ReplaceAllString(code, fungibleTokenAddr)
+	code = placeholderTokenName.ReplaceAllString(code, *c.Name)
+	code = placeholderTokenAddr.ReplaceAllString(code, *c.Addr)
+	return []byte(code)
+}
+
 func WaitForSeal(ctx context.Context, c *client.Client, id flow.Identifier) (*flow.TransactionResult, *flow.Transaction, error) {
 	result, err := c.GetTransactionResult(ctx, id)
 	if err != nil {
@@ -197,4 +291,47 @@ func WaitForSeal(ctx context.Context, c *client.Client, id flow.Identifier) (*fl
 
 	tx, errTx := c.GetTransaction(ctx, id)
 	return result, tx, errTx
+}
+
+func CadenceValueToInterface(field cadence.Value) interface{} {
+	if field == nil {
+		return ""
+	}
+
+	switch field := field.(type) {
+	case cadence.Optional:
+		return CadenceValueToInterface(field.Value)
+	case cadence.Dictionary:
+		result := map[string]interface{}{}
+		for _, item := range field.Pairs {
+			key, err := strconv.Unquote(item.Key.String())
+			if err != nil {
+				result[item.Key.String()] = CadenceValueToInterface(item.Value)
+				continue
+			}
+
+			result[key] = CadenceValueToInterface(item.Value)
+		}
+		return result
+	case cadence.Struct:
+		result := map[string]interface{}{}
+		subStructNames := field.StructType.Fields
+
+		for j, subField := range field.Fields {
+			result[subStructNames[j].Identifier] = CadenceValueToInterface(subField)
+		}
+		return result
+	case cadence.Array:
+		var result []interface{}
+		for _, item := range field.Values {
+			result = append(result, CadenceValueToInterface(item))
+		}
+		return result
+	default:
+		result, err := strconv.Unquote(field.String())
+		if err != nil {
+			return field.String()
+		}
+		return result
+	}
 }

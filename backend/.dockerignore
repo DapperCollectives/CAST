@@ -2,7 +2,6 @@
 cadence/*
 .gitignore
 Dockerfile
-flow.json
 go.sum
 Makefile
 package.json

@@ -12,6 +12,13 @@ export { default as ErrorHandler } from "contexts/ErrorHandler";
 export { default as Loader } from "./Loader";
 export { default as Dropdown } from "./Dropdown";
 export { default as WrapperResponsive } from "./WrapperResponsive";
+export { default as LeaderBoard } from "./LeaderBoard";
+export { default as CommunityProposals } from "./CommunityProposals";
+export { default as CommunityLinks } from "./CommunityLinks";
+export { default as CommunityPulse } from "./CommunityPulse";
+export { default as CommunityMemberList } from "./CommunityMembersList";
+export { default as CommunityAbout } from "./CommunityAbout";
+export { default as JoinCommunityButton } from "./Community/JoinCommunityButton";
 export { default as CommunityEditorProfile } from "./Community/CommunityEditorProfile";
 export { default as CommunityEditorLinks } from "./Community/CommunityEditorLinks";
 export { default as CommunityEditorDetails } from "./Community/CommunityEditorDetails";
@@ -22,3 +29,4 @@ export {
 } from "./ProposalCreate";
 export { default as FadeIn } from "./FadeIn";
 export { default as UploadImageModal } from "./UploadImageModal";
+export { default as Tablink } from "./Tablink";

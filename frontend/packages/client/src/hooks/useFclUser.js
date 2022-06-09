@@ -9,8 +9,7 @@ export default function useFclUser(provider, forceLedger) {
       setUser({ ...user });
       if (forceLedger) {
         setIsLedger(true);
-      }
-      else if (user?.services) {
+      } else if (user?.services) {
         setIsLedger(user.services[0]?.uid === "fcl-ledger-authz");
       }
     });
