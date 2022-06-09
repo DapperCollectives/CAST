@@ -51,7 +51,6 @@ const DropDown = forwardRef(
       { [margin]: !!margin }
     );
 
-    console.log(classNames);
     return (
       <div
         className={classNames}
