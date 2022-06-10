@@ -9,8 +9,12 @@ const Tablink = ({
   onlyLink,
   onClick = () => {},
   animateHover = false,
+  className = "",
 }) => {
-  const textClass = isActive ? "has-text-black" : "has-text-grey";
+  const textClass = `${className} ${
+    isActive ? "has-text-black" : "has-text-grey"
+  }`;
+
   if (!linkUrl) {
     return (
       // eslint-disable-next-line jsx-a11y/anchor-is-valid
@@ -31,7 +35,7 @@ const Tablink = ({
   const link = isActive ? (
     <>
       <b className="pr-2">{linkText + " "}</b>
-      <Star width="13" height="13" />
+      <Star width="13" height="13" fill="black" />
     </>
   ) : (
     <>{linkText}</>

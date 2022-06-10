@@ -6,10 +6,15 @@ import (
 	"net/http"
 	"testing"
 
+<<<<<<< HEAD
 	"github.com/brudfyi/flow-voting-tool/main/models"
 	"github.com/brudfyi/flow-voting-tool/main/shared"
 	utils "github.com/brudfyi/flow-voting-tool/main/test_utils"
 	"github.com/rs/zerolog/log"
+=======
+	"github.com/DapperCollectives/CAST/backend/main/models"
+	utils "github.com/DapperCollectives/CAST/backend/main/test_utils"
+>>>>>>> main
 	"github.com/stretchr/testify/assert"
 )
 

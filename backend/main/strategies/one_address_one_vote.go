@@ -3,8 +3,8 @@ package strategies
 import (
 	"fmt"
 
-	"github.com/brudfyi/flow-voting-tool/main/models"
-	s "github.com/brudfyi/flow-voting-tool/main/shared"
+	"github.com/DapperCollectives/CAST/backend/main/models"
+	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/jackc/pgx/v4"
 	"github.com/rs/zerolog/log"
 )

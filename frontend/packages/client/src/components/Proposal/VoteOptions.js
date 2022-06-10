@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { WrapperResponsive as Wrapper } from "..";
 import { parseDateFromServer, getProposalType } from "utils";
 import { useVotesForAddress } from "hooks";
-import { getStatus } from "../ProposalsList/ProposalHeader";
+import { getStatus } from "./getStatus";
 import { FilterValues } from "const";
 
 const TextBasedOptions = ({
@@ -62,10 +62,9 @@ const TextBasedOptions = ({
         >
           <button
             style={{ height: 48, width: "100%" }}
-            className={`button vote-button transition-all is-flex has-background-yellow rounded-sm is-${
-              currentOption && !readOnly ? "enabled" : "disabled"
-            }`}
-            onClick={readOnly ? () => {} : onConfirmVote}
+            className={`button vote-button transition-all is-flex has-background-yellow rounded-sm is-${currentOption && !readOnly ? "enabled" : "disabled"
+              }`}
+            onClick={readOnly ? () => { } : onConfirmVote}
           >
             VOTE
           </button>
@@ -91,11 +90,10 @@ const ButtonChoice = ({
   return (
     <button
       style={{ minHeight: "67px", height: "auto", width: "100%" }}
-      className={`button vote-button transition-all is-flex has-background-yellow rounded-sm is-${
-        (choice.value === currentOption || !currentOption) && !readOnly
+      className={`button vote-button transition-all is-flex has-background-yellow rounded-sm is-${(choice.value === currentOption || !currentOption) && !readOnly
           ? "enabled"
           : "disabled"
-      }`}
+        }`}
       onClick={_confirmAndVote(choice.value)}
     >
       <div className="columns is-mobile">
@@ -274,9 +272,8 @@ const VoteOptions = ({
 
   const canVote = addr && isActive && hasntVoted;
 
-  const voteClasses = `vote-options border-light rounded-sm mb-6 ${
-    !canVote && "is-disabled"
-  } ${!hasntVoted && "is-voted"}`;
+  const voteClasses = `vote-options border-light rounded-sm mb-6 ${!canVote && "is-disabled"
+    } ${!hasntVoted && "is-voted"}`;
 
   let previousVote = castVote;
   let currentOption = optionChosen;
@@ -309,11 +306,10 @@ const VoteOptions = ({
   return (
     <div className={voteClasses}>
       <Wrapper
-        classNames={`${
-          isImageChoice
+        classNames={`${isImageChoice
             ? "is-flex is-flex-direction-column is-align-items-center is-justify-content-center"
             : ""
-        }`}
+          }`}
         extraClasses="px-6 pt-6 pb-6"
         extraClassesMobile="px-4 pt-6 pb-6"
       >
@@ -333,7 +329,7 @@ const VoteOptions = ({
           currentOption={currentOption}
           previousVote={previousVote}
           labelType={labelType}
-          onOptionSelect={readOnly ? () => {} : onOptionSelect}
+          onOptionSelect={readOnly ? () => { } : onOptionSelect}
           readOnly={readOnly}
           onConfirmVote={onConfirmVote}
         />

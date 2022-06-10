@@ -96,6 +96,7 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
     });
     setEndTimeOpen(false);
   };
+
   return (
     <div>
       <div className="border-light rounded-lg is-flex-direction-column is-mobile m-0 p-6 mb-6">

@@ -3,10 +3,10 @@ package shared
 import (
 	"context"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"flag"
 	"io/ioutil"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -22,9 +22,21 @@ import (
 )
 
 type FlowAdapter struct {
+	Config  FlowConfig
 	Client  *client.Client
 	Context context.Context
 	URL     string
+	Env     string
+}
+
+type FlowContract struct {
+	Source  string            `json:"source,omitempty"`
+	Aliases map[string]string `json:"aliases"`
+}
+
+type FlowConfig struct {
+	Contracts map[string]FlowContract `json:"contracts"`
+	Networks  map[string]string       `json:"networks"`
 }
 
 type Contract struct {
@@ -35,25 +47,45 @@ type Contract struct {
 }
 
 var (
+<<<<<<< HEAD
 	placeholderTokenName            = regexp.MustCompile(`"[^"\s]*TOKEN_NAME"`)
 	placeholderTokenAddr            = regexp.MustCompile(`"[^"\s]*TOKEN_ADDRESS"`)
 	placeholderFungibleTokenAddr    = regexp.MustCompile(`"[^"\s]*FUNGIBLE_TOKEN_ADDRESS"`)
 	placeholderNonFungibleTokenAddr = regexp.MustCompile(`"[^"\s]*NON_FUNGIBLE_TOKEN_ADDRESS"`)
 	placeholderMetadataViewsAddr    = regexp.MustCompile(`"[^"\s]*METADATA_VIEWS_ADDRESS"`)
+=======
+	placeholderTokenName         = regexp.MustCompile(`{{TOKEN_NAME}}`)
+	placeholderTokenAddr         = regexp.MustCompile(`{{TOKEN_ADDRESS}}`)
+	placeholderFungibleTokenAddr = regexp.MustCompile(`{{FUNGIBLE_TOKEN_ADDRESS}}`)
+>>>>>>> main
 )
 
-func NewFlowClient() *FlowAdapter {
+func NewFlowClient(flowEnv string) *FlowAdapter {
 	adapter := FlowAdapter{}
 	adapter.Context = context.Background()
-	// any reason to pass this as an arg instead?
-	if flag.Lookup("test.v") == nil {
-		adapter.URL = os.Getenv("FLOW_URL")
-	} else {
-		adapter.URL = os.Getenv("FLOW_EMULATOR_URL")
+	adapter.Env = flowEnv
+
+	content, err := ioutil.ReadFile("./flow.json")
+	if err != nil {
+		log.Fatal().Msgf("Error when opening file: %+v", err)
+	}
+
+	var config FlowConfig
+	err = json.Unmarshal(content, &config)
+	if err != nil {
+		log.Fatal().Msgf("Error parsing flow.json: %+v", err)
+	}
+
+	adapter.Config = config
+	adapter.URL = config.Networks[adapter.Env]
+
+	// Explicitly set when running test suite
+	if flag.Lookup("test.v") != nil {
+		adapter.URL = "127.0.0.1:3569"
 	}
 
 	// create flow client
-	FlowClient, err := client.New(strings.TrimSpace(adapter.URL), grpc.WithInsecure())
+	FlowClient, err := client.New(adapter.URL, grpc.WithInsecure())
 	if err != nil {
 		log.Panic().Msgf("failed to connect to %s", adapter.URL)
 	}
@@ -94,7 +126,7 @@ func (fa *FlowAdapter) UserSignatureValidate(address string, message string, sig
 	}
 
 	// Load script
-	script, err := ioutil.ReadFile("./main/cadence/validate_signature_v2.cdc")
+	script, err := ioutil.ReadFile("./main/cadence/scripts/validate_signature_v2.cdc")
 	if err != nil {
 		log.Error().Err(err).Msgf("error reading cadence script file")
 		return err
@@ -204,13 +236,17 @@ func (fa *FlowAdapter) EnforceTokenThreshold(creatorAddr string, c *Contract) (b
 	cadenceAddress := cadence.NewAddress(flowAddress)
 	cadencePath := cadence.Path{Domain: "public", Identifier: *c.Public_path}
 
-	script, err := ioutil.ReadFile("./main/cadence/get_balance.cdc")
+	script, err := ioutil.ReadFile("./main/cadence/scripts/get_balance.cdc")
 	if err != nil {
 		log.Error().Err(err).Msgf("error reading cadence script file")
 		return false, err
 	}
 
+<<<<<<< HEAD
 	script = replaceContractPlaceholders(string(script[:]), c, true)
+=======
+	script = fa.ReplaceContractPlaceholders(string(script[:]), c)
+>>>>>>> main
 
 	//call the script to verify balance
 	cadenceValue, err := fa.Client.ExecuteScriptAtLatestBlock(
@@ -234,12 +270,13 @@ func (fa *FlowAdapter) EnforceTokenThreshold(creatorAddr string, c *Contract) (b
 	}
 
 	if balance < *c.Threshold {
-		return false, errors.New("balance is below threshold")
+		return false, nil
 	}
 
 	return true, nil
 }
 
+<<<<<<< HEAD
 func (fa *FlowAdapter) GetNFTIds(voterAddr string, c *Contract) ([]interface{}, error) {
 	flowAddress := flow.HexToAddress(voterAddr)
 	cadenceAddress := cadence.NewAddress(flowAddress)
@@ -283,6 +320,14 @@ func replaceContractPlaceholders(code string, c *Contract, isFungible bool) []by
 		code = placeholderNonFungibleTokenAddr.ReplaceAllString(code, "0xf8d6e0586b0a20c7")
 	}
 	code = placeholderMetadataViewsAddr.ReplaceAllString(code, "0xf8d6e0586b0a20c7")
+=======
+// Fungible Token Address here is hardcoded to emulator address, this should
+// be set based on environment
+func (fa *FlowAdapter) ReplaceContractPlaceholders(code string, c *Contract) []byte {
+	fungibleTokenAddr := fa.Config.Contracts["FungibleToken"].Aliases[fa.Env]
+
+	code = placeholderFungibleTokenAddr.ReplaceAllString(code, fungibleTokenAddr)
+>>>>>>> main
 	code = placeholderTokenName.ReplaceAllString(code, *c.Name)
 	code = placeholderTokenAddr.ReplaceAllString(code, *c.Addr)
 

@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 
-	app "github.com/brudfyi/flow-voting-tool/main/server"
+	app "github.com/DapperCollectives/CAST/backend/main/server"
 	"github.com/joho/godotenv"
 )
 
