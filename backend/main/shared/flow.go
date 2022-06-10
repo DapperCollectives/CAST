@@ -47,17 +47,11 @@ type Contract struct {
 }
 
 var (
-<<<<<<< HEAD
 	placeholderTokenName            = regexp.MustCompile(`"[^"\s]*TOKEN_NAME"`)
 	placeholderTokenAddr            = regexp.MustCompile(`"[^"\s]*TOKEN_ADDRESS"`)
 	placeholderFungibleTokenAddr    = regexp.MustCompile(`"[^"\s]*FUNGIBLE_TOKEN_ADDRESS"`)
 	placeholderNonFungibleTokenAddr = regexp.MustCompile(`"[^"\s]*NON_FUNGIBLE_TOKEN_ADDRESS"`)
 	placeholderMetadataViewsAddr    = regexp.MustCompile(`"[^"\s]*METADATA_VIEWS_ADDRESS"`)
-=======
-	placeholderTokenName         = regexp.MustCompile(`{{TOKEN_NAME}}`)
-	placeholderTokenAddr         = regexp.MustCompile(`{{TOKEN_ADDRESS}}`)
-	placeholderFungibleTokenAddr = regexp.MustCompile(`{{FUNGIBLE_TOKEN_ADDRESS}}`)
->>>>>>> main
 )
 
 func NewFlowClient(flowEnv string) *FlowAdapter {
@@ -242,11 +236,7 @@ func (fa *FlowAdapter) EnforceTokenThreshold(creatorAddr string, c *Contract) (b
 		return false, err
 	}
 
-<<<<<<< HEAD
 	script = replaceContractPlaceholders(string(script[:]), c, true)
-=======
-	script = fa.ReplaceContractPlaceholders(string(script[:]), c)
->>>>>>> main
 
 	//call the script to verify balance
 	cadenceValue, err := fa.Client.ExecuteScriptAtLatestBlock(
@@ -276,7 +266,6 @@ func (fa *FlowAdapter) EnforceTokenThreshold(creatorAddr string, c *Contract) (b
 	return true, nil
 }
 
-<<<<<<< HEAD
 func (fa *FlowAdapter) GetNFTIds(voterAddr string, c *Contract) ([]interface{}, error) {
 	flowAddress := flow.HexToAddress(voterAddr)
 	cadenceAddress := cadence.NewAddress(flowAddress)
@@ -320,14 +309,6 @@ func replaceContractPlaceholders(code string, c *Contract, isFungible bool) []by
 		code = placeholderNonFungibleTokenAddr.ReplaceAllString(code, "0xf8d6e0586b0a20c7")
 	}
 	code = placeholderMetadataViewsAddr.ReplaceAllString(code, "0xf8d6e0586b0a20c7")
-=======
-// Fungible Token Address here is hardcoded to emulator address, this should
-// be set based on environment
-func (fa *FlowAdapter) ReplaceContractPlaceholders(code string, c *Contract) []byte {
-	fungibleTokenAddr := fa.Config.Contracts["FungibleToken"].Aliases[fa.Env]
-
-	code = placeholderFungibleTokenAddr.ReplaceAllString(code, fungibleTokenAddr)
->>>>>>> main
 	code = placeholderTokenName.ReplaceAllString(code, *c.Name)
 	code = placeholderTokenAddr.ReplaceAllString(code, *c.Addr)
 
