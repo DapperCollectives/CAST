@@ -51,7 +51,7 @@ export default function useFlowAddrValidator({
     ) {
       setValidations({ isValid: baseValidation, hasChangedFromOriginal });
     }
-  }, [addrList, setValidations, initialList]);
+  }, [addrList, setValidations, initialList, validations]);
 
   return validations;
 }
