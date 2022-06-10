@@ -119,7 +119,9 @@ function StepByStep({
     } else if (!showPreStep && currentStep > stepIdx) {
       return (
         <div className={`is-flex ${stepClasses.join(" ")}`} key={stepIdx}>
-          <CheckMark color={customStyle.completeStep.icon.hexBackgroundColor} />
+          <CheckMark
+            circleFill={customStyle.completeStep.icon.hexBackgroundColor}
+          />
           {stepLabel ? <span className="ml-4">{stepLabel}</span> : divider}
         </div>
       );
