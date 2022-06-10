@@ -45,8 +45,8 @@ export const checkResponse = async (response) => {
   return response.json();
 };
 
-export const isNotEmptyArray = (array) =>
-  Array.isArray(array) && array.length > 0;
+export const isEmptyArray = (array) =>
+  Array.isArray(array) && array.length === 0;
 
 export function debounce(e, waitingTime = 300) {
   let timer;

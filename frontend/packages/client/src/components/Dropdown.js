@@ -1,5 +1,6 @@
 import React, { useState, forwardRef } from "react";
 import { CaretDown } from "./Svg";
+import classnames from "classnames";
 
 const DropDown = forwardRef(
   (
@@ -42,12 +43,17 @@ const DropDown = forwardRef(
       setIsOpen(false);
     };
 
-    const spacingStyle = `${padding} ${margin}`.trim();
+    const classNames = classnames(
+      `dropdown is-flex is-flex-grow-1`,
+      { "is-right": isRight },
+      { "is-active": isOpen },
+      { [padding]: !!padding },
+      { [margin]: !!margin }
+    );
+
     return (
       <div
-        className={`dropdown ${
-          isRight ? "is-right " : ""
-        }is-flex is-flex-grow-1${isOpen ? " is-active" : ""}`}
+        className={classNames}
         onBlur={closeOnBlur}
         aria-haspopup="true"
         aria-controls="dropdown-menu"

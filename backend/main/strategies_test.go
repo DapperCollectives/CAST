@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/brudfyi/flow-voting-tool/main/models"
-	utils "github.com/brudfyi/flow-voting-tool/main/test_utils"
+	"github.com/DapperCollectives/CAST/backend/main/models"
+	utils "github.com/DapperCollectives/CAST/backend/main/test_utils"
 	"github.com/stretchr/testify/assert"
 )
 

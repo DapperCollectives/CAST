@@ -35,7 +35,7 @@ const Tablink = ({
   const link = isActive ? (
     <>
       <b className="pr-2">{linkText + " "}</b>
-      <Star width="13" height="13" />
+      <Star width="13" height="13" fill="black" />
     </>
   ) : (
     <>{linkText}</>

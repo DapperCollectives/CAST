@@ -1,4 +1,4 @@
-module github.com/brudfyi/flow-voting-tool
+module github.com/DapperCollectives/CAST/backend
 
 go 1.16
 

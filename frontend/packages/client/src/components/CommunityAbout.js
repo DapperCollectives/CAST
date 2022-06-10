@@ -29,7 +29,7 @@ const CommunityAbout = ({
 } = {}) => {
   return (
     <div>
-      <div className="columns is-multiline">
+      <div className="columns is-multiline mt-0">
         <div className="column is-12">
           <Title role={"About"} />
         </div>

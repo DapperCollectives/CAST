@@ -1,7 +1,7 @@
 package models
 
 import (
-	s "github.com/brudfyi/flow-voting-tool/main/shared"
+	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/jackc/pgx/v4"
 	"github.com/rs/zerolog/log"
@@ -215,7 +215,6 @@ func (u *CommunityUser) CreateCommunityUser(db *s.Database) error {
 // when a user creates a community, they are automatically assigned
 // all roles
 func GrantRolesToCommunityCreator(db *s.Database, addr string, communityId int) error {
-
 	for _, userType := range USER_TYPES {
 		communityUser := CommunityUser{Addr: addr, Community_id: communityId, User_type: userType}
 		if err := communityUser.CreateCommunityUser(db); err != nil {

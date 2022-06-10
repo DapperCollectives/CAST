@@ -6,9 +6,9 @@ import (
 	"os"
 	"testing"
 
+	"github.com/DapperCollectives/CAST/backend/main/server"
+	utils "github.com/DapperCollectives/CAST/backend/main/test_utils"
 	"github.com/bjartek/overflow/overflow"
-	"github.com/brudfyi/flow-voting-tool/main/server"
-	utils "github.com/brudfyi/flow-voting-tool/main/test_utils"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
 )
@@ -19,7 +19,6 @@ var otu *utils.OverflowTestUtils
 
 const ServiceAddress = "0xf8d6e0586b0a20c7"
 
-//
 func TestMain(m *testing.M) {
 	var err error
 
