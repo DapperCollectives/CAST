@@ -737,7 +737,19 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Printf("COMMUNITY : %+v\n", community)
+
 	if community.Contract_name != nil {
+
+		//There may be some cases where public path and threshold are nill
+		//But a contract is still present
+		if community.Public_path == nil || community.Threshold == nil {
+			pathDefault := "none"
+			thresholdDefault := 0.00
+
+			community.Public_path = &pathDefault
+			community.Threshold = &thresholdDefault
+		}
 
 		var contract = &shared.Contract{
 			Name:        community.Contract_name,

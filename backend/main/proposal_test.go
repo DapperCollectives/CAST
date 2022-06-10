@@ -140,6 +140,44 @@ func TestCreateProposalThreshold(t *testing.T) {
 	})
 }
 
+func TestCreateBalanceOfNFTProposal(t *testing.T) {
+	clearTable("communities")
+	clearTable("community_users")
+	clearTable("proposals")
+	communityId, community := otu.AddCommunitiesWithNFTContract(1, "user1")
+	proposalId := otu.AddProposalsForStrategy(communityId[0], "balance-of-nfts", 1)[0]
+
+	var contract = &shared.Contract{
+		Name: community.Contract_name,
+		Addr: community.Contract_addr,
+	}
+	votes, err := otu.GenerateListOfVotesWithNFTs(proposalId, 5, contract)
+	if err != nil {
+		t.Error(err)
+	}
+
+	otu.AddDummyVotesAndNFTs(votes)
+	t.Run("Test Creating a Proposal with balance-of-nft Strategy", func(t *testing.T) {
+
+		proposalStruct := otu.GenerateProposalStruct("user1", communityId[0])
+		payload := otu.GenerateProposalPayload("user1", proposalStruct)
+
+		response := otu.CreateProposalAPI(payload)
+		fmt.Printf("%+v\n", response.Body)
+		CheckResponseCode(t, http.StatusOK, response.Code)
+
+		var p models.Proposal
+		json.Unmarshal(response.Body.Bytes(), &p)
+
+		assert.Equal(t, proposalStruct.Name, p.Name)
+		assert.Equal(t, *proposalStruct.Body, *p.Body)
+		assert.Equal(t, proposalStruct.Choices, p.Choices)
+		assert.Equal(t, proposalStruct.Community_id, p.Community_id)
+		assert.Equal(t, *proposalStruct.Strategy, *p.Strategy)
+
+	})
+}
+
 func TestUpdateProposal(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")

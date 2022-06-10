@@ -92,6 +92,8 @@ func (otu *OverflowTestUtils) GenerateProposalPayload(signer string, proposal *m
 	timestamp := fmt.Sprint(time.Now().UnixNano() / int64(time.Millisecond))
 	compositeSignatures := otu.GenerateCompositeSignatures(signer, timestamp)
 
+	fmt.Printf("PROPOSAL GENERATION PAYLOAD: %+v\n", proposal)
+
 	proposal.Timestamp = timestamp
 	proposal.Composite_signatures = compositeSignatures
 
