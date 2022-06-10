@@ -60,7 +60,9 @@ $border-color-light: #DBDBDB
 @import '~bulma/sass/helpers/flexbox.sass'
 
 $tooltip-radius: 6px
+$popover-max-width: 20rem
 @import '@creativebulma/bulma-tooltip'
+@import 'bulma-popover'
 
 // custom css
 .App, #root
@@ -612,3 +614,7 @@ span[data-tooltip]
 			margin-top: 0.5em
 		&:not(:last-child)
 			margin-bottom: 0.5em
+
+@include mobile
+	.popover .popover-content
+		max-width: 10rem !important	
