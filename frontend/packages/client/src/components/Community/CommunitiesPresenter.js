@@ -32,12 +32,13 @@ const CommunitiesPresenter = ({
       <h1 className="is-uppercase small-text communities">{title}</h1>
       <div className="columns is-multiline">
         {communities.map((community, index) => {
-          const { logo, name, description, id, isComingSoon, isMember } =
+          const { logo, name, description, id, isComingSoon } =
             community;
           return (
             <div
               className={`column ${columnSize} is-12-tablet`}
               key={`community-${index}`}
+              style={{ position: "relative" }} // bulma class did not override
             >
               <CommunityCard
                 logo={logo}
@@ -45,7 +46,6 @@ const CommunitiesPresenter = ({
                 description={description}
                 id={id}
                 isComingSoon={isComingSoon}
-                isMember={isMember}
                 key={index}
               />
             </div>

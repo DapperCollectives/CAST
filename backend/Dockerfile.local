@@ -8,7 +8,8 @@ WORKDIR /flow-voting-tool
 ADD ./main ./main
 RUN go mod tidy
 RUN go mod download
-COPY .env .
+COPY .env ./
+COPY flow.json ./
 
 FROM vt-init as vt-build
 WORKDIR /flow-voting-tool

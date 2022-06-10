@@ -5,7 +5,7 @@ import (
 	"math/rand"
 	"strconv"
 
-	"github.com/brudfyi/flow-voting-tool/main/models"
+	"github.com/DapperCollectives/CAST/backend/main/models"
 )
 
 type VoteWithBalance struct {
