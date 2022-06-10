@@ -13,11 +13,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/DapperCollectives/CAST/backend/main/middleware"
+	"github.com/DapperCollectives/CAST/backend/main/models"
+	"github.com/DapperCollectives/CAST/backend/main/shared"
+	"github.com/DapperCollectives/CAST/backend/main/strategies"
 	"github.com/axiomzen/envconfig"
-	"github.com/brudfyi/flow-voting-tool/main/middleware"
-	"github.com/brudfyi/flow-voting-tool/main/models"
-	"github.com/brudfyi/flow-voting-tool/main/shared"
-	"github.com/brudfyi/flow-voting-tool/main/strategies"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v4"
@@ -117,7 +117,10 @@ func (a *App) Initialize(user, password, dbname, dbhost, dbport, ipfsKey, ipfsSe
 	// IPFS
 	a.IpfsClient = shared.NewIpfsClient(ipfsKey, ipfsSecret)
 	// Flow
-	a.FlowAdapter = shared.NewFlowClient()
+	if os.Getenv("FLOW_ENV") == "" {
+		os.Setenv("FLOW_ENV", "emulator")
+	}
+	a.FlowAdapter = shared.NewFlowClient(os.Getenv("FLOW_ENV"))
 	// Snapshot
 	a.SnapshotClient = shared.NewSnapshotClient(os.Getenv("SNAPSHOT_BASE_URL"))
 	// address to vote options mapping
@@ -777,13 +780,13 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// pin to ipfs
-	// pin, err := a.IpfsClient.PinJson(p)
-	// if err != nil {
-	// 	log.Error().Err(err).Msg("error pinning proposal to IPFS")
-	// 	respondWithError(w, http.StatusInternalServerError, err.Error())
-	// 	return
-	// }
-	// p.Cid = &pin.IpfsHash
+	pin, err := a.IpfsClient.PinJson(p)
+	if err != nil {
+		log.Error().Err(err).Msg("error pinning proposal to IPFS")
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	p.Cid = &pin.IpfsHash
 
 	// validate proposal fields
 	validate := validator.New()
@@ -1614,22 +1617,6 @@ func (a *App) handleRemoveUserRole(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	// validate they arent removing a "member" role
-	if payload.User_type == "member" && payload.Signing_addr != payload.Addr {
-		CANNOT_REMOVE_MEMBER_ERR := errors.New("cannot remove another member from a community")
-		log.Error().Err(CANNOT_REMOVE_MEMBER_ERR)
-		respondWithError(w, http.StatusForbidden, CANNOT_REMOVE_MEMBER_ERR.Error())
-		return
-	}
-	// validate signer is admin
-	var adminUser = models.CommunityUser{Addr: payload.Signing_addr, Community_id: payload.Community_id, User_type: "admin"}
-	if err := adminUser.GetCommunityUser(a.DB); err != nil {
-		USER_MUST_BE_ADMIN_ERR := errors.New("user must be community admin")
-		log.Error().Err(err).Msg("db error")
-		log.Error().Err(USER_MUST_BE_ADMIN_ERR)
-		respondWithError(w, http.StatusForbidden, USER_MUST_BE_ADMIN_ERR.Error())
-		return
-	}
 	// validate timestamp of request/message
 	if err := a.validateTimestamp(payload.Timestamp, 60); err != nil {
 		log.Error().Err(err)
@@ -1642,29 +1629,42 @@ func (a *App) handleRemoveUserRole(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u := payload.CommunityUser
-
-	resp := struct {
-		Status string `json:"status"`
-	}{
-		Status: "ok",
-	}
-
-	// If a member is removing themselves, remove all their other roles as well
-	if payload.User_type == "member" && payload.Addr == payload.Signing_addr {
-		userRoles, err := models.GetAllRolesForUserInCommunity(a.DB, payload.Addr, payload.Community_id)
-		if err != nil {
-			log.Error().Err(err)
-			respondWithError(w, http.StatusInternalServerError, err.Error())
-		}
-		for _, userRole := range userRoles {
-			if err := userRole.Remove(a.DB); err != nil {
+	if payload.User_type == "member" {
+		if payload.Addr == payload.Signing_addr {
+			// If a member is removing themselves, remove all their other roles as well
+			userRoles, err := models.GetAllRolesForUserInCommunity(a.DB, payload.Addr, payload.Community_id)
+			if err != nil {
 				log.Error().Err(err)
 				respondWithError(w, http.StatusInternalServerError, err.Error())
-				return
 			}
+			for _, userRole := range userRoles {
+				if err := userRole.Remove(a.DB); err != nil {
+					log.Error().Err(err)
+					respondWithError(w, http.StatusInternalServerError, err.Error())
+					return
+				}
+			}
+		} else {
+			// validate someone else is not removing a "member" role
+			CANNOT_REMOVE_MEMBER_ERR := errors.New("cannot remove another member from a community")
+			log.Error().Err(CANNOT_REMOVE_MEMBER_ERR)
+			respondWithError(w, http.StatusForbidden, CANNOT_REMOVE_MEMBER_ERR.Error())
+			return
 		}
-	} else if payload.User_type == "admin" {
+	}
+
+	u := payload.CommunityUser
+
+	if payload.User_type == "admin" {
+		// validate signer is admin
+		var adminUser = models.CommunityUser{Addr: payload.Signing_addr, Community_id: payload.Community_id, User_type: "admin"}
+		if err := adminUser.GetCommunityUser(a.DB); err != nil {
+			USER_MUST_BE_ADMIN_ERR := errors.New("user must be community admin") // this
+			log.Error().Err(err).Msg("db error")
+			log.Error().Err(USER_MUST_BE_ADMIN_ERR)
+			respondWithError(w, http.StatusForbidden, USER_MUST_BE_ADMIN_ERR.Error())
+			return
+		}
 		// If the admin role is being removed, remove author role as well
 		author := models.CommunityUser{Addr: u.Addr, Community_id: u.Community_id, User_type: "author"}
 		if err := author.Remove(a.DB); err != nil {
@@ -1680,6 +1680,12 @@ func (a *App) handleRemoveUserRole(w http.ResponseWriter, r *http.Request) {
 		// Otherwise, just remove the specified user role
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
+	}
+
+	resp := struct {
+		Status string `json:"status"`
+	}{
+		Status: "ok",
 	}
 
 	respondWithJSON(w, http.StatusOK, resp)

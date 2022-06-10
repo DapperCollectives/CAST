@@ -1,9 +1,13 @@
 import React from "react";
 
-export default function FadeIn({ children }) {
+export default function FadeIn({
+  children,
+  as: Tag = "div",
+  style = { display: "inherit" },
+} = {}) {
   return (
-    <div style={{ display: "inherit" }} className="fade-in">
+    <Tag style={style} className="fade-in">
       {children}
-    </div>
+    </Tag>
   );
 }
