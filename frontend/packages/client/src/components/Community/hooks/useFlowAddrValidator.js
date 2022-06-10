@@ -34,6 +34,8 @@ export default function useFlowAddrValidator({
     hasChangedFromOriginal: false,
   });
 
+  const { isValid, hasChangedFromOriginal } = validations;
+
   useEffect(() => {
     const baseValidation =
       addrList.length > 0 &&
@@ -41,17 +43,20 @@ export default function useFlowAddrValidator({
       notEmptyAddr(addrList) &&
       hasValidAddresses(addrList);
 
-    const hasChangedFromOriginal = listHasChanged(
+    const hasListChanged = listHasChanged(
       addrList,
       initialList.map((e) => e.addr)
     );
     if (
-      validations.isValid !== baseValidation ||
-      validations.hasChangedFromOriginal !== hasChangedFromOriginal
+      isValid !== baseValidation ||
+      hasChangedFromOriginal !== hasListChanged
     ) {
-      setValidations({ isValid: baseValidation, hasChangedFromOriginal });
+      setValidations({
+        isValid: baseValidation,
+        hasChangedFromOriginal: hasListChanged,
+      });
     }
-  }, [addrList, setValidations, initialList, validations]);
+  }, [addrList, setValidations, initialList, isValid, hasChangedFromOriginal]);
 
   return validations;
 }
