@@ -5,7 +5,7 @@ import classnames from "classnames";
 export default function StartSteps({ dismissPreStep }) {
   const { notMobile } = useMediaQuery();
   const classNames = classnames(
-    "columns is-multiline border-light rounded-sm m-0 p-6",
+    "columns is-multiline border-light rounded-sm m-0",
     {
       "p-6": notMobile,
       "p-2": !notMobile,
