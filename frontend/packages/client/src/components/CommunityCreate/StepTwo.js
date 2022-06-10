@@ -1,6 +1,8 @@
 import React, { useEffect } from "react";
 import { CommunityUsersForm } from "../Community/CommunityEditorDetails";
 import useFlowAddrValidator from "../Community/hooks/useFlowAddrValidator";
+import { useMediaQuery } from "hooks";
+import classnames from "classnames";
 
 const isInitialList = (listAddr) => {
   return listAddr?.length === 1 && listAddr[0].addr === "";
@@ -19,6 +21,8 @@ export default function StepTwo({
   moveToNextStep,
   isStepValid,
 }) {
+  const notMobile = useMediaQuery();
+
   const { listAddrAdmins = [{ addr: "" }], listAddrAuthors = [{ addr: "" }] } =
     stepData || {};
 
@@ -83,13 +87,23 @@ export default function StepTwo({
     onDataChange({ listAddrAuthors: [...listAddrAuthors, { addr: "" }] });
   };
 
+  const className = classnames(
+    "popover",
+    { "is-popover-bottom": notMobile },
+    { "is-popover-right": !notMobile }
+  );
+  const popoverClassName = classnames(
+    "columns",
+    { "m-4": notMobile },
+    { "m-2": !notMobile }
+  );
   return (
     <>
       <CommunityUsersForm
         title={
           <>
             Admins
-            <div className="popover is-popover-bottom">
+            <div className={className}>
               <button
                 className="delete has-text-grey rounded-full cursor-pointer popover-trigger"
                 style={buttonStyle}
@@ -97,13 +111,19 @@ export default function StepTwo({
                 ?
               </button>
               <div className="popover-content">
-                <div className="columns m-3">
-                  <div className="column is-12">
-                    <p className="small-text has-text-weight-normal has-text-grey small-text has-text-justified mb-1">
+                <div className={popoverClassName}>
+                  <div className="column is-12 p-0">
+                    <p
+                      className="small-text has-text-weight-normal has-text-grey small-text has-text-justified mb-1"
+                      style={{ lineHeight: "20px" }}
+                    >
                       Admin addresses will be added automatically as authors and
                       members for the community.
                     </p>
-                    <p className="small-text has-text-weight-normal has-text-grey small-text has-text-justified">
+                    <p
+                      className="small-text has-text-weight-normal has-text-grey small-text has-text-justified"
+                      style={{ lineHeight: "20px" }}
+                    >
                       In addition, community creator address will be set as
                       admin and member by default.
                     </p>
