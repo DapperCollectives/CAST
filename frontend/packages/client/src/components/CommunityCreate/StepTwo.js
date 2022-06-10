@@ -87,11 +87,6 @@ export default function StepTwo({
     onDataChange({ listAddrAuthors: [...listAddrAuthors, { addr: "" }] });
   };
 
-  const className = classnames(
-    "popover",
-    { "is-popover-bottom": notMobile },
-    { "is-popover-right": !notMobile }
-  );
   const popoverClassName = classnames(
     "columns",
     { "m-4": notMobile },
@@ -103,7 +98,7 @@ export default function StepTwo({
         title={
           <>
             Admins
-            <div className={className}>
+            <div className="popover is-popover-bottom">
               <button
                 className="delete has-text-grey rounded-full cursor-pointer popover-trigger"
                 style={buttonStyle}
@@ -114,15 +109,19 @@ export default function StepTwo({
                 <div className={popoverClassName}>
                   <div className="column is-12 p-0">
                     <p
-                      className="small-text has-text-weight-normal has-text-grey small-text has-text-justified mb-1"
-                      style={{ lineHeight: "20px" }}
+                      className="small-text has-text-weight-normal has-text-grey small-text mb-1"
+                      style={{
+                        lineHeight: "20px",
+                      }}
                     >
                       Admin addresses will be added automatically as authors and
                       members for the community.
                     </p>
                     <p
-                      className="small-text has-text-weight-normal has-text-grey small-text has-text-justified"
-                      style={{ lineHeight: "20px" }}
+                      className="small-text has-text-weight-normal has-text-grey small-text"
+                      style={{
+                        lineHeight: "20px",
+                      }}
                     >
                       In addition, community creator address will be set as
                       admin and member by default.
