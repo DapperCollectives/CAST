@@ -15,7 +15,7 @@ const ShowMoreOrLess = ({ showMore, showLess, enableMore, enableLess }) => (
   <>
     {enableLess && (
       <button
-        className="button is-white is-text-grey small-text"
+        className="button is-white has-text-grey small-text"
         onClick={showLess}
       >
         <AngleUp />
@@ -24,7 +24,7 @@ const ShowMoreOrLess = ({ showMore, showLess, enableMore, enableLess }) => (
     )}
     {enableMore && (
       <button
-        className="button is-white is-text-grey small-text"
+        className="button is-white has-text-grey small-text"
         onClick={showMore}
       >
         View more <AngleDown />

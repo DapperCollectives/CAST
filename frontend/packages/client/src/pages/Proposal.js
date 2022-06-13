@@ -9,13 +9,13 @@ import {
   Error,
   Loader,
   WrapperResponsive,
-} from "../components";
-import { CheckMark, ArrowLeft, Bin } from "../components/Svg";
-import { useProposal, useVotingStrategies, useMediaQuery } from "../hooks";
-import { useModalContext } from "../contexts/NotificationModal";
-import { useWebContext } from "../contexts/Web3";
-import { FilterValues } from "../const";
-import { Tablink } from "../components/ProposalsList";
+  Tablink,
+} from "components";
+import { CheckMark, ArrowLeft, Bin } from "components/Svg";
+import { useProposal, useVotingStrategies, useMediaQuery } from "hooks";
+import { useModalContext } from "contexts/NotificationModal";
+import { useWebContext } from "contexts/Web3";
+import { FilterValues } from "const";
 import {
   CancelProposalModalConfirmation,
   ProposalStatus,
@@ -382,7 +382,7 @@ export default function ProposalPage() {
       <section className="section">
         <div className="container">
           <WrapperResponsive extraClasses="mb-6" extraClassesMobile="mb-3">
-            <Link to={`/community/${proposal.communityId}`}>
+            <Link to={`/community/${proposal.communityId}?tab=proposals`}>
               <span className="has-text-grey is-flex is-align-items-center back-button transition-all">
                 <ArrowLeft /> <span className="ml-3">Back</span>
               </span>
@@ -407,7 +407,7 @@ export default function ProposalPage() {
             {showCancelButton && isAdmin && (
               <div className="is-flex is-align-items-center">
                 <button
-                  className="button is-white is-text-grey small-text"
+                  className="button is-white has-text-grey small-text"
                   onClick={onCancelProposal}
                 >
                   <div className="mr-2 is-flex is-align-items-center">

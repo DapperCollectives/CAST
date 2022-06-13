@@ -5,8 +5,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/DapperCollectives/CAST/backend/main/server"
 	"github.com/bjartek/overflow/overflow"
-	"github.com/brudfyi/flow-voting-tool/main/server"
 )
 
 type OverflowTestUtils struct {

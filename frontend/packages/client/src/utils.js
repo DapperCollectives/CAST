@@ -1,13 +1,23 @@
+import { formatDistance } from 'date-fns'
+import { customAlphabet } from "nanoid";
 import { stateToHTML } from "draft-js-export-html";
+
+const nanoid = customAlphabet("1234567890abcdef", 10);
+
+export const generateSlug = nanoid;
 
 export const parseDateFromServer = (endTime) => {
   const dateTime = new Date(endTime);
-  const diffFromNow = dateTime.getTime() - Date.now();
+  const end = dateTime.getTime();
+  const now = Date.now();
+  const diffFromNow = end - now;
   const diffDays = Math.ceil(Math.abs(diffFromNow) / (1000 * 60 * 60 * 24));
+  const diffDuration = formatDistance(now, end); // for the proposalCardFooter
   return {
     date: dateTime,
     diffFromNow,
     diffDays,
+    diffDuration,
   };
 };
 
@@ -35,9 +45,18 @@ export const checkResponse = async (response) => {
   return response.json();
 };
 
-export const isNotEmptyArray = (array) =>
-  Array.isArray(array) && array.length > 0;
+export const isEmptyArray = (array) =>
+  Array.isArray(array) && array.length === 0;
 
+export function debounce(e, waitingTime = 300) {
+  let timer;
+  return (...i) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      e.apply(this, i);
+    }, waitingTime);
+  };
+}
 // for some reason, in emulator fcl this signature is nested two levels
 // deep but on testnet fcl this is only nested one level deep
 export const getSig = (sigArr) =>
@@ -101,13 +120,38 @@ export function getReducedImg(image, newImageWidth = 150, fileName) {
 export const getProposalType = (choices) => {
   if (
     choices.length === 2 &&
-    choices.every((choice) => choice.choiceImgUrl !== undefined)
+    choices.every(
+      (choice) =>
+        choice.choiceImgUrl !== undefined && choice.choiceImgUrl !== null
+    )
   ) {
     return "image";
   }
   return "text-based";
 };
 
+// Note: Does not currently return children
+export const parseHTML = (body, tag, all) => {
+  const parser = new DOMParser();
+  const bodyDoc = parser.parseFromString(body, "text/html");
+  const elsFound = bodyDoc.getElementsByTagName(tag);
+
+  if (all) {
+    const elArr = Array.from(elsFound);
+    if (elArr.length === 0) return {};
+    return elArr.map(el => el.getAttributeNames().reduce((acc, attr) => {
+      acc[attr] = el.getAttribute(attr);
+      return acc;
+    }, {}));
+  } else {
+    const firstEl = Array.from(elsFound)[0];
+    if (!firstEl) return {};
+    return firstEl.getAttributeNames().reduce((acc, attr) => {
+      acc[attr] = firstEl.getAttribute(attr);
+      return acc;
+    }, {});
+  }
+};
 export const customDraftToHTML = (content) => {
   const options = {
     blockRenderers: {
@@ -136,3 +180,5 @@ export const customDraftToHTML = (content) => {
   };
   return stateToHTML(content, options);
 };
+
+export const isValidAddress = (addr) => /0[x,X][a-zA-Z0-9]{16}$/gim.test(addr);
