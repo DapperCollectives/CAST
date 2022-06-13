@@ -5,14 +5,21 @@ import (
 	"math"
 
 	"github.com/DapperCollectives/CAST/backend/main/models"
+	"github.com/DapperCollectives/CAST/backend/main/shared"
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/jackc/pgx/v4"
 	"github.com/rs/zerolog/log"
 )
 
-type StakedTokenWeightedDefault struct{}
+type StakedTokenWeightedDefault struct {
+	FlowAdapter *shared.FlowAdapter
+}
 
-func (s *StakedTokenWeightedDefault) FetchBalance(db *s.Database, b *models.Balance, sc *s.SnapshotClient) (*models.Balance, error) {
+func (s *StakedTokenWeightedDefault) FetchBalance(
+	db *s.Database,
+	b *models.Balance,
+	sc *s.SnapshotClient,
+) (*models.Balance, error) {
 
 	if err := b.GetBalanceByAddressAndBlockHeight(db); err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		log.Error().Err(err).Msg("error querying address b at blockheight")
@@ -35,7 +42,10 @@ func (s *StakedTokenWeightedDefault) FetchBalance(db *s.Database, b *models.Bala
 	return b, nil
 }
 
-func (s *StakedTokenWeightedDefault) TallyVotes(votes []*models.VoteWithBalance, proposalId int) (models.ProposalResults, error) {
+func (s *StakedTokenWeightedDefault) TallyVotes(
+	votes []*models.VoteWithBalance,
+	proposalId int,
+) (models.ProposalResults, error) {
 	var r models.ProposalResults
 	r.Results = map[string]int{}
 	r.Results_float = map[string]float64{}
@@ -49,7 +59,10 @@ func (s *StakedTokenWeightedDefault) TallyVotes(votes []*models.VoteWithBalance,
 	return r, nil
 }
 
-func (s *StakedTokenWeightedDefault) GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error) {
+func (s *StakedTokenWeightedDefault) GetVoteWeightForBalance(
+	vote *models.VoteWithBalance,
+	proposal *models.Proposal,
+) (float64, error) {
 	var weight float64
 	var ERROR error = fmt.Errorf("no weight found, address: %s, strategy: %s", vote.Addr, *proposal.Strategy)
 
@@ -74,7 +87,10 @@ func (s *StakedTokenWeightedDefault) GetVoteWeightForBalance(vote *models.VoteWi
 	}
 }
 
-func (s *StakedTokenWeightedDefault) GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error) {
+func (s *StakedTokenWeightedDefault) GetVotes(
+	votes []*models.VoteWithBalance,
+	proposal *models.Proposal,
+) ([]*models.VoteWithBalance, error) {
 
 	for _, vote := range votes {
 		weight, err := s.GetVoteWeightForBalance(vote, proposal)

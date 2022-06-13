@@ -5,12 +5,15 @@ import (
 	"math"
 
 	"github.com/DapperCollectives/CAST/backend/main/models"
+	"github.com/DapperCollectives/CAST/backend/main/shared"
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/jackc/pgx/v4"
 	"github.com/rs/zerolog/log"
 )
 
-type BalanceOfNfts struct{}
+type BalanceOfNfts struct {
+	FlowAdapter *shared.FlowAdapter
+}
 
 func (s *BalanceOfNfts) FetchBalance(db *s.Database, b *models.Balance, sc *s.SnapshotClient) (*models.Balance, error) {
 
@@ -25,13 +28,27 @@ func (s *BalanceOfNfts) FetchBalance(db *s.Database, b *models.Balance, sc *s.Sn
 		NFTs: []*models.NFT{},
 	}
 
+	var c models.Community
+	if err := c.GetCommunityByProposalId(db, b.Proposal_id); err != nil {
+		return nil, err
+	}
+
 	nftIds, err := models.GetUserNFTs(db, vb)
 	if err != nil {
 		log.Error().Err(err).Msg("error getting user nfts")
 		return nil, err
 	}
 
+	// get the communityID
+	var contract = &shared.Contract{
+		Name: c.Contract_name,
+		Addr: c.Contract_addr,
+	}
+
+	fmt.Printf("contract name: %v\n", contract.Name)
+
 	if len(nftIds) == 0 {
+		//nftIds := shared.GetNFTIds(b.Addr, contract)
 		// add create function
 	}
 

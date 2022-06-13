@@ -5,14 +5,21 @@ import (
 	"math"
 
 	"github.com/DapperCollectives/CAST/backend/main/models"
+	"github.com/DapperCollectives/CAST/backend/main/shared"
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/jackc/pgx/v4"
 	"github.com/rs/zerolog/log"
 )
 
-type TokenWeightedDefault struct{}
+type TokenWeightedDefault struct {
+	FlowAdapter *shared.FlowAdapter
+}
 
-func (s *TokenWeightedDefault) FetchBalance(db *s.Database, b *models.Balance, sc *s.SnapshotClient) (*models.Balance, error) {
+func (s *TokenWeightedDefault) FetchBalance(
+	db *s.Database,
+	b *models.Balance,
+	sc *s.SnapshotClient,
+) (*models.Balance, error) {
 
 	if err := b.GetBalanceByAddressAndBlockHeight(db); err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		log.Error().Err(err).Msg("error querying address b at blockheight")
@@ -50,7 +57,10 @@ func (s *TokenWeightedDefault) TallyVotes(votes []*models.VoteWithBalance, propo
 	return r, nil
 }
 
-func (s *TokenWeightedDefault) GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error) {
+func (s *TokenWeightedDefault) GetVoteWeightForBalance(
+	vote *models.VoteWithBalance,
+	proposal *models.Proposal,
+) (float64, error) {
 	var weight float64
 	var ERROR error = fmt.Errorf("no weight found, address: %s, strategy: %s", vote.Addr, *proposal.Strategy)
 
@@ -75,7 +85,10 @@ func (s *TokenWeightedDefault) GetVoteWeightForBalance(vote *models.VoteWithBala
 	}
 }
 
-func (s *TokenWeightedDefault) GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error) {
+func (s *TokenWeightedDefault) GetVotes(
+	votes []*models.VoteWithBalance,
+	proposal *models.Proposal,
+) ([]*models.VoteWithBalance, error) {
 
 	for _, vote := range votes {
 		weight, err := s.GetVoteWeightForBalance(vote, proposal)

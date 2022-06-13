@@ -69,6 +69,7 @@ type Strategy interface {
 	GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error)
 }
 
+//@TODO update structs to all implement a Strategy Struct
 var strategyMap = map[string]Strategy{
 	"token-weighted-default":        &strategies.TokenWeightedDefault{},
 	"staked-token-weighted-default": &strategies.StakedTokenWeightedDefault{},
@@ -524,8 +525,6 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Printf("proposal: %+v\n", p)
-
 	// check that proposal is live
 	if !p.IsLive() {
 		err = errors.New("user cannot vote on inactive proposal")
@@ -573,9 +572,12 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	s.FlowAdapter = a.FlowAdapter
+
 	emptyBalance := &models.Balance{
 		Addr:        v.Addr,
 		BlockHeight: p.Block_height,
+		Proposal_id: p.ID,
 	}
 
 	balance, err := s.FetchBalance(a.DB, emptyBalance, a.SnapshotClient)

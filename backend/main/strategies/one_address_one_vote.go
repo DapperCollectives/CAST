@@ -4,12 +4,15 @@ import (
 	"fmt"
 
 	"github.com/DapperCollectives/CAST/backend/main/models"
+	"github.com/DapperCollectives/CAST/backend/main/shared"
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/jackc/pgx/v4"
 	"github.com/rs/zerolog/log"
 )
 
-type OneAddressOneVote struct{}
+type OneAddressOneVote struct {
+	FlowAdapter *shared.FlowAdapter
+}
 
 func (s *OneAddressOneVote) FetchBalance(db *s.Database, b *models.Balance, sc *s.SnapshotClient) (*models.Balance, error) {
 
@@ -47,7 +50,10 @@ func (s *OneAddressOneVote) TallyVotes(votes []*models.VoteWithBalance, proposal
 	return r, nil
 }
 
-func (s *OneAddressOneVote) GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error) {
+func (s *OneAddressOneVote) GetVoteWeightForBalance(
+	vote *models.VoteWithBalance,
+	proposal *models.Proposal,
+) (float64, error) {
 	var weight float64
 	var ERROR error = fmt.Errorf("no address found")
 
@@ -59,7 +65,10 @@ func (s *OneAddressOneVote) GetVoteWeightForBalance(vote *models.VoteWithBalance
 	return weight, nil
 }
 
-func (s *OneAddressOneVote) GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error) {
+func (s *OneAddressOneVote) GetVotes(
+	votes []*models.VoteWithBalance,
+	proposal *models.Proposal,
+) ([]*models.VoteWithBalance, error) {
 
 	for _, vote := range votes {
 		weight, err := s.GetVoteWeightForBalance(vote, proposal)

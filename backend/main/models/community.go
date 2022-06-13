@@ -123,6 +123,12 @@ func GetCommunities(db *s.Database, start, count int) ([]*Community, int, error)
 	return communities, totalRecords, nil
 }
 
+func (c *Community) GetCommunityByProposalId(db *s.Database, proposalId int) error {
+	return pgxscan.Get(db.Context, db.Conn, c,
+		`SELECT * from communities WHERE id = (SELECT community_id FROM proposals WHERE id = $1)`,
+		proposalId)
+}
+
 func GetCommunitiesForHomePage(db *s.Database, start, count int) ([]*Community, int, error) {
 	var communities []*Community
 
