@@ -24,12 +24,14 @@ var (
 	AdminAddr   = "0xf8d6e0586b0a20c7"
 	UserOneAddr = "0x01cf0e2f2f715450"
 
-	nameUpdated = "TestDAO - updated"
-	category    = "dao"
-	logo        = "toad.jpeg"
-	logoUpdated = "0xf8d6e0586b0a20c7"
-	slug        = "test-slug"
-	body        = "<html>test body</html>"
+	nameUpdated    = "TestDAO - updated"
+	category       = "dao"
+	logo           = "toad.jpeg"
+	logoUpdated    = "0xf8d6e0586b0a20c7"
+	slug           = "test-slug"
+	body           = "<html>test body</html>"
+	onlyAuthors    = true
+	notOnlyAuthors = false
 
 	banner             = "banner"
 	website            = "website"
@@ -48,36 +50,39 @@ var (
 	exampleNFTAddr = "0xf8d6e0586b0a20c7"
 
 	DefaultCommunity = models.Community{
-		Name:         "TestDAO",
-		Category:     &category,
-		Body:         &body,
-		Creator_addr: "<replace>",
-		Logo:         &logo,
-		Slug:         &slug,
+		Name:                   "TestDAO",
+		Category:               &category,
+		Body:                   &body,
+		Creator_addr:           "<replace>",
+		Logo:                   &logo,
+		Slug:                   &slug,
+		Only_authors_to_submit: &onlyAuthors,
 	}
 
 	CommunityWithThreshold = models.Community{
-		Name:          "With Threshold",
-		Category:      &category,
-		Body:          &body,
-		Creator_addr:  "<replace>",
-		Logo:          &logo,
-		Slug:          &slug,
-		Contract_name: &flowContractName,
-		Contract_addr: &flowContractAddr,
-		Public_path:   &flowPublicPath,
-		Threshold:     &threshold,
+		Name:                   "With Threshold",
+		Category:               &category,
+		Body:                   &body,
+		Creator_addr:           "<replace>",
+		Logo:                   &logo,
+		Slug:                   &slug,
+		Contract_name:          &flowContractName,
+		Contract_addr:          &flowContractAddr,
+		Public_path:            &flowPublicPath,
+		Threshold:              &threshold,
+		Only_authors_to_submit: &notOnlyAuthors,
 	}
 
 	CommunityWithNFT = models.Community{
-		Name:          "With NFT Contract",
-		Category:      &category,
-		Body:          &body,
-		Creator_addr:  "<replace>",
-		Logo:          &logo,
-		Slug:          &slug,
-		Contract_name: &exampleNFTName,
-		Contract_addr: &exampleNFTAddr,
+		Name:                   "With NFT Contract",
+		Category:               &category,
+		Body:                   &body,
+		Creator_addr:           "<replace>",
+		Logo:                   &logo,
+		Slug:                   &slug,
+		Contract_name:          &exampleNFTName,
+		Contract_addr:          &exampleNFTAddr,
+		Only_authors_to_submit: &notOnlyAuthors,
 	}
 
 	UpdatedCommunity = models.Community{

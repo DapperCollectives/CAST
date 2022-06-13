@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/brudfyi/flow-voting-tool/main/models"
-	s "github.com/brudfyi/flow-voting-tool/main/shared"
+	"github.com/DapperCollectives/CAST/backend/main/models"
+	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/jackc/pgx/v4"
 	"github.com/rs/zerolog/log"
 )
@@ -64,7 +64,10 @@ func (s *BalanceOfNfts) GetVoteWeightForBalance(vote *models.VoteWithBalance, pr
 	return weight, nil
 }
 
-func (s *BalanceOfNfts) GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error) {
+func (s *BalanceOfNfts) GetVotes(
+	votes []*models.VoteWithBalance,
+	proposal *models.Proposal,
+) ([]*models.VoteWithBalance, error) {
 
 	for _, vote := range votes {
 		weight, err := s.GetVoteWeightForBalance(vote, proposal)

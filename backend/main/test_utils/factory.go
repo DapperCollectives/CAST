@@ -175,7 +175,7 @@ func (otu *OverflowTestUtils) AddCommunitiesWithNFTContract(count int, signer st
 	}
 	for i := 0; i < count; i++ {
 		community = otu.GenerateCommunityWithNFTContractStruct(signer)
-		if err := community.CreateCommunityWithContract(otu.A.DB); err != nil {
+		if err := community.CreateCommunity(otu.A.DB); err != nil {
 			log.Error().Err(err).Msg("error in otu.AddCommunities")
 		}
 

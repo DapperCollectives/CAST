@@ -10,7 +10,6 @@ import (
 	"github.com/DapperCollectives/CAST/backend/main/shared"
 	utils "github.com/DapperCollectives/CAST/backend/main/test_utils"
 	"github.com/bjartek/overflow/overflow"
-
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
 )
@@ -53,7 +52,7 @@ func TestMain(m *testing.M) {
 		os.Getenv("IPFS_SECRET"),
 	)
 
-	adapter := shared.NewFlowClient()
+	adapter := shared.NewFlowClient(os.Getenv("FLOW_ENV"))
 
 	// Setup overflow test utils struct
 	otu = &utils.OverflowTestUtils{T: nil, A: &A, O: O, Adapter: adapter}

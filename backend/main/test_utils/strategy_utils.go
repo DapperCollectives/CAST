@@ -20,7 +20,10 @@ type VoteWithBalance struct {
 	NFTs []models.NFT
 }
 
-func (otu *OverflowTestUtils) TallyResultsForTokenWeightedDefault(proposalId int, votes *[]VoteWithBalance) *models.ProposalResults {
+func (otu *OverflowTestUtils) TallyResultsForTokenWeightedDefault(
+	proposalId int,
+	votes *[]VoteWithBalance,
+) *models.ProposalResults {
 	r := models.ProposalResults{Proposal_id: proposalId}
 
 	r.Results_float = map[string]float64{}
@@ -34,7 +37,10 @@ func (otu *OverflowTestUtils) TallyResultsForTokenWeightedDefault(proposalId int
 	return &r
 }
 
-func (otu *OverflowTestUtils) TallyResultsForStakedTokenWeightedDefault(proposalId int, votes *[]VoteWithBalance) *models.ProposalResults {
+func (otu *OverflowTestUtils) TallyResultsForStakedTokenWeightedDefault(
+	proposalId int,
+	votes *[]VoteWithBalance,
+) *models.ProposalResults {
 	r := models.ProposalResults{Proposal_id: proposalId}
 
 	r.Results_float = map[string]float64{}
@@ -48,7 +54,10 @@ func (otu *OverflowTestUtils) TallyResultsForStakedTokenWeightedDefault(proposal
 	return &r
 }
 
-func (otu *OverflowTestUtils) TallyResultsForOneAddressOneVote(proposalId int, votes *[]VoteWithBalance) *models.ProposalResults {
+func (otu *OverflowTestUtils) TallyResultsForOneAddressOneVote(
+	proposalId int,
+	votes *[]VoteWithBalance,
+) *models.ProposalResults {
 	r := models.ProposalResults{Proposal_id: proposalId}
 
 	r.Results = map[string]int{}
@@ -62,7 +71,10 @@ func (otu *OverflowTestUtils) TallyResultsForOneAddressOneVote(proposalId int, v
 	return &r
 }
 
-func (otu *OverflowTestUtils) TallyResultsForBalanceOfNfts(proposalId int, votes *[]VoteWithBalance) *models.ProposalResults {
+func (otu *OverflowTestUtils) TallyResultsForBalanceOfNfts(
+	proposalId int,
+	votes *[]VoteWithBalance,
+) *models.ProposalResults {
 	r := models.ProposalResults{Proposal_id: proposalId}
 
 	r.Results_float = map[string]float64{}
@@ -103,7 +115,11 @@ func (otu *OverflowTestUtils) GenerateListOfVotes(proposalId int, count int) *[]
 	return &votes
 }
 
-func (otu *OverflowTestUtils) GenerateListOfVotesWithNFTs(proposalId int, count int, contract *shared.Contract) (*[]VoteWithBalance, error) {
+func (otu *OverflowTestUtils) GenerateListOfVotesWithNFTs(
+	proposalId int,
+	count int,
+	contract *shared.Contract,
+) (*[]VoteWithBalance, error) {
 	var votes []VoteWithBalance
 	choices := []string{"a", "b"}
 	for i := 0; i < count; i++ {

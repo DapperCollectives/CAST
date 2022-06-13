@@ -36,7 +36,7 @@ export const CommunityUsersForm = ({
           <div className="is-flex flex-1">
             <WrapperResponsive
               tag="h5"
-              classNames="title is-6 mb-2"
+              classNames="title is-6 mb-2 is-flex"
               extraClassesMobile="mt-4"
             >
               {title}

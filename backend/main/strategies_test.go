@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"log"
 	"math"
 	"net/http"
 	"testing"
@@ -111,7 +110,7 @@ func TestBalanceOfNFTsStrategy(t *testing.T) {
 
 	votes, err := otu.GenerateListOfVotesWithNFTs(proposalId, 5, contract)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to generate list of votes")
+		t.Error(err)
 	}
 
 	otu.AddDummyVotesAndNFTs(votes)
