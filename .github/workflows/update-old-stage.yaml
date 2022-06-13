@@ -1,0 +1,27 @@
+name: UPDATE OLD STAGE
+
+on:
+  # Trigger the workflow on push or pull request merge
+  push:
+    branches:
+      - staging
+
+env:
+  TAG: ${{ github.sha }}
+  jenkins_user: ${{ secrets.JENKINS_USER }}
+  jenkins_token: ${{ secrets.JENKINS_TOKEN }}
+  jenkins_url: ${{ secrets.JENKINS_URL }}
+
+jobs:
+
+  get-last-commit:
+      name: UPDATE-OLD-STAGE
+      if: "!contains(github.event.head_commit.message, 'cancel action')"
+      runs-on: ubuntu-20.04
+      timeout-minutes: 1
+      steps:      
+      - name: Update OLD STAGE
+        shell: bash
+        run : |
+          tag_short=$(echo ${{ env.TAG }} | cut -c1-7)
+          curl -X POST https://${{ env.jenkins_user }}:${{ env.jenkins_token }}@${{ env.jenkins_url }}/job/UPDATE-OLD-STAGE/build --data-urlencode json='{"parameter": [{"name":"TAG", "value":"'$tag_short'"}]}'
