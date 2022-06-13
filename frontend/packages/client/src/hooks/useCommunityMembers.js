@@ -41,6 +41,8 @@ export default function useCommunityMembers({
     try {
       const response = await fetch(url);
       const members = await checkResponse(response);
+
+      // this needs to be replaced with real data from backend on votingStreak and score
       const membersMocked = members?.data.map((member) => ({
         ...member,
         // see how these two fields get implemented
@@ -64,6 +66,7 @@ export default function useCommunityMembers({
     try {
       const response = await fetch(url);
       const members = await checkResponse(response);
+      // this needs to be replaced with real data from backend on votingStreak and score
       const membersMocked = members?.data.map((member) => ({
         ...member,
         // see how these two fields get implemented
