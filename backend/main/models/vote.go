@@ -279,10 +279,16 @@ func GetUserNFTs(db *s.Database, vote *VoteWithBalance) ([]*NFT, error) {
 }
 
 func CreateUserNFTRecord(db *s.Database, v *VoteWithBalance) error {
-	_, err := db.Conn.Exec(db.Context,
-		`
-		INSERT INTO nfts(proposal_id, owner_addr, id)
-		VALUES($1, $2, $3)
-	`, uuid.New(), v.Addr, v.Proposal_id)
-	return err
+	for _, nft := range v.NFTs {
+		_, err := db.Conn.Exec(db.Context,
+			`
+		INSERT INTO nfts(uuid, proposal_id, owner_addr, id)
+		VALUES($1, $2, $3, $4)
+	`, uuid.New(), v.Proposal_id, v.Addr, nft.ID)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

@@ -7,29 +7,25 @@ import (
 	"github.com/DapperCollectives/CAST/backend/main/models"
 	"github.com/DapperCollectives/CAST/backend/main/shared"
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
-	"github.com/jackc/pgx/v4"
 	"github.com/rs/zerolog/log"
 )
 
 type BalanceOfNfts struct {
-	FlowAdapter *shared.FlowAdapter
+	shared.StrategyStruct
 }
 
-func (s *BalanceOfNfts) FetchBalance(db *s.Database, b *models.Balance, sc *s.SnapshotClient) (*models.Balance, error) {
-
-	//swap this function out for the following
-	// getVote SQL
-	// if no vote exists look up the balance with the script
-	// and write to DB
-
-	//create new vote with balance
+func (b *BalanceOfNfts) FetchBalance(
+	db *s.Database,
+	balance *models.Balance,
+	sc *s.SnapshotClient,
+) (*models.Balance, error) {
 
 	vb := &models.VoteWithBalance{
 		NFTs: []*models.NFT{},
 	}
 
 	var c models.Community
-	if err := c.GetCommunityByProposalId(db, b.Proposal_id); err != nil {
+	if err := c.GetCommunityByProposalId(db, balance.Proposal_id); err != nil {
 		return nil, err
 	}
 
@@ -39,41 +35,32 @@ func (s *BalanceOfNfts) FetchBalance(db *s.Database, b *models.Balance, sc *s.Sn
 		return nil, err
 	}
 
-	// get the communityID
 	var contract = &shared.Contract{
 		Name: c.Contract_name,
 		Addr: c.Contract_addr,
 	}
 
-	fmt.Printf("contract name: %v\n", contract.Name)
-
 	if len(nftIds) == 0 {
-		//nftIds := shared.GetNFTIds(b.Addr, contract)
-		// add create function
-	}
-
-	if err := b.GetBalanceByAddressAndBlockHeight(db); err != nil && err.Error() != pgx.ErrNoRows.Error() {
-		log.Error().Err(err).Msg("error querying address b at blockheight")
-		return nil, err
-	}
-
-	if b.ID == "" {
-		err := b.FetchAddressBalanceAtBlockHeight(sc, b.Addr, b.BlockHeight)
+		nftIds, err := b.FlowAdapter.GetNFTIds(balance.Addr, contract)
 		if err != nil {
-			log.Error().Err(err).Msg("error fetching address b at blockheight.")
 			return nil, err
 		}
 
-		if err = b.CreateBalance(db); err != nil {
-			log.Error().Err(err).Msg("error saving b to DB")
-			return nil, err
+		for _, nftId := range nftIds {
+			nft := &models.NFT{
+				ID: nftId.(uint64),
+			}
+			vb.NFTs = append(vb.NFTs, nft)
 		}
+		err = models.CreateUserNFTRecord(db, vb)
 	}
 
-	return b, nil
+	balance.NFTCount = len(vb.NFTs)
+
+	return balance, nil
 }
 
-func (s *BalanceOfNfts) TallyVotes(votes []*models.VoteWithBalance, proposalId int) (models.ProposalResults, error) {
+func (b *BalanceOfNfts) TallyVotes(votes []*models.VoteWithBalance, proposalId int) (models.ProposalResults, error) {
 	var r models.ProposalResults
 	r.Results_float = map[string]float64{}
 	r.Results_float["a"] = 0
@@ -90,7 +77,7 @@ func (s *BalanceOfNfts) TallyVotes(votes []*models.VoteWithBalance, proposalId i
 	return r, nil
 }
 
-func (s *BalanceOfNfts) GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error) {
+func (b *BalanceOfNfts) GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error) {
 	var weight float64
 	var ERROR error = fmt.Errorf("this address has no nfts")
 
@@ -116,4 +103,8 @@ func (s *BalanceOfNfts) GetVotes(
 	}
 
 	return votes, nil
+}
+
+func (b *BalanceOfNfts) InitFlowAdapter(f *shared.FlowAdapter) {
+	b.FlowAdapter = f
 }

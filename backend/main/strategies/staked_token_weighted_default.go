@@ -12,7 +12,7 @@ import (
 )
 
 type StakedTokenWeightedDefault struct {
-	FlowAdapter *shared.FlowAdapter
+	shared.StrategyStruct
 }
 
 func (s *StakedTokenWeightedDefault) FetchBalance(
@@ -101,4 +101,8 @@ func (s *StakedTokenWeightedDefault) GetVotes(
 	}
 
 	return votes, nil
+}
+
+func (s *StakedTokenWeightedDefault) InitFlowAdapter(f *shared.FlowAdapter) {
+	s.FlowAdapter = f
 }

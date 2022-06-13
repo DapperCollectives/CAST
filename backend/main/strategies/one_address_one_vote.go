@@ -11,7 +11,7 @@ import (
 )
 
 type OneAddressOneVote struct {
-	FlowAdapter *shared.FlowAdapter
+	shared.StrategyStruct
 }
 
 func (s *OneAddressOneVote) FetchBalance(db *s.Database, b *models.Balance, sc *s.SnapshotClient) (*models.Balance, error) {
@@ -79,4 +79,8 @@ func (s *OneAddressOneVote) GetVotes(
 	}
 
 	return votes, nil
+}
+
+func (s *OneAddressOneVote) InitFlowAdapter(f *shared.FlowAdapter) {
+	s.FlowAdapter = f
 }

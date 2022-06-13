@@ -67,9 +67,9 @@ type Strategy interface {
 	TallyVotes(votes []*models.VoteWithBalance, proposalId int) (models.ProposalResults, error)
 	GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error)
 	GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error)
+	InitFlowAdapter(f *shared.FlowAdapter)
 }
 
-//@TODO update structs to all implement a Strategy Struct
 var strategyMap = map[string]Strategy{
 	"token-weighted-default":        &strategies.TokenWeightedDefault{},
 	"staked-token-weighted-default": &strategies.StakedTokenWeightedDefault{},
@@ -572,13 +572,13 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.FlowAdapter = a.FlowAdapter
-
 	emptyBalance := &models.Balance{
 		Addr:        v.Addr,
 		BlockHeight: p.Block_height,
 		Proposal_id: p.ID,
 	}
+
+	s.InitFlowAdapter(a.FlowAdapter)
 
 	balance, err := s.FetchBalance(a.DB, emptyBalance, a.SnapshotClient)
 	if err != nil {
@@ -619,6 +619,8 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 		dummyCid := "0000000000"
 		v.Cid = &dummyCid
 	}
+
+	fmt.Printf("vote: %+v\n", v)
 
 	if err := v.CreateVote(a.DB); err != nil {
 		log.Error().Err(err).Msg("Couldnt create vote")

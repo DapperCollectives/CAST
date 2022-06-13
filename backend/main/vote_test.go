@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"testing"
@@ -120,6 +121,7 @@ func TestCreateNFTVote(t *testing.T) {
 
 		response := otu.CreateVoteAPI(proposalId, votePayload)
 		CheckResponseCode(t, http.StatusCreated, response.Code)
+		fmt.Printf("%+v\n", response.Body)
 
 		response = otu.GetVoteForProposalByAccountNameAPI(proposalId, "user1")
 		CheckResponseCode(t, http.StatusOK, response.Code)
