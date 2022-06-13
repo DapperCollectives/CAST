@@ -524,6 +524,8 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Printf("proposal: %+v\n", p)
+
 	// check that proposal is live
 	if !p.IsLive() {
 		err = errors.New("user cannot vote on inactive proposal")

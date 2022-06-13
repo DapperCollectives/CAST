@@ -14,6 +14,27 @@ type BalanceOfNfts struct{}
 
 func (s *BalanceOfNfts) FetchBalance(db *s.Database, b *models.Balance, sc *s.SnapshotClient) (*models.Balance, error) {
 
+	//swap this function out for the following
+	// getVote SQL
+	// if no vote exists look up the balance with the script
+	// and write to DB
+
+	//create new vote with balance
+
+	vb := &models.VoteWithBalance{
+		NFTs: []*models.NFT{},
+	}
+
+	nftIds, err := models.GetUserNFTs(db, vb)
+	if err != nil {
+		log.Error().Err(err).Msg("error getting user nfts")
+		return nil, err
+	}
+
+	if len(nftIds) == 0 {
+		// add create function
+	}
+
 	if err := b.GetBalanceByAddressAndBlockHeight(db); err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		log.Error().Err(err).Msg("error querying address b at blockheight")
 		return nil, err
@@ -54,13 +75,13 @@ func (s *BalanceOfNfts) TallyVotes(votes []*models.VoteWithBalance, proposalId i
 
 func (s *BalanceOfNfts) GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error) {
 	var weight float64
-	var ERROR error = fmt.Errorf("no address found")
+	var ERROR error = fmt.Errorf("this address has no nfts")
 
-	if vote.Addr == "" {
+	if len(vote.NFTs) == 0 {
 		return 0.00, ERROR
 	}
-	weight = 1.00
-
+	nftCount := len(vote.NFTs)
+	weight = float64(nftCount) * math.Pow(10, -8)
 	return weight, nil
 }
 

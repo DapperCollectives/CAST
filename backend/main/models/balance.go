@@ -18,6 +18,7 @@ type Balance struct {
 	ScriptResult            string    `json:"scriptResult"`
 	Stakes                  []string  `json:"stakes"`
 	BlockHeight             uint64    `json:"blockHeight"`
+	Proposal_id             string    `json:"proposal_id"`
 	CreatedAt               time.Time `json:"createdAt"`
 }
 

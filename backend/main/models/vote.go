@@ -9,14 +9,15 @@ import (
 
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/georgysavva/scany/pgxscan"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
 )
 
 type Vote struct {
 	ID                   int                     `json:"id,omitempty"`
 	Proposal_id          int                     `json:"proposalId"`
-	Addr                 string                  `json:"addr" validate:"required"`
-	Choice               string                  `json:"choice" validate:"required"`
+	Addr                 string                  `json:"addr"                validate:"required"`
+	Choice               string                  `json:"choice"              validate:"required"`
 	Composite_signatures *[]s.CompositeSignature `json:"compositeSignatures" validate:"required"`
 	Created_at           time.Time               `json:"createdAt,omitempty"`
 	Cid                  *string                 `json:"cid"`
@@ -53,7 +54,12 @@ const (
 ///////////
 
 // TODO: make the proposalIds optional
-func GetVotesForAddress(db *s.Database, start, count int, address string, proposalIds *[]int) ([]*VoteWithBalance, int, error) {
+func GetVotesForAddress(
+	db *s.Database,
+	start, count int,
+	address string,
+	proposalIds *[]int,
+) ([]*VoteWithBalance, int, error) {
 	var votes []*VoteWithBalance
 	var err error
 	sql := `select v.*, 
@@ -113,7 +119,7 @@ func GetAllVotesForProposal(db *s.Database, proposalId int, strategy string) ([]
 	}
 
 	if strategy == "balance-of-nfts" {
-		votesWithNFTs, err := getUserNFTs(db, votes)
+		votesWithNFTs, err := getUsersNFTs(db, votes)
 		if err != nil {
 			return nil, err
 		}
@@ -246,23 +252,37 @@ func (v *Vote) ValidateChoice(proposal Proposal) error {
 	return nil
 }
 
-func getUserNFTs(db *s.Database, votes []*VoteWithBalance) ([]*VoteWithBalance, error) {
-
-	//scan the NFTs into the vote struct
+func getUsersNFTs(db *s.Database, votes []*VoteWithBalance) ([]*VoteWithBalance, error) {
 	for _, vote := range votes {
-		var voteNFTs []*NFT
-		sql := `select id from nfts
-			where proposal_id = $1 and owner_addr = $2
-			`
-		err := pgxscan.Select(db.Context, db.Conn, &voteNFTs, sql, vote.Proposal_id, vote.Addr)
-		if err != nil && err.Error() != pgx.ErrNoRows.Error() {
+		nftIds, err := GetUserNFTs(db, vote)
+		if err != nil {
 			return nil, err
-		} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
-			return []*VoteWithBalance{}, nil
 		}
-
-		vote.NFTs = voteNFTs
+		vote.NFTs = nftIds
 	}
 
 	return votes, nil
+}
+
+func GetUserNFTs(db *s.Database, vote *VoteWithBalance) ([]*NFT, error) {
+	var nftIds []*NFT
+	sql := `select id from nfts
+	where proposal_id = $1 and owner_addr = $2
+	`
+	err := pgxscan.Select(db.Context, db.Conn, &nftIds, sql, vote.Proposal_id, vote.Addr)
+	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
+		return nil, err
+	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
+		return []*NFT{}, nil
+	}
+	return nftIds, nil
+}
+
+func CreateUserNFTRecord(db *s.Database, v *VoteWithBalance) error {
+	_, err := db.Conn.Exec(db.Context,
+		`
+		INSERT INTO nfts(proposal_id, owner_addr, id)
+		VALUES($1, $2, $3)
+	`, uuid.New(), v.Addr, v.Proposal_id)
+	return err
 }

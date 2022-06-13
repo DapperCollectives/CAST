@@ -100,7 +100,12 @@ func (fa *FlowAdapter) GetCurrentBlockHeight() (int, error) {
 	return int(block.Height), nil
 }
 
-func (fa *FlowAdapter) UserSignatureValidate(address string, message string, sigs *[]CompositeSignature, transactionId string) error {
+func (fa *FlowAdapter) UserSignatureValidate(
+	address string,
+	message string,
+	sigs *[]CompositeSignature,
+	transactionId string,
+) error {
 	if transactionId != "" {
 		// need transaction validation
 		return nil
@@ -157,7 +162,14 @@ func (fa *FlowAdapter) UserSignatureValidate(address string, message string, sig
 	return nil
 }
 
-func (fa *FlowAdapter) UserTransactionValidate(address string, message string, sigs *[]CompositeSignature, transactionId string, txOptaddrs []string, choices []Choice) error {
+func (fa *FlowAdapter) UserTransactionValidate(
+	address string,
+	message string,
+	sigs *[]CompositeSignature,
+	transactionId string,
+	txOptaddrs []string,
+	choices []Choice,
+) error {
 	if transactionId == "" {
 		// need user signature validation
 		return nil
@@ -187,7 +199,9 @@ func (fa *FlowAdapter) UserTransactionValidate(address string, message string, s
 	}
 
 	if txBlockByID.Timestamp.Before(time.Now().Add(-15 * time.Minute)) {
-		log.Error().Err(err).Msgf("Tx timestamp too old, now: %s block: %s, blockId %s", time.Now(), txBlockByID.Timestamp, txBlockByID.ID)
+		log.Error().
+			Err(err).
+			Msgf("Tx timestamp too old, now: %s block: %s, blockId %s", time.Now(), txBlockByID.Timestamp, txBlockByID.ID)
 		return errors.New("voting transaction is invalid")
 	}
 
@@ -315,7 +329,11 @@ func replaceContractPlaceholders(code string, c *Contract, isFungible bool) []by
 	return []byte(code)
 }
 
-func WaitForSeal(ctx context.Context, c *client.Client, id flow.Identifier) (*flow.TransactionResult, *flow.Transaction, error) {
+func WaitForSeal(
+	ctx context.Context,
+	c *client.Client,
+	id flow.Identifier,
+) (*flow.TransactionResult, *flow.Transaction, error) {
 	result, err := c.GetTransactionResult(ctx, id)
 	if err != nil {
 		return nil, nil, err
