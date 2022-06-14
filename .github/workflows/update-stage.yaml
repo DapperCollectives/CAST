@@ -91,13 +91,13 @@ jobs:
       run: echo "::set-output name=time::$(date "+%T")"
 
     - name: Get short SHA
-      id: short
+      id: short-backend
       run: echo "::set-output name=sha7::$(echo ${GITHUB_SHA} | cut -c1-7)"
 
     - name: Install Kustomize and update tag
       env:
         TIME: ${{ steps.time.outputs.time }}
-        TAG: ${{ steps.short.outputs.sha7 }}
+        TAG: ${{ steps.short-backend.outputs.sha7 }}
       run: |
         curl -fL https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v4.5.5/kustomize_v4.5.5_linux_amd64.tar.gz| tar xz && \
         chmod +x kustomize
@@ -128,12 +128,12 @@ jobs:
         password: ${{ env.dockerhub_token }}
 
     - name: Get short SHA
-      id: short
+      id: short-frontend
       run: echo "::set-output name=sha7::$(echo ${GITHUB_SHA} | cut -c1-7)"
 
     - name: build and push frontend - stage -
       env:
-        TAG: ${{ steps.short.outputs.sha7 }}
+        TAG: ${{ steps.short-frontend.outputs.sha7 }}
       run: |
         cd frontend && sed -i 's/REPLACE_BACKEND/${{ env.backend_api }}/g' Dockerfile.stage 
         cd frontend && sed -i 's/REPLACE_TX/${{ env.tx_options }}/g' Dockerfile.stage
