@@ -221,7 +221,9 @@ export default function Community() {
               </div>
               <div className="column community-info is-justify-content-space-evenly">
                 <h2 className="title is-4 mb-2">
-                  <span className="is-size-5 has-text-weight-bold">{community.name}</span>
+                  <span className="is-size-5 has-text-weight-bold">
+                    {community.name}
+                  </span>
                 </h2>
                 <p>
                   <span className="community-numbers">
@@ -231,19 +233,19 @@ export default function Community() {
                 <div className="is-flex">
                   {admins
                     ? admins.slice(0, 5).map(({ addr: adminAddr }, idx) => (
-                      <div
-                        key={`${idx}`}
-                        className="blockies-wrapper is-relative has-background-white"
-                        style={{ right: `${idx * 12}px` }}
-                      >
-                        <Blockies
-                          seed={adminAddr}
-                          size={10}
-                          scale={4}
-                          className="blockies"
-                        />
-                      </div>
-                    ))
+                        <div
+                          key={`${idx}`}
+                          className="blockies-wrapper is-relative"
+                          style={{ right: `${idx * 12}px` }}
+                        >
+                          <Blockies
+                            seed={adminAddr}
+                            size={notMobile ? 10 : 6}
+                            scale={4}
+                            className="blockies blockies-border"
+                          />
+                        </div>
+                      ))
                     : null}
                 </div>
               </div>
@@ -274,8 +276,9 @@ export default function Community() {
                       />
                     </li>
                     <li
-                      className={`${activeTabMap["proposals"] ? "is-active" : ""
-                        }`}
+                      className={`${
+                        activeTabMap["proposals"] ? "is-active" : ""
+                      }`}
                     >
                       <Tablink
                         linkText="Proposals"
@@ -285,8 +288,9 @@ export default function Community() {
                       />
                     </li>
                     <li
-                      className={`${activeTabMap["members"] ? "is-active" : ""
-                        }`}
+                      className={`${
+                        activeTabMap["members"] ? "is-active" : ""
+                      }`}
                     >
                       <Tablink
                         linkText="Members"
@@ -336,7 +340,10 @@ export default function Community() {
                   />
                 )}
                 {activeTabMap["proposals"] && (
-                  <CommunityProposals communityId={community.id} admins={admins} />
+                  <CommunityProposals
+                    communityId={community.id}
+                    admins={admins}
+                  />
                 )}
                 {activeTabMap["members"] && (
                   <MembersLayout
