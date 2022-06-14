@@ -101,7 +101,7 @@ jobs:
       run: |
         curl -fL https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v4.5.5/kustomize_v4.5.5_linux_amd64.tar.gz| tar xz && \
         chmod +x kustomize
-        cd ./argo/voting-tool-stage-prod/frontend/environments/stage && kustomize edit set image bruddev/cast-stage:$TAG-be
+        cd ./argo/voting-tool-stage-prod/backend/environments/stage && kustomize edit set image bruddev/cast-stage:$TAG-be
         git config --global user.email "brunkins@brudfyi.com"
         git config --global user.name "Brunkins" 
         git commit -am "Added new backend value from GHA $TIME" && git push
@@ -135,8 +135,7 @@ jobs:
       env:
         TAG: ${{ steps.short-frontend.outputs.sha7 }}
       run: |
-        cd frontend && sed -i 's/REPLACE_BACKEND/${{ env.backend_api }}/g' Dockerfile.stage 
-        cd frontend && sed -i 's/REPLACE_TX/${{ env.tx_options }}/g' Dockerfile.stage
+        cd frontend && sed -i 's/REPLACE_BACKEND/${{ env.backend_api }}/g' Dockerfile.stage && sed -i 's/REPLACE_TX/${{ env.tx_options }}/g' Dockerfile.stage
         docker build -f Dockerfile.stage . -t bruddev/cast-stage:$TAG-fe
         docker push bruddev/cast-stage:$TAG-fe
 
