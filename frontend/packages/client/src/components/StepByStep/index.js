@@ -91,7 +91,7 @@ function StepByStep({
       );
     }
     if (stepLabel) {
-      stepClasses.push("mb-6");
+      stepClasses.push("mb-6 is-align-items-center");
     }
 
     const currentStepIconStyle = Object.values(
@@ -101,7 +101,7 @@ function StepByStep({
     if (!showPreStep && stepIdx === currentStep) {
       return (
         <div
-          className={`is-flex is-align-items-center ${stepClasses.join(" ")}`}
+          className={`is-flex ${stepClasses.join(" ")}`}
           key={stepIdx}
         >
           <div
