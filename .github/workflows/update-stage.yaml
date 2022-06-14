@@ -104,7 +104,7 @@ jobs:
         cd ./argo/voting-tool-stage-prod/frontend/environments/stage && kustomize edit set image bruddev/cast-stage:$TAG-be
         git config --global user.email "brunkins@brudfyi.com"
         git config --global user.name "Brunkins" 
-        git commit -am "Added new frontend value from GHA $TIME" && git push
+        git commit -am "Added new backend value from GHA $TIME" && git push
 
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ##  BUILD AND PUSH FRONTEND STAGE - ARGO TIME!
@@ -172,4 +172,4 @@ jobs:
         cd ./argo/voting-tool-stage-prod/frontend/environments/stage && kustomize edit set image bruddev/cast-stage:$TAG-fe
         git config --global user.email "brunkins@brudfyi.com"
         git config --global user.name "Brunkins" 
-        git commit -am "Added new backend value from GHA $TIME" && git push
+        git commit -am "Added new frontend value from GHA $TIME" && git push
