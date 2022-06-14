@@ -17,6 +17,8 @@ env:
   argo_repo: ${{ secrets.ARGO_REPO }}
   argo_ref: ${{ secrets.ARGO_REF }}
   argo_token: ${{ secrets.ARGO_TOKEN }}
+  backend_api: ${{ secrets.BACKEND_API }}
+  tx_options: ${{ secrets.TX_OPTIONS }}
 
 jobs:
 
@@ -43,10 +45,10 @@ jobs:
 ##  BUILD AND PUSH BACKEND STAGE
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  build-and-push:
-    name: Build and push
+  build-and-push-backend:
+    name: Build and push backend
     runs-on: ubuntu-20.04
-    if: "!contains(github.event.head_commit.message, 'cancel build')"
+    if: "!contains(github.event.head_commit.message, 'cancel build backend')"
     steps:
 
     - name: checkout
@@ -68,17 +70,51 @@ jobs:
       env:
         TAG: ${{ steps.short.outputs.sha7 }}
       run: |
-        cd backend && docker build . -t bruddev/cast-backend-stage:$TAG
-        docker push bruddev/cast-backend-stage:$TAG
+        cd backend && docker build . -t bruddev/cast-stage:$TAG-be
+        docker push bruddev/cast-stage:$TAG-fe
 
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-##  UPDATE STAGE ENVIRONMENT - ARGO TIME!
+##  BUILD AND PUSH FRONTEND STAGE
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  update-stage-via-argocd:
-    name: ArgoCD update Stage
+  build-and-push-frontend:
+    name: Build and push frontend
     runs-on: ubuntu-20.04
-    needs: build-and-push
+    if: "!contains(github.event.head_commit.message, 'cancel build frontend')"
+    steps:
+
+    - name: checkout
+      uses: actions/checkout@v3
+      with:
+        ref: staging
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ env.dockerhub_username }}
+        password: ${{ env.dockerhub_token }}
+
+    - name: Get short SHA
+      id: short
+      run: echo "::set-output name=sha7::$(echo ${GITHUB_SHA} | cut -c1-7)"
+
+    - name: build and push frontend - stage -
+      env:
+        TAG: ${{ steps.short.outputs.sha7 }}
+      run: |
+        cd frontend && sed 'sed -i 's/REPLACE_BACKEND/${{ env.backend_api }}/g' Dockerfile.stage'
+        sed 'sed -i 's/REPLACE_TX/${{ env.tx_options}}/g' Dockerfile.stage'
+        docker build -f Dockerfile.stage . -t bruddev/cast-stage:$TAG-fe
+        docker push bruddev/cast-stage:$TAG-fe
+
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##  UPDATE STAGE BACKEND ENVIRONMENT - ARGO TIME!
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  update-stage-via-argocd-backend:
+    name: ArgoCD update Stage backend
+    runs-on: ubuntu-20.04
+    needs: build-and-push-backend
     steps:
 
     - name: Clone ArgoManifests
@@ -108,9 +144,49 @@ jobs:
       run: |
         curl -fL https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v4.5.5/kustomize_v4.5.5_linux_amd64.tar.gz| tar xz && \
         chmod +x kustomize
-        cd ./argo/voting-tool-stage-prod/backend/environments/stage && kustomize edit set image bruddev/cast-backend-stage:$TAG
+        cd ./argo/voting-tool-stage-prod/backend/environments/stage && kustomize edit set image bruddev/cast-stage:$TAG-be
         git config --global user.email "brunkins@brudfyi.com"
         git config --global user.name "Brunkins" 
         git commit -am "Added New Value From GHA $TIME" && git push
 
-    
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##  UPDATE STAGE FRONTEND ENVIRONMENT - ARGO TIME!
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  update-stage-via-argocd-frontend:
+    name: ArgoCD update Stage frontend
+    runs-on: ubuntu-20.04
+    needs: build-and-push-frontend
+    steps:
+
+    - name: Clone ArgoManifests
+      run: |
+        mkdir -p ./argo
+
+    - name: Checkout ArgoManifests
+      uses: actions/checkout@v3
+      with:
+        repository: ${{ env.argo_repo }}
+        ref: ${{ env.argo_ref }}
+        token: ${{ env.argo_token }}
+        path: ./argo
+
+    - name: time
+      id: time
+      run: echo "::set-output name=time::$(date "+%T")"
+
+    - name: Get short SHA
+      id: short
+      run: echo "::set-output name=sha7::$(echo ${GITHUB_SHA} | cut -c1-7)"
+
+    - name: Install Kustomize and update tag
+      env:
+        TIME: ${{ steps.time.outputs.time }}
+        TAG: ${{ steps.short.outputs.sha7 }}
+      run: |
+        curl -fL https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v4.5.5/kustomize_v4.5.5_linux_amd64.tar.gz| tar xz && \
+        chmod +x kustomize
+        cd ./argo/voting-tool-stage-prod/frontend/environments/stage && kustomize edit set image bruddev/cast-stage:$TAG-fe
+        git config --global user.email "brunkins@brudfyi.com"
+        git config --global user.name "Brunkins" 
+        git commit -am "Added New Value From GHA $TIME" && git push
