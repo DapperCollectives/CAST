@@ -67,7 +67,7 @@ type Strategy interface {
 	TallyVotes(votes []*models.VoteWithBalance, proposalId int) (models.ProposalResults, error)
 	GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error)
 	GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error)
-	InitFlowAdapter(f *shared.FlowAdapter)
+	InitStrategy(f *shared.FlowAdapter, db *shared.Database)
 }
 
 var strategyMap = map[string]Strategy{
@@ -339,7 +339,7 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//get the proposal by Id
+	//get the proposal
 	proposal := models.Proposal{ID: proposalId}
 	if err := proposal.GetProposalById(a.DB); err != nil {
 		switch err.Error() {
@@ -356,6 +356,8 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, "Invalid Strategy")
 		return
 	}
+
+	s.InitStrategy(a.FlowAdapter, a.DB)
 
 	votesWithWeights, err := s.GetVotes(votes, &proposal)
 	if err != nil {
@@ -578,7 +580,7 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 		Proposal_id: p.ID,
 	}
 
-	s.InitFlowAdapter(a.FlowAdapter)
+	s.InitStrategy(a.FlowAdapter, a.DB)
 
 	balance, err := s.FetchBalance(a.DB, emptyBalance, a.SnapshotClient)
 	if err != nil {
@@ -619,8 +621,6 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 		dummyCid := "0000000000"
 		v.Cid = &dummyCid
 	}
-
-	fmt.Printf("vote: %+v\n", v)
 
 	if err := v.CreateVote(a.DB); err != nil {
 		log.Error().Err(err).Msg("Couldnt create vote")

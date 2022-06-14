@@ -53,7 +53,6 @@ const (
 // Votes //
 ///////////
 
-// TODO: make the proposalIds optional
 func GetVotesForAddress(
 	db *s.Database,
 	start, count int,
@@ -78,6 +77,7 @@ func GetVotesForAddress(
 	} else {
 		sql = sql + "LIMIT $1 OFFSET $2 "
 		err = pgxscan.Select(db.Context, db.Conn, &votes,
+
 			sql, count, start, address)
 	}
 
@@ -123,7 +123,6 @@ func GetAllVotesForProposal(db *s.Database, proposalId int, strategy string) ([]
 		if err != nil {
 			return nil, err
 		}
-
 		return votesWithNFTs, nil
 	}
 

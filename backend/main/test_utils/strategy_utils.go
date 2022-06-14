@@ -140,6 +140,12 @@ func (otu *OverflowTestUtils) GenerateListOfVotesWithNFTs(
 		}
 
 		vote := otu.CreateNFTVote(v, nftIds, contract)
+
+		balance := 100000000 * (i + 1)
+		vote.Primary_account_balance = uint64(balance)
+		vote.Staking_balance = uint64(balance * 5)
+		vote.Block_height = uint64(0)
+
 		votes = append(votes, vote)
 	}
 

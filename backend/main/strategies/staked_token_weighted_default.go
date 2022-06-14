@@ -103,6 +103,7 @@ func (s *StakedTokenWeightedDefault) GetVotes(
 	return votes, nil
 }
 
-func (s *StakedTokenWeightedDefault) InitFlowAdapter(f *shared.FlowAdapter) {
+func (s *StakedTokenWeightedDefault) InitStrategy(f *shared.FlowAdapter, db *shared.Database) {
 	s.FlowAdapter = f
+	s.DB = db
 }

@@ -20,6 +20,7 @@ type Database struct {
 
 type StrategyStruct struct {
 	FlowAdapter *FlowAdapter
+	DB          *Database
 }
 
 type Allowlist struct {

@@ -81,11 +81,27 @@ func (b *BalanceOfNfts) GetVoteWeightForBalance(vote *models.VoteWithBalance, pr
 	var weight float64
 	var ERROR error = fmt.Errorf("this address has no nfts")
 
-	if len(vote.NFTs) == 0 {
+	// get the nfts for this address
+	var c models.Community
+	if err := c.GetCommunityByProposalId(b.DB, proposal.ID); err != nil {
+		return 0, err
+	}
+
+	var contract = &shared.Contract{
+		Name: c.Contract_name,
+		Addr: c.Contract_addr,
+	}
+
+	nftIds, err := b.FlowAdapter.GetNFTIds(vote.Addr, contract)
+	if err != nil {
+		return 0, err
+	}
+
+	if len(nftIds) == 0 {
 		return 0.00, ERROR
 	}
-	nftCount := len(vote.NFTs)
-	weight = float64(nftCount) * math.Pow(10, -8)
+	nftCount := len(nftIds)
+	weight = float64(nftCount)
 	return weight, nil
 }
 
@@ -105,6 +121,7 @@ func (s *BalanceOfNfts) GetVotes(
 	return votes, nil
 }
 
-func (b *BalanceOfNfts) InitFlowAdapter(f *shared.FlowAdapter) {
+func (b *BalanceOfNfts) InitStrategy(f *shared.FlowAdapter, db *shared.Database) {
 	b.FlowAdapter = f
+	b.DB = db
 }

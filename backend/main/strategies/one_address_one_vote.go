@@ -81,6 +81,7 @@ func (s *OneAddressOneVote) GetVotes(
 	return votes, nil
 }
 
-func (s *OneAddressOneVote) InitFlowAdapter(f *shared.FlowAdapter) {
+func (s *OneAddressOneVote) InitStrategy(f *shared.FlowAdapter, db *shared.Database) {
 	s.FlowAdapter = f
+	s.DB = db
 }

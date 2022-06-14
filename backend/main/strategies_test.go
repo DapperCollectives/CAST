@@ -131,7 +131,6 @@ func TestBalanceOfNFTsStrategy(t *testing.T) {
 
 	t.Run("Test Fetching Votes for Proposal", func(t *testing.T) {
 		response := otu.GetVotesForProposalAPI(proposalId)
-
 		CheckResponseCode(t, http.StatusOK, response.Code)
 
 		var body utils.PaginatedResponseWithVotes

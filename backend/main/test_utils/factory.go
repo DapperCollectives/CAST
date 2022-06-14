@@ -212,6 +212,7 @@ func (otu *OverflowTestUtils) AddProposalsForStrategy(cId int, strategy string, 
 	for i := 0; i < count; i++ {
 		proposal := otu.GenerateProposalStruct("account", cId)
 		proposal.Strategy = &strategy
+		proposal.Start_time = time.Now().AddDate(0, -1, 0)
 		if err := proposal.CreateProposal(otu.A.DB); err != nil {
 			fmt.Printf("error in otu.AddProposals")
 			fmt.Printf("err: %v\n", err.Error())
