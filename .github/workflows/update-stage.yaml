@@ -16,7 +16,7 @@ env:
   argo_repo: ${{ secrets.ARGO_REPO }}
   argo_ref: ${{ secrets.ARGO_REF }}
   argo_token: ${{ secrets.ARGO_TOKEN }}
-  backend_api: ${{ secrets.BACKEND_API }}
+  backend_api: ${{ secrets.BACKEND_API }} #TESTING
   tx_options: ${{ secrets.TX_OPTIONS }}
 
 jobs:
