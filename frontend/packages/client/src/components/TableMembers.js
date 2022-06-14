@@ -3,7 +3,7 @@ import Loader from "./Loader";
 import Blockies from "react-blockies";
 import FadeIn from "../components/FadeIn";
 import classnames from "classnames";
-import WrapperResponsive from "./WrapperResponsive";
+// import WrapperResponsive from "./WrapperResponsive";
 
 const Row = ({
   index,
