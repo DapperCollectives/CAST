@@ -198,6 +198,7 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/users/{addr:0x[a-zA-Z0-9]{16}}/communities", a.handleGetUserCommunities).Methods("GET")
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users", a.handleCreateCommunityUser).Methods("POST", "OPTIONS")
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users", a.handleGetCommunityUsers).Methods("GET")
+	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users/type/{userType:[a-zA-Z]+}", a.handleGetCommunityUsersByType).Methods("GET")
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users/{addr:0x[a-zA-Z0-9]{16}}/{userType:[a-zA-Z]+}", a.handleRemoveUserRole).Methods("DELETE", "OPTIONS")
 	// Utilities
 	a.Router.HandleFunc("/accounts/admin", a.getAdminList).Methods("GET")
@@ -1527,7 +1528,6 @@ func (a *App) handleGetCommunityUsers(w http.ResponseWriter, r *http.Request) {
 
 	count, _ := strconv.Atoi(r.FormValue("count"))
 	start, _ := strconv.Atoi(r.FormValue("start"))
-	userType := r.FormValue("userType")
 	if count > 100 || count < 1 {
 		count = 100
 	}
@@ -1535,26 +1535,49 @@ func (a *App) handleGetCommunityUsers(w http.ResponseWriter, r *http.Request) {
 		start = 0
 	}
 
-	// if userType param is not passed, fetch all, if it is passed fetch by type
-	if userType == "" {
-		users, totalRecords, err := models.GetUsersForCommunity(a.DB, communityId, start, count)
-		if err != nil {
-			respondWithError(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-
-		response := shared.GetPaginatedResponseWithPayload(users, start, count, totalRecords)
-		respondWithJSON(w, http.StatusOK, response)
-	} else {
-		users, totalRecords, err := models.GetUsersForCommunityByType(a.DB, communityId, start, count, userType)
-		if err != nil {
-			respondWithError(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-
-		response := shared.GetPaginatedResponseWithPayload(users, start, count, totalRecords)
-		respondWithJSON(w, http.StatusOK, response)
+	users, totalRecords, err := models.GetUsersForCommunity(a.DB, communityId, start, count)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
 	}
+
+	response := shared.GetPaginatedResponseWithPayload(users, start, count, totalRecords)
+	respondWithJSON(w, http.StatusOK, response)
+
+}
+
+func (a *App) handleGetCommunityUsersByType(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	communityId, err := strconv.Atoi(vars["communityId"])
+
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid Community ID")
+		return
+	}
+
+	userType := vars["userType"]
+	if !models.EnsureValidRole(userType) {
+		respondWithError(w, http.StatusBadRequest, "Invalid userType")
+	}
+
+	count, _ := strconv.Atoi(r.FormValue("count"))
+	start, _ := strconv.Atoi(r.FormValue("start"))
+	if count > 100 || count < 1 {
+		count = 100
+	}
+	if start < 0 {
+		start = 0
+	}
+
+	users, totalRecords, err := models.GetUsersForCommunityByType(a.DB, communityId, start, count, userType)
+	fmt.Println(err)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response := shared.GetPaginatedResponseWithPayload(users, start, count, totalRecords)
+	respondWithJSON(w, http.StatusOK, response)
 }
 
 func (a *App) handleGetUserCommunities(w http.ResponseWriter, r *http.Request) {
