@@ -135,9 +135,8 @@ jobs:
         TAG: ${{ steps.short-frontend.outputs.sha7 }}
         BACKEND: ${{ env.backend_api }}
         TX: ${{ env.tx_options }}
-      run: |
-        cd frontend && sed -i 's/REPLACE_BACKEND/$BACKEND/g' Dockerfile.stage && sed -i 's/REPLACE_TX/$TX/g' Dockerfile.stage
-        docker build -f Dockerfile.stage . -t bruddev/cast-stage:$TAG-fe
+      run: | 
+        cd frontend && docker build -f Dockerfile.stage . -t bruddev/cast-stage:$TAG-fe
         docker push bruddev/cast-stage:$TAG-fe
 
 ## ARGO FROM HERE
