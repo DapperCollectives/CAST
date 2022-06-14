@@ -107,13 +107,13 @@ jobs:
         docker push bruddev/cast-stage:$TAG-fe
 
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-##  UPDATE STAGE ENVIRONMENT - ARGO TIME!
+##  UPDATE STAGE BACKEND ENVIRONMENT - ARGO TIME!
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   update-stage-via-argocd-backend:
     name: ArgoCD update Stage backend
     runs-on: ubuntu-20.04
-    if: "!failure()"
+    needs: build-and-push-backend
     steps:
 
     - name: Clone ArgoManifests
@@ -144,8 +144,48 @@ jobs:
         curl -fL https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v4.5.5/kustomize_v4.5.5_linux_amd64.tar.gz| tar xz && \
         chmod +x kustomize
         cd ./argo/voting-tool-stage-prod/backend/environments/stage && kustomize edit set image bruddev/cast-stage:$TAG-be
-        echo "now frontend"
+        git config --global user.email "brunkins@brudfyi.com"
+        git config --global user.name "Brunkins" 
+        git commit -am "Added new backend value from GHA $TIME" && git push
+
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##  UPDATE STAGE FRONTEND ENVIRONMENT - ARGO TIME!
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  update-stage-via-argocd-frontend:
+    name: ArgoCD update Stage frontend
+    runs-on: ubuntu-20.04
+    needs: build-and-push-frontend
+    steps:
+
+    - name: Clone ArgoManifests
+      run: |
+        mkdir -p ./argo
+
+    - name: Checkout ArgoManifests
+      uses: actions/checkout@v3
+      with:
+        repository: ${{ env.argo_repo }}
+        ref: ${{ env.argo_ref }}
+        token: ${{ env.argo_token }}
+        path: ./argo
+
+    - name: time
+      id: time
+      run: echo "::set-output name=time::$(date "+%T")"
+
+    - name: Get short SHA
+      id: short
+      run: echo "::set-output name=sha7::$(echo ${GITHUB_SHA} | cut -c1-7)"
+
+    - name: Install Kustomize and update tag
+      env:
+        TIME: ${{ steps.time.outputs.time }}
+        TAG: ${{ steps.short.outputs.sha7 }}
+      run: |
+        curl -fL https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v4.5.5/kustomize_v4.5.5_linux_amd64.tar.gz| tar xz && \
+        chmod +x kustomize
         cd ./argo/voting-tool-stage-prod/frontend/environments/stage && kustomize edit set image bruddev/cast-stage:$TAG-fe
         git config --global user.email "brunkins@brudfyi.com"
         git config --global user.name "Brunkins" 
-        git commit -am "Added New Value From GHA $TIME" && git push
+        git commit -am "Added new frontend value from GHA $TIME" && git push
