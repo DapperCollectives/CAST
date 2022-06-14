@@ -16,7 +16,7 @@ env:
   argo_repo: ${{ secrets.ARGO_REPO }}
   argo_ref: ${{ secrets.ARGO_REF }}
   argo_token: ${{ secrets.ARGO_TOKEN }}
-  backend_api: ${{ secrets.BACKEND_API }} #TESTING
+  backend_api: ${{ secrets.BACKEND_API }}
   tx_options: ${{ secrets.TX_OPTIONS }}
 
 jobs:
@@ -133,9 +133,10 @@ jobs:
     - name: build and push frontend - stage -
       env:
         TAG: ${{ steps.short-frontend.outputs.sha7 }}
+        BACKEND: ${{ env.backend_api }}
+        TX: ${{ env.tx_options }}
       run: |
-        ls
-        cd frontend && sed -i 's/REPLACE_BACKEND/${{ env.backend_api }}/g' Dockerfile.stage && sed -i 's/REPLACE_TX/${{ env.tx_options }}/g' Dockerfile.stage
+        cd frontend && sed -i 's/REPLACE_BACKEND/$BACKEND/g' Dockerfile.stage && sed -i 's/REPLACE_TX/$TX/g' Dockerfile.stage
         docker build -f Dockerfile.stage . -t bruddev/cast-stage:$TAG-fe
         docker push bruddev/cast-stage:$TAG-fe
 
