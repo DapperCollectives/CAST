@@ -58,6 +58,7 @@ $border-color-light: #DBDBDB
 @import '~bulma/sass/helpers/visibility.sass'
 @import '~bulma/sass/helpers/typography.sass'
 @import '~bulma/sass/helpers/flexbox.sass'
+@import '~bulma/sass/helpers/position.sass'
 
 $tooltip-radius: 6px
 $popover-max-width: 20rem
@@ -294,9 +295,6 @@ hr
 .community-info
 	padding: 19.5px 24px
 	max-width: 225px
-.community-numbers
-	color: #757575
-	font-size: 14px
 .community-content
 	padding-top: 31px
 .proposal-title
@@ -364,8 +362,6 @@ hr
 		padding: 40px 20px 0px 20px
 	.spacing-right-panel
 		padding: 24px 24px 0px 24px
-	.community-numbers
-		font-size: 16px
 	.community-content
 		padding-top: 0
 		margin-top: -70px
@@ -580,7 +576,7 @@ span[data-tooltip]
 		box-shadow: none
 
 .form-error-input-icon
-	padding-right: 4.5rem !important	
+	padding-right: 4.5rem !important
 .form-error-input-border
 	border-color: $error-red  !important
 
@@ -609,7 +605,7 @@ span[data-tooltip]
 		color: #757575
 
 // overwrite default conent from bulma
-.content 
+.content
 	figure
 		margin-left: 0em
 		margin-right: 0em
@@ -620,4 +616,4 @@ span[data-tooltip]
 
 @include mobile
 	.popover .popover-content
-		max-width: 10rem !important	
+		max-width: 10rem !important
