@@ -176,7 +176,8 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/proposals", a.getProposalsForCommunity).Methods("GET")
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/proposals/{id:[0-9]+}", a.getProposal).Methods("GET")
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/proposals", a.createProposal).Methods("POST", "OPTIONS")
-	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/proposals/{id:[0-9]+}", a.updateProposal).Methods("PUT", "OPTIONS")
+	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/proposals/{id:[0-9]+}", a.updateProposal).
+		Methods("PUT", "OPTIONS")
 	// Lists
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/lists", a.getListsForCommunity).Methods("GET")
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/lists", a.createListForCommunity).Methods("POST", "OPTIONS")
@@ -198,8 +199,10 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/users/{addr:0x[a-zA-Z0-9]{16}}/communities", a.handleGetUserCommunities).Methods("GET")
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users", a.handleCreateCommunityUser).Methods("POST", "OPTIONS")
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users", a.handleGetCommunityUsers).Methods("GET")
-	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users/type/{userType:[a-zA-Z]+}", a.handleGetCommunityUsersByType).Methods("GET")
-	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users/{addr:0x[a-zA-Z0-9]{16}}/{userType:[a-zA-Z]+}", a.handleRemoveUserRole).Methods("DELETE", "OPTIONS")
+	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users/type/{userType:[a-zA-Z]+}", a.handleGetCommunityUsersByType).
+		Methods("GET")
+	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users/{addr:0x[a-zA-Z0-9]{16}}/{userType:[a-zA-Z]+}", a.handleRemoveUserRole).
+		Methods("DELETE", "OPTIONS")
 	// Utilities
 	a.Router.HandleFunc("/accounts/admin", a.getAdminList).Methods("GET")
 	a.Router.HandleFunc("/accounts/blocklist", a.getCommunityBlocklist).Methods("GET")
@@ -602,14 +605,16 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//pin to ipfs
-	pin, err := a.IpfsClient.PinJson(v)
-	// If request fails, it may be because of an issue with Pinata.
-	// Continue on, and worker will retroactively populate
-	if err != nil {
-		log.Error().Err(err).Msg("error pinning vote to IPFS")
+	if os.Getenv("APP_ENV") != "TEST" {
+		pin, err := a.IpfsClient.PinJson(p)
+		if err != nil {
+			log.Error().Err(err).Msg("error pinning vote to IPFS")
+		} else {
+			p.Cid = &pin.IpfsHash
+		}
 	} else {
-		v.Cid = &pin.IpfsHash
+		dummyCid := "0000000000"
+		p.Cid = &dummyCid
 	}
 
 	if err := v.CreateVote(a.DB); err != nil {
@@ -770,14 +775,17 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// pin to ipfs
-	pin, err := a.IpfsClient.PinJson(p)
-	if err != nil {
-		log.Error().Err(err).Msg("error pinning proposal to IPFS")
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
+	if os.Getenv("APP_ENV") != "TEST" {
+		pin, err := a.IpfsClient.PinJson(p)
+		if err != nil {
+			log.Error().Err(err).Msg("error pinning vote to IPFS")
+		} else {
+			p.Cid = &pin.IpfsHash
+		}
+	} else {
+		dummyCid := "0000000000"
+		p.Cid = &dummyCid
 	}
-	p.Cid = &pin.IpfsHash
 
 	// validate proposal fields
 	validate := validator.New()
@@ -855,15 +863,19 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Set new status
-	p.Status = &payload.Status
+	p.Status = &payload.Status // pin to ipfs
 
-	// Pin to ipfs
-	pin, err := a.IpfsClient.PinJson(p)
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
-		return
+	if os.Getenv("APP_ENV") != "TEST" {
+		pin, err := a.IpfsClient.PinJson(p)
+		if err != nil {
+			log.Error().Err(err).Msg("error pinning vote to IPFS")
+		} else {
+			p.Cid = &pin.IpfsHash
+		}
+	} else {
+		dummyCid := "0000000000"
+		p.Cid = &dummyCid
 	}
-	p.Cid = &pin.IpfsHash
 
 	// Finally, update DB
 	if err := p.UpdateProposal(a.DB); err != nil {
@@ -971,12 +983,17 @@ func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// pin to ipfs
-	pin, err := a.IpfsClient.PinJson(c)
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
-		return
+	if os.Getenv("APP_ENV") != "TEST" {
+		pin, err := a.IpfsClient.PinJson(c)
+		if err != nil {
+			log.Error().Err(err).Msg("error pinning vote to IPFS")
+		} else {
+			c.Cid = &pin.IpfsHash
+		}
+	} else {
+		dummyCid := "0000000000"
+		c.Cid = &dummyCid
 	}
-	c.Cid = &pin.IpfsHash
 
 	validate := validator.New()
 	vErr := validate.Struct(c)
@@ -1166,7 +1183,11 @@ func (a *App) createListForCommunity(w http.ResponseWriter, r *http.Request) {
 	// Ensure list doesnt already exist
 
 	if existingList, _ := models.GetListForCommunityByType(a.DB, communityId, *payload.List_type); existingList.ID > 0 {
-		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("list of type %s already exists for community %d", *payload.List_type, communityId))
+		respondWithError(
+			w,
+			http.StatusBadRequest,
+			fmt.Sprintf("list of type %s already exists for community %d", *payload.List_type, communityId),
+		)
 		return
 	}
 
@@ -1199,14 +1220,17 @@ func (a *App) createListForCommunity(w http.ResponseWriter, r *http.Request) {
 
 	l := payload.List
 
-	// pin to ipfs
-	pin, err := a.IpfsClient.PinJson(l)
-	if err != nil {
-		log.Error().Err(err).Msg("error pinning list to IPFS")
-		respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
-		return
+	if os.Getenv("APP_ENV") != "TEST" {
+		pin, err := a.IpfsClient.PinJson(l)
+		if err != nil {
+			log.Error().Err(err).Msg("error pinning vote to IPFS")
+		} else {
+			l.Cid = &pin.IpfsHash
+		}
+	} else {
+		dummyCid := "0000000000"
+		l.Cid = &dummyCid
 	}
-	l.Cid = &pin.IpfsHash
 
 	// create proposal
 	if err := l.CreateList(a.DB); err != nil {
@@ -1277,14 +1301,17 @@ func (a *App) addAddressesToList(w http.ResponseWriter, r *http.Request) {
 	// Add specified addresses to list
 	l.AddAddresses(payload.Addresses)
 
-	// Pin to ipfs
-	pin, err := a.IpfsClient.PinJson(l)
-	if err != nil {
-		log.Error().Err(err).Msg("error pinning to ipfs")
-		respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
-		return
+	if os.Getenv("APP_ENV") != "TEST" {
+		pin, err := a.IpfsClient.PinJson(l)
+		if err != nil {
+			log.Error().Err(err).Msg("error pinning vote to IPFS")
+		} else {
+			l.Cid = &pin.IpfsHash
+		}
+	} else {
+		dummyCid := "0000000000"
+		l.Cid = &dummyCid
 	}
-	l.Cid = &pin.IpfsHash
 
 	// Finally, update DB
 	if err := l.UpdateList(a.DB); err != nil {
@@ -1354,14 +1381,17 @@ func (a *App) removeAddressesFromList(w http.ResponseWriter, r *http.Request) {
 	// Remove specified addresses
 	l.RemoveAddresses(payload.Addresses)
 
-	// Pin to ipfs
-	pin, err := a.IpfsClient.PinJson(l)
-	if err != nil {
-		log.Error().Err(err).Msg("ipfs error")
-		respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
-		return
+	if os.Getenv("APP_ENV") != "TEST" {
+		pin, err := a.IpfsClient.PinJson(l)
+		if err != nil {
+			log.Error().Err(err).Msg("error pinning vote to IPFS")
+		} else {
+			l.Cid = &pin.IpfsHash
+		}
+	} else {
+		dummyCid := "0000000000"
+		l.Cid = &dummyCid
 	}
-	l.Cid = &pin.IpfsHash
 
 	// Finally, update DB
 	if err := l.UpdateList(a.DB); err != nil {
@@ -1469,7 +1499,9 @@ func (a *App) handleCreateCommunityUser(w http.ResponseWriter, r *http.Request) 
 	// only an account can add itself as a "member", unless an admin is granting
 	// an address a priviledged role
 	if payload.User_type == "member" && payload.Addr != payload.Signing_addr {
-		CANNOT_ADD_MEMBER_ERR := errors.New("an account can only add itself as a community member, unless an admin is granting priviledged role")
+		CANNOT_ADD_MEMBER_ERR := errors.New(
+			"an account can only add itself as a community member, unless an admin is granting priviledged role",
+		)
 		log.Error().Err(CANNOT_ADD_MEMBER_ERR)
 		respondWithError(w, http.StatusForbidden, CANNOT_ADD_MEMBER_ERR.Error())
 		return
@@ -1491,7 +1523,11 @@ func (a *App) handleCreateCommunityUser(w http.ResponseWriter, r *http.Request) 
 	// should throw a "ErrNoRows" error
 	u := payload.CommunityUser
 	if err := u.GetCommunityUser(a.DB); err == nil {
-		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Error: Address %s is already a %s of community %d\n", u.Addr, u.User_type, u.Community_id))
+		respondWithError(
+			w,
+			http.StatusBadRequest,
+			fmt.Sprintf("Error: Address %s is already a %s of community %d\n", u.Addr, u.User_type, u.Community_id),
+		)
 		return
 	}
 
