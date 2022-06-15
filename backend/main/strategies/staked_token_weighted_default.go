@@ -12,6 +12,7 @@ import (
 
 type StakedTokenWeightedDefault struct{}
 
+// should handle and return error case here
 func (s *StakedTokenWeightedDefault) FetchBalance(db *s.Database, b *models.Balance, sc *s.SnapshotClient) (*models.Balance, error) {
 
 	if err := b.GetBalanceByAddressAndBlockHeight(db); err != nil && err.Error() != pgx.ErrNoRows.Error() {
@@ -35,18 +36,13 @@ func (s *StakedTokenWeightedDefault) FetchBalance(db *s.Database, b *models.Bala
 	return b, nil
 }
 
-func (s *StakedTokenWeightedDefault) TallyVotes(votes []*models.VoteWithBalance, proposalId int) (models.ProposalResults, error) {
-	var r models.ProposalResults
-	r.Results = map[string]int{}
-	r.Results_float = map[string]float64{}
-	r.Proposal_id = proposalId
-
+func (s *StakedTokenWeightedDefault) TallyVotes(votes []*models.VoteWithBalance, p *models.ProposalResults) (models.ProposalResults, error) {
 	for _, vote := range votes {
-		r.Results[vote.Choice] += int(float64(*vote.StakingBalance) * math.Pow(10, -8))
-		r.Results_float[vote.Choice] += float64(*vote.StakingBalance) * math.Pow(10, -8)
+		p.Results[vote.Choice] += int(float64(*vote.StakingBalance) * math.Pow(10, -8))
+		p.Results_float[vote.Choice] += float64(*vote.StakingBalance) * math.Pow(10, -8)
 	}
 
-	return r, nil
+	return *p, nil
 }
 
 func (s *StakedTokenWeightedDefault) GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error) {

@@ -35,19 +35,15 @@ func (s *TokenWeightedDefault) FetchBalance(db *s.Database, b *models.Balance, s
 	return b, nil
 }
 
-func (s *TokenWeightedDefault) TallyVotes(votes []*models.VoteWithBalance, proposalId int) (models.ProposalResults, error) {
-	var r models.ProposalResults
-	r.Results = map[string]int{}
-	r.Results_float = map[string]float64{}
-	r.Proposal_id = proposalId
-
+// func (s *TokenWeightedDefault) TallyVotes(votes []*models.VoteWithBalance, proposalId int) (models.ProposalResults, error) {
+func (s *TokenWeightedDefault) TallyVotes(votes []*models.VoteWithBalance, p *models.ProposalResults) (models.ProposalResults, error) {
 	//tally votes
 	for _, vote := range votes {
-		r.Results[vote.Choice] += int(float64(*vote.PrimaryAccountBalance) * math.Pow(10, -8))
-		r.Results_float[vote.Choice] += float64(*vote.PrimaryAccountBalance) * math.Pow(10, -8)
+		p.Results[vote.Choice] += int(float64(*vote.PrimaryAccountBalance) * math.Pow(10, -8))
+		p.Results_float[vote.Choice] += float64(*vote.PrimaryAccountBalance) * math.Pow(10, -8)
 	}
 
-	return r, nil
+	return *p, nil
 }
 
 func (s *TokenWeightedDefault) GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error) {
