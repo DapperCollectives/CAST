@@ -50,7 +50,5 @@ export default function useUserRoleOnCommunity({
       })
       .map((community) => community?.membershipType) ?? [];
 
-  console.log(rolesInCommunity);
-
   return roles.every((role) => rolesInCommunity.includes(role));
 }
