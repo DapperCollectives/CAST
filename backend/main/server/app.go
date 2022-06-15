@@ -1594,6 +1594,7 @@ func (a *App) handleGetCommunityUsersByType(w http.ResponseWriter, r *http.Reque
 	userType := vars["userType"]
 	if !models.EnsureValidRole(userType) {
 		respondWithError(w, http.StatusBadRequest, "Invalid userType")
+		return
 	}
 
 	count, _ := strconv.Atoi(r.FormValue("count"))
@@ -1606,7 +1607,7 @@ func (a *App) handleGetCommunityUsersByType(w http.ResponseWriter, r *http.Reque
 	}
 
 	users, totalRecords, err := models.GetUsersForCommunityByType(a.DB, communityId, start, count, userType)
-	fmt.Println(err)
+
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
