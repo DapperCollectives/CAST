@@ -50,6 +50,11 @@ func (s *TokenWeightedDefault) TallyVotes(votes []*models.VoteWithBalance, propo
 
 	//tally votes
 	for _, vote := range votes {
+		if vote.PrimaryAccountBalance == nil {
+			r.Results[vote.Choice] = 0.0
+			r.Results_float[vote.Choice] = 0.0
+			continue
+		}
 		r.Results[vote.Choice] += int(float64(*vote.PrimaryAccountBalance) * math.Pow(10, -8))
 		r.Results_float[vote.Choice] += float64(*vote.PrimaryAccountBalance) * math.Pow(10, -8)
 	}
