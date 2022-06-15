@@ -391,7 +391,11 @@ export default function ProposalPage() {
       />
       <section className="section">
         <div className="container">
-          <WrapperResponsive extraClasses="mb-6" extraClassesMobile="mb-3">
+          <WrapperResponsive
+            classNames="is-flex"
+            extraClasses="mb-6"
+            extraClassesMobile="mb-3"
+          >
             <Link to={`/community/${proposal.communityId}?tab=proposals`}>
               <span className="has-text-grey is-flex is-align-items-center back-button transition-all">
                 <ArrowLeft /> <span className="ml-3">Back</span>
