@@ -12,7 +12,12 @@ import {
   Tablink,
 } from "components";
 import { CheckMark, ArrowLeft, Bin } from "components/Svg";
-import { useProposal, useVotingStrategies, useMediaQuery } from "hooks";
+import {
+  useProposal,
+  useVotingStrategies,
+  useMediaQuery,
+  useUserRoleOnCommunity,
+} from "hooks";
 import { useModalContext } from "contexts/NotificationModal";
 import { useWebContext } from "contexts/Web3";
 import { FilterValues } from "const";
@@ -20,8 +25,8 @@ import {
   CancelProposalModalConfirmation,
   ProposalStatus,
   VoteOptions,
-} from "../components/Proposal";
-import { getProposalType } from "../utils";
+} from "components/Proposal";
+import { getProposalType } from "utils";
 
 function useQueryParams() {
   const { search } = useLocation();
@@ -99,7 +104,12 @@ export default function ProposalPage() {
     error: strategiesError,
   } = useVotingStrategies();
 
-  const isAdmin = proposal && proposal?.creatorAddr === user?.addr;
+  // only authors on community can cancel the proposal
+  const canCancelProposal = useUserRoleOnCommunity({
+    addr: user?.addr,
+    communityId: proposal?.communityId,
+    roles: ["author"],
+  });
 
   const proposalStrategy =
     votingStrategies && !loadingStrategies && proposal && !loading
@@ -404,7 +414,7 @@ export default function ProposalPage() {
               proposal={proposal}
               className="is-flex is-align-items-center smaller-text"
             />
-            {showCancelButton && isAdmin && (
+            {showCancelButton && canCancelProposal && (
               <div className="is-flex is-align-items-center">
                 <button
                   className="button is-white has-text-grey small-text"
