@@ -34,17 +34,13 @@ func (s *OneAddressOneVote) FetchBalance(db *s.Database, b *models.Balance, sc *
 	return b, nil
 }
 
-func (s *OneAddressOneVote) TallyVotes(votes []*models.VoteWithBalance, proposalId int) (models.ProposalResults, error) {
-	var r models.ProposalResults
-	r.Results = map[string]int{}
-	r.Proposal_id = proposalId
-
+func (s *OneAddressOneVote) TallyVotes(votes []*models.VoteWithBalance, p *models.ProposalResults) (models.ProposalResults, error) {
 	//tally votes
 	for _, vote := range votes {
-		r.Results[vote.Choice]++
+		p.Results[vote.Choice]++
 	}
 
-	return r, nil
+	return *p, nil
 }
 
 func (s *OneAddressOneVote) GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error) {

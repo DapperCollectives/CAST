@@ -16,9 +16,9 @@ type CommunityUser struct {
 type CommunityUserType struct {
 	Community_id int    `json:"communityId" validate:"required"`
 	Addr         string `json:"addr" validate:"required"`
-	Is_admin     bool 	`json:"isAdmin" validate:"required"`
-	Is_author    bool 	`json:"isAuthor" validate:"required"`
-	Is_member    bool 	`json:"isMember" validate:"required"`
+	Is_admin     bool   `json:"isAdmin" validate:"required"`
+	Is_author    bool   `json:"isAuthor" validate:"required"`
+	Is_member    bool   `json:"isMember" validate:"required"`
 }
 
 type UserTypes []string
@@ -229,4 +229,13 @@ func GrantRolesToCommunityCreator(db *s.Database, addr string, communityId int) 
 func EnsureRoleForCommunity(db *s.Database, addr string, communityId int, userType string) error {
 	user := CommunityUser{Addr: addr, Community_id: communityId, User_type: userType}
 	return user.GetCommunityUser(db)
+}
+
+func EnsureValidRole(userType string) bool {
+	for _, t := range USER_TYPES {
+		if t == userType {
+			return true
+		}
+	}
+	return false
 }

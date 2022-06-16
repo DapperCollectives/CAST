@@ -1,8 +1,18 @@
 import React from "react";
+import { useMediaQuery } from "hooks";
+import classnames from "classnames";
 
 export default function StartSteps({ dismissPreStep }) {
+  const { notMobile } = useMediaQuery();
+  const classNames = classnames(
+    "columns is-multiline border-light rounded-sm m-0",
+    {
+      "p-6": notMobile,
+      "p-2": !notMobile,
+    }
+  );
   return (
-    <div className="columns is-multiline border-light rounded-sm p-6 m-0">
+    <div className={classNames}>
       <div className="column is-12">
         <h4 className="has-text-weight-bold is-size-5">
           Let's create a community

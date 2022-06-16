@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useHistory, useParams, Link } from "react-router-dom";
+import classnames from "classnames";
 import {
   Loader,
   CommunityPulse,
@@ -195,11 +196,25 @@ export default function Community() {
 
   const { instagramUrl, twitterUrl, websiteUrl, discordUrl } = community ?? {};
 
+  const titleClassNames = classnames(
+    "is-size-5 has-text-weight-bold",
+    { "mb-3": notMobile },
+    { "mb-1": !notMobile }
+  );
+  const memberClassNames = classnames(
+    "has-text-grey",
+    { "small-text mb-3": notMobile },
+    { "is-size-6 mb-1": !notMobile }
+  );
+  const headerContainerClassNames = classnames(
+    "is-flex container community-header section",
+    { "is-justify-content-space-between": notMobile }
+  );
   return (
     <section className="full-height pt-0">
       {community ? (
         <div className="is-flex community-header-wrapper">
-          <div className="is-flex container community-header section is-justify-content-space-between">
+          <div className={headerContainerClassNames}>
             <div className="is-flex community-specific">
               <div className="is-hidden-tablet is-mobile is-flex is-flex-direction-column is-justify-content-center m-0 community-logo-wrapper">
                 <img
@@ -220,30 +235,24 @@ export default function Community() {
                 />
               </div>
               <div className="column community-info is-justify-content-space-evenly">
-                <h2 className="title is-4 mb-2">
-                  <span className="is-size-5 has-text-weight-bold">{community.name}</span>
-                </h2>
-                <p>
-                  <span className="community-numbers">
-                    {totalMembers} members
-                  </span>
-                </p>
+                <h2 className={titleClassNames}>{community.name}</h2>
+                <p className={memberClassNames}>{totalMembers} members</p>
                 <div className="is-flex">
                   {admins
                     ? admins.slice(0, 5).map(({ addr: adminAddr }, idx) => (
-                      <div
-                        key={`${idx}`}
-                        className="blockies-wrapper is-relative has-background-white"
-                        style={{ right: `${idx * 12}px` }}
-                      >
-                        <Blockies
-                          seed={adminAddr}
-                          size={10}
-                          scale={4}
-                          className="blockies"
-                        />
-                      </div>
-                    ))
+                        <div
+                          key={`${idx}`}
+                          className="blockies-wrapper is-relative"
+                          style={{ right: `${idx * (notMobile ? 12 : 6)}px` }}
+                        >
+                          <Blockies
+                            seed={adminAddr}
+                            size={notMobile ? 10 : 6}
+                            scale={4}
+                            className="blockies blockies-border"
+                          />
+                        </div>
+                      ))
                     : null}
                 </div>
               </div>
@@ -274,8 +283,9 @@ export default function Community() {
                       />
                     </li>
                     <li
-                      className={`${activeTabMap["proposals"] ? "is-active" : ""
-                        }`}
+                      className={`${
+                        activeTabMap["proposals"] ? "is-active" : ""
+                      }`}
                     >
                       <Tablink
                         linkText="Proposals"
@@ -285,8 +295,9 @@ export default function Community() {
                       />
                     </li>
                     <li
-                      className={`${activeTabMap["members"] ? "is-active" : ""
-                        }`}
+                      className={`${
+                        activeTabMap["members"] ? "is-active" : ""
+                      }`}
                     >
                       <Tablink
                         linkText="Members"
@@ -336,7 +347,10 @@ export default function Community() {
                   />
                 )}
                 {activeTabMap["proposals"] && (
-                  <CommunityProposals communityId={community.id} admins={admins} />
+                  <CommunityProposals
+                    communityId={community.id}
+                    admins={admins}
+                  />
                 )}
                 {activeTabMap["members"] && (
                   <MembersLayout
