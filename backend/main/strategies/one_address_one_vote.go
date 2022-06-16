@@ -42,7 +42,6 @@ func (s *OneAddressOneVote) TallyVotes(votes []*models.VoteWithBalance, proposal
 	r.Results = map[string]int{}
 	r.Proposal_id = proposalId
 
-	//tally votes
 	for _, vote := range votes {
 		r.Results[vote.Choice]++
 	}
