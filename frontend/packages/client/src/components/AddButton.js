@@ -4,7 +4,7 @@ import { Plus } from "components/Svg";
 
 export default function AddButton({
   onAdd = () => {},
-  diabled = false,
+  disabled = false,
   addText = "",
   className = "",
 } = {}) {
@@ -14,7 +14,7 @@ export default function AddButton({
       [className]: !!className,
     },
     { "is-disabled has-text-grey": disabled },
-    { "cursor-pointer": !diabled }
+    { "cursor-pointer": !disabled }
   );
   return (
     <div className={classNames} onClick={onAdd}>

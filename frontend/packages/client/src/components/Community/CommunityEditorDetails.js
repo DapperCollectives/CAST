@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Plus, Bin, ValidCheckMark, InvalidCheckMark } from "components/Svg";
+import { Bin, ValidCheckMark, InvalidCheckMark } from "components/Svg";
 import { WrapperResponsive, Loader, AddButton } from "components";
 import { useCommunityUsers } from "hooks";
 import { useErrorHandlerContext } from "contexts/ErrorHandler";
