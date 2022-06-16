@@ -22,12 +22,6 @@ func TestCreateCommunityUsers(t *testing.T) {
 
 	communityStruct := otu.GenerateCommunityStruct("account")
 
-	//create the author before generating the payload
-	var createCommunityStruct models.CreateCommunityRequestPayload
-	createCommunityStruct.Community = *communityStruct
-	author := []string{"0x01cf0e2f2f715450"}
-	createCommunityStruct.Additional_authors = &author
-
 	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
 
 	response := otu.CreateCommunityAPI(communityPayload)
@@ -68,12 +62,69 @@ func TestGetCommunityUsers(t *testing.T) {
 	response = otu.GetCommunityUsersAPI(community.ID)
 	checkResponseCode(t, http.StatusOK, response.Code)
 
+	var p test_utils.PaginatedResponseWithUserType
+	json.Unmarshal(response.Body.Bytes(), &p)
+
+	assert.Equal(t, 1, len(p.Data))
+	assert.Equal(t, true, p.Data[0].Is_admin)
+	assert.Equal(t, true, p.Data[0].Is_author)
+	assert.Equal(t, true, p.Data[0].Is_member)
+}
+
+func TestGetCommunityUsersByType(t *testing.T) {
+	clearTable("communities")
+	clearTable("community_users")
+
+	communityStruct := otu.GenerateCommunityStruct("account")
+	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
+
+	response := otu.CreateCommunityAPI(communityPayload)
+	checkResponseCode(t, http.StatusCreated, response.Code)
+
+	var community models.Community
+	json.Unmarshal(response.Body.Bytes(), &community)
+
+	response = otu.GetCommunityUsersAPIByType(community.ID, "admin")
+	checkResponseCode(t, http.StatusOK, response.Code)
+
 	var p test_utils.PaginatedResponseWithUser
 	json.Unmarshal(response.Body.Bytes(), &p)
 
-	// three user roles created by default
-	// admin, author and member
-	assert.Equal(t, 3, len(p.Data))
+	assert.Equal(t, 1, len(p.Data))
+	assert.Equal(t, "admin", p.Data[0].User_type)
+
+	response = otu.GetCommunityUsersAPIByType(community.ID, "author")
+	checkResponseCode(t, http.StatusOK, response.Code)
+
+	json.Unmarshal(response.Body.Bytes(), &p)
+
+	assert.Equal(t, 1, len(p.Data))
+	assert.Equal(t, "author", p.Data[0].User_type)
+
+	response = otu.GetCommunityUsersAPIByType(community.ID, "member")
+	checkResponseCode(t, http.StatusOK, response.Code)
+
+	json.Unmarshal(response.Body.Bytes(), &p)
+
+	assert.Equal(t, 1, len(p.Data))
+	assert.Equal(t, "member", p.Data[0].User_type)
+}
+
+func TestGetCommunityUsersByInvalidType(t *testing.T) {
+	clearTable("communities")
+	clearTable("community_users")
+
+	communityStruct := otu.GenerateCommunityStruct("account")
+	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
+
+	response := otu.CreateCommunityAPI(communityPayload)
+	checkResponseCode(t, http.StatusCreated, response.Code)
+
+	var community models.Community
+	json.Unmarshal(response.Body.Bytes(), &community)
+
+	response = otu.GetCommunityUsersAPIByType(community.ID, "invalidType")
+	checkResponseCode(t, http.StatusBadRequest, response.Code)
 }
 
 func TestGetUserCommunities(t *testing.T) {
