@@ -148,7 +148,20 @@ func (a *App) ConnectDB(database_url string) {
 
 	database.Context = context.Background()
 	database.Name = "flow_snapshot"
-	database.Conn, err = pgxpool.Connect(database.Context, database_url)
+
+	pconf, confErr := pgxpool.ParseConfig(database_url)
+	if confErr != nil {
+		log.Fatal().Err(err).Msg("Unable to parse database config url")
+	}
+
+	if os.Getenv("APP_ENV") == "TEST" {
+		log.Info().Msg("Setting MIN/MAX connections to 1")
+		pconf.MinConns = 1
+		pconf.MaxConns = 1
+	}
+
+	database.Conn, err = pgxpool.ConnectConfig(database.Context, pconf)
+
 	database.Env = &a.Env
 	if err != nil {
 		log.Fatal().Err(err).Msg("Error creating Postsgres conn pool")
