@@ -1,7 +1,8 @@
 import React, { useEffect } from "react";
-import { useCommunityMembers } from "../hooks";
+import { useWebContext } from "contexts/Web3";
+import { useCommunityMembers } from "hooks";
 import TableMembers from "./TableMembers";
-import { debounce } from "../utils";
+import { debounce } from "utils";
 import WrapperResponsive from "./WrapperResponsive";
 
 export default function CommunityMembersList({ communityId } = {}) {
@@ -14,6 +15,10 @@ export default function CommunityMembersList({ communityId } = {}) {
   });
 
   const hasMore = pagination.next > 0;
+
+  const {
+    user: { addr: userAddr },
+  } = useWebContext();
 
   useEffect(() => {
     document.hasMore = hasMore;
@@ -54,6 +59,7 @@ export default function CommunityMembersList({ communityId } = {}) {
           data={data}
           loading={loading && Array.isArray(data)}
           initialLoading={loading && !data}
+          userAddr={userAddr}
         />
       </div>
     </div>

@@ -13,6 +13,14 @@ type CommunityUser struct {
 	User_type    string `json:"userType" validate:"required"`
 }
 
+type CommunityUserType struct {
+	Community_id int    `json:"communityId" validate:"required"`
+	Addr         string `json:"addr" validate:"required"`
+	Is_admin     bool 	`json:"isAdmin" validate:"required"`
+	Is_author    bool 	`json:"isAuthor" validate:"required"`
+	Is_member    bool 	`json:"isMember" validate:"required"`
+}
+
 type UserTypes []string
 
 var USER_TYPES = UserTypes{"member", "author", "admin"}
@@ -29,11 +37,25 @@ type CommunityUserPayload struct {
 	Composite_signatures *[]s.CompositeSignature `json:"compositeSignatures" validate:"required"`
 }
 
-func GetUsersForCommunity(db *s.Database, communityId, start, count int) ([]CommunityUser, int, error) {
-	var users = []CommunityUser{}
+func GetUsersForCommunity(db *s.Database, communityId, start, count int) ([]CommunityUserType, int, error) {
+	var users = []CommunityUserType{}
 	err := pgxscan.Select(db.Context, db.Conn, &users,
 		`
-		SELECT * FROM community_users WHERE community_id = $1
+		SELECT
+ 				(CASE WHEN 
+					(EXISTS (SELECT community_users.addr FROM community_users WHERE community_users.addr = temp_user_addrs.addr AND community_users.user_type = 'admin')) 
+					THEN '1' else '0' end)::boolean AS is_admin,
+ 				(CASE WHEN 
+					(EXISTS (SELECT community_users.addr FROM community_users WHERE community_users.addr = temp_user_addrs.addr AND community_users.user_type = 'author')) 
+				THEN '1' else '0' end)::boolean AS is_author,
+ 				(CASE WHEN 
+					(EXISTS (SELECT community_users.addr FROM community_users WHERE community_users.addr = temp_user_addrs.addr AND community_users.user_type = 'member')) 
+				THEN '1' else '0' end)::boolean AS is_member,
+				temp_user_addrs.addr AS addr,
+				$1 as community_id
+		FROM 
+				(SELECT addr FROM community_users WHERE community_id = $1 group BY community_users.addr) 
+		AS temp_user_addrs 
 		LIMIT $2 OFFSET $3
 		`, communityId, count, start)
 
@@ -42,12 +64,12 @@ func GetUsersForCommunity(db *s.Database, communityId, start, count int) ([]Comm
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		return nil, 0, err
 	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
-		return []CommunityUser{}, 0, nil
+		return []CommunityUserType{}, 0, nil
 	}
 
 	// Get total number of users
 	var totalRecords int
-	countSql := `SELECT COUNT(*) FROM community_users WHERE community_id = $1`
+	countSql := `SELECT COUNT(*) FROM (SELECT addr FROM community_users WHERE community_id = $1 group BY community_users.addr) as temp_users_addr`
 	_ = db.Conn.QueryRow(db.Context, countSql, communityId).Scan(&totalRecords)
 
 	return users, totalRecords, nil

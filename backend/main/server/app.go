@@ -63,10 +63,10 @@ type App struct {
 var allowedFileTypes = []string{"image/jpg", "image/jpeg", "image/png", "image/gif"}
 
 type Strategy interface {
-	FetchBalance(db *shared.Database, b *models.Balance, sc *shared.SnapshotClient) (*models.Balance, error)
-	TallyVotes(votes []*models.VoteWithBalance, proposalId int) (models.ProposalResults, error)
-	GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error)
+	TallyVotes(votes []*models.VoteWithBalance, p *models.ProposalResults) (models.ProposalResults, error)
 	GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error)
+	FetchBalance(db *shared.Database, b *models.Balance, sc *shared.SnapshotClient) (*models.Balance, error)
+	GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error)
 	InitStrategy(f *shared.FlowAdapter, db *shared.Database)
 }
 
@@ -300,7 +300,9 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	proposalResults, err := s.TallyVotes(votes, proposalId)
+	proposalWithChoices := models.NewProposalResults(proposalId, p.Choices)
+	fmt.Printf("PROPOSAL CHOICES %+v\n", proposalWithChoices)
+	proposalResults, err := s.TallyVotes(votes, proposalWithChoices)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return

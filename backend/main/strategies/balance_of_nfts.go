@@ -60,8 +60,10 @@ func (b *BalanceOfNfts) FetchBalance(
 	return balance, nil
 }
 
-func (b *BalanceOfNfts) TallyVotes(votes []*models.VoteWithBalance, proposalId int) (models.ProposalResults, error) {
-	var r models.ProposalResults
+func (b *BalanceOfNfts) TallyVotes(
+	votes []*models.VoteWithBalance,
+	r *models.ProposalResults,
+) (models.ProposalResults, error) {
 	r.Results_float = map[string]float64{}
 	r.Results_float["a"] = 0
 	r.Results_float["b"] = 0
@@ -72,9 +74,7 @@ func (b *BalanceOfNfts) TallyVotes(votes []*models.VoteWithBalance, proposalId i
 		r.Results_float[v.Choice] += float64(nftCount) * math.Pow(10, -8)
 	}
 
-	r.Proposal_id = proposalId
-
-	return r, nil
+	return *r, nil
 }
 
 func (b *BalanceOfNfts) GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error) {

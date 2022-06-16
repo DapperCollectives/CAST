@@ -44,12 +44,8 @@ func (s *StakedTokenWeightedDefault) FetchBalance(
 
 func (s *StakedTokenWeightedDefault) TallyVotes(
 	votes []*models.VoteWithBalance,
-	proposalId int,
+	r *models.ProposalResults,
 ) (models.ProposalResults, error) {
-	var r models.ProposalResults
-	r.Results = map[string]int{}
-	r.Results_float = map[string]float64{}
-	r.Proposal_id = proposalId
 
 	for _, vote := range votes {
 		if vote.StakingBalance == nil {
@@ -61,7 +57,7 @@ func (s *StakedTokenWeightedDefault) TallyVotes(
 		r.Results_float[vote.Choice] += float64(*vote.StakingBalance) * math.Pow(10, -8)
 	}
 
-	return r, nil
+	return *r, nil
 }
 
 func (s *StakedTokenWeightedDefault) GetVoteWeightForBalance(
