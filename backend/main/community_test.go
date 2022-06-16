@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"testing"
 
@@ -53,7 +52,6 @@ func TestCreateCommunity(t *testing.T) {
 	communityStruct := otu.GenerateCommunityStruct("account")
 	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
 	response := otu.CreateCommunityAPI(communityPayload)
-	fmt.Printf("%+v\n", response.Body)
 
 	// Check response code
 	checkResponseCode(t, http.StatusCreated, response.Code)
@@ -88,21 +86,13 @@ func TestCommunityAdminRoles(t *testing.T) {
 	response = otu.GetCommunityUsersAPI(community.ID)
 	checkResponseCode(t, http.StatusOK, response.Code)
 
-	var p test_utils.PaginatedResponseWithUser
+	var p test_utils.PaginatedResponseWithUserType
 	json.Unmarshal(response.Body.Bytes(), &p)
 
-	//loop through response, validate user types for specific index
-	for i, u := range p.Data {
-		if i == 0 && u.Addr == test_utils.AdminAddr {
-			assert.Equal(t, "member", u.User_type)
-		}
-		if i == 1 && u.Addr == test_utils.AdminAddr {
-			assert.Equal(t, "author", u.User_type)
-		}
-		if i == 2 && u.Addr == test_utils.AdminAddr {
-			assert.Equal(t, "admin", u.User_type)
-		}
-	}
+	//Admin user has all possible roles
+	assert.Equal(t, true, p.Data[0].Is_admin)
+	assert.Equal(t, true, p.Data[0].Is_author)
+	assert.Equal(t, true, p.Data[0].Is_member)
 }
 
 func TestCommunityAuthorRoles(t *testing.T) {
@@ -131,18 +121,12 @@ func TestCommunityAuthorRoles(t *testing.T) {
 	response = otu.GetCommunityUsersAPI(community.ID)
 	checkResponseCode(t, http.StatusOK, response.Code)
 
-	var p test_utils.PaginatedResponseWithUser
+	var p test_utils.PaginatedResponseWithUserType
 	json.Unmarshal(response.Body.Bytes(), &p)
 
-	//loop through response, validate user types for specific index
-	for i, u := range p.Data {
-		if i == 3 && u.Addr == test_utils.UserOneAddr {
-			assert.Equal(t, "author", u.User_type)
-		}
-		if i == 4 && u.Addr == test_utils.UserOneAddr {
-			assert.Equal(t, "member", u.User_type)
-		}
-	}
+	assert.Equal(t, false, p.Data[0].Is_admin)
+	assert.Equal(t, true, p.Data[0].Is_author)
+	assert.Equal(t, true, p.Data[0].Is_member)
 }
 
 func TestGetCommunityAPI(t *testing.T) {
