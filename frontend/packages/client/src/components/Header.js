@@ -30,7 +30,6 @@ function Header(props) {
                 <NavLink
                   to={{
                     pathname: "/about",
-                    state: { modal: true },
                   }}
                   className="navbar-item p-0 ml-4 mr-4 is-hidden-mobile"
                 >

@@ -46,7 +46,6 @@ const Sidenavbar = ({ showSidenav, closeSidenav }) => {
                 <NavLink
                   to={{
                     pathname: "/community/create",
-                    state: { modal: true },
                   }}
                   className="navbar-item pl-0 py-4 is-size-5"
                   onClick={closeSidenav}
