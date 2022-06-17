@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { WrapperResponsive, Loader, AddButton, ActionButton } from "components";
 import { Bin } from "components/Svg";
 import { useModalContext } from "contexts/NotificationModal";
 import { useVotingStrategies } from "hooks";
+import StrategyEditorModal from "./StrategyEditorModal";
 
 const StrategyInput = ({ index, commuVotStra, onDeleteStrategy } = {}) => {
   return (
@@ -40,47 +41,6 @@ const StrategyInput = ({ index, commuVotStra, onDeleteStrategy } = {}) => {
   );
 };
 
-const StrategyModalSelector = ({
-  onDismiss = () => {},
-  enableDismiss = true,
-} = {}) => {
-  return (
-    <div
-      className="modal-card has-background-white m-0 p-5"
-      style={{ height: "570px" }}
-    >
-      <header
-        className="modal-card-head has-background-white columns is-mobile p-4 m-0"
-        style={{ borderBottom: "none" }}
-      >
-        <div className="column px-0 is-flex flex-1 ">
-          <h2 className="is-size-4">Edit Strategy Details</h2>
-        </div>
-        <div
-          className={`column is-narrow px-0 has-text-right is-size-2 leading-tight cursor-pointer ${
-            enableDismiss && "has-text-grey"
-          }`}
-          onClick={onDismiss}
-        >
-          &times;
-        </div>
-      </header>
-      <section className="modal-card-body" style={{ minHeight: "280px" }}>
-        <div
-          className="is-flex is-flex-direction-column flex-1"
-          style={{ height: "100%" }}
-        ></div>
-      </section>
-      <footer
-        className="modal-card-foot has-background-white pb-0 pt-1 px-4"
-        style={{ borderTop: "none" }}
-      >
-        <div className="columns is-flex p-0 m-0 flex-1 is-justify-content-end"></div>
-      </footer>
-    </div>
-  );
-};
-
 export default function CommunityProposalsAndVoting({
   loading,
   communityVotingStrategies = [],
@@ -88,18 +48,44 @@ export default function CommunityProposalsAndVoting({
   const { data: allVotingStrategies, loading: loadingAllStrategies } =
     useVotingStrategies();
 
-  console.log(communityVotingStrategies);
+  const [newStrategies, setNewStrategies] = useState([]);
 
   const { openModal, closeModal } = useModalContext();
-  
-  const onAddStrategy = () => {
-    openModal(<StrategyModalSelector onDismiss={() => closeModal()} />, {
-      classNameModalContent: "rounded-sm",
-    });
+
+  const strategiesToAdd = (allVotingStrategies || []).filter(
+    (st) => !communityVotingStrategies.includes(st.key)
+  );
+
+  const addNewStrategy = (data) => {
+    setNewStrategies((state) => [...state, data]);
+    closeModal();
   };
-  
+
+  const onAddStrategy = () => {
+    openModal(
+      <StrategyEditorModal
+        onDismiss={() => closeModal()}
+        strategies={strategiesToAdd}
+        onDone={addNewStrategy}
+      />,
+      {
+        classNameModalContent: "rounded-sm",
+        showCloseButton: false,
+      }
+    );
+  };
+
+  // removes existing strategies on the community
   const onDeleteStrategy = () => {};
+
+  // removes new strategies not saved yet
+  const onDeleteNewStrategy = (index) => {
+    setNewStrategies((state) => state.filter((st, idx) => idx !== index));
+  };
+
+  // sends updates to backend
   const saveData = () => {};
+
   const savingData = false;
 
   return (
@@ -131,11 +117,19 @@ export default function CommunityProposalsAndVoting({
       {!loading &&
         communityVotingStrategies.map((commuVotStra, index) => (
           <StrategyInput
-            key={index}
+            key={`existing-${index}`}
             commuVotStra={commuVotStra}
             onDeleteStrategy={onDeleteStrategy}
           />
         ))}
+      {newStrategies.map((st, index) => (
+        <StrategyInput
+          index={index}
+          key={`new-${index}`}
+          commuVotStra={st.strategy}
+          onDeleteStrategy={onDeleteNewStrategy}
+        />
+      ))}
       <AddButton
         disabled={loading}
         addText={"Strategy"}
