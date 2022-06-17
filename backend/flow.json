@@ -23,19 +23,19 @@
 		"NonFungibleToken": {
 			"source": "./cadence/contracts/NonFungibleToken.cdc",
 			"aliases": {
-				"emulator": "0x0ae53cb6e3f42a79"
+				"emulator": "0xf8d6e0586b0a20c7"
 			}
 		},
 		"ExampleNFT": {
 			"source": "./cadence/contracts/ExampleNFT.cdc",
 			"aliases": {
-				"emulator": "0x0ae53cb6e3f42a79" 
+				"emulator": "0xf8d6e0586b0a20c7"
 			}
 		},
 		"MetadataViews": {
 			"source": "./cadence/contracts/MetadataViews.cdc",
 			"aliases": {
-				"emulator": "0x0ae53cb6e3f42a79"
+				"emulator": "0xf8d6e0586b0a20c7"
 			}
 		}
 	},
