@@ -60,6 +60,8 @@ const NotificationModalProvider = ({ children }) => {
 
   const closeModal = useCallback(() => {
     setModal(false);
+    // this unmounts the component
+    setContent(null);
     modalConfig.onClose();
   }, [modalConfig]);
 
