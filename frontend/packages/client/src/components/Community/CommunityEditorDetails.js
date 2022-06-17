@@ -26,11 +26,7 @@ export const CommunityUsersForm = ({
 } = {}) => {
   const canDeleteAddress = addrList.length > 1;
   return (
-    <WrapperResponsive
-      classNames="border-light rounded-lg columns is-flex-direction-column is-mobile m-0"
-      extraClasses="p-6 mb-6"
-      extraClassesMobile="p-4 mb-4"
-    >
+    <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6 p-4-mobile mb-4-mobile">
       <div className="columns flex-1">
         <div className="column">
           <div className="is-flex flex-1">
@@ -144,7 +140,7 @@ export const CommunityUsersForm = ({
         </span>
       </div>
       {submitComponent}
-    </WrapperResponsive>
+    </div>
   );
 };
 
