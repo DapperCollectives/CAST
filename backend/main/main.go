@@ -16,6 +16,7 @@ func main() {
 
 	if CWD = os.Getenv("CWD"); len(CWD) == 0 {
 		CWD = "./"
+		os.Setenv("CWD", CWD)
 	}
 
 	// Set working directory so relative file paths work
