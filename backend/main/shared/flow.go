@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"flag"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -329,17 +328,12 @@ func (fa *FlowAdapter) ReplaceContractPlaceholders(code string, c *Contract, isF
 	nonFungibleTokenAddr := fa.Config.Contracts["NonFungibleToken"].Aliases[fa.Env]
 	metadataViewsAddr := fa.Config.Contracts["MetadataViews"].Aliases[fa.Env]
 
-	fmt.Printf("fa.Env %s\n", fa.Env)
-
-	fmt.Printf("fungibleTokenAddr: %s\n", fungibleTokenAddr)
-	fmt.Printf("nonFungibleTokenAddr: %s\n", nonFungibleTokenAddr)
-	fmt.Printf("metadataViewsAddr: %s\n", metadataViewsAddr)
-
 	if isFungible {
 		code = placeholderFungibleTokenAddr.ReplaceAllString(code, fungibleTokenAddr)
 	} else {
 		code = placeholderNonFungibleTokenAddr.ReplaceAllString(code, nonFungibleTokenAddr)
 	}
+
 	code = placeholderMetadataViewsAddr.ReplaceAllString(code, metadataViewsAddr)
 	code = placeholderTokenName.ReplaceAllString(code, *c.Name)
 	code = placeholderTokenAddr.ReplaceAllString(code, *c.Addr)
