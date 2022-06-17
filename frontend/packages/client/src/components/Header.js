@@ -38,6 +38,17 @@ function Header(props) {
                     About
                   </span>
                 </NavLink>
+                <NavLink
+                  to={{
+                    pathname: "/community/create",
+                    state: { modal: true },
+                  }}
+                  className="navbar-item p-0 ml-4 mr-4 is-hidden-mobile"
+                >
+                  <span className="navbar-item-hover transition-all">
+                    Create Community
+                  </span>
+                </NavLink>
                 <a
                   href="https://github.com/DapperCollectives/CAST"
                   target="_blank"
