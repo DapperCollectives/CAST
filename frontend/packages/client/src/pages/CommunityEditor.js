@@ -203,6 +203,7 @@ export default function CommunityEditorPage() {
               <CommunityPropsAndVoting
                 communityId={community?.id}
                 updateCommunity={updateCommunity}
+                updatingCommunity={loading}
                 communityVotingStrategies={community.strategies}
               />
             )}

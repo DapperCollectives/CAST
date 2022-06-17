@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { WrapperResponsive, Loader, AddButton, ActionButton } from "components";
+import { useVotingStrategies } from "hooks";
+import { Loader, AddButton, ActionButton } from "components";
 import { Bin } from "components/Svg";
 import { useModalContext } from "contexts/NotificationModal";
-import { useVotingStrategies } from "hooks";
 import StrategyEditorModal from "./StrategyEditorModal";
 
 const StrategyInput = ({ index, commuVotStra, onDeleteStrategy } = {}) => {
@@ -42,22 +42,35 @@ const StrategyInput = ({ index, commuVotStra, onDeleteStrategy } = {}) => {
 };
 
 export default function CommunityProposalsAndVoting({
-  loading,
   communityVotingStrategies = [],
+  communityId,
+  updateCommunity,
+  updatingCommunity,
 } = {}) {
   const { data: allVotingStrategies, loading: loadingAllStrategies } =
     useVotingStrategies();
 
+  const [currentStrategies, setCurrentStrategies] = useState(
+    communityVotingStrategies.map((st) => ({ strategy: st, fromServer: true }))
+  );
+
+  // holds array of objects with strategy information to be added
   const [newStrategies, setNewStrategies] = useState([]);
 
   const { openModal, closeModal } = useModalContext();
 
+  // filter strategis: remove existing on community
+  // and the ones to be added sent to add in the backend
   const strategiesToAdd = (allVotingStrategies || []).filter(
-    (st) => !communityVotingStrategies.includes(st.key)
+    (st) =>
+      ![...currentStrategies, ...newStrategies].find(
+        (currentSt) =>
+          currentSt.strategy === st.key && currentSt?.removed !== true
+      )
   );
 
-  const addNewStrategy = (data) => {
-    setNewStrategies((state) => [...state, data]);
+  const addNewStrategy = (newStrategyInfo) => {
+    setNewStrategies((state) => [...state, newStrategyInfo]);
     closeModal();
   };
 
@@ -76,7 +89,17 @@ export default function CommunityProposalsAndVoting({
   };
 
   // removes existing strategies on the community
-  const onDeleteStrategy = () => {};
+  const onDeleteStrategy = (index) => {
+    console.log("called to remove", index);
+    setCurrentStrategies((state) =>
+      state.map((datum, idx) => {
+        if (idx === index) {
+          return { ...datum, removed: true };
+        }
+        return datum;
+      })
+    );
+  };
 
   // removes new strategies not saved yet
   const onDeleteNewStrategy = (index) => {
@@ -84,26 +107,21 @@ export default function CommunityProposalsAndVoting({
   };
 
   // sends updates to backend
-  const saveData = () => {};
+  const saveData = () => {
+    console.log("strategies to delete");
+    console.log("strategies to add", newStrategies);
+  };
 
   const savingData = false;
 
   return (
-    <WrapperResponsive
-      classNames="border-light rounded-lg columns is-flex-direction-column is-mobile m-0"
-      extraClasses="p-6 mb-6"
-      extraClassesMobile="p-4 mb-4"
-    >
+    <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6 p-4-mobile mb-4-mobile">
       <div className="columns flex-1">
         <div className="column">
           <div className="is-flex flex-1">
-            <WrapperResponsive
-              tag="h5"
-              classNames="title is-6 mb-2 is-flex"
-              extraClassesMobile="mt-4"
-            >
+            <h5 className="title is-6 mb-2 is-flex mt-4-mobile">
               Voting Strategies
-            </WrapperResponsive>
+            </h5>
           </div>
           <div className="is-flex flex-1 mt-5">
             <p className="has-text-grey small-text">
@@ -113,15 +131,16 @@ export default function CommunityProposalsAndVoting({
           </div>
         </div>
       </div>
-      {loading && <Loader className="py-5" />}
-      {!loading &&
-        communityVotingStrategies.map((commuVotStra, index) => (
+      {currentStrategies.map((commuVotStra, index) =>
+        commuVotStra?.removed ? null : (
           <StrategyInput
+            index={index}
             key={`existing-${index}`}
-            commuVotStra={commuVotStra}
+            commuVotStra={commuVotStra.strategy}
             onDeleteStrategy={onDeleteStrategy}
           />
-        ))}
+        )
+      )}
       {newStrategies.map((st, index) => (
         <StrategyInput
           index={index}
@@ -131,18 +150,18 @@ export default function CommunityProposalsAndVoting({
         />
       ))}
       <AddButton
-        disabled={loading}
+        disabled={updatingCommunity || loadingAllStrategies}
         addText={"Strategy"}
         onAdd={onAddStrategy}
         className="mt-2"
       />
       <ActionButton
         label="save"
-        enabled={true}
+        enabled={!updatingCommunity}
         onClick={saveData}
         loading={savingData}
         classNames="mt-5"
       />
-    </WrapperResponsive>
+    </div>
   );
 }

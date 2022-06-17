@@ -1,39 +1,73 @@
 import React, { useEffect, useState } from "react";
 import StrategySelector from "./StrategySelector";
 import StrategyInformation from "./StrategyInformation";
+import { ActionButton } from "components";
+import { isValidAddress } from "utils";
 
 const ModalSteps = {
   1: "select-strategy",
   2: "strategy-information",
 };
 
+const initialFormFields = {
+  contractAddress: "",
+  contractName: "",
+  maxWeight: "",
+  minimunBalance: "",
+};
+
+const formFields = Object.keys(initialFormFields);
+
 export default function StrategyEditorModal({
   strategies = [],
   enableDismiss = true,
   onDismiss = () => {},
+  // callback to pass data collected and closed modal
   onDone = () => {},
 } = {}) {
   const [step, setSep] = useState(ModalSteps[1]);
+  const [formIsValid, setIsFormValid] = useState(false);
 
-  const [data, setData] = useState({});
+  const [data, setData] = useState({
+    strategy: "",
+    ...initialFormFields,
+  });
 
+  // this useEffect validates form on second step
+  useEffect(() => {
+    const requiredFields = {
+      contractAddress: (addr) =>
+        addr?.trim().length > 0 && isValidAddress(addr),
+      contractName: (name) =>
+        name?.trim().length > 0 && name?.trim().length <= 150,
+      maxWeight: (maxWeight) =>
+        maxWeight?.trim().length > 0 && /^[0-9]+$/.test(maxWeight),
+      minimunBalance: (minimunBalance) =>
+        minimunBalance?.trim().length > 0 && /^[0-9]+$/.test(minimunBalance),
+    };
+    const isValid = Object.keys(requiredFields).every(
+      (field) => data && requiredFields[field](data[field])
+    );
+    setIsFormValid(isValid);
+  }, [data]);
+
+  // user selected strategy move to second step to enter information
   const setStrategy = (strategy) => {
-    setData({ strategy });
+    setData((state) => ({ ...state, strategy }));
     setSep(ModalSteps[2]);
   };
 
-  useEffect(() => {
-    return setSep(ModalSteps[1]);
-  }, []);
-
   const _onDismiss = () => {
-    setSep(ModalSteps[1]);
     onDismiss();
   };
 
-  const _onDone = (fields) => {
-    onDone({ ...data, ...fields });
+  const _onDone = () => {
+    onDone(data);
   };
+
+  const setInformationField = (field) => (value) =>
+    setData((state) => ({ ...state, [field]: value }));
+
   return (
     <div
       className="modal-card has-background-white m-0 p-5 p-1-mobile"
@@ -67,7 +101,21 @@ export default function StrategyEditorModal({
             onSelectStrategy={setStrategy}
           />
         )}
-        {step === ModalSteps[2] && <StrategyInformation onDone={_onDone} />}
+        {step === ModalSteps[2] && (
+          <StrategyInformation
+            setField={setInformationField}
+            formData={data}
+            formFields={formFields}
+            actionButton={
+              <ActionButton
+                label="done"
+                enabled={formIsValid}
+                onClick={_onDone}
+                classNames="mt-5"
+              />
+            }
+          />
+        )}
       </section>
     </div>
   );
