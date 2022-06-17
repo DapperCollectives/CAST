@@ -23,6 +23,8 @@ export { default as CommunityEditorProfile } from "./Community/CommunityEditorPr
 export { default as CommunityEditorLinks } from "./Community/CommunityEditorLinks";
 export { default as CommunityEditorDetails } from "./Community/CommunityEditorDetails";
 export { default as AddButton } from "./AddButton";
+export { default as ActionButton } from "./ActionButton";
+export { default as CommunityPropsAndVoting } from "./Community/CommunityPropsAndVoting";
 export {
   PropCreateStepOne,
   PropCreateStepTwo,
