@@ -291,3 +291,20 @@ func CreateUserNFTRecord(db *s.Database, v *VoteWithBalance) error {
 
 	return nil
 }
+
+func DoesNFTExist(db *s.Database, v *VoteWithBalance) (bool, error) {
+	for _, nft := range v.NFTs {
+		var nftId int
+		sql := `select id from nfts
+		where proposal_id = $1 and id = $2
+		`
+		err := pgxscan.Get(db.Context, db.Conn, &nftId, sql, v.Proposal_id, nft.ID)
+		if err != nil && err.Error() != pgx.ErrNoRows.Error() {
+			return false, err
+		} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
+			return false, nil
+		}
+	}
+
+	return true, nil
+}

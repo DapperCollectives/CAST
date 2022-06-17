@@ -52,10 +52,17 @@ func (b *BalanceOfNfts) FetchBalance(
 			}
 			vb.NFTs = append(vb.NFTs, nft)
 		}
-		err = models.CreateUserNFTRecord(db, vb)
-	}
 
-	balance.NFTCount = len(vb.NFTs)
+		doesExist, err := models.DoesNFTExist(db, vb)
+		if err != nil {
+			return nil, err
+		}
+
+		if !doesExist && err == nil {
+			err = models.CreateUserNFTRecord(db, vb)
+			balance.NFTCount = len(vb.NFTs)
+		}
+	}
 
 	return balance, nil
 }
@@ -64,9 +71,6 @@ func (b *BalanceOfNfts) TallyVotes(
 	votes []*models.VoteWithBalance,
 	r *models.ProposalResults,
 ) (models.ProposalResults, error) {
-	r.Results_float = map[string]float64{}
-	r.Results_float["a"] = 0
-	r.Results_float["b"] = 0
 
 	for _, v := range votes {
 		//print the length of v.NFTs

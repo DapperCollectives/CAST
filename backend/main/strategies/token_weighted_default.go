@@ -46,16 +46,13 @@ func (s *TokenWeightedDefault) TallyVotes(
 	votes []*models.VoteWithBalance,
 	p *models.ProposalResults,
 ) (models.ProposalResults, error) {
+
 	//tally votes
 	for _, vote := range votes {
-		if vote.PrimaryAccountBalance == nil {
-			p.Results[vote.Choice] = 0.0
-			p.Results_float[vote.Choice] = 0.0
-			continue
+		if vote.PrimaryAccountBalance != nil {
+			p.Results[vote.Choice] += int(float64(*vote.PrimaryAccountBalance) * math.Pow(10, -8))
+			p.Results_float[vote.Choice] += float64(*vote.PrimaryAccountBalance) * math.Pow(10, -8)
 		}
-		p.Results[vote.Choice] += int(float64(*vote.PrimaryAccountBalance) * math.Pow(10, -8))
-		p.Results_float[vote.Choice] += float64(*vote.PrimaryAccountBalance) * math.Pow(10, -8)
-
 	}
 
 	return *p, nil

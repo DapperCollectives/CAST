@@ -204,11 +204,12 @@ func (otu *OverflowTestUtils) AddProposals(cId int, count int) []int {
 	return retIds
 }
 
-func (otu *OverflowTestUtils) AddProposalsForStrategy(cId int, strategy string, count int) []int {
+func (otu *OverflowTestUtils) AddProposalsForStrategy(cId int, strategy string, count int) ([]int, []*models.Proposal) {
 	if count < 1 {
 		count = 1
 	}
 	retIds := []int{}
+	proposals := []*models.Proposal{}
 	for i := 0; i < count; i++ {
 		proposal := otu.GenerateProposalStruct("account", cId)
 		proposal.Strategy = &strategy
@@ -217,11 +218,11 @@ func (otu *OverflowTestUtils) AddProposalsForStrategy(cId int, strategy string, 
 			fmt.Printf("error in otu.AddProposals")
 			fmt.Printf("err: %v\n", err.Error())
 		}
-		fmt.Printf("proposal.ID: %v\n", proposal.ID)
 
 		retIds = append(retIds, proposal.ID)
+		proposals = append(proposals, proposal)
 	}
-	return retIds
+	return retIds, proposals
 }
 
 func (otu *OverflowTestUtils) AddActiveProposals(cId int, count int) []int {

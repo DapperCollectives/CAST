@@ -48,13 +48,10 @@ func (s *StakedTokenWeightedDefault) TallyVotes(
 ) (models.ProposalResults, error) {
 
 	for _, vote := range votes {
-		if vote.StakingBalance == nil {
-			r.Results[vote.Choice] = 0.0
-			r.Results_float[vote.Choice] = 0.0
-			continue
+		if vote.StakingBalance != nil {
+			r.Results[vote.Choice] += int(float64(*vote.StakingBalance) * math.Pow(10, -8))
+			r.Results_float[vote.Choice] += float64(*vote.StakingBalance) * math.Pow(10, -8)
 		}
-		r.Results[vote.Choice] += int(float64(*vote.StakingBalance) * math.Pow(10, -8))
-		r.Results_float[vote.Choice] += float64(*vote.StakingBalance) * math.Pow(10, -8)
 	}
 
 	return *r, nil

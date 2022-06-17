@@ -21,71 +21,54 @@ type VoteWithBalance struct {
 }
 
 func (otu *OverflowTestUtils) TallyResultsForTokenWeightedDefault(
-	proposalId int,
-	votes *[]VoteWithBalance,
+	votes []VoteWithBalance,
+	p *models.ProposalResults,
 ) *models.ProposalResults {
-	r := models.ProposalResults{Proposal_id: proposalId}
 
-	r.Results_float = map[string]float64{}
-	r.Results_float["a"] = 0
-	r.Results_float["b"] = 0
-
-	for _, v := range *votes {
-		r.Results_float[v.Choice] += float64(v.Primary_account_balance) * math.Pow(10, -8)
+	for _, vote := range votes {
+		if vote.Primary_account_balance != 0 {
+			p.Results[vote.Choice] += int(float64(vote.Primary_account_balance) * math.Pow(10, -8))
+			p.Results_float[vote.Choice] += float64(vote.Primary_account_balance) * math.Pow(10, -8)
+		}
 	}
 
-	return &r
+	return p
 }
 
 func (otu *OverflowTestUtils) TallyResultsForStakedTokenWeightedDefault(
-	proposalId int,
 	votes *[]VoteWithBalance,
+	r *models.ProposalResults,
 ) *models.ProposalResults {
-	r := models.ProposalResults{Proposal_id: proposalId}
-
-	r.Results_float = map[string]float64{}
-	r.Results_float["a"] = 0
-	r.Results_float["b"] = 0
 
 	for _, v := range *votes {
 		r.Results_float[v.Choice] += float64(v.Staking_balance) * math.Pow(10, -8)
 	}
 
-	return &r
+	return r
 }
 
 func (otu *OverflowTestUtils) TallyResultsForOneAddressOneVote(
-	proposalId int,
 	votes *[]VoteWithBalance,
+	r *models.ProposalResults,
 ) *models.ProposalResults {
-	r := models.ProposalResults{Proposal_id: proposalId}
-
-	r.Results = map[string]int{}
-	r.Results["a"] = 0
-	r.Results["b"] = 0
 
 	for _, v := range *votes {
 		r.Results[v.Choice]++
 	}
 
-	return &r
+	return r
 }
 
 func (otu *OverflowTestUtils) TallyResultsForBalanceOfNfts(
-	proposalId int,
 	votes *[]VoteWithBalance,
+	r *models.ProposalResults,
 ) *models.ProposalResults {
-	r := models.ProposalResults{Proposal_id: proposalId}
-
-	r.Results_float = map[string]float64{}
-	r.Results_float["a"] = 0
-	r.Results_float["b"] = 0
 
 	for _, v := range *votes {
 		nfts := len(v.NFTs)
 		r.Results_float[v.Choice] += float64(nfts) * math.Pow(10, -8)
 	}
-	return &r
+	return r
 }
 
 func (otu *OverflowTestUtils) GenerateListOfVotes(proposalId int, count int) *[]VoteWithBalance {

@@ -316,7 +316,6 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	proposalWithChoices := models.NewProposalResults(proposalId, p.Choices)
-	fmt.Printf("PROPOSAL CHOICES %+v\n", proposalWithChoices)
 	proposalResults, err := s.TallyVotes(votes, proposalWithChoices)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
