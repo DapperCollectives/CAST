@@ -8,7 +8,6 @@ const Tablink = ({
   isActive,
   onlyLink,
   onClick = () => {},
-  animateHover = false,
   className = "",
 }) => {
   const textClass = `${className} ${
@@ -41,13 +40,9 @@ const Tablink = ({
     <>{linkText}</>
   );
 
-  const animateClasses = animateHover ? " tab-link transition-all" : "";
-
   return (
     <Link to={linkUrl} className={textClass}>
-      <div
-        className={`is-flex is-align-items-center is-justify-content-left ${animateClasses}`}
-      >
+      <div className={`is-flex is-align-items-center is-justify-content-left`}>
         {link}
       </div>
     </Link>
