@@ -1,30 +1,19 @@
-import React, { useState } from "react";
-import { Input, ActionButton } from "components";
+import React from "react";
+import { Input } from "components";
 
 const staticPlaceholders = {
   contractAddress: "Contract Address",
-  contractName: "Contact Name",
+  contractName: "Contract Name",
   maxWeight: "Max Weight",
   minimunBalance: "Minimum Balance",
 };
 
-export default function StrategyInformation({ onDone = () => {} } = {}) {
-  const [formData, setFormData] = useState({
-    contractAddress: "",
-    contractName: "",
-    maxWeight: "",
-    minimunBalance: "",
-  });
-
-  const formFields = Object.keys(formData);
-
-  const setField = (field) => (value) =>
-    setFormData((state) => ({ ...state, [field]: value }));
-
-  const _onDone = () => {
-    onDone(formData);
-  };
-
+export default function StrategyInformation({
+  formFields = [],
+  formData = {},
+  setField = () => {},
+  actionButton,
+} = {}) {
   return (
     <>
       <div className="columns is-flex-direction-column is-mobile m-0">
@@ -38,12 +27,7 @@ export default function StrategyInformation({ onDone = () => {} } = {}) {
           />
         ))}
       </div>
-      <ActionButton
-        label="done"
-        enabled={true}
-        onClick={_onDone}
-        classNames="mt-5"
-      />
+      {actionButton}
     </>
   );
 }
