@@ -90,7 +90,6 @@ export default function CommunityProposalsAndVoting({
 
   // removes existing strategies on the community
   const onDeleteStrategy = (index) => {
-    console.log("called to remove", index);
     setCurrentStrategies((state) =>
       state.map((datum, idx) => {
         if (idx === index) {
