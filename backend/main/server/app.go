@@ -1128,7 +1128,6 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	fmt.Printf("community should be updated %+v\n", c.Strategies)
 
 	respondWithJSON(w, http.StatusOK, c)
 }
