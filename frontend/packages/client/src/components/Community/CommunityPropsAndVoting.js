@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useVotingStrategies } from "hooks";
-import { Loader, AddButton, ActionButton } from "components";
+import { AddButton, ActionButton } from "components";
 import { Bin } from "components/Svg";
 import { useModalContext } from "contexts/NotificationModal";
 import StrategyEditorModal from "./StrategyEditorModal";
@@ -65,7 +65,7 @@ export default function CommunityProposalsAndVoting({
     (st) =>
       ![...currentStrategies, ...newStrategies].find(
         (currentSt) =>
-          currentSt.strategy === st.key && currentSt?.removed !== true
+          currentSt.strategy === st.key && currentSt?.toBeremoved !== true
       )
   );
 
@@ -108,8 +108,18 @@ export default function CommunityProposalsAndVoting({
 
   // sends updates to backend
   const saveData = () => {
-    console.log("strategies to delete");
-    console.log("strategies to add", newStrategies);
+    // we need to remove strategies first:
+    // in case user removes and old one and
+    // creates the same strategy with different contract information
+    // use same signature for both requests
+    console.log(
+      "--- strategies to delete ---",
+      currentStrategies.filter((st) => st?.toBeremoved)
+    );
+    // we will add new strategies
+    console.log("--- strategies to add ---", newStrategies);
+
+    // await updateCommunity()
   };
 
   const savingData = false;
@@ -132,7 +142,7 @@ export default function CommunityProposalsAndVoting({
         </div>
       </div>
       {currentStrategies.map((commuVotStra, index) =>
-        commuVotStra?.removed ? null : (
+        commuVotStra?.toBeremoved ? null : (
           <StrategyInput
             index={index}
             key={`existing-${index}`}
