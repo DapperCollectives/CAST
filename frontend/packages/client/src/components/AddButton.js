@@ -16,9 +16,11 @@ export default function AddButton({
     { "is-disabled has-text-grey": disabled },
     { "cursor-pointer": !disabled }
   );
+  const onClick = !disabled ? onAdd : () => {};
+  const fill = disabled ? "hsl(0, 0%, 48%)" : "black";
   return (
-    <div className={classNames} onClick={!disabled ? onAdd : () => {}}>
-      <Plus fill={disabled ? "hsl(0, 0%, 48%)" : "black"} />{" "}
+    <div className={classNames} onClick={onClick}>
+      <Plus fill={fill} />{" "}
       <span className="ml-2 small-text is-flex is-align-items-center">
         Add{` ${addText}`}
       </span>
