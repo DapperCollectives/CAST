@@ -12,7 +12,7 @@ export default function StrategyInformationForm({
   formFields = [],
   formData = {},
   setField = () => {},
-  actionButton,
+  actionButton = null,
 } = {}) {
   return (
     <>
