@@ -172,6 +172,7 @@ func TestUpdateCommunity(t *testing.T) {
 	assert.Equal(t, oldCommunity.ID, updatedCommunity.ID)
 	assert.Equal(t, utils.UpdatedCommunity.Name, updatedCommunity.Name)
 	assert.Equal(t, *utils.UpdatedCommunity.Logo, *updatedCommunity.Logo)
+	assert.Equal(t, *utils.UpdatedCommunity.Strategies, *updatedCommunity.Strategies)
 	assert.Equal(t, *utils.UpdatedCommunity.Banner_img_url, *updatedCommunity.Banner_img_url)
 	assert.Equal(t, *utils.UpdatedCommunity.Website_url, *updatedCommunity.Website_url)
 	assert.Equal(t, *utils.UpdatedCommunity.Twitter_url, *updatedCommunity.Twitter_url)

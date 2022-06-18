@@ -5,7 +5,6 @@ package models
 /////////////////
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 
@@ -178,46 +177,39 @@ func (c *Community) CreateCommunity(db *s.Database) error {
 	)
 	RETURNING id, created_at
 	`, c.Name, c.Category, c.Logo, c.Slug, c.Strategies, c.Strategy, c.Banner_img_url, c.Website_url, c.Twitter_url, c.Github_url, c.Discord_url, c.Instagram_url, c.Terms_and_conditions_url, c.Proposal_validation, c.Proposal_threshold, c.Body, c.Cid, c.Creator_addr, c.Contract_name, c.Contract_addr, c.Public_path, c.Threshold, c.Only_authors_to_submit).Scan(&c.ID, &c.Created_at)
-	return err // will be nil unless something went wrong
+	return err
 }
 
-func (c *Community) UpdateCommunity(db *s.Database, payload *UpdateCommunityRequestPayload) error {
-	// First, merge the CommunityRequst
-	data, err := json.Marshal(payload)
-	if err != nil {
-		return err
-	}
-
-	json.Unmarshal(data, c)
-
-	_, err = db.Conn.Exec(
+func (c *Community) UpdateCommunity(db *s.Database, p *UpdateCommunityRequestPayload) error {
+	_, err := db.Conn.Exec(
 		db.Context,
 		`
 	UPDATE communities
 	SET name = $1, body = $2, logo = $3, strategies = $4, strategy = $5, 
 		banner_img_url = $6, website_url = $7, twitter_url = $8, github_url = $9,
-		discord_url = $10, instagram_url = $11, proposal_validation = $12, proposal_threshold = $13, category = $14, terms_and_conditions_url = $15
+		discord_url = $10, instagram_url = $11, proposal_validation = $12, 
+		proposal_threshold = $13, category = $14,
+		terms_and_conditions_url = $15
 	WHERE id = $16
 	`,
-		c.Name,
-		c.Body,
-		c.Logo,
-		c.Strategies,
-		c.Strategy,
-		c.Banner_img_url,
-		c.Website_url,
-		c.Twitter_url,
-		c.Github_url,
-		c.Discord_url,
-		c.Instagram_url,
-		c.Proposal_validation,
-		c.Proposal_threshold,
-		c.Category,
-		c.Terms_and_conditions_url,
+		p.Name,
+		p.Body,
+		p.Logo,
+		p.Strategies,
+		p.Strategy,
+		p.Banner_img_url,
+		p.Website_url,
+		p.Twitter_url,
+		p.Github_url,
+		p.Discord_url,
+		p.Instagram_url,
+		p.Proposal_validation,
+		p.Proposal_threshold,
+		p.Category,
+		p.Terms_and_conditions_url,
 		c.ID,
 	)
-
-	return err // will be nil unless something went wrong
+	return err
 }
 
 func (c *Community) CanUpdateCommunity(db *s.Database, addr string) error {

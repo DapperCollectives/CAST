@@ -57,7 +57,8 @@ var (
 	exampleNFTName = "ExampleNFT"
 	exampleNFTAddr = "0xf8d6e0586b0a20c7"
 
-	strategies = []string{"token-weighted-default", "staked-token-weighted-default"}
+	strategies        = []string{"token-weighted-default", "staked-token-weighted-default"}
+	updatedStrategies = []string{"token-weighted-default", "staked-token-weighted-default", "one-address-one-vote"}
 
 	DefaultCommunity = models.Community{
 		Name:                   "TestDAO",
@@ -105,6 +106,7 @@ var (
 		Github_url:               &github,
 		Discord_url:              &discord,
 		Instagram_url:            &instagram,
+		Strategies:               &updatedStrategies,
 		Terms_and_conditions_url: &termsAndConditions,
 	}
 )
@@ -119,7 +121,9 @@ func (otu *OverflowTestUtils) GenerateCommunityPayload(signer string, payload *m
 	payload.Timestamp = timestamp
 	payload.Composite_signatures = compositeSignatures
 	payload.Signing_addr = &signingAddr
-	payload.Strategies = &strategies
+	if payload.Strategies == nil {
+		payload.Strategies = &strategies
+	}
 
 	return payload
 }
