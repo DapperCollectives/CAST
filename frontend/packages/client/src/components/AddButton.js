@@ -17,8 +17,8 @@ export default function AddButton({
     { "cursor-pointer": !disabled }
   );
   return (
-    <div className={classNames} onClick={onAdd}>
-      <Plus />{" "}
+    <div className={classNames} onClick={!disabled ? onAdd : () => {}}>
+      <Plus fill={disabled ? "hsl(0, 0%, 48%)" : "black"} />{" "}
       <span className="ml-2 small-text is-flex is-align-items-center">
         Add{` ${addText}`}
       </span>
