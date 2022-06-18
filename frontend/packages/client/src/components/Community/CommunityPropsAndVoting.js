@@ -5,7 +5,12 @@ import { Bin } from "components/Svg";
 import { useModalContext } from "contexts/NotificationModal";
 import StrategyEditorModal from "./StrategyEditorModal";
 
-const StrategyInput = ({ index, commuVotStra, onDeleteStrategy } = {}) => {
+const StrategyInput = ({
+  index,
+  commuVotStra,
+  onDeleteStrategy,
+  enableDelete,
+} = {}) => {
   return (
     <div
       key={`index-${index}`}
@@ -30,12 +35,14 @@ const StrategyInput = ({ index, commuVotStra, onDeleteStrategy } = {}) => {
           top: 9,
         }}
       >
-        <div
-          className="cursor-pointer is-flex is-align-items-center"
-          onClick={() => onDeleteStrategy(index)}
-        >
-          <Bin />
-        </div>
+        {enableDelete && (
+          <div
+            className="cursor-pointer is-flex is-align-items-center"
+            onClick={() => onDeleteStrategy(index)}
+          >
+            <Bin />
+          </div>
+        )}
       </div>
     </div>
   );
@@ -93,7 +100,7 @@ export default function CommunityProposalsAndVoting({
     setCurrentStrategies((state) =>
       state.map((datum, idx) => {
         if (idx === index) {
-          return { ...datum, removed: true };
+          return { ...datum, toBeRemoved: true };
         }
         return datum;
       })
@@ -123,6 +130,7 @@ export default function CommunityProposalsAndVoting({
 
   const savingData = false;
 
+  const enableDelete = currentStrategies.length + newStrategies.length > 1;
   return (
     <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6 p-4-mobile mb-4-mobile">
       <div className="columns flex-1">
@@ -147,6 +155,7 @@ export default function CommunityProposalsAndVoting({
             key={`existing-${index}`}
             commuVotStra={commuVotStra.strategy}
             onDeleteStrategy={onDeleteStrategy}
+            enableDelete={enableDelete}
           />
         )
       )}
@@ -156,6 +165,7 @@ export default function CommunityProposalsAndVoting({
           key={`new-${index}`}
           commuVotStra={st.strategy}
           onDeleteStrategy={onDeleteNewStrategy}
+          enableDelete={enableDelete}
         />
       ))}
       <AddButton
