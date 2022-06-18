@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import StrategySelector from "./StrategySelector";
-import StrategyInformation from "./StrategyInformation";
+import StrategyInformationForm from "./StrategyInformationForm";
 import { ActionButton } from "components";
 import { isValidAddress } from "utils";
 
@@ -113,7 +113,7 @@ export default function StrategyEditorModal({
           />
         )}
         {step === ModalSteps[2] && (
-          <StrategyInformation
+          <StrategyInformationForm
             setField={setInformationField}
             formData={data}
             formFields={formFields}

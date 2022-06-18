@@ -8,7 +8,7 @@ const staticPlaceholders = {
   minimunBalance: "Minimum Balance",
 };
 
-export default function StrategyInformation({
+export default function StrategyInformationForm({
   formFields = [],
   formData = {},
   setField = () => {},
