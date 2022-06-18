@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/DapperCollectives/CAST/backend/main/server"
+	"github.com/DapperCollectives/CAST/backend/main/shared"
 	utils "github.com/DapperCollectives/CAST/backend/main/test_utils"
 	"github.com/bjartek/overflow/overflow"
 	"github.com/joho/godotenv"
@@ -24,6 +25,7 @@ func TestMain(m *testing.M) {
 
 	emulator := overflow.NewOverflowEmulator()
 	emulator.Config("../flow.json")
+	emulator.BasePath("./main/cadence")
 	O = emulator.Start()
 
 	CWD := "../"
@@ -50,8 +52,10 @@ func TestMain(m *testing.M) {
 		os.Getenv("IPFS_SECRET"),
 	)
 
+	adapter := shared.NewFlowClient(os.Getenv("FLOW_ENV"))
+
 	// Setup overflow test utils struct
-	otu = &utils.OverflowTestUtils{T: nil, A: &A, O: O}
+	otu = &utils.OverflowTestUtils{T: nil, A: &A, O: O, Adapter: adapter}
 
 	ensureTableExists()
 	// Clear DB tables before running tests

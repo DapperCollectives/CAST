@@ -67,12 +67,14 @@ type Strategy interface {
 	GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error)
 	FetchBalance(db *shared.Database, b *models.Balance, sc *shared.SnapshotClient) (*models.Balance, error)
 	GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error)
+	InitStrategy(f *shared.FlowAdapter, db *shared.Database)
 }
 
 var strategyMap = map[string]Strategy{
 	"token-weighted-default":        &strategies.TokenWeightedDefault{},
 	"staked-token-weighted-default": &strategies.StakedTokenWeightedDefault{},
 	"one-address-one-vote":          &strategies.OneAddressOneVote{},
+	"balance-of-nfts":               &strategies.BalanceOfNfts{},
 }
 
 const (
@@ -298,7 +300,7 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get the votes for proposal
-	votes, err := models.GetAllVotesForProposal(a.DB, proposalId)
+	votes, err := models.GetAllVotesForProposal(a.DB, proposalId, *p.Strategy)
 	if err != nil {
 		// print the error to the console
 		log.Error().Err(err).Msg("Error getting votes for proposal")
@@ -353,7 +355,7 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//get the proposal by Id
+	//get the proposal
 	proposal := models.Proposal{ID: proposalId}
 	if err := proposal.GetProposalById(a.DB); err != nil {
 		switch err.Error() {
@@ -370,6 +372,8 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, "Invalid Strategy")
 		return
 	}
+
+	s.InitStrategy(a.FlowAdapter, a.DB)
 
 	votesWithWeights, err := s.GetVotes(votes, &proposal)
 	if err != nil {
@@ -589,7 +593,10 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 	emptyBalance := &models.Balance{
 		Addr:        v.Addr,
 		BlockHeight: p.Block_height,
+		Proposal_id: p.ID,
 	}
+
+	s.InitStrategy(a.FlowAdapter, a.DB)
 
 	balance, err := s.FetchBalance(a.DB, emptyBalance, a.SnapshotClient)
 	if err != nil {
@@ -620,15 +627,15 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if os.Getenv("APP_ENV") != "TEST" {
-		pin, err := a.IpfsClient.PinJson(p)
+		pin, err := a.IpfsClient.PinJson(v)
 		if err != nil {
 			log.Error().Err(err).Msg("error pinning vote to IPFS")
 		} else {
-			p.Cid = &pin.IpfsHash
+			v.Cid = &pin.IpfsHash
 		}
 	} else {
 		dummyCid := "0000000000"
-		p.Cid = &dummyCid
+		v.Cid = &dummyCid
 	}
 
 	if err := v.CreateVote(a.DB); err != nil {
@@ -767,6 +774,14 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
+		if community.Public_path == nil || community.Threshold == nil {
+			pathDefault := "none"
+			thresholdDefault := 0.00
+
+			community.Public_path = &pathDefault
+			community.Threshold = &thresholdDefault
+		}
+
 		var contract = &shared.Contract{
 			Name:        community.Contract_name,
 			Addr:        community.Contract_addr,
@@ -789,15 +804,17 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// pin to ipfs
 	if os.Getenv("APP_ENV") != "TEST" {
 		pin, err := a.IpfsClient.PinJson(p)
 		if err != nil {
-			log.Error().Err(err).Msg("error pinning vote to IPFS")
-		} else {
-			p.Cid = &pin.IpfsHash
+			log.Error().Err(err).Msg("error pinning proposal to IPFS")
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+			return
 		}
+		p.Cid = &pin.IpfsHash
 	} else {
-		dummyCid := "0000000000"
+		dummyCid := "000000"
 		p.Cid = &dummyCid
 	}
 
@@ -879,15 +896,16 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 	// Set new status
 	p.Status = &payload.Status // pin to ipfs
 
+	// Pin to ipfs
 	if os.Getenv("APP_ENV") != "TEST" {
 		pin, err := a.IpfsClient.PinJson(p)
 		if err != nil {
-			log.Error().Err(err).Msg("error pinning vote to IPFS")
-		} else {
-			p.Cid = &pin.IpfsHash
+			respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
+			return
 		}
+		p.Cid = &pin.IpfsHash
 	} else {
-		dummyCid := "0000000000"
+		dummyCid := "000000"
 		p.Cid = &dummyCid
 	}
 
@@ -1000,12 +1018,12 @@ func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 	if os.Getenv("APP_ENV") != "TEST" {
 		pin, err := a.IpfsClient.PinJson(c)
 		if err != nil {
-			log.Error().Err(err).Msg("error pinning vote to IPFS")
-		} else {
-			c.Cid = &pin.IpfsHash
+			respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
+			return
 		}
+		c.Cid = &pin.IpfsHash
 	} else {
-		dummyCid := "0000000000"
+		dummyCid := "000000000000000"
 		c.Cid = &dummyCid
 	}
 
@@ -1237,12 +1255,13 @@ func (a *App) createListForCommunity(w http.ResponseWriter, r *http.Request) {
 	if os.Getenv("APP_ENV") != "TEST" {
 		pin, err := a.IpfsClient.PinJson(l)
 		if err != nil {
-			log.Error().Err(err).Msg("error pinning vote to IPFS")
-		} else {
-			l.Cid = &pin.IpfsHash
+			log.Error().Err(err).Msg("error pinning list to IPFS")
+			respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
+			return
 		}
+		l.Cid = &pin.IpfsHash
 	} else {
-		dummyCid := "0000000000"
+		dummyCid := "000000"
 		l.Cid = &dummyCid
 	}
 
@@ -1315,15 +1334,17 @@ func (a *App) addAddressesToList(w http.ResponseWriter, r *http.Request) {
 	// Add specified addresses to list
 	l.AddAddresses(payload.Addresses)
 
+	// Pin to ipfs
 	if os.Getenv("APP_ENV") != "TEST" {
 		pin, err := a.IpfsClient.PinJson(l)
 		if err != nil {
-			log.Error().Err(err).Msg("error pinning vote to IPFS")
-		} else {
-			l.Cid = &pin.IpfsHash
+			log.Error().Err(err).Msg("error pinning to ipfs")
+			respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
+			return
 		}
+		l.Cid = &pin.IpfsHash
 	} else {
-		dummyCid := "0000000000"
+		dummyCid := "000000"
 		l.Cid = &dummyCid
 	}
 
@@ -1395,15 +1416,17 @@ func (a *App) removeAddressesFromList(w http.ResponseWriter, r *http.Request) {
 	// Remove specified addresses
 	l.RemoveAddresses(payload.Addresses)
 
+	// Pin to ipfs
 	if os.Getenv("APP_ENV") != "TEST" {
 		pin, err := a.IpfsClient.PinJson(l)
 		if err != nil {
-			log.Error().Err(err).Msg("error pinning vote to IPFS")
-		} else {
-			l.Cid = &pin.IpfsHash
+			log.Error().Err(err).Msg("ipfs error")
+			respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
+			return
 		}
+		l.Cid = &pin.IpfsHash
 	} else {
-		dummyCid := "0000000000"
+		dummyCid := "000000"
 		l.Cid = &dummyCid
 	}
 

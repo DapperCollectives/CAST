@@ -1,9 +1,7 @@
 import NonFungibleToken from 0xf8d6e0586b0a20c7
 import ExampleNFT from 0xf8d6e0586b0a20c7
-import MetadataViews from 0xf8d6e0586b0a20c7
-
-/// This transaction is what an account would run
-/// to set itself up to receive NFTs
+// This transaction is what an account would run
+// to set itself up to receive NFTs
 transaction {
 
     prepare(signer: AuthAccount) {
@@ -19,7 +17,7 @@ transaction {
         signer.save(<-collection, to: ExampleNFT.CollectionStoragePath)
 
         // create a public capability for the collection
-        signer.link<&{NonFungibleToken.CollectionPublic, ExampleNFT.ExampleNFTCollectionPublic, MetadataViews.ResolverCollection}>(
+        signer.link<&{NonFungibleToken.CollectionPublic, ExampleNFT.ExampleNFTCollectionPublic}>(
             ExampleNFT.CollectionPublicPath,
             target: ExampleNFT.CollectionStoragePath
         )

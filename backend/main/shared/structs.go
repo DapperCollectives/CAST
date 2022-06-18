@@ -18,6 +18,11 @@ type Database struct {
 	Env     *string
 }
 
+type StrategyStruct struct {
+	FlowAdapter *FlowAdapter
+	DB          *Database
+}
+
 type Allowlist struct {
 	Addresses []string `json:"addresses"`
 }
@@ -40,8 +45,8 @@ type CompositeSignature struct {
 
 type TimestampSignaturePayload struct {
 	Composite_signatures *[]CompositeSignature `json:"compositeSignatures" validate:"required"`
-	Signing_addr         string                `json:"signingAddr" validate:"required"`
-	Timestamp            string                `json:"timestamp" validate:"required"`
+	Signing_addr         string                `json:"signingAddr"         validate:"required"`
+	Timestamp            string                `json:"timestamp"           validate:"required"`
 }
 
 // used in models/proposal.go
