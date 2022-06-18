@@ -1008,7 +1008,6 @@ func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO: since we removed the allowlist, some sort of rate limiting will probably be necessary
-
 	if err := a.validateSignature(c.Creator_addr, c.Timestamp, c.Composite_signatures); err != nil {
 		respondWithError(w, http.StatusForbidden, err.Error())
 		return
