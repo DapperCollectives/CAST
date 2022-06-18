@@ -54,6 +54,17 @@ export default function StrategyEditorModal({
   // user selected strategy move to second step to enter information
   const setStrategy = (strategy) => {
     setData((state) => ({ ...state, strategy }));
+
+    //
+    // Very important!!!
+    // If strategy selected is 'one-address-one-vote'
+    // then no more information is required
+    // modal should be closed and
+    // strategy should be ready to be added
+    if (strategy === "one-address-one-vote") {
+      onDone({ strategy });
+      return;
+    }
     setSep(ModalSteps[2]);
   };
 
