@@ -1,11 +1,11 @@
-import { useReducer, useEffect, useCallback } from "react";
+import { useReducer, useEffect, useCallback } from 'react';
 import {
   paginationReducer,
   PAGINATION_INITIAL_STATE,
   INITIAL_STATE,
-} from "../reducers";
-import { checkResponse } from "../utils";
-import { useErrorHandlerContext } from "../contexts/ErrorHandler";
+} from '../reducers';
+import { checkResponse } from '../utils';
+import { useErrorHandlerContext } from '../contexts/ErrorHandler';
 
 /**
  * Hook to return proposals created on a community. Results are paginated
@@ -37,12 +37,12 @@ export default function useCommunityProposals({
    * Function to fetch more results based on pagination configuration
    */
   const fetchMore = useCallback(async () => {
-    dispatch({ type: "PROCESSING" });
+    dispatch({ type: 'PROCESSING' });
     const url = `${
       process.env.REACT_APP_BACK_END_SERVER_API
     }/communities/${communityId}/proposals?count=${
       state.pagination.count
-    }&start=${state.pagination.start}${status ? `&status=${status}` : ""}`;
+    }&start=${state.pagination.start}${status ? `&status=${status}` : ''}`;
     try {
       const response = await fetch(url);
       const proposals = await checkResponse(response);
@@ -51,25 +51,25 @@ export default function useCommunityProposals({
         ...p,
         // missing fields added to avoid breaking the frontend rendering
         winCount: 4480000,
-        textDecision: "No, do not compensate them",
+        textDecision: 'No, do not compensate them',
       }));
 
       dispatch({
-        type: "SUCCESS",
+        type: 'SUCCESS',
         payload: { ...proposals, data: updatedProposals },
       });
     } catch (err) {
       notifyError(err, url);
-      dispatch({ type: "ERROR", payload: { errorData: err.message } });
+      dispatch({ type: 'ERROR', payload: { errorData: err.message } });
     }
   }, [state.pagination, communityId, status, notifyError]);
 
   const getCommunityProposals = useCallback(async () => {
-    dispatch({ type: "PROCESSING" });
+    dispatch({ type: 'PROCESSING' });
     const url = `${
       process.env.REACT_APP_BACK_END_SERVER_API
     }/communities/${communityId}/proposals?count=${count}&start=${start}${
-      status ? `&status=${status}` : ""
+      status ? `&status=${status}` : ''
     }`;
     try {
       const response = await fetch(url);
@@ -79,21 +79,21 @@ export default function useCommunityProposals({
         ...p,
         // missing fields added to avoid breaking the frontend rendering
         winCount: 4480000,
-        textDecision: "No, do not compensate them",
+        textDecision: 'No, do not compensate them',
       }));
 
       dispatch({
-        type: "SUCCESS",
+        type: 'SUCCESS',
         payload: { ...proposals, data: updatedProposals },
       });
     } catch (err) {
       notifyError(err, url);
-      dispatch({ type: "ERROR", payload: { errorData: err.message } });
+      dispatch({ type: 'ERROR', payload: { errorData: err.message } });
     }
   }, [dispatch, communityId, count, start, status, notifyError]);
 
   const resetResults = () => {
-    dispatch({ type: "RESET_RESULTS" });
+    dispatch({ type: 'RESET_RESULTS' });
   };
 
   useEffect(() => {

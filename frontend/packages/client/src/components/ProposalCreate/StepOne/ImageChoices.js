@@ -1,20 +1,20 @@
-import React, { useEffect } from "react";
-import ImageChoiceUploader from "./ImageChoiceUploader";
-import { getProposalType } from "../../../utils";
+import React, { useEffect } from 'react';
+import ImageChoiceUploader from './ImageChoiceUploader';
+import { getProposalType } from '../../../utils';
 
 const ImageChoices = ({ choices = [], onChoiceChange, initChoices } = {}) => {
   useEffect(() => {
-    if (getProposalType(choices) !== "image") {
+    if (getProposalType(choices) !== 'image') {
       initChoices([
         {
           id: 1,
-          value: "",
-          choiceImgUrl: "",
+          value: '',
+          choiceImgUrl: '',
         },
         {
           id: 2,
-          value: "",
-          choiceImgUrl: "",
+          value: '',
+          choiceImgUrl: '',
         },
       ]);
     }
@@ -39,8 +39,8 @@ const ImageChoices = ({ choices = [], onChoiceChange, initChoices } = {}) => {
         <div className="column">
           <ImageChoiceUploader
             image={{
-              imageUrl: choiceA?.choiceImgUrl ?? "",
-              text: choiceA?.value ?? "",
+              imageUrl: choiceA?.choiceImgUrl ?? '',
+              text: choiceA?.value ?? '',
             }}
             letterLabel="A"
             onImageUpdate={onImageUpdate(0)}
@@ -49,8 +49,8 @@ const ImageChoices = ({ choices = [], onChoiceChange, initChoices } = {}) => {
         <div className="column">
           <ImageChoiceUploader
             image={{
-              imageUrl: choiceB?.choiceImgUrl ?? "",
-              text: choiceB?.value ?? "",
+              imageUrl: choiceB?.choiceImgUrl ?? '',
+              text: choiceB?.value ?? '',
             }}
             letterLabel="B"
             onImageUpdate={onImageUpdate(1)}

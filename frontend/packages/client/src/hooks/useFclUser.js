@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
 export default function useFclUser(provider, forceLedger) {
   const [user, setUser] = useState({});
@@ -10,7 +10,7 @@ export default function useFclUser(provider, forceLedger) {
       if (forceLedger) {
         setIsLedger(true);
       } else if (user?.services) {
-        setIsLedger(user.services[0]?.uid === "fcl-ledger-authz");
+        setIsLedger(user.services[0]?.uid === 'fcl-ledger-authz');
       }
     });
   }, [provider, forceLedger]);

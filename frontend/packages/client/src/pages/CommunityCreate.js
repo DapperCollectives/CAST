@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from "react";
-import { useHistory } from "react-router-dom";
-import { StepByStep, WalletConnect, Error } from "components";
-import { useWebContext } from "contexts/Web3";
-import { useModalContext } from "contexts/NotificationModal";
+import React, { useState, useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
+import { StepByStep, WalletConnect, Error } from 'components';
+import { useWebContext } from 'contexts/Web3';
+import { useModalContext } from 'contexts/NotificationModal';
 import {
   StartSteps,
   StepOne,
   StepTwo,
   StepThree,
-} from "components/CommunityCreate";
-import useCommunity from "hooks/useCommunity";
-import { generateSlug } from "utils";
+} from 'components/CommunityCreate';
+import useCommunity from 'hooks/useCommunity';
+import { generateSlug } from 'utils';
 
 export default function CommunityCreate() {
   const [modalError, setModalError] = useState(false);
@@ -55,9 +55,9 @@ export default function CommunityCreate() {
             </div>
           ),
 
-          errorTitle: "Please connect a wallet to create a community.",
+          errorTitle: 'Please connect a wallet to create a community.',
         }),
-        { classNameModalContent: "rounded-sm" }
+        { classNameModalContent: 'rounded-sm' }
       );
       setModalError(true);
       return;
@@ -75,39 +75,39 @@ export default function CommunityCreate() {
   };
 
   const props = {
-    finalLabel: "Publish",
+    finalLabel: 'Publish',
     onSubmit,
     isSubmitting: creatingCommunity && !error,
     styleConfig: {
       currentStep: {
         icon: {
-          textColor: "has-text-white",
-          backgroundColor: "has-background-black",
+          textColor: 'has-text-white',
+          backgroundColor: 'has-background-black',
         },
       },
     },
-    submittingMessage: "Creating community...",
+    submittingMessage: 'Creating community...',
     passNextToComp: true,
     passSubmitToComp: true,
     preStep: <StartSteps />,
     steps: [
       {
-        label: "Community Profile",
+        label: 'Community Profile',
         description:
-          "Some description of what you can write here that is useful.",
+          'Some description of what you can write here that is useful.',
         component: <StepOne />,
       },
       {
-        label: "Community Details",
+        label: 'Community Details',
         description:
-          "Some description of what you can write here that is useful.",
-        component: <StepTwo stepData={{ test: "ok" }} />,
+          'Some description of what you can write here that is useful.',
+        component: <StepTwo stepData={{ test: 'ok' }} />,
       },
       {
-        label: "Proposal & Voting",
+        label: 'Proposal & Voting',
         description:
-          "Some description of what you can write here that is useful.",
-        component: <StepThree stepData={{ test: "ok" }} />,
+          'Some description of what you can write here that is useful.',
+        component: <StepThree stepData={{ test: 'ok' }} />,
       },
     ],
   };

@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import useUserCommunities from "./useUserCommunities";
+import { useEffect } from 'react';
+import useUserCommunities from './useUserCommunities';
 
 export default function useUserRoleOnCommunity({
   addr,

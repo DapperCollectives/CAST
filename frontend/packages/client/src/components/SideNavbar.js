@@ -1,12 +1,12 @@
-import React from "react";
-import { Logo, LinkOut } from "./Svg";
-import { NavLink } from "react-router-dom";
+import React from 'react';
+import { Logo, LinkOut } from './Svg';
+import { NavLink } from 'react-router-dom';
 
 const Sidenavbar = ({ showSidenav, closeSidenav }) => {
   return (
     <div
       className={`modal is-align-items-flex-start is-justify-content-flex-start is-hidden-tablet has-background-white${
-        showSidenav ? " is-active" : ""
+        showSidenav ? ' is-active' : ''
       }`}
     >
       <div className="modal-content">
@@ -26,14 +26,14 @@ const Sidenavbar = ({ showSidenav, closeSidenav }) => {
             onClick={closeSidenav}
             className="navbar-item pl-0 py-6"
           >
-            <Logo width={"136"} height={"40"} />
+            <Logo width={'136'} height={'40'} />
           </NavLink>
           <aside className="menu">
             <ul className="menu-list">
               <li>
                 <NavLink
                   to={{
-                    pathname: "/about",
+                    pathname: '/about',
                     state: { modal: true },
                   }}
                   className="navbar-item pl-0 py-4 is-size-5"

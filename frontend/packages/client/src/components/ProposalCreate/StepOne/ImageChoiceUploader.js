@@ -1,16 +1,16 @@
-import React, { useState, useCallback, useEffect } from "react";
-import { useDropzone } from "react-dropzone";
-import { useFileUploader } from "hooks";
-import { Upload, Bin } from "components/Svg";
-import { Loader } from "components";
-import { MAX_FILE_SIZE } from "const";
+import React, { useState, useCallback, useEffect } from 'react';
+import { useDropzone } from 'react-dropzone';
+import { useFileUploader } from 'hooks';
+import { Upload, Bin } from 'components/Svg';
+import { Loader } from 'components';
+import { MAX_FILE_SIZE } from 'const';
 
 const IMAGE_STATUS = {
-  notStarted: "not-started",
-  uploading: "uploading",
-  uploaded: "uploaded",
-  deleted: "deleted",
-  toBeDeleted: "to-be-deleted",
+  notStarted: 'not-started',
+  uploading: 'uploading',
+  uploaded: 'uploaded',
+  deleted: 'deleted',
+  toBeDeleted: 'to-be-deleted',
 };
 
 const UploadArea = ({ getRootProps, getInputProps, errorMessage }) => {
@@ -19,12 +19,12 @@ const UploadArea = ({ getRootProps, getInputProps, errorMessage }) => {
       <div
         className={`is-flex is-flex-direction-column is-align-items-center is-justify-content-center cursor-pointer`}
         style={{
-          borderRadius: "8px",
-          border: "1px dashed #757575",
-          overflow: "hidden",
-          position: "relative",
-          height: "215px",
-          width: "100%",
+          borderRadius: '8px',
+          border: '1px dashed #757575',
+          overflow: 'hidden',
+          position: 'relative',
+          height: '215px',
+          width: '100%',
         }}
         {...getRootProps()}
       >
@@ -51,7 +51,7 @@ const initialState = {
   imageUrl: null,
   uploadStatus: null,
   file: null,
-  text: "",
+  text: '',
 };
 
 export default function ImageChoiceUploader({
@@ -70,7 +70,7 @@ export default function ImageChoiceUploader({
   };
 
   const [image, setImage] = useState(
-    imageParam.imageUrl === "" ? initialState : existingImage
+    imageParam.imageUrl === '' ? initialState : existingImage
   );
 
   const { uploadFile, loading, error } = useFileUploader({
@@ -106,7 +106,7 @@ export default function ImageChoiceUploader({
       }));
       onImageUpdate({
         ...image,
-        imageUrl: "",
+        imageUrl: '',
       });
     }
     if (image.text !== imageParam?.text) {
@@ -149,7 +149,7 @@ export default function ImageChoiceUploader({
         setErrorMessage(null);
         if (imageFile.size > MAX_FILE_SIZE) {
           setErrorMessage(
-            "Image file size not allowed: Please upload a new file (smaller than 5mb)"
+            'Image file size not allowed: Please upload a new file (smaller than 5mb)'
           );
           return;
         }
@@ -160,7 +160,7 @@ export default function ImageChoiceUploader({
         img.onload = function (e) {
           const { target } = e;
           const maxDim =
-            target.naturalWidth > target.naturalHeight ? "width" : "height";
+            target.naturalWidth > target.naturalHeight ? 'width' : 'height';
           setImage((state) => ({
             ...state,
             imageUrl: imageAsURL,
@@ -178,7 +178,7 @@ export default function ImageChoiceUploader({
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
     maxFiles: 1,
-    accept: "image/jpeg,image/png,image/gif",
+    accept: 'image/jpeg,image/png,image/gif',
   });
 
   return (
@@ -195,12 +195,12 @@ export default function ImageChoiceUploader({
         <div
           className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center"
           style={{
-            borderRadius: "8px",
-            border: "1px dashed #757575",
-            overflow: "hidden",
-            position: "relative",
-            height: "215px",
-            width: "100%",
+            borderRadius: '8px',
+            border: '1px dashed #757575',
+            overflow: 'hidden',
+            position: 'relative',
+            height: '215px',
+            width: '100%',
           }}
         >
           <Loader size={18} className="mb-3" spacing="mx-button-loader" />
@@ -212,26 +212,26 @@ export default function ImageChoiceUploader({
           className="is-flex flex-1 is-flex-direction-column is-align-items-flex-end is-justify-content-flex-start"
           style={{
             backgroundImage: `url(${image.imageUrl})`,
-            backgroundRepeat: "no-repeat",
-            backgroundPosition: "center",
-            backgroundSize: "contain",
-            borderRadius: "8px",
-            height: "445px",
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'center',
+            backgroundSize: 'contain',
+            borderRadius: '8px',
+            height: '445px',
           }}
         >
           <div
             className="has-background-white rounded-sm cursor-pointer"
             style={{
-              position: "relative",
-              marginTop: "16px",
-              marginRight: "16px",
-              paddingTop: "6px",
-              paddingLeft: "8px",
-              paddingRight: "8px",
-              paddingBottom: "3px",
-              borderStyle: "solid",
-              borderWidth: "1px",
-              borderColor: "#ccc",
+              position: 'relative',
+              marginTop: '16px',
+              marginRight: '16px',
+              paddingTop: '6px',
+              paddingLeft: '8px',
+              paddingRight: '8px',
+              paddingBottom: '3px',
+              borderStyle: 'solid',
+              borderWidth: '1px',
+              borderColor: '#ccc',
             }}
             onClick={onDeleteImage}
           >
@@ -252,7 +252,7 @@ export default function ImageChoiceUploader({
             text: event.target.value,
           }))
         }
-        style={{ width: "100%" }}
+        style={{ width: '100%' }}
       />
     </div>
   );

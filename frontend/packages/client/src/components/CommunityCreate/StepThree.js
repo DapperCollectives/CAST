@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
-import { WrapperResponsive } from "components";
-import { isValidAddress } from "utils";
+import React, { useEffect } from 'react';
+import { WrapperResponsive } from 'components';
+import { isValidAddress } from 'utils';
 
 export default function StepThree({
   stepData,
@@ -10,10 +10,10 @@ export default function StepThree({
   isStepValid,
 }) {
   const {
-    proposalThreshold = "",
-    contractAddress = "",
-    contractName = "",
-    storagePath = "",
+    proposalThreshold = '',
+    contractAddress = '',
+    contractName = '',
+    storagePath = '',
     onlyAuthorsToSubmitProposals = false,
   } = stepData || {};
 
@@ -112,9 +112,9 @@ export default function StepThree({
       </WrapperResponsive>
       <div className="column p-0 is-12 mt-4">
         <button
-          style={{ height: 48, width: "100%" }}
+          style={{ height: 48, width: '100%' }}
           className={`button vote-button transition-all is-flex has-background-yellow rounded-sm is-enabled is-size-6 ${
-            !isStepValid ? "is-disabled" : ""
+            !isStepValid ? 'is-disabled' : ''
           }`}
           onClick={isStepValid ? () => onSubmit() : () => {}}
         >

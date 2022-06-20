@@ -1,28 +1,28 @@
-import React, { useEffect, useCallback } from "react";
-import { useDropzone } from "react-dropzone";
-import { Upload } from "components/Svg";
-import { WrapperResponsive, Dropdown } from "components";
-import { CommunityLinksForm } from "components/Community/CommunityEditorLinks";
+import React, { useEffect, useCallback } from 'react';
+import { useDropzone } from 'react-dropzone';
+import { Upload } from 'components/Svg';
+import { WrapperResponsive, Dropdown } from 'components';
+import { CommunityLinksForm } from 'components/Community/CommunityEditorLinks';
 import useLinkValidator, {
   urlPatternValidation,
-} from "../Community/hooks/useLinkValidator";
-import { getReducedImg } from "utils";
-import { useErrorHandlerContext } from "contexts/ErrorHandler";
-import { MAX_FILE_SIZE } from "const";
-import pick from "lodash/pick";
-import { useCommunityCategory } from "hooks";
+} from '../Community/hooks/useLinkValidator';
+import { getReducedImg } from 'utils';
+import { useErrorHandlerContext } from 'contexts/ErrorHandler';
+import { MAX_FILE_SIZE } from 'const';
+import pick from 'lodash/pick';
+import { useCommunityCategory } from 'hooks';
 
 const linksFields = [
-  "websiteUrl",
-  "twitterUrl",
-  "instagramUrl",
-  "discordUrl",
-  "githubUrl",
+  'websiteUrl',
+  'twitterUrl',
+  'instagramUrl',
+  'discordUrl',
+  'githubUrl',
 ];
 
 const initialValues = Object.assign(
   {},
-  ...linksFields.map((key) => ({ [key]: "" }))
+  ...linksFields.map((key) => ({ [key]: '' }))
 );
 export default function StepOne({
   stepData,
@@ -44,19 +44,19 @@ export default function StepOne({
       acceptedFiles.forEach((imageFile) => {
         // validate type
         if (
-          !["image/png", "image/jpeg", "image/jpg"].includes(imageFile.type)
+          !['image/png', 'image/jpeg', 'image/jpg'].includes(imageFile.type)
         ) {
           notifyError({
-            status: "Image Type not supported",
-            statusText: "Please upload a .png or .jpeg file type extension",
+            status: 'Image Type not supported',
+            statusText: 'Please upload a .png or .jpeg file type extension',
           });
           return;
         }
         // validate size
         if (imageFile.size > MAX_FILE_SIZE) {
           notifyError({
-            status: "Image file size not allowed",
-            statusText: "Please upload a new file (smaller than 5mb)",
+            status: 'Image file size not allowed',
+            statusText: 'Please upload a new file (smaller than 5mb)',
           });
           return;
         }
@@ -66,7 +66,7 @@ export default function StepOne({
         img.onload = function (e) {
           // reduce image if necessary before upload
           if (e.target.width > 150) {
-            getReducedImg(e.target, 150, "community_image").then((result) => {
+            getReducedImg(e.target, 150, 'community_image').then((result) => {
               onDataChange({
                 logo: { imageUrl: imageAsURL, file: result.imageFile },
               });
@@ -84,7 +84,7 @@ export default function StepOne({
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
     maxFiles: 1,
-    accept: "image/jpeg,image/png",
+    accept: 'image/jpeg,image/png',
   });
 
   const { communityName, communityDescription, logo, communityTerms } =
@@ -147,12 +147,12 @@ export default function StepOne({
             <div
               className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center cursor-pointer"
               style={{
-                borderRadius: "50px",
-                height: "90px",
-                width: "90px",
-                overflow: "hidden",
-                position: "relative",
-                ...(!logo ? { border: "1px dashed #757575" } : undefined),
+                borderRadius: '50px',
+                height: '90px',
+                width: '90px',
+                overflow: 'hidden',
+                position: 'relative',
+                ...(!logo ? { border: '1px dashed #757575' } : undefined),
               }}
               {...getRootProps()}
             >
@@ -168,9 +168,9 @@ export default function StepOne({
                   className="is-flex flex-1 is-flex-direction-column is-align-items-center is-justify-content-center"
                   style={{
                     backgroundImage: `url(${logo.imageUrl})`,
-                    backgroundRepeat: "no-repeat",
-                    backgroundSize: "cover",
-                    width: "100%",
+                    backgroundRepeat: 'no-repeat',
+                    backgroundSize: 'cover',
+                    width: '100%',
                     opacity: 0.5,
                   }}
                 />
@@ -179,11 +179,11 @@ export default function StepOne({
                 <div
                   className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center"
                   style={{
-                    borderRadius: "50px",
-                    height: "40px",
-                    width: "40px",
-                    position: "absolute",
-                    backgroundColor: "#4a4a4a",
+                    borderRadius: '50px',
+                    height: '40px',
+                    width: '40px',
+                    position: 'absolute',
+                    backgroundColor: '#4a4a4a',
                   }}
                 >
                   <Upload className="has-text-white" />
@@ -198,14 +198,14 @@ export default function StepOne({
           placeholder="Community Name"
           name="community_name"
           className="rounded-sm border-light p-3 column is-full mt-2"
-          value={communityName || ""}
+          value={communityName || ''}
           onChange={(event) => setData({ communityName: event.target.value })}
         />
         <textarea
           className="text-area rounded-sm border-light p-3 column is-full mt-4"
           type="text"
           placeholder="About (short description)"
-          value={communityDescription || ""}
+          value={communityDescription || ''}
           name="community_details"
           rows="3"
           cols="30"
@@ -229,7 +229,7 @@ export default function StepOne({
           placeholder="Terms  (e.g. https://example.com/terms)"
           name="terms"
           className="rounded-sm border-light p-3 column is-full mt-4"
-          value={communityTerms || ""}
+          value={communityTerms || ''}
           onChange={(event) => setData({ communityTerms: event.target.value })}
         />
       </WrapperResponsive>
@@ -243,9 +243,9 @@ export default function StepOne({
       <div className="columns mb-5">
         <div className="column is-12">
           <button
-            style={{ height: 48, width: "100%" }}
+            style={{ height: 48, width: '100%' }}
             className={`button vote-button transition-all is-flex has-background-yellow rounded-sm is-size-6 is-uppercase is-${
-              isStepValid ? "enabled" : "disabled"
+              isStepValid ? 'enabled' : 'disabled'
             }`}
             onClick={isStepValid ? () => moveToNextStep() : () => {}}
           >
