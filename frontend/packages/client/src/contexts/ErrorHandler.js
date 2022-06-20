@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { useModalContext } from "./NotificationModal";
-import { Error } from "../components";
+import Error from "components/Error";
 
 const ErrorHandlerContext = React.createContext({});
 

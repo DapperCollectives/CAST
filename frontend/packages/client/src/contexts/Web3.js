@@ -1,4 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
+ // eslint-disable-next-line no-unused-vars
+import * as Buffer from "./Buffer";
 import * as fcl from "@onflow/fcl";
 import networks from "../networks";
 import { useFclUser } from "../hooks";
@@ -63,12 +65,12 @@ export function Web3Provider({ children, network = "testnet", ...props }) {
       .put("accessNode.api", accessApi) // connect to Flow
       .put("discovery.wallet", walletDiscovery); // use Blocto wallet
 
-    try {
-      const contracts = require("../contracts.json");
-      Object.keys(contracts).forEach((contract) => {
-        fcl.config().put(contract, contracts[contract]);
-      });
-    } catch (e) {}
+    // try {
+    //   const contracts = require("../contracts.json");
+    //   Object.keys(contracts).forEach((contract) => {
+    //     fcl.config().put(contract, contracts[contract]);
+    //   });
+    // } catch (e) {}
   }, [network]);
 
   const setWebContextConfig = useCallback((config) => {
