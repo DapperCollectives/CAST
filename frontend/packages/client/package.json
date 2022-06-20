@@ -57,19 +57,7 @@
       "prettier/prettier": [
         "error",
         {
-          "singleQuote": true,
-          "object-curly-spacing": [
-            "error",
-            "always"
-          ],
-          "array-bracket-spacing": [
-            "error",
-            "always"
-          ],
-          "computed-property-spacing": [
-            "error",
-            "always"
-          ]
+          "singleQuote": true
         },
         {
           "usePrettierrc": true
