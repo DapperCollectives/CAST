@@ -57,7 +57,11 @@
       "prettier/prettier": [
         "error",
         {
-          "singleQuote": true
+          "singleQuote": true,
+          "comma-dangle": [
+            "error",
+            "always-multiline"
+          ]
         },
         {
           "usePrettierrc": true
