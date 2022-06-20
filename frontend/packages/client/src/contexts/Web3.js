@@ -1,6 +1,4 @@
 import React, { useEffect, useState, useCallback } from "react";
- // eslint-disable-next-line no-unused-vars
-import * as Buffer from "./Buffer";
 import * as fcl from "@onflow/fcl";
 import networks from "../networks";
 import { useFclUser } from "../hooks";
