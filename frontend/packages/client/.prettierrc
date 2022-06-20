@@ -1,0 +1,6 @@
+{
+  "trailingComma": "all",
+  "singleQuote": true,
+  "semicolons": true,
+  "max-len": ["error", { "code": 80 }]
+}
