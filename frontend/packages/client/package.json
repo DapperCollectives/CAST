@@ -34,7 +34,6 @@
     "react-redux": "^7.2.4",
     "react-router-dom": "^5.2.0",
     "react-scripts": "^5.0.1",
-    "sass": "^1.49.8",
     "stream": "npm:stream-browserify",
     "string-strip-html": "8.3.0",
     "url": "npm:url",
@@ -72,6 +71,6 @@
     "@testing-library/react": "^13.3.0",
     "@testing-library/user-event": "^14.0.0",
     "react-test-renderer": "^17.0.2",
-    "sass": "^1.47.0"
+    "sass": "^1.49.8"
   }
 }
