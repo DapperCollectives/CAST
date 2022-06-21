@@ -26,6 +26,8 @@ export default function useCommunityDetails(id) {
         about: {
           textAbout: details.body,
         },
+        // mocked data
+        strategies: ["one-address-one-vote"],
         ...details,
       };
 
@@ -71,14 +73,6 @@ export default function useCommunityDetails(id) {
         dispatch({ type: "PROCESSING" });
         const response = await fetch(url, fetchOptions);
         const json = await checkResponse(response);
-        const wait = async () =>
-          new Promise((resolve) => {
-            setTimeout(() => {
-              resolve(true);
-            }, 4000);
-          });
-
-        await wait();
         dispatch({
           type: "SUCCESS",
           payload: json,

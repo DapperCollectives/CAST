@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Plus, Bin, ValidCheckMark, InvalidCheckMark } from "components/Svg";
-import { WrapperResponsive, Loader } from "components";
+import { Bin, ValidCheckMark, InvalidCheckMark } from "components/Svg";
+import { WrapperResponsive, Loader, AddButton } from "components";
 import { useCommunityUsers } from "hooks";
 import { useErrorHandlerContext } from "contexts/ErrorHandler";
 import { useWebContext } from "contexts/Web3";
@@ -127,18 +127,12 @@ export const CommunityUsersForm = ({
           })}
         </div>
       )}
-      <div
-        className={`mt-2 is-flex is-align-items-centered ${
-          loadingUsers ? "is-disabled has-text-grey" : "cursor-pointer"
-        }`}
-        onClick={onAddAddress}
-        style={loadingUsers ? { opacity: 0.5 } : {}}
-      >
-        <Plus />{" "}
-        <span className="ml-2 small-text is-flex is-align-items-center">
-          Add{` ${addrType}`}
-        </span>
-      </div>
+      <AddButton
+        disabled={loadingUsers}
+        addText={addrType}
+        onAdd={onAddAddress}
+        className="mt-2"
+      />
       {submitComponent}
     </div>
   );
