@@ -6,8 +6,8 @@ export default function StepThree({
   stepData,
   setStepValid,
   onDataChange,
-  onSubmit,
   isStepValid,
+  moveToNextStep,
 }) {
   const {
     proposalThreshold = "",
@@ -110,16 +110,19 @@ export default function StepThree({
           </p>
         </label>
       </WrapperResponsive>
-      <div className="column p-0 is-12 mt-4">
-        <button
-          style={{ height: 48, width: "100%" }}
-          className={`button vote-button transition-all is-flex has-background-yellow rounded-sm is-enabled is-size-6 ${
-            !isStepValid ? "is-disabled" : ""
-          }`}
-          onClick={isStepValid ? () => onSubmit() : () => {}}
-        >
-          CREATE COMMUNITY
-        </button>
+
+      <div className="columns mb-5">
+        <div className="column is-12">
+          <button
+            style={{ height: 48, width: "100%" }}
+            className={`button vote-button transition-all is-flex has-background-yellow rounded-sm is-size-6 is-uppercase is-${
+              isStepValid ? "enabled" : "disabled"
+            }`}
+            onClick={isStepValid ? () => moveToNextStep() : () => {}}
+          >
+            Next: VOTING STRATEGIES
+          </button>
+        </div>
       </div>
     </>
   );
