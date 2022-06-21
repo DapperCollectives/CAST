@@ -8,31 +8,33 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/DapperCollectives/CAST/backend/main/shared"
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/jackc/pgx/v4"
 )
 
 type Community struct {
-	ID                       int       `json:"id,omitempty"`
-	Name                     string    `json:"name"                            validate:"required"`
-	Category                 *string   `json:"category,omitempty"              validate:"required"`
-	Logo                     *string   `json:"logo,omitempty"`
-	Body                     *string   `json:"body,omitempty"                  validate:"required"`
-	Strategies               *[]string `json:"strategies,omitempty"`
-	Strategy                 *string   `json:"strategy,omitempty"`
-	Banner_img_url           *string   `json:"bannerImgUrl,omitempty"`
-	Website_url              *string   `json:"websiteUrl,omitempty"`
-	Twitter_url              *string   `json:"twitterUrl,omitempty"`
-	Github_url               *string   `json:"githubUrl,omitempty"`
-	Discord_url              *string   `json:"discordUrl,omitempty"`
-	Instagram_url            *string   `json:"instagramUrl,omitempty"`
-	Terms_and_conditions_url *string   `json:"termsAndConditionsUrl,omitempty"`
-	Only_authors_to_submit   *bool     `json:"onlyAuthorsToSubmit,omitempty"`
-	Proposal_validation      *string   `json:"proposalValidation,omitempty"`
-	Proposal_threshold       *string   `json:"proposalThreshold,omitempty"`
-	Slug                     *string   `json:"slug,omitempty"                  validate:"required"`
+	ID                       int         `json:"id,omitempty"`
+	Name                     string      `json:"name"                            validate:"required"`
+	Category                 *string     `json:"category,omitempty"              validate:"required"`
+	Logo                     *string     `json:"logo,omitempty"`
+	Body                     *string     `json:"body,omitempty"                  validate:"required"`
+	Strategies               *[]Strategy `json:"strategies,omitempty"`
+	Strategy                 *string     `json:"strategy,omitempty"`
+	Banner_img_url           *string     `json:"bannerImgUrl,omitempty"`
+	Website_url              *string     `json:"websiteUrl,omitempty"`
+	Twitter_url              *string     `json:"twitterUrl,omitempty"`
+	Github_url               *string     `json:"githubUrl,omitempty"`
+	Discord_url              *string     `json:"discordUrl,omitempty"`
+	Instagram_url            *string     `json:"instagramUrl,omitempty"`
+	Terms_and_conditions_url *string     `json:"termsAndConditionsUrl,omitempty"`
+	Only_authors_to_submit   *bool       `json:"onlyAuthorsToSubmit,omitempty"`
+	Proposal_validation      *string     `json:"proposalValidation,omitempty"`
+	Proposal_threshold       *string     `json:"proposalThreshold,omitempty"`
+	Slug                     *string     `json:"slug,omitempty"                  validate:"required"`
 
+	//TODO we can remove this from the struct as contract data is inside Strategies now
 	Contract_name *string  `json:"contractName,omitempty"`
 	Contract_addr *string  `json:"contractAddr,omitempty"`
 	Public_path   *string  `json:"publicPath,omitempty"`
@@ -54,23 +56,28 @@ type CreateCommunityRequestPayload struct {
 }
 
 type UpdateCommunityRequestPayload struct {
-	Name                     *string   `json:"name,omitempty"`
-	Category                 *string   `json:"category,omitempty"`
-	Body                     *string   `json:"body,omitempty"`
-	Logo                     *string   `json:"logo,omitempty"`
-	Strategies               *[]string `json:"strategies,omitempty"`
-	Strategy                 *string   `json:"strategy,omitempty"`
-	Banner_img_url           *string   `json:"bannerImgUrl,omitempty"`
-	Website_url              *string   `json:"websiteUrl,omitempty"`
-	Twitter_url              *string   `json:"twitterUrl,omitempty"`
-	Github_url               *string   `json:"githubUrl,omitempty"`
-	Discord_url              *string   `json:"discordUrl,omitempty"`
-	Instagram_url            *string   `json:"instagramUrl,omitempty"`
-	Terms_and_conditions_url *string   `json:"termsAndConditionsUrl,omitempty"`
-	Proposal_validation      *string   `json:"proposalValidation,omitempty"`
-	Proposal_threshold       *string   `json:"proposalThreshold,omitempty"`
+	Name                     *string     `json:"name,omitempty"`
+	Category                 *string     `json:"category,omitempty"`
+	Body                     *string     `json:"body,omitempty"`
+	Logo                     *string     `json:"logo,omitempty"`
+	Strategies               *[]Strategy `json:"strategies,omitempty"`
+	Strategy                 *string     `json:"strategy,omitempty"`
+	Banner_img_url           *string     `json:"bannerImgUrl,omitempty"`
+	Website_url              *string     `json:"websiteUrl,omitempty"`
+	Twitter_url              *string     `json:"twitterUrl,omitempty"`
+	Github_url               *string     `json:"githubUrl,omitempty"`
+	Discord_url              *string     `json:"discordUrl,omitempty"`
+	Instagram_url            *string     `json:"instagramUrl,omitempty"`
+	Terms_and_conditions_url *string     `json:"termsAndConditionsUrl,omitempty"`
+	Proposal_validation      *string     `json:"proposalValidation,omitempty"`
+	Proposal_threshold       *string     `json:"proposalThreshold,omitempty"`
 
 	s.TimestampSignaturePayload
+}
+
+type Strategy struct {
+	Name *string `json:"name,omitempty"`
+	shared.Contract
 }
 
 type CommunityType struct {
@@ -181,6 +188,7 @@ func (c *Community) CreateCommunity(db *s.Database) error {
 }
 
 func (c *Community) UpdateCommunity(db *s.Database, p *UpdateCommunityRequestPayload) error {
+	fmt.Printf(" \n models UPDATE FUNCTION %+v \n", p.Strategies)
 	_, err := db.Conn.Exec(
 		db.Context,
 		`

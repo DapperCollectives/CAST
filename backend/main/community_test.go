@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"testing"
 
@@ -52,6 +53,7 @@ func TestCreateCommunity(t *testing.T) {
 	communityStruct := otu.GenerateCommunityStruct("account")
 	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
 	response := otu.CreateCommunityAPI(communityPayload)
+	fmt.Printf("RESPONSE %+v \n", response.Body)
 
 	// Check response code
 	checkResponseCode(t, http.StatusCreated, response.Code)
@@ -146,6 +148,7 @@ func TestUpdateCommunity(t *testing.T) {
 	communityStruct := otu.GenerateCommunityStruct("account")
 	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
 	response := otu.CreateCommunityAPI(communityPayload)
+	fmt.Printf("RESPONSE %+v \n", response.Body)
 
 	// Check response code
 	checkResponseCode(t, http.StatusCreated, response.Code)
@@ -158,16 +161,20 @@ func TestUpdateCommunity(t *testing.T) {
 	json.Unmarshal(response.Body.Bytes(), &oldCommunity)
 
 	// Update some fields
-	communityToUpdate := utils.UpdatedCommunity
-	payload := otu.GenerateCommunityPayload("account", &communityToUpdate)
+	payload := otu.GenerateCommunityPayload("account", &utils.UpdatedCommunity)
+	fmt.Printf("\n payload to be updated %+v \n :", payload.Strategies)
 
 	response = otu.UpdateCommunityAPI(oldCommunity.ID, payload)
+	fmt.Printf("RESPONSE %+v \n", response.Body)
 	checkResponseCode(t, http.StatusOK, response.Code)
 
 	// Get community again for assertions
 	response = otu.GetCommunityAPI(oldCommunity.ID)
 	var updatedCommunity models.Community
 	json.Unmarshal(response.Body.Bytes(), &updatedCommunity)
+
+	fmt.Printf("\n UPDATED COMMUNITY %+v \n", updatedCommunity.Strategies)
+	fmt.Printf("\n UTILS.UPDATED COMMUNITY %+v \n", *utils.UpdatedCommunity.Strategies)
 
 	assert.Equal(t, oldCommunity.ID, updatedCommunity.ID)
 	assert.Equal(t, utils.UpdatedCommunity.Name, updatedCommunity.Name)
@@ -180,3 +187,23 @@ func TestUpdateCommunity(t *testing.T) {
 	assert.Equal(t, *utils.UpdatedCommunity.Discord_url, *updatedCommunity.Discord_url)
 	assert.Equal(t, *utils.UpdatedCommunity.Instagram_url, *updatedCommunity.Instagram_url)
 }
+
+// func TestUpdateStrategies(t *testing.T) {
+// 	clearTable("communities")
+// 	clearTable("community_users")
+
+// 	communityStruct := otu.GenerateCommunityStruct("account")
+// 	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
+// 	response := otu.CreateCommunityAPI(communityPayload)
+
+// 	// Check response code
+// 	checkResponseCode(t, http.StatusCreated, response.Code)
+
+// 	// Fetch community to compare updated version against
+// 	response = otu.GetCommunityAPI(1)
+
+// 	// Get the original community from the API
+// 	var oldCommunity models.Community
+// 	json.Unmarshal(response.Body.Bytes(), &oldCommunity)
+
+// }

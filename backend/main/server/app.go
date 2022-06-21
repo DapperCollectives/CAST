@@ -990,6 +990,7 @@ func (a *App) getCommunitiesForHomePage(w http.ResponseWriter, r *http.Request) 
 func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 	var c models.Community
 	var payload models.CreateCommunityRequestPayload
+
 	decoder := json.NewDecoder(r.Body)
 
 	if err := decoder.Decode(&payload); err != nil {
@@ -1075,7 +1076,6 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, "Invalid community ID")
 		return
 	}
-
 	var payload models.UpdateCommunityRequestPayload
 
 	decoder := json.NewDecoder(r.Body)
@@ -1084,7 +1084,10 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
+
 	defer r.Body.Close()
+
+	fmt.Printf("\n CONTROLLER PAYLOAD %+v \n", payload.Strategies)
 
 	// Fetch community
 	var c = models.Community{ID: id}

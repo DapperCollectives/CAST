@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/DapperCollectives/CAST/backend/main/models"
+	s "github.com/DapperCollectives/CAST/backend/main/shared"
 )
 
 type PaginatedResponseWithUser struct {
@@ -56,9 +57,30 @@ var (
 
 	exampleNFTName = "ExampleNFT"
 	exampleNFTAddr = "0xf8d6e0586b0a20c7"
+	tokenWeighted  = "token-weighted-default"
 
-	strategies        = []string{"token-weighted-default", "staked-token-weighted-default"}
-	updatedStrategies = []string{"token-weighted-default", "staked-token-weighted-default", "one-address-one-vote"}
+	defaultStrategy = models.Strategy{
+		Name: &tokenWeighted,
+		Contract: s.Contract{
+			Name:        &flowContractName,
+			Addr:        &flowContractAddr,
+			Public_path: &flowPublicPath,
+		},
+	}
+
+	stakedStrategy = models.Strategy{
+		Name: &tokenWeighted,
+		Contract: s.Contract{
+			Name:        &flowContractName,
+			Addr:        &flowContractAddr,
+			Public_path: &flowPublicPath,
+		},
+	}
+	strategies        = []models.Strategy{defaultStrategy}
+	updatedStrategies = []models.Strategy{
+		defaultStrategy,
+		stakedStrategy,
+	}
 
 	DefaultCommunity = models.Community{
 		Name:                   "TestDAO",
