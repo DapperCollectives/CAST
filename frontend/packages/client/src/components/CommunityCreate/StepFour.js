@@ -1,4 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
+import StrategySelectorForm from "components/Community/StrategySelectorForm";
+import { ActionButton } from "components";
 
 export default function StepFour({
   stepData,
@@ -9,9 +11,29 @@ export default function StepFour({
 } = {}) {
   const { strategies } = stepData || {};
 
+  useEffect(() => {
+    if (strategies.length > 1) {
+      setStepValid(true);
+    }
+  }, [strategies, setStepValid]);
+
   return (
     <div>
-      StepFour
+      <StrategySelectorForm
+        existingStrategies={strategies}
+        disableAddButton={false}
+        callToAction={(st) => {
+          onDataChange({ strategies: st });
+          return (
+            <ActionButton
+              label="save"
+              enabled={isStepValid}
+              onClick={isStepValid ? () => onSubmit() : () => {}}
+              classNames="mt-5"
+            />
+          );
+        }}
+      />
       <div className="column p-0 is-12 mt-4">
         <button
           style={{ height: 48, width: "100%" }}
