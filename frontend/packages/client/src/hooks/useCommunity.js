@@ -3,19 +3,6 @@ import { defaultReducer, INITIAL_STATE } from "../reducers";
 import { checkResponse, getCompositeSigs } from "utils";
 import { useErrorHandlerContext } from "../contexts/ErrorHandler";
 import { useFileUploader } from "hooks";
-const mockData = {
-  createdAt: new Date().toISOString(),
-  creatorAddr: "0xf8d6e0586b0a20c7",
-  description: "Coming soon...",
-  isComingSoon: true,
-  logo: "/miquelahead.png",
-  id: 2,
-  name: "?????",
-  sig: "",
-  timestamp: "",
-};
-
-const addMockData = (data) => [...data, mockData];
 
 export default function useCommunity() {
   const [state, dispatch] = useReducer(defaultReducer, {
@@ -34,7 +21,7 @@ export default function useCommunity() {
       const communities = await checkResponse(response);
       dispatch({
         type: "SUCCESS",
-        payload: addMockData(communities?.data ?? []),
+        payload: communities?.data ?? [],
       });
     } catch (err) {
       // notify user of error
