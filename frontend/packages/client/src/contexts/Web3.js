@@ -63,12 +63,14 @@ export function Web3Provider({ children, network = "testnet", ...props }) {
       .put("accessNode.api", accessApi) // connect to Flow
       .put("discovery.wallet", walletDiscovery); // use Blocto wallet
 
-    // try {
-    //   const contracts = require("../contracts.json");
-    //   Object.keys(contracts).forEach((contract) => {
-    //     fcl.config().put(contract, contracts[contract]);
-    //   });
-    // } catch (e) {}
+    if (network === "emulator") {
+      try {
+        const contracts = require("../contracts.json");
+        Object.keys(contracts).forEach((contract) => {
+          fcl.config().put(contract, contracts[contract]);
+        });
+      } catch (e) {}
+    }
   }, [network]);
 
   const setWebContextConfig = useCallback((config) => {
