@@ -50,7 +50,7 @@ const StrategyInput = ({
   );
 };
 
-export default function StrategySelector({
+export default function StrategySelectorForm({
   existingStrategies = [],
   disableAddButton = false,
   callToAction = () => {},

@@ -1,6 +1,6 @@
 import React from "react";
 import ActionButton from "components/ActionButton";
-import StrategySelector from "components/Community/StrategySelector";
+import StrategySelectorForm from "components/Community/StrategySelectorForm";
 
 export default function CommunityProposalsAndVoting({
   communityVotingStrategies = [],
@@ -33,7 +33,7 @@ export default function CommunityProposalsAndVoting({
   }));
 
   return (
-    <StrategySelector
+    <StrategySelectorForm
       existingStrategies={st}
       disableAddButton={updatingCommunity}
       // st is an array with strategies hold by StrategySelector
