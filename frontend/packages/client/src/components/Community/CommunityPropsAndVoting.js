@@ -113,7 +113,7 @@ export default function CommunityProposalsAndVoting({
   };
 
   // sends updates to backend
-  const saveData = () => {
+  const saveData = async () => {
     // we need to remove strategies first:
     // in case user removes and old one and
     // creates the same strategy with different contract information
@@ -125,10 +125,22 @@ export default function CommunityProposalsAndVoting({
     // we will add new strategies
     console.log("--- strategies to add ---", newStrategies);
 
-    // await updateCommunity()
+    // array like:
+    /* 
+    {
+      strategies: [ 
+        {
+          contractAddress: "0x0000012122222222"
+          contractName: "222"
+          maxWeight: "2222222"
+          minimunBalance: "2222"
+          strategy: "staked-token-weighted-default"
+        }
+      ]
+  } 
+    */
+    await updateCommunity({ strategies: newStrategies });
   };
-
-  const savingData = false;
 
   const enableDelete = currentStrategies.length + newStrategies.length > 1;
   return (
@@ -178,7 +190,7 @@ export default function CommunityProposalsAndVoting({
         label="save"
         enabled={!updatingCommunity}
         onClick={saveData}
-        loading={savingData}
+        loading={updatingCommunity}
         classNames="mt-5"
       />
     </div>
