@@ -31,7 +31,9 @@ export default function StrategySelector({
       })}
       {strategies.length === 0 && (
         <div className="is-flex is-flex-direction-column is-justify-content-center is-align-items-center flex-1">
-          <p className="small-text has-text-grey">No more Strategies to Add</p>
+          <p className="small-text has-text-grey">
+            All strategies have been added to your community already
+          </p>
         </div>
       )}
     </div>
