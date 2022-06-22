@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 	"testing"
@@ -90,8 +89,6 @@ func TestGetVotes(t *testing.T) {
 			}
 			return
 		}
-
-		fmt.Printf("Proposal: %+v", p)
 
 		defaultResults := models.NewProposalResults(proposalId, p.Choices)
 		response := otu.GetProposalResultsAPI(proposalId)

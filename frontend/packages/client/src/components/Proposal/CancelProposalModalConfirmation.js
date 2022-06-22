@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from "react";
-import { Loader } from "components";
+import React, { useState, useCallback } from 'react';
+import { Loader } from 'components';
 
 const CancelProposalModalConfirmation = ({
   proposalName,
@@ -24,18 +24,18 @@ const CancelProposalModalConfirmation = ({
     <div className="modal-card m-0">
       <header
         className="modal-card-head has-background-white is-flex-direction-column columns is-mobile pb-0 m-0"
-        style={{ borderBottom: "none" }}
+        style={{ borderBottom: 'none' }}
       >
         <div
           className={`column is-full has-text-right is-size-2 p-0 leading-tight cursor-pointer ${
-            isCancelling && "has-text-grey"
+            isCancelling && 'has-text-grey'
           }`}
           onClick={_onDismiss}
         >
           &times;
         </div>
       </header>
-      <section className="modal-card-body" style={{ minHeight: "120px" }}>
+      <section className="modal-card-body" style={{ minHeight: '120px' }}>
         {!isCancelling && (
           <>
             <div className="column is-full has-text-left px-4">
@@ -51,7 +51,7 @@ const CancelProposalModalConfirmation = ({
         {isCancelling && (
           <div
             className="is-flex flex-1 is-flex-direction-column is-align-items-center is-justify-content-center"
-            style={{ height: "100%" }}
+            style={{ height: '100%' }}
           >
             <Loader className="mb-4" />
             <p className="has-text-grey">Cancelling Proposal...</p>
@@ -62,7 +62,7 @@ const CancelProposalModalConfirmation = ({
         <div className="columns is-flex p-0 m-0 flex-1 is-justify-content-end">
           <button
             className={`button column is-4 is-flex-mobile is-6-mobile p-0 is-uppercase ${
-              isCancelling && "is-disabled"
+              isCancelling && 'is-disabled'
             }`}
             onClick={onDismiss}
           >
@@ -70,7 +70,7 @@ const CancelProposalModalConfirmation = ({
           </button>
           <button
             className={`button column is-4 is-flex-mobile is-6-mobile p-0 has-background-yellow is-uppercase ${
-              isCancelling && "is-disabled"
+              isCancelling && 'is-disabled'
             }`}
             onClick={_onCancelProposal}
           >

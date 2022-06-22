@@ -28,55 +28,83 @@ type PaginatedResponseWithUserType struct {
 	Next         int                        `json:"next"`
 }
 
-var AdminAddr = "0xf8d6e0586b0a20c7"
-var UserOneAddr = "0x01cf0e2f2f715450"
+var (
+	AdminAddr   = "0xf8d6e0586b0a20c7"
+	UserOneAddr = "0x01cf0e2f2f715450"
 
-var nameUpdated = "TestDAO - updated"
-var category = "dao"
-var logo = "toad.jpeg"
-var logoUpdated = "toad-updated.jpeg"
-var slug = "test-slug"
-var body = "<html>test body</html>"
+	nameUpdated    = "TestDAO - updated"
+	category       = "dao"
+	logo           = "toad.jpeg"
+	logoUpdated    = "0xf8d6e0586b0a20c7"
+	slug           = "test-slug"
+	body           = "<html>test body</html>"
+	onlyAuthors    = true
+	notOnlyAuthors = false
 
-var banner = "banner"
-var website = "website"
-var twitter = "twitter"
-var github = "github"
-var discord = "discord"
-var instagram = "instagram"
-var termsAndConditions = "termsAndConditions"
-var contractName = "FlowToken"
-var contractAddr = "0x0ae53cb6e3f42a79"
-var publicPath = "flowTokenBalance"
-var threshold = 0.0000069
+	banner             = "banner"
+	website            = "website"
+	twitter            = "twitter"
+	github             = "github"
+	discord            = "discord"
+	instagram          = "instagram"
+	termsAndConditions = "termsAndConditions"
 
-var DefaultCommunity = models.Community{
-	Name:         "TestDAO",
-	Category:     &category,
-	Body:         &body,
-	Creator_addr: "<replace>",
-	Logo:         &logo,
-	Slug:         &slug,
-}
+	flowContractName = "FlowToken"
+	flowContractAddr = "0x0ae53cb6e3f42a79"
+	flowPublicPath   = "flowTokenBalance"
+	threshold        = 0.0000069
 
-var CommunityWithThreshold = models.Community{
-	Name:          "With Threshold",
-	Category:      &category,
-	Body:          &body,
-	Creator_addr:  "<replace>",
-	Logo:          &logo,
-	Slug:          &slug,
-	Contract_name: &contractName,
-	Contract_addr: &contractAddr,
-	Public_path:   &publicPath,
-	Threshold:     &threshold,
-}
+	exampleNFTName = "ExampleNFT"
+	exampleNFTAddr = "0xf8d6e0586b0a20c7"
 
-var UpdatedCommunity = models.Community{
-	Name: nameUpdated, Logo: &logoUpdated, Banner_img_url: &banner,
-	Website_url: &website, Twitter_url: &twitter, Github_url: &github, Discord_url: &discord,
-	Instagram_url: &instagram, Terms_and_conditions_url: &termsAndConditions,
-}
+	DefaultCommunity = models.Community{
+		Name:                   "TestDAO",
+		Category:               &category,
+		Body:                   &body,
+		Creator_addr:           "<replace>",
+		Logo:                   &logo,
+		Slug:                   &slug,
+		Only_authors_to_submit: &onlyAuthors,
+	}
+
+	CommunityWithThreshold = models.Community{
+		Name:                   "With Threshold",
+		Category:               &category,
+		Body:                   &body,
+		Creator_addr:           "<replace>",
+		Logo:                   &logo,
+		Slug:                   &slug,
+		Contract_name:          &flowContractName,
+		Contract_addr:          &flowContractAddr,
+		Public_path:            &flowPublicPath,
+		Threshold:              &threshold,
+		Only_authors_to_submit: &notOnlyAuthors,
+	}
+
+	CommunityWithNFT = models.Community{
+		Name:                   "With NFT Contract",
+		Category:               &category,
+		Body:                   &body,
+		Creator_addr:           "<replace>",
+		Logo:                   &logo,
+		Slug:                   &slug,
+		Contract_name:          &exampleNFTName,
+		Contract_addr:          &exampleNFTAddr,
+		Only_authors_to_submit: &notOnlyAuthors,
+	}
+
+	UpdatedCommunity = models.Community{
+		Name:                     nameUpdated,
+		Logo:                     &logoUpdated,
+		Banner_img_url:           &banner,
+		Website_url:              &website,
+		Twitter_url:              &twitter,
+		Github_url:               &github,
+		Discord_url:              &discord,
+		Instagram_url:            &instagram,
+		Terms_and_conditions_url: &termsAndConditions,
+	}
+)
 
 func (otu *OverflowTestUtils) GenerateCommunityPayload(signer string, payload *models.Community) *models.Community {
 
@@ -106,6 +134,15 @@ func (otu *OverflowTestUtils) GenerateCommunityWithThresholdStruct(accountName s
 
 	// this does a deep copy
 	community := CommunityWithThreshold
+	community.Creator_addr = "0x" + account.Address().String()
+	return &community
+}
+
+func (otu *OverflowTestUtils) GenerateCommunityWithNFTContractStruct(accountName string) *models.Community {
+	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", accountName))
+
+	// this does a deep copy
+	community := CommunityWithNFT
 	community.Creator_addr = "0x" + account.Address().String()
 	return &community
 }

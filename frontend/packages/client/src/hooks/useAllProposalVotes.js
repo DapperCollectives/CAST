@@ -1,11 +1,11 @@
-import { useReducer, useCallback } from "react";
+import { useReducer, useCallback } from 'react';
 import {
   paginationReducer,
   PAGINATION_INITIAL_STATE,
   INITIAL_STATE,
-} from "../reducers";
-import { checkResponse } from "../utils";
-import { useErrorHandlerContext } from "../contexts/ErrorHandler";
+} from '../reducers';
+import { checkResponse } from '../utils';
+import { useErrorHandlerContext } from '../contexts/ErrorHandler';
 
 /**
  * Hook to return proposal votes for a proposal. Results are paginated
@@ -32,11 +32,11 @@ export default function useAllProposalVotes({
    * Function to reset results from Api call stored in hook state
    */
   const resetResults = useCallback(() => {
-    dispatch({ type: "RESET_RESULTS" });
+    dispatch({ type: 'RESET_RESULTS' });
   }, []);
 
   const getAllProposalVotes = useCallback(async () => {
-    dispatch({ type: "PROCESSING" });
+    dispatch({ type: 'PROCESSING' });
     let page = 0;
     const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/proposals/${proposalId}/votes?count=25`;
     try {
@@ -53,13 +53,13 @@ export default function useAllProposalVotes({
       }
 
       dispatch({
-        type: "SUCCESS",
+        type: 'SUCCESS',
         payload: { ...proposalVotes, data: votesArray },
       });
     } catch (err) {
       notifyError(err, url);
       dispatch({
-        type: "ERROR",
+        type: 'ERROR',
         payload: { errorData: err.message },
       });
     }

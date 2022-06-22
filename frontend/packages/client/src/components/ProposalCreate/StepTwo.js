@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
-import DatePicker from "react-datepicker";
-import { Calendar, CaretDown } from "components/Svg";
+import React, { useEffect, useState } from 'react';
+import DatePicker from 'react-datepicker';
+import { Calendar, CaretDown } from 'components/Svg';
 
 const detectTimeZone = () =>
   new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -10,7 +10,7 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
   const [isEndTimeOpen, setEndTimeOpen] = useState(false);
 
   useEffect(() => {
-    const isDate = (d) => Object.prototype.toString.call(d) === "[object Date]";
+    const isDate = (d) => Object.prototype.toString.call(d) === '[object Date]';
     const requiredFields = {
       startDate: isDate,
       endDate: isDate,
@@ -61,11 +61,11 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
   const formatTime = (date) => {
     let hours = date.getHours();
     let minutes = date.getMinutes();
-    const ampm = hours >= 12 ? "pm" : "am";
+    const ampm = hours >= 12 ? 'pm' : 'am';
     hours = hours % 12;
     hours = hours ? hours : 12; // the hour '0' should be '12'
-    minutes = minutes < 10 ? "0" + minutes : minutes;
-    return hours + ":" + minutes + " " + ampm;
+    minutes = minutes < 10 ? '0' + minutes : minutes;
+    return hours + ':' + minutes + ' ' + ampm;
   };
 
   const addDays = (date, days) => {
@@ -106,7 +106,7 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
         <div className="columns p-0 m-0">
           <div
             className="columns is-mobile p-0 pr-2 p-0-mobile mb-4-mobile m-0 column is-half"
-            style={{ position: "relative" }}
+            style={{ position: 'relative' }}
           >
             <DatePicker
               required
@@ -124,10 +124,10 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
             />
             <div
               style={{
-                position: "absolute",
+                position: 'absolute',
                 right: 15,
                 top: 7,
-                pointerEvents: "none",
+                pointerEvents: 'none',
               }}
             >
               <Calendar />
@@ -136,8 +136,8 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
           <div className="columns is-mobile p-0 pl-2 p-0-mobile m-0 column is-half">
             <div
               className={`dropdown columns is-mobile p-0 m-0 is-right is-flex is-flex-grow-1${
-                isStartTimeOpen ? " is-active" : ""
-              } ${stepData?.startDate ? "" : " is-disabled"}`}
+                isStartTimeOpen ? ' is-active' : ''
+              } ${stepData?.startDate ? '' : ' is-disabled'}`}
               onBlur={closeStartOnBlur}
               aria-haspopup="true"
               aria-controls="dropdown-menu"
@@ -152,7 +152,7 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
                   <div className="is-flex is-flex-grow-1 is-align-items-center is-justify-content-space-between has-text-grey small-text">
                     {stepData?.startTime
                       ? formatTime(stepData.startTime)
-                      : "Select Time"}
+                      : 'Select Time'}
                     <CaretDown className="has-text-black" />
                   </div>
                 </button>
@@ -164,12 +164,12 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
               >
                 <div
                   className="dropdown-content"
-                  style={{ maxHeight: 300, overflow: "auto" }}
+                  style={{ maxHeight: 300, overflow: 'auto' }}
                 >
                   {timeIntervals.map((itemValue, index) => (
                     <button
                       className={`button is-white dropdown-item has-text-grey${
-                        itemValue === stepData?.startTime ? " is-active" : ""
+                        itemValue === stepData?.startTime ? ' is-active' : ''
                       }`}
                       onMouseDown={setStartTime(itemValue)}
                       key={`drop-down-${index}`}
@@ -190,7 +190,7 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
         <div className="columns p-0 m-0">
           <div
             className="columns is-mobile p-0 pr-2 p-0-mobile mb-4-mobile m-0 column is-half"
-            style={{ position: "relative" }}
+            style={{ position: 'relative' }}
           >
             <DatePicker
               required
@@ -207,10 +207,10 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
             />
             <div
               style={{
-                position: "absolute",
+                position: 'absolute',
                 right: 15,
                 top: 7,
-                pointerEvents: "none",
+                pointerEvents: 'none',
               }}
             >
               <Calendar />
@@ -219,8 +219,8 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
           <div className="columns is-mobile p-0 pl-2 p-0-mobile m-0 column is-half">
             <div
               className={`dropdown columns is-mobile p-0 m-0 is-right is-flex is-flex-grow-1${
-                isEndTimeOpen ? " is-active" : ""
-              } ${stepData?.endDate ? "" : "is-disabled"}`}
+                isEndTimeOpen ? ' is-active' : ''
+              } ${stepData?.endDate ? '' : 'is-disabled'}`}
               onBlur={closeEndOnBlur}
               aria-haspopup="true"
               aria-controls="dropdown-menu"
@@ -235,7 +235,7 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
                   <div className="is-flex is-flex-grow-1 is-align-items-center is-justify-content-space-between has-text-grey small-text">
                     {stepData?.endTime
                       ? formatTime(stepData.endTime)
-                      : "Select Time"}
+                      : 'Select Time'}
                     <CaretDown className="has-text-black" />
                   </div>
                 </button>
@@ -247,12 +247,12 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
               >
                 <div
                   className="dropdown-content"
-                  style={{ maxHeight: 300, overflow: "auto" }}
+                  style={{ maxHeight: 300, overflow: 'auto' }}
                 >
                   {getTimeIntervals().map((itemValue, index) => (
                     <button
                       className={`button is-white dropdown-item has-text-grey${
-                        itemValue === stepData?.endTime ? " is-active" : ""
+                        itemValue === stepData?.endTime ? ' is-active' : ''
                       }`}
                       onMouseDown={setEndTime(itemValue)}
                       key={`drop-down-${index}`}

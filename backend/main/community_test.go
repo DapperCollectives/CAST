@@ -61,7 +61,6 @@ func TestCreateCommunity(t *testing.T) {
 	json.Unmarshal(response.Body.Bytes(), &community)
 
 	// Validate
-	assert.NotEqual(t, nil, community.Cid)
 	assert.Equal(t, utils.DefaultCommunity.Name, community.Name)
 	assert.Equal(t, utils.DefaultCommunity.Body, community.Body)
 	assert.Equal(t, utils.DefaultCommunity.Logo, community.Logo)

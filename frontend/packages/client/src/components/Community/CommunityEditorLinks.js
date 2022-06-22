@@ -1,27 +1,27 @@
-import React, { useEffect, useState } from "react";
-import { Website, Instagram, Twitter, Discord, Github } from "components/Svg";
-import { WrapperResponsive, Loader } from "components";
-import useLinkValidator from "./hooks/useLinkValidator";
+import React, { useEffect, useState } from 'react';
+import { Website, Instagram, Twitter, Discord, Github } from 'components/Svg';
+import { WrapperResponsive, Loader } from 'components';
+import useLinkValidator from './hooks/useLinkValidator';
 
 const FormFieldsConfig = [
   {
-    fieldName: "websiteUrl",
+    fieldName: 'websiteUrl',
     iconComponent: <Website width="16px" height="16px" />,
   },
   {
-    fieldName: "twitterUrl",
+    fieldName: 'twitterUrl',
     iconComponent: <Twitter width="16px" height="16px" />,
   },
   {
-    fieldName: "githubUrl",
+    fieldName: 'githubUrl',
     iconComponent: <Github width="16px" height="16px" />,
   },
   {
-    fieldName: "discordUrl",
+    fieldName: 'discordUrl',
     iconComponent: <Discord width="16px" height="16px" />,
   },
   {
-    fieldName: "instagramUrl",
+    fieldName: 'instagramUrl',
     iconComponent: <Instagram width="16px" height="16px" />,
   },
 ];
@@ -31,8 +31,8 @@ export const CommunityLinksForm = ({
   onChangeHandler,
   fields,
   isUpdating = false,
-  wrapperMargin = "mb-6",
-  wrapperMarginMobile = "mb-4",
+  wrapperMargin = 'mb-6',
+  wrapperMarginMobile = 'mb-4',
 }) => {
   return (
     <WrapperResponsive
@@ -62,7 +62,7 @@ export const CommunityLinksForm = ({
       </div>
       {formFields.map((formField, index) => (
         <div
-          style={{ position: "relative" }}
+          style={{ position: 'relative' }}
           className="is-flex is-align-items-center mt-4"
           key={`form-field-${index}`}
         >
@@ -76,14 +76,14 @@ export const CommunityLinksForm = ({
               onChangeHandler(formField.fieldName)(event.target.value)
             }
             style={{
-              paddingLeft: "34px",
+              paddingLeft: '34px',
             }}
             disabled={isUpdating}
           />
           <div
             className="pl-3"
             style={{
-              position: "absolute",
+              position: 'absolute',
               height: 18,
               opacity: 0.3,
             }}
@@ -98,11 +98,11 @@ export const CommunityLinksForm = ({
 };
 export default function CommunityEditorLinks(props = {}) {
   const {
-    websiteUrl = "",
-    twitterUrl = "",
-    instagramUrl = "",
-    discordUrl = "",
-    githubUrl = "",
+    websiteUrl = '',
+    twitterUrl = '',
+    instagramUrl = '',
+    discordUrl = '',
+    githubUrl = '',
     updateCommunity,
   } = props;
   const [enableSave, setEnableSave] = useState(false);
@@ -118,7 +118,7 @@ export default function CommunityEditorLinks(props = {}) {
   const saveData = async () => {
     setIsUpdating(true);
     const updatedKeys = Object.keys(links).filter(
-      (key) => links[key] !== (props[key] ?? "")
+      (key) => links[key] !== (props[key] ?? '')
     );
 
     const updatedFields = Object.assign(
@@ -145,9 +145,9 @@ export default function CommunityEditorLinks(props = {}) {
     <CommunityLinksForm
       submitComponent={
         <button
-          style={{ height: 48, width: "100%" }}
+          style={{ height: 48, width: '100%' }}
           className={`button vote-button transition-all is-flex has-background-yellow rounded-sm mt-5 is-${
-            enableSave && !isUpdating ? "enabled" : "disabled"
+            enableSave && !isUpdating ? 'enabled' : 'disabled'
           }`}
           onClick={!enableSave ? () => {} : saveData}
         >

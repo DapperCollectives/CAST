@@ -1,5 +1,5 @@
-import React from "react";
-import { Twitter, Discord, Website, Instagram } from "./Svg";
+import React from 'react';
+import { Twitter, Discord, Website, Instagram } from './Svg';
 
 export default function CommunityLinks({
   instagramUrl,
@@ -11,7 +11,7 @@ export default function CommunityLinks({
     <div className="columns my-0 is-multiline">
       <div
         className="column is-12 has-text-weight-bold is-uppercase small-text"
-        style={{ marginBottom: "20px" }}
+        style={{ marginBottom: '20px' }}
       >
         Links
       </div>
@@ -22,7 +22,7 @@ export default function CommunityLinks({
           rel="noreferrer noopenner"
           href={websiteUrl}
         >
-          <Website width="20px" height="20px" />{" "}
+          <Website width="20px" height="20px" />{' '}
           <span className="pl-2">Website</span>
         </a>
       )}

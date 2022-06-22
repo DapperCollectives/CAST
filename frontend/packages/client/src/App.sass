@@ -65,6 +65,49 @@ $popover-max-width: 20rem
 @import '@creativebulma/bulma-tooltip'
 @import 'bulma-popover'
 
+=spacing-helpers($suffix: '')
+	$suffix: if($suffix == '', '', '-' + $suffix)
+	@each $property, $shortcut in $spacing-shortcuts
+		@each $name, $value in $spacing-values
+			@if $property == 'padding' and $value == 'auto'
+				// Exclude padding value auto
+			@else
+				// All directions
+				.#{$shortcut}-#{$name}#{$suffix}
+					#{$property}: $value !important
+				// Cardinal directions
+				@each $direction, $direction-suffix in $spacing-directions
+					.#{$shortcut}#{$direction-suffix}-#{$name}#{$suffix}
+						#{$property}-#{$direction}: $value !important
+				// Horizontal axis
+				@if $spacing-horizontal != null
+					.#{$shortcut}#{$spacing-horizontal}-#{$name}#{$suffix}
+						#{$property}-left: $value !important
+						#{$property}-right: $value !important
+				// Vertical axis
+				@if $spacing-vertical != null
+					.#{$shortcut}#{$spacing-vertical}-#{$name}#{$suffix}
+						#{$property}-top: $value !important
+						#{$property}-bottom: $value !important	
+@include spacing-helpers('')
+
++mobile
+	@include spacing-helpers('mobile')
+
++mobile
+	@include spacing-helpers('mobile-only')
+
++tablet
+	@include spacing-helpers('tablet')
+
++tablet-only
+	@include spacing-helpers('tablet-only')
+
++desktop
+	@include spacing-helpers('desktop')
+
++desktop-only
+	@include spacing-helpers('desktop-only')							
 // custom css
 .App, #root
 	height: 100%
@@ -112,7 +155,6 @@ code
 		&.vote-button:hover
 			color: black
 			border: 1px solid rgba(0, 0, 0, 0.4) !important
-			transform: scale(1.01)
 .button.is-disabled
 	pointer-events: none
 	opacity: 0.5
@@ -249,8 +291,6 @@ hr
 	border-bottom-width: 0px
 	&.tab-community
 		border-bottom-width: 2px
-		&:hover
-			transform: scale(1.04)
 
 .tabs li.is-active a
 	border-bottom-color: $yellow
@@ -429,18 +469,13 @@ span[data-tooltip]
 .wallet-connect.button.is-primary:hover, .button-vote:hover
 	border-color: rgba(0, 0, 0, 0.4) !important
 	border-width: 1px !important
-	transform: scale(1.01)
+
 .wallet-connect.button.is-primary
 	color: #000000 !important
 
 .community-card:hover, .proposal-card:hover
 	border-color: rgba(0, 0, 0, 0.4)
 	border-width: 1px
-	transform: scale(1.01)
-
-.tab-link:hover
-	padding-left: 0.3rem
-	transform: scale(1.04)
 
 .back-button:hover
 	margin-left: -0.25rem
@@ -451,7 +486,6 @@ span[data-tooltip]
 	border-width: 1px
 
 .navbar-item-hover:hover
-	transform: scale(1.1)
 	color: rgba(0, 0, 0, 0.7)
 
 .button:hover

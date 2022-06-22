@@ -4,12 +4,15 @@ import (
 	"fmt"
 
 	"github.com/DapperCollectives/CAST/backend/main/models"
+	"github.com/DapperCollectives/CAST/backend/main/shared"
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/jackc/pgx/v4"
 	"github.com/rs/zerolog/log"
 )
 
-type OneAddressOneVote struct{}
+type OneAddressOneVote struct {
+	shared.StrategyStruct
+}
 
 func (s *OneAddressOneVote) FetchBalance(db *s.Database, b *models.Balance, sc *s.SnapshotClient) (*models.Balance, error) {
 
@@ -34,8 +37,11 @@ func (s *OneAddressOneVote) FetchBalance(db *s.Database, b *models.Balance, sc *
 	return b, nil
 }
 
-func (s *OneAddressOneVote) TallyVotes(votes []*models.VoteWithBalance, p *models.ProposalResults) (models.ProposalResults, error) {
-	//tally votes
+func (s *OneAddressOneVote) TallyVotes(
+	votes []*models.VoteWithBalance,
+	p *models.ProposalResults,
+) (models.ProposalResults, error) {
+
 	for _, vote := range votes {
 		p.Results[vote.Choice]++
 	}
@@ -43,7 +49,10 @@ func (s *OneAddressOneVote) TallyVotes(votes []*models.VoteWithBalance, p *model
 	return *p, nil
 }
 
-func (s *OneAddressOneVote) GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error) {
+func (s *OneAddressOneVote) GetVoteWeightForBalance(
+	vote *models.VoteWithBalance,
+	proposal *models.Proposal,
+) (float64, error) {
 	var weight float64
 	var ERROR error = fmt.Errorf("no address found")
 
@@ -55,7 +64,10 @@ func (s *OneAddressOneVote) GetVoteWeightForBalance(vote *models.VoteWithBalance
 	return weight, nil
 }
 
-func (s *OneAddressOneVote) GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error) {
+func (s *OneAddressOneVote) GetVotes(
+	votes []*models.VoteWithBalance,
+	proposal *models.Proposal,
+) ([]*models.VoteWithBalance, error) {
 
 	for _, vote := range votes {
 		weight, err := s.GetVoteWeightForBalance(vote, proposal)
@@ -66,4 +78,9 @@ func (s *OneAddressOneVote) GetVotes(votes []*models.VoteWithBalance, proposal *
 	}
 
 	return votes, nil
+}
+
+func (s *OneAddressOneVote) InitStrategy(f *shared.FlowAdapter, db *shared.Database) {
+	s.FlowAdapter = f
+	s.DB = db
 }

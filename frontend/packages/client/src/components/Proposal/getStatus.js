@@ -1,4 +1,4 @@
-import { FilterValues } from "const";
+import { FilterValues } from 'const';
 
 export const getStatus = (startDiff, endDiff, status) => {
   // get status from backend

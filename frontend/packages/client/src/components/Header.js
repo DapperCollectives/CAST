@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { NavLink, withRouter } from "react-router-dom";
-import Sidenavbar from "./SideNavbar";
-import { Logo, LinkOut } from "./Svg";
-import WalletConnect from "./WalletConnect";
+import React, { useState } from 'react';
+import { NavLink, withRouter } from 'react-router-dom';
+import Sidenavbar from './SideNavbar';
+import { Logo, LinkOut } from './Svg';
+import WalletConnect from './WalletConnect';
 
 function Header(props) {
   const [showSidenav, setShowSidenav] = useState(false);
@@ -29,7 +29,7 @@ function Header(props) {
                 </NavLink>
                 <NavLink
                   to={{
-                    pathname: "/about",
+                    pathname: '/about',
                     state: { modal: true },
                   }}
                   className="navbar-item p-0 ml-4 mr-4 is-hidden-mobile"

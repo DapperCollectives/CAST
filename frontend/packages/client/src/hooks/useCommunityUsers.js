@@ -1,11 +1,11 @@
-import { useReducer, useEffect, useCallback } from "react";
+import { useReducer, useEffect, useCallback } from 'react';
 import {
   paginationReducer,
   PAGINATION_INITIAL_STATE,
   INITIAL_STATE,
-} from "../reducers";
-import { checkResponse } from "../utils";
-import { useErrorHandlerContext } from "../contexts/ErrorHandler";
+} from '../reducers';
+import { checkResponse } from '../utils';
+import { useErrorHandlerContext } from '../contexts/ErrorHandler';
 /**
  * Hook to return users from a community. Results are paginated
  * @param  {int} communityId community Id to get proposals from
@@ -37,43 +37,43 @@ export default function useCommunityUsers({
    * Function to fetch more results based on pagination configuration
    */
   const fetchMore = useCallback(async () => {
-    dispatch({ type: "PROCESSING" });
+    dispatch({ type: 'PROCESSING' });
     const url = `${
       process.env.REACT_APP_BACK_END_SERVER_API
     }/communities/${communityId}/users?count=${state.pagination.count}&start=${
       state.pagination.start
-    }${type ? `&userType=${type}` : ""}`;
+    }${type ? `&userType=${type}` : ''}`;
     try {
       const response = await fetch(url);
       const users = await checkResponse(response);
 
       dispatch({
-        type: "SUCCESS",
+        type: 'SUCCESS',
         payload: users,
       });
     } catch (err) {
       notifyError(err, url);
-      dispatch({ type: "ERROR", payload: { errorData: err.message } });
+      dispatch({ type: 'ERROR', payload: { errorData: err.message } });
     }
   }, [state.pagination, communityId, type, notifyError]);
 
   const getCommunityUsers = useCallback(async () => {
-    dispatch({ type: "PROCESSING" });
+    dispatch({ type: 'PROCESSING' });
     const url = `${
       process.env.REACT_APP_BACK_END_SERVER_API
     }/communities/${communityId}/users?count=${count}&start=${start}${
-      type ? `&userType=${type}` : ""
+      type ? `&userType=${type}` : ''
     }`;
     try {
       const response = await fetch(url);
       const users = await checkResponse(response);
       dispatch({
-        type: "SUCCESS",
+        type: 'SUCCESS',
         payload: users,
       });
     } catch (err) {
       notifyError(err, url);
-      dispatch({ type: "ERROR", payload: { errorData: err.message } });
+      dispatch({ type: 'ERROR', payload: { errorData: err.message } });
     }
   }, [dispatch, communityId, count, start, type, notifyError]);
 
@@ -82,9 +82,9 @@ export default function useCommunityUsers({
       const requests = addrs.map((addrToRemove) => {
         const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}/users/${addrToRemove}/${userType}`;
         const fetchOptions = {
-          method: "DELETE",
+          method: 'DELETE',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify(body),
         };
@@ -103,9 +103,9 @@ export default function useCommunityUsers({
 
       const requests = addrs.map((addrToAdd) => {
         const fetchOptions = {
-          method: "POST",
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             ...body,
@@ -123,7 +123,7 @@ export default function useCommunityUsers({
   );
 
   const resetResults = () => {
-    dispatch({ type: "RESET_RESULTS" });
+    dispatch({ type: 'RESET_RESULTS' });
   };
 
   useEffect(() => {
