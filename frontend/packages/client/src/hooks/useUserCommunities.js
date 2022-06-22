@@ -1,11 +1,11 @@
-import { useReducer, useEffect, useCallback } from "react";
+import { useReducer, useEffect, useCallback } from 'react';
 import {
   paginationReducer,
   INITIAL_STATE,
   PAGINATION_INITIAL_STATE,
-} from "../reducers";
-import { checkResponse } from "../utils";
-import { useErrorHandlerContext } from "../contexts/ErrorHandler";
+} from '../reducers';
+import { checkResponse } from '../utils';
+import { useErrorHandlerContext } from '../contexts/ErrorHandler';
 
 export default function useUserCommunities({
   addr,
@@ -23,23 +23,23 @@ export default function useUserCommunities({
   const { notifyError } = useErrorHandlerContext();
 
   const resetResults = useCallback(() => {
-    dispatch({ type: "RESET_RESULTS" });
+    dispatch({ type: 'RESET_RESULTS' });
   }, []);
 
   const getUserCommunities = useCallback(async () => {
-    dispatch({ type: "PROCESSING" });
+    dispatch({ type: 'PROCESSING' });
     const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/users/${addr}/communities?count=${count}&start=${start}`;
     try {
       const response = await fetch(url);
       const userCommunities = await checkResponse(response);
       dispatch({
-        type: "SUCCESS",
-        payload: userCommunities
+        type: 'SUCCESS',
+        payload: userCommunities,
       });
     } catch (err) {
       // notify user of error
       notifyError(err, url);
-      dispatch({ type: "ERROR", payload: { errorData: err.message } });
+      dispatch({ type: 'ERROR', payload: { errorData: err.message } });
     }
   }, [dispatch, notifyError, addr, count, start]);
 

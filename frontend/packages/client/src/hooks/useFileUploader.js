@@ -1,7 +1,7 @@
-import { useReducer, useCallback } from "react";
-import { defaultReducer, INITIAL_STATE } from "../reducers";
-import { checkResponse } from "../utils";
-import { useErrorHandlerContext } from "../contexts/ErrorHandler";
+import { useReducer, useCallback } from 'react';
+import { defaultReducer, INITIAL_STATE } from '../reducers';
+import { checkResponse } from '../utils';
+import { useErrorHandlerContext } from '../contexts/ErrorHandler';
 
 export default function useFileUploader({ useModalNotifications = true } = {}) {
   const [state, dispatch] = useReducer(defaultReducer, {
@@ -12,13 +12,13 @@ export default function useFileUploader({ useModalNotifications = true } = {}) {
 
   const uploadFile = useCallback(
     async (image) => {
-      dispatch({ type: "PROCESSING" });
+      dispatch({ type: 'PROCESSING' });
       const formData = new FormData();
-      formData.append("file", image);
+      formData.append('file', image);
       const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/upload`;
       try {
         const fetchOptions = {
-          method: "POST",
+          method: 'POST',
           body: formData,
         };
         const response = await fetch(url, fetchOptions);
@@ -26,7 +26,7 @@ export default function useFileUploader({ useModalNotifications = true } = {}) {
         // complete url on IPFS
         const fileUrl = `${process.env.REACT_APP_IPFS_GATEWAY}${upload.cid}`;
         dispatch({
-          type: "SUCCESS",
+          type: 'SUCCESS',
           payload: { ...upload, fileUrl },
         });
         return { ...upload, fileUrl };
@@ -35,7 +35,7 @@ export default function useFileUploader({ useModalNotifications = true } = {}) {
         if (useModalNotifications) {
           notifyError(err, url);
         }
-        dispatch({ type: "ERROR", payload: { errorData: err.message } });
+        dispatch({ type: 'ERROR', payload: { errorData: err.message } });
       }
     },
     [dispatch, notifyError, useModalNotifications]

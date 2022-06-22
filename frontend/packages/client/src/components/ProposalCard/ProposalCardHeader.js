@@ -1,10 +1,10 @@
-import React from "react";
-import { Star } from "components/Svg";
-import Blockies from "react-blockies";
+import React from 'react';
+import { Star } from 'components/Svg';
+import Blockies from 'react-blockies';
 
 const ProposalCardHeader = ({ creatorAddr, isAdminProposal }) => {
   return (
-    <div className={"is-flex is-align-items-center pb-3"}>
+    <div className={'is-flex is-align-items-center pb-3'}>
       <Blockies
         seed={creatorAddr}
         size={6}

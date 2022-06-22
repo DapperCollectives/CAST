@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useState, useMemo } from "react";
-import { useModalContext } from "./NotificationModal";
-import Error from "components/Error";
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import { useModalContext } from './NotificationModal';
+import Error from 'components/Error';
 
 const ErrorHandlerContext = React.createContext({});
 
@@ -8,7 +8,7 @@ export const useErrorHandlerContext = () => {
   const context = React.useContext(ErrorHandlerContext);
   if (context === undefined) {
     throw new Error(
-      "`useErrorHandlerContext` must be used within a `ErrorHandlerProvider`."
+      '`useErrorHandlerContext` must be used within a `ErrorHandlerProvider`.'
     );
   }
   return context;
@@ -36,13 +36,13 @@ const ErrorHandlerProvider = ({ children }) => {
             </p>
           ),
           errorTitle:
-            typeof error.status === "number"
+            typeof error.status === 'number'
               ? `Error code: ${error.status}`
               : error?.status,
         }),
         {
           onClose: closeError,
-          classNameModalContent: "rounded-sm",
+          classNameModalContent: 'rounded-sm',
         }
       );
       setErrorOpened(true);
@@ -59,7 +59,7 @@ const ErrorHandlerProvider = ({ children }) => {
   const notifyError = useCallback((err, url) => {
     try {
       const response = JSON.parse(err.message);
-      if (typeof response === "object") {
+      if (typeof response === 'object') {
         setError(response);
       }
     } catch (error) {

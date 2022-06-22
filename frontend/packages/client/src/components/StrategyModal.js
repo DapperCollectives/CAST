@@ -1,14 +1,14 @@
-import React from "react";
+import React from 'react';
 
 const StrategyModal = ({ isOpen, closeModal, strategies }) => {
   return (
-    <div className={`modal ${isOpen ? "is-active" : undefined}`}>
+    <div className={`modal ${isOpen ? 'is-active' : undefined}`}>
       <div className="modal-background" onClick={closeModal} />
       <div className="modal-card rounded-sm px-4">
         <header
           className="modal-card-head is-flex-direction-column is-align-items-stretch has-background-white columns is-mobile m-0 pb-2 pt-3"
           style={{
-            borderBottom: "none",
+            borderBottom: 'none',
           }}
         >
           <div className="columns is-mobile m-0 flex-1">
@@ -41,7 +41,7 @@ const StrategyModal = ({ isOpen, closeModal, strategies }) => {
         </section>
         <footer
           className="modal-card-foot has-background-white"
-          style={{ borderTop: "none" }}
+          style={{ borderTop: 'none' }}
         ></footer>
       </div>
     </div>
