@@ -8,14 +8,14 @@ import {
   CommunityPropsAndVoting,
   Dropdown,
   Loader,
-} from "components";
-import { ArrowLeft, ArrowLeftBold } from "components/Svg";
+} from 'components';
+import { ArrowLeft, ArrowLeftBold } from 'components/Svg';
 import {
   useCommunityDetails,
   useMediaQuery,
   useFileUploader,
   useUserRoleOnCommunity,
-} from "hooks";
+} from 'hooks';
 
 const MenuTabs = ({ tabs, communityId, onClickButtonTab = () => {} } = {}) => {
   return (
@@ -51,12 +51,12 @@ const MenuTabs = ({ tabs, communityId, onClickButtonTab = () => {} } = {}) => {
           Community Details
         </button>
       </div>
-      <div className="is-flex flex-1" style={{ marginTop: "18px" }}>
+      <div className="is-flex flex-1" style={{ marginTop: '18px' }}>
         <button
           className={`button is-white px-2 small-text ${
-            tabs.details ? "has-text-weight-bold" : ""
+            tabs.details ? 'has-text-weight-bold' : ''
           }`}
-          onClick={onClickButtonTab("proposals-and-voting")}
+          onClick={onClickButtonTab('proposals-and-voting')}
         >
           Proposals & Voting
         </button>
@@ -87,9 +87,9 @@ const DropdownMenu = ({ communityId, onClickButtonTab = () => {} } = {}) => {
       <Dropdown
         defaultValue="profile"
         values={[
-          { label: "Community Profile", value: "profile" },
-          { label: "Community Details", value: "details" },
-          { label: "Proposals & Voting", value: "proposals-and-voting" },
+          { label: 'Community Profile', value: 'profile' },
+          { label: 'Community Details', value: 'details' },
+          { label: 'Proposals & Voting', value: 'proposals-and-voting' },
         ]}
         onSelectValue={(value) => {
           onClickButtonTab(value)();
@@ -117,9 +117,9 @@ export default function CommunityEditorPage() {
 
   const onClickButtonTab = (value) => () => {
     setTab({
-      profile: value === "profile",
-      details: value === "details",
-      proposalsAndVoting: value === "proposals-and-voting",
+      profile: value === 'profile',
+      details: value === 'details',
+      proposalsAndVoting: value === 'proposals-and-voting',
     });
   };
 
