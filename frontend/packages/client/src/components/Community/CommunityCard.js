@@ -15,8 +15,6 @@ const CommunityCard = ({ logo, name, description, id }) => {
     overflow: 'hidden',
   };
 
-  const hoverClasses = !isComingSoon ? ' transition-all community-card' : '';
-
   const { width: windowWidth } = useWindowDimensions();
   const joinBtnPositions = useMemo(
     () => ({
