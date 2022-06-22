@@ -48,11 +48,13 @@ const TextBasedChoices = ({
           </div>
         </div>
       ))}
-      <AddButton
-        onAdd={onCreateChoice}
-        className="mt-2"
-        addText={`${choices?.length >= 1 ? 'Another ' : ''}Choice`}
-      />
+      <div className="is-flex">
+        <AddButton
+          onAdd={onCreateChoice}
+          className="mt-2 pr-2"
+          addText={`${choices?.length >= 1 ? 'Another ' : ''}Choice`}
+        />
+      </div>
     </>
   );
 };
