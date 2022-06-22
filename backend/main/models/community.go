@@ -76,8 +76,8 @@ type UpdateCommunityRequestPayload struct {
 }
 
 type Strategy struct {
-	Name *string `json:"name,omitempty"`
-	shared.Contract
+	Name            *string `json:"name,omitempty"`
+	shared.Contract `json:"contract"`
 }
 
 type CommunityType struct {

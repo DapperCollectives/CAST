@@ -1002,6 +1002,9 @@ func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 
 	c = payload.Community
 
+	fmt.Printf("COMMUNITY CREATE CONTROLLER \n %+v", c.Strategies)
+	fmt.Printf(" \n community %+v \n", a)
+
 	// validate timestamp of request/message
 	if err := a.validateTimestamp(c.Timestamp, 60); err != nil {
 		respondWithError(w, http.StatusForbidden, err.Error())
@@ -1066,6 +1069,8 @@ func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	fmt.Printf("\n COMMUNITY CONTROLLER STRATEGIES : %+v \n", c.Strategies)
+
 	respondWithJSON(w, http.StatusCreated, c)
 }
 
@@ -1076,6 +1081,7 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, "Invalid community ID")
 		return
 	}
+	fmt.Printf("\n request body %+v \n", r.Body)
 	var payload models.UpdateCommunityRequestPayload
 
 	decoder := json.NewDecoder(r.Body)
@@ -1086,8 +1092,8 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	defer r.Body.Close()
-
-	fmt.Printf("\n CONTROLLER PAYLOAD %+v \n", payload.Strategies)
+	fmt.Printf("COMMUNITY UPDATE CONTROLLER \n %+v", payload.Strategies)
+	fmt.Printf(" \n community %+v \n", payload)
 
 	// Fetch community
 	var c = models.Community{ID: id}

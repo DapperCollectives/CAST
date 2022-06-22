@@ -58,6 +58,7 @@ var (
 	exampleNFTName = "ExampleNFT"
 	exampleNFTAddr = "0xf8d6e0586b0a20c7"
 	tokenWeighted  = "token-weighted-default"
+	stakedWeighted = "staked-token-weighted-default"
 
 	defaultStrategy = models.Strategy{
 		Name: &tokenWeighted,
@@ -69,14 +70,15 @@ var (
 	}
 
 	stakedStrategy = models.Strategy{
-		Name: &tokenWeighted,
+		Name: &stakedWeighted,
 		Contract: s.Contract{
 			Name:        &flowContractName,
 			Addr:        &flowContractAddr,
 			Public_path: &flowPublicPath,
 		},
 	}
-	strategies        = []models.Strategy{defaultStrategy}
+	strategies = []models.Strategy{defaultStrategy}
+
 	updatedStrategies = []models.Strategy{
 		defaultStrategy,
 		stakedStrategy,

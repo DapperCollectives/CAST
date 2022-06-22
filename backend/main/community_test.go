@@ -52,8 +52,10 @@ func TestCreateCommunity(t *testing.T) {
 	// Create Community
 	communityStruct := otu.GenerateCommunityStruct("account")
 	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
+
+	fmt.Printf("create community payload - STRATEGIES %+v", communityPayload.Strategies)
 	response := otu.CreateCommunityAPI(communityPayload)
-	fmt.Printf("RESPONSE %+v \n", response.Body)
+	fmt.Printf("create response %+v", response.Body)
 
 	// Check response code
 	checkResponseCode(t, http.StatusCreated, response.Code)
@@ -61,6 +63,8 @@ func TestCreateCommunity(t *testing.T) {
 	// Parse
 	var community models.Community
 	json.Unmarshal(response.Body.Bytes(), &community)
+
+	fmt.Printf("community strategies %+v", community.Strategies)
 
 	// Validate
 	assert.Equal(t, utils.DefaultCommunity.Name, community.Name)
@@ -172,9 +176,6 @@ func TestUpdateCommunity(t *testing.T) {
 	response = otu.GetCommunityAPI(oldCommunity.ID)
 	var updatedCommunity models.Community
 	json.Unmarshal(response.Body.Bytes(), &updatedCommunity)
-
-	fmt.Printf("\n UPDATED COMMUNITY %+v \n", updatedCommunity.Strategies)
-	fmt.Printf("\n UTILS.UPDATED COMMUNITY %+v \n", *utils.UpdatedCommunity.Strategies)
 
 	assert.Equal(t, oldCommunity.ID, updatedCommunity.ID)
 	assert.Equal(t, utils.UpdatedCommunity.Name, updatedCommunity.Name)
