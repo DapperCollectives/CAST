@@ -40,7 +40,7 @@ function Header(props) {
                 </NavLink>
                 <NavLink
                   to={{
-                    pathname: "/community/create",
+                    pathname: '/community/create',
                   }}
                   className="navbar-item p-0 ml-4 mr-4 is-hidden-mobile"
                 >
