@@ -1,6 +1,6 @@
-import React, { useState, forwardRef } from "react";
-import { CaretDown } from "./Svg";
-import classnames from "classnames";
+import React, { useState, forwardRef } from 'react';
+import { CaretDown } from './Svg';
+import classnames from 'classnames';
 
 const DropDown = forwardRef(
   (
@@ -9,11 +9,11 @@ const DropDown = forwardRef(
       values = [],
       onSelectValue = () => {},
       disabled = false,
-      label = "Select option",
+      label = 'Select option',
       dropdownFull = true,
       isRight = false,
-      padding = "",
-      margin = "",
+      padding = '',
+      margin = '',
     } = {},
     ref
   ) => {
@@ -21,7 +21,7 @@ const DropDown = forwardRef(
       defaultValue &&
       !values.find(({ value }) => value === defaultValue.value)
     ) {
-      console.warn("DropDown: Default value is not included in values array");
+      console.warn('DropDown: Default value is not included in values array');
     }
     const [isOpen, setIsOpen] = useState(false);
     const [innerValue, setInnerValue] = useState(defaultValue ?? { label });
@@ -45,8 +45,8 @@ const DropDown = forwardRef(
 
     const classNames = classnames(
       `dropdown is-flex is-flex-grow-1`,
-      { "is-right": isRight },
-      { "is-active": isOpen },
+      { 'is-right': isRight },
+      { 'is-active': isOpen },
       { [padding]: !!padding },
       { [margin]: !!margin }
     );
@@ -61,11 +61,11 @@ const DropDown = forwardRef(
       >
         <div
           className="dropdown-trigger columns m-0 is-flex-grow-1"
-          style={{ maxWidth: "100%" }}
+          style={{ maxWidth: '100%' }}
         >
           <button
             className={`button rounded-sm is-outlined border-light column m-0 py-0 px-3 is-full-mobile ${
-              disabled ? "is-disabled" : ""
+              disabled ? 'is-disabled' : ''
             }`}
             aria-haspopup="true"
             aria-controls="dropdown-menu"
@@ -77,8 +77,8 @@ const DropDown = forwardRef(
               <div
                 className="is-flex"
                 style={{
-                  maxWidth: "calc(100% - 30px)",
-                  overflow: "hidden",
+                  maxWidth: 'calc(100% - 30px)',
+                  overflow: 'hidden',
                 }}
               >
                 {innerValue?.label}
@@ -89,7 +89,7 @@ const DropDown = forwardRef(
         </div>
         <div
           className={`dropdown-menu column p-0 ${
-            dropdownFull ? "is-full-mobile is-full" : ""
+            dropdownFull ? 'is-full-mobile is-full' : ''
           }`}
           id="dropdown-menu"
           role="menu"
@@ -98,7 +98,7 @@ const DropDown = forwardRef(
             {values.map((itemValue, index) => (
               <button
                 className={`button is-white dropdown-item has-text-grey${
-                  itemValue?.value === innerValue ? " is-active" : ""
+                  itemValue?.value === innerValue ? ' is-active' : ''
                 }`}
                 onMouseDown={setValue(itemValue)}
                 key={`drop-down-${index}`}

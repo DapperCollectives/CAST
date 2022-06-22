@@ -4,8 +4,8 @@ import React, {
   useCallback,
   useMemo,
   useRef,
-} from "react";
-import { Editor } from "react-draft-wysiwyg";
+} from 'react';
+import { Editor } from 'react-draft-wysiwyg';
 import {
   EditorState,
   AtomicBlockUtils,
@@ -13,21 +13,21 @@ import {
   ContentState,
   DefaultDraftBlockRenderMap,
   SelectionState,
-} from "draft-js";
-import { Map } from "immutable";
-import { useVotingStrategies } from "hooks";
-import { useModalContext } from "contexts/NotificationModal";
-import { Dropdown, Error, UploadImageModal } from "components";
-import TextBasedChoices from "./TextBasedChoices";
-import ImageChoices from "./ImageChoices";
-import { Image } from "components/Svg";
+} from 'draft-js';
+import { Map } from 'immutable';
+import { useVotingStrategies } from 'hooks';
+import { useModalContext } from 'contexts/NotificationModal';
+import { Dropdown, Error, UploadImageModal } from 'components';
+import TextBasedChoices from './TextBasedChoices';
+import ImageChoices from './ImageChoices';
+import { Image } from 'components/Svg';
 
 // using a React component to render custom blocks
 const ImageCaptionCustomBlock = (props) => {
   return <div className="image-caption-draft-js">{props.children}</div>;
 };
 const blockRenderMap = Map({
-  "image-caption-block": {
+  'image-caption-block': {
     // element is used during paste or html conversion to auto match your component;
     // it is also retained as part of this.props.children and not stripped out. Example:
     // element: "section",
@@ -69,7 +69,7 @@ const StepOne = ({
   const { openModal, closeModal } = useModalContext();
 
   const tabOption = useMemo(
-    () => stepData?.proposalType || "text-based",
+    () => stepData?.proposalType || 'text-based',
     [stepData?.proposalType]
   );
   const [localEditorState, setLocalEditorState] = useState(
@@ -96,7 +96,7 @@ const StepOne = ({
           moreThanOne &&
           optLabels.every((opt, idx) => optLabels.indexOf(opt) === idx);
 
-        if (tabOption === "text-based") return haveLabels && eachUnique;
+        if (tabOption === 'text-based') return haveLabels && eachUnique;
 
         const imagesUrl = (opts || []).map((opt) => getImageUrl(opt));
 
@@ -128,24 +128,24 @@ const StepOne = ({
     setLocalEditorState(changes);
   };
 
-  const options = ["blockType", "inline", "list", "link", "emoji"];
+  const options = ['blockType', 'inline', 'list', 'link', 'emoji'];
   const inline = {
-    options: ["bold", "italic", "underline"],
+    options: ['bold', 'italic', 'underline'],
   };
   const list = {
-    options: ["unordered"],
+    options: ['unordered'],
   };
   const link = {
-    options: ["link"],
-    defaultTargetOption: "_blank",
+    options: ['link'],
+    defaultTargetOption: '_blank',
   };
 
   const styleMap = {
     IMAGE_CAPTION: {
-      fontFamily: "Arimo",
-      fontStyle: "normal",
+      fontFamily: 'Arimo',
+      fontStyle: 'normal',
       fontWeight: 400,
-      fontSize: "12px",
+      fontSize: '12px',
     },
   };
 
@@ -169,9 +169,9 @@ const StepOne = ({
                 </button>
               </div>
             ),
-            errorTitle: "Please select a strategy",
+            errorTitle: 'Please select a strategy',
           }),
-          { classNameModalContent: "rounded-sm" }
+          { classNameModalContent: 'rounded-sm' }
         );
         return false;
       }
@@ -186,7 +186,7 @@ const StepOne = ({
       choices: choices.concat([
         {
           id: choices.length + 1,
-          value: "",
+          value: '',
         },
       ]),
     });
@@ -253,7 +253,7 @@ const StepOne = ({
   ) {
     const entityKey = editorState
       .getCurrentContent()
-      .createEntity("IMAGE", "MUTABLE", {
+      .createEntity('IMAGE', 'MUTABLE', {
         src,
         height,
         width,
@@ -268,7 +268,7 @@ const StepOne = ({
     const newESWidthImageAndExtraBlock = AtomicBlockUtils.insertAtomicBlock(
       editorState,
       entityKey,
-      " "
+      ' '
     );
     // user did not add caption text
     if (caption.length === 0) {
@@ -285,7 +285,7 @@ const StepOne = ({
     );
 
     const lastBlockAddedKey = emptyBlockInserted.getKey();
-    
+
     // get existing blocks and
     // filter and remove the last block added
     // bc it's not necessary and caption block goes right after it
@@ -302,7 +302,7 @@ const StepOne = ({
     const csWithUpdatedBlock = Modifier.setBlockType(
       ContentState.createFromBlockArray([tempBlockArray]),
       SelectionState.createEmpty(tempBlockArray.key),
-      "image-caption-block"
+      'image-caption-block'
     );
     // get the block with custom type and with text
     const [updatedBlock] = csWithUpdatedBlock.getBlocksAsArray();
@@ -331,7 +331,7 @@ const StepOne = ({
     const editorStateWithImageAndCaption = EditorState.push(
       newESWidthImageAndExtraBlock,
       newContentState,
-      "insert-fragment"
+      'insert-fragment'
     );
 
     // move cursor to the end
@@ -352,8 +352,8 @@ const StepOne = ({
         tempEditorState,
         {
           src: image.imageUrl,
-          height: "auto",
-          width: "100%",
+          height: 'auto',
+          width: '100%',
           alt: caption,
         },
         caption
@@ -385,7 +385,7 @@ const StepOne = ({
           <input
             type="text"
             className="rounded-sm border-light p-3 column is-full"
-            value={stepData?.title || ""}
+            value={stepData?.title || ''}
             maxLength={128}
             onChange={(event) =>
               onDataChange({
@@ -449,9 +449,9 @@ const StepOne = ({
               <li>
                 <button
                   className={`button left ${
-                    tabOption === "text-based" ? "is-black" : "outlined"
+                    tabOption === 'text-based' ? 'is-black' : 'outlined'
                   }`}
-                  onClick={setTab("text-based")}
+                  onClick={setTab('text-based')}
                 >
                   <span>Text-based</span>
                 </button>
@@ -459,16 +459,16 @@ const StepOne = ({
               <li>
                 <button
                   className={`button right ${
-                    tabOption === "visual" ? "is-black" : "outlined"
+                    tabOption === 'visual' ? 'is-black' : 'outlined'
                   }`}
-                  onClick={setTab("visual")}
+                  onClick={setTab('visual')}
                 >
                   <span>Visual</span>
                 </button>
               </li>
             </ul>
           </div>
-          {tabOption === "text-based" && (
+          {tabOption === 'text-based' && (
             <TextBasedChoices
               choices={choices}
               onChoiceChange={onChoiceChange}
@@ -477,7 +477,7 @@ const StepOne = ({
               initChoices={initChoices}
             />
           )}
-          {tabOption === "visual" && (
+          {tabOption === 'visual' && (
             <ImageChoices
               choices={choices}
               onChoiceChange={onChoiceChange}

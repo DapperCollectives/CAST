@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { WrapperResponsive as Wrapper } from "..";
-import { parseDateFromServer, getProposalType } from "utils";
-import { useVotesForAddress } from "hooks";
-import { getStatus } from "./getStatus";
-import { FilterValues } from "const";
+import React, { useState, useEffect, useMemo } from 'react';
+import { WrapperResponsive as Wrapper } from '..';
+import { parseDateFromServer, getProposalType } from 'utils';
+import { useVotesForAddress } from 'hooks';
+import { getStatus } from './getStatus';
+import { FilterValues } from 'const';
 
 const TextBasedOptions = ({
   choices,
@@ -32,9 +32,9 @@ const TextBasedOptions = ({
           <Wrapper
             key={`proposal-option-${i}`}
             classNames="has-background-white border-light option-vote transition-all rounded-sm py-5 px-4 has-text-justified word-break"
-            extraClasses={choices?.length !== i + 1 ? "mb-5" : {}}
+            extraClasses={choices?.length !== i + 1 ? 'mb-5' : {}}
             extraStylesMobile={
-              choices?.length !== i + 1 ? { marginBottom: "14px" } : {}
+              choices?.length !== i + 1 ? { marginBottom: '14px' } : {}
             }
           >
             <label className="radio is-flex">
@@ -42,12 +42,12 @@ const TextBasedOptions = ({
                 type="radio"
                 name={`${labelType}-${opt.value}`}
                 value={opt.value}
-                className={`mr-3 ${showVotedCheck(opt.value) && "is-chosen"}`}
+                className={`mr-3 ${showVotedCheck(opt.value) && 'is-chosen'}`}
                 onChange={_onOptionSelect}
                 checked={currentOption === String(opt.value)}
               />
               <span />
-              <div className="has-text-black" style={{ lineHeight: "22.4px" }}>
+              <div className="has-text-black" style={{ lineHeight: '22.4px' }}>
                 {opt.label}
               </div>
             </label>
@@ -61,10 +61,11 @@ const TextBasedOptions = ({
           extraClassesMobile="px-4"
         >
           <button
-            style={{ height: 48, width: "100%" }}
-            className={`button vote-button transition-all is-flex has-background-yellow rounded-sm is-${currentOption && !readOnly ? "enabled" : "disabled"
-              }`}
-            onClick={readOnly ? () => { } : onConfirmVote}
+            style={{ height: 48, width: '100%' }}
+            className={`button vote-button transition-all is-flex has-background-yellow rounded-sm is-${
+              currentOption && !readOnly ? 'enabled' : 'disabled'
+            }`}
+            onClick={readOnly ? () => {} : onConfirmVote}
           >
             VOTE
           </button>
@@ -89,11 +90,12 @@ const ButtonChoice = ({
 
   return (
     <button
-      style={{ minHeight: "67px", height: "auto", width: "100%" }}
-      className={`button vote-button transition-all is-flex has-background-yellow rounded-sm is-${(choice.value === currentOption || !currentOption) && !readOnly
-          ? "enabled"
-          : "disabled"
-        }`}
+      style={{ minHeight: '67px', height: 'auto', width: '100%' }}
+      className={`button vote-button transition-all is-flex has-background-yellow rounded-sm is-${
+        (choice.value === currentOption || !currentOption) && !readOnly
+          ? 'enabled'
+          : 'disabled'
+      }`}
       onClick={_confirmAndVote(choice.value)}
     >
       <div className="columns is-mobile">
@@ -106,8 +108,8 @@ const ButtonChoice = ({
           <p
             className="has-text-justified"
             style={{
-              whiteSpace: "normal",
-              wordWrap: "break-word",
+              whiteSpace: 'normal',
+              wordWrap: 'break-word',
             }}
           >
             {choice.label}
@@ -136,7 +138,7 @@ const ImageBasedOptions = ({
       img.onload = function (event) {
         const { target } = event;
         const maxDim =
-          target.naturalHeight > target.naturalWidth ? "height" : "width";
+          target.naturalHeight > target.naturalWidth ? 'height' : 'width';
 
         setImageA({
           file: target,
@@ -156,7 +158,7 @@ const ImageBasedOptions = ({
       img.onload = function (event) {
         const { target } = event;
         const maxDim =
-          target.naturalHeight > target.naturalWidth ? "height" : "width";
+          target.naturalHeight > target.naturalWidth ? 'height' : 'width';
 
         setImageB({
           file: target,
@@ -169,8 +171,8 @@ const ImageBasedOptions = ({
     }
   }, [choiceB, setImageB, imageB]);
 
-  const styleHeight = { height: "500px" };
-  const imageStyle = { maxHeight: "500px" };
+  const styleHeight = { height: '500px' };
+  const imageStyle = { maxHeight: '500px' };
 
   return (
     <div className="columns">
@@ -188,7 +190,7 @@ const ImageBasedOptions = ({
               src={imageA?.file.src}
               alt={choiceA.label}
               style={
-                imageA?.maxDim === "width" ? { width: "100%" } : imageStyle
+                imageA?.maxDim === 'width' ? { width: '100%' } : imageStyle
               }
             />
           )}
@@ -215,7 +217,7 @@ const ImageBasedOptions = ({
               src={imageB?.file.src}
               alt={choiceB.label}
               style={
-                imageB?.maxDim === "width" ? { width: "100%" } : imageStyle
+                imageB?.maxDim === 'width' ? { width: '100%' } : imageStyle
               }
             />
           )}
@@ -272,8 +274,9 @@ const VoteOptions = ({
 
   const canVote = addr && isActive && hasntVoted;
 
-  const voteClasses = `vote-options border-light rounded-sm mb-6 ${!canVote && "is-disabled"
-    } ${!hasntVoted && "is-voted"}`;
+  const voteClasses = `vote-options border-light rounded-sm mb-6 ${
+    !canVote && 'is-disabled'
+  } ${!hasntVoted && 'is-voted'}`;
 
   let previousVote = castVote;
   let currentOption = optionChosen;
@@ -292,7 +295,7 @@ const VoteOptions = ({
   const { choices } = proposal;
 
   const isImageChoice = useMemo(
-    () => getProposalType(choices) === "image",
+    () => getProposalType(choices) === 'image',
     [choices]
   );
 
@@ -306,19 +309,20 @@ const VoteOptions = ({
   return (
     <div className={voteClasses}>
       <Wrapper
-        classNames={`${isImageChoice
-            ? "is-flex is-flex-direction-column is-align-items-center is-justify-content-center"
-            : ""
-          }`}
+        classNames={`${
+          isImageChoice
+            ? 'is-flex is-flex-direction-column is-align-items-center is-justify-content-center'
+            : ''
+        }`}
         extraClasses="px-6 pt-6 pb-6"
         extraClassesMobile="px-4 pt-6 pb-6"
       >
-        <h3 className={`is-size-5 `} style={{ lineHeight: "24px" }}>
+        <h3 className={`is-size-5 `} style={{ lineHeight: '24px' }}>
           Cast your vote
         </h3>
         <p
           className="has-text-grey small-text pt-2"
-          style={{ lineHeight: "19.6px" }}
+          style={{ lineHeight: '19.6px' }}
         >
           Secondary information about voting.
         </p>
@@ -329,7 +333,7 @@ const VoteOptions = ({
           currentOption={currentOption}
           previousVote={previousVote}
           labelType={labelType}
-          onOptionSelect={readOnly ? () => { } : onOptionSelect}
+          onOptionSelect={readOnly ? () => {} : onOptionSelect}
           readOnly={readOnly}
           onConfirmVote={onConfirmVote}
         />

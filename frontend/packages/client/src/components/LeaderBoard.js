@@ -1,13 +1,13 @@
-import React from "react";
-import Blockies from "react-blockies";
-import { WrapperResponsive } from "../components";
-import { useLeaderBoard } from "../hooks";
+import React from 'react';
+import Blockies from 'react-blockies';
+import { WrapperResponsive } from '../components';
+import { useLeaderBoard } from '../hooks';
 
 const Row = ({ index, addr, score, classNameIndex }) => {
-  const smallRowStyle = { width: "30%" };
+  const smallRowStyle = { width: '30%' };
 
   const clnIndex = `${
-    classNameIndex ?? "has-background-white-ter index-cell"
+    classNameIndex ?? 'has-background-white-ter index-cell'
   }  `.trim();
 
   return (
@@ -29,8 +29,8 @@ export default function LeaderBoard({ onClickViewMore = () => {} } = {}) {
     <div className="is-flex is-flex-direction-column">
       <WrapperResponsive
         classNames="is-flex flex-1 has-text-weight-bold is-uppercase small-text"
-        extraStyles={{ marginBottom: "32px", marginTop: "28px" }}
-        extraStylesMobile={{ marginBottom: "32px", marginTop: "24px" }}
+        extraStyles={{ marginBottom: '32px', marginTop: '28px' }}
+        extraStylesMobile={{ marginBottom: '32px', marginTop: '24px' }}
       >
         LEADERBOARD
       </WrapperResponsive>
@@ -41,10 +41,10 @@ export default function LeaderBoard({ onClickViewMore = () => {} } = {}) {
               const userIndex = index + 1;
               const styleIndex =
                 index === 0
-                  ? "rounded-sm-tl has-background-white-ter index-cell"
+                  ? 'rounded-sm-tl has-background-white-ter index-cell'
                   : index === 4
-                  ? "rounded-sm-bl has-background-white-ter index-cell"
-                  : "has-background-white-ter index-cell";
+                  ? 'rounded-sm-bl has-background-white-ter index-cell'
+                  : 'has-background-white-ter index-cell';
 
               return (
                 <Row

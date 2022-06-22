@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 export const Gitbook = () => (
   <svg
@@ -59,7 +59,7 @@ export const Bin = () => (
   </svg>
 );
 
-export const Plus = () => (
+export const Plus = ({ fill = 'black' } = {}) => (
   <svg
     width="24"
     height="24"
@@ -67,7 +67,7 @@ export const Plus = () => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" fill="black" />
+    <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" fill={fill} />
   </svg>
 );
 
@@ -106,10 +106,10 @@ export const ArrowLeftBold = () => (
 );
 
 export const CheckMark = ({
-  width = "30",
-  height = "30",
-  circleFill = "#0E5B20",
-  checkFill = "white",
+  width = '30',
+  height = '30',
+  circleFill = '#0E5B20',
+  checkFill = 'white',
   style = {},
 }) => (
   <svg
@@ -128,7 +128,7 @@ export const CheckMark = ({
   </svg>
 );
 
-export const Star = ({ width = "64", height = "64", fill = "none" }) => (
+export const Star = ({ width = '64', height = '64', fill = 'none' }) => (
   <svg
     width={width}
     height={height}
@@ -173,7 +173,7 @@ export const Add = () => (
   </svg>
 );
 
-export const LinkOut = ({ width = "18", height = "18" }) => (
+export const LinkOut = ({ width = '18', height = '18' }) => (
   <svg
     width={width}
     height={height}
@@ -192,7 +192,7 @@ export const LinkOut = ({ width = "18", height = "18" }) => (
   </svg>
 );
 
-export const Logo = ({ width = "110", height = "32" }) => (
+export const Logo = ({ width = '110', height = '32' }) => (
   <svg
     width={width}
     height={height}
@@ -204,7 +204,7 @@ export const Logo = ({ width = "110", height = "32" }) => (
       <mask
         id="b"
         style={{
-          maskType: "alpha",
+          maskType: 'alpha',
         }}
         maskUnits="userSpaceOnUse"
         x={0}
@@ -251,7 +251,7 @@ export const Logo = ({ width = "110", height = "32" }) => (
       <mask
         id="c"
         style={{
-          maskType: "alpha",
+          maskType: 'alpha',
         }}
         maskUnits="userSpaceOnUse"
         x={480}
@@ -270,7 +270,7 @@ export const Logo = ({ width = "110", height = "32" }) => (
       <mask
         id="d"
         style={{
-          maskType: "alpha",
+          maskType: 'alpha',
         }}
         maskUnits="userSpaceOnUse"
         x={720}
@@ -294,7 +294,7 @@ export const Logo = ({ width = "110", height = "32" }) => (
   </svg>
 );
 
-export const Twitter = ({ width = "24", height = "18" }) => {
+export const Twitter = ({ width = '24', height = '18' }) => {
   return (
     <svg
       width={width}
@@ -316,7 +316,7 @@ export const Twitter = ({ width = "24", height = "18" }) => {
   );
 };
 
-export const Discord = ({ width = "24", height = "18" }) => (
+export const Discord = ({ width = '24', height = '18' }) => (
   <svg
     width={width}
     height={height}
@@ -336,7 +336,7 @@ export const Discord = ({ width = "24", height = "18" }) => (
   </svg>
 );
 
-export const Github = ({ width = "24", height = "18" }) => (
+export const Github = ({ width = '24', height = '18' }) => (
   <svg
     width={width}
     height={height}
@@ -357,9 +357,9 @@ export const Github = ({ width = "24", height = "18" }) => (
 );
 
 export const StrategyIcon = ({
-  width = "24",
-  height = "24",
-  className = "",
+  width = '24',
+  height = '24',
+  className = '',
 }) => {
   return (
     <img
@@ -372,7 +372,7 @@ export const StrategyIcon = ({
   );
 };
 
-export const CaretDown = ({ width = "30", height = "15", className = "" }) => {
+export const CaretDown = ({ width = '30', height = '15', className = '' }) => {
   return (
     <svg
       width={width}
@@ -395,9 +395,9 @@ export const CaretDown = ({ width = "30", height = "15", className = "" }) => {
 };
 
 export const CheckCircle = ({
-  width = "30",
-  height = "30",
-  className = "",
+  width = '30',
+  height = '30',
+  className = '',
 }) => {
   return (
     <svg
@@ -420,7 +420,7 @@ export const CheckCircle = ({
     </svg>
   );
 };
-export const AngleDown = ({ width = "30", height = "15", className }) => (
+export const AngleDown = ({ width = '30', height = '15', className }) => (
   <svg
     width={width}
     height={height}
@@ -440,7 +440,7 @@ export const AngleDown = ({ width = "30", height = "15", className }) => (
   </svg>
 );
 
-export const AngleUp = ({ width = "30", height = "15", className }) => (
+export const AngleUp = ({ width = '30', height = '15', className }) => (
   <svg
     width={width}
     height={height}
@@ -493,9 +493,9 @@ export const Image = () => (
 );
 
 export const Upload = ({
-  width = "25",
-  height = "25",
-  className = "",
+  width = '25',
+  height = '25',
+  className = '',
 } = {}) => {
   return (
     <svg
@@ -540,9 +540,9 @@ export const Upload = ({
   );
 };
 export const Website = ({
-  width = "30",
-  height = "15",
-  className = "",
+  width = '30',
+  height = '15',
+  className = '',
 } = {}) => (
   <svg
     width={width}
@@ -570,9 +570,9 @@ export const Website = ({
 );
 
 export const Instagram = ({
-  width = "20",
-  height = "24",
-  className = "",
+  width = '20',
+  height = '24',
+  className = '',
 } = {}) => (
   <svg
     width={width}
