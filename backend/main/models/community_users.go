@@ -21,6 +21,11 @@ type CommunityUserType struct {
 	Is_member    bool   `json:"isMember" validate:"required"`
 }
 
+type LeaderboardUser struct {
+	Addr  string `json:"addr" validate:"required"`
+	Score int    `json:"score" validate:"required"`
+}
+
 type UserTypes []string
 
 var USER_TYPES = UserTypes{"member", "author", "admin"}
@@ -95,6 +100,34 @@ func GetUsersForCommunityByType(db *s.Database, communityId, start, count int, u
 	var totalRecords int
 	countSql := `SELECT COUNT(*) FROM community_users WHERE community_id = $1 AND user_type = $2`
 	_ = db.Conn.QueryRow(db.Context, countSql, communityId, user_type).Scan(&totalRecords)
+
+	return users, totalRecords, nil
+}
+
+func GetCommunityLeaderboard(db *s.Database, communityId, start, count int) ([]LeaderboardUser, int, error) {
+	var users = []LeaderboardUser{}
+	err := pgxscan.Select(db.Context, db.Conn, &users,
+		`
+		SELECT v.addr, count(*) AS score FROM votes v 
+		JOIN proposals p ON p.id = v.proposal_id
+		WHERE p.community_id = $1
+		GROUP BY v.addr
+		ORDER BY score DESC
+		LIMIT $2 OFFSET $3
+		`, communityId, count, start)
+
+	// If we get pgx.ErrNoRows, just return an empty array
+	// and obfuscate error
+	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
+		return nil, 0, err
+	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
+		return []LeaderboardUser{}, 0, nil
+	}
+
+	// Get total number of users
+	var totalRecords int
+	countSql := `SELECT COUNT(*) FROM community_users WHERE community_id = $1`
+	_ = db.Conn.QueryRow(db.Context, countSql, communityId).Scan(&totalRecords)
 
 	return users, totalRecords, nil
 }
