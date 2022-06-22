@@ -68,3 +68,9 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `yarn build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+### Polyfills - Webpack
+
+Webpack 5 no longer polyfills Node.js core modules automatically which means if you use them in your code running this application you will have to install compatible modules from yarn and include them yourself.
+Dependencies used so far were added as aliases which make them work.
+Other options if the package needed does not work is to use `react-app-rewired` or `patch-package` to exptend or patch webpack configuration provided by `create-react-app`
