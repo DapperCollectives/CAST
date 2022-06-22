@@ -1,6 +1,6 @@
-import React from "react";
-import ActionButton from "components/ActionButton";
-import StrategySelectorForm from "components/Community/StrategySelectorForm";
+import React from 'react';
+import ActionButton from 'components/ActionButton';
+import StrategySelectorForm from 'components/Community/StrategySelectorForm';
 
 export default function CommunityProposalsAndVoting({
   communityVotingStrategies = [],
@@ -9,7 +9,7 @@ export default function CommunityProposalsAndVoting({
 } = {}) {
   // sends updates to backend
   const saveData = async (strategies) => {
-    console.log("--- strategies to update ---", strategies);
+    console.log('--- strategies to update ---', strategies);
     // array like:
     /* 
     {

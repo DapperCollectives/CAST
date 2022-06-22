@@ -1,19 +1,19 @@
-import React, { useEffect, useState } from "react";
-import StrategySelector from "./StrategySelector";
-import StrategyInformationForm from "./StrategyInformationForm";
-import { ActionButton } from "components";
-import { isValidAddress } from "utils";
+import React, { useEffect, useState } from 'react';
+import StrategySelector from './StrategySelector';
+import StrategyInformationForm from './StrategyInformationForm';
+import { ActionButton } from 'components';
+import { isValidAddress } from 'utils';
 
 const ModalSteps = {
-  1: "select-strategy",
-  2: "strategy-information",
+  1: 'select-strategy',
+  2: 'strategy-information',
 };
 
 const initialFormFields = {
-  contractAddress: "",
-  contractName: "",
-  maxWeight: "",
-  minimunBalance: "",
+  contractAddress: '',
+  contractName: '',
+  maxWeight: '',
+  minimunBalance: '',
 };
 
 const formFields = Object.keys(initialFormFields);
@@ -29,7 +29,7 @@ export default function StrategyEditorModal({
   const [formIsValid, setIsFormValid] = useState(false);
 
   const [data, setData] = useState({
-    strategy: "",
+    strategy: '',
     ...initialFormFields,
   });
 
@@ -61,7 +61,7 @@ export default function StrategyEditorModal({
     // then no more information is required
     // modal should be closed and
     // strategy should be ready to be added
-    if (strategy === "one-address-one-vote") {
+    if (strategy === 'one-address-one-vote') {
       onDone({ strategy });
       return;
     }
@@ -82,18 +82,18 @@ export default function StrategyEditorModal({
   return (
     <div
       className="modal-card has-background-white m-0 p-5 p-1-mobile"
-      style={{ minHeight: "467px" }}
+      style={{ minHeight: '467px' }}
     >
       <header
         className="modal-card-head has-background-white columns is-mobile m-0 px-4 pt-4"
-        style={{ borderBottom: "none" }}
+        style={{ borderBottom: 'none' }}
       >
         <div className="column p-0 is-flex flex-1">
           <h2 className="is-size-4">Select a Strategy</h2>
         </div>
         <div
           className={`column is-narrow px-0 has-text-right is-size-2 leading-tight cursor-pointer ${
-            enableDismiss && "has-text-grey"
+            enableDismiss && 'has-text-grey'
           }`}
           onClick={_onDismiss}
         >
@@ -102,7 +102,7 @@ export default function StrategyEditorModal({
       </header>
       <section
         className="modal-card-body py-0 px-4"
-        style={{ minHeight: "280px" }}
+        style={{ minHeight: '280px' }}
       >
         {step === ModalSteps[1] && (
           <StrategySelector
