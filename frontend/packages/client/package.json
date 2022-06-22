@@ -15,8 +15,8 @@
     "date-fns": "^2.28.0",
     "draft-js": "^0.11.7",
     "draft-js-export-html": "^1.4.1",
-    "http": "npm:stream-http",
-    "https": "npm:https-browserify",
+    "http": "yarn:stream-http",
+    "https": "yarn:https-browserify",
     "immutable": "^4.0.0",
     "lodash": "4.17.21",
     "millify": "^4.0.0",
@@ -33,9 +33,9 @@
     "react-redux": "^7.2.4",
     "react-router-dom": "^5.2.0",
     "react-scripts": "^5.0.1",
-    "stream": "npm:stream-browserify",
+    "stream": "yarn:stream-browserify",
     "string-strip-html": "8.3.0",
-    "url": "npm:url",
+    "url": "yarn:url",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
