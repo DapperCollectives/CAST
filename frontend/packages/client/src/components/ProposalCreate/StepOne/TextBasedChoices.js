@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
-import { Plus, Bin } from 'components/Svg';
+import { Bin } from 'components/Svg';
 import { getProposalType } from 'utils';
+import AddButton from 'components/AddButton';
 
 const TextBasedChoices = ({
   choices = [],
@@ -47,15 +48,11 @@ const TextBasedChoices = ({
           </div>
         </div>
       ))}
-      <div
-        className="mt-2 cursor-pointer is-flex is-align-items-centered"
-        onClick={onCreateChoice}
-      >
-        <Plus />{' '}
-        <span className="ml-2">
-          Add {`${choices?.length >= 1 ? 'Another ' : ''}`}Choice
-        </span>
-      </div>
+      <AddButton
+        onAdd={onCreateChoice}
+        className="mt-2"
+        addText={`${choices?.length >= 1 ? 'Another ' : ''}Choice`}
+      />
     </>
   );
 };

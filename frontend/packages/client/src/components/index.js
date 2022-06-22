@@ -22,6 +22,7 @@ export { default as JoinCommunityButton } from './Community/JoinCommunityButton'
 export { default as CommunityEditorProfile } from './Community/CommunityEditorProfile';
 export { default as CommunityEditorLinks } from './Community/CommunityEditorLinks';
 export { default as CommunityEditorDetails } from './Community/CommunityEditorDetails';
+export { default as AddButton } from './AddButton';
 export {
   PropCreateStepOne,
   PropCreateStepTwo,
