@@ -1,9 +1,9 @@
-import React, { useState } from "react";
-import { useVotingStrategies } from "hooks";
-import { AddButton } from "components";
-import { Bin } from "components/Svg";
-import { useModalContext } from "contexts/NotificationModal";
-import StrategyEditorModal from "./StrategyEditorModal";
+import React, { useState } from 'react';
+import { useVotingStrategies } from 'hooks';
+import { AddButton } from 'components';
+import { Bin } from 'components/Svg';
+import { useModalContext } from 'contexts/NotificationModal';
+import StrategyEditorModal from './StrategyEditorModal';
 
 const StrategyInput = ({
   index,
@@ -16,7 +16,7 @@ const StrategyInput = ({
     <div
       key={`index-${index}`}
       className="column is-12 is-mobile p-0 m-0 mb-4 fade-in"
-      style={{ position: "relative" }}
+      style={{ position: 'relative' }}
     >
       <input
         type="text"
@@ -24,15 +24,15 @@ const StrategyInput = ({
         value={commuVotStra}
         onChange={onChange}
         style={{
-          width: "100%",
+          width: '100%',
         }}
       />
       <div
         style={{
-          display: "flex",
-          justifyContent: "flex-end",
-          alignContent: "center",
-          position: "absolute",
+          display: 'flex',
+          justifyContent: 'flex-end',
+          alignContent: 'center',
+          position: 'absolute',
           right: 15,
           top: 9,
         }}
@@ -84,7 +84,7 @@ export default function StrategySelectorForm({
         onDone={addNewStrategy}
       />,
       {
-        classNameModalContent: "rounded-sm",
+        classNameModalContent: 'rounded-sm',
         showCloseButton: false,
       }
     );
@@ -126,7 +126,7 @@ export default function StrategySelectorForm({
       ))}
       <AddButton
         disabled={disableAddButton || loadingAllStrategies}
-        addText={"Strategy"}
+        addText={'Strategy'}
         onAdd={onAddStrategy}
         className="mt-2"
       />
