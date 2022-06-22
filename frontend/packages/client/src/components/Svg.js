@@ -59,7 +59,7 @@ export const Bin = () => (
   </svg>
 );
 
-export const Plus = ({ fill = "black" } = {}) => (
+export const Plus = ({ fill = 'black' } = {}) => (
   <svg
     width="24"
     height="24"
