@@ -1,7 +1,7 @@
-import { useReducer, useCallback } from "react";
-import { defaultReducer, INITIAL_STATE } from "../reducers";
-import { useErrorHandlerContext } from "../contexts/ErrorHandler";
-import { getCompositeSigs } from "utils";
+import { useReducer, useCallback } from 'react';
+import { defaultReducer, INITIAL_STATE } from '../reducers';
+import { useErrorHandlerContext } from '../contexts/ErrorHandler';
+import { getCompositeSigs } from 'utils';
 
 export default function useJoinCommunity() {
   const [state, dispatch] = useReducer(defaultReducer, {
@@ -15,30 +15,30 @@ export default function useJoinCommunity() {
       const { addr } = user;
       const { currentUser } = injectedProvider;
       const { signUserMessage } = currentUser();
-      dispatch({ type: "PROCESSING" });
+      dispatch({ type: 'PROCESSING' });
       const timestamp = Date.now().toString();
-      const hexTime = Buffer.from(timestamp).toString("hex");
+      const hexTime = Buffer.from(timestamp).toString('hex');
       const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}/users`;
       const _compositeSignatures = await signUserMessage(hexTime);
-      if (_compositeSignatures.indexOf("Declined:") > -1) {
-        dispatch({ type: "SUCCESS" });
+      if (_compositeSignatures.indexOf('Declined:') > -1) {
+        dispatch({ type: 'SUCCESS' });
         return { success: false };
       }
       const compositeSignatures = getCompositeSigs(_compositeSignatures);
       if (!compositeSignatures) {
-        return { error: "No valid user signature found." };
+        return { error: 'No valid user signature found.' };
       }
 
       try {
         const fetchOptions = {
-          method: "POST",
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             communityId: parseInt(communityId),
             addr,
-            userType: "member",
+            userType: 'member',
             signingAddr: addr,
             timestamp,
             compositeSignatures,
@@ -47,11 +47,11 @@ export default function useJoinCommunity() {
 
         const response = await fetch(url, fetchOptions);
         const json = await response.json();
-        dispatch({ type: "SUCCESS", payload: json });
+        dispatch({ type: 'SUCCESS', payload: json });
         return { success: true };
       } catch (err) {
         notifyError(err, url);
-        dispatch({ type: "ERROR", payload: { errorData: err.message } });
+        dispatch({ type: 'ERROR', payload: { errorData: err.message } });
       }
     },
     [notifyError]
@@ -62,30 +62,30 @@ export default function useJoinCommunity() {
       const { addr } = user;
       const { currentUser } = injectedProvider;
       const { signUserMessage } = currentUser();
-      dispatch({ type: "PROCESSING" });
+      dispatch({ type: 'PROCESSING' });
       const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}/users/${addr}/member`;
       const timestamp = Date.now().toString();
-      const hexTime = Buffer.from(timestamp).toString("hex");
+      const hexTime = Buffer.from(timestamp).toString('hex');
       const _compositeSignatures = await signUserMessage(hexTime);
-      if (_compositeSignatures.indexOf("Declined:") > -1) {
-        dispatch({ type: "SUCCESS" });
+      if (_compositeSignatures.indexOf('Declined:') > -1) {
+        dispatch({ type: 'SUCCESS' });
         return { success: false };
       }
       const compositeSignatures = getCompositeSigs(_compositeSignatures);
       if (!compositeSignatures) {
-        return { error: "No valid user signature found." };
+        return { error: 'No valid user signature found.' };
       }
 
       try {
         const fetchOptions = {
-          method: "DELETE",
+          method: 'DELETE',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             communityId: parseInt(communityId),
             addr,
-            userType: "member",
+            userType: 'member',
             signingAddr: addr,
             timestamp,
             compositeSignatures,
@@ -94,11 +94,11 @@ export default function useJoinCommunity() {
 
         const response = await fetch(url, fetchOptions);
         const json = await response.json();
-        dispatch({ type: "SUCCESS", payload: json });
+        dispatch({ type: 'SUCCESS', payload: json });
         return { success: true };
       } catch (err) {
         notifyError(err, url);
-        dispatch({ type: "ERROR", payload: { errorData: err.message } });
+        dispatch({ type: 'ERROR', payload: { errorData: err.message } });
       }
     },
     [notifyError]

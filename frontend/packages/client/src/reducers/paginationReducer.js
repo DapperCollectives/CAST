@@ -1,12 +1,12 @@
 export const paginationReducer = (state, action) => {
   switch (action.type) {
-    case "PROCESSING":
+    case 'PROCESSING':
       return {
         ...state,
         loading: true,
         error: false,
       };
-    case "SUCCESS":
+    case 'SUCCESS':
       const { count, next, totalRecords, data } = action.payload;
       const newData = data ? data : [];
       // return if there are no more items and hook is called again
@@ -40,7 +40,7 @@ export const paginationReducer = (state, action) => {
           totalRecords,
         },
       };
-    case "RESET_RESULTS": {
+    case 'RESET_RESULTS': {
       return {
         ...state,
         data: null,
@@ -50,7 +50,7 @@ export const paginationReducer = (state, action) => {
         },
       };
     }
-    case "ERROR":
+    case 'ERROR':
       return {
         ...state,
         loading: false,

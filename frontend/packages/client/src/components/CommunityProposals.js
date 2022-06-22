@@ -1,10 +1,10 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import CommunityProposalList from "./CommunityProposalList";
-import { useCommunityProposalsWithVotes, useMediaQuery } from "../hooks";
-import { FilterValues } from "../const";
-import DropDown from "./Dropdown";
-import WrapperResponsive from "./WrapperResponsive";
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import CommunityProposalList from './CommunityProposalList';
+import { useCommunityProposalsWithVotes, useMediaQuery } from '../hooks';
+import { FilterValues } from '../const';
+import DropDown from './Dropdown';
+import WrapperResponsive from './WrapperResponsive';
 
 export default function CommunityProposals({ communityId = 1, admins } = {}) {
   const notMobile = useMediaQuery();
@@ -16,7 +16,7 @@ export default function CommunityProposals({ communityId = 1, admins } = {}) {
     )
     .map(([key, value]) => ({ value: key, label: value }));
 
-  const [filterValue, setFilterValues] = useState("all");
+  const [filterValue, setFilterValues] = useState('all');
 
   // When filter has all values two requests are made to the backend:
   // one will bring all active and pending proposals: "inprogress"
@@ -27,7 +27,7 @@ export default function CommunityProposals({ communityId = 1, admins } = {}) {
     useCommunityProposalsWithVotes({
       communityId,
       count: 10,
-      status: filterValue === "all" ? "terminated" : filterValue,
+      status: filterValue === 'all' ? 'terminated' : filterValue,
     });
 
   // used to load active and pending proposals without pulling data on scrolling
@@ -35,21 +35,22 @@ export default function CommunityProposals({ communityId = 1, admins } = {}) {
     useCommunityProposalsWithVotes({
       communityId,
       count: 25,
-      status: "inprogress",
+      status: 'inprogress',
       scrollToFetchMore: false,
     });
 
-  const classesContainer = notMobile ? "mt-6" : "mt-5";
-  const classesAboutContainer = `columns is-multiline m-0 ${notMobile ? "mt-5 pt-2" : "mt-4"
-    }`;
+  const classesContainer = notMobile ? 'mt-6' : 'mt-5';
+  const classesAboutContainer = `columns is-multiline m-0 ${
+    notMobile ? 'mt-5 pt-2' : 'mt-4'
+  }`;
 
   const initialLoading =
-    filterValue !== "all"
+    filterValue !== 'all'
       ? loadingProposals && !proposals
       : loadingProposals &&
-      !proposals &&
-      !activeProposals &&
-      loadingActiveProposals;
+        !proposals &&
+        !activeProposals &&
+        loadingActiveProposals;
 
   return (
     <div className={`columns ${classesContainer}`}>
@@ -61,7 +62,7 @@ export default function CommunityProposals({ communityId = 1, admins } = {}) {
             extraClassesMobile="mt-2 mb-5 is-8 pr-2"
           >
             <DropDown
-              defaultValue={{ value: "all", label: "All" }}
+              defaultValue={{ value: 'all', label: 'All' }}
               values={proposalFilterValues}
               onSelectValue={(value) => {
                 setFilterValues(value);
@@ -73,7 +74,7 @@ export default function CommunityProposals({ communityId = 1, admins } = {}) {
               <Link to="/proposal/create">
                 <div
                   className="button rounded-sm is-uppercase is-flex small-text has-text-white has-background-black"
-                  style={{ minHeight: "40px" }}
+                  style={{ minHeight: '40px' }}
                 >
                   Create
                 </div>
@@ -88,7 +89,7 @@ export default function CommunityProposals({ communityId = 1, admins } = {}) {
               <Link to={`/proposal/create?communityId=${communityId}`}>
                 <div
                   className="button is-fullwidth rounded-sm is-uppercase is-flex small-text has-text-white has-background-black"
-                  style={{ minHeight: "40px" }}
+                  style={{ minHeight: '40px' }}
                 >
                   Create Proposal
                 </div>
@@ -102,7 +103,7 @@ export default function CommunityProposals({ communityId = 1, admins } = {}) {
           </div>
           <div
             className="column is-12 has-text-grey px-0"
-            style={{ marginBottom: "20px" }}
+            style={{ marginBottom: '20px' }}
           >
             Proposals are created and submitted by community members. Members
             can cast token-weighted votes on active proposals to make decisions.
@@ -111,7 +112,7 @@ export default function CommunityProposals({ communityId = 1, admins } = {}) {
       </div>
       <div
         className="column is-9-desktop is-7-tablet"
-        style={notMobile ? { paddingLeft: "12%" } : {}}
+        style={notMobile ? { paddingLeft: '12%' } : {}}
       >
         <CommunityProposalList
           proposalsList={proposals}

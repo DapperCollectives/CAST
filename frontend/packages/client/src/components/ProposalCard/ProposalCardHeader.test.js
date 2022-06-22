@@ -1,37 +1,37 @@
-import React from "react";
-import { cleanup, render } from "@testing-library/react";
-import "@testing-library/jest-dom";
-import renderer from "react-test-renderer";
-import ProposalCardHeader from "./ProposalCardHeader";
+import React from 'react';
+import { cleanup, render } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import renderer from 'react-test-renderer';
+import ProposalCardHeader from './ProposalCardHeader';
 
 const date = new Date();
 let pendingProposalProps = {
-  textDecision: "This is decision text",
+  textDecision: 'This is decision text',
   winCount: 12,
   voted: true,
   endTime: new Date().setDate(date.getDate() + 10),
   startTime: new Date().setDate(date.getDate() + 2),
-  computedStatus: "pending",
+  computedStatus: 'pending',
 };
 let activeProposalProps = {
-  textDecision: "This is decision text",
+  textDecision: 'This is decision text',
   winCount: 12,
   voted: true,
   endTime: new Date().setDate(date.getDate() + 10),
   startTime: new Date().setDate(date.getDate() - 2),
-  computedStatus: "active",
+  computedStatus: 'active',
 };
 let closedProposalProps = {
-  textDecision: "This is decision text",
+  textDecision: 'This is decision text',
   winCount: 12,
   voted: true,
   endTime: new Date().setDate(date.getDate() - 3),
   startTime: new Date().setDate(date.getDate() - 8),
-  computedStatus: "closed",
+  computedStatus: 'closed',
 };
 let cancelledProposalProps = {
-  computedStatus: "cancelled",
-  textDecision: "This is decision text",
+  computedStatus: 'cancelled',
+  textDecision: 'This is decision text',
   winCount: 12,
   voted: true,
   endTime: new Date().setDate(date.getDate() + 10),
@@ -45,7 +45,7 @@ const propsArray = [
 ];
 afterEach(cleanup);
 
-describe("ProposalCardHeader UI Component", () => {
+describe('ProposalCardHeader UI Component', () => {
   propsArray.forEach((props) => {
     it(`renders correctly on  ${props.computedStatus} computedStatus`, () => {
       const component = renderer.create(
@@ -80,14 +80,14 @@ describe("ProposalCardHeader computedStatus 'pending'", () => {
   });
   it("should display 'Pending' label with grey light color", () => {
     const { getByText } = rendered;
-    expect(getByText("Pending")).toBeInTheDocument();
-    expect(getByText("Pending")).toHaveClass(
-      "has-text-white rounded-sm px-2 py-1 has-background-grey-light"
+    expect(getByText('Pending')).toBeInTheDocument();
+    expect(getByText('Pending')).toHaveClass(
+      'has-text-white rounded-sm px-2 py-1 has-background-grey-light'
     );
   });
-  it("does not display voted label", () => {
+  it('does not display voted label', () => {
     const { queryByText } = rendered;
-    expect(queryByText("voted")).toBe(null);
+    expect(queryByText('voted')).toBe(null);
   });
 });
 
@@ -108,17 +108,17 @@ describe("ProposalCardHeader computedStatus 'active' without vote", () => {
       />
     );
   });
-  it("should display active text with countdown days", () => {
+  it('should display active text with countdown days', () => {
     const { getByText } = rendered;
     expect(
       getByText(`Active: Ends in ${daysToClose} days`)
     ).toBeInTheDocument();
   });
-  it("should display active icon", () => {
+  it('should display active icon', () => {
     const { queryByTitle } = rendered;
-    expect(queryByTitle("Active")).toBeInTheDocument();
+    expect(queryByTitle('Active')).toBeInTheDocument();
   });
-  it("should not display voted label", () => {
+  it('should not display voted label', () => {
     const { queryByText } = rendered;
     expect(queryByText(`Voted`)).toBe(null);
   });
@@ -141,17 +141,17 @@ describe("ProposalCardHeader computedStatus 'active' with user vote", () => {
       />
     );
   });
-  it("should display active text with countdown days", () => {
+  it('should display active text with countdown days', () => {
     const { getByText } = rendered;
     expect(
       getByText(`Active: Ends in ${daysToClose} days`)
     ).toBeInTheDocument();
   });
-  it("should display active icon", () => {
+  it('should display active icon', () => {
     const { queryByTitle } = rendered;
-    expect(queryByTitle("Active")).toBeInTheDocument();
+    expect(queryByTitle('Active')).toBeInTheDocument();
   });
-  it("should display voted label when user voted", () => {
+  it('should display voted label when user voted', () => {
     const { getByText } = rendered;
     expect(getByText(`Voted`)).toBeInTheDocument();
   });
@@ -173,12 +173,12 @@ describe("ProposalCardHeader computedStatus 'closed'", () => {
   });
   it("should display 'Closed' label with grey color", () => {
     const { getByText } = rendered;
-    expect(getByText("Closed")).toBeInTheDocument();
-    expect(getByText("Closed")).toHaveClass(
-      "has-text-white rounded-sm px-2 py-1 has-background-grey"
+    expect(getByText('Closed')).toBeInTheDocument();
+    expect(getByText('Closed')).toHaveClass(
+      'has-text-white rounded-sm px-2 py-1 has-background-grey'
     );
   });
-  it("should display decision text with win count", () => {
+  it('should display decision text with win count', () => {
     const { getByText } = rendered;
     expect(
       getByText(
@@ -186,34 +186,34 @@ describe("ProposalCardHeader computedStatus 'closed'", () => {
       )
     ).toBeInTheDocument();
   });
-  it("does not display voted label", () => {
+  it('does not display voted label', () => {
     const { queryByText } = rendered;
-    expect(queryByText("voted")).toBe(null);
+    expect(queryByText('voted')).toBe(null);
   });
-  it("should display closed checked icon", () => {
+  it('should display closed checked icon', () => {
     const { queryByTitle } = rendered;
-    expect(queryByTitle("CheckCircle")).toBeInTheDocument();
+    expect(queryByTitle('CheckCircle')).toBeInTheDocument();
   });
 });
 
-describe("ProposalCardHeader defaults to closed when no props are passed", () => {
+describe('ProposalCardHeader defaults to closed when no props are passed', () => {
   let rendered;
   beforeEach(() => {
     rendered = render(<ProposalCardHeader />);
   });
   it("should display 'Closed' label with grey color", () => {
     const { getByText } = rendered;
-    expect(getByText("Closed")).toBeInTheDocument();
-    expect(getByText("Closed")).toHaveClass(
-      "has-text-white rounded-sm px-2 py-1 has-background-grey"
+    expect(getByText('Closed')).toBeInTheDocument();
+    expect(getByText('Closed')).toHaveClass(
+      'has-text-white rounded-sm px-2 py-1 has-background-grey'
     );
   });
-  it("does not display voted label", () => {
+  it('does not display voted label', () => {
     const { queryByText } = rendered;
-    expect(queryByText("voted")).toBe(null);
+    expect(queryByText('voted')).toBe(null);
   });
-  it("should display closed checked icon", () => {
+  it('should display closed checked icon', () => {
     const { queryByTitle } = rendered;
-    expect(queryByTitle("CheckCircle")).toBeInTheDocument();
+    expect(queryByTitle('CheckCircle')).toBeInTheDocument();
   });
 });

@@ -1,5 +1,5 @@
-export { defaultReducer } from "./defaultReducer";
-export { paginationReducer } from "./paginationReducer";
+export { defaultReducer } from './defaultReducer';
+export { paginationReducer } from './paginationReducer';
 
 export const PAGINATION_INITIAL_STATE = {
   count: 10,

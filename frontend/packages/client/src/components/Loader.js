@@ -1,6 +1,6 @@
-import React from "react";
+import React from 'react';
 
-const StartLoader = ({ pathId, className = "", width = 35, height = 35 }) => {
+const StartLoader = ({ pathId, className = '', width = 35, height = 35 }) => {
   return (
     <svg
       width={width}
@@ -34,11 +34,11 @@ const StartLoader = ({ pathId, className = "", width = 35, height = 35 }) => {
 
 export default function Loader({
   fullHeight = false,
-  className = "",
+  className = '',
   size,
   spacing,
 }) {
-  const style = fullHeight ? { height: "100%" } : {};
+  const style = fullHeight ? { height: '100%' } : {};
   return (
     <div
       className={`is-flex is-flex-direction-column is-align-items-center is-justify-content-center fade-in ${className}`}
@@ -49,19 +49,19 @@ export default function Loader({
           width={size}
           height={size}
           pathId="loader_1"
-          className={spacing ?? "mx-3"}
+          className={spacing ?? 'mx-3'}
         />
         <StartLoader
           width={size}
           height={size}
           pathId="loader_2"
-          className={spacing ?? "mx-3"}
+          className={spacing ?? 'mx-3'}
         />
         <StartLoader
           width={size}
           height={size}
           pathId="loader_3"
-          className={spacing ?? "mx-3"}
+          className={spacing ?? 'mx-3'}
         />
       </div>
     </div>

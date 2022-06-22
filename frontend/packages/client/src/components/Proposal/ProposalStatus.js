@@ -1,10 +1,10 @@
-import React from "react";
-import { parseDateFromServer } from "utils";
-import { getStatus } from "./getStatus";
-import { FilterValues } from "const";
-import { StatusLabel } from "components";
+import React from 'react';
+import { parseDateFromServer } from 'utils';
+import { getStatus } from './getStatus';
+import { FilterValues } from 'const';
+import { StatusLabel } from 'components';
 
-const ProposalStatus = ({ proposal, className = "" }) => {
+const ProposalStatus = ({ proposal, className = '' }) => {
   const { diffFromNow: endDiff, diffDays } = parseDateFromServer(
     proposal.endTime
   );
@@ -39,7 +39,7 @@ const ProposalStatus = ({ proposal, className = "" }) => {
               className="smaller-text"
             />
           )}
-          <span style={{ lineHeight: "18.8px" }} className="smaller-text">
+          <span style={{ lineHeight: '18.8px' }} className="smaller-text">
             Ends in {diffDays} days
           </span>
         </code>
@@ -64,7 +64,7 @@ const ProposalStatus = ({ proposal, className = "" }) => {
   return (
     <div className={className}>
       <code className="has-text-grey pl-0">
-        <StatusLabel status={"Closed"} className="smaller-text" />
+        <StatusLabel status={'Closed'} className="smaller-text" />
       </code>
     </div>
   );
