@@ -1,8 +1,8 @@
-import { formatDistance } from 'date-fns'
-import { customAlphabet } from "nanoid";
-import { stateToHTML } from "draft-js-export-html";
+import { formatDistance } from 'date-fns';
+import { customAlphabet } from 'nanoid';
+import { stateToHTML } from 'draft-js-export-html';
 
-const nanoid = customAlphabet("1234567890abcdef", 10);
+const nanoid = customAlphabet('1234567890abcdef', 10);
 
 export const generateSlug = nanoid;
 
@@ -68,8 +68,8 @@ export const getCompositeSigs = (sigArr) => {
   }
 
   if (
-    typeof sigArr === "string" &&
-    sigArr.includes("Declined: No reason supplied")
+    typeof sigArr === 'string' &&
+    sigArr.includes('Declined: No reason supplied')
   ) {
     return null;
   }
@@ -77,14 +77,14 @@ export const getCompositeSigs = (sigArr) => {
 };
 
 export function getReducedImg(image, newImageWidth = 150, fileName) {
-  const canvas = document.createElement("canvas");
+  const canvas = document.createElement('canvas');
   // if image is bigger then scale
   const scale =
     image.width > newImageWidth ? (newImageWidth / image.width).toFixed(2) : 1;
 
   canvas.width = image.width * scale;
   canvas.height = image.height * scale;
-  const ctx = canvas.getContext("2d");
+  const ctx = canvas.getContext('2d');
   if (ctx) {
     ctx.drawImage(
       image,
@@ -109,9 +109,9 @@ export function getReducedImg(image, newImageWidth = 150, fileName) {
           const blobAsFile = blobImageNoType;
           return resolve({ imageFile: blobAsFile });
         }
-        reject({ error: "Error while using blob" });
+        reject({ error: 'Error while using blob' });
       },
-      "image/jpeg",
+      'image/jpeg',
       1
     );
   });
@@ -125,24 +125,26 @@ export const getProposalType = (choices) => {
         choice.choiceImgUrl !== undefined && choice.choiceImgUrl !== null
     )
   ) {
-    return "image";
+    return 'image';
   }
-  return "text-based";
+  return 'text-based';
 };
 
 // Note: Does not currently return children
 export const parseHTML = (body, tag, all) => {
   const parser = new DOMParser();
-  const bodyDoc = parser.parseFromString(body, "text/html");
+  const bodyDoc = parser.parseFromString(body, 'text/html');
   const elsFound = bodyDoc.getElementsByTagName(tag);
 
   if (all) {
     const elArr = Array.from(elsFound);
     if (elArr.length === 0) return {};
-    return elArr.map(el => el.getAttributeNames().reduce((acc, attr) => {
-      acc[attr] = el.getAttribute(attr);
-      return acc;
-    }, {}));
+    return elArr.map((el) =>
+      el.getAttributeNames().reduce((acc, attr) => {
+        acc[attr] = el.getAttribute(attr);
+        return acc;
+      }, {})
+    );
   } else {
     const firstEl = Array.from(elsFound)[0];
     if (!firstEl) return {};
@@ -155,24 +157,24 @@ export const parseHTML = (body, tag, all) => {
 export const customDraftToHTML = (content) => {
   const options = {
     blockRenderers: {
-      "image-caption-block": (block) => {
+      'image-caption-block': (block) => {
         return (
           "<p style='font-size: 12px; color: #757575;' class='image-caption'>" +
           block.getText() +
-          "</p>"
+          '</p>'
         );
       },
     },
     entityStyleFn: (entity) => {
-      const entityType = entity.get("type").toLowerCase();
-      if (entityType === "link") {
+      const entityType = entity.get('type').toLowerCase();
+      if (entityType === 'link') {
         const data = entity.getData();
         return {
-          element: "a",
+          element: 'a',
           attributes: {
             href: data.url,
-            target: "_blank",
-            rel: "noopener noreferrer",
+            target: '_blank',
+            rel: 'noopener noreferrer',
           },
         };
       }

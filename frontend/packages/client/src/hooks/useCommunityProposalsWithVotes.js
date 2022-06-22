@@ -1,9 +1,9 @@
-import useCommunityProposals from "./useCommunityProposals";
-import useVotesForAddress from "./useVotesForAddress";
-import { PAGINATION_INITIAL_STATE } from "../reducers";
-import { useWebContext } from "../contexts/Web3";
-import { useEffect, useMemo } from "react";
-import { debounce } from "../utils";
+import useCommunityProposals from './useCommunityProposals';
+import useVotesForAddress from './useVotesForAddress';
+import { PAGINATION_INITIAL_STATE } from '../reducers';
+import { useWebContext } from '../contexts/Web3';
+import { useEffect, useMemo } from 'react';
+import { debounce } from '../utils';
 
 export default function useCommunityProposalsWithVotes({
   communityId,
@@ -68,11 +68,11 @@ export default function useCommunityProposalsWithVotes({
 
   useEffect(() => {
     if (scrollToFetchMore) {
-      document.addEventListener("scroll", pullDataFromApi());
+      document.addEventListener('scroll', pullDataFromApi());
     }
     return () =>
       scrollToFetchMore &&
-      document.removeEventListener("scroll", pullDataFromApi());
+      document.removeEventListener('scroll', pullDataFromApi());
   }, [scrollToFetchMore]);
 
   // merges user votes with list of proposals

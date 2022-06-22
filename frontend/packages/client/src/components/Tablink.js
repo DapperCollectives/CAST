@@ -1,6 +1,6 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { Star } from "components/Svg";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Star } from 'components/Svg';
 
 const Tablink = ({
   linkText,
@@ -8,10 +8,10 @@ const Tablink = ({
   isActive,
   onlyLink,
   onClick = () => {},
-  className = "",
+  className = '',
 }) => {
   const textClass = `${className} ${
-    isActive ? "has-text-black" : "has-text-grey"
+    isActive ? 'has-text-black' : 'has-text-grey'
   }`;
 
   if (!linkUrl) {
@@ -33,7 +33,7 @@ const Tablink = ({
 
   const link = isActive ? (
     <>
-      <b className="pr-2">{linkText + " "}</b>
+      <b className="pr-2">{linkText + ' '}</b>
       <Star width="13" height="13" fill="black" />
     </>
   ) : (

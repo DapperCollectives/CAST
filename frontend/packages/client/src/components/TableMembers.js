@@ -1,8 +1,8 @@
-import React from "react";
-import Loader from "./Loader";
-import Blockies from "react-blockies";
-import FadeIn from "../components/FadeIn";
-import classnames from "classnames";
+import React from 'react';
+import Loader from './Loader';
+import Blockies from 'react-blockies';
+import FadeIn from '../components/FadeIn';
+import classnames from 'classnames';
 // import WrapperResponsive from "./WrapperResponsive";
 
 const Row = ({
@@ -13,18 +13,18 @@ const Row = ({
   isConnectedUserAddress,
   isLastRow,
 }) => {
-  const smallRowStyle = { width: "20%" };
+  const smallRowStyle = { width: '20%' };
   const classNames = classnames(
-    "index-cell",
-    { "has-background-white-ter": !isConnectedUserAddress },
-    { "has-background-black has-text-white": isConnectedUserAddress },
-    { "rounded-sm-bl": isLastRow }
+    'index-cell',
+    { 'has-background-white-ter': !isConnectedUserAddress },
+    { 'has-background-black has-text-white': isConnectedUserAddress },
+    { 'rounded-sm-bl': isLastRow }
   );
 
   const cellStyle = classnames(
-    "",
-    { "has-background-white-ter": isConnectedUserAddress },
-    { "rounded-sm-br": isLastRow }
+    '',
+    { 'has-background-white-ter': isConnectedUserAddress },
+    { 'rounded-sm-br': isLastRow }
   );
   return (
     <tr className="table-row">
@@ -66,7 +66,7 @@ export default function TableMembers({
   data = [],
   initialLoading = false,
   loading = false,
-  minTableHeight = "450px",
+  minTableHeight = '450px',
   userAddr,
 } = {}) {
   const isEmpty = data?.length === 0;
@@ -101,7 +101,7 @@ export default function TableMembers({
       <tbody className="is-scrollable-table" style={style}>
         {initialLoading && <InitialLoader />}
         {isEmpty && (
-          <EmptyTable emptyTableMessage={"No members in this community yet"} />
+          <EmptyTable emptyTableMessage={'No members in this community yet'} />
         )}
         {data?.map((datum, index) => {
           const userIndex = index + 1;
@@ -155,7 +155,7 @@ export default function TableMembers({
         })}
       </tbody>
       {loading && (
-        <FadeIn as="tfoot" style={{ display: "table-footer-group" }}>
+        <FadeIn as="tfoot" style={{ display: 'table-footer-group' }}>
           <tr>
             <td colSpan="4">
               <div className="is-flex flex-1 is-justify-content-center smaller-text">

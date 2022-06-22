@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { useHistory, useParams, Link } from "react-router-dom";
-import classnames from "classnames";
+import React, { useEffect, useState } from 'react';
+import { useHistory, useParams, Link } from 'react-router-dom';
+import classnames from 'classnames';
 import {
   Loader,
   CommunityPulse,
@@ -11,7 +11,7 @@ import {
   LeaderBoard,
   JoinCommunityButton,
   Tablink,
-} from "components";
+} from 'components';
 import {
   useMediaQuery,
   useCommunityDetails,
@@ -20,9 +20,9 @@ import {
   useVotingStrategies,
   useUserRoleOnCommunity,
   useCommunityMembers,
-} from "../hooks";
-import { useWebContext } from "../contexts/Web3";
-import Blockies from "react-blockies";
+} from '../hooks';
+import { useWebContext } from '../contexts/Web3';
+import Blockies from 'react-blockies';
 
 const AboutLayout = ({
   isMobile,
@@ -40,7 +40,7 @@ const AboutLayout = ({
         <div className="column pt-3">{communityAbout}</div>
         {leaderBoard && (
           <>
-            <hr className="mb-0" style={{ marginTop: "20px" }} />
+            <hr className="mb-0" style={{ marginTop: '20px' }} />
             <div className="column pt-0">{leaderBoard}</div>
           </>
         )}
@@ -59,20 +59,20 @@ const AboutLayout = ({
         {leaderBoard ? (
           <>
             {leaderBoard}
-            <hr style={{ marginTop: "20px", marginBottom: "20px" }} />
+            <hr style={{ marginTop: '20px', marginBottom: '20px' }} />
             {communityLinks}
           </>
         ) : (
-          <div style={{ paddingTop: "28px" }}>{communityLinks}</div>
+          <div style={{ paddingTop: '28px' }}>{communityLinks}</div>
         )}
-        <hr style={{ marginTop: "32px", marginBottom: "32px" }} />
+        <hr style={{ marginTop: '32px', marginBottom: '32px' }} />
         {showEdit && (
-          <div className="columns flex-1" style={{ marginBottom: "20px" }}>
+          <div className="columns flex-1" style={{ marginBottom: '20px' }}>
             <div className="column is-11">
               <Link to={`/community/${communityId}/edit`}>
                 <div
                   className="button is-fullwidth rounded-sm is-uppercase is-flex small-text has-text-white has-background-black"
-                  style={{ minHeight: "40px" }}
+                  style={{ minHeight: '40px' }}
                 >
                   Community Settings
                 </div>
@@ -84,15 +84,15 @@ const AboutLayout = ({
       </div>
       <div
         className="column is-8-desktop is-9-widescreen is-7-tablet"
-        style={{ paddingLeft: "12%" }}
+        style={{ paddingLeft: '12%' }}
       >
         {communityPulse ? (
           <>
             {communityPulse}
-            <div style={{ paddingTop: "28px" }}>{communityAbout}</div>
+            <div style={{ paddingTop: '28px' }}>{communityAbout}</div>
           </>
         ) : (
-          <div className="column" style={{ paddingTop: "40px" }}>
+          <div className="column" style={{ paddingTop: '40px' }}>
             {communityAbout}
           </div>
         )}
@@ -110,24 +110,24 @@ const MembersLayout = ({
     <div className="columns mt-0">
       <div
         className="column is-3-desktop is-4-tablet is-hidden-mobile"
-        style={{ paddingTop: "28px" }}
+        style={{ paddingTop: '28px' }}
       >
         {communityLinks}
-        <hr style={{ marginTop: "32px", marginBottom: "32px" }} />
+        <hr style={{ marginTop: '32px', marginBottom: '32px' }} />
         <p className="smaller-text has-text-grey">Founded 2022</p>
       </div>
       <div
         className="column pt-0 is-9-desktop is-7-tablet"
-        style={isMobile ? {} : { paddingLeft: "12%" }}
+        style={isMobile ? {} : { paddingLeft: '12%' }}
       >
         {communityMemberList}
       </div>
       <div
         className="column is-3-desktop is-5-tablet is-hidden-tablet"
-        style={{ paddingTop: "20px" }}
+        style={{ paddingTop: '20px' }}
       >
         {communityLinks}
-        <hr style={{ marginTop: "32px", marginBottom: "32px" }} />
+        <hr style={{ marginTop: '32px', marginBottom: '32px' }} />
         <p className="smaller-text has-text-grey">Founded 2022</p>
       </div>
     </div>
@@ -139,7 +139,7 @@ export default function Community() {
 
   const history = useHistory();
 
-  const { activeTab } = useQueryParams({ activeTab: "tab" });
+  const { activeTab } = useQueryParams({ activeTab: 'tab' });
 
   const { data: community, loading, error } = useCommunityDetails(communityId);
 
@@ -150,11 +150,11 @@ export default function Community() {
   const isAdmin = useUserRoleOnCommunity({
     addr,
     communityId,
-    roles: ["admin"],
+    roles: ['admin'],
   });
 
-  const { data: admins } = useCommunityUsers({ communityId, type: "admin" });
-  const { data: authors } = useCommunityUsers({ communityId, type: "author" });
+  const { data: admins } = useCommunityUsers({ communityId, type: 'admin' });
+  const { data: authors } = useCommunityUsers({ communityId, type: 'author' });
 
   const { data: strategies } = useVotingStrategies();
 
@@ -171,7 +171,7 @@ export default function Community() {
   const showLeaderBoard = false;
 
   // check for allowing only three options
-  if (!["proposals", "about", "members"].includes(activeTab)) {
+  if (!['proposals', 'about', 'members'].includes(activeTab)) {
     history.push(`/community/${communityId}?tab=about`);
   }
   // navigation from leader board to member list
@@ -180,9 +180,9 @@ export default function Community() {
   };
 
   const activeTabMap = {
-    about: activeTab === "about",
-    proposals: activeTab === "proposals",
-    members: activeTab === "members",
+    about: activeTab === 'about',
+    proposals: activeTab === 'proposals',
+    members: activeTab === 'members',
   };
 
   const notMobile = useMediaQuery();
@@ -197,18 +197,18 @@ export default function Community() {
   const { instagramUrl, twitterUrl, websiteUrl, discordUrl } = community ?? {};
 
   const titleClassNames = classnames(
-    "is-size-5 has-text-weight-bold",
-    { "mb-3": notMobile },
-    { "mb-1": !notMobile }
+    'is-size-5 has-text-weight-bold',
+    { 'mb-3': notMobile },
+    { 'mb-1': !notMobile }
   );
   const memberClassNames = classnames(
-    "has-text-grey",
-    { "small-text mb-3": notMobile },
-    { "is-size-6 mb-1": !notMobile }
+    'has-text-grey',
+    { 'small-text mb-3': notMobile },
+    { 'is-size-6 mb-1': !notMobile }
   );
   const headerContainerClassNames = classnames(
-    "is-flex container community-header section",
-    { "is-justify-content-space-between": notMobile }
+    'is-flex container community-header section',
+    { 'is-justify-content-space-between': notMobile }
   );
   return (
     <section className="full-height pt-0">
@@ -273,42 +273,42 @@ export default function Community() {
                 <div className="tabs tabs-community is-medium small-text">
                   <ul className="tabs-community-list">
                     <li
-                      className={`${activeTabMap["about"] ? "is-active" : ""}`}
+                      className={`${activeTabMap['about'] ? 'is-active' : ''}`}
                     >
                       <Tablink
                         linkText="About"
                         linkUrl={`/community/${community.id}?tab=about`}
-                        isActive={activeTabMap["about"]}
+                        isActive={activeTabMap['about']}
                         className="tab-community pb-4 pl-2 pr-0 mr-4"
                       />
                     </li>
                     <li
                       className={`${
-                        activeTabMap["proposals"] ? "is-active" : ""
+                        activeTabMap['proposals'] ? 'is-active' : ''
                       }`}
                     >
                       <Tablink
                         linkText="Proposals"
                         linkUrl={`/community/${community.id}?tab=proposals`}
-                        isActive={activeTabMap["proposals"]}
+                        isActive={activeTabMap['proposals']}
                         className="tab-community pb-4 pr-1 pl-0 mx-4"
                       />
                     </li>
                     <li
                       className={`${
-                        activeTabMap["members"] ? "is-active" : ""
+                        activeTabMap['members'] ? 'is-active' : ''
                       }`}
                     >
                       <Tablink
                         linkText="Members"
                         linkUrl={`/community/${community.id}?tab=members`}
-                        isActive={activeTabMap["members"]}
+                        isActive={activeTabMap['members']}
                         className="tab-community pb-4 pr-1 pl-0 ml-4"
                       />
                     </li>
                   </ul>
                 </div>
-                {activeTabMap["about"] && (
+                {activeTabMap['about'] && (
                   <AboutLayout
                     isMobile={!notMobile}
                     communityPulse={showPulse && <CommunityPulse />}
@@ -346,13 +346,13 @@ export default function Community() {
                     communityId={communityId}
                   />
                 )}
-                {activeTabMap["proposals"] && (
+                {activeTabMap['proposals'] && (
                   <CommunityProposals
                     communityId={community.id}
                     admins={admins}
                   />
                 )}
-                {activeTabMap["members"] && (
+                {activeTabMap['members'] && (
                   <MembersLayout
                     isMobile={!notMobile}
                     communityLinks={

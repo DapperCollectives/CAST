@@ -1,6 +1,6 @@
-import { useReducer, useCallback } from "react";
-import { defaultReducer, INITIAL_STATE } from "../reducers";
-import { checkResponse } from "../utils";
+import { useReducer, useCallback } from 'react';
+import { defaultReducer, INITIAL_STATE } from '../reducers';
+import { checkResponse } from '../utils';
 
 export default function useVotesForAddress() {
   const [state, dispatch] = useReducer(defaultReducer, {
@@ -10,17 +10,17 @@ export default function useVotesForAddress() {
 
   const getVotesForAddress = useCallback(
     async (proposalIds, addr) => {
-      dispatch({ type: "PROCESSING" });
+      dispatch({ type: 'PROCESSING' });
       try {
         const response = await fetch(
           `${
             process.env.REACT_APP_BACK_END_SERVER_API
-          }/votes/${addr}?proposalIds=[${proposalIds.join(",")}]`
+          }/votes/${addr}?proposalIds=[${proposalIds.join(',')}]`
         );
         const userVotes = await checkResponse(response);
 
         dispatch({
-          type: "SUCCESS",
+          type: 'SUCCESS',
           payload: {
             [addr]: (userVotes?.data ?? []).map(({ proposalId, choice }) => ({
               [proposalId]: choice,
@@ -28,7 +28,7 @@ export default function useVotesForAddress() {
           },
         });
       } catch (err) {
-        dispatch({ type: "ERROR", payload: { errorData: err.message } });
+        dispatch({ type: 'ERROR', payload: { errorData: err.message } });
       }
     },
     [dispatch]
