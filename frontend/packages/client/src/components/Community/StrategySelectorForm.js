@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useVotingStrategies } from 'hooks';
 import { AddButton } from 'components';
 import { Bin } from 'components/Svg';
@@ -57,6 +57,11 @@ export default function StrategySelectorForm({
 } = {}) {
   // holds array of objects with strategy information
   const [strategies, setStrategies] = useState(existingStrategies);
+
+  // reloads lists if update is done
+  useEffect(() => {
+    setStrategies(existingStrategies);
+  }, [existingStrategies]);
 
   const { data: allVotingStrategies, loading: loadingAllStrategies } =
     useVotingStrategies();

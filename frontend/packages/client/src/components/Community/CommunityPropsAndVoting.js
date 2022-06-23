@@ -61,7 +61,9 @@ export default function CommunityProposalsAndVoting({
         <ActionButton
           label="save"
           enabled={
-            updatingCommunity || hasListChanged(st, communityVotingStrategies)
+            updatingCommunity
+              ? false
+              : hasListChanged(st, communityVotingStrategies)
           }
           onClick={() => saveDataToBackend(st)}
           loading={updatingCommunity}
