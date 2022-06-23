@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useVotingStrategies } from 'hooks';
 import { AddButton } from 'components';
 import { Bin } from 'components/Svg';
@@ -63,7 +63,8 @@ export default function StrategySelectorForm({
 
   const { openModal, closeModal } = useModalContext();
 
-  const strategiesToAdd = (allVotingStrategies || []).filter(
+  // filter strategies already added
+  const strategiesList = (allVotingStrategies || []).filter(
     (st) => !strategies.find((currentSt) => currentSt.name === st.key)
   );
 
@@ -76,7 +77,7 @@ export default function StrategySelectorForm({
     openModal(
       <StrategyEditorModal
         onDismiss={() => closeModal()}
-        strategies={strategiesToAdd}
+        strategies={strategiesList}
         onDone={addNewStrategy}
       />,
       {
@@ -90,6 +91,7 @@ export default function StrategySelectorForm({
     setStrategies((state) => state.filter((_, idx) => idx !== index));
   };
 
+  // hide delete one there's only one strategy
   const enableDelete = strategies.length > 1;
 
   const callToActionComponent = callToAction(strategies);
@@ -111,6 +113,7 @@ export default function StrategySelectorForm({
           </div>
         </div>
       </div>
+      {/* filter elements that will be deleted */}
       {strategies.map((st, index) => (
         <StrategyInput
           index={index}

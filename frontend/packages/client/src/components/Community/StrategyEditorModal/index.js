@@ -25,12 +25,15 @@ export default function StrategyEditorModal({
   // callback to pass data collected and closed modal
   onDone = () => {},
 } = {}) {
+  // handles two steps inside modal
+  // 1 - strategy name
+  // 2 - contract strategy info
   const [step, setSep] = useState(ModalSteps[1]);
   const [formIsValid, setIsFormValid] = useState(false);
 
-  const [data, setData] = useState({
-    strategy: '',
-    ...initialFormFields,
+  const [strategyData, setStrategyData] = useState({
+    name: '',
+    contract: { ...initialFormFields },
   });
 
   // this useEffect validates form on second step
@@ -45,15 +48,15 @@ export default function StrategyEditorModal({
       minimunBalance: (minimunBalance) =>
         minimunBalance?.trim().length > 0 && /^[0-9]+$/.test(minimunBalance),
     };
-    const isValid = Object.keys(requiredFields).every(
-      (field) => data && requiredFields[field](data[field])
+    const isValid = Object.keys(requiredFields).every((field) =>
+      requiredFields[field](strategyData.contract[field])
     );
     setIsFormValid(isValid);
-  }, [data]);
+  }, [strategyData]);
 
   // user selected strategy move to second step to enter information
-  const setStrategy = (strategy) => {
-    setData((state) => ({ ...state, strategy }));
+  const setStrategy = (strategyName) => {
+    setStrategyData((state) => ({ ...state, name: strategyName }));
 
     //
     // Very important!!!
@@ -61,23 +64,30 @@ export default function StrategyEditorModal({
     // then no more information is required
     // modal should be closed and
     // strategy should be ready to be added
-    if (strategy === 'one-address-one-vote') {
-      onDone({ strategy });
+    if (strategyName === 'one-address-one-vote') {
+      onDone({ name: strategyName });
       return;
     }
+    // else go to second step
     setSep(ModalSteps[2]);
   };
 
-  const _onDismiss = () => {
+  const onDismissModal = () => {
     onDismiss();
   };
 
-  const _onDone = () => {
-    onDone(data);
+  const onConfirmDone = () => {
+    onDone(strategyData);
   };
 
-  const setInformationField = (field) => (value) =>
-    setData((state) => ({ ...state, [field]: value }));
+  const setContractInfoField = (field) => (value) =>
+    setStrategyData((state) => ({
+      ...state,
+      contract: {
+        ...state.contract,
+        [field]: value,
+      },
+    }));
 
   return (
     <div
@@ -95,7 +105,7 @@ export default function StrategyEditorModal({
           className={`column is-narrow px-0 has-text-right is-size-2 leading-tight cursor-pointer ${
             enableDismiss && 'has-text-grey'
           }`}
-          onClick={_onDismiss}
+          onClick={onDismissModal}
         >
           &times;
         </div>
@@ -114,14 +124,14 @@ export default function StrategyEditorModal({
         )}
         {step === ModalSteps[2] && (
           <StrategyInformationForm
-            setField={setInformationField}
-            formData={data}
+            setField={setContractInfoField}
+            formData={strategyData.contract}
             formFields={formFields}
             actionButton={
               <ActionButton
                 label="done"
                 enabled={formIsValid}
-                onClick={_onDone}
+                onClick={onConfirmDone}
                 classNames="mt-5"
               />
             }
