@@ -289,7 +289,7 @@ const CommunityMembersEditor = ({
       submitComponent={
         <button
           style={{ height: 48, width: '100%' }}
-          className={`button transition-all is-flex has-background-yellow rounded-sm mt-5 is-uppercase is-${
+          className={`button transition-all is-flex has-background-yellow rounded-sm mt-5 is-uppercase is-uppercase is-${
             enableSave ? 'enabled' : 'disabled'
           }`}
           onClick={!enableSave ? () => {} : saveData}
