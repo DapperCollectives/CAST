@@ -44,8 +44,8 @@ type Contract struct {
 	Name        *string  `json:"name,omitempty"`
 	Addr        *string  `json:"addr,omitempty"`
 	Public_path *string  `json:"publicPath,omitempty"`
-	Threshold   *float64 `json:"threshold,omitempty"`
-	MaxWeight   *float64 `json:"maxWeight,omitempty"`
+	Threshold   *float64 `json:"threshold,omitempty,string"`
+	MaxWeight   *float64 `json:"maxWeight,omitempty,string"`
 }
 
 var (
@@ -63,9 +63,9 @@ func NewFlowClient(flowEnv string) *FlowAdapter {
 	var path string
 
 	if os.Getenv("APP_DEV") == "TEST" {
-		path = "../flow.json"
-	} else {
 		path = "./flow.json"
+	} else {
+		path = "../flow.json"
 	}
 	content, err := ioutil.ReadFile(path)
 	if err != nil {

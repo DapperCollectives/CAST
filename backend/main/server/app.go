@@ -1081,7 +1081,6 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, "Invalid community ID")
 		return
 	}
-	fmt.Printf("\n request body %+v \n", r.Body)
 	var payload models.UpdateCommunityRequestPayload
 
 	decoder := json.NewDecoder(r.Body)

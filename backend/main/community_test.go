@@ -151,8 +151,9 @@ func TestUpdateCommunity(t *testing.T) {
 	// Create Community
 	communityStruct := otu.GenerateCommunityStruct("account")
 	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
+	fmt.Printf("\n community payload %+v\n", communityPayload)
 	response := otu.CreateCommunityAPI(communityPayload)
-	fmt.Printf("RESPONSE %+v \n", response.Body)
+	fmt.Printf(" \n RESPONSE %+v \n", response.Body)
 
 	// Check response code
 	checkResponseCode(t, http.StatusCreated, response.Code)
@@ -166,7 +167,10 @@ func TestUpdateCommunity(t *testing.T) {
 
 	// Update some fields
 	payload := otu.GenerateCommunityPayload("account", &utils.UpdatedCommunity)
-	fmt.Printf("\n payload to be updated %+v \n :", payload.Strategies)
+
+	fmt.Printf("\n payload to be updated %+v \n :", payload)
+	fmt.Printf("payload comp sigs :%+v \n", payload.Composite_signatures)
+	fmt.Printf("payload strategies :%+v \n", payload.Strategies)
 
 	response = otu.UpdateCommunityAPI(oldCommunity.ID, payload)
 	fmt.Printf("RESPONSE %+v \n", response.Body)
