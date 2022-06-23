@@ -1,14 +1,14 @@
-import React from "react";
-import { useMediaQuery } from "hooks";
-import classnames from "classnames";
+import React from 'react';
+import { useMediaQuery } from 'hooks';
+import classnames from 'classnames';
 
 export default function StartSteps({ dismissPreStep }) {
   const { notMobile } = useMediaQuery();
   const classNames = classnames(
-    "columns is-multiline border-light rounded-sm m-0",
+    'columns is-multiline border-light rounded-sm m-0',
     {
-      "p-6": notMobile,
-      "p-2": !notMobile,
+      'p-6': notMobile,
+      'p-2': !notMobile,
     }
   );
   return (
@@ -28,7 +28,7 @@ export default function StartSteps({ dismissPreStep }) {
       </div>
       <div className="column is-12">
         <button
-          style={{ height: 48, width: "100%" }}
+          style={{ height: 48, width: '100%' }}
           className="button vote-button transition-all is-flex has-background-yellow rounded-sm is-enabled is-size-6"
           onClick={() => dismissPreStep()}
         >

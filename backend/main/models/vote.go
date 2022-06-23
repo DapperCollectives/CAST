@@ -9,14 +9,15 @@ import (
 
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/georgysavva/scany/pgxscan"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
 )
 
 type Vote struct {
 	ID                   int                     `json:"id,omitempty"`
 	Proposal_id          int                     `json:"proposalId"`
-	Addr                 string                  `json:"addr" validate:"required"`
-	Choice               string                  `json:"choice" validate:"required"`
+	Addr                 string                  `json:"addr"                validate:"required"`
+	Choice               string                  `json:"choice"              validate:"required"`
 	Composite_signatures *[]s.CompositeSignature `json:"compositeSignatures" validate:"required"`
 	Created_at           time.Time               `json:"createdAt,omitempty"`
 	Cid                  *string                 `json:"cid"`
@@ -34,6 +35,14 @@ type VoteWithBalance struct {
 	SecondaryAccountBalance *uint64  `json:"secondaryAccountBalance"`
 	StakingBalance          *uint64  `json:"stakingBalance"`
 	Weight                  *float64 `json:"weight"`
+
+	NFTs []*NFT
+}
+
+type NFT struct {
+	ID            uint64    `json:"id"`
+	Contract_addr string    `json:"contract_addr"`
+	Created_at    time.Time `json:"created_at"`
 }
 
 const (
@@ -44,8 +53,12 @@ const (
 // Votes //
 ///////////
 
-// TODO: make the proposalIds optional
-func GetVotesForAddress(db *s.Database, start, count int, address string, proposalIds *[]int) ([]*VoteWithBalance, int, error) {
+func GetVotesForAddress(
+	db *s.Database,
+	start, count int,
+	address string,
+	proposalIds *[]int,
+) ([]*VoteWithBalance, int, error) {
 	var votes []*VoteWithBalance
 	var err error
 	sql := `select v.*, 
@@ -64,6 +77,7 @@ func GetVotesForAddress(db *s.Database, start, count int, address string, propos
 	} else {
 		sql = sql + "LIMIT $1 OFFSET $2 "
 		err = pgxscan.Select(db.Context, db.Conn, &votes,
+
 			sql, count, start, address)
 	}
 
@@ -82,7 +96,7 @@ func GetVotesForAddress(db *s.Database, start, count int, address string, propos
 	return votes, totalRecords, nil
 }
 
-func GetAllVotesForProposal(db *s.Database, proposalId int) ([]*VoteWithBalance, error) {
+func GetAllVotesForProposal(db *s.Database, proposalId int, strategy string) ([]*VoteWithBalance, error) {
 	var votes []*VoteWithBalance
 
 	//return all balances, strategy will do rest of the work
@@ -95,13 +109,21 @@ func GetAllVotesForProposal(db *s.Database, proposalId int) ([]*VoteWithBalance,
     join proposals p on p.id = $1
   	left join balances b on b.addr = v.addr 
 		and p.block_height = b.block_height
-    where proposal_id = $1`
-
+    where proposal_id = $1
+`
 	err := pgxscan.Select(db.Context, db.Conn, &votes, sql, proposalId)
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		return nil, err
 	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
 		return []*VoteWithBalance{}, nil
+	}
+
+	if strategy == "balance-of-nfts" {
+		votesWithNFTs, err := getUsersNFTs(db, votes)
+		if err != nil {
+			return nil, err
+		}
+		return votesWithNFTs, nil
 	}
 
 	return votes, nil
@@ -227,4 +249,62 @@ func (v *Vote) ValidateChoice(proposal Proposal) error {
 		return errors.New("invalid choice for proposal")
 	}
 	return nil
+}
+
+func getUsersNFTs(db *s.Database, votes []*VoteWithBalance) ([]*VoteWithBalance, error) {
+	for _, vote := range votes {
+		nftIds, err := GetUserNFTs(db, vote)
+		if err != nil {
+			return nil, err
+		}
+		vote.NFTs = nftIds
+	}
+
+	return votes, nil
+}
+
+func GetUserNFTs(db *s.Database, vote *VoteWithBalance) ([]*NFT, error) {
+	var nftIds []*NFT
+	sql := `select id from nfts
+	where proposal_id = $1 and owner_addr = $2
+	`
+	err := pgxscan.Select(db.Context, db.Conn, &nftIds, sql, vote.Proposal_id, vote.Addr)
+	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
+		return nil, err
+	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
+		return []*NFT{}, nil
+	}
+	return nftIds, nil
+}
+
+func CreateUserNFTRecord(db *s.Database, v *VoteWithBalance) error {
+	for _, nft := range v.NFTs {
+		_, err := db.Conn.Exec(db.Context,
+			`
+		INSERT INTO nfts(uuid, proposal_id, owner_addr, id)
+		VALUES($1, $2, $3, $4)
+	`, uuid.New(), v.Proposal_id, v.Addr, nft.ID)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func DoesNFTExist(db *s.Database, v *VoteWithBalance) (bool, error) {
+	for _, nft := range v.NFTs {
+		var nftId int
+		sql := `select id from nfts
+		where proposal_id = $1 and id = $2
+		`
+		err := pgxscan.Get(db.Context, db.Conn, &nftId, sql, v.Proposal_id, nft.ID)
+		if err != nil && err.Error() != pgx.ErrNoRows.Error() {
+			return false, err
+		} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
+			return false, nil
+		}
+	}
+
+	return true, nil
 }

@@ -1,7 +1,7 @@
-import React, { useEffect } from "react";
-import { Message, Loader, FadeIn } from "components";
-import CommunitiesPresenter from "components/Community/CommunitiesPresenter";
-import useCommunity from "hooks/useCommunity";
+import React, { useEffect } from 'react';
+import { Message, Loader, FadeIn } from 'components';
+import CommunitiesPresenter from 'components/Community/CommunitiesPresenter';
+import useCommunity from 'hooks/useCommunity';
 
 export default function HomePage() {
   const { data, loading, getCommunities } = useCommunity();
@@ -13,11 +13,11 @@ export default function HomePage() {
   const communities = loading
     ? []
     : (data || []).map((datum) => ({
-      ...datum,
-      // missing fields
-      logo: datum.logo || "https://i.imgur.com/RMKXPCw.png",
-      isComingSoon: datum.isComingSoon || false,
-    }));
+        ...datum,
+        // missing fields
+        logo: datum.logo || 'https://i.imgur.com/RMKXPCw.png',
+        isComingSoon: datum.isComingSoon || false,
+      }));
 
   return (
     <section className="section">
@@ -26,7 +26,7 @@ export default function HomePage() {
         labelText="Alpha"
       />
       {loading && (
-        <div style={{ height: "50vh" }}>
+        <div style={{ height: '50vh' }}>
           <Loader fullHeight />
         </div>
       )}

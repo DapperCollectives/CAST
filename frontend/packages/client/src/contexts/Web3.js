@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useCallback } from "react";
-import * as fcl from "@onflow/fcl";
-import networks from "../networks";
-import { useFclUser } from "../hooks";
+import React, { useEffect, useState, useCallback } from 'react';
+import * as fcl from '@onflow/fcl';
+import networks from '../networks';
+import { useFclUser } from '../hooks';
 
 // create our app context
 export const Web3Context = React.createContext({});
@@ -9,16 +9,16 @@ export const Web3Context = React.createContext({});
 export const useWebContext = () => {
   const context = React.useContext(Web3Context);
   if (context === undefined) {
-    throw new Error("`useWebContext` must be used within a `Web3Context`.");
+    throw new Error('`useWebContext` must be used within a `Web3Context`.');
   }
   return context;
 };
 
 // provider Component that wraps the entire app and provides context variables
-export function Web3Provider({ children, network = "testnet", ...props }) {
+export function Web3Provider({ children, network = 'testnet', ...props }) {
   const [transactionInProgress, setTransactionInProgress] = useState(false);
   const [transactionStatus, setTransactionStatus] = useState(null);
-  const [transactionError, setTransactionError] = useState("");
+  const [transactionError, setTransactionError] = useState('');
   const [txId, setTxId] = useState(null);
   const [extraConfig, setExtraConfig] = useState({ forceLedger: false });
 
@@ -57,14 +57,14 @@ export function Web3Provider({ children, network = "testnet", ...props }) {
     const { accessApi, walletDiscovery } = networks[network];
     fcl
       .config({
-        "0xFUNGIBLETOKENADDRESS":
-          network === "testnet" ? "0x9a0766d93b6608b7" : "0xf233dcee88fe0abe",
+        '0xFUNGIBLETOKENADDRESS':
+          network === 'testnet' ? '0x9a0766d93b6608b7' : '0xf233dcee88fe0abe',
       })
-      .put("accessNode.api", accessApi) // connect to Flow
-      .put("discovery.wallet", walletDiscovery); // use Blocto wallet
+      .put('accessNode.api', accessApi) // connect to Flow
+      .put('discovery.wallet', walletDiscovery); // use Blocto wallet
 
     try {
-      const contracts = require("../contracts.json");
+      const contracts = require('../contracts.json');
       Object.keys(contracts).forEach((contract) => {
         fcl.config().put(contract, contracts[contract]);
       });

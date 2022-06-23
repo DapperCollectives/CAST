@@ -16,10 +16,10 @@ import (
 
 type Community struct {
 	ID                       int       `json:"id,omitempty"`
-	Name                     string    `json:"name" validate:"required"`
-	Category                 *string   `json:"category,omitempty" validate:"required"`
+	Name                     string    `json:"name"                            validate:"required"`
+	Category                 *string   `json:"category,omitempty"              validate:"required"`
 	Logo                     *string   `json:"logo,omitempty"`
-	Body                     *string   `json:"body,omitempty" validate:"required"`
+	Body                     *string   `json:"body,omitempty"                  validate:"required"`
 	Strategies               *[]string `json:"strategies,omitempty"`
 	Strategy                 *string   `json:"strategy,omitempty"`
 	Banner_img_url           *string   `json:"bannerImgUrl,omitempty"`
@@ -32,16 +32,16 @@ type Community struct {
 	Only_authors_to_submit   *bool     `json:"onlyAuthorsToSubmit,omitempty"`
 	Proposal_validation      *string   `json:"proposalValidation,omitempty"`
 	Proposal_threshold       *string   `json:"proposalThreshold,omitempty"`
-	Slug                     *string   `json:"slug,omitempty" validate:"required"`
+	Slug                     *string   `json:"slug,omitempty"                  validate:"required"`
 
-	Contract_name *string  `json:"contract_name,omitempty"`
-	Contract_addr *string  `json:"contract_addr,omitempty"`
-	Public_path   *string  `json:"public_path,omitempty"`
+	Contract_name *string  `json:"contractName,omitempty"`
+	Contract_addr *string  `json:"contractAddr,omitempty"`
+	Public_path   *string  `json:"publicPath,omitempty"`
 	Threshold     *float64 `json:"threshold,omitempty"`
 
-	Timestamp            string                  `json:"timestamp" validate:"required"`
-	Composite_signatures *[]s.CompositeSignature `json:"compositeSignatures" validate:"required"`
-	Creator_addr         string                  `json:"creatorAddr" validate:"required"`
+	Timestamp            string                  `json:"timestamp"             validate:"required"`
+	Composite_signatures *[]s.CompositeSignature `json:"compositeSignatures"   validate:"required"`
+	Creator_addr         string                  `json:"creatorAddr"           validate:"required"`
 	Signing_addr         *string                 `json:"signingAddr,omitempty"`
 	Created_at           *time.Time              `json:"createdAt,omitempty"`
 	Cid                  *string                 `json:"cid,omitempty"`
@@ -75,8 +75,8 @@ type UpdateCommunityRequestPayload struct {
 }
 
 type CommunityType struct {
-	Key         string `json:"key" validate:"required"`
-	Name        string `json:"name" validate:"required"`
+	Key         string `json:"key"                   validate:"required"`
+	Name        string `json:"name"                  validate:"required"`
 	Description string `json:"description,omitempty"`
 }
 
@@ -123,6 +123,12 @@ func GetCommunities(db *s.Database, start, count int) ([]*Community, int, error)
 	return communities, totalRecords, nil
 }
 
+func (c *Community) GetCommunityByProposalId(db *s.Database, proposalId int) error {
+	return pgxscan.Get(db.Context, db.Conn, c,
+		`SELECT * from communities WHERE id = (SELECT community_id FROM proposals WHERE id = $1)`,
+		proposalId)
+}
+
 func GetCommunitiesForHomePage(db *s.Database, start, count int) ([]*Community, int, error) {
 	var communities []*Community
 
@@ -166,13 +172,12 @@ func (c *Community) CreateCommunity(db *s.Database) error {
 	err := db.Conn.QueryRow(db.Context,
 		`
 	INSERT INTO communities(
-		name, category, logo, slug, strategies, strategy, banner_img_url, website_url, twitter_url, github_url, discord_url, instagram_url, terms_and_conditions_url, proposal_validation, proposal_threshold, body, cid, creator_addr, contract_name, contract_addr, public_path, threshold
-	)
+		name, category, logo, slug, strategies, strategy, banner_img_url, website_url, twitter_url, github_url, discord_url, instagram_url, terms_and_conditions_url, proposal_validation, proposal_threshold, body, cid, creator_addr, contract_name, contract_addr, public_path, threshold, only_authors_to_submit)
 	VALUES(
-		$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22
+		$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23
 	)
 	RETURNING id, created_at
-	`, c.Name, c.Category, c.Logo, c.Slug, c.Strategies, c.Strategy, c.Banner_img_url, c.Website_url, c.Twitter_url, c.Github_url, c.Discord_url, c.Instagram_url, c.Terms_and_conditions_url, c.Proposal_validation, c.Proposal_threshold, c.Body, c.Cid, c.Creator_addr, c.Contract_name, c.Contract_addr, c.Public_path, c.Threshold).Scan(&c.ID, &c.Created_at)
+	`, c.Name, c.Category, c.Logo, c.Slug, c.Strategies, c.Strategy, c.Banner_img_url, c.Website_url, c.Twitter_url, c.Github_url, c.Discord_url, c.Instagram_url, c.Terms_and_conditions_url, c.Proposal_validation, c.Proposal_threshold, c.Body, c.Cid, c.Creator_addr, c.Contract_name, c.Contract_addr, c.Public_path, c.Threshold, c.Only_authors_to_submit).Scan(&c.ID, &c.Created_at)
 	return err // will be nil unless something went wrong
 }
 
@@ -185,15 +190,32 @@ func (c *Community) UpdateCommunity(db *s.Database, payload *UpdateCommunityRequ
 
 	json.Unmarshal(data, c)
 
-	_, err = db.Conn.Exec(db.Context,
+	_, err = db.Conn.Exec(
+		db.Context,
 		`
 	UPDATE communities
 	SET name = $1, body = $2, logo = $3, strategies = $4, strategy = $5, 
 		banner_img_url = $6, website_url = $7, twitter_url = $8, github_url = $9,
 		discord_url = $10, instagram_url = $11, proposal_validation = $12, proposal_threshold = $13, category = $14, terms_and_conditions_url = $15
 	WHERE id = $16
-	`, c.Name, c.Body, c.Logo, c.Strategies, c.Strategy, c.Banner_img_url, c.Website_url,
-		c.Twitter_url, c.Github_url, c.Discord_url, c.Instagram_url, c.Proposal_validation, c.Proposal_threshold, c.Category, c.Terms_and_conditions_url, c.ID)
+	`,
+		c.Name,
+		c.Body,
+		c.Logo,
+		c.Strategies,
+		c.Strategy,
+		c.Banner_img_url,
+		c.Website_url,
+		c.Twitter_url,
+		c.Github_url,
+		c.Discord_url,
+		c.Instagram_url,
+		c.Proposal_validation,
+		c.Proposal_threshold,
+		c.Category,
+		c.Terms_and_conditions_url,
+		c.ID,
+	)
 
 	return err // will be nil unless something went wrong
 }

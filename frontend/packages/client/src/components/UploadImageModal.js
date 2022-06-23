@@ -1,13 +1,13 @@
-import React, { useCallback, useState, useEffect, useMemo } from "react";
-import { useDropzone } from "react-dropzone";
-import { useFileUploader } from "../hooks";
-import { Upload, Bin } from "../components/Svg";
-import { Loader } from "../components";
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
+import { useDropzone } from 'react-dropzone';
+import { useFileUploader } from '../hooks';
+import { Upload, Bin } from '../components/Svg';
+import { Loader } from '../components';
 
 const IMAGE_STATUS = {
-  notStarted: "not-started",
-  uploading: "uploading",
-  uploaded: "uploaded",
+  notStarted: 'not-started',
+  uploading: 'uploading',
+  uploaded: 'uploaded',
 };
 
 function ImageUploader({
@@ -60,12 +60,12 @@ function ImageUploader({
             className="is-flex flex-1 is-flex-direction-column is-align-items-center is-justify-content-center"
             style={{
               backgroundImage: `url(${image.imageUrl})`,
-              backgroundRepeat: "no-repeat",
-              backgroundPosition: "center",
-              backgroundSize: "cover",
-              width: "32px",
-              height: "32px",
-              borderRadius: "8px",
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'center',
+              backgroundSize: 'cover',
+              width: '32px',
+              height: '32px',
+              borderRadius: '8px',
             }}
           />
         )}
@@ -73,9 +73,9 @@ function ImageUploader({
           <div
             className="is-flex flex-1 is-flex-direction-column is-align-items-center is-justify-content-center"
             style={{
-              width: "32px",
-              height: "32px",
-              borderRadius: "8px",
+              width: '32px',
+              height: '32px',
+              borderRadius: '8px',
             }}
           >
             <Loader size={10} spacing="mx-loader" />
@@ -98,15 +98,15 @@ const UploadArea = ({ getRootProps, getInputProps, enableUpload }) => {
   return (
     <div
       className={`is-flex is-flex-direction-column is-align-items-center is-justify-content-center ${
-        enableUpload ? "cursor-pointer" : ""
+        enableUpload ? 'cursor-pointer' : ''
       }`}
       style={{
-        borderRadius: "8px",
-        border: "1px dashed #757575",
-        overflow: "hidden",
-        position: "relative",
-        height: "100%",
-        width: "100%",
+        borderRadius: '8px',
+        border: '1px dashed #757575',
+        overflow: 'hidden',
+        position: 'relative',
+        height: '100%',
+        width: '100%',
       }}
       disabled={enableUpload}
       {...(enableUpload ? getRootProps() : undefined)}
@@ -138,7 +138,7 @@ export default function UploadImageModal({
   const MAX_IMAGE_FILES = 1;
   const [images, setImages] = useState([]);
   // when more than one image is added this will be an array mapping the images array
-  const [captionValues, setCaptionValues] = useState([""]);
+  const [captionValues, setCaptionValues] = useState(['']);
 
   const _onDismiss = () => {
     onDismiss();
@@ -189,7 +189,7 @@ export default function UploadImageModal({
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
     maxFiles: MAX_IMAGE_FILES,
-    accept: "image/jpeg,image/png,image/gif",
+    accept: 'image/jpeg,image/png,image/gif',
   });
 
   const onUploadStared = useCallback(
@@ -232,28 +232,28 @@ export default function UploadImageModal({
       <div className="modal-background"></div>
       <div
         className="modal-card rounded-sm has-background-white m-0 p-5"
-        style={{ height: "570px" }}
+        style={{ height: '570px' }}
       >
         <header
           className="modal-card-head has-background-white columns is-mobile p-4 m-0"
-          style={{ borderBottom: "none" }}
+          style={{ borderBottom: 'none' }}
         >
           <div className="column px-0 is-flex flex-1 ">
             <h2 className="is-size-4">Upload Image</h2>
           </div>
           <div
             className={`column is-narrow px-0 has-text-right is-size-2 leading-tight cursor-pointer ${
-              isCancelling && "has-text-grey"
+              isCancelling && 'has-text-grey'
             }`}
             onClick={_onDismiss}
           >
             &times;
           </div>
         </header>
-        <section className="modal-card-body" style={{ minHeight: "280px" }}>
+        <section className="modal-card-body" style={{ minHeight: '280px' }}>
           <div
             className="is-flex is-flex-direction-column flex-1"
-            style={{ height: "100%" }}
+            style={{ height: '100%' }}
           >
             {images.length === 0 && (
               <UploadArea
@@ -308,12 +308,12 @@ export default function UploadImageModal({
         </section>
         <footer
           className="modal-card-foot has-background-white pb-0 pt-1 px-4"
-          style={{ borderTop: "none" }}
+          style={{ borderTop: 'none' }}
         >
           <div className="columns is-flex p-0 m-0 flex-1 is-justify-content-end">
             <button
               className={`button column is-12 transition-all has-background-yellow rounded-sm m-0 p-0 is-uppercase ${
-                !enableDone && "is-disabled"
+                !enableDone && 'is-disabled'
               }`}
               onClick={_onDone}
             >

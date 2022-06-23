@@ -6,13 +6,15 @@ import (
 	"testing"
 
 	"github.com/DapperCollectives/CAST/backend/main/server"
+	"github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/bjartek/overflow/overflow"
 )
 
 type OverflowTestUtils struct {
-	O *overflow.Overflow
-	T *testing.T
-	A *server.App
+	O       *overflow.Overflow
+	T       *testing.T
+	A       *server.App
+	Adapter *shared.FlowAdapter
 }
 
 func (otu *OverflowTestUtils) SetTest(t *testing.T) *OverflowTestUtils {

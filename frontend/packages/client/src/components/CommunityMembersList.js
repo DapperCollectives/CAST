@@ -1,9 +1,9 @@
-import React, { useEffect } from "react";
-import { useWebContext } from "contexts/Web3";
-import { useCommunityMembers } from "hooks";
-import TableMembers from "./TableMembers";
-import { debounce } from "utils";
-import WrapperResponsive from "./WrapperResponsive";
+import React, { useEffect } from 'react';
+import { useWebContext } from 'contexts/Web3';
+import { useCommunityMembers } from 'hooks';
+import TableMembers from './TableMembers';
+import { debounce } from 'utils';
+import WrapperResponsive from './WrapperResponsive';
 
 export default function CommunityMembersList({ communityId } = {}) {
   // number of users brought at each pull based on design
@@ -39,19 +39,19 @@ export default function CommunityMembersList({ communityId } = {}) {
           }
         }
       }, 500);
-    document.addEventListener("scroll", pullDataFromApi());
-    return () => document.removeEventListener("scroll", pullDataFromApi());
+    document.addEventListener('scroll', pullDataFromApi());
+    return () => document.removeEventListener('scroll', pullDataFromApi());
   }, []);
 
   return (
     <div className="is-flex is-flex-direction-column">
       <WrapperResponsive
         commonClasses="is-flex flex-1"
-        extraStyles={{ marginBottom: "40px", marginTop: "40px" }}
-        extraStylesMobile={{ marginBottom: "32px", marginTop: "24px" }}
+        extraStyles={{ marginBottom: '40px', marginTop: '40px' }}
+        extraStylesMobile={{ marginBottom: '32px', marginTop: '24px' }}
       >
         <p className="has-text-weight-bold is-uppercase small-text">
-          {pagination?.totalRecords ?? "..."} members
+          {pagination?.totalRecords ?? '...'} members
         </p>
       </WrapperResponsive>
       <div className="is-flex flex-1">

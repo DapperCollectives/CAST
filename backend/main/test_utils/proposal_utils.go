@@ -47,12 +47,19 @@ func (otu *OverflowTestUtils) GetProposalByIdAPI(communityId int, proposalId int
 
 func (otu *OverflowTestUtils) CreateProposalAPI(proposal *models.Proposal) *httptest.ResponseRecorder {
 	json, _ := json.Marshal(proposal)
-	req, _ := http.NewRequest("POST", "/communities/"+strconv.Itoa(proposal.Community_id)+"/proposals", bytes.NewBuffer(json))
+	req, _ := http.NewRequest(
+		"POST",
+		"/communities/"+strconv.Itoa(proposal.Community_id)+"/proposals",
+		bytes.NewBuffer(json),
+	)
 	req.Header.Set("Content-Type", "application/json")
 	return otu.ExecuteRequest(req)
 }
 
-func (otu *OverflowTestUtils) UpdateProposalAPI(proposalId int, payload *models.UpdateProposalRequestPayload) *httptest.ResponseRecorder {
+func (otu *OverflowTestUtils) UpdateProposalAPI(
+	proposalId int,
+	payload *models.UpdateProposalRequestPayload,
+) *httptest.ResponseRecorder {
 	json, _ := json.Marshal(payload)
 	req, _ := http.NewRequest("PUT", "/proposals/"+strconv.Itoa(proposalId), bytes.NewBuffer(json))
 	req.Header.Set("Content-Type", "application/json")
@@ -76,7 +83,10 @@ func (otu *OverflowTestUtils) GenerateProposalStruct(signer string, communityId 
 	return &proposal
 }
 
-func (otu *OverflowTestUtils) GenerateCancelProposalStruct(signer string, proposalId int) *models.UpdateProposalRequestPayload {
+func (otu *OverflowTestUtils) GenerateCancelProposalStruct(
+	signer string,
+	proposalId int,
+) *models.UpdateProposalRequestPayload {
 	payload := models.UpdateProposalRequestPayload{Status: "cancelled"}
 	timestamp := fmt.Sprint(time.Now().UnixNano() / int64(time.Millisecond))
 	compositeSignatures := otu.GenerateCompositeSignatures(signer, timestamp)
