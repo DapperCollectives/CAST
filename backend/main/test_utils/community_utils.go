@@ -122,7 +122,6 @@ var (
 	}
 
 	UpdatedCommunity = models.Community{
-		Name:                     nameUpdated,
 		Logo:                     &logoUpdated,
 		Banner_img_url:           &banner,
 		Website_url:              &website,

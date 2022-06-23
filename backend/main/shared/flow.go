@@ -65,7 +65,7 @@ func NewFlowClient(flowEnv string) *FlowAdapter {
 	if os.Getenv("APP_DEV") == "TEST" {
 		path = "./flow.json"
 	} else {
-		path = "../flow.json"
+		path = "./flow.json"
 	}
 	content, err := ioutil.ReadFile(path)
 	if err != nil {

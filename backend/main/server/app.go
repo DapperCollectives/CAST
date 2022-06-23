@@ -1091,8 +1091,6 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	defer r.Body.Close()
-	fmt.Printf("COMMUNITY UPDATE CONTROLLER \n %+v", payload.Strategies)
-	fmt.Printf(" \n community %+v \n", payload)
 
 	// Fetch community
 	var c = models.Community{ID: id}
@@ -1101,6 +1099,8 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Invalid request: no community with ID %d", id))
 		return
 	}
+
+	payload.Name = &c.Name
 
 	// validate is commuity creator
 	// TODO: update to validating address is admin
