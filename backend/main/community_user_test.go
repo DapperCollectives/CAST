@@ -127,6 +127,34 @@ func TestGetCommunityUsersByInvalidType(t *testing.T) {
 	checkResponseCode(t, http.StatusBadRequest, response.Code)
 }
 
+func TestGetCommunityLeaderboard(t *testing.T) {
+	clearTable("communities")
+	clearTable("community_users")
+	clearTable("proposals")
+	clearTable("votes")
+	communityId := otu.AddCommunities(1)[0]
+	proposalIdA := otu.AddActiveProposals(communityId, 1)[0]
+	proposalIdB := otu.AddActiveProposals(communityId, 2)[0]
+	proposalIdC := otu.AddActiveProposals(communityId, 3)[0]
+	voteChoice := "a"
+
+	otu.CreateVoteAPI(proposalIdA, otu.GenerateValidVotePayload("user1", proposalIdA, voteChoice))
+	otu.CreateVoteAPI(proposalIdB, otu.GenerateValidVotePayload("user1", proposalIdB, voteChoice))
+	otu.CreateVoteAPI(proposalIdC, otu.GenerateValidVotePayload("user1", proposalIdC, voteChoice))
+	otu.CreateVoteAPI(proposalIdA, otu.GenerateValidVotePayload("user2", proposalIdA, voteChoice))
+	otu.CreateVoteAPI(proposalIdB, otu.GenerateValidVotePayload("user2", proposalIdB, voteChoice))
+
+	response := otu.GetCommunityLeaderboardAPI(communityId)
+	checkResponseCode(t, http.StatusOK, response.Code)
+
+	var p test_utils.PaginatedResponseWithLeaderboardUser
+	json.Unmarshal(response.Body.Bytes(), &p)
+
+	assert.Equal(t, 2, len(p.Data))
+	assert.Equal(t, 3, p.Data[0].Score)
+	assert.Equal(t, 2, p.Data[1].Score)
+}
+
 func TestGetUserCommunities(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")
