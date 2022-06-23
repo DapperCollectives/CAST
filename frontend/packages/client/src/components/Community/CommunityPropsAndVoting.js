@@ -9,7 +9,7 @@ const fieldMapPayload = {
   contractName: 'name',
   maxWeight: 'maxWeight',
   minimunBalance: 'threshold',
-  strategy: 'name',
+  publicPath: 'publicPath',
 };
 export default function CommunityProposalsAndVoting({
   communityVotingStrategies = [],
@@ -23,7 +23,7 @@ export default function CommunityProposalsAndVoting({
       // only other strategies than 'one-address-one-vote' have contract information
       ...(st.strategy !== 'one-address-one-vote'
         ? {
-            contracts: Object.assign(
+            contract: Object.assign(
               {},
               ...Object.entries(st).map(([key, value]) => ({
                 ...(fieldMapPayload[key] && value
@@ -36,7 +36,9 @@ export default function CommunityProposalsAndVoting({
           }
         : undefined),
     }));
-    await updateCommunity({ strategies: updatePayload });
+    await updateCommunity({
+      strategies: updatePayload,
+    });
   };
 
   // used like this until backend returns strategies
