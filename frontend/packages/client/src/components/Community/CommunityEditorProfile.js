@@ -25,13 +25,17 @@ function CommunityEditorProfile({
   useEffect(() => {
     if (name !== undefined && body !== undefined) {
       if (
-        ((communityName !== name || communityDescription !== body) &&
-          communityName.length > 0) ||
+        (communityName !== name && communityName.length > 0) ||
+        communityDescription !== body ||
         image.file
       ) {
         setEnableSave(true);
       }
-      if (communityName.trim().length === 0) {
+      if (
+        communityName.trim().length === 0 ||
+        communityDescription.trim() === body ||
+        (communityName === name && communityDescription === body)
+      ) {
         setEnableSave(false);
       }
     }
