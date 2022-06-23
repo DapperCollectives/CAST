@@ -7,7 +7,6 @@ import (
 	"errors"
 	"flag"
 	"io/ioutil"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -60,13 +59,8 @@ func NewFlowClient(flowEnv string) *FlowAdapter {
 	adapter := FlowAdapter{}
 	adapter.Context = context.Background()
 	adapter.Env = flowEnv
-	var path string
+	path := "./flow.json"
 
-	if os.Getenv("APP_DEV") == "TEST" {
-		path = "./flow.json"
-	} else {
-		path = "./flow.json"
-	}
 	content, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Fatal().Msgf("Error when opening file: %+v", err)
