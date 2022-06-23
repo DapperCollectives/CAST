@@ -1,9 +1,9 @@
-import React, { useState } from "react";
-import { useVotingStrategies } from "hooks";
-import { AddButton } from "components";
-import { Bin } from "components/Svg";
-import { useModalContext } from "contexts/NotificationModal";
-import StrategyEditorModal from "./StrategyEditorModal";
+import React, { useState } from 'react';
+import { useVotingStrategies } from 'hooks';
+import { AddButton } from 'components';
+import { Bin } from 'components/Svg';
+import { useModalContext } from 'contexts/NotificationModal';
+import StrategyEditorModal from './StrategyEditorModal';
 
 const StrategyInput = ({
   index,
@@ -16,7 +16,7 @@ const StrategyInput = ({
     <div
       key={`index-${index}`}
       className="column is-12 is-mobile p-0 m-0 mb-4 fade-in"
-      style={{ position: "relative" }}
+      style={{ position: 'relative' }}
     >
       <input
         type="text"
@@ -24,15 +24,15 @@ const StrategyInput = ({
         value={commuVotStra}
         onChange={onChange}
         style={{
-          width: "100%",
+          width: '100%',
         }}
       />
       <div
         style={{
-          display: "flex",
-          justifyContent: "flex-end",
-          alignContent: "center",
-          position: "absolute",
+          display: 'flex',
+          justifyContent: 'flex-end',
+          alignContent: 'center',
+          position: 'absolute',
           right: 15,
           top: 9,
         }}
@@ -63,12 +63,9 @@ export default function StrategySelectorForm({
 
   const { openModal, closeModal } = useModalContext();
 
-  const strategiesToAdd = (allVotingStrategies || []).filter(
-    (st) =>
-      !strategies.find(
-        (currentSt) =>
-          currentSt.strategy === st.key && currentSt?.toBeremoved !== true
-      )
+  // filter strategies already added
+  const strategiesList = (allVotingStrategies || []).filter(
+    (st) => !strategies.find((currentSt) => currentSt.name === st.key)
   );
 
   const addNewStrategy = (newStrategyInfo) => {
@@ -80,11 +77,11 @@ export default function StrategySelectorForm({
     openModal(
       <StrategyEditorModal
         onDismiss={() => closeModal()}
-        strategies={strategiesToAdd}
+        strategies={strategiesList}
         onDone={addNewStrategy}
       />,
       {
-        classNameModalContent: "rounded-sm",
+        classNameModalContent: 'rounded-sm',
         showCloseButton: false,
       }
     );
@@ -94,6 +91,7 @@ export default function StrategySelectorForm({
     setStrategies((state) => state.filter((_, idx) => idx !== index));
   };
 
+  // hide delete one there's only one strategy
   const enableDelete = strategies.length > 1;
 
   const callToActionComponent = callToAction(strategies);
@@ -115,18 +113,19 @@ export default function StrategySelectorForm({
           </div>
         </div>
       </div>
+      {/* filter elements that will be deleted */}
       {strategies.map((st, index) => (
         <StrategyInput
           index={index}
           key={`strategy-${index}`}
-          commuVotStra={st.strategy}
+          commuVotStra={st.name}
           onDeleteStrategy={onDeleteStrategy}
           enableDelete={enableDelete}
         />
       ))}
       <AddButton
         disabled={disableAddButton || loadingAllStrategies}
-        addText={"Strategy"}
+        addText={'Strategy'}
         onAdd={onAddStrategy}
         className="mt-2"
       />

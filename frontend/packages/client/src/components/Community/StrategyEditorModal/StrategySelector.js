@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 export default function StrategySelector({
   strategies = [],
@@ -8,14 +8,14 @@ export default function StrategySelector({
   return (
     <div
       className="is-flex is-flex-direction-column flex-1"
-      style={{ minHeight: "280px" }}
+      style={{ minHeight: '280px' }}
     >
       {strategies.map((st, index) => {
         return (
           <div
             key={`strategy-${index}`}
             className="border-light rounded-sm is-flex is-flex-direction-column is-justify-content-center mb-4 py-4 px-3 cursor-pointer strategy-selector transition-all"
-            style={{ minHeight: "99px" }}
+            style={{ minHeight: '99px' }}
             onClick={selectStrategy(st.key)}
           >
             <div className="columns is-multiline">
@@ -31,7 +31,9 @@ export default function StrategySelector({
       })}
       {strategies.length === 0 && (
         <div className="is-flex is-flex-direction-column is-justify-content-center is-align-items-center flex-1">
-          <p className="small-text has-text-grey">No more Strategies to Add</p>
+          <p className="small-text has-text-grey">
+            All strategies have been added to your community already
+          </p>
         </div>
       )}
     </div>

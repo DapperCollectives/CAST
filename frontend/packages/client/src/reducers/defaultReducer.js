@@ -1,12 +1,12 @@
 export const defaultReducer = (state, action) => {
   switch (action.type) {
-    case "PROCESSING":
+    case 'PROCESSING':
       return {
         ...state,
         loading: true,
         error: false,
       };
-    case "SUCCESS":
+    case 'SUCCESS':
       return {
         ...state,
         loading: false,
@@ -14,7 +14,7 @@ export const defaultReducer = (state, action) => {
         // do not update state if no payload is passed
         ...(action?.payload ? { data: action.payload } : undefined),
       };
-    case "ERROR":
+    case 'ERROR':
       return {
         ...state,
         loading: false,

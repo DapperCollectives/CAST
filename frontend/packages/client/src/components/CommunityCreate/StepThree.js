@@ -1,6 +1,5 @@
-import React, { useEffect } from "react";
-import { WrapperResponsive } from "components";
-import { isValidAddress } from "utils";
+import React, { useEffect } from 'react';
+import { isValidAddress } from 'utils';
 
 export default function StepThree({
   stepData,
@@ -10,10 +9,10 @@ export default function StepThree({
   moveToNextStep,
 }) {
   const {
-    proposalThreshold = "",
-    contractAddress = "",
-    contractName = "",
-    storagePath = "",
+    proposalThreshold = '',
+    contractAddress = '',
+    contractName = '',
+    storagePath = '',
     onlyAuthorsToSubmitProposals = false,
   } = stepData || {};
 
@@ -35,11 +34,7 @@ export default function StepThree({
   }, [stepData, setStepValid]);
   return (
     <>
-      <WrapperResponsive
-        classNames="border-light rounded-lg columns is-flex-direction-column is-mobile m-0"
-        extraClasses="p-6 mb-5"
-        extraClassesMobile="p-4 mb-4"
-      >
+      <div classNames="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-5p-4-mobile mb-4-mobile">
         <div className="columns is-multiline">
           <div className="column is-12">
             <h4 className="has-text-weight-bold is-size-5">
@@ -109,14 +104,13 @@ export default function StepThree({
             Allow only authors to submit a proposal
           </p>
         </label>
-      </WrapperResponsive>
-
+      </div>
       <div className="columns mb-5">
         <div className="column is-12">
           <button
-            style={{ height: 48, width: "100%" }}
+            style={{ height: 48, width: '100%' }}
             className={`button vote-button transition-all is-flex has-background-yellow rounded-sm is-size-6 is-uppercase is-${
-              isStepValid ? "enabled" : "disabled"
+              isStepValid ? 'enabled' : 'disabled'
             }`}
             onClick={isStepValid ? () => moveToNextStep() : () => {}}
           >

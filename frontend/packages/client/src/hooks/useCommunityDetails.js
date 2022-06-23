@@ -1,8 +1,8 @@
-import { useReducer, useEffect, useCallback } from "react";
-import { defaultReducer, INITIAL_STATE } from "../reducers";
-import { checkResponse, getCompositeSigs } from "../utils";
-import { useErrorHandlerContext } from "../contexts/ErrorHandler";
-import { useWebContext } from "../contexts/Web3";
+import { useReducer, useEffect, useCallback } from 'react';
+import { defaultReducer, INITIAL_STATE } from '../reducers';
+import { checkResponse, getCompositeSigs } from '../utils';
+import { useErrorHandlerContext } from '../contexts/ErrorHandler';
+import { useWebContext } from '../contexts/Web3';
 
 export default function useCommunityDetails(id) {
   const {
@@ -12,29 +12,27 @@ export default function useCommunityDetails(id) {
   const { notifyError } = useErrorHandlerContext();
   const [state, dispatch] = useReducer(defaultReducer, INITIAL_STATE);
   const getCommunityDetails = useCallback(async () => {
-    dispatch({ type: "PROCESSING" });
+    dispatch({ type: 'PROCESSING' });
     const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${id}`;
     try {
       const response = await fetch(url);
       const details = await checkResponse(response);
       // merging with mock data
       const detailsMocked = {
-        logo: "https://i.imgur.com/RMKXPCw.png",
-        name: "Flow",
+        logo: 'https://i.imgur.com/RMKXPCw.png',
+        name: 'Flow',
         description:
           "Flow's decentralized governance and node operations community.",
         about: {
           textAbout: details.body,
         },
-        // mocked data
-        strategies: ["one-address-one-vote"],
         ...details,
       };
 
-      dispatch({ type: "SUCCESS", payload: detailsMocked });
+      dispatch({ type: 'SUCCESS', payload: detailsMocked });
     } catch (err) {
       notifyError(err, url);
-      dispatch({ type: "ERROR", payload: { errorData: err.message } });
+      dispatch({ type: 'ERROR', payload: { errorData: err.message } });
     }
   }, [dispatch, id, notifyError]);
 
@@ -47,7 +45,7 @@ export default function useCommunityDetails(id) {
       const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}`;
       try {
         const timestamp = Date.now().toString();
-        const hexTime = Buffer.from(timestamp).toString("hex");
+        const hexTime = Buffer.from(timestamp).toString('hex');
         const _compositeSignatures = await injectedProvider
           .currentUser()
           .signUserMessage(hexTime);
@@ -55,13 +53,13 @@ export default function useCommunityDetails(id) {
         const compositeSignatures = getCompositeSigs(_compositeSignatures);
 
         if (!compositeSignatures) {
-          return { error: "No valid user signature found." };
+          return { error: 'No valid user signature found.' };
         }
 
         const fetchOptions = {
-          method: "PATCH",
+          method: 'PATCH',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             ...update,
@@ -70,17 +68,17 @@ export default function useCommunityDetails(id) {
             compositeSignatures,
           }),
         };
-        dispatch({ type: "PROCESSING" });
+        dispatch({ type: 'PROCESSING' });
         const response = await fetch(url, fetchOptions);
         const json = await checkResponse(response);
         dispatch({
-          type: "SUCCESS",
+          type: 'SUCCESS',
           payload: json,
         });
         return json;
       } catch (err) {
         notifyError(err, url);
-        dispatch({ type: "ERROR", payload: { errorData: err.message } });
+        dispatch({ type: 'ERROR', payload: { errorData: err.message } });
         return { error: err.message };
       }
     },

@@ -1,6 +1,6 @@
-import React, { useState, useCallback, useEffect } from "react";
-import { Link, useParams, useHistory } from "react-router-dom";
-import { useWebContext } from "contexts/Web3";
+import React, { useState, useCallback, useEffect } from 'react';
+import { Link, useParams, useHistory } from 'react-router-dom';
+import { useWebContext } from 'contexts/Web3';
 import {
   CommunityEditorProfile,
   CommunityEditorLinks,
@@ -8,14 +8,14 @@ import {
   CommunityPropsAndVoting,
   Dropdown,
   Loader,
-} from "components";
-import { ArrowLeft, ArrowLeftBold } from "components/Svg";
+} from 'components';
+import { ArrowLeft, ArrowLeftBold } from 'components/Svg';
 import {
   useCommunityDetails,
   useMediaQuery,
   useFileUploader,
   useUserRoleOnCommunity,
-} from "hooks";
+} from 'hooks';
 
 const MenuTabs = ({ tabs, communityId, onClickButtonTab = () => {} } = {}) => {
   return (
@@ -31,32 +31,32 @@ const MenuTabs = ({ tabs, communityId, onClickButtonTab = () => {} } = {}) => {
       <div className="is-flex flex-1">
         <p className="px-2 has-text-weight-bold">Edit Profile</p>
       </div>
-      <div className="is-flex flex-1" style={{ marginTop: "36px" }}>
+      <div className="is-flex flex-1" style={{ marginTop: '36px' }}>
         <button
           className={`button is-white px-2 small-text ${
-            tabs.profile ? "has-text-weight-bold" : ""
+            tabs.profile ? 'has-text-weight-bold' : ''
           }`}
-          onClick={onClickButtonTab("profile")}
+          onClick={onClickButtonTab('profile')}
         >
           Community Profile
         </button>
       </div>
-      <div className="is-flex flex-1" style={{ marginTop: "18px" }}>
+      <div className="is-flex flex-1" style={{ marginTop: '18px' }}>
         <button
           className={`button is-white px-2 small-text ${
-            tabs.details ? "has-text-weight-bold" : ""
+            tabs.details ? 'has-text-weight-bold' : ''
           }`}
-          onClick={onClickButtonTab("details")}
+          onClick={onClickButtonTab('details')}
         >
           Community Details
         </button>
       </div>
-      <div className="is-flex flex-1" style={{ marginTop: "18px" }}>
+      <div className="is-flex flex-1" style={{ marginTop: '18px' }}>
         <button
           className={`button is-white px-2 small-text ${
-            tabs.details ? "has-text-weight-bold" : ""
+            tabs.details ? 'has-text-weight-bold' : ''
           }`}
-          onClick={onClickButtonTab("proposals-and-voting")}
+          onClick={onClickButtonTab('proposals-and-voting')}
         >
           Proposals & Voting
         </button>
@@ -71,14 +71,14 @@ const DropdownMenu = ({ communityId, onClickButtonTab = () => {} } = {}) => {
       <div className="columns is-mobile">
         <div
           className="column is-flex is-align-center"
-          style={{ width: "100%" }}
+          style={{ width: '100%' }}
         >
           <Link to={`/community/${communityId}?tabs=about`}>
             <ArrowLeftBold />
           </Link>
           <p
             className="px-2 is-flex is-justify-content-center has-text-weight-bold"
-            style={{ width: "calc(100% - 37px)" }}
+            style={{ width: 'calc(100% - 37px)' }}
           >
             Edit Profile
           </p>
@@ -87,9 +87,9 @@ const DropdownMenu = ({ communityId, onClickButtonTab = () => {} } = {}) => {
       <Dropdown
         defaultValue="profile"
         values={[
-          { label: "Community Profile", value: "profile" },
-          { label: "Community Details", value: "details" },
-          { label: "Proposals & Voting", value: "proposals-and-voting" },
+          { label: 'Community Profile', value: 'profile' },
+          { label: 'Community Details', value: 'details' },
+          { label: 'Proposals & Voting', value: 'proposals-and-voting' },
         ]}
         onSelectValue={(value) => {
           onClickButtonTab(value)();
@@ -117,9 +117,9 @@ export default function CommunityEditorPage() {
 
   const onClickButtonTab = (value) => () => {
     setTab({
-      profile: value === "profile",
-      details: value === "details",
-      proposalsAndVoting: value === "proposals-and-voting",
+      profile: value === 'profile',
+      details: value === 'details',
+      proposalsAndVoting: value === 'proposals-and-voting',
     });
   };
 
@@ -131,7 +131,7 @@ export default function CommunityEditorPage() {
   const isAdmin = useUserRoleOnCommunity({
     addr,
     communityId,
-    roles: ["admin"],
+    roles: ['admin'],
   });
 
   // when user is connected to wallet it checks if role is admin
@@ -139,7 +139,7 @@ export default function CommunityEditorPage() {
   // otherwise it's redirected to previous location
   useEffect(() => {
     if ((!isAdmin && addr === null) || (isAdmin === false && addr)) {
-      history.push("/");
+      history.push('/');
       return;
     }
   }, [isAdmin, addr, history]);

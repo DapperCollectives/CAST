@@ -1,5 +1,5 @@
-import React from "react";
-import { stripHtml } from "string-strip-html";
+import React from 'react';
+import { stripHtml } from 'string-strip-html';
 
 const ProposalCardBody = ({ name, body, inlineImage }) => (
   <div className="proposal-body-spacing mr-0 pt-1">
@@ -8,7 +8,7 @@ const ProposalCardBody = ({ name, body, inlineImage }) => (
         {name}
       </h4>
       <p className="has-text-grey proposal-text-truncated is-size-7">
-        {stripHtml(body || "").result}
+        {stripHtml(body || '').result}
       </p>
     </div>
   </div>

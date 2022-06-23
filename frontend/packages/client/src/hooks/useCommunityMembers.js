@@ -1,11 +1,11 @@
-import { useReducer, useEffect, useCallback } from "react";
+import { useReducer, useEffect, useCallback } from 'react';
 import {
   paginationReducer,
   PAGINATION_INITIAL_STATE,
   INITIAL_STATE,
-} from "../reducers";
-import { checkResponse } from "../utils";
-import { useErrorHandlerContext } from "../contexts/ErrorHandler";
+} from '../reducers';
+import { checkResponse } from '../utils';
+import { useErrorHandlerContext } from '../contexts/ErrorHandler';
 
 function getRandomInt(max) {
   return Math.floor(Math.random() * max);
@@ -36,7 +36,7 @@ export default function useCommunityMembers({
    * Function to fetch more results based on pagination configuration
    */
   const fetchMore = useCallback(async () => {
-    dispatch({ type: "PROCESSING" });
+    dispatch({ type: 'PROCESSING' });
     const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}/users?count=${state.pagination.count}&start=${state.pagination.start}`;
     try {
       const response = await fetch(url);
@@ -51,17 +51,17 @@ export default function useCommunityMembers({
       }));
 
       dispatch({
-        type: "SUCCESS",
+        type: 'SUCCESS',
         payload: { ...members, data: membersMocked },
       });
     } catch (err) {
       notifyError(err, url);
-      dispatch({ type: "ERROR", payload: { errorData: err.message } });
+      dispatch({ type: 'ERROR', payload: { errorData: err.message } });
     }
   }, [state.pagination, communityId, notifyError]);
 
   const getCommunityMembers = useCallback(async () => {
-    dispatch({ type: "PROCESSING" });
+    dispatch({ type: 'PROCESSING' });
     const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}/users?count=${count}&start=${start}`;
     try {
       const response = await fetch(url);
@@ -75,17 +75,17 @@ export default function useCommunityMembers({
       }));
 
       dispatch({
-        type: "SUCCESS",
+        type: 'SUCCESS',
         payload: { ...members, data: membersMocked },
       });
     } catch (err) {
       notifyError(err, url);
-      dispatch({ type: "ERROR", payload: { errorData: err.message } });
+      dispatch({ type: 'ERROR', payload: { errorData: err.message } });
     }
   }, [dispatch, communityId, count, start, notifyError]);
 
   const resetResults = () => {
-    dispatch({ type: "RESET_RESULTS" });
+    dispatch({ type: 'RESET_RESULTS' });
   };
 
   useEffect(() => {

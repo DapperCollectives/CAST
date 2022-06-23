@@ -1,18 +1,18 @@
-import React, { useState, useCallback } from "react";
-import { ArrowLeft, CheckMark } from "../Svg";
-import Loader from "../Loader";
-import defaultsDeep from "lodash/defaultsDeep";
+import React, { useState, useCallback } from 'react';
+import { ArrowLeft, CheckMark } from '../Svg';
+import Loader from '../Loader';
+import defaultsDeep from 'lodash/defaultsDeep';
 
 const defaultStyles = {
   currentStep: {
     icon: {
-      textColor: "has-text-black",
-      hexBackgroundColor: "has-background-orange",
+      textColor: 'has-text-black',
+      hexBackgroundColor: 'has-background-orange',
     },
   },
   completeStep: {
     icon: {
-      hexBackgroundColor: "#44C42F",
+      hexBackgroundColor: '#44C42F',
     },
   },
 };
@@ -36,8 +36,8 @@ function StepByStep({
   const [stepsData, setStepsData] = useState({});
   const refs = React.useRef();
 
-  const onStepAdvance = (direction = "next") => {
-    if (direction === "next") {
+  const onStepAdvance = (direction = 'next') => {
+    if (direction === 'next') {
       if (currentStep + 1 <= steps.length - 1) {
         const enableAdvance = runPreCheckStepAdvance();
         if (!enableAdvance) {
@@ -45,7 +45,7 @@ function StepByStep({
         }
         setCurrentStep(currentStep + 1);
       }
-    } else if (direction === "prev") {
+    } else if (direction === 'prev') {
       if (currentStep - 1 >= 0) {
         setCurrentStep(currentStep - 1);
       }
@@ -77,33 +77,30 @@ function StepByStep({
     const stepClasses = [];
     let divider = null;
     if (!stepLabel && stepIdx < steps.length - 1) {
-      stepClasses.push("mr-2");
+      stepClasses.push('mr-2');
       divider = (
         <span
           className="has-background-grey-light ml-2"
           style={{
-            height: "1px",
+            height: '1px',
             width: 20,
-            position: "relative",
+            position: 'relative',
             top: 14,
           }}
         />
       );
     }
     if (stepLabel) {
-      stepClasses.push("mb-6 is-align-items-center");
+      stepClasses.push('mb-6 is-align-items-center');
     }
 
     const currentStepIconStyle = Object.values(
       customStyle.currentStep.icon
-    ).join(" ");
+    ).join(' ');
 
     if (!showPreStep && stepIdx === currentStep) {
       return (
-        <div
-          className={`is-flex ${stepClasses.join(" ")}`}
-          key={stepIdx}
-        >
+        <div className={`is-flex ${stepClasses.join(' ')}`} key={stepIdx}>
           <div
             className={`rounded-full ${currentStepIconStyle} is-flex is-align-items-center is-justify-content-center`}
             style={{
@@ -118,7 +115,7 @@ function StepByStep({
       );
     } else if (!showPreStep && currentStep > stepIdx) {
       return (
-        <div className={`is-flex ${stepClasses.join(" ")}`} key={stepIdx}>
+        <div className={`is-flex ${stepClasses.join(' ')}`} key={stepIdx}>
           <CheckMark
             circleFill={customStyle.completeStep.icon.hexBackgroundColor}
           />
@@ -127,7 +124,7 @@ function StepByStep({
       );
     } else {
       return (
-        <div className={`is-flex ${stepClasses.join(" ")}`} key={stepIdx}>
+        <div className={`is-flex ${stepClasses.join(' ')}`} key={stepIdx}>
           <div
             className="rounded-full border-light is-flex is-align-items-center is-justify-content-center"
             style={{
@@ -148,14 +145,14 @@ function StepByStep({
   const getBackLabel = () => (
     <div
       className="is-flex is-align-items-center has-text-grey cursor-pointer"
-      onClick={() => onStepAdvance("prev")}
+      onClick={() => onStepAdvance('prev')}
     >
       <ArrowLeft />
       <span className="ml-4">Back</span>
     </div>
   );
 
-  const moveToNextStep = () => onStepAdvance("next");
+  const moveToNextStep = () => onStepAdvance('next');
 
   const _onSubmit = useCallback(
     () => onSubmit(stepsData),
@@ -166,7 +163,7 @@ function StepByStep({
     <div className="my-6">
       <div
         className={`button is-block has-background-yellow rounded-sm py-2 px-4 has-text-centered ${
-          !isStepValid && "is-disabled"
+          !isStepValid && 'is-disabled'
         }`}
         onClick={moveToNextStep}
       >
@@ -179,7 +176,7 @@ function StepByStep({
     <div className="my-6">
       <div
         className={`button is-block has-background-yellow rounded-sm py-2 px-4 has-text-centered ${
-          !isStepValid && "is-disabled"
+          !isStepValid && 'is-disabled'
         }`}
         onClick={_onSubmit}
       >
@@ -192,11 +189,11 @@ function StepByStep({
     <section>
       <div
         style={{
-          position: "fixed",
+          position: 'fixed',
           top: 0,
           left: 0,
-          width: "50%",
-          height: "100vh",
+          width: '50%',
+          height: '100vh',
           zIndex: -1,
         }}
         className="has-background-white-ter is-hidden-mobile"
@@ -205,11 +202,11 @@ function StepByStep({
         {/* left panel */}
         <div
           style={{
-            paddingTop: "3rem",
-            paddingRight: "5rem",
+            paddingTop: '3rem',
+            paddingRight: '5rem',
             minWidth: 280,
-            position: "fixed",
-            minHeight: "100%",
+            position: 'fixed',
+            minHeight: '100%',
           }}
           className="has-background-white-ter pl-4 is-hidden-mobile"
         >
@@ -225,7 +222,7 @@ function StepByStep({
         {/* left panel mobile */}
         <div
           className="is-hidden-tablet has-background-white-ter p-4"
-          style={{ position: "fixed", minWidth: "100%", zIndex: 1 }}
+          style={{ position: 'fixed', minWidth: '100%', zIndex: 1 }}
         >
           <div className="is-flex is-justify-content-space-between is-align-items-center">
             <div style={{ minHeight: 24 }}>
@@ -241,7 +238,7 @@ function StepByStep({
           {isSubmitting && (
             <div
               className="is-flex flex-1 is-flex-direction-column is-align-items-center is-justify-content-center"
-              style={{ height: "100%" }}
+              style={{ height: '100%' }}
             >
               <Loader className="mb-4" />
               <p className="has-text-grey">{submittingMessage}</p>

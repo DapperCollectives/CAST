@@ -1,47 +1,69 @@
-import React from "react";
-import ActionButton from "components/ActionButton";
-import StrategySelectorForm from "components/Community/StrategySelectorForm";
+import React from 'react';
+import ActionButton from 'components/ActionButton';
+import StrategySelectorForm from 'components/Community/StrategySelectorForm';
+import isEqual from 'lodash/isEqual';
 
+// this object is used to change
+// field names as are used
+// on the backend
+const fieldMapPayload = {
+  contractAddress: 'addr',
+  contractName: 'name',
+  maxWeight: 'maxWeight',
+  minimunBalance: 'threshold',
+  publicPath: 'publicPath',
+};
+
+// this function renames fields to prepare payload for backend
+const mapFieldsForBackend = (contract) => {
+  return Object.assign(
+    {},
+    ...Object.entries(contract).map(([key, value]) => ({
+      ...(fieldMapPayload[key] && value
+        ? {
+            [fieldMapPayload[key]]: value,
+          }
+        : undefined),
+    }))
+  );
+};
+
+const hasListChanged = (newList, originalList) => {
+  return !isEqual(newList, originalList);
+};
 export default function CommunityProposalsAndVoting({
   communityVotingStrategies = [],
   updateCommunity,
   updatingCommunity,
 } = {}) {
-  // sends updates to backend
-  const saveData = async (strategies) => {
-    console.log("--- strategies to update ---", strategies);
-    // array like:
-    /* 
-    {
-      strategies: [ 
-        {
-          contractAddress: "0x0000012122222222"
-          contractName: "222"
-          maxWeight: "2222222"
-          minimunBalance: "2222"
-          strategy: "staked-token-weighted-default"
-        }
-      ]
-  } 
-    */
-    await updateCommunity({ strategies });
+  const saveDataToBackend = async (strategies) => {
+    const updatePayload = strategies
+      .filter((st) => st?.toDelete !== true)
+      .map((st) => ({
+        name: st.name,
+        // only other strategies than 'one-address-one-vote' have contract information
+        ...(st.name !== 'one-address-one-vote'
+          ? {
+              contract: mapFieldsForBackend(st.contract),
+            }
+          : undefined),
+      }));
+    await updateCommunity({
+      strategies: updatePayload,
+    });
   };
-
-  // used like this until backend returns strategies
-  const st = communityVotingStrategies.map((st) => ({
-    strategy: st,
-  }));
 
   return (
     <StrategySelectorForm
-      existingStrategies={st}
+      existingStrategies={communityVotingStrategies}
       disableAddButton={updatingCommunity}
-      // st is an array with strategies hold by StrategySelector
       callToAction={(st) => (
         <ActionButton
           label="save"
-          enabled={!updatingCommunity}
-          onClick={() => saveData(st)}
+          enabled={
+            updatingCommunity || hasListChanged(st, communityVotingStrategies)
+          }
+          onClick={() => saveDataToBackend(st)}
           loading={updatingCommunity}
           classNames="mt-5"
         />

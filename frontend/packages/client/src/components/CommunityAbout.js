@@ -1,5 +1,5 @@
-import React from "react";
-import Blockies from "react-blockies";
+import React from 'react';
+import Blockies from 'react-blockies';
 
 const CommunityMemberInfo = ({ name }) => {
   return (
@@ -21,7 +21,7 @@ const Title = ({ role, styles = {} } = {}) => {
 };
 
 const CommunityAbout = ({
-  textAbout = "",
+  textAbout = '',
   adminMembers = [],
   authorsMembers = [],
   strategies = [],
@@ -31,7 +31,7 @@ const CommunityAbout = ({
     <div>
       <div className="columns is-multiline mt-0">
         <div className="column is-12">
-          <Title role={"About"} />
+          <Title role={'About'} />
         </div>
         <div className="column is-12">
           <p className="mb-5 has-text-grey">{textAbout}</p>
@@ -40,19 +40,19 @@ const CommunityAbout = ({
           <hr
             style={
               !isMobile
-                ? { marginBottom: "16px", marginTop: "16px" }
-                : { marginBottom: "0px", marginTop: "0px" }
+                ? { marginBottom: '16px', marginTop: '16px' }
+                : { marginBottom: '0px', marginTop: '0px' }
             }
           />
         </div>
         <div className="column is-12">
           <Title
-            role={"Details"}
-            styles={{ paddingBottom: isMobile ? "24px" : "48px" }}
+            role={'Details'}
+            styles={{ paddingBottom: isMobile ? '24px' : '48px' }}
           />
           <div className="columns flex-1">
             <div className="column is-6">
-              <Title role={"Strategies"} styles={{ paddingBottom: "24px" }} />
+              <Title role={'Strategies'} styles={{ paddingBottom: '24px' }} />
               {strategies.map((item, index) => (
                 <div
                   className="is-flex is-align-items-center py-1"
@@ -69,8 +69,8 @@ const CommunityAbout = ({
           <hr
             style={
               !isMobile
-                ? { marginBottom: "16px", marginTop: "16px" }
-                : { marginBottom: "0px", marginTop: "0px" }
+                ? { marginBottom: '16px', marginTop: '16px' }
+                : { marginBottom: '0px', marginTop: '0px' }
             }
           />
         </div>
@@ -78,13 +78,13 @@ const CommunityAbout = ({
         <div className="column is-12">
           <div className="columns flex-1">
             <div className="column is-6">
-              <Title role={"Admins"} styles={{ paddingBottom: "24px" }} />
+              <Title role={'Admins'} styles={{ paddingBottom: '24px' }} />
               {adminMembers.map((item, index) => (
                 <CommunityMemberInfo name={item.name} key={`member-${index}`} />
               ))}
             </div>
             <div className="column is-6">
-              <Title role={"Authors"} styles={{ paddingBottom: "24px" }} />
+              <Title role={'Authors'} styles={{ paddingBottom: '24px' }} />
               {authorsMembers.map((item, index) => (
                 <CommunityMemberInfo name={item.name} key={`member-${index}`} />
               ))}

@@ -1,19 +1,19 @@
-import React, { useEffect, useState } from "react";
-import StrategySelector from "./StrategySelector";
-import StrategyInformationForm from "./StrategyInformationForm";
-import { ActionButton } from "components";
-import { isValidAddress } from "utils";
+import React, { useEffect, useState } from 'react';
+import StrategySelector from './StrategySelector';
+import StrategyInformationForm from './StrategyInformationForm';
+import { ActionButton } from 'components';
+import { isValidAddress } from 'utils';
 
 const ModalSteps = {
-  1: "select-strategy",
-  2: "strategy-information",
+  1: 'select-strategy',
+  2: 'strategy-information',
 };
 
 const initialFormFields = {
-  contractAddress: "",
-  contractName: "",
-  maxWeight: "",
-  minimunBalance: "",
+  contractAddress: '',
+  contractName: '',
+  maxWeight: '',
+  minimunBalance: '',
 };
 
 const formFields = Object.keys(initialFormFields);
@@ -25,12 +25,15 @@ export default function StrategyEditorModal({
   // callback to pass data collected and closed modal
   onDone = () => {},
 } = {}) {
+  // handles two steps inside modal
+  // 1 - strategy name
+  // 2 - contract strategy info
   const [step, setSep] = useState(ModalSteps[1]);
   const [formIsValid, setIsFormValid] = useState(false);
 
-  const [data, setData] = useState({
-    strategy: "",
-    ...initialFormFields,
+  const [strategyData, setStrategyData] = useState({
+    name: '',
+    contract: { ...initialFormFields },
   });
 
   // this useEffect validates form on second step
@@ -45,15 +48,15 @@ export default function StrategyEditorModal({
       minimunBalance: (minimunBalance) =>
         minimunBalance?.trim().length > 0 && /^[0-9]+$/.test(minimunBalance),
     };
-    const isValid = Object.keys(requiredFields).every(
-      (field) => data && requiredFields[field](data[field])
+    const isValid = Object.keys(requiredFields).every((field) =>
+      requiredFields[field](strategyData.contract[field])
     );
     setIsFormValid(isValid);
-  }, [data]);
+  }, [strategyData]);
 
   // user selected strategy move to second step to enter information
-  const setStrategy = (strategy) => {
-    setData((state) => ({ ...state, strategy }));
+  const setStrategy = (strategyName) => {
+    setStrategyData((state) => ({ ...state, name: strategyName }));
 
     //
     // Very important!!!
@@ -61,48 +64,55 @@ export default function StrategyEditorModal({
     // then no more information is required
     // modal should be closed and
     // strategy should be ready to be added
-    if (strategy === "one-address-one-vote") {
-      onDone({ strategy });
+    if (strategyName === 'one-address-one-vote') {
+      onDone({ name: strategyName });
       return;
     }
+    // else go to second step
     setSep(ModalSteps[2]);
   };
 
-  const _onDismiss = () => {
+  const onDismissModal = () => {
     onDismiss();
   };
 
-  const _onDone = () => {
-    onDone(data);
+  const onConfirmDone = () => {
+    onDone(strategyData);
   };
 
-  const setInformationField = (field) => (value) =>
-    setData((state) => ({ ...state, [field]: value }));
+  const setContractInfoField = (field) => (value) =>
+    setStrategyData((state) => ({
+      ...state,
+      contract: {
+        ...state.contract,
+        [field]: value,
+      },
+    }));
 
   return (
     <div
       className="modal-card has-background-white m-0 p-5 p-1-mobile"
-      style={{ minHeight: "467px" }}
+      style={{ minHeight: '467px' }}
     >
       <header
         className="modal-card-head has-background-white columns is-mobile m-0 px-4 pt-4"
-        style={{ borderBottom: "none" }}
+        style={{ borderBottom: 'none' }}
       >
         <div className="column p-0 is-flex flex-1">
           <h2 className="is-size-4">Select a Strategy</h2>
         </div>
         <div
           className={`column is-narrow px-0 has-text-right is-size-2 leading-tight cursor-pointer ${
-            enableDismiss && "has-text-grey"
+            enableDismiss && 'has-text-grey'
           }`}
-          onClick={_onDismiss}
+          onClick={onDismissModal}
         >
           &times;
         </div>
       </header>
       <section
         className="modal-card-body py-0 px-4"
-        style={{ minHeight: "280px" }}
+        style={{ minHeight: '280px' }}
       >
         {step === ModalSteps[1] && (
           <StrategySelector
@@ -114,14 +124,14 @@ export default function StrategyEditorModal({
         )}
         {step === ModalSteps[2] && (
           <StrategyInformationForm
-            setField={setInformationField}
-            formData={data}
+            setField={setContractInfoField}
+            formData={strategyData.contract}
             formFields={formFields}
             actionButton={
               <ActionButton
                 label="done"
                 enabled={formIsValid}
-                onClick={_onDone}
+                onClick={onConfirmDone}
                 classNames="mt-5"
               />
             }
