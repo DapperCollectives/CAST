@@ -64,11 +64,7 @@ export default function StrategySelectorForm({
   const { openModal, closeModal } = useModalContext();
 
   const strategiesToAdd = (allVotingStrategies || []).filter(
-    (st) =>
-      !strategies.find(
-        (currentSt) =>
-          currentSt.strategy === st.key && currentSt?.toBeremoved !== true
-      )
+    (st) => !strategies.find((currentSt) => currentSt.name === st.key)
   );
 
   const addNewStrategy = (newStrategyInfo) => {
@@ -119,7 +115,7 @@ export default function StrategySelectorForm({
         <StrategyInput
           index={index}
           key={`strategy-${index}`}
-          commuVotStra={st.strategy}
+          commuVotStra={st.name}
           onDeleteStrategy={onDeleteStrategy}
           enableDelete={enableDelete}
         />

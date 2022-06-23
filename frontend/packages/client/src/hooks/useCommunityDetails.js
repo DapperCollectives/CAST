@@ -26,8 +26,6 @@ export default function useCommunityDetails(id) {
         about: {
           textAbout: details.body,
         },
-        // mocked data
-        strategies: ['one-address-one-vote'],
         ...details,
       };
 

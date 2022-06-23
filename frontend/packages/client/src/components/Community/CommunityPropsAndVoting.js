@@ -38,17 +38,12 @@ export default function CommunityProposalsAndVoting({
     }));
     await updateCommunity({
       strategies: updatePayload,
+      name: 'this field should not be here',
     });
   };
-
-  // used like this until backend returns strategies
-  const st = communityVotingStrategies.map((st) => ({
-    strategy: st,
-  }));
-
   return (
     <StrategySelectorForm
-      existingStrategies={st}
+      existingStrategies={communityVotingStrategies}
       disableAddButton={updatingCommunity}
       // st is an array with strategies hold by StrategySelector
       callToAction={(st) => (
