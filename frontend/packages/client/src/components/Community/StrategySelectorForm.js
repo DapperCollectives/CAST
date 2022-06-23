@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useVotingStrategies } from 'hooks';
 import { AddButton } from 'components';
 import { Bin } from 'components/Svg';
