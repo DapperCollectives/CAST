@@ -16,7 +16,7 @@ import (
 
 type Community struct {
 	ID                       int         `json:"id,omitempty"`
-	Name                     string      `json:"name"`
+	Name                     string      `json:"name,omitempty"`
 	Category                 *string     `json:"category,omitempty"              validate:"required"`
 	Logo                     *string     `json:"logo,omitempty"`
 	Body                     *string     `json:"body,omitempty"                  validate:"required"`
