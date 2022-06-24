@@ -234,7 +234,7 @@ function StepByStep({
           </div>
         </div>
         {/* right panel */}
-        <div className="step-by-step-body flex-1 has-background-white px-4-mobile pt-0-mobile">
+        <div className="step-by-step-body flex-1 has-background-white px-4-mobile pt-7-mobile">
           {isSubmitting && (
             <div
               className="is-flex flex-1 is-flex-direction-column is-align-items-center is-justify-content-center"
