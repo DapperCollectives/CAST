@@ -89,7 +89,7 @@ export default function StepThree({
           }
         />
 
-        <label className="checkbox column is-flex is-align-items-center is-full is-full-mobile px-0 mt-4">
+        <label className="checkbox column is-flex is-align-items-center is-full is-full-mobile px-0 mt-4 mb-4">
           <input
             type="checkbox"
             className="mr-2 form-checkbox"
