@@ -54,7 +54,7 @@ const MenuTabs = ({ tabs, communityId, onClickButtonTab = () => {} } = {}) => {
       <div className="is-flex flex-1" style={{ marginTop: '18px' }}>
         <button
           className={`button is-white px-2 small-text ${
-            tabs.details ? 'has-text-weight-bold' : ''
+            tabs.proposalsAndVoting ? 'has-text-weight-bold' : ''
           }`}
           onClick={onClickButtonTab('proposals-and-voting')}
         >
