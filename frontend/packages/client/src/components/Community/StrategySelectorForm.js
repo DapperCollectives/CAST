@@ -4,6 +4,7 @@ import { AddButton } from 'components';
 import { Bin } from 'components/Svg';
 import { useModalContext } from 'contexts/NotificationModal';
 import StrategyEditorModal from './StrategyEditorModal';
+import { kebabToString } from 'utils';
 
 const StrategyInput = ({
   index,
@@ -123,7 +124,7 @@ export default function StrategySelectorForm({
         <StrategyInput
           index={index}
           key={`strategy-${index}`}
-          commuVotStra={st.name}
+          commuVotStra={kebabToString(st.name)}
           onDeleteStrategy={onDeleteStrategy}
           enableDelete={enableDelete}
         />

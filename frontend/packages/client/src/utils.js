@@ -184,3 +184,13 @@ export const customDraftToHTML = (content) => {
 };
 
 export const isValidAddress = (addr) => /0[x,X][a-zA-Z0-9]{16}$/gim.test(addr);
+
+// converts kebab case to regular string
+const REVERSE_REGEX = /-[a-zA-Z]/g;
+
+export const kebabToString = (str = '') => {
+  const updated = str.replace(REVERSE_REGEX, function (match) {
+    return ' ' + match.slice(1);
+  });
+  return updated.charAt(0).toUpperCase() + updated.slice(1);
+};

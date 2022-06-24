@@ -31,6 +31,7 @@ const mapFieldsForBackend = (contract) => {
 const hasListChanged = (newList, originalList) => {
   return !isEqual(newList, originalList);
 };
+
 export default function CommunityProposalsAndVoting({
   communityVotingStrategies = [],
   updateCommunity,
