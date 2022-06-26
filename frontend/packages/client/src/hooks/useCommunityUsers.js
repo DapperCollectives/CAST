@@ -40,9 +40,9 @@ export default function useCommunityUsers({
     dispatch({ type: 'PROCESSING' });
     const url = `${
       process.env.REACT_APP_BACK_END_SERVER_API
-    }/communities/${communityId}/users?count=${state.pagination.count}&start=${
+    }/communities/${communityId}/users${type ? `/type/${type}` : ''}?count=${
       state.pagination.start
-    }${type ? `&userType=${type}` : ''}`;
+    }&start=${state.pagination.start}`;
     try {
       const response = await fetch(url);
       const users = await checkResponse(response);
@@ -61,9 +61,9 @@ export default function useCommunityUsers({
     dispatch({ type: 'PROCESSING' });
     const url = `${
       process.env.REACT_APP_BACK_END_SERVER_API
-    }/communities/${communityId}/users?count=${count}&start=${start}${
-      type ? `&userType=${type}` : ''
-    }`;
+    }/communities/${communityId}/users${
+      type ? `/type/${type}` : ''
+    }?count=${count}&start=${start}`;
     try {
       const response = await fetch(url);
       const users = await checkResponse(response);
