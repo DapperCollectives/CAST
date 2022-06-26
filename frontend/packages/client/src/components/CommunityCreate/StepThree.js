@@ -34,7 +34,7 @@ export default function StepThree({
   }, [stepData, setStepValid]);
   return (
     <>
-      <div classNames="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-5p-4-mobile mb-4-mobile">
+      <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-4 p-4-mobile mb-4-mobile">
         <div className="columns is-multiline">
           <div className="column is-12">
             <h4 className="has-text-weight-bold is-size-5">

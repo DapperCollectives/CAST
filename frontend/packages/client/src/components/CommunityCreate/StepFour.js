@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import StrategySelectorForm from 'components/Community/StrategySelectorForm';
-import { ActionButton } from 'components';
+import ActionButton from 'components/ActionButton';
 
 export default function StepFour({
   stepData,
@@ -11,22 +11,24 @@ export default function StepFour({
 } = {}) {
   const { strategies } = stepData || {};
 
-  useEffect(() => {
-    if (strategies.length > 1) {
+  const onStrategySelection = (strategies) => {
+    if (strategies.length > 0) {
       setStepValid(true);
+    } else {
+      setStepValid(false);
     }
-  }, [strategies, setStepValid]);
+    onDataChange({ strategies });
+  };
 
   return (
     <div>
       <StrategySelectorForm
         existingStrategies={strategies}
-        disableAddButton={false}
-        callToAction={(st) => {
-          onDataChange({ strategies: st });
+        onStrategySelection={onStrategySelection}
+        callToAction={() => {
           return (
             <ActionButton
-              label="save"
+              label="CREATE COMMUNITY"
               enabled={isStepValid}
               onClick={isStepValid ? () => onSubmit() : () => {}}
               classNames="mt-5"
@@ -34,17 +36,6 @@ export default function StepFour({
           );
         }}
       />
-      <div className="column p-0 is-12 mt-4">
-        <button
-          style={{ height: 48, width: '100%' }}
-          className={`button vote-button transition-all is-flex has-background-yellow rounded-sm is-enabled is-size-6 ${
-            !isStepValid ? 'is-disabled' : ''
-          }`}
-          onClick={isStepValid ? () => onSubmit() : () => {}}
-        >
-          CREATE COMMUNITY
-        </button>
-      </div>
     </div>
   );
 }

@@ -54,22 +54,30 @@ const StrategyInput = ({
 export default function StrategySelectorForm({
   existingStrategies = [],
   disableAddButton = false,
+  // this fc returns a component(Button) to render
   callToAction = () => {},
+  // callback to return strategies selected
+  onStrategySelection = () => {},
 } = {}) {
   // holds array of objects with strategy information
-  const [strategies, setStrategies] = useState(existingStrategies);
+  const [strategies, setStrategies] = useState([]);
 
-  // reloads lists if update is done
-  useEffect(() => {
+  // update state if new strategies are passed
+  useState(() => {
     setStrategies(existingStrategies);
   }, [existingStrategies]);
+
+  // notify parent component
+  useEffect(() => {
+    onStrategySelection(strategies);
+  }, [strategies]);
 
   const { data: allVotingStrategies, loading: loadingAllStrategies } =
     useVotingStrategies();
 
   const { openModal, closeModal } = useModalContext();
 
-  // filter strategies already added
+  // filter strategies already added from the ones received from backend
   const strategiesList = (allVotingStrategies || []).filter(
     (st) => !strategies.find((currentSt) => currentSt.name === st.key)
   );
