@@ -70,7 +70,7 @@ export default function StrategySelectorForm({
   // notify parent component
   useEffect(() => {
     onStrategySelection(strategies);
-  }, [strategies]);
+  }, [strategies, onStrategySelection]);
 
   const { data: allVotingStrategies, loading: loadingAllStrategies } =
     useVotingStrategies();
