@@ -6,7 +6,6 @@
     "deploy": "yarn workspace @scaffold-flow/cadence deploy",
     "chain": "yarn workspace @scaffold-flow/cadence start",
     "test": "yarn workspace @scaffold-flow/cadence test",
-    "prettier": "yarn workspace @scaffold-flow/client prettier",
     "build": "yarn workspace @scaffold-flow/client build --max-old-space-size=12288",
     "start": "yarn workspace @scaffold-flow/client start"
   },
