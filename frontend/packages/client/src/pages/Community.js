@@ -24,6 +24,23 @@ import {
 import { useWebContext } from '../contexts/Web3';
 import Blockies from 'react-blockies';
 
+const CommunitySettingsButton = ({ communityId } = {}) => {
+  return (
+    <div className="columns flex-1" style={{ marginBottom: '20px' }}>
+      <div className="column is-11">
+        <Link to={`/community/${communityId}/edit`}>
+          <div
+            className="button is-fullwidth rounded-sm is-uppercase is-flex small-text has-text-white has-background-black"
+            style={{ minHeight: '40px' }}
+          >
+            Community Settings
+          </div>
+        </Link>
+      </div>
+    </div>
+  );
+};
+
 const AboutLayout = ({
   isMobile,
   leaderBoard,
@@ -48,6 +65,7 @@ const AboutLayout = ({
         <hr className="my-3" />
         <div className="column">{communityLinks}</div>
         <div className="column">
+          {showEdit && <CommunitySettingsButton communityId={communityId} />}
           <p className="smaller-text has-text-grey">Founded 2022</p>
         </div>
       </div>
@@ -66,20 +84,7 @@ const AboutLayout = ({
           <div style={{ paddingTop: '28px' }}>{communityLinks}</div>
         )}
         <hr style={{ marginTop: '32px', marginBottom: '32px' }} />
-        {showEdit && (
-          <div className="columns flex-1" style={{ marginBottom: '20px' }}>
-            <div className="column is-11">
-              <Link to={`/community/${communityId}/edit`}>
-                <div
-                  className="button is-fullwidth rounded-sm is-uppercase is-flex small-text has-text-white has-background-black"
-                  style={{ minHeight: '40px' }}
-                >
-                  Community Settings
-                </div>
-              </Link>
-            </div>
-          </div>
-        )}
+        {showEdit && <CommunitySettingsButton communityId={communityId} />}
         <p className="smaller-text has-text-grey">Founded 2022</p>
       </div>
       <div
