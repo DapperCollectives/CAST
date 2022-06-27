@@ -1,6 +1,7 @@
-import React, { useEffect } from "react";
-import { Plus, Bin } from "components/Svg";
-import { getProposalType } from "utils";
+import React, { useEffect } from 'react';
+import { Bin } from 'components/Svg';
+import { getProposalType } from 'utils';
+import AddButton from 'components/AddButton';
 
 const TextBasedChoices = ({
   choices = [],
@@ -10,7 +11,7 @@ const TextBasedChoices = ({
   initChoices,
 } = {}) => {
   useEffect(() => {
-    if (getProposalType(choices) !== "text-based") {
+    if (getProposalType(choices) !== 'text-based') {
       initChoices([]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -21,7 +22,7 @@ const TextBasedChoices = ({
         <div
           key={i}
           className="columns is-mobile p-0 m-0"
-          style={{ position: "relative" }}
+          style={{ position: 'relative' }}
         >
           <input
             type="text"
@@ -37,7 +38,7 @@ const TextBasedChoices = ({
           <div
             className="cursor-pointer"
             style={{
-              position: "absolute",
+              position: 'absolute',
               right: 15,
               top: 7,
             }}
@@ -47,14 +48,12 @@ const TextBasedChoices = ({
           </div>
         </div>
       ))}
-      <div
-        className="mt-2 cursor-pointer is-flex is-align-items-centered"
-        onClick={onCreateChoice}
-      >
-        <Plus />{" "}
-        <span className="ml-2">
-          Add {`${choices?.length >= 1 ? "Another " : ""}`}Choice
-        </span>
+      <div className="is-flex">
+        <AddButton
+          onAdd={onCreateChoice}
+          className="mt-2 pr-2"
+          addText={`${choices?.length >= 1 ? 'Another ' : ''}Choice`}
+        />
       </div>
     </>
   );

@@ -1,15 +1,15 @@
-import React from "react";
-import WrapperResponsive from "./WrapperResponsive";
-import Miquela from "../assets/miquela.png";
-import PeopleToast from "../assets/people-toast.png";
+import React from 'react';
+import WrapperResponsive from './WrapperResponsive';
+import Miquela from '../assets/miquela.png';
+import PeopleToast from '../assets/people-toast.png';
 
 export default function CommunityPulse() {
   return (
     <div>
       <WrapperResponsive
         classNames="is-flex flex-1 has-text-weight-bold is-uppercase small-text"
-        extraStyles={{ marginBottom: "32px", marginTop: "40px" }}
-        extraStylesMobile={{ marginBottom: "32px", marginTop: "24px" }}
+        extraStyles={{ marginBottom: '32px', marginTop: '40px' }}
+        extraStylesMobile={{ marginBottom: '32px', marginTop: '24px' }}
       >
         Pulse
       </WrapperResponsive>
@@ -25,11 +25,11 @@ export default function CommunityPulse() {
         <div
           className="column is-4 cell top-right p-0"
           style={{
-            justifyContent: "flex-end",
-            alignItems: "flex-start",
+            justifyContent: 'flex-end',
+            alignItems: 'flex-start',
             backgroundImage: `url(${PeopleToast})`,
-            backgroundRepeat: "no-repeat",
-            backgroundSize: "cover",
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: 'cover',
           }}
         >
           <button className="button ml-4 mb-4 has-background-white has-text-black rounded-lg">
@@ -41,11 +41,11 @@ export default function CommunityPulse() {
         <div
           className="column is-4 cell bottom-left p-0"
           style={{
-            justifyContent: "flex-end",
-            alignItems: "flex-start",
+            justifyContent: 'flex-end',
+            alignItems: 'flex-start',
             backgroundImage: `url(${Miquela})`,
-            backgroundRepeat: "no-repeat",
-            backgroundSize: "cover",
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: 'cover',
           }}
         />
         <div className="column is-4 cell">

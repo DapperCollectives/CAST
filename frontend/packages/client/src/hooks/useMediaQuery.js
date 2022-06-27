@@ -1,14 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 export const mediaMatchers = {
-  tabletUp: "(min-width: 768px)",
-  tabletOnly: "(min-width: 768px) and (max-width:1023px)",
+  tabletUp: '(min-width: 768px)',
+  tabletOnly: '(min-width: 768px) and (max-width:1023px)',
 };
 
 function useMediaQuery(query = mediaMatchers.tabletUp) {
   const getMatches = () => {
     // Prevents SSR issues
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       return window.matchMedia(query).matches;
     }
     return false;
@@ -27,10 +27,10 @@ function useMediaQuery(query = mediaMatchers.tabletUp) {
     handleChange();
 
     // Listen matchMedia
-    matchMedia.addEventListener("change", handleChange);
+    matchMedia.addEventListener('change', handleChange);
 
     return () => {
-      matchMedia.removeEventListener("change", handleChange);
+      matchMedia.removeEventListener('change', handleChange);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);

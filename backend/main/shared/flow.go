@@ -62,6 +62,7 @@ func NewFlowClient(flowEnv string) *FlowAdapter {
 	path := "./flow.json"
 
 	content, err := ioutil.ReadFile(path)
+
 	if err != nil {
 		log.Fatal().Msgf("Error when opening file: %+v", err)
 	}

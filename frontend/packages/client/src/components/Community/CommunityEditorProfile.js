@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { useDropzone } from "react-dropzone";
-import { Upload } from "components/Svg";
-import { WrapperResponsive, Loader } from "components";
-import { getReducedImg } from "utils";
-import { useErrorHandlerContext } from "contexts/ErrorHandler";
-import { MAX_FILE_SIZE } from "const";
+import React, { useState, useEffect, useCallback } from 'react';
+import { useDropzone } from 'react-dropzone';
+import { Upload } from 'components/Svg';
+import { WrapperResponsive, Loader } from 'components';
+import { getReducedImg } from 'utils';
+import { useErrorHandlerContext } from 'contexts/ErrorHandler';
+import { MAX_FILE_SIZE } from 'const';
 
 function CommunityEditorProfile({
   name,
@@ -17,7 +17,7 @@ function CommunityEditorProfile({
 } = {}) {
   const [communityName, setCommunityName] = useState(name);
   const [communityDescription, setCommunityDescription] = useState(body);
-  const [isUpdating, setIsUpdating] = useState("");
+  const [isUpdating, setIsUpdating] = useState('');
   const [enableSave, setEnableSave] = useState(false);
   const [image, setImage] = useState({ imageUrl: logo });
   const { notifyError } = useErrorHandlerContext();
@@ -25,13 +25,17 @@ function CommunityEditorProfile({
   useEffect(() => {
     if (name !== undefined && body !== undefined) {
       if (
-        ((communityName !== name || communityDescription !== body) &&
-          communityName.length > 0) ||
+        (communityName !== name && communityName.length > 0) ||
+        communityDescription !== body ||
         image.file
       ) {
         setEnableSave(true);
       }
-      if (communityName.trim().length === 0) {
+      if (
+        communityName.trim().length === 0 ||
+        communityDescription.trim() === body ||
+        (communityName === name && communityDescription === body)
+      ) {
         setEnableSave(false);
       }
     }
@@ -62,19 +66,19 @@ function CommunityEditorProfile({
       acceptedFiles.forEach((imageFile) => {
         // validate type
         if (
-          !["image/png", "image/jpeg", "image/jpg"].includes(imageFile.type)
+          !['image/png', 'image/jpeg', 'image/jpg'].includes(imageFile.type)
         ) {
           notifyError({
-            status: "Image Type not supported",
-            statusText: "Please upload a .png or .jpeg file type extension",
+            status: 'Image Type not supported',
+            statusText: 'Please upload a .png or .jpeg file type extension',
           });
           return;
         }
         // validate size
         if (imageFile.size > MAX_FILE_SIZE) {
           notifyError({
-            status: "Image file size not allowed",
-            statusText: "Please upload a new file (smaller than 5mb)",
+            status: 'Image file size not allowed',
+            statusText: 'Please upload a new file (smaller than 5mb)',
           });
           return;
         }
@@ -84,7 +88,7 @@ function CommunityEditorProfile({
         img.onload = function (e) {
           // reduce image if necessary before upload
           if (e.target.width > 150) {
-            getReducedImg(e.target, 150, "community_image").then((result) => {
+            getReducedImg(e.target, 150, 'community_image').then((result) => {
               setImage({ imageUrl: imageAsURL, file: result.imageFile });
             });
           } else {
@@ -100,7 +104,7 @@ function CommunityEditorProfile({
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
     maxFiles: 1,
-    accept: "image/jpeg,image/png",
+    accept: 'image/jpeg,image/png',
   });
 
   return (
@@ -131,12 +135,12 @@ function CommunityEditorProfile({
           <div
             className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center cursor-pointer"
             style={{
-              borderRadius: "50px",
-              height: "90px",
-              width: "90px",
-              overflow: "hidden",
-              position: "relative",
-              ...(!image ? { border: "1px dashed #757575" } : undefined),
+              borderRadius: '50px',
+              height: '90px',
+              width: '90px',
+              overflow: 'hidden',
+              position: 'relative',
+              ...(!image ? { border: '1px dashed #757575' } : undefined),
             }}
             {...getRootProps()}
           >
@@ -152,9 +156,9 @@ function CommunityEditorProfile({
                 className="is-flex flex-1 is-flex-direction-column is-align-items-center is-justify-content-center"
                 style={{
                   backgroundImage: `url(${image.imageUrl})`,
-                  backgroundRepeat: "no-repeat",
-                  backgroundSize: "cover",
-                  width: "100%",
+                  backgroundRepeat: 'no-repeat',
+                  backgroundSize: 'cover',
+                  width: '100%',
                   opacity: 0.5,
                 }}
               />
@@ -163,11 +167,11 @@ function CommunityEditorProfile({
               <div
                 className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center"
                 style={{
-                  borderRadius: "50px",
-                  height: "40px",
-                  width: "40px",
-                  position: "absolute",
-                  backgroundColor: "#4a4a4a",
+                  borderRadius: '50px',
+                  height: '40px',
+                  width: '40px',
+                  position: 'absolute',
+                  backgroundColor: '#4a4a4a',
                 }}
               >
                 <Upload className="has-text-white" />
@@ -177,7 +181,7 @@ function CommunityEditorProfile({
               <div
                 className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center"
                 style={{
-                  position: "absolute",
+                  position: 'absolute',
                 }}
               >
                 <p className="is-size-7">Uploading...</p>
@@ -205,9 +209,9 @@ function CommunityEditorProfile({
         disabled={isUpdating}
       />
       <button
-        style={{ height: 48, width: "100%" }}
-        className={`button vote-button transition-all is-flex has-background-yellow rounded-sm mt-5 is-${
-          enableSave && !isUpdating ? "enabled" : "disabled"
+        style={{ height: 48, width: '100%' }}
+        className={`button vote-button transition-all is-flex has-background-yellow rounded-sm mt-5 is-uppercase is-${
+          enableSave && !isUpdating ? 'enabled' : 'disabled'
         }`}
         onClick={!enableSave ? () => {} : saveData}
       >

@@ -1,9 +1,9 @@
-import React, { useState } from "react";
-import { Web3Consumer } from "../contexts/Web3";
+import React, { useState } from 'react';
+import { Web3Consumer } from '../contexts/Web3';
 
 function Debug({ web3 }) {
   const { user, injectedProvider, executeTransaction } = web3;
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState('');
   const [profile, setProfile] = useState(false);
 
   const queryHello = async () => {

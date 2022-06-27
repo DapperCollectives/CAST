@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Web3Consumer } from "../contexts/Web3";
+import React, { useState, useEffect } from 'react';
+import { Web3Consumer } from '../contexts/Web3';
 
 function Transaction({ web3 }) {
   const { id, status, errorMessage } = web3.transaction;
@@ -188,11 +188,11 @@ function Transaction({ web3 }) {
         <div
           className="close py-2 px-4 is-"
           style={{
-            position: "absolute",
+            position: 'absolute',
             top: 0,
             right: 0,
-            color: "white",
-            cursor: "pointer",
+            color: 'white',
+            cursor: 'pointer',
           }}
           onClick={() => setMinimized(true)}
         >

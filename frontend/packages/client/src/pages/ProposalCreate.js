@@ -1,17 +1,17 @@
 /* global plausible */
-import React, { useEffect, useState } from "react";
-import { useHistory } from "react-router-dom";
-import { StepByStep, WalletConnect, Error } from "components";
-import { useWebContext } from "contexts/Web3";
-import { useModalContext } from "contexts/NotificationModal";
-import { useErrorHandlerContext } from "contexts/ErrorHandler";
-import { useProposal, useQueryParams } from "hooks";
-import { parseDateToServer, customDraftToHTML } from "utils";
+import React, { useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import { StepByStep, WalletConnect, Error } from 'components';
+import { useWebContext } from 'contexts/Web3';
+import { useModalContext } from 'contexts/NotificationModal';
+import { useErrorHandlerContext } from 'contexts/ErrorHandler';
+import { useProposal, useQueryParams } from 'hooks';
+import { parseDateToServer, customDraftToHTML } from 'utils';
 import {
   PropCreateStepOne,
   PropCreateStepTwo,
   PropCreateStepThree,
-} from "components/ProposalCreate";
+} from 'components/ProposalCreate';
 
 export default function ProposalCreatePage() {
   const { createProposal, data, loading, error } = useProposal();
@@ -26,7 +26,7 @@ export default function ProposalCreatePage() {
 
   const { notifyError } = useErrorHandlerContext();
 
-  const { communityId } = useQueryParams({ communityId: "communityId" });
+  const { communityId } = useQueryParams({ communityId: 'communityId' });
 
   useEffect(() => {
     if (data?.id) {
@@ -51,9 +51,9 @@ export default function ProposalCreatePage() {
             </div>
           ),
 
-          errorTitle: "Please connect a wallet to create a proposal.",
+          errorTitle: 'Please connect a wallet to create a proposal.',
         }),
-        { classNameModalContent: "rounded-sm" }
+        { classNameModalContent: 'rounded-sm' }
       );
       setModalError(true);
       return;
@@ -61,9 +61,9 @@ export default function ProposalCreatePage() {
 
     if (!communityId) {
       notifyError({
-        status: "No community information provided",
+        status: 'No community information provided',
         statusText:
-          "Please restart the proposal creation from the community page",
+          'Please restart the proposal creation from the community page',
       });
       return;
     }
@@ -98,37 +98,37 @@ export default function ProposalCreatePage() {
       endTime,
       startTime,
       strategy: strategy?.value,
-      status: "published",
+      status: 'published',
       communityId,
     };
 
     await createProposal(injectedProvider, proposalData);
-    plausible("Proposal Created");
+    plausible('Proposal Created');
   };
 
   const props = {
-    finalLabel: "Publish",
+    finalLabel: 'Publish',
     onSubmit,
     isSubmitting: loading && !error,
-    submittingMessage: "Creating Proposal...",
+    submittingMessage: 'Creating Proposal...',
     steps: [
       {
-        label: "Draft Proposal",
+        label: 'Draft Proposal',
         description:
-          "Some description of what you can write here that is useful.",
+          'Some description of what you can write here that is useful.',
         component: <PropCreateStepOne />,
       },
       {
-        label: "Set Date & Time",
+        label: 'Set Date & Time',
         description:
-          "Some description of what you can write here that is useful.",
-        component: <PropCreateStepTwo stepData={{ test: "ok" }} />,
+          'Some description of what you can write here that is useful.',
+        component: <PropCreateStepTwo stepData={{ test: 'ok' }} />,
       },
       {
-        label: "Preview Proposal",
+        label: 'Preview Proposal',
         description:
-          "Some description of what you can write here that is useful.",
-        component: <PropCreateStepThree stepData={{ test: "ok" }} />,
+          'Some description of what you can write here that is useful.',
+        component: <PropCreateStepThree stepData={{ test: 'ok' }} />,
       },
     ],
   };

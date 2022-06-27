@@ -1,5 +1,5 @@
-import React from "react";
-import { Web3Consumer } from "../contexts/Web3";
+import React from 'react';
+import { Web3Consumer } from '../contexts/Web3';
 
 const SignInOutButton = ({ user: { loggedIn, addr }, injectedProvider }) => {
   const signInOrOut = async (event) => {

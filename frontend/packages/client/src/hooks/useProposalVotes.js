@@ -1,11 +1,11 @@
-import { useReducer, useEffect, useCallback } from "react";
+import { useReducer, useEffect, useCallback } from 'react';
 import {
   paginationReducer,
   PAGINATION_INITIAL_STATE,
   INITIAL_STATE,
-} from "../reducers";
-import { checkResponse } from "../utils";
-import { useErrorHandlerContext } from "../contexts/ErrorHandler";
+} from '../reducers';
+import { checkResponse } from '../utils';
+import { useErrorHandlerContext } from '../contexts/ErrorHandler';
 
 /**
  * Hook to return proposal votes for a proposal. Results are paginated
@@ -31,7 +31,7 @@ export default function useProposalVotes({
    * Function to reset results from Api call stored in hook state
    */
   const resetResults = useCallback(() => {
-    dispatch({ type: "RESET_RESULTS" });
+    dispatch({ type: 'RESET_RESULTS' });
   }, []);
 
   /**
@@ -39,30 +39,30 @@ export default function useProposalVotes({
    * @param  {int} proposalId id used to fetch votes from
    */
   const fetchMore = useCallback(async () => {
-    dispatch({ type: "PROCESSING" });
+    dispatch({ type: 'PROCESSING' });
     const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/proposals/${proposalId}/votes?count=${state.pagination.count}&start=${state.pagination.start}`;
     try {
       const response = await fetch(url);
       const proposalVotes = await response.json();
 
-      dispatch({ type: "SUCCESS", payload: proposalVotes });
+      dispatch({ type: 'SUCCESS', payload: proposalVotes });
     } catch (err) {
       notifyError(err, url);
-      dispatch({ type: "ERROR", payload: { errorData: err.message } });
+      dispatch({ type: 'ERROR', payload: { errorData: err.message } });
     }
   }, [state.pagination, proposalId, notifyError]);
 
   const getProposalVotes = useCallback(async () => {
-    dispatch({ type: "PROCESSING" });
+    dispatch({ type: 'PROCESSING' });
     const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/proposals/${proposalId}/votes?count=${count}&start=${start}`;
     try {
       const response = await fetch(url);
       const proposalVotes = await checkResponse(response);
-      dispatch({ type: "SUCCESS", payload: proposalVotes });
+      dispatch({ type: 'SUCCESS', payload: proposalVotes });
     } catch (err) {
       notifyError(err, url);
       dispatch({
-        type: "ERROR",
+        type: 'ERROR',
         payload: { errorData: err.message },
       });
     }
