@@ -25,13 +25,17 @@ function CommunityEditorProfile({
   useEffect(() => {
     if (name !== undefined && body !== undefined) {
       if (
-        ((communityName !== name || communityDescription !== body) &&
-          communityName.length > 0) ||
+        (communityName !== name && communityName.length > 0) ||
+        communityDescription !== body ||
         image.file
       ) {
         setEnableSave(true);
       }
-      if (communityName.trim().length === 0) {
+      if (
+        communityName.trim().length === 0 ||
+        communityDescription.trim() === body ||
+        (communityName === name && communityDescription === body)
+      ) {
         setEnableSave(false);
       }
     }
@@ -206,7 +210,7 @@ function CommunityEditorProfile({
       />
       <button
         style={{ height: 48, width: '100%' }}
-        className={`button vote-button transition-all is-flex has-background-yellow rounded-sm mt-5 is-${
+        className={`button vote-button transition-all is-flex has-background-yellow rounded-sm mt-5 is-uppercase is-${
           enableSave && !isUpdating ? 'enabled' : 'disabled'
         }`}
         onClick={!enableSave ? () => {} : saveData}
