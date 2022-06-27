@@ -13,7 +13,7 @@ ENV REACT_APP_TX_OPTIONS_ADDRS "0xe0de919ed4ebeee4,0x7f81b82fa0e59b17"
 
 COPY ./packages/client/package*.json ./
 
-RUN npm install
+RUN npm ci
 COPY ./packages/client/ ./
 
 ENV NODE_ENV=production
