@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - staging
+      - dbslone/test-build
 
 env:
   db_username: ${{ secrets.DB_USERNAME }}
