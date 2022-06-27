@@ -4,6 +4,7 @@ import { AddButton } from 'components';
 import { Bin } from 'components/Svg';
 import { useModalContext } from 'contexts/NotificationModal';
 import StrategyEditorModal from './StrategyEditorModal';
+import isEqual from 'lodash/isEqual';
 import { kebabToString } from 'utils';
 
 const StrategyInput = ({
@@ -57,7 +58,7 @@ export default function StrategySelectorForm({
   // this fc returns a component(Button) to render
   callToAction = () => {},
   // callback to return strategies selected
-  onStrategySelection = () => {},
+  onStrategySelection,
 } = {}) {
   // holds array of objects with strategy information
   const [strategies, setStrategies] = useState([]);
@@ -67,10 +68,12 @@ export default function StrategySelectorForm({
     setStrategies(existingStrategies);
   }, [existingStrategies]);
 
-  // notify parent component
+  // only notify parent component if callback was passed
   useEffect(() => {
-    onStrategySelection(strategies);
-  }, [strategies, onStrategySelection]);
+    if (onStrategySelection && !isEqual(strategies, existingStrategies)) {
+      onStrategySelection(strategies);
+    }
+  }, [strategies, onStrategySelection, existingStrategies]);
 
   const { data: allVotingStrategies, loading: loadingAllStrategies } =
     useVotingStrategies();
