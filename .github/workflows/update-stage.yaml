@@ -112,14 +112,14 @@ jobs:
 
   build-and-push-frontend:
     name: Build and push frontend
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     if: "!contains(github.event.head_commit.message, 'cancel build frontend')"
     steps:
 
     - name: checkout
       uses: actions/checkout@v3
       with:
-        ref: staging
+        ref: dbslone/test-build
 
     - name: Login to Docker Hub
       uses: docker/login-action@v2
