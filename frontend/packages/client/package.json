@@ -48,24 +48,9 @@
   "eslintConfig": {
     "extends": [
       "react-app",
-      "react-app/jest",
-      "plugin:prettier/recommended"
+      "react-app/jest"
     ],
-    "rules": {
-      "prettier/prettier": [
-        "error",
-        {
-          "singleQuote": true,
-          "comma-dangle": [
-            "error",
-            "always-multiline"
-          ]
-        },
-        {
-          "usePrettierrc": true
-        }
-      ]
-    }
+    "rules": {}
   },
   "browserslist": {
     "production": [
@@ -84,10 +69,7 @@
     "@testing-library/jest-dom": "^5.16.2",
     "@testing-library/react": "^12.1.3",
     "@testing-library/user-event": "^14.0.0",
-    "eslint-plugin-prettier": "^4.0.0",
-    "prettier": "^2.7.1",
     "react-test-renderer": "^17.0.2",
-    "sass": "^1.47.0",
-    "eslint-config-prettier": "^8.5.0"
+    "sass": "^1.47.0"
   }
 }
