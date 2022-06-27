@@ -25,6 +25,7 @@ import { Dropdown, Error, UploadImageModal } from 'components';
 import TextBasedChoices from './TextBasedChoices';
 import ImageChoices from './ImageChoices';
 import { Image } from 'components/Svg';
+import { kebabToString } from 'utils';
 
 // using a React component to render custom blocks
 const ImageCaptionCustomBlock = (props) => {
@@ -70,14 +71,18 @@ const StepOne = ({
 
   const { communityId } = useQueryParams({ communityId: 'communityId' });
 
-  console.log('first > ', communityId);
+  const { data: community } = useCommunityDetails(communityId);
 
-  const { data: community, loading, error } = useCommunityDetails(communityId);
+  const { strategies = [] } = community || {};
 
-  console.log('first community> ', community);
-
-  const { data: votingStrategies, loading: loadingStrategies } =
-    useVotingStrategies();
+  const votingStrategies = useMemo(
+    () =>
+      strategies.map((st) => ({
+        key: st.name,
+        name: kebabToString(st.name),
+      })),
+    [strategies]
+  );
 
   const { openModal, closeModal } = useModalContext();
 
@@ -443,7 +448,7 @@ const StepOne = ({
                 value: vs.key,
               })) ?? []
             }
-            disabled={loadingStrategies}
+            disabled={votingStrategies.length === 0}
             onSelectValue={onSelectStrategy}
             ref={dropDownRef}
           />
