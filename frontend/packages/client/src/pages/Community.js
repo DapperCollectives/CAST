@@ -163,8 +163,6 @@ export default function Community() {
     type: 'author',
   });
 
-  console.log(admins);
-  console.log(authors);
   const { data: strategies } = useVotingStrategies();
 
   const {
