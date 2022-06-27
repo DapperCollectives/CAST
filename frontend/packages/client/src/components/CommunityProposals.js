@@ -71,7 +71,7 @@ export default function CommunityProposals({ communityId = 1, admins } = {}) {
           </WrapperResponsive>
           {!notMobile && (
             <div className="column p-0 mt-2 pl-2">
-              <Link to="/proposal/create">
+              <Link to={`/proposal/create?communityId=${communityId}`}>
                 <div
                   className="button rounded-sm is-uppercase is-flex small-text has-text-white has-background-black"
                   style={{ minHeight: '40px' }}
