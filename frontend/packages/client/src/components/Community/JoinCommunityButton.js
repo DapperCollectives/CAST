@@ -50,7 +50,7 @@ export default function JoinCommunityButton({
 
     if (success) {
       refresh((totalMembers) => --totalMembers);
-      onLeaveCommunity();
+      await onLeaveCommunity();
     }
   };
 
