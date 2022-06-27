@@ -43,7 +43,6 @@
     "test": "react-scripts test",
     "test:update": "react-scripts test --updateSnapshot",
     "eject": "react-scripts eject",
-    "prettier": "npx prettier --write .",
     "eslint": "eslint . --ext .js --fix"
   },
   "eslintConfig": {
