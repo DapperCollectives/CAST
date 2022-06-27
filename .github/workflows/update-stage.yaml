@@ -112,7 +112,7 @@ jobs:
 
   build-and-push-frontend:
     name: Build and push frontend
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-18.04
     if: "!contains(github.event.head_commit.message, 'cancel build frontend')"
     steps:
 
