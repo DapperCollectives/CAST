@@ -151,9 +151,7 @@ func TestUpdateCommunity(t *testing.T) {
 	// Create Community
 	communityStruct := otu.GenerateCommunityStruct("account")
 	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
-	fmt.Printf("\n community payload %+v\n", communityPayload)
 	response := otu.CreateCommunityAPI(communityPayload)
-	fmt.Printf(" \n RESPONSE %+v \n", response.Body)
 
 	// Check response code
 	checkResponseCode(t, http.StatusCreated, response.Code)
@@ -168,12 +166,7 @@ func TestUpdateCommunity(t *testing.T) {
 	// Update some fields
 	payload := otu.GenerateCommunityPayload("account", &utils.UpdatedCommunity)
 
-	fmt.Printf("\n payload to be updated %+v \n :", payload)
-	fmt.Printf("payload comp sigs :%+v \n", payload.Composite_signatures)
-	fmt.Printf("payload strategies :%+v \n", payload.Strategies)
-
 	response = otu.UpdateCommunityAPI(oldCommunity.ID, payload)
-	fmt.Printf("RESPONSE %+v \n", response.Body)
 	checkResponseCode(t, http.StatusOK, response.Code)
 
 	// Get community again for assertions
@@ -182,7 +175,6 @@ func TestUpdateCommunity(t *testing.T) {
 	json.Unmarshal(response.Body.Bytes(), &updatedCommunity)
 
 	assert.Equal(t, oldCommunity.ID, updatedCommunity.ID)
-	assert.Equal(t, utils.UpdatedCommunity.Name, updatedCommunity.Name)
 	assert.Equal(t, *utils.UpdatedCommunity.Logo, *updatedCommunity.Logo)
 	assert.Equal(t, *utils.UpdatedCommunity.Strategies, *updatedCommunity.Strategies)
 	assert.Equal(t, *utils.UpdatedCommunity.Banner_img_url, *updatedCommunity.Banner_img_url)
