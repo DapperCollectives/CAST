@@ -15,7 +15,11 @@ import {
   SelectionState,
 } from 'draft-js';
 import { Map } from 'immutable';
-import { useVotingStrategies } from 'hooks';
+import {
+  useQueryParams,
+  useVotingStrategies,
+  useCommunityDetails,
+} from 'hooks';
 import { useModalContext } from 'contexts/NotificationModal';
 import { Dropdown, Error, UploadImageModal } from 'components';
 import TextBasedChoices from './TextBasedChoices';
@@ -63,6 +67,15 @@ const StepOne = ({
   setPreCheckStepAdvance,
 }) => {
   const dropDownRef = useRef();
+
+  const { communityId } = useQueryParams({ communityId: 'communityId' });
+
+  console.log('first > ', communityId);
+
+  const { data: community, loading, error } = useCommunityDetails(communityId);
+
+  console.log('first community> ', community);
+
   const { data: votingStrategies, loading: loadingStrategies } =
     useVotingStrategies();
 
