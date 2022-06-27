@@ -153,9 +153,18 @@ export default function Community() {
     roles: ['admin'],
   });
 
-  const { data: admins } = useCommunityUsers({ communityId, type: 'admin' });
-  const { data: authors } = useCommunityUsers({ communityId, type: 'author' });
+  const { data: admins, reFetch: reFectAdmins } = useCommunityUsers({
+    communityId,
+    type: 'admin',
+  });
 
+  const { data: authors, reFetch: reFectAuthors } = useCommunityUsers({
+    communityId,
+    type: 'author',
+  });
+
+  console.log(admins);
+  console.log(authors);
   const { data: strategies } = useVotingStrategies();
 
   const {
@@ -186,6 +195,17 @@ export default function Community() {
   };
 
   const notMobile = useMediaQuery();
+
+  const onUserLeaveCommunity = async () => {
+    // if current user leaving community is admin or author
+    // trigger update on admin and author list
+    if (authors?.find((author) => author.addr === addr)) {
+      await reFectAuthors();
+    }
+    if (admins?.find((admin) => admin.addr === addr)) {
+      await reFectAdmins();
+    }
+  };
 
   if (error) {
     // modal will show error message
@@ -260,6 +280,7 @@ export default function Community() {
             <JoinCommunityButton
               communityId={communityId}
               setTotalMembers={setTotalMembers}
+              onLeaveCommunity={onUserLeaveCommunity}
             />
           </div>
         </div>

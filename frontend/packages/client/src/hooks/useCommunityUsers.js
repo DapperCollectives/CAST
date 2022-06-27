@@ -126,6 +126,12 @@ export default function useCommunityUsers({
     dispatch({ type: 'RESET_RESULTS' });
   };
 
+  // clears all results and pulls again
+  const reFetch = async () => {
+    resetResults();
+    await getCommunityUsers();
+  };
+
   useEffect(() => {
     getCommunityUsers();
   }, [getCommunityUsers]);
@@ -137,5 +143,6 @@ export default function useCommunityUsers({
     getCommunityUsers,
     fetchMore,
     resetResults,
+    reFetch,
   };
 }

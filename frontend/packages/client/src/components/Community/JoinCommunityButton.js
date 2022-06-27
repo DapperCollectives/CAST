@@ -5,6 +5,8 @@ import { useJoinCommunity, useUserRoleOnCommunity } from 'hooks';
 export default function JoinCommunityButton({
   communityId,
   setTotalMembers = () => {},
+  // callback to notify leaveCommunity was called
+  onLeaveCommunity = async () => {},
 }) {
   const { createCommunityUser, deleteUserFromCommunity } = useJoinCommunity();
   const { injectedProvider, user } = useWebContext();
@@ -22,28 +24,35 @@ export default function JoinCommunityButton({
   }, [user.addr, memberState]);
 
   const refresh = (updateFn) => {
+    // setting this to null and then to a valid address retriggers query to get memberState
     setAddr(null);
     setAddr(user.addr);
     setTotalMembers(updateFn);
   };
 
-  const joinCommunity = () =>
-    createCommunityUser(communityId, user, injectedProvider).then(
-      ({ success }) => {
-        if (success) {
-          refresh((totalMembers) => ++totalMembers);
-        }
-      }
+  const joinCommunity = async () => {
+    const { success } = await createCommunityUser(
+      communityId,
+      user,
+      injectedProvider
+    );
+    if (success) {
+      refresh((totalMembers) => ++totalMembers);
+    }
+  };
+
+  const leaveCommunity = async () => {
+    const { success } = await deleteUserFromCommunity(
+      communityId,
+      user,
+      injectedProvider
     );
 
-  const leaveCommunity = () =>
-    deleteUserFromCommunity(communityId, user, injectedProvider).then(
-      ({ success }) => {
-        if (success) {
-          refresh((totalMembers) => --totalMembers);
-        }
-      }
-    );
+    if (success) {
+      refresh((totalMembers) => --totalMembers);
+      onLeaveCommunity();
+    }
+  };
 
   if (!addr || (isMember !== true && isMember !== false)) return null;
 
