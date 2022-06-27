@@ -15,11 +15,7 @@ import {
   SelectionState,
 } from 'draft-js';
 import { Map } from 'immutable';
-import {
-  useQueryParams,
-  useVotingStrategies,
-  useCommunityDetails,
-} from 'hooks';
+import { useQueryParams, useCommunityDetails } from 'hooks';
 import { useModalContext } from 'contexts/NotificationModal';
 import { Dropdown, Error, UploadImageModal } from 'components';
 import TextBasedChoices from './TextBasedChoices';
