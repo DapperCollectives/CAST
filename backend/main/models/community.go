@@ -227,3 +227,14 @@ func (c *Community) CanUpdateCommunity(db *s.Database, addr string) error {
 	}
 	return nil
 }
+
+func MatchStrategyByProposal(s []Strategy, strategyToMatch string) (Strategy, error) {
+	var match Strategy
+	for _, strategy := range s {
+		if *strategy.Name == strategyToMatch {
+			match = strategy
+			return match, nil
+		}
+	}
+	return match, fmt.Errorf("Community does not have strategy avaliable")
+}

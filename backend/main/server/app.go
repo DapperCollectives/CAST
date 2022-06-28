@@ -768,6 +768,13 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	strategy, err := models.MatchStrategyByProposal(*community.Strategies, *p.Strategy)
+	if err != nil {
+		log.Error().Err(err).Msg("Community does not have this strategy availabe")
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
 	if *community.Only_authors_to_submit == true {
 		if err := models.EnsureRoleForCommunity(a.DB, p.Creator_addr, communityId, "author"); err != nil {
 			errMsg := fmt.Sprintf("account %s is not an author for community %d", p.Creator_addr, p.Community_id)
@@ -776,22 +783,7 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		if community.Public_path == nil || community.Threshold == nil {
-			pathDefault := "none"
-			thresholdDefault := 0.00
-
-			community.Public_path = &pathDefault
-			community.Threshold = &thresholdDefault
-		}
-
-		var contract = &shared.Contract{
-			Name:        community.Contract_name,
-			Addr:        community.Contract_addr,
-			Public_path: community.Public_path,
-			Threshold:   community.Threshold,
-		}
-
-		hasBalance, err := a.FlowAdapter.EnforceTokenThreshold(p.Creator_addr, contract)
+		hasBalance, err := a.FlowAdapter.EnforceTokenThreshold(p.Creator_addr, &strategy.Contract)
 		if err != nil {
 			log.Error().Err(err).Msg("error enforcing token threshold")
 			respondWithError(w, http.StatusInternalServerError, err.Error())

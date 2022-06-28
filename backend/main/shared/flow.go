@@ -316,9 +316,6 @@ func (fa *FlowAdapter) GetNFTIds(voterAddr string, c *Contract) ([]interface{}, 
 	return nftIds, nil
 }
 
-// @TODO
-// Hard coded Addresses here are for emulator dev only this should
-// be set based on environment var
 func (fa *FlowAdapter) ReplaceContractPlaceholders(code string, c *Contract, isFungible bool) []byte {
 	fungibleTokenAddr := fa.Config.Contracts["FungibleToken"].Aliases[fa.Env]
 	nonFungibleTokenAddr := fa.Config.Contracts["NonFungibleToken"].Aliases[fa.Env]
