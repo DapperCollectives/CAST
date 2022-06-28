@@ -1,6 +1,8 @@
 package models
 
 import (
+	"fmt"
+
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/jackc/pgx/v4"
@@ -21,9 +23,10 @@ type CommunityUserType struct {
 	Is_member    bool   `json:"isMember" validate:"required"`
 }
 
-type LeaderboardUser struct {
-	Addr  string `json:"addr" validate:"required"`
-	Score int    `json:"score" validate:"required"`
+type UserAchievements struct {
+	Address   string
+	NumVotes  int
+	EarlyVote int
 }
 
 type UserTypes []string
@@ -40,6 +43,17 @@ type CommunityUserPayload struct {
 	Signing_addr         string                  `json:"signingAddr" validate:"required"`
 	Timestamp            string                  `json:"timestamp" validate:"required"`
 	Composite_signatures *[]s.CompositeSignature `json:"compositeSignatures" validate:"required"`
+}
+
+type AchievementPayload struct {
+	Addr             string `json:"addr" validate:"required"`
+	Achievement_type string `json:"string" validate:"required"`
+	Total            int    `json:"total,omitempty"`
+}
+
+type LeaderboardUserPayload struct {
+	Addr  string `json:"addr" validate:"required"`
+	Score int    `json:"score,omitempty"`
 }
 
 func GetUsersForCommunity(db *s.Database, communityId, start, count int) ([]CommunityUserType, int, error) {
@@ -98,29 +112,50 @@ func GetUsersForCommunityByType(db *s.Database, communityId, start, count int, u
 	return users, totalUsers, nil
 }
 
-func GetCommunityLeaderboard(db *s.Database, communityId, start, count int) ([]LeaderboardUser, int, error) {
-	var users = []LeaderboardUser{}
-	err := pgxscan.Select(db.Context, db.Conn, &users,
+func GetCommunityLeaderboard(db *s.Database, communityId, start, count int) ([]LeaderboardUserPayload, int, error) {
+	var userAchievements = []UserAchievements{}
+	var leaderboardUsers = []LeaderboardUserPayload{}
+	var defaultEarlyVoteWeight = 1
+
+	sql := fmt.Sprintf(
 		`
-		SELECT v.addr, count(*) AS score FROM votes v 
-		JOIN proposals p ON p.id = v.proposal_id
-		WHERE p.community_id = $1
-		GROUP BY v.addr
-		ORDER BY score DESC
-		LIMIT $2 OFFSET $3
-		`, communityId, count, start)
+		SELECT v.addr as address, count(*) as num_votes, 
+			CASE WHEN a.early_vote is NULL THEN 0 ELSE a.early_vote END as early_vote 
+			FROM votes v 
+			LEFT OUTER JOIN proposals p ON p.id = v.proposal_id
+			LEFT OUTER JOIN (
+				SELECT * FROM crosstab(
+					$$SELECT addr, achievement_type, count(*) FROM community_users_achievements 
+					WHERE community_id = %d
+					GROUP BY addr, achievement_type
+					ORDER BY 1,2$$
+				) AS ct(address varchar(18), early_vote bigint)
+			) a ON v.addr = a.address
+			WHERE p.community_id = $1
+			GROUP BY v.addr, a.early_vote
+			LIMIT $2 OFFSET $3
+		`, communityId)
+
+	err := pgxscan.Select(db.Context, db.Conn, &userAchievements, sql, communityId, count, start)
 
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		return nil, 0, err
 	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
-		return []LeaderboardUser{}, 0, nil
+		return []LeaderboardUserPayload{}, 0, nil
+	}
+
+	for _, user := range userAchievements {
+		var leaderboardUser = LeaderboardUserPayload{}
+		leaderboardUser.Addr = user.Address
+		leaderboardUser.Score = user.NumVotes + (user.EarlyVote * defaultEarlyVoteWeight)
+		leaderboardUsers = append(leaderboardUsers, leaderboardUser)
 	}
 
 	var totalUsers int
 	countSql := `SELECT COUNT(*) FROM community_users WHERE community_id = $1`
 	_ = db.Conn.QueryRow(db.Context, countSql, communityId).Scan(&totalUsers)
 
-	return users, totalUsers, nil
+	return leaderboardUsers, totalUsers, nil
 }
 
 func GetCommunitiesForUser(db *s.Database, addr string, start, count int) ([]UserCommunity, int, error) {

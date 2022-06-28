@@ -49,6 +49,12 @@ const (
 	timestampExpiry = 60
 )
 
+const (
+	EarlyVote   string = "earlyVote"
+	Streak             = "streak"
+	WinningVote        = "winningVote"
+)
+
 ///////////
 // Votes //
 ///////////
@@ -194,12 +200,35 @@ func (v *Vote) GetVoteById(db *s.Database) error {
 }
 
 func (v *Vote) CreateVote(db *s.Database) error {
+	var defaultEarlyVoteLength = 1
+
+	// Create Vote
 	err := db.Conn.QueryRow(db.Context,
 		`
 		INSERT INTO votes(proposal_id, addr, choice, composite_signatures, cid, message)
 		VALUES($1, $2, $3, $4, $5, $6)
 		RETURNING id, created_at
 	`, v.Proposal_id, v.Addr, v.Choice, v.Composite_signatures, v.Cid, v.Message).Scan(&v.ID, &v.Created_at)
+
+	// Get Proposal Start time to check for early vote
+	var proposal Proposal
+	pgxscan.Get(db.Context, db.Conn, &proposal,
+		`SELECT start_time, community_id from proposals
+		WHERE id = $1`,
+		v.Proposal_id)
+
+	isEarlyVote := proposal.Start_time.Before(proposal.Start_time.Add(time.Hour + time.Duration(defaultEarlyVoteLength)))
+
+	if isEarlyVote {
+		err = db.Conn.QueryRow(db.Context,
+			`
+			INSERT INTO community_users_achievements(addr, achievement_type, community_id, proposals)
+			VALUES($1, $2, $3, $4)
+			RETURNING id
+		`, v.Addr, EarlyVote, proposal.Community_id, []int{v.Proposal_id}).Scan(&v.ID)
+
+		return err
+	}
 
 	return err // will be nil unless something went wrong
 }
