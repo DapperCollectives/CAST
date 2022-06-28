@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Website, Instagram, Twitter, Discord, Github } from 'components/Svg';
 import { WrapperResponsive, Loader } from 'components';
 import useLinkValidator from './hooks/useLinkValidator';
@@ -97,15 +97,14 @@ export const CommunityLinksForm = ({
   );
 };
 export default function CommunityEditorLinks(props = {}) {
+  const { updateCommunity, ...fields } = props;
   const {
     websiteUrl = '',
     twitterUrl = '',
     instagramUrl = '',
     discordUrl = '',
     githubUrl = '',
-    updateCommunity,
-  } = props;
-  const [enableSave, setEnableSave] = useState(false);
+  } = fields;
   const [isUpdating, setIsUpdating] = useState(false);
   const [links, setLinks] = useState({
     websiteUrl,
@@ -118,7 +117,7 @@ export default function CommunityEditorLinks(props = {}) {
   const saveData = async () => {
     setIsUpdating(true);
     const updatedKeys = Object.keys(links).filter(
-      (key) => links[key] !== (props[key] ?? '')
+      (key) => links[key] !== (fields[key] ?? '')
     );
 
     const updatedFields = Object.assign(
@@ -129,11 +128,12 @@ export default function CommunityEditorLinks(props = {}) {
     setIsUpdating(false);
   };
 
-  const { isValid } = useLinkValidator({ links, initialValues: props });
+  const { isValid, hasChangedFromOriginal } = useLinkValidator({
+    links,
+    initialValues: fields,
+  });
 
-  useEffect(() => {
-    setEnableSave(isValid);
-  }, [isValid]);
+  const enableSave = isValid && hasChangedFromOriginal;
 
   const changeHandler = (field) => (value) =>
     setLinks((state) => ({
@@ -146,7 +146,7 @@ export default function CommunityEditorLinks(props = {}) {
       submitComponent={
         <button
           style={{ height: 48, width: '100%' }}
-          className={`button vote-button transition-all is-flex has-background-yellow rounded-sm mt-5 is-${
+          className={`button vote-button transition-all is-flex has-background-yellow rounded-sm mt-5 is-uppercase is-${
             enableSave && !isUpdating ? 'enabled' : 'disabled'
           }`}
           onClick={!enableSave ? () => {} : saveData}
