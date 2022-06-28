@@ -61,7 +61,7 @@ export default function StepThree({
     if (
       isValid &&
       // anyone can submit: we need a threshold
-      ((onlyAuthorsToSubmitProposals && isNumber(threshold) && threshold > 0) ||
+      ((!onlyAuthorsToSubmitProposals && isNumber(threshold) && threshold > 0) ||
         // only autors can submit: ignore threshold it could be a number or empty
         onlyAuthorsToSubmitProposals)
     ) {
