@@ -768,7 +768,7 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if *community.Only_authors_to_submit {
+	if *community.Only_authors_to_submit == true {
 		if err := models.EnsureRoleForCommunity(a.DB, p.Creator_addr, communityId, "author"); err != nil {
 			errMsg := fmt.Sprintf("account %s is not an author for community %d", p.Creator_addr, p.Community_id)
 			log.Error().Err(err).Msg(errMsg)
