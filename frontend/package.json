@@ -13,6 +13,9 @@
   "workspaces": {
     "packages": [
       "packages/*"
+    ],
+    "nohoist": [
+      "**"
     ]
   },
   "dependencies": {}
