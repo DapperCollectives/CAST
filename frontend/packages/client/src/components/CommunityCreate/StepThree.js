@@ -3,6 +3,15 @@ import { WrapperResponsive } from 'components';
 import { isValidAddress } from 'utils';
 import isNumber from 'lodash/isNumber';
 
+// validate that proposalThreshold is a number higher than 0
+const isValidThreSholdNumber = (proposalThreshold) => {
+  const threshold = Number(proposalThreshold);
+  if (isNumber(threshold)) {
+    return threshold > 0;
+  }
+  return false;
+};
+
 export default function StepThree({
   stepData = {},
   setStepValid,
@@ -23,13 +32,12 @@ export default function StepThree({
   // If user opts to proceed without setting a proposal threshold
   // we should automatically mark the community as Authors Only possibly
   useEffect(() => {
-    const threshold = Number(proposalThreshold);
-    if (isNumber(threshold) && threshold > 0) {
+    if (isValidThreSholdNumber(proposalThreshold) && authorCheckboxDisabled) {
       setAuthorCheckboxDisabled(false);
     }
     if (
-      (!isNumber(threshold) || threshold <= 0) &&
-      !onlyAuthorsToSubmitProposals
+      !onlyAuthorsToSubmitProposals &&
+      !isValidThreSholdNumber(proposalThreshold)
     ) {
       setAuthorCheckboxDisabled(true);
       onDataChange({ onlyAuthorsToSubmitProposals: true });
@@ -61,7 +69,9 @@ export default function StepThree({
     if (
       isValid &&
       // anyone can submit: we need a threshold
-      ((!onlyAuthorsToSubmitProposals && isNumber(threshold) && threshold > 0) ||
+      ((!onlyAuthorsToSubmitProposals &&
+        isNumber(threshold) &&
+        threshold > 0) ||
         // only autors can submit: ignore threshold it could be a number or empty
         onlyAuthorsToSubmitProposals)
     ) {
