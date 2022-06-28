@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { WrapperResponsive } from 'components';
 import { isValidAddress } from 'utils';
+import isNumber from 'lodash/isNumber';
 
 export default function StepThree({
-  stepData,
+  stepData = {},
   setStepValid,
   onDataChange,
   onSubmit,
@@ -14,25 +15,62 @@ export default function StepThree({
     contractAddress = '',
     contractName = '',
     storagePath = '',
-    onlyAuthorsToSubmitProposals = false,
-  } = stepData || {};
+    onlyAuthorsToSubmitProposals = true,
+  } = stepData;
+
+  const [authorCheckboxDisabled, setAuthorCheckboxDisabled] = useState(true);
+
+  // If user opts to proceed without setting a proposal threshold
+  // we should automatically mark the community as Authors Only possibly
+  useEffect(() => {
+    const threshold = Number(proposalThreshold);
+    if (isNumber(threshold) && threshold > 0) {
+      setAuthorCheckboxDisabled(false);
+    }
+    if (
+      (!isNumber(threshold) || threshold <= 0) &&
+      !onlyAuthorsToSubmitProposals
+    ) {
+      setAuthorCheckboxDisabled(true);
+      onDataChange({ onlyAuthorsToSubmitProposals: true });
+    }
+  }, [
+    onlyAuthorsToSubmitProposals,
+    proposalThreshold,
+    setAuthorCheckboxDisabled,
+    onDataChange,
+  ]);
 
   useEffect(() => {
     const requiredFields = {
       contractAddress: (addr) =>
-        addr?.trim().length > 0 && isValidAddress(addr),
+        addr?.trim().length > 0 ? isValidAddress(addr) : true,
       proposalThreshold: (threshold) =>
-        threshold?.trim().length > 0 && /^[0-9]+$/.test(threshold),
+        threshold?.trim().length > 0 ? /^[0-9]+$/.test(threshold) : true,
       contractName: (name) =>
-        name?.trim().length > 0 && name?.trim().length <= 150,
+        name?.trim().length > 0 ? name?.trim().length <= 150 : true,
       storagePath: (path) =>
-        path?.trim().length > 0 && path?.trim().length <= 150,
+        path?.trim().length > 0 ? path?.trim().length <= 150 : true,
     };
     const isValid = Object.keys(requiredFields).every(
       (field) => stepData && requiredFields[field](stepData[field])
     );
-    setStepValid(isValid);
-  }, [stepData, setStepValid]);
+
+    const threshold = Number(stepData?.proposalThreshold);
+
+    if (
+      isValid &&
+      // anyone can submit: we need a threshold
+      ((onlyAuthorsToSubmitProposals && isNumber(threshold) && threshold > 0) ||
+        // only autors can submit: ignore threshold it could be a number or empty
+        onlyAuthorsToSubmitProposals)
+    ) {
+      setStepValid(true);
+      return;
+    }
+    setStepValid(false);
+  }, [stepData, setStepValid, onlyAuthorsToSubmitProposals]);
+
   return (
     <>
       <WrapperResponsive
@@ -99,6 +137,7 @@ export default function StepThree({
             type="checkbox"
             className="mr-2 form-checkbox"
             checked={onlyAuthorsToSubmitProposals}
+            disabled={authorCheckboxDisabled}
             onChange={(e) => {
               onDataChange({
                 onlyAuthorsToSubmitProposals: !onlyAuthorsToSubmitProposals,
