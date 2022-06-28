@@ -1,4 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
+import isEqual from 'lodash/isEqual';
+import pickBy from 'lodash/pickBy';
+import pick from 'lodash/pick';
 
 export const urlPatternValidation = (url) => {
   const regex = new RegExp(
@@ -39,21 +42,27 @@ const githubValidator = (url) => {
   return url === '' || /https?:\/\/github\.com\/(?:[^/\s]+)/gim.test(url);
 };
 
+const removeUndefinedProps = (obj) => pickBy(obj, (e) => e !== undefined);
+
 export default function useLinkValidator({ links, initialValues }) {
-  const [isValid, setIsValid] = useState(false);
+  const [validations, setValidations] = useState({
+    isValid: false,
+    hasChangedFromOriginal: false,
+  });
+
   const urlLinkNotRepeated = useCallback(() => {
     const values = Object.values(links).filter((link) => link !== '');
-
     const valuesSet = new Set(values);
-
     if (valuesSet.size === values.length) {
       return true;
     }
     return false;
   }, [links]);
 
+  const { isValid, hasChangedFromOriginal } = validations;
+
   useEffect(() => {
-    const commonValidation =
+    const baseValidation =
       urlPatternValidation(links['websiteUrl']) &&
       twitterValidator(links['twitterUrl']) &&
       instagramValidator(links['instagramUrl']) &&
@@ -61,20 +70,35 @@ export default function useLinkValidator({ links, initialValues }) {
       githubValidator(links['githubUrl']) &&
       urlLinkNotRepeated();
 
-    if (
-      initialValues &&
-      Object.keys(links).some(
-        (key) => links[key] !== (initialValues[key] ?? '')
-      ) &&
-      commonValidation
-    ) {
-      setIsValid(true);
-    } else if (commonValidation) {
-      setIsValid(true);
-    } else {
-      setIsValid(false);
-    }
-  }, [links, initialValues, urlLinkNotRepeated]);
+    // get an object with valid props to copare
+    // this object contains inital props !== undefined
+    const initialProps = removeUndefinedProps(initialValues);
 
-  return { isValid };
+    // fields are initialized with '' if they come as undefined from the backend
+    // this object represents fields updated
+    // by user with initual values !== undefined
+    const linksObjUpdated = pick(
+      links,
+      Object.keys(links).filter(
+        (key) => !(links[key] === '' && initialProps[key] === undefined)
+      )
+    );
+    // chech if object fields has changed from original one
+    const hasChanged = !isEqual(linksObjUpdated, initialProps);
+
+    if (isValid !== baseValidation || hasChangedFromOriginal !== hasChanged) {
+      setValidations({
+        isValid: baseValidation,
+        hasChangedFromOriginal: hasChanged,
+      });
+    }
+  }, [
+    links,
+    initialValues,
+    urlLinkNotRepeated,
+    hasChangedFromOriginal,
+    isValid,
+  ]);
+
+  return validations;
 }

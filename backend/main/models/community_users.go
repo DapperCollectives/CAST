@@ -64,20 +64,17 @@ func GetUsersForCommunity(db *s.Database, communityId, start, count int) ([]Comm
 		LIMIT $2 OFFSET $3
 		`, communityId, count, start)
 
-	// If we get pgx.ErrNoRows, just return an empty array
-	// and obfuscate error
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		return nil, 0, err
 	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
 		return []CommunityUserType{}, 0, nil
 	}
 
-	// Get total number of users
-	var totalRecords int
+	var totalUsers int
 	countSql := `SELECT COUNT(*) FROM (SELECT addr FROM community_users WHERE community_id = $1 group BY community_users.addr) as temp_users_addr`
-	_ = db.Conn.QueryRow(db.Context, countSql, communityId).Scan(&totalRecords)
+	_ = db.Conn.QueryRow(db.Context, countSql, communityId).Scan(&totalUsers)
 
-	return users, totalRecords, nil
+	return users, totalUsers, nil
 }
 
 func GetUsersForCommunityByType(db *s.Database, communityId, start, count int, user_type string) ([]CommunityUser, int, error) {
@@ -88,20 +85,17 @@ func GetUsersForCommunityByType(db *s.Database, communityId, start, count int, u
 		LIMIT $3 OFFSET $4
 		`, communityId, user_type, count, start)
 
-	// If we get pgx.ErrNoRows, just return an empty array
-	// and obfuscate error
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		return nil, 0, err
 	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
 		return []CommunityUser{}, 0, nil
 	}
 
-	// Get total number of users by type
-	var totalRecords int
+	var totalUsers int
 	countSql := `SELECT COUNT(*) FROM community_users WHERE community_id = $1 AND user_type = $2`
-	_ = db.Conn.QueryRow(db.Context, countSql, communityId, user_type).Scan(&totalRecords)
+	_ = db.Conn.QueryRow(db.Context, countSql, communityId, user_type).Scan(&totalUsers)
 
-	return users, totalRecords, nil
+	return users, totalUsers, nil
 }
 
 func GetCommunityLeaderboard(db *s.Database, communityId, start, count int) ([]LeaderboardUser, int, error) {
@@ -116,20 +110,17 @@ func GetCommunityLeaderboard(db *s.Database, communityId, start, count int) ([]L
 		LIMIT $2 OFFSET $3
 		`, communityId, count, start)
 
-	// If we get pgx.ErrNoRows, just return an empty array
-	// and obfuscate error
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		return nil, 0, err
 	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
 		return []LeaderboardUser{}, 0, nil
 	}
 
-	// Get total number of users
-	var totalRecords int
+	var totalUsers int
 	countSql := `SELECT COUNT(*) FROM community_users WHERE community_id = $1`
-	_ = db.Conn.QueryRow(db.Context, countSql, communityId).Scan(&totalRecords)
+	_ = db.Conn.QueryRow(db.Context, countSql, communityId).Scan(&totalUsers)
 
-	return users, totalRecords, nil
+	return users, totalUsers, nil
 }
 
 func GetCommunitiesForUser(db *s.Database, addr string, start, count int) ([]UserCommunity, int, error) {
@@ -145,16 +136,13 @@ func GetCommunitiesForUser(db *s.Database, addr string, start, count int) ([]Use
 		LIMIT $2 OFFSET $3
 		`, addr, count, start)
 
-	// If we get pgx.ErrNoRows, just return an empty array
-	// and obfuscate error
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		return nil, 0, err
 	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
 		return []UserCommunity{}, 0, nil
 	}
 
-	// Get total number of communities by user
-	var totalRecords int
+	var totalCommunities int
 	countSql := `
 	SELECT
 		COUNT(communities.id)
@@ -162,9 +150,9 @@ func GetCommunitiesForUser(db *s.Database, addr string, start, count int) ([]Use
 	LEFT JOIN community_users ON community_users.community_id = communities.id
 	WHERE community_users.addr = $1
 	`
-	_ = db.Conn.QueryRow(db.Context, countSql, addr).Scan(&totalRecords)
+	_ = db.Conn.QueryRow(db.Context, countSql, addr).Scan(&totalCommunities)
 
-	return communities, totalRecords, nil
+	return communities, totalCommunities, nil
 }
 
 func (u *CommunityUser) GetCommunityUser(db *s.Database) error {
@@ -182,8 +170,6 @@ func GetAllRolesForUserInCommunity(db *s.Database, addr string, communityId int)
 		SELECT * FROM community_users WHERE community_id = $1 AND addr = $2
 		`, communityId, addr)
 
-	// If we get pgx.ErrNoRows, just return an empty array
-	// and obfuscate error
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		return nil, err
 	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
@@ -199,15 +185,13 @@ func (u *CommunityUser) Remove(db *s.Database) error {
 		WHERE community_id = $1 AND addr = $2 AND user_type = $3
 	`, u.Community_id, u.Addr, u.User_type)
 
-	return err // will be nil unless something went wrong
+	return err
 }
 
-// Create any of the 3 roles for the user that they dont have already
 func GrantAdminRolesToAddress(db *s.Database, communityId int, addr string) error {
 	userTypes := UserTypes{"admin", "author", "member"}
 	for _, role := range userTypes {
 		userRole := CommunityUser{Addr: addr, Community_id: communityId, User_type: role}
-		// Check if role exists.  If we throw a ErrNoRows err, create the role
 		if err := userRole.GetCommunityUser(db); err != nil {
 			if err := userRole.CreateCommunityUser(db); err != nil {
 				log.Error().Err(err).Msgf("db error creating role %s for addr %s for communityId %d", role, addr, communityId)
@@ -218,12 +202,10 @@ func GrantAdminRolesToAddress(db *s.Database, communityId int, addr string) erro
 	return nil
 }
 
-// Create either author or member role for the user that they dont have already
 func GrantAuthorRolesToAddress(db *s.Database, communityId int, addr string) error {
 	userTypes := UserTypes{"author", "member"}
 	for _, role := range userTypes {
 		userRole := CommunityUser{Addr: addr, Community_id: communityId, User_type: role}
-		// Check if role exists.  If we throw a ErrNoRows err, create the role
 		if err := userRole.GetCommunityUser(db); err != nil {
 			if err := userRole.CreateCommunityUser(db); err != nil {
 				log.Error().Err(err).Msgf("db error creating role %s for addr %s for communityId %d", role, addr, communityId)
@@ -242,11 +224,9 @@ func (u *CommunityUser) CreateCommunityUser(db *s.Database) error {
 		RETURNING community_id, addr, user_type
 	`, u.Community_id, u.Addr, u.User_type).Scan(&u.Community_id, &u.Addr, &u.User_type)
 
-	return err // will be nil unless something went wrong
+	return err
 }
 
-// when a user creates a community, they are automatically assigned
-// all roles
 func GrantRolesToCommunityCreator(db *s.Database, addr string, communityId int) error {
 	for _, userType := range USER_TYPES {
 		communityUser := CommunityUser{Addr: addr, Community_id: communityId, User_type: userType}
@@ -258,7 +238,6 @@ func GrantRolesToCommunityCreator(db *s.Database, addr string, communityId int) 
 	return nil
 }
 
-// Validate account's role
 func EnsureRoleForCommunity(db *s.Database, addr string, communityId int, userType string) error {
 	user := CommunityUser{Addr: addr, Community_id: communityId, User_type: userType}
 	return user.GetCommunityUser(db)
