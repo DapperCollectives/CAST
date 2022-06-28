@@ -33,8 +33,9 @@ function CommunityEditorProfile({
       }
       if (
         communityName.trim().length === 0 ||
-        communityDescription.trim() === body ||
-        (communityName === name && communityDescription === body)
+        (communityName === name &&
+          communityDescription === body &&
+          image.file === undefined)
       ) {
         setEnableSave(false);
       }
