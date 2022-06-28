@@ -77,6 +77,9 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
 
   const { user, isLedger } = useFclUser(fcl, extraConfig.forceLedger);
 
+
+  // add check for address
+
   // for Nextjs Builds, return null until "window" is available
   if (!global.window) {
     return null;
