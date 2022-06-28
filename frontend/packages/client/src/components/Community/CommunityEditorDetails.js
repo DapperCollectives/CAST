@@ -10,6 +10,15 @@ import useFlowAddrValidator, {
 } from './hooks/useFlowAddrValidator';
 import FadeIn from 'components/FadeIn';
 
+const determineAutoFocus = (listLength, index, addr, autoFocusOnLoad) => {
+  return (
+    // fist element of list depends on configuration (autoFocusOnLoad)
+    (listLength === 1 && addr === '' && autoFocusOnLoad) ||
+    // new elements on list will be autofocus by default
+    (listLength === index + 1 && addr === '' && index !== 0)
+  );
+};
+
 export const CommunityUsersForm = ({
   title,
   description,
@@ -23,6 +32,7 @@ export const CommunityUsersForm = ({
   submitComponent,
   validateEachAddress = false,
   onClearField = () => {},
+  autoFocusOnLoad = false,
 } = {}) => {
   const canDeleteAddress = addrList.length > 1;
   return (
@@ -60,6 +70,12 @@ export const CommunityUsersForm = ({
                   isInvalid ? 'form-error-input-border' : ''
                 }`
               : 'pr-6';
+            const hasAutoFocus = determineAutoFocus(
+              addrList.length,
+              index,
+              addr,
+              autoFocusOnLoad
+            );
             return (
               <div
                 key={`index-${index}`}
@@ -74,7 +90,7 @@ export const CommunityUsersForm = ({
                   onChange={(event) =>
                     onAddressChange(index, event.target.value)
                   }
-                  autoFocus={addrList.length === index + 1 && addr === ''}
+                  autoFocus={hasAutoFocus}
                   disabled={fromServer ?? false}
                   style={{
                     width: '100%',
