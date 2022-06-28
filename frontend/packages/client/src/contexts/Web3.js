@@ -77,9 +77,14 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
 
   const { user, isLedger } = useFclUser(fcl, extraConfig.forceLedger);
 
-
   // add check for address
-
+  const isValidAddress = async (addr) => {
+    try {
+      return fcl.account(addr);
+    } catch (err) {
+      return false;
+    }
+  };
   // for Nextjs Builds, return null until "window" is available
   if (!global.window) {
     return null;
@@ -101,6 +106,7 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
     isLedger,
     network,
     logOut,
+    isValidAddress,
     ...props,
   };
 
