@@ -217,7 +217,8 @@ export default function Community() {
     return null;
   }
 
-  const { instagramUrl, twitterUrl, websiteUrl, discordUrl } = community ?? {};
+  const { instagramUrl, twitterUrl, websiteUrl, discordUrl, githubUrl } =
+    community ?? {};
 
   const titleClassNames = classnames(
     'is-size-5 has-text-weight-bold',
@@ -347,6 +348,7 @@ export default function Community() {
                         twitterUrl={twitterUrl}
                         websiteUrl={websiteUrl}
                         discordUrl={discordUrl}
+                        githubUrl={githubUrl}
                       />
                     }
                     communityAbout={
