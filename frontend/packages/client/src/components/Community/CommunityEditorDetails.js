@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Bin, ValidCheckMark, InvalidCheckMark } from 'components/Svg';
 import { WrapperResponsive, Loader, AddButton } from 'components';
 import { useCommunityUsers } from 'hooks';
@@ -9,15 +9,6 @@ import useFlowAddrValidator, {
   validateAddrInList,
 } from './hooks/useFlowAddrValidator';
 import FadeIn from 'components/FadeIn';
-
-const determineAutoFocus = (listLength, index, addr, autoFocusOnLoad) => {
-  return (
-    // fist element of list depends on configuration (autoFocusOnLoad)
-    (listLength === 1 && addr === '' && autoFocusOnLoad) ||
-    // new elements on list will be autofocus by default
-    (listLength === index + 1 && addr === '' && index !== 0)
-  );
-};
 
 export const CommunityUsersForm = ({
   title,
@@ -35,6 +26,14 @@ export const CommunityUsersForm = ({
   autoFocusOnLoad = false,
 } = {}) => {
   const canDeleteAddress = addrList.length > 1;
+
+  const refOnFirstInput = useRef();
+
+  useEffect(() => {
+    if (refOnFirstInput.current) {
+      refOnFirstInput.current.focus();
+    }
+  }, [refOnFirstInput]);
   return (
     <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6 p-4-mobile mb-4-mobile">
       <div className="columns flex-1">
@@ -70,12 +69,6 @@ export const CommunityUsersForm = ({
                   isInvalid ? 'form-error-input-border' : ''
                 }`
               : 'pr-6';
-            const hasAutoFocus = determineAutoFocus(
-              addrList.length,
-              index,
-              addr,
-              autoFocusOnLoad
-            );
             return (
               <div
                 key={`index-${index}`}
@@ -90,12 +83,17 @@ export const CommunityUsersForm = ({
                   onChange={(event) =>
                     onAddressChange(index, event.target.value)
                   }
-                  autoFocus={hasAutoFocus}
+                  autoFocus={addrList.length === index + 1 && addr === ''}
                   disabled={fromServer ?? false}
                   style={{
                     width: '100%',
                     ...(isInvalid ? {} : undefined),
                   }}
+                  ref={
+                    addrList.length === 1 && addr === '' && autoFocusOnLoad
+                      ? refOnFirstInput
+                      : undefined
+                  }
                 />
                 <div
                   style={{
