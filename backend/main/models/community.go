@@ -188,7 +188,6 @@ func (c *Community) CreateCommunity(db *s.Database) error {
 }
 
 func (c *Community) UpdateCommunity(db *s.Database, p *UpdateCommunityRequestPayload) error {
-	fmt.Printf(" \n models UPDATE FUNCTION %+v \n", p.Strategies)
 	_, err := db.Conn.Exec(
 		db.Context,
 		`

@@ -1004,9 +1004,6 @@ func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 
 	c = payload.Community
 
-	fmt.Printf("COMMUNITY CREATE CONTROLLER \n %+v", c.Strategies)
-	fmt.Printf(" \n community %+v \n", a)
-
 	// validate timestamp of request/message
 	if err := a.validateTimestamp(c.Timestamp, 60); err != nil {
 		respondWithError(w, http.StatusForbidden, err.Error())
@@ -1070,8 +1067,6 @@ func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-
-	fmt.Printf("\n COMMUNITY CONTROLLER STRATEGIES : %+v \n", c.Strategies)
 
 	respondWithJSON(w, http.StatusCreated, c)
 }
