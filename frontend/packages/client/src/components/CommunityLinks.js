@@ -1,11 +1,12 @@
 import React from 'react';
-import { Twitter, Discord, Website, Instagram } from './Svg';
+import { Twitter, Discord, Website, Instagram, Github } from './Svg';
 
 export default function CommunityLinks({
   instagramUrl,
   twitterUrl,
   websiteUrl,
   discordUrl,
+  githubUrl,
 } = {}) {
   return (
     <div className="columns my-0 is-multiline">
@@ -57,6 +58,17 @@ export default function CommunityLinks({
         >
           <Twitter width="20px" height="23.3px" />
           <span className="pl-2">Twitter</span>
+        </a>
+      )}
+      {githubUrl && (
+        <a
+          className="column py-1 is-12 is-flex is-align-items-center has-text-black"
+          target="_blank"
+          rel="noreferrer noopenner"
+          href={githubUrl}
+        >
+          <Github width="20px" height="23.3px" />
+          <span className="pl-2">Github</span>
         </a>
       )}
     </div>

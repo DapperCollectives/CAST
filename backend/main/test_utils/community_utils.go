@@ -28,6 +28,14 @@ type PaginatedResponseWithUserType struct {
 	Next         int                        `json:"next"`
 }
 
+type PaginatedResponseWithLeaderboardUser struct {
+	Data         []models.LeaderboardUser `json:"data"`
+	Start        int                          `json:"start"`
+	Count        int                          `json:"count"`
+	TotalRecords int                          `json:"totalRecords"`
+	Next         int                          `json:"next"`
+}
+
 var (
 	AdminAddr   = "0xf8d6e0586b0a20c7"
 	UserOneAddr = "0x01cf0e2f2f715450"
@@ -171,6 +179,12 @@ func (otu *OverflowTestUtils) UpdateCommunityAPI(id int, payload *models.Communi
 
 func (otu *OverflowTestUtils) GetCommunityAPI(id int) *httptest.ResponseRecorder {
 	req, _ := http.NewRequest("GET", "/communities/"+strconv.Itoa(id), nil)
+	response := otu.ExecuteRequest(req)
+	return response
+}
+
+func (otu *OverflowTestUtils) GetCommunityLeaderboardAPI(id int) *httptest.ResponseRecorder {
+	req, _ := http.NewRequest("GET", "/communities/"+strconv.Itoa(id)+"/leaderboard", nil)
 	response := otu.ExecuteRequest(req)
 	return response
 }

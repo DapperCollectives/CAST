@@ -222,7 +222,7 @@ function StepByStep({
         {/* left panel mobile */}
         <div
           className="is-hidden-tablet has-background-white-ter p-4"
-          style={{ position: 'fixed', minWidth: '100%', zIndex: 1 }}
+          style={{ position: 'fixed', minWidth: '100%', zIndex: 2 }}
         >
           <div className="is-flex is-justify-content-space-between is-align-items-center">
             <div style={{ minHeight: 24 }}>
