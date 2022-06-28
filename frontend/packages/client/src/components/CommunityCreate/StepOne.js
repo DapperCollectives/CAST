@@ -109,7 +109,8 @@ export default function StepOne({
       communityName: (name) => name?.trim().length > 0,
       communityDescription: (desc) =>
         desc?.trim().length ? desc?.trim().length < 1000 : true,
-      logo: (logo) => logo?.file && logo?.imageUrl,
+      logo: (logo) =>
+        logo !== undefined ? logo?.file && logo?.imageUrl : true,
       communityTerms: (termsUrl) =>
         termsUrl?.length > 0 ? urlPatternValidation(termsUrl) : true,
     };
