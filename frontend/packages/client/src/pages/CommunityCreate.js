@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { StepByStep, WalletConnect, Error } from 'components';
+import { mapFieldsForBackend } from 'components/Community/CommunityPropsAndVoting';
 import { useWebContext } from 'contexts/Web3';
 import { useModalContext } from 'contexts/NotificationModal';
 import {
@@ -69,6 +70,12 @@ export default function CommunityCreate() {
     const proposalData = {
       creatorAddr,
       ...fields,
+      ...{
+        strategies: fields.strategies.map((st) => ({
+          name: st.name,
+          contract: mapFieldsForBackend(st.contract),
+        })),
+      },
       slug: generateSlug(),
     };
 

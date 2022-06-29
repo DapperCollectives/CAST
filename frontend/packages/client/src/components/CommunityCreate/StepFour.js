@@ -1,7 +1,6 @@
 import React from 'react';
 import StrategySelectorForm from 'components/Community/StrategySelectorForm';
 import ActionButton from 'components/ActionButton';
-import { mapFieldsForBackend } from '../Community/CommunityPropsAndVoting';
 
 export default function StepFour({
   stepData,
@@ -18,12 +17,7 @@ export default function StepFour({
     } else {
       setStepValid(false);
     }
-    onDataChange({
-      strategies: strategies.map((st) => ({
-        name: st.name,
-        contract: mapFieldsForBackend(st.contract),
-      })),
-    });
+    onDataChange({ strategies });
   };
 
   return (
