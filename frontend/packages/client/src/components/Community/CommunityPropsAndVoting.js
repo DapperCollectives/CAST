@@ -14,7 +14,7 @@ const fieldMapPayload = {
   publicPath: 'publicPath',
 };
 
-// this function renames fields to prepare payload for backend
+// this function renames fields if necessary to prepare payload for backend
 const mapFieldsForBackend = (contract) => {
   return Object.assign(
     {},
@@ -23,6 +23,8 @@ const mapFieldsForBackend = (contract) => {
         ? {
             [fieldMapPayload[key]]: value,
           }
+        : value
+        ? { [key]: value }
         : undefined),
     }))
   );
