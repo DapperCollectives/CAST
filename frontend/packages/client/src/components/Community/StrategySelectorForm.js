@@ -11,7 +11,6 @@ const StrategyInput = ({
   commuVotStra,
   onDeleteStrategy,
   enableDelete,
-  onChange = () => {},
 } = {}) => {
   return (
     <div
@@ -19,15 +18,16 @@ const StrategyInput = ({
       className="column is-12 is-mobile p-0 m-0 mb-4 fade-in"
       style={{ position: 'relative' }}
     >
-      <input
-        type="text"
-        className="border-light rounded-sm p-3 column is-full"
-        value={commuVotStra}
-        onChange={onChange}
+      <div
+        className="border-light rounded-sm p-3 column is-full small-text is-uppercase"
         style={{
           width: '100%',
+          lineHeight: 'normal',
         }}
-      />
+      >
+        {commuVotStra}
+      </div>
+
       <div
         style={{
           display: 'flex',
