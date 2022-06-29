@@ -52,7 +52,7 @@ export default function StrategySelectorForm({
     setStrategies((state) => state.filter((_, idx) => idx !== index));
   };
 
-  // hide delete one there's only one strategy
+  // hide delete when there's only one strategy
   const enableDelete = strategies.length > 1;
 
   const callToActionComponent = callToAction(strategies);
