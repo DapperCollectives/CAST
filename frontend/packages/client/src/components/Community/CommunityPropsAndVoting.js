@@ -3,10 +3,6 @@ import ActionButton from 'components/ActionButton';
 import StrategySelectorForm from 'components/Community/StrategySelectorForm';
 import isEqual from 'lodash/isEqual';
 
-const hasListChanged = (newList, originalList) => {
-  return !isEqual(newList, originalList);
-};
-
 export default function CommunityProposalsAndVoting({
   communityVotingStrategies = [],
   updateCommunity,
@@ -34,7 +30,8 @@ export default function CommunityProposalsAndVoting({
           enabled={
             updatingCommunity
               ? false
-              : hasListChanged(st, communityVotingStrategies)
+              : // or check if list has changed to enable saving
+                !isEqual(newList, originalList)
           }
           onClick={() => saveDataToBackend(st)}
           loading={updatingCommunity}
