@@ -1,7 +1,7 @@
 import React from 'react';
 import { Bin } from 'components/Svg';
 
-export function StrategyInput({
+export default function StrategyInput({
   index,
   commuVotStra,
   onDeleteStrategy,
