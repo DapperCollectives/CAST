@@ -14,7 +14,7 @@ const fieldMapPayload = {
   publicPath: 'publicPath',
 };
 
-// this function renames fields to prepare payload for backend
+// this function renames fields if necessary to prepare payload for backend
 const mapFieldsForBackend = (contract) => {
   return Object.assign(
     {},
@@ -23,6 +23,8 @@ const mapFieldsForBackend = (contract) => {
         ? {
             [fieldMapPayload[key]]: value,
           }
+        : value
+        ? { [key]: value }
         : undefined),
     }))
   );
@@ -42,12 +44,7 @@ export default function CommunityProposalsAndVoting({
       .filter((st) => st?.toDelete !== true)
       .map((st) => ({
         name: st.name,
-        // only other strategies than 'one-address-one-vote' have contract information
-        ...(st.name !== 'one-address-one-vote'
-          ? {
-              contract: mapFieldsForBackend(st.contract),
-            }
-          : undefined),
+        contract: mapFieldsForBackend(st.contract),
       }));
     await updateCommunity({
       strategies: updatePayload,
