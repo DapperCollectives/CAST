@@ -51,9 +51,8 @@ func TestCreateCommunity(t *testing.T) {
 	// Create Community
 	communityStruct := otu.GenerateCommunityStruct("account")
 	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
-	response := otu.CreateCommunityAPI(communityPayload)
 
-	// Check response code
+	response := otu.CreateCommunityAPI(communityPayload)
 	checkResponseCode(t, http.StatusCreated, response.Code)
 
 	// Parse
@@ -158,8 +157,7 @@ func TestUpdateCommunity(t *testing.T) {
 	json.Unmarshal(response.Body.Bytes(), &oldCommunity)
 
 	// Update some fields
-	communityToUpdate := utils.UpdatedCommunity
-	payload := otu.GenerateCommunityPayload("account", &communityToUpdate)
+	payload := otu.GenerateCommunityPayload("account", &utils.UpdatedCommunity)
 
 	response = otu.UpdateCommunityAPI(oldCommunity.ID, payload)
 	checkResponseCode(t, http.StatusOK, response.Code)
@@ -170,8 +168,8 @@ func TestUpdateCommunity(t *testing.T) {
 	json.Unmarshal(response.Body.Bytes(), &updatedCommunity)
 
 	assert.Equal(t, oldCommunity.ID, updatedCommunity.ID)
-	assert.Equal(t, utils.UpdatedCommunity.Name, updatedCommunity.Name)
 	assert.Equal(t, *utils.UpdatedCommunity.Logo, *updatedCommunity.Logo)
+	assert.Equal(t, *utils.UpdatedCommunity.Strategies, *updatedCommunity.Strategies)
 	assert.Equal(t, *utils.UpdatedCommunity.Banner_img_url, *updatedCommunity.Banner_img_url)
 	assert.Equal(t, *utils.UpdatedCommunity.Website_url, *updatedCommunity.Website_url)
 	assert.Equal(t, *utils.UpdatedCommunity.Twitter_url, *updatedCommunity.Twitter_url)
@@ -179,3 +177,23 @@ func TestUpdateCommunity(t *testing.T) {
 	assert.Equal(t, *utils.UpdatedCommunity.Discord_url, *updatedCommunity.Discord_url)
 	assert.Equal(t, *utils.UpdatedCommunity.Instagram_url, *updatedCommunity.Instagram_url)
 }
+
+// func TestUpdateStrategies(t *testing.T) {
+// 	clearTable("communities")
+// 	clearTable("community_users")
+
+// 	communityStruct := otu.GenerateCommunityStruct("account")
+// 	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
+// 	response := otu.CreateCommunityAPI(communityPayload)
+
+// 	// Check response code
+// 	checkResponseCode(t, http.StatusCreated, response.Code)
+
+// 	// Fetch community to compare updated version against
+// 	response = otu.GetCommunityAPI(1)
+
+// 	// Get the original community from the API
+// 	var oldCommunity models.Community
+// 	json.Unmarshal(response.Body.Bytes(), &oldCommunity)
+
+// }
