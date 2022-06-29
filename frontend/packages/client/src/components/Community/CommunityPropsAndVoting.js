@@ -31,7 +31,7 @@ export default function CommunityProposalsAndVoting({
             updatingCommunity
               ? false
               : // or check if list has changed to enable saving
-                !isEqual(newList, originalList)
+                !isEqual(st, communityVotingStrategies)
           }
           onClick={() => saveDataToBackend(st)}
           loading={updatingCommunity}
