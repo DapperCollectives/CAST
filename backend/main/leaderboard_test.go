@@ -8,23 +8,25 @@ import (
 	"github.com/DapperCollectives/CAST/backend/main/test_utils"
 	"github.com/stretchr/testify/assert"
 )
+
 func TestGetCommunityLeaderboard(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")
+	clearTable("community_users_achievements")
 	clearTable("proposals")
 	clearTable("votes")
+
 	communityId := otu.AddCommunities(1)[0]
-	proposalIdA := otu.AddActiveProposals(communityId, 1)[0]
-	proposalIdB := otu.AddActiveProposals(communityId, 2)[0]
-	proposalIdC := otu.AddActiveProposals(communityId, 3)[0]
+	proposalIds := otu.AddActiveProposals(communityId, 3)
 	voteChoice := "a"
 
-	otu.CreateVoteAPI(proposalIdA, otu.GenerateValidVotePayload("user1", proposalIdA, voteChoice))
-	otu.CreateVoteAPI(proposalIdB, otu.GenerateValidVotePayload("user1", proposalIdB, voteChoice))
-	otu.CreateVoteAPI(proposalIdC, otu.GenerateValidVotePayload("user1", proposalIdC, voteChoice))
-	otu.CreateVoteAPI(proposalIdA, otu.GenerateValidVotePayload("user2", proposalIdA, voteChoice))
-	otu.CreateVoteAPI(proposalIdB, otu.GenerateValidVotePayload("user2", proposalIdB, voteChoice))
+	otu.CreateVoteAPI(proposalIds[0], otu.GenerateValidVotePayload("user1", proposalIds[0], voteChoice))
+	otu.CreateVoteAPI(proposalIds[1], otu.GenerateValidVotePayload("user1", proposalIds[1], voteChoice))
+	otu.CreateVoteAPI(proposalIds[2], otu.GenerateValidVotePayload("user1", proposalIds[2], voteChoice))
+	otu.CreateVoteAPI(proposalIds[0], otu.GenerateValidVotePayload("user2", proposalIds[0], voteChoice))
+	otu.CreateVoteAPI(proposalIds[1], otu.GenerateValidVotePayload("user2", proposalIds[1], voteChoice))
 
+	// Remove all achievements to test base case for scoring
 	clearTable("community_users_achievements")
 
 	response := otu.GetCommunityLeaderboardAPI(communityId)
@@ -41,20 +43,20 @@ func TestGetCommunityLeaderboard(t *testing.T) {
 func TestGetCommunityLeaderboardWithEarlyVotes(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")
+	clearTable("community_users_achievements")
 	clearTable("proposals")
 	clearTable("votes")
+
 	communityId := otu.AddCommunities(1)[0]
-	proposalIdA := otu.AddActiveProposals(communityId, 1)[0]
-	proposalIdB := otu.AddActiveProposals(communityId, 2)[0]
-	proposalIdC := otu.AddActiveProposals(communityId, 3)[0]
+	proposalIds := otu.AddActiveProposalsWithStartTimeNow(communityId, 3)
 	voteChoice := "a"
 	earlyVoteBonus := 1
 
-	otu.CreateVoteAPI(proposalIdA, otu.GenerateValidVotePayload("user1", proposalIdA, voteChoice))
-	otu.CreateVoteAPI(proposalIdB, otu.GenerateValidVotePayload("user1", proposalIdB, voteChoice))
-	otu.CreateVoteAPI(proposalIdC, otu.GenerateValidVotePayload("user1", proposalIdC, voteChoice))
-	otu.CreateVoteAPI(proposalIdA, otu.GenerateValidVotePayload("user2", proposalIdA, voteChoice))
-	otu.CreateVoteAPI(proposalIdB, otu.GenerateValidVotePayload("user2", proposalIdB, voteChoice))
+	otu.CreateVoteAPI(proposalIds[0], otu.GenerateValidVotePayload("user1", proposalIds[0], voteChoice))
+	otu.CreateVoteAPI(proposalIds[1], otu.GenerateValidVotePayload("user1", proposalIds[1], voteChoice))
+	otu.CreateVoteAPI(proposalIds[2], otu.GenerateValidVotePayload("user1", proposalIds[2], voteChoice))
+	otu.CreateVoteAPI(proposalIds[0], otu.GenerateValidVotePayload("user2", proposalIds[0], voteChoice))
+	otu.CreateVoteAPI(proposalIds[1], otu.GenerateValidVotePayload("user2", proposalIds[1], voteChoice))
 
 	response := otu.GetCommunityLeaderboardAPI(communityId)
 	checkResponseCode(t, http.StatusOK, response.Code)

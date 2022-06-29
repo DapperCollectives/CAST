@@ -101,7 +101,7 @@ func GetUsersForCommunityByType(db *s.Database, communityId, start, count int, u
 }
 
 func GetCommunityLeaderboard(db *s.Database, communityId, start, count int) ([]LeaderboardUserPayload, int, error) {
-	var userAchievements = [] struct {
+	var userAchievements = []struct {
 		Address   string
 		NumVotes  int
 		EarlyVote int
@@ -109,6 +109,10 @@ func GetCommunityLeaderboard(db *s.Database, communityId, start, count int) ([]L
 	var leaderboardUsers = []LeaderboardUserPayload{}
 	var defaultEarlyVoteWeight = 1
 
+	// Retrieve each user in the community with totals for
+	// their votes and achievements (e.g. early votes, streaks and winning choices)
+	// Note: crosstab is a postgres extension that creates a pivot table.
+	// Achievements are joined as columns for each user.
 	sql := fmt.Sprintf(
 		`
 		SELECT v.addr as address, count(*) as num_votes, 
