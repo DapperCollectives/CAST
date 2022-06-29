@@ -40,10 +40,11 @@ type FlowConfig struct {
 }
 
 type Contract struct {
-	Name        *string
-	Addr        *string
-	Public_path *string
-	Threshold   *float64
+	Name        *string  `json:"name,omitempty"`
+	Addr        *string  `json:"addr,omitempty"`
+	Public_path *string  `json:"publicPath,omitempty"`
+	Threshold   *float64 `json:"threshold,omitempty,string"`
+	MaxWeight   *float64 `json:"maxWeight,omitempty,string"`
 }
 
 var (
@@ -58,8 +59,10 @@ func NewFlowClient(flowEnv string) *FlowAdapter {
 	adapter := FlowAdapter{}
 	adapter.Context = context.Background()
 	adapter.Env = flowEnv
+	path := "./flow.json"
 
-	content, err := ioutil.ReadFile("./flow.json")
+	content, err := ioutil.ReadFile(path)
+
 	if err != nil {
 		log.Fatal().Msgf("Error when opening file: %+v", err)
 	}
@@ -313,9 +316,6 @@ func (fa *FlowAdapter) GetNFTIds(voterAddr string, c *Contract) ([]interface{}, 
 	return nftIds, nil
 }
 
-// @TODO
-// Hard coded Addresses here are for emulator dev only this should
-// be set based on environment var
 func (fa *FlowAdapter) ReplaceContractPlaceholders(code string, c *Contract, isFungible bool) []byte {
 	fungibleTokenAddr := fa.Config.Contracts["FungibleToken"].Aliases[fa.Env]
 	nonFungibleTokenAddr := fa.Config.Contracts["NonFungibleToken"].Aliases[fa.Env]
