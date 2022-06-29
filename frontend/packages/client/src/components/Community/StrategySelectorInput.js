@@ -14,10 +14,11 @@ export default function StrategyInput({
       style={{ position: 'relative' }}
     >
       <div
-        className="border-light rounded-sm p-3 column is-full small-text is-uppercase"
+        className="border-light rounded-sm p-3 column is-full small-text"
         style={{
           width: '100%',
           lineHeight: 'normal',
+          textTransform: 'capitalize',
         }}
       >
         {commuVotStra}
