@@ -42,12 +42,7 @@ export default function CommunityProposalsAndVoting({
       .filter((st) => st?.toDelete !== true)
       .map((st) => ({
         name: st.name,
-        // only other strategies than 'one-address-one-vote' have contract information
-        ...(st.name !== 'one-address-one-vote'
-          ? {
-              contract: mapFieldsForBackend(st.contract),
-            }
-          : undefined),
+        contract: mapFieldsForBackend(st.contract),
       }));
     await updateCommunity({
       strategies: updatePayload,
