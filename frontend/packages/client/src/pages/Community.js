@@ -24,6 +24,23 @@ import {
 import { useWebContext } from '../contexts/Web3';
 import Blockies from 'react-blockies';
 
+const CommunitySettingsButton = ({ communityId } = {}) => {
+  return (
+    <div className="columns flex-1" style={{ marginBottom: '20px' }}>
+      <div className="column is-11">
+        <Link to={`/community/${communityId}/edit`}>
+          <div
+            className="button is-fullwidth rounded-sm is-uppercase is-flex small-text has-text-white has-background-black"
+            style={{ minHeight: '40px' }}
+          >
+            Community Settings
+          </div>
+        </Link>
+      </div>
+    </div>
+  );
+};
+
 const AboutLayout = ({
   isMobile,
   leaderBoard,
@@ -48,6 +65,7 @@ const AboutLayout = ({
         <hr className="my-3" />
         <div className="column">{communityLinks}</div>
         <div className="column">
+          {showEdit && <CommunitySettingsButton communityId={communityId} />}
           <p className="smaller-text has-text-grey">Founded 2022</p>
         </div>
       </div>
@@ -66,20 +84,7 @@ const AboutLayout = ({
           <div style={{ paddingTop: '28px' }}>{communityLinks}</div>
         )}
         <hr style={{ marginTop: '32px', marginBottom: '32px' }} />
-        {showEdit && (
-          <div className="columns flex-1" style={{ marginBottom: '20px' }}>
-            <div className="column is-11">
-              <Link to={`/community/${communityId}/edit`}>
-                <div
-                  className="button is-fullwidth rounded-sm is-uppercase is-flex small-text has-text-white has-background-black"
-                  style={{ minHeight: '40px' }}
-                >
-                  Community Settings
-                </div>
-              </Link>
-            </div>
-          </div>
-        )}
+        {showEdit && <CommunitySettingsButton communityId={communityId} />}
         <p className="smaller-text has-text-grey">Founded 2022</p>
       </div>
       <div
@@ -153,8 +158,15 @@ export default function Community() {
     roles: ['admin'],
   });
 
-  const { data: admins } = useCommunityUsers({ communityId, type: 'admin' });
-  const { data: authors } = useCommunityUsers({ communityId, type: 'author' });
+  const { data: admins, reFetch: reFectAdmins } = useCommunityUsers({
+    communityId,
+    type: 'admin',
+  });
+
+  const { data: authors, reFetch: reFectAuthors } = useCommunityUsers({
+    communityId,
+    type: 'author',
+  });
 
   const { data: strategies } = useVotingStrategies();
 
@@ -187,6 +199,17 @@ export default function Community() {
 
   const notMobile = useMediaQuery();
 
+  const onUserLeaveCommunity = async () => {
+    // if current user leaving community is admin or author
+    // trigger update on admin and author list
+    if (authors?.find((author) => author.addr === addr)) {
+      await reFectAuthors();
+    }
+    if (admins?.find((admin) => admin.addr === addr)) {
+      await reFectAdmins();
+    }
+  };
+
   if (error) {
     // modal will show error message
     // but page cannot render
@@ -194,7 +217,8 @@ export default function Community() {
     return null;
   }
 
-  const { instagramUrl, twitterUrl, websiteUrl, discordUrl } = community ?? {};
+  const { instagramUrl, twitterUrl, websiteUrl, discordUrl, githubUrl } =
+    community ?? {};
 
   const titleClassNames = classnames(
     'is-size-5 has-text-weight-bold',
@@ -260,6 +284,7 @@ export default function Community() {
             <JoinCommunityButton
               communityId={communityId}
               setTotalMembers={setTotalMembers}
+              onLeaveCommunity={onUserLeaveCommunity}
             />
           </div>
         </div>
@@ -323,6 +348,7 @@ export default function Community() {
                         twitterUrl={twitterUrl}
                         websiteUrl={websiteUrl}
                         discordUrl={discordUrl}
+                        githubUrl={githubUrl}
                       />
                     }
                     communityAbout={

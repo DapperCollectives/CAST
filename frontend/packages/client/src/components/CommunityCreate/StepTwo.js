@@ -141,6 +141,7 @@ export default function StepTwo({
         label="Domain name or wallet address"
         validateEachAddress
         onClearField={(index) => onAdminAddressChange(index, '')}
+        autoFocusOnLoad={true}
       />
       <CommunityUsersForm
         title="Authors"
@@ -153,6 +154,7 @@ export default function StepTwo({
         label="Domain name or wallet address"
         validateEachAddress
         onClearField={(index) => onAuthorAddressChange(index, '')}
+        autoFocusOnLoad={false}
       />
       <div className="columns mb-5">
         <div className="column is-12">
