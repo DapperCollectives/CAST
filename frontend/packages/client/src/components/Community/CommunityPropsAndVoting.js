@@ -15,7 +15,7 @@ const fieldMapPayload = {
 };
 
 // this function renames fields if necessary to prepare payload for backend
-const mapFieldsForBackend = (contract) => {
+export const mapFieldsForBackend = (contract) => {
   return Object.assign(
     {},
     ...Object.entries(contract).map(([key, value]) => ({
