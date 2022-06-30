@@ -1,13 +1,13 @@
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Gitbook, Github } from '../components/Svg';
 
-const AboutPage = ({ location }) => {
-  const { state = {} } = location;
-  const history = useHistory();
-  const { modal } = state;
+const AboutPage = () => {
+  const { state } = useLocation();
+  const navigate = useNavigate();
+  const modal = state?.modal ?? true;
   const closeModal = () => {
-    history.push('/');
+    navigate('../');
   };
   return (
     <div className={modal ? 'modal is-active' : undefined}>

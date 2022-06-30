@@ -1,7 +1,8 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { ArrowLeft, CheckMark } from '../Svg';
 import Loader from '../Loader';
 import defaultsDeep from 'lodash/defaultsDeep';
+import { useSearchParams } from 'react-router-dom';
 
 const defaultStyles = {
   currentStep: {
@@ -17,6 +18,11 @@ const defaultStyles = {
   },
 };
 
+/**
+ * NOTE:
+ * currentStep is the number representing the index in the steps array (0 to n)
+ * displayStep is the string representing the display value in the URL (1 to n)
+ */
 function StepByStep({
   finalLabel,
   preStep,
@@ -32,38 +38,18 @@ function StepByStep({
 
   const [currentStep, setCurrentStep] = useState(0);
   const [showPreStep, setShowPreStep] = useState(!!preStep);
-  const [isStepValid, setStepValid] = useState(false);
+  const [isStepValid, setIsStepValid] = useState(false);
   const [stepsData, setStepsData] = useState({});
-  const refs = React.useRef();
-
-  const onStepAdvance = (direction = 'next') => {
-    if (direction === 'next') {
-      if (currentStep + 1 <= steps.length - 1) {
-        const enableAdvance = runPreCheckStepAdvance();
-        if (!enableAdvance) {
-          return;
-        }
-        setCurrentStep(currentStep + 1);
-      }
-    } else if (direction === 'prev') {
-      if (currentStep - 1 >= 0) {
-        setCurrentStep(currentStep - 1);
-      }
+  const refs = useRef();
+  const [validSteps, setValidSteps] = useState({});
+  const setStepValid = (validity) => {
+    if (validSteps[currentStep] !== validity) {
+      setValidSteps((prevState) => ({ ...prevState, [currentStep]: validity }));
     }
+    setIsStepValid(validity);
   };
 
   const dismissPreStep = () => setShowPreStep(false);
-
-  const runPreCheckStepAdvance = () => {
-    if (refs.current) {
-      const runCheckResult = refs.current();
-      if (!runCheckResult) {
-        return false;
-      }
-      refs.current = null;
-    }
-    return true;
-  };
 
   const setPreCheckStepAdvance = useCallback(
     (fnCheck) => {
@@ -72,6 +58,71 @@ function StepByStep({
     },
     [refs]
   );
+
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const goToStep = useCallback(
+    (step, replace = false) => {
+      searchParams.set('step', step + 1);
+      setSearchParams(searchParams, { replace });
+    },
+    [searchParams, setSearchParams]
+  );
+  const tryToGoForward = useCallback(() => {
+    const runPreCheckStepAdvance = () => {
+      if (refs.current) {
+        const runCheckResult = refs.current();
+        if (!runCheckResult) {
+          return false;
+        }
+        refs.current = null;
+      }
+      return true;
+    };
+    const canAdvance = runPreCheckStepAdvance();
+    if (currentStep + 1 < steps.length && canAdvance) {
+      goToStep(currentStep + 1);
+    }
+  }, [currentStep, goToStep, refs, steps.length]);
+  const tryToGoBack = useCallback(() => {
+    if (currentStep - 1 >= 0) {
+      goToStep(currentStep - 1);
+    }
+  }, [currentStep, goToStep]);
+
+  useEffect(() => {
+    const displayStep = searchParams.get('step');
+    const displayStepNum = Number(displayStep);
+    const validStepsVals = Object.values(validSteps);
+    const numValidSteps = validStepsVals.length;
+    const allValidSteps = () =>
+      numValidSteps &&
+      validStepsVals.slice(0, displayStepNum - 1).every((val) => val === true);
+    if (
+      displayStep === null || // first time, need to set step in URL
+      displayStep === undefined || // first time, need to set step in URL
+      displayStepNum <= 0 || // prevent out-of-bounds values
+      displayStepNum > steps.length || // prevent out-of-bounds values
+      (displayStepNum > 1 && !allValidSteps()) || // prevent reaching a subsequent step until prior steps have data
+      (!Object.keys(stepsData).length && numValidSteps) // mismatch
+    ) {
+      setValidSteps({});
+      goToStep(0, true);
+    } else if (displayStepNum - 1 !== currentStep) {
+      // navigated, so update currentStep to match
+      setCurrentStep(displayStepNum - 1);
+    } // else valid & matching, so do nothing
+  }, [
+    currentStep,
+    goToStep,
+    searchParams,
+    steps.length,
+    isStepValid,
+    stepsData,
+    validSteps,
+    setValidSteps,
+    setCurrentStep,
+  ]);
 
   const getStepIcon = (stepIdx, stepLabel) => {
     const stepClasses = [];
@@ -145,14 +196,12 @@ function StepByStep({
   const getBackLabel = () => (
     <div
       className="is-flex is-align-items-center has-text-grey cursor-pointer"
-      onClick={() => onStepAdvance('prev')}
+      onClick={tryToGoBack}
     >
       <ArrowLeft />
       <span className="ml-4">Back</span>
     </div>
   );
-
-  const moveToNextStep = () => onStepAdvance('next');
 
   const _onSubmit = useCallback(
     () => onSubmit(stepsData),
@@ -165,7 +214,7 @@ function StepByStep({
         className={`button is-block has-background-yellow rounded-sm py-2 px-4 has-text-centered ${
           !isStepValid && 'is-disabled'
         }`}
-        onClick={moveToNextStep}
+        onClick={tryToGoForward}
       >
         Next
       </div>
@@ -262,7 +311,7 @@ function StepByStep({
               stepsData,
               setPreCheckStepAdvance,
               ...(currentStep < steps.length - 1 && passNextToComp
-                ? { moveToNextStep }
+                ? { tryToGoForward }
                 : undefined),
               ...(currentStep === steps.length - 1 && passSubmitToComp
                 ? { onSubmit: _onSubmit }

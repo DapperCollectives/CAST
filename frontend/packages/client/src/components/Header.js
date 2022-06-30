@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NavLink, withRouter } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import Sidenavbar from './SideNavbar';
 import { Logo, LinkOut } from './Svg';
 import WalletConnect from './WalletConnect';
@@ -18,7 +18,7 @@ function Header(props) {
   return (
     <>
       <header
-        className={`header ${props.location.pathname} has-background-white is-block navbar is-fixed-top`}
+        className={`header has-background-white is-block navbar is-fixed-top`}
       >
         <div className="px-4 divider">
           <div className="container header-spacing">
@@ -83,4 +83,4 @@ function Header(props) {
   );
 }
 
-export default withRouter((props) => <Header {...props} />);
+export default Header;

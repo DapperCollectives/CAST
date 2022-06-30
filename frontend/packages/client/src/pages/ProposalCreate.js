@@ -1,11 +1,11 @@
 /* global plausible */
 import React, { useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { StepByStep, WalletConnect, Error } from 'components';
 import { useWebContext } from 'contexts/Web3';
 import { useModalContext } from 'contexts/NotificationModal';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
-import { useProposal, useQueryParams } from 'hooks';
+import { useProposal } from 'hooks';
 import { parseDateToServer, customDraftToHTML } from 'utils';
 import {
   PropCreateStepOne,
@@ -20,19 +20,19 @@ export default function ProposalCreatePage() {
     user: { addr: creatorAddr },
     injectedProvider,
   } = useWebContext();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const modalContext = useModalContext();
 
   const { notifyError } = useErrorHandlerContext();
 
-  const { communityId } = useQueryParams({ communityId: 'communityId' });
+  const [{ communityId }] = useSearchParams();
 
   useEffect(() => {
     if (data?.id) {
-      history.push(`/proposal/${data.id}`);
+      navigate(`../${data.id}`);
     }
-  }, [data, history]);
+  }, [data, navigate]);
 
   useEffect(() => {
     if (modalContext.isOpen && creatorAddr && modalError) {

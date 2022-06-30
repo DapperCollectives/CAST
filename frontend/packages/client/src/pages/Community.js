@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useHistory, useParams, Link } from 'react-router-dom';
+import { useSearchParams, useParams, Link } from 'react-router-dom';
 import classnames from 'classnames';
 import {
   Loader,
@@ -15,7 +15,6 @@ import {
 import {
   useMediaQuery,
   useCommunityDetails,
-  useQueryParams,
   useCommunityUsers,
   useVotingStrategies,
   useUserRoleOnCommunity,
@@ -142,9 +141,9 @@ const MembersLayout = ({
 export default function Community() {
   const { communityId } = useParams();
 
-  const history = useHistory();
-
-  const { activeTab } = useQueryParams({ activeTab: 'tab' });
+  const [searchParams, setParams] = useSearchParams();
+  const activeTab = searchParams.get('tab');
+  const goToTab = (tab) => setParams([['tab', tab]]);
 
   const { data: community, loading, error } = useCommunityDetails(communityId);
 
@@ -184,11 +183,11 @@ export default function Community() {
 
   // check for allowing only three options
   if (!['proposals', 'about', 'members'].includes(activeTab)) {
-    history.push(`/community/${communityId}?tab=about`);
+    goToTab('about');
   }
   // navigation from leader board to member list
   const onClickViewMore = () => {
-    history.push(`/community/${communityId}?tab=members`);
+    goToTab('members');
   };
 
   const activeTabMap = {

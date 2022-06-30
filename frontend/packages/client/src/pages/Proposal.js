@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useParams, useLocation } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import {
   Message,
   VotesList,
@@ -27,16 +27,6 @@ import {
   VoteOptions,
 } from 'components/Proposal';
 import { getProposalType } from 'utils';
-
-function useQueryParams() {
-  const { search } = useLocation();
-  return React.useMemo(() => {
-    const params = new URLSearchParams(search);
-    return {
-      forceLedger: params.get('ledger') === 'true',
-    };
-  }, [search]);
-}
 
 const VoteUserError = () => (
   <div className="columns m-0 p-0 is-multiline is-mobile">
@@ -73,7 +63,7 @@ export default function ProposalPage() {
   const [isStrategyModalOpen, setIsStrategyModalOpen] = useState(false);
 
   // setting this manually for users that do not have a ledger device
-  const { forceLedger } = useQueryParams();
+  const [{ forceLedger }] = useSearchParams();
 
   const modalContext = useModalContext();
 
@@ -396,7 +386,7 @@ export default function ProposalPage() {
             extraClasses="mb-6"
             extraClassesMobile="mb-3"
           >
-            <Link to={`/community/${proposal.communityId}?tab=proposals`}>
+            <Link to={`../../community/${proposal.communityId}?tab=proposals`}>
               <span className="has-text-grey is-flex is-align-items-center back-button transition-all">
                 <ArrowLeft /> <span className="ml-3">Back</span>
               </span>

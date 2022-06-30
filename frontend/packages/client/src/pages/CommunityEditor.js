@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Link, useParams, useHistory } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useWebContext } from 'contexts/Web3';
 import {
   CommunityEditorProfile,
@@ -22,7 +22,7 @@ const MenuTabs = ({ tabs, communityId, onClickButtonTab = () => {} } = {}) => {
   return (
     <div>
       <div className="is-flex pl-2 mb-6">
-        <Link to={`/community/${communityId}?tabs=proposals`}>
+        <Link to={`../../${communityId}?tabs=proposals`}>
           <span className="has-text-grey is-flex is-align-items-center back-button transition-all">
             <ArrowLeft /> <span className="ml-3">Back</span>
           </span>
@@ -74,7 +74,7 @@ const DropdownMenu = ({ communityId, onClickButtonTab = () => {} } = {}) => {
           className="column is-flex is-align-center"
           style={{ width: '100%' }}
         >
-          <Link to={`/community/${communityId}?tabs=about`}>
+          <Link to={`../../${communityId}?tabs=about`}>
             <ArrowLeftBold />
           </Link>
           <p
@@ -107,7 +107,7 @@ const DropdownMenu = ({ communityId, onClickButtonTab = () => {} } = {}) => {
 };
 export default function CommunityEditorPage() {
   const { communityId } = useParams();
-  const history = useHistory();
+  const navigate = useNavigate();
   const {
     user: { addr },
   } = useWebContext();
@@ -146,10 +146,10 @@ export default function CommunityEditorPage() {
   // otherwise it's redirected to previous location
   useEffect(() => {
     if ((!isAdmin && addr === null) || (isAdmin === false && addr)) {
-      history.push('/');
+      navigate('../../');
       return;
     }
-  }, [isAdmin, addr, history]);
+  }, [isAdmin, addr, navigate]);
 
   // initial loading
   if (loading && !community) {
