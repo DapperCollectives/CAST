@@ -117,7 +117,7 @@ export default function useCommunity() {
             contractAddress,
             contractName,
             storagePath,
-            onlyAuthorsToSubmitProposals: Boolean(onlyAuthorsToSubmitProposals),
+            onlyAuthorsToSubmit: Boolean(onlyAuthorsToSubmitProposals),
             timestamp,
             compositeSignatures,
           }),
