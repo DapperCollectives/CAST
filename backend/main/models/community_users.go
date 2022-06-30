@@ -23,12 +23,6 @@ type CommunityUserType struct {
 	Is_member    bool   `json:"isMember" validate:"required"`
 }
 
-type UserAchievements struct {
-	Address   string
-	NumVotes  int
-	EarlyVote int
-}
-
 type UserTypes []string
 
 var USER_TYPES = UserTypes{"member", "author", "admin"}
@@ -43,12 +37,6 @@ type CommunityUserPayload struct {
 	Signing_addr         string                  `json:"signingAddr" validate:"required"`
 	Timestamp            string                  `json:"timestamp" validate:"required"`
 	Composite_signatures *[]s.CompositeSignature `json:"compositeSignatures" validate:"required"`
-}
-
-type AchievementPayload struct {
-	Addr             string `json:"addr" validate:"required"`
-	Achievement_type string `json:"string" validate:"required"`
-	Total            int    `json:"total,omitempty"`
 }
 
 type LeaderboardUserPayload struct {
@@ -113,10 +101,18 @@ func GetUsersForCommunityByType(db *s.Database, communityId, start, count int, u
 }
 
 func GetCommunityLeaderboard(db *s.Database, communityId, start, count int) ([]LeaderboardUserPayload, int, error) {
-	var userAchievements = []UserAchievements{}
+	var userAchievements = []struct {
+		Address   string
+		NumVotes  int
+		EarlyVote int
+	}{}
 	var leaderboardUsers = []LeaderboardUserPayload{}
 	var defaultEarlyVoteWeight = 1
 
+	// Retrieve each user in the community with totals for
+	// their votes and achievements (e.g. early votes, streaks and winning choices)
+	// Note: crosstab is a postgres extension that creates a pivot table.
+	// Achievements are joined as columns for each user.
 	sql := fmt.Sprintf(
 		`
 		SELECT v.addr as address, count(*) as num_votes, 

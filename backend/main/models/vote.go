@@ -217,7 +217,7 @@ func (v *Vote) CreateVote(db *s.Database) error {
 		WHERE id = $1`,
 		v.Proposal_id)
 
-	isEarlyVote := proposal.Start_time.Before(proposal.Start_time.Add(time.Hour + time.Duration(defaultEarlyVoteLength)))
+	isEarlyVote := v.Created_at.Before(proposal.Start_time.Add(time.Hour * time.Duration(defaultEarlyVoteLength)))
 
 	if isEarlyVote {
 		err = db.Conn.QueryRow(db.Context,
