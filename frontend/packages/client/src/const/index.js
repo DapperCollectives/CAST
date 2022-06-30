@@ -13,8 +13,8 @@ export const FilterValues = {
   terminated: 'Terminated',
 };
 
-export const CommunityPageTabs = {
-  about: 'about',
+export const CommunityEditPageTabs = {
+  profile: 'profile',
   details: 'details',
   proposalAndVoting: 'proposals-and-voting',
 };

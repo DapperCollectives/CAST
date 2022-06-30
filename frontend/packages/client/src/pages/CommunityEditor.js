@@ -16,7 +16,7 @@ import {
   useFileUploader,
   useUserRoleOnCommunity,
 } from 'hooks';
-import { CommunityPageTabs } from 'const';
+import { CommunityEditPageTabs } from 'const';
 
 const MenuTabs = ({ tabs, communityId, onClickButtonTab = () => {} } = {}) => {
   return (
@@ -88,14 +88,14 @@ const DropdownMenu = ({ communityId, onClickButtonTab = () => {} } = {}) => {
       <Dropdown
         defaultValue={{
           label: 'Community Profile',
-          value: CommunityPageTabs.profile,
+          value: CommunityEditPageTabs.profile,
         }}
         values={[
-          { label: 'Community Profile', value: CommunityPageTabs.profile },
-          { label: 'Community Details', value: CommunityPageTabs.details },
+          { label: 'Community Profile', value: CommunityEditPageTabs.profile },
+          { label: 'Community Details', value: CommunityEditPageTabs.details },
           {
             label: 'Proposals & Voting',
-            value: CommunityPageTabs.proposalAndVoting,
+            value: CommunityEditPageTabs.proposalAndVoting,
           },
         ]}
         onSelectValue={(value) => {
@@ -123,10 +123,11 @@ export default function CommunityEditorPage() {
   const [tabs, setTab] = useState({ profile: true, details: false });
 
   const onClickButtonTab = (value) => () => {
+    console.log('value', value);
     setTab({
-      profile: value === CommunityPageTabs.profile,
-      details: value === CommunityPageTabs.details,
-      proposalsAndVoting: value === CommunityPageTabs.proposalAndVoting,
+      profile: value === CommunityEditPageTabs.profile,
+      details: value === CommunityEditPageTabs.details,
+      proposalsAndVoting: value === CommunityEditPageTabs.proposalAndVoting,
     });
   };
 
