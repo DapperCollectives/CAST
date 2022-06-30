@@ -43,6 +43,22 @@ export default function useUserCommunities({
     }
   }, [dispatch, notifyError, addr, count, start]);
 
+  const fetchMore = useCallback(async () => {
+    dispatch({ type: 'PROCESSING' });
+    const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/users/${addr}/communities?count=${state.pagination.count}&start=${state.pagination.start}`;
+    try {
+      const response = await fetch(url);
+      const userCommunities = await checkResponse(response);
+      dispatch({
+        type: 'SUCCESS',
+        payload: userCommunities,
+      });
+    } catch (err) {
+      notifyError(err, url);
+      dispatch({ type: 'ERROR', payload: { errorData: err.message } });
+    }
+  }, [state.pagination, addr, notifyError]);
+
   useEffect(() => {
     if (addr) {
       getUserCommunities();
@@ -55,6 +71,7 @@ export default function useUserCommunities({
   return {
     ...state,
     getUserCommunities,
+    fetchMore,
     resetResults,
   };
 }

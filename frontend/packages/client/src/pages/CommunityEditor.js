@@ -1,20 +1,22 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Link, useParams, useHistory } from 'react-router-dom';
-import { useWebContext } from '../contexts/Web3';
+import { useWebContext } from 'contexts/Web3';
 import {
   CommunityEditorProfile,
   CommunityEditorLinks,
   CommunityEditorDetails,
+  CommunityPropsAndVoting,
   Dropdown,
   Loader,
-} from '../components';
-import { ArrowLeft, ArrowLeftBold } from '../components/Svg';
+} from 'components';
+import { ArrowLeft, ArrowLeftBold } from 'components/Svg';
 import {
   useCommunityDetails,
   useMediaQuery,
   useFileUploader,
   useUserRoleOnCommunity,
-} from '../hooks';
+} from 'hooks';
+import { CommunityEditPageTabs } from 'const';
 
 const MenuTabs = ({ tabs, communityId, onClickButtonTab = () => {} } = {}) => {
   return (
@@ -50,6 +52,16 @@ const MenuTabs = ({ tabs, communityId, onClickButtonTab = () => {} } = {}) => {
           Community Details
         </button>
       </div>
+      <div className="is-flex flex-1" style={{ marginTop: '18px' }}>
+        <button
+          className={`button is-white px-2 small-text ${
+            tabs.proposalsAndVoting ? 'has-text-weight-bold' : ''
+          }`}
+          onClick={onClickButtonTab('proposals-and-voting')}
+        >
+          Proposals & Voting
+        </button>
+      </div>
     </div>
   );
 };
@@ -74,10 +86,17 @@ const DropdownMenu = ({ communityId, onClickButtonTab = () => {} } = {}) => {
         </div>
       </div>
       <Dropdown
-        defaultValue="profile"
+        defaultValue={{
+          label: 'Community Profile',
+          value: CommunityEditPageTabs.profile,
+        }}
         values={[
-          { label: 'Community Profile', value: 'profile' },
-          { label: 'Community Details', value: 'details' },
+          { label: 'Community Profile', value: CommunityEditPageTabs.profile },
+          { label: 'Community Details', value: CommunityEditPageTabs.details },
+          {
+            label: 'Proposals & Voting',
+            value: CommunityEditPageTabs.proposalAndVoting,
+          },
         ]}
         onSelectValue={(value) => {
           onClickButtonTab(value)();
@@ -104,7 +123,11 @@ export default function CommunityEditorPage() {
   const [tabs, setTab] = useState({ profile: true, details: false });
 
   const onClickButtonTab = (value) => () => {
-    setTab({ profile: value === 'profile', details: value === 'details' });
+    setTab({
+      profile: value === CommunityEditPageTabs.profile,
+      details: value === CommunityEditPageTabs.details,
+      proposalsAndVoting: value === CommunityEditPageTabs.proposalAndVoting,
+    });
   };
 
   const updateCommunity = useCallback(
@@ -182,6 +205,14 @@ export default function CommunityEditorPage() {
             )}
             {tabs.details && (
               <CommunityEditorDetails communityId={community?.id} />
+            )}
+            {tabs.proposalsAndVoting && (
+              <CommunityPropsAndVoting
+                communityId={community?.id}
+                updateCommunity={updateCommunity}
+                updatingCommunity={loading}
+                communityVotingStrategies={community.strategies}
+              />
             )}
           </div>
         </div>
