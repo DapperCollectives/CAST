@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import StrategySelectorForm from 'components/Community/StrategySelectorForm';
 import ActionButton from 'components/ActionButton';
 
@@ -11,12 +11,15 @@ export default function StepFour({
 } = {}) {
   const { strategies } = stepData || {};
 
-  const onStrategySelection = (strategies) => {
-    if (strategies.length > 0) {
+  useEffect(() => {
+    if (strategies?.length > 0) {
       setStepValid(true);
     } else {
       setStepValid(false);
     }
+  }, [strategies, setStepValid, isStepValid]);
+
+  const onStrategySelection = (strategies) => {
     onDataChange({ strategies });
   };
 
