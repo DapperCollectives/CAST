@@ -123,7 +123,6 @@ export default function CommunityEditorPage() {
   const [tabs, setTab] = useState({ profile: true, details: false });
 
   const onClickButtonTab = (value) => () => {
-    console.log('value', value);
     setTab({
       profile: value === CommunityEditPageTabs.profile,
       details: value === CommunityEditPageTabs.details,
