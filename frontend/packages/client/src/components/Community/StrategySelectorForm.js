@@ -16,12 +16,7 @@ export default function StrategySelectorForm({
   onStrategySelection,
 } = {}) {
   // holds array of objects with strategy information
-  const [strategies, setStrategies] = useState([]);
-
-  // update state if new strategies are passed
-  useState(() => {
-    setStrategies(existingStrategies);
-  }, [existingStrategies]);
+  const [strategies, setStrategies] = useState(existingStrategies);
 
   // only notify parent component if callback was passed
   useEffect(() => {
