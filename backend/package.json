@@ -8,7 +8,6 @@
     "cadence:start": "yarn workspace @ugly-baby/cadence start",
     "server:install": "yarn workspace @ugly-baby/server install",
     "server:start": "yarn workspace @ugly-baby/server start",
-    "prettier": "yarn workspace @ugly-baby/client prettier",
     "chain": "yarn workspace @ugly-baby/contracts chain",
     "test": "yarn workspace @ugly-baby/contracts test",
     "start": "yarn workspace @ugly-baby/client start"

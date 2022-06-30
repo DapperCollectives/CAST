@@ -218,10 +218,13 @@ func (a *App) initializeRoutes() {
 		Methods("GET")
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users/{addr:0x[a-zA-Z0-9]{16}}/{userType:[a-zA-Z]+}", a.handleRemoveUserRole).
 		Methods("DELETE", "OPTIONS")
+	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/leaderboard", a.handleGetCommunityLeaderboard).Methods("GET")
 	// Utilities
 	a.Router.HandleFunc("/accounts/admin", a.getAdminList).Methods("GET")
 	a.Router.HandleFunc("/accounts/blocklist", a.getCommunityBlocklist).Methods("GET")
 	a.Router.HandleFunc("/accounts/{addr:0x[a-zA-Z0-9]{16}}/{blockHeight:[0-9]+}", a.getAccountAtBlockHeight).Methods("GET")
+
+	//this JSON for snapshotter api
 	a.Router.HandleFunc("/latest-snapshot", a.getLatestSnapshot).Methods("GET")
 }
 
@@ -766,7 +769,14 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if *community.Only_authors_to_submit {
+	strategy, err := models.MatchStrategyByProposal(*community.Strategies, *p.Strategy)
+	if err != nil {
+		log.Error().Err(err).Msg("Community does not have this strategy availabe")
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if *community.Only_authors_to_submit == true {
 		if err := models.EnsureRoleForCommunity(a.DB, p.Creator_addr, communityId, "author"); err != nil {
 			errMsg := fmt.Sprintf("account %s is not an author for community %d", p.Creator_addr, p.Community_id)
 			log.Error().Err(err).Msg(errMsg)
@@ -774,22 +784,7 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		if community.Public_path == nil || community.Threshold == nil {
-			pathDefault := "none"
-			thresholdDefault := 0.00
-
-			community.Public_path = &pathDefault
-			community.Threshold = &thresholdDefault
-		}
-
-		var contract = &shared.Contract{
-			Name:        community.Contract_name,
-			Addr:        community.Contract_addr,
-			Public_path: community.Public_path,
-			Threshold:   community.Threshold,
-		}
-
-		hasBalance, err := a.FlowAdapter.EnforceTokenThreshold(p.Creator_addr, contract)
+		hasBalance, err := a.FlowAdapter.EnforceTokenThreshold(p.Creator_addr, &strategy.Contract)
 		if err != nil {
 			log.Error().Err(err).Msg("error enforcing token threshold")
 			respondWithError(w, http.StatusInternalServerError, err.Error())
@@ -990,6 +985,7 @@ func (a *App) getCommunitiesForHomePage(w http.ResponseWriter, r *http.Request) 
 func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 	var c models.Community
 	var payload models.CreateCommunityRequestPayload
+
 	decoder := json.NewDecoder(r.Body)
 
 	if err := decoder.Decode(&payload); err != nil {
@@ -1008,7 +1004,6 @@ func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO: since we removed the allowlist, some sort of rate limiting will probably be necessary
-
 	if err := a.validateSignature(c.Creator_addr, c.Timestamp, c.Composite_signatures); err != nil {
 		respondWithError(w, http.StatusForbidden, err.Error())
 		return
@@ -1076,7 +1071,6 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, "Invalid community ID")
 		return
 	}
-
 	var payload models.UpdateCommunityRequestPayload
 
 	decoder := json.NewDecoder(r.Body)
@@ -1085,6 +1079,7 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
+
 	defer r.Body.Close()
 
 	// Fetch community
@@ -1094,6 +1089,8 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Invalid request: no community with ID %d", id))
 		return
 	}
+
+	payload.Name = &c.Name
 
 	// validate is commuity creator
 	// TODO: update to validating address is admin
@@ -1652,6 +1649,35 @@ func (a *App) handleGetCommunityUsersByType(w http.ResponseWriter, r *http.Reque
 
 	response := shared.GetPaginatedResponseWithPayload(users, start, count, totalRecords)
 	respondWithJSON(w, http.StatusOK, response)
+}
+
+func (a *App) handleGetCommunityLeaderboard(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	communityId, err := strconv.Atoi(vars["communityId"])
+
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid Community ID")
+		return
+	}
+
+	count, _ := strconv.Atoi(r.FormValue("count"))
+	start, _ := strconv.Atoi(r.FormValue("start"))
+	if count > 100 || count < 1 {
+		count = 100
+	}
+	if start < 0 {
+		start = 0
+	}
+
+	users, totalRecords, err := models.GetCommunityLeaderboard(a.DB, communityId, start, count)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response := shared.GetPaginatedResponseWithPayload(users, start, count, totalRecords)
+	respondWithJSON(w, http.StatusOK, response)
+
 }
 
 func (a *App) handleGetUserCommunities(w http.ResponseWriter, r *http.Request) {

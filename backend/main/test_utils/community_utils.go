@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/DapperCollectives/CAST/backend/main/models"
+	s "github.com/DapperCollectives/CAST/backend/main/shared"
 )
 
 type PaginatedResponseWithUser struct {
@@ -26,6 +27,14 @@ type PaginatedResponseWithUserType struct {
 	Count        int                        `json:"count"`
 	TotalRecords int                        `json:"totalRecords"`
 	Next         int                        `json:"next"`
+}
+
+type PaginatedResponseWithLeaderboardUser struct {
+	Data         []models.LeaderboardUser `json:"data"`
+	Start        int                          `json:"start"`
+	Count        int                          `json:"count"`
+	TotalRecords int                          `json:"totalRecords"`
+	Next         int                          `json:"next"`
 }
 
 var (
@@ -56,6 +65,32 @@ var (
 
 	exampleNFTName = "ExampleNFT"
 	exampleNFTAddr = "0xf8d6e0586b0a20c7"
+	tokenWeighted  = "token-weighted-default"
+	stakedWeighted = "staked-token-weighted-default"
+
+	defaultStrategy = models.Strategy{
+		Name: &tokenWeighted,
+		Contract: s.Contract{
+			Name:        &flowContractName,
+			Addr:        &flowContractAddr,
+			Public_path: &flowPublicPath,
+		},
+	}
+
+	stakedStrategy = models.Strategy{
+		Name: &stakedWeighted,
+		Contract: s.Contract{
+			Name:        &flowContractName,
+			Addr:        &flowContractAddr,
+			Public_path: &flowPublicPath,
+		},
+	}
+	strategies = []models.Strategy{defaultStrategy}
+
+	updatedStrategies = []models.Strategy{
+		defaultStrategy,
+		stakedStrategy,
+	}
 
 	DefaultCommunity = models.Community{
 		Name:                   "TestDAO",
@@ -64,6 +99,7 @@ var (
 		Creator_addr:           "<replace>",
 		Logo:                   &logo,
 		Slug:                   &slug,
+		Strategies:             &strategies,
 		Only_authors_to_submit: &onlyAuthors,
 	}
 
@@ -102,6 +138,7 @@ var (
 		Github_url:               &github,
 		Discord_url:              &discord,
 		Instagram_url:            &instagram,
+		Strategies:               &updatedStrategies,
 		Terms_and_conditions_url: &termsAndConditions,
 	}
 )
@@ -116,6 +153,9 @@ func (otu *OverflowTestUtils) GenerateCommunityPayload(signer string, payload *m
 	payload.Timestamp = timestamp
 	payload.Composite_signatures = compositeSignatures
 	payload.Signing_addr = &signingAddr
+	if payload.Strategies == nil {
+		payload.Strategies = &strategies
+	}
 
 	return payload
 }
@@ -171,6 +211,12 @@ func (otu *OverflowTestUtils) UpdateCommunityAPI(id int, payload *models.Communi
 
 func (otu *OverflowTestUtils) GetCommunityAPI(id int) *httptest.ResponseRecorder {
 	req, _ := http.NewRequest("GET", "/communities/"+strconv.Itoa(id), nil)
+	response := otu.ExecuteRequest(req)
+	return response
+}
+
+func (otu *OverflowTestUtils) GetCommunityLeaderboardAPI(id int) *httptest.ResponseRecorder {
+	req, _ := http.NewRequest("GET", "/communities/"+strconv.Itoa(id)+"/leaderboard", nil)
 	response := otu.ExecuteRequest(req)
 	return response
 }
