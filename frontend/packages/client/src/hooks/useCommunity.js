@@ -85,7 +85,7 @@ export default function useCommunity() {
         let communityLogo;
         // not handling upload error: there's a default image
         // admins can edit later the image
-        if (logo.file) {
+        if (logo?.file) {
           try {
             communityLogo = await uploadFile(logo.file);
           } catch (err) {

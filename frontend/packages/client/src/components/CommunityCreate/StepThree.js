@@ -47,6 +47,7 @@ export default function StepThree({
     proposalThreshold,
     setAuthorCheckboxDisabled,
     onDataChange,
+    authorCheckboxDisabled,
   ]);
 
   useEffect(() => {

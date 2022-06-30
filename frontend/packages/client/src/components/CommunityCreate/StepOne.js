@@ -113,6 +113,7 @@ export default function StepOne({
         logo !== undefined ? logo?.file && logo?.imageUrl : true,
       communityTerms: (termsUrl) =>
         termsUrl?.length > 0 ? urlPatternValidation(termsUrl) : true,
+      category: (cat) => cat?.length > 0,
     };
     const isValid = Object.keys(requiredFields).every(
       (field) => stepData && requiredFields[field](stepData[field])
