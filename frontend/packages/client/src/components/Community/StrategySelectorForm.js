@@ -1,56 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { useVotingStrategies } from 'hooks';
+import isEqual from 'lodash/isEqual';
 import { AddButton } from 'components';
-import { Bin } from 'components/Svg';
 import { useModalContext } from 'contexts/NotificationModal';
 import StrategyEditorModal from './StrategyEditorModal';
-import isEqual from 'lodash/isEqual';
+import StrategySelectorInput from 'components/Community/StrategySelectorInput';
+import { useVotingStrategies } from 'hooks';
 import { kebabToString } from 'utils';
-
-const StrategyInput = ({
-  index,
-  commuVotStra,
-  onDeleteStrategy,
-  enableDelete,
-  onChange = () => {},
-} = {}) => {
-  return (
-    <div
-      key={`index-${index}`}
-      className="column is-12 is-mobile p-0 m-0 mb-4 fade-in"
-      style={{ position: 'relative' }}
-    >
-      <input
-        type="text"
-        className="border-light rounded-sm p-3 column is-full"
-        value={commuVotStra}
-        onChange={onChange}
-        style={{
-          width: '100%',
-        }}
-      />
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'flex-end',
-          alignContent: 'center',
-          position: 'absolute',
-          right: 15,
-          top: 9,
-        }}
-      >
-        {enableDelete && (
-          <div
-            className="cursor-pointer is-flex is-align-items-center"
-            onClick={() => onDeleteStrategy(index)}
-          >
-            <Bin />
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
 
 export default function StrategySelectorForm({
   existingStrategies = [],
@@ -80,7 +35,7 @@ export default function StrategySelectorForm({
 
   const { openModal, closeModal } = useModalContext();
 
-  // filter strategies already added from the ones received from backend
+  // filter strategies already added
   const strategiesList = (allVotingStrategies || []).filter(
     (st) => !strategies.find((currentSt) => currentSt.name === st.key)
   );
@@ -108,7 +63,7 @@ export default function StrategySelectorForm({
     setStrategies((state) => state.filter((_, idx) => idx !== index));
   };
 
-  // hide delete one there's only one strategy
+  // hide delete when there's only one strategy
   const enableDelete = strategies.length > 1;
 
   const callToActionComponent = callToAction(strategies);
@@ -132,7 +87,7 @@ export default function StrategySelectorForm({
       </div>
       {/* filter elements that will be deleted */}
       {strategies.map((st, index) => (
-        <StrategyInput
+        <StrategySelectorInput
           index={index}
           key={`strategy-${index}`}
           commuVotStra={kebabToString(st.name)}

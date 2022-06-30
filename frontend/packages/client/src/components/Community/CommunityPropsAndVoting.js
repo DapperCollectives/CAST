@@ -3,37 +3,6 @@ import ActionButton from 'components/ActionButton';
 import StrategySelectorForm from 'components/Community/StrategySelectorForm';
 import isEqual from 'lodash/isEqual';
 
-// this object is used to change
-// field names as are used
-// on the backend
-const fieldMapPayload = {
-  contractAddress: 'addr',
-  contractName: 'name',
-  maxWeight: 'maxWeight',
-  minimunBalance: 'threshold',
-  publicPath: 'publicPath',
-};
-
-// this function renames fields if necessary to prepare payload for backend
-export const mapFieldsForBackend = (contract) => {
-  return Object.assign(
-    {},
-    ...Object.entries(contract).map(([key, value]) => ({
-      ...(fieldMapPayload[key] && value
-        ? {
-            [fieldMapPayload[key]]: value,
-          }
-        : value
-        ? { [key]: value }
-        : undefined),
-    }))
-  );
-};
-
-const hasListChanged = (newList, originalList) => {
-  return !isEqual(newList, originalList);
-};
-
 export default function CommunityProposalsAndVoting({
   communityVotingStrategies = [],
   updateCommunity,
@@ -44,7 +13,7 @@ export default function CommunityProposalsAndVoting({
       .filter((st) => st?.toDelete !== true)
       .map((st) => ({
         name: st.name,
-        contract: mapFieldsForBackend(st.contract),
+        contract: st.contract,
       }));
     await updateCommunity({
       strategies: updatePayload,
@@ -61,7 +30,8 @@ export default function CommunityProposalsAndVoting({
           enabled={
             updatingCommunity
               ? false
-              : hasListChanged(st, communityVotingStrategies)
+              : // or check if list has changed to enable saving
+                !isEqual(st, communityVotingStrategies)
           }
           onClick={() => saveDataToBackend(st)}
           loading={updatingCommunity}

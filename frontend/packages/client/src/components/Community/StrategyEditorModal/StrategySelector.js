@@ -21,7 +21,9 @@ export default function StrategySelector({
           >
             <div className="columns is-multiline">
               <div className="column is-12 pb-2">
-                <p>{kebabToString(st.key)}</p>
+                <p style={{ textTransform: 'capitalize' }}>
+                  {kebabToString(st.key)}
+                </p>
               </div>
               <div className="column is-12 pt-2">
                 <p className="small-text has-text-grey">{st.description}</p>

@@ -13,10 +13,10 @@ const ModalSteps = {
 };
 
 const initialFormFields = {
-  contractAddress: '',
-  contractName: '',
+  addr: '',
+  name: '',
+  threshold: '',
   maxWeight: '',
-  minimunBalance: '',
 };
 
 const formFields = Object.keys(initialFormFields);
@@ -42,14 +42,12 @@ export default function StrategyEditorModal({
   // this useEffect validates form on second step
   useEffect(() => {
     const requiredFields = {
-      contractAddress: (addr) =>
-        addr?.trim().length > 0 && isValidAddress(addr),
-      contractName: (name) =>
-        name?.trim().length > 0 && name?.trim().length <= 150,
+      addr: (addr) => addr?.trim().length > 0 && isValidAddress(addr),
+      name: (name) => name?.trim().length > 0 && name?.trim().length <= 150,
       maxWeight: (maxWeight) =>
         maxWeight?.trim().length > 0 && /^[0-9]+$/.test(maxWeight),
-      minimunBalance: (minimunBalance) =>
-        minimunBalance?.trim().length > 0 && /^[0-9]+$/.test(minimunBalance),
+      threshold: (threshold) =>
+        threshold?.trim().length > 0 && /^[0-9]+$/.test(threshold),
     };
     const isValid = Object.keys(requiredFields).every((field) =>
       requiredFields[field](strategyData.contract[field])
@@ -71,10 +69,10 @@ export default function StrategyEditorModal({
       onDone({
         name: strategyName,
         contract: {
-          contractName: strategyConfig.name,
-          contractAddress: strategyConfig.addr,
+          name: strategyConfig.name,
+          addr: strategyConfig.addr,
           publicPath: strategyConfig.publicPath,
-          minimunBalance: '0',
+          threshold: '0',
         },
       });
       return;

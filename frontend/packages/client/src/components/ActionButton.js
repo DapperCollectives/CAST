@@ -23,8 +23,7 @@ export default function ActionButton({
       className={clNames}
       onClick={!enabled ? () => {} : onClick}
     >
-      {!loading && <>{label}</>}
-      {loading && <Loader size={18} spacing="mx-button-loader" />}
+      {loading ? <Loader size={18} spacing="mx-button-loader" /> : <>{label}</>}
     </button>
   );
 }
