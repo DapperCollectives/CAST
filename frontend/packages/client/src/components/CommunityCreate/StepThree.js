@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { WrapperResponsive } from 'components';
 import { isValidAddress } from 'utils';
 
 export default function StepThree({
@@ -34,7 +35,11 @@ export default function StepThree({
   }, [stepData, setStepValid]);
   return (
     <>
-      <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-4 p-4-mobile mb-4-mobile">
+      <WrapperResponsive
+        classNames="border-light rounded-lg columns is-flex-direction-column is-mobile m-0"
+        extraClasses="p-6 mb-5"
+        extraClassesMobile="p-4 mb-4"
+      >
         <div className="columns is-multiline">
           <div className="column is-12">
             <h4 className="has-text-weight-bold is-size-5">
@@ -104,7 +109,7 @@ export default function StepThree({
             Allow only authors to submit a proposal
           </p>
         </label>
-      </div>
+      </WrapperResponsive>
       <div className="columns mb-5">
         <div className="column is-12">
           <button

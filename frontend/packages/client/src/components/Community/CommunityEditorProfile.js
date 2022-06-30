@@ -8,7 +8,7 @@ import { MAX_FILE_SIZE } from 'const';
 
 function CommunityEditorProfile({
   name,
-  body,
+  body = '',
   logo,
   // fn to update community payload
   updateCommunity,
@@ -23,22 +23,20 @@ function CommunityEditorProfile({
   const { notifyError } = useErrorHandlerContext();
 
   useEffect(() => {
-    if (name !== undefined && body !== undefined) {
-      if (
-        (communityName !== name && communityName.length > 0) ||
-        communityDescription !== body ||
-        image.file
-      ) {
-        setEnableSave(true);
-      }
-      if (
-        communityName.trim().length === 0 ||
-        (communityName === name &&
-          communityDescription === body &&
-          image.file === undefined)
-      ) {
-        setEnableSave(false);
-      }
+    if (
+      (communityName !== name && communityName.length > 0) ||
+      communityDescription !== body ||
+      image.file
+    ) {
+      setEnableSave(true);
+    }
+    if (
+      communityName.trim().length === 0 ||
+      (communityName === name &&
+        communityDescription === body &&
+        image.file === undefined)
+    ) {
+      setEnableSave(false);
     }
   }, [name, body, communityName, communityDescription, image]);
 

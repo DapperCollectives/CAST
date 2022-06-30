@@ -2,10 +2,10 @@ import React from 'react';
 import { Input } from 'components';
 
 const staticPlaceholders = {
-  contractAddress: 'Contract Address',
-  contractName: 'Contract Name',
+  addr: 'Contract Address',
+  name: 'Contract Name',
   maxWeight: 'Max Weight',
-  minimunBalance: 'Minimum Balance',
+  threshold: 'Minimum Balance',
 };
 
 export default function StrategyInformationForm({

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import StrategySelectorForm from 'components/Community/StrategySelectorForm';
 import ActionButton from 'components/ActionButton';
 import { mapFieldsForBackend } from '../Community/CommunityPropsAndVoting';
@@ -12,18 +12,16 @@ export default function StepFour({
 } = {}) {
   const { strategies } = stepData || {};
 
-  const onStrategySelection = (strategies) => {
-    if (strategies.length > 0) {
+  useEffect(() => {
+    if (strategies?.length > 0 && !isStepValid) {
       setStepValid(true);
     } else {
       setStepValid(false);
     }
-    onDataChange({
-      strategies: strategies.map((st) => ({
-        name: st.name,
-        contract: mapFieldsForBackend(st.contract),
-      })),
-    });
+  }, [strategies, setStepValid, isStepValid]);
+
+  const onStrategySelection = (strategies) => {
+    onDataChange({ strategies });
   };
 
   return (
