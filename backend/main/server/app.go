@@ -1089,8 +1089,6 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Printf("community before update: %+v\n", c)
-
 	payload.Name = &c.Name
 
 	// validate is commuity creator
@@ -1127,8 +1125,6 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-
-	fmt.Printf("community after update: %+v\n", c)
 
 	respondWithJSON(w, http.StatusOK, c)
 }
