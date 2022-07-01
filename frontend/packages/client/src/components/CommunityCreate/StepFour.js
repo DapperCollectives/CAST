@@ -17,7 +17,7 @@ export default function StepFour({
     } else {
       setStepValid(false);
     }
-  }, [strategies, setStepValid]);
+  }, [setStepValid, strategies]);
 
   const onStrategySelection = (strategies) => {
     onDataChange({ strategies });
