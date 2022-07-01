@@ -19,7 +19,7 @@ type Community struct {
 	Name                     string      `json:"name,omitempty"`
 	Category                 *string     `json:"category,omitempty"              validate:"required"`
 	Logo                     *string     `json:"logo,omitempty"`
-	Body                     *string     `json:"body,omitempty"                  validate:"required"`
+	Body                     *string     `json:"body,omitempty"`
 	Strategies               *[]Strategy `json:"strategies,omitempty"`
 	Strategy                 *string     `json:"strategy,omitempty"`
 	Banner_img_url           *string     `json:"bannerImgUrl,omitempty"`
