@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import StrategySelectorForm from 'components/Community/StrategySelectorForm';
 import ActionButton from 'components/ActionButton';
-import { mapFieldsForBackend } from '../Community/CommunityPropsAndVoting';
 
 export default function StepFour({
   stepData,
@@ -13,12 +12,12 @@ export default function StepFour({
   const { strategies } = stepData || {};
 
   useEffect(() => {
-    if (strategies?.length > 0 && !isStepValid) {
+    if (strategies?.length > 0) {
       setStepValid(true);
     } else {
       setStepValid(false);
     }
-  }, [strategies, setStepValid, isStepValid]);
+  }, [strategies, setStepValid]);
 
   const onStrategySelection = (strategies) => {
     onDataChange({ strategies });
