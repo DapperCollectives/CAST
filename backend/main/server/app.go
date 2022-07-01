@@ -1082,13 +1082,14 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 
-	// Fetch community
 	var c = models.Community{ID: id}
 	if err := c.GetCommunity(a.DB); err != nil {
 		log.Error().Err(err)
 		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Invalid request: no community with ID %d", id))
 		return
 	}
+
+	fmt.Printf("community before update: %+v\n", c)
 
 	payload.Name = &c.Name
 
@@ -1126,6 +1127,8 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	fmt.Printf("community after update: %+v\n", c)
 
 	respondWithJSON(w, http.StatusOK, c)
 }

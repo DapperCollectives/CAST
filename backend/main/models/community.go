@@ -192,11 +192,21 @@ func (c *Community) UpdateCommunity(db *s.Database, p *UpdateCommunityRequestPay
 		db.Context,
 		`
 	UPDATE communities
-	SET name = $1, body = $2, logo = $3, strategies = $4, strategy = $5, 
-		banner_img_url = $6, website_url = $7, twitter_url = $8, github_url = $9,
-		discord_url = $10, instagram_url = $11, proposal_validation = $12, 
-		proposal_threshold = $13, category = $14,
-		terms_and_conditions_url = $15
+	SET name = COALESCE($1, name), 
+	body = COALESCE($2, body), 
+	logo = COALESCE($3, logo), 
+	strategies = COALESCE($4, strategies), 
+	strategy = COALESCE($5, strategy),
+	banner_img_url = COALESCE($6, banner_img_url),
+	website_url = COALESCE($7, website_url),
+	twitter_url = COALESCE($8, twitter_url),
+	github_url = COALESCE($9, github_url),
+	discord_url = COALESCE($10, discord_url),
+	instagram_url = COALESCE($11, instagram_url),
+	proposal_validation = COALESCE($12, proposal_validation),
+	proposal_threshold = COALESCE($13, proposal_threshold),
+	category = COALESCE($14, category),
+	terms_and_conditions_url = COALESCE($15, terms_and_conditions_url)
 	WHERE id = $16
 	`,
 		p.Name,
