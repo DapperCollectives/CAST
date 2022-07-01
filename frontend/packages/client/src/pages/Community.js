@@ -217,8 +217,16 @@ export default function Community() {
     return null;
   }
 
-  const { instagramUrl, twitterUrl, websiteUrl, discordUrl, githubUrl } =
-    community ?? {};
+  const {
+    instagramUrl,
+    twitterUrl,
+    websiteUrl,
+    discordUrl,
+    githubUrl,
+    logo,
+    slug,
+    id,
+  } = community ?? {};
 
   const titleClassNames = classnames(
     'is-size-5 has-text-weight-bold',
@@ -234,29 +242,45 @@ export default function Community() {
     'is-flex container community-header section',
     { 'is-justify-content-space-between': notMobile }
   );
+
+  const imageContainerClasses = classnames(
+    { '': notMobile },
+    {
+      'is-flex is-flex-direction-column is-justify-content-center m-0 community-logo-wrapper':
+        !notMobile,
+    }
+  );
+  const imageClases = classnames(
+    {
+      'rounded-full community-logo-mobile': !notMobile,
+    },
+    {
+      'rounded-full': notMobile,
+    }
+  );
   return (
     <section className="full-height pt-0">
       {community ? (
         <div className="is-flex community-header-wrapper">
           <div className={headerContainerClassNames}>
             <div className="is-flex community-specific">
-              <div className="is-hidden-tablet is-mobile is-flex is-flex-direction-column is-justify-content-center m-0 community-logo-wrapper">
-                <img
-                  className="rounded-full community-logo-mobile"
-                  alt="community banner"
-                  src={community.logo}
-                  height="85px"
-                  width="85px"
-                />
-              </div>
-              <div className="is-hidden-mobile">
-                <img
-                  alt="community banner"
-                  className="rounded-full"
-                  src={community.logo}
-                  height="149px"
-                  width="149px"
-                />
+              <div className={imageContainerClasses}>
+                {logo ? (
+                  <img
+                    className={imageClases}
+                    alt="community banner"
+                    src={logo}
+                    height="85px"
+                    width="85px"
+                  />
+                ) : (
+                  <Blockies
+                    seed={slug ?? id}
+                    size={10}
+                    scale={9.6}
+                    className="blockies"
+                  />
+                )}
               </div>
               <div className="column community-info is-justify-content-space-evenly">
                 <h2 className={titleClassNames}>{community.name}</h2>

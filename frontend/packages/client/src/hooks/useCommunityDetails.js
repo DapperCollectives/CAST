@@ -18,18 +18,14 @@ export default function useCommunityDetails(id) {
       const response = await fetch(url);
       const details = await checkResponse(response);
       // merging with mock data
-      const detailsMocked = {
-        logo: 'https://i.imgur.com/RMKXPCw.png',
-        name: 'Flow',
-        description:
-          "Flow's decentralized governance and node operations community.",
+      const detailsUpdated = {
         about: {
           textAbout: details.body,
         },
         ...details,
       };
 
-      dispatch({ type: 'SUCCESS', payload: detailsMocked });
+      dispatch({ type: 'SUCCESS', payload: detailsUpdated });
     } catch (err) {
       notifyError(err, url);
       dispatch({ type: 'ERROR', payload: { errorData: err.message } });
