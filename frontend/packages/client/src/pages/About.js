@@ -7,7 +7,7 @@ const AboutPage = () => {
   const navigate = useNavigate();
   const modal = state?.modal ?? true;
   const closeModal = () => {
-    navigate('../');
+    navigate('/');
   };
   return (
     <div className={modal ? 'modal is-active' : undefined}>

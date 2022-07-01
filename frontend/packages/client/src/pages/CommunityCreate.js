@@ -32,7 +32,7 @@ export default function CommunityCreate() {
 
   useEffect(() => {
     if (data?.id) {
-      navigate(`../${data.id}`);
+      navigate(`/community/${data.id}`);
     }
   }, [data, navigate]);
 

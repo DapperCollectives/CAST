@@ -17,7 +17,7 @@ const EmptyPlaceHolder = ({ communityId }) => {
           <p className="has-text-grey mb-4 small-text">
             What will your community’s first proposal be?
           </p>
-          <Link to={`../../proposal/create?communityId=${communityId}`}>
+          <Link to={`/proposal/create?communityId=${communityId}`}>
             <p className="small-text">
               Click here to start creating a proposal now
             </p>

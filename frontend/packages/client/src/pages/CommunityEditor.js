@@ -22,7 +22,7 @@ const MenuTabs = ({ tabs, communityId, onClickButtonTab = () => {} } = {}) => {
   return (
     <div>
       <div className="is-flex pl-2 mb-6">
-        <Link to={`../../${communityId}?tabs=proposals`}>
+        <Link to={`/community/${communityId}?tabs=proposals`}>
           <span className="has-text-grey is-flex is-align-items-center back-button transition-all">
             <ArrowLeft /> <span className="ml-3">Back</span>
           </span>
@@ -74,7 +74,7 @@ const DropdownMenu = ({ communityId, onClickButtonTab = () => {} } = {}) => {
           className="column is-flex is-align-center"
           style={{ width: '100%' }}
         >
-          <Link to={`../../${communityId}?tabs=about`}>
+          <Link to={`/community/${communityId}?tabs=about`}>
             <ArrowLeftBold />
           </Link>
           <p
@@ -146,7 +146,7 @@ export default function CommunityEditorPage() {
   // otherwise it's redirected to previous location
   useEffect(() => {
     if ((!isAdmin && addr === null) || (isAdmin === false && addr)) {
-      navigate('../../');
+      navigate('/');
       return;
     }
   }, [isAdmin, addr, navigate]);

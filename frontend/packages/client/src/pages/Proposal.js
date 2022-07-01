@@ -63,7 +63,8 @@ export default function ProposalPage() {
   const [isStrategyModalOpen, setIsStrategyModalOpen] = useState(false);
 
   // setting this manually for users that do not have a ledger device
-  const [{ forceLedger }] = useSearchParams();
+  const [searchParams] = useSearchParams();
+  const forceLedger = searchParams.get('forceLedger');
 
   const modalContext = useModalContext();
 

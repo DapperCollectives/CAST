@@ -91,20 +91,37 @@ function StepByStep({
   }, [currentStep, goToStep]);
 
   useEffect(() => {
+    // check if displayStep is valid
     const displayStep = searchParams.get('step');
-    const displayStepNum = Number(displayStep);
-    const validStepsVals = Object.values(validSteps);
-    const numValidSteps = validStepsVals.length;
-    const allValidSteps = () =>
-      numValidSteps &&
-      validStepsVals.slice(0, displayStepNum - 1).every((val) => val === true);
+    const displayStepNum = !isNaN(Number(displayStep))
+      ? Number(displayStep)
+      : -1;
     if (
       displayStep === null || // first time, need to set step in URL
       displayStep === undefined || // first time, need to set step in URL
       displayStepNum <= 0 || // prevent out-of-bounds values
-      displayStepNum > steps.length || // prevent out-of-bounds values
-      (displayStepNum > 1 && !allValidSteps()) || // prevent reaching a subsequent step until prior steps have data
-      (!Object.keys(stepsData).length && numValidSteps) // mismatch
+      displayStepNum > steps.length // prevent out-of-bounds values
+    ) {
+      setValidSteps({});
+      goToStep(0, true);
+    }
+  }, [searchParams, steps.length, setValidSteps, goToStep]);
+
+  useEffect(() => {
+    // check if valid condition to go forward/back
+    const displayStep = searchParams.get('step');
+    const displayStepNum = !isNaN(Number(displayStep))
+      ? Number(displayStep)
+      : -1;
+    const validStepsVals = Object.values(validSteps);
+    const numValidSteps = validStepsVals.length;
+    const allValidSteps = () =>
+      validStepsVals.slice(0, displayStepNum - 1).every((val) => val === true);
+    if (
+      // prevent reaching a subsequent step until prior steps have data
+      (displayStepNum > 1 && (!numValidSteps || !allValidSteps())) ||
+      // or in the case of a mismatch
+      (!Object.keys(stepsData).length && numValidSteps)
     ) {
       setValidSteps({});
       goToStep(0, true);
@@ -116,8 +133,6 @@ function StepByStep({
     currentStep,
     goToStep,
     searchParams,
-    steps.length,
-    isStepValid,
     stepsData,
     validSteps,
     setValidSteps,

@@ -9,7 +9,7 @@ export const MobileTabletCard = ({ pr, style }) => {
   const { src, alt } = imgProps;
 
   return (
-    <Link to={`../../proposal/${pr.id}`}>
+    <Link to={`/proposal/${pr.id}`}>
       <div
         className="border-light rounded-sm mb-5 proposal-card transition-all"
         style={{ overflow: 'hidden', ...style }}

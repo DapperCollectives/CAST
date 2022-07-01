@@ -26,11 +26,12 @@ export default function ProposalCreatePage() {
 
   const { notifyError } = useErrorHandlerContext();
 
-  const [{ communityId }] = useSearchParams();
+  const [searchParams] = useSearchParams();
+  const communityId = searchParams.get('communityId');
 
   useEffect(() => {
     if (data?.id) {
-      navigate(`../${data.id}`);
+      navigate(`/proposal/${data.id}`);
     }
   }, [data, navigate]);
 
