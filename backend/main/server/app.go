@@ -1089,8 +1089,6 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	payload.Name = &c.Name
-
 	// validate is commuity creator
 	// TODO: update to validating address is admin
 	if err := c.CanUpdateCommunity(a.DB, payload.Signing_addr); err != nil {
