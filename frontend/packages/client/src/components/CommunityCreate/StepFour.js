@@ -12,12 +12,12 @@ export default function StepFour({
   const { strategies } = stepData || {};
 
   useEffect(() => {
-    if (strategies?.length > 0 && !isStepValid) {
+    if (strategies?.length > 0) {
       setStepValid(true);
     } else {
       setStepValid(false);
     }
-  }, [strategies, setStepValid, isStepValid]);
+  }, [strategies, setStepValid]);
 
   const onStrategySelection = (strategies) => {
     onDataChange({ strategies });
