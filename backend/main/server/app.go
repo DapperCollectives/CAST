@@ -1089,15 +1089,12 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 
-	// Fetch community
 	var c = models.Community{ID: id}
 	if err := c.GetCommunity(a.DB); err != nil {
 		log.Error().Err(err)
 		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Invalid request: no community with ID %d", id))
 		return
 	}
-
-	payload.Name = &c.Name
 
 	// validate is commuity creator
 	// TODO: update to validating address is admin
