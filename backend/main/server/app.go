@@ -752,7 +752,6 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// get latest snapshotted blockheight
 	snapshot, err := a.SnapshotClient.GetLatestSnapshot()
 	if err != nil {
 		log.Error().Err(err).Msg("error fetching latest snapshot")
@@ -798,6 +797,14 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+
+	if err := a.SnapshotClient.TakeSnapshot(strategy.Contract); err != nil {
+		log.Error().Err(err).Msg("error taking snapshot")
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	fmt.Println("snapshotter fired")
 
 	// pin to ipfs
 	if os.Getenv("APP_ENV") != "TEST" {
@@ -1452,8 +1459,13 @@ func (a *App) getAccountAtBlockHeight(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	flowToken := "FlowToken"
+	defaultFlowContract := shared.Contract{
+		Name: &flowToken,
+	}
+
 	b := Balance{}
-	if err = a.SnapshotClient.GetAddressBalanceAtBlockHeight(addr, blockHeight, &b); err != nil {
+	if err = a.SnapshotClient.GetAddressBalanceAtBlockHeight(addr, blockHeight, &b, defaultFlowContract); err != nil {
 		log.Error().Err(err).Msgf("error getting account %s at blockheight %d", addr, blockHeight)
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return

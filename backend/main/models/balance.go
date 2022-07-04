@@ -32,7 +32,11 @@ func (b *Balance) GetBalanceByAddressAndBlockHeight(db *s.Database) error {
 }
 
 func (b *Balance) FetchAddressBalanceAtBlockHeight(c *s.SnapshotClient, address string, blockheight uint64) error {
-	err := c.GetAddressBalanceAtBlockHeight(address, blockheight, b)
+	flowToken := "FlowToken"
+	defaultContract := s.Contract{
+		Name: &flowToken,
+	}
+	err := c.GetAddressBalanceAtBlockHeight(address, blockheight, b, defaultContract)
 	if err != nil {
 		return err
 	}
