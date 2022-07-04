@@ -60,6 +60,12 @@ export default function useCommunity() {
           return;
         }
 
+        // Do we need to fill fiels with default info?
+        // contractAddress =  '0x0ae53cb6e3f42a79',
+        // contractName = 'FlowToken',
+        // storagePath = 'flowTokenBalance',
+        // when user leaves fields empty
+
         const {
           communityName: name,
           communityDescription: body,
