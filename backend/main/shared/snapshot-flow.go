@@ -52,16 +52,10 @@ func NewSnapshotClient(baseUrl string) *SnapshotClient {
 }
 
 func (c *SnapshotClient) TakeSnapshot(contract Contract) error {
-	var url string
-	var i interface{}
-	i = &struct{}{}
+	var response interface{}
+	response = &struct{}{}
 
-	if *contract.Name == "FlowToken" {
-		url = fmt.Sprintf(`%s/snapshot-flow-balances`, c.BaseURL)
-	} else {
-		url = fmt.Sprintf(`%s/take-snapshot/%v/%v`, c.BaseURL, contract.Addr, contract.Name)
-	}
-
+	url := c.setSnapshotUrl(contract)
 	req, err := http.NewRequest("POST", url, nil)
 	if err != nil {
 		log.Debug().Err(err).Msg("SnapshotClient TakeSnapshot request error")
@@ -71,12 +65,25 @@ func (c *SnapshotClient) TakeSnapshot(contract Contract) error {
 	fmt.Println("Sending request to take snapshot")
 
 	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
-	if err := c.sendRequest(req, i); err != nil {
+	if err := c.sendRequest(req, response); err != nil {
 		log.Debug().Err(err).Msg("SnapshotClient takeSnapshot request error")
 		return err
 	}
 
+	fmt.Printf("response from take snapshot: %v\n", response)
 	return nil
+}
+
+func (c *SnapshotClient) setSnapshotUrl(contract Contract) string {
+	var url string
+
+	if *contract.Name == "FlowToken" {
+		url = fmt.Sprintf(`%s/snapshot-flow-balances`, c.BaseURL)
+	} else {
+		url = fmt.Sprintf(`%s/take-snapshot/%v/%v`, c.BaseURL, contract.Addr, contract.Name)
+	}
+
+	return url
 }
 
 func (c *SnapshotClient) sendRequest(req *http.Request, pointer interface{}) error {
