@@ -4,6 +4,12 @@ import { checkResponse, getCompositeSigs } from 'utils';
 import { useErrorHandlerContext } from '../contexts/ErrorHandler';
 import { useFileUploader } from 'hooks';
 
+const setDefaultValue = (field, fallbackValue) => {
+  if (field === undefined || field === '') {
+    return fallbackValue;
+  }
+  return field;
+};
 export default function useCommunity() {
   const [state, dispatch] = useReducer(defaultReducer, {
     ...INITIAL_STATE,
@@ -60,12 +66,6 @@ export default function useCommunity() {
           return;
         }
 
-        // Do we need to fill fiels with default info?
-        // contractAddress =  '0x0ae53cb6e3f42a79',
-        // contractName = 'FlowToken',
-        // storagePath = 'flowTokenBalance',
-        // when user leaves fields empty
-
         const {
           communityName: name,
           communityDescription: body,
@@ -75,16 +75,16 @@ export default function useCommunity() {
           listAddrAuthors,
           creatorAddr,
           slug,
-          proposalThreshold,
           discordUrl,
           githubUrl,
           instagramUrl,
           twitterUrl,
           websiteUrl,
           logo,
-          contractAddress,
-          contractName,
-          storagePath,
+          contractAdrress: contractAddr,
+          contractName: contractN,
+          storagePath: storageP,
+          proposalThreshold: propThreshold,
           onlyAuthorsToSubmitProposals,
         } = communityData;
 
@@ -112,7 +112,6 @@ export default function useCommunity() {
             creatorAddr,
             additionalAuthors: listAddrAuthors?.map((ele) => ele.addr),
             additionalAdmins: listAddrAdmins?.map((ele) => ele.addr),
-            proposalThreshold,
             slug,
             githubUrl,
             instagramUrl,
@@ -120,9 +119,13 @@ export default function useCommunity() {
             websiteUrl,
             discordUrl,
             logo: communityLogo?.fileUrl,
-            contractAddress,
-            contractName,
-            storagePath,
+            contractAddress: setDefaultValue(
+              contractAddr,
+              '0x0ae53cb6e3f42a79'
+            ),
+            contractName: setDefaultValue(contractN, 'FlowToken'),
+            storagePath: setDefaultValue(storageP, 'flowTokenBalance'),
+            proposalThreshold: setDefaultValue(propThreshold, '0'),
             onlyAuthorsToSubmit: Boolean(onlyAuthorsToSubmitProposals),
             timestamp,
             compositeSignatures,
