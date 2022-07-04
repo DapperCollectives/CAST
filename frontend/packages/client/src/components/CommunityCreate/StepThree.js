@@ -1,15 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { WrapperResponsive } from 'components';
 import { isValidAddress } from 'utils';
-import isNumber from 'lodash/isNumber';
 
-// validate that proposalThreshold is a number higher than 0
-const isValidThreSholdNumber = (proposalThreshold) => {
-  const threshold = Number(proposalThreshold);
-  return isNumber(threshold) && threshold > 0;
+const allEmptyFields = (data, fields) => {
+  return (
+    // all fields are undefined
+    fields.every((field) => data[field] === undefined) ||
+    // all fields have data and are not empty strings
+    fields.every((field) => data[field] !== undefined && data[field] !== '')
+  );
 };
-
-const allEmptyOrAllFill = (data, fields) => {
+const allFiedlsFilled = (data, fields) => {
   return (
     // all fields are undefined
     fields.every((field) => data[field] === undefined) ||
@@ -32,29 +33,6 @@ export default function StepThree({
     onlyAuthorsToSubmitProposals = false,
   } = stepData;
 
-  const [authorCheckboxDisabled, setAuthorCheckboxDisabled] = useState(true);
-
-  // If user opts to proceed without setting a proposal threshold
-  // we should automatically mark the community as Authors Only possibly
-  useEffect(() => {
-    if (isValidThreSholdNumber(proposalThreshold) && authorCheckboxDisabled) {
-      setAuthorCheckboxDisabled(false);
-    }
-    if (
-      !onlyAuthorsToSubmitProposals &&
-      !isValidThreSholdNumber(proposalThreshold)
-    ) {
-      setAuthorCheckboxDisabled(true);
-      onDataChange({ onlyAuthorsToSubmitProposals: true });
-    }
-  }, [
-    onlyAuthorsToSubmitProposals,
-    proposalThreshold,
-    setAuthorCheckboxDisabled,
-    onDataChange,
-    authorCheckboxDisabled,
-  ]);
-
   useEffect(() => {
     const requiredFields = {
       contractAddress: (addr) =>
@@ -71,27 +49,26 @@ export default function StepThree({
       Object.keys(requiredFields).every(
         (field) => stepData && requiredFields[field](stepData[field])
       ) &&
-      allEmptyOrAllFill(stepData, [
+      // only autors can submit: ignore threshold it could be a number or empty
+      ((allEmptyFields(stepData, [
         'contractAddress',
         'contractName',
         'storagePath',
-      ]);
+        'proposalThreshold',
+      ]) &&
+        onlyAuthorsToSubmitProposals) ||
+        // anyone can submit: use threshold
+        (allFiedlsFilled(stepData, [
+          'contractAddress',
+          'contractName',
+          'storagePath',
+          'proposalThreshold',
+        ]) &&
+          !onlyAuthorsToSubmitProposals));
 
-    const threshold = Number(stepData?.proposalThreshold);
+    // const threshold = Number(stepData?.proposalThreshold);
 
-    if (
-      isValid &&
-      // anyone can submit: we need a threshold
-      ((!onlyAuthorsToSubmitProposals &&
-        isNumber(threshold) &&
-        threshold > 0) ||
-        // only autors can submit: ignore threshold it could be a number or empty
-        onlyAuthorsToSubmitProposals)
-    ) {
-      setStepValid(true);
-      return;
-    }
-    setStepValid(false);
+    setStepValid(isValid);
   }, [stepData, setStepValid, onlyAuthorsToSubmitProposals]);
 
   return (
