@@ -23,6 +23,16 @@ type Snapshot struct {
 	Finished     time.Time `json:"finished"`
 }
 
+type LatestBlockHeight struct {
+	ID              string    `json:"id"`
+	FungibleTokenID string    `json:"fungibleTokenId"`
+	BlockHeight     uint64    `json:"blockHeight"`
+	Started         time.Time `json:"started"`
+	Finished        time.Time `json:"finished"`
+	Status          string    `json:"status"`
+	Attempts        int       `json:"attempts"`
+}
+
 type balanceAtBlockheight struct {
 	ID              string    `json:"id"`
 	FungibleTokenID string    `json:"fungibleTokenId"`
@@ -55,57 +65,36 @@ func (c *SnapshotClient) TakeSnapshot(contract Contract) error {
 	var response interface{}
 	response = &struct{}{}
 
-	url := c.setSnapshotUrl(contract)
-	req, err := http.NewRequest("POST", url, nil)
+	url := c.setSnapshotUrl(contract, "take-snapshot")
+	req, err := c.setRequestMethod("POST", url)
 	if err != nil {
 		log.Debug().Err(err).Msg("SnapshotClient TakeSnapshot request error")
 		return err
 	}
 
-	fmt.Println("Sending request to take snapshot")
-
-	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
 	if err := c.sendRequest(req, response); err != nil {
 		log.Debug().Err(err).Msg("SnapshotClient takeSnapshot request error")
 		return err
 	}
-
-	fmt.Printf("response from take snapshot: %v\n", response)
 	return nil
 }
 
-func (c *SnapshotClient) setSnapshotUrl(contract Contract) string {
-	var url string
+func (c *SnapshotClient) GetSnapshotStatus(contract Contract) (LatestBlockHeight, error) {
+	var b LatestBlockHeight
 
-	if *contract.Name == "FlowToken" {
-		url = fmt.Sprintf(`%s/snapshot-flow-balances`, c.BaseURL)
-	} else {
-		url = fmt.Sprintf(`%s/take-snapshot/%v/%v`, c.BaseURL, contract.Addr, contract.Name)
-	}
-
-	return url
-}
-
-func (c *SnapshotClient) sendRequest(req *http.Request, pointer interface{}) error {
-	res, err := c.HTTPClient.Do(req)
+	url := c.setSnapshotUrl(contract, "latest-blockheight")
+	req, err := c.setRequestMethod("GET", url)
 	if err != nil {
-		log.Debug().Err(err).Msg("snapshot http client error")
-		return err
+		log.Debug().Err(err).Msg("SnapshotClient GetSnapshotStatus request error")
+		return b, err
 	}
 
-	defer res.Body.Close()
-
-	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusBadRequest {
-		log.Debug().Msgf("snapshot error in sendRequest")
-		return fmt.Errorf("unknown snapshot error, status code: %d", res.StatusCode)
+	if err := c.sendRequest(req, &b); err != nil {
+		log.Debug().Err(err).Msg("SnapshotClient GetSnapshotStatus send request error")
+		return b, err
 	}
 
-	if err = json.NewDecoder(res.Body).Decode(pointer); err != nil {
-		log.Debug().Err(err).Msgf("snapshot response decode error")
-		return err
-	}
-
-	return nil
+	return b, nil
 }
 
 func (c *SnapshotClient) GetAddressBalanceAtBlockHeight(
@@ -133,8 +122,11 @@ func (c *SnapshotClient) GetAddressBalanceAtBlockHeight(
 		)
 	}
 
-	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+	req, err := c.setRequestMethod("GET", url)
+	if err != nil {
+		log.Debug().Err(err).Msg("SnapshotClient GetAddressBalanceAtBlockHeight request error")
+		return err
+	}
 
 	if err := c.sendRequest(req, balancePointer); err != nil {
 		log.Debug().Err(err).Msgf("Snapshot GetAddressBalanceAtBlockHeight send request error.")
@@ -144,7 +136,7 @@ func (c *SnapshotClient) GetAddressBalanceAtBlockHeight(
 	return nil
 }
 
-func (c *SnapshotClient) GetLatestSnapshot() (*Snapshot, error) {
+func (c *SnapshotClient) GetLatestFlowSnapshot() (*Snapshot, error) {
 	var snapshot Snapshot
 
 	// Send dummy data for tests
@@ -162,6 +154,50 @@ func (c *SnapshotClient) GetLatestSnapshot() (*Snapshot, error) {
 	}
 
 	return &snapshot, nil
+}
+
+func (c *SnapshotClient) setSnapshotUrl(contract Contract, route string) string {
+	var url string
+	if *contract.Name == "FlowToken" {
+		url = fmt.Sprintf(`%s/%s`, c.BaseURL, route)
+	} else {
+		url = fmt.Sprintf(`%s/%s/%v/%v`, c.BaseURL, route, contract.Addr, contract.Name)
+	}
+
+	return url
+}
+
+func (c *SnapshotClient) setRequestMethod(method, url string) (*http.Request, error) {
+	req, err := http.NewRequest(method, url, nil)
+	if err != nil {
+		log.Debug().Err(err).Msg("SnapshotClient TakeSnapshot request error")
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+
+	return req, nil
+}
+
+func (c *SnapshotClient) sendRequest(req *http.Request, pointer interface{}) error {
+	res, err := c.HTTPClient.Do(req)
+	if err != nil {
+		log.Debug().Err(err).Msg("snapshot http client error")
+		return err
+	}
+
+	defer res.Body.Close()
+
+	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusBadRequest {
+		log.Debug().Msgf("snapshot error in sendRequest")
+		return fmt.Errorf("unknown snapshot error, status code: %d", res.StatusCode)
+	}
+
+	if err = json.NewDecoder(res.Body).Decode(pointer); err != nil {
+		log.Debug().Err(err).Msgf("snapshot response decode error")
+		return err
+	}
+
+	return nil
 }
 
 // Don't hit snapshot service if ENV is TEST or DEV
