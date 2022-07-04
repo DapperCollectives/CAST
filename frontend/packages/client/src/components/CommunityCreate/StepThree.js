@@ -2,21 +2,27 @@ import React, { useEffect } from 'react';
 import { WrapperResponsive } from 'components';
 import { isValidAddress } from 'utils';
 
-const allEmptyFields = (data, fields) => {
+const allEmptyFields = (data) => {
+  // all fields are undefined: form untouched or empty strings
+  const fields = [
+    'contractAddress',
+    'contractName',
+    'storagePath',
+    'proposalThreshold',
+  ];
   return (
-    // all fields are undefined
     fields.every((field) => data[field] === undefined) ||
-    // all fields have data and are not empty strings
-    fields.every((field) => data[field] !== undefined && data[field] !== '')
+    fields.every((field) => data[field] === '')
   );
 };
-const allFiedlsFilled = (data, fields) => {
-  return (
-    // all fields are undefined
-    fields.every((field) => data[field] === undefined) ||
-    // all fields have data and are not empty strings
-    fields.every((field) => data[field] !== undefined && data[field] !== '')
-  );
+const allFiedlsFilled = (data) => {
+  // all fields have data and are not empty strings: form touched
+  return [
+    'contractAddress',
+    'contractName',
+    'storagePath',
+    'proposalThreshold',
+  ].every((field) => data[field] !== undefined && data[field] !== '');
 };
 export default function StepThree({
   stepData = {},
@@ -49,24 +55,11 @@ export default function StepThree({
       Object.keys(requiredFields).every(
         (field) => stepData && requiredFields[field](stepData[field])
       ) &&
-      // only autors can submit: ignore threshold it could be a number or empty
-      ((allEmptyFields(stepData, [
-        'contractAddress',
-        'contractName',
-        'storagePath',
-        'proposalThreshold',
-      ]) &&
-        onlyAuthorsToSubmitProposals) ||
-        // anyone can submit: use threshold
-        (allFiedlsFilled(stepData, [
-          'contractAddress',
-          'contractName',
-          'storagePath',
-          'proposalThreshold',
-        ]) &&
-          !onlyAuthorsToSubmitProposals));
-
-    // const threshold = Number(stepData?.proposalThreshold);
+      // only autors can submit, Ignore all other fields they must be empty
+      ((allEmptyFields(stepData) && onlyAuthorsToSubmitProposals) ||
+        // all fields are complete with valid data
+        // (onlyAuthorsToSubmitProposals could be checked or not)
+        allFiedlsFilled(stepData));
 
     setStepValid(isValid);
   }, [stepData, setStepValid, onlyAuthorsToSubmitProposals]);
