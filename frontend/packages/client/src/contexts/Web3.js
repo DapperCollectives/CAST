@@ -78,7 +78,7 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
   const { user, isLedger } = useFclUser(fcl, extraConfig.forceLedger);
 
   // add check for address
-  const isValidAddress = async (addr) => {
+  const isValidFlowAddress = async (addr) => {
     try {
       return fcl.account(addr);
     } catch (err) {
@@ -106,7 +106,7 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
     isLedger,
     network,
     logOut,
-    isValidAddress,
+    isValidFlowAddress,
     ...props,
   };
 
