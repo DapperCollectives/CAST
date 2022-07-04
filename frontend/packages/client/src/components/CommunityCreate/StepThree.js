@@ -15,7 +15,7 @@ const allEmptyFields = (data) => {
     fields.every((field) => data[field] === '')
   );
 };
-const allFiedlsFilled = (data) => {
+const allFieldsFilled = (data) => {
   // all fields have data and are not empty strings: form touched
   return [
     'contractAddress',
@@ -59,7 +59,7 @@ export default function StepThree({
       ((allEmptyFields(stepData) && onlyAuthorsToSubmitProposals) ||
         // all fields are complete with valid data
         // (onlyAuthorsToSubmitProposals could be checked or not)
-        allFiedlsFilled(stepData));
+        allFieldsFilled(stepData));
 
     setStepValid(isValid);
   }, [stepData, setStepValid, onlyAuthorsToSubmitProposals]);
