@@ -1,4 +1,4 @@
-name: UPDATE PROD
+name: UPDATE PROD GCP
 
 on:
   push:
