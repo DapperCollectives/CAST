@@ -27,7 +27,7 @@ jobs:
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   migrations:
     name: Migrations
-    runs-on: staging-runner
+    runs-on: production-runner
     if: "!contains(github.event.head_commit.message, 'cancel migrations')"
     steps:
 
