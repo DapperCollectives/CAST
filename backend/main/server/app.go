@@ -698,8 +698,6 @@ func (a *App) getProposal(w http.ResponseWriter, r *http.Request) {
 
 	p := models.Proposal{ID: id}
 	if err := p.GetProposalById(a.DB); err != nil {
-		// TODO: for some reason switch err doesn't match pgx.ErrNoRows.
-		// So I've added .Error() to convert to a string comparison
 		switch err.Error() {
 		case pgx.ErrNoRows.Error():
 			respondWithError(w, http.StatusNotFound, "Proposal not found")
@@ -708,6 +706,27 @@ func (a *App) getProposal(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
+
+	c := models.Community{ID: p.Community_id}
+	if err := c.GetCommunity(a.DB); err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	strategy, err := models.MatchStrategyByProposal(*c.Strategies, *p.Strategy)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	snapshotResponse, err := a.SnapshotClient.GetSnapshotStatus(strategy.Contract)
+	if err != nil {
+		log.Error().Err(err).Msg("error getting snapshot status")
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	p.Snapshot = snapshotResponse
 
 	respondWithJSON(w, http.StatusOK, p)
 }
@@ -806,27 +825,26 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	snapshotResponse, err := a.SnapshotClient.GetSnapshotStatus(strategy.Contract)
-	p.SnapshotStatus = snapshotResponse
-
 	if err != nil {
 		log.Error().Err(err).Msg("error getting snapshot status")
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	// pin to ipfs
-	// if os.Getenv("APP_ENV") != "TEST" {
-	// 	pin, err := a.IpfsClient.PinJson(p)
-	// 	if err != nil {
-	// 		log.Error().Err(err).Msg("error pinning proposal to IPFS")
-	// 		respondWithError(w, http.StatusInternalServerError, err.Error())
-	// 		return
-	// 	}
-	// 	p.Cid = &pin.IpfsHash
-	// } else {
-	// 	dummyCid := "000000"
-	// 	p.Cid = &dummyCid
-	// }
+	p.Snapshot = snapshotResponse
+
+	if os.Getenv("APP_ENV") != "TEST" {
+		pin, err := a.IpfsClient.PinJson(p)
+		if err != nil {
+			log.Error().Err(err).Msg("error pinning proposal to IPFS")
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		p.Cid = &pin.IpfsHash
+	} else {
+		dummyCid := "000000"
+		p.Cid = &dummyCid
+	}
 
 	// validate proposal fields
 	validate := validator.New()
