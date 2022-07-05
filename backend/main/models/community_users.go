@@ -39,6 +39,12 @@ type CommunityUserPayload struct {
 	Composite_signatures *[]s.CompositeSignature `json:"compositeSignatures" validate:"required"`
 }
 
+type UserAchievements = []struct {
+	Address   string
+	NumVotes  int
+	EarlyVote int
+}
+
 type LeaderboardUserPayload struct {
 	Addr  string `json:"addr" validate:"required"`
 	Score int    `json:"score,omitempty"`
@@ -109,35 +115,10 @@ func GetCommunityLeaderboard(db *s.Database, communityId, start, count int) ([]L
 	var leaderboardUsers = []LeaderboardUserPayload{}
 	var defaultEarlyVoteWeight = 1
 
-	// Retrieve each user in the community with totals for
-	// their votes and achievements (e.g. early votes, streaks and winning choices)
-	// Note: crosstab is a postgres extension that creates a pivot table.
-	// Achievements are joined as columns for each user.
-	sql := fmt.Sprintf(
-		`
-		SELECT v.addr as address, count(*) as num_votes, 
-			CASE WHEN a.early_vote is NULL THEN 0 ELSE a.early_vote END as early_vote 
-			FROM votes v 
-			LEFT OUTER JOIN proposals p ON p.id = v.proposal_id
-			LEFT OUTER JOIN (
-				SELECT * FROM crosstab(
-					$$SELECT addr, achievement_type, count(*) FROM community_users_achievements 
-					WHERE community_id = %d
-					GROUP BY addr, achievement_type
-					ORDER BY 1,2$$
-				) AS ct(address varchar(18), early_vote bigint)
-			) a ON v.addr = a.address
-			WHERE p.community_id = $1
-			GROUP BY v.addr, a.early_vote
-			LIMIT $2 OFFSET $3
-		`, communityId)
+	userAchievements, err := getUserAchievements(db, communityId, start, count)
 
-	err := pgxscan.Select(db.Context, db.Conn, &userAchievements, sql, communityId, count, start)
-
-	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
-		return nil, 0, err
-	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
-		return []LeaderboardUserPayload{}, 0, nil
+	if err != nil {
+		return leaderboardUsers, 0, err
 	}
 
 	for _, user := range userAchievements {
@@ -147,9 +128,7 @@ func GetCommunityLeaderboard(db *s.Database, communityId, start, count int) ([]L
 		leaderboardUsers = append(leaderboardUsers, leaderboardUser)
 	}
 
-	var totalUsers int
-	countSql := `SELECT COUNT(*) FROM community_users WHERE community_id = $1`
-	_ = db.Conn.QueryRow(db.Context, countSql, communityId).Scan(&totalUsers)
+	totalUsers := getTotalUsersForCommunity(db, communityId)
 
 	return leaderboardUsers, totalUsers, nil
 }
@@ -281,4 +260,49 @@ func EnsureValidRole(userType string) bool {
 		}
 	}
 	return false
+}
+
+func getTotalUsersForCommunity(db *s.Database, communityId int) int {
+	var totalUsers int
+	countSql := `SELECT COUNT(*) FROM community_users WHERE community_id = $1`
+	_ = db.Conn.QueryRow(db.Context, countSql, communityId).Scan(&totalUsers)
+	return totalUsers
+}
+
+func getUserAchievements(db *s.Database, communityId int, start int, count int) (UserAchievements, error) {
+	var userAchievements UserAchievements
+	// Retrieve each user in the community with totals for
+	// their votes and achievements (e.g. early votes, streaks and winning choices)
+	// Note 1: crosstab is a postgres extension that creates a pivot table.
+	// Achievements are joined as columns for each user.
+	// Note 2: Subselect community_id not replaced properly by $1, so has been
+	// substituted in string first.
+	sql := fmt.Sprintf(
+		`
+		SELECT v.addr as address, count(*) as num_votes, 
+			CASE WHEN a.early_vote is NULL THEN 0 ELSE a.early_vote END as early_vote 
+			FROM votes v 
+			LEFT OUTER JOIN proposals p ON p.id = v.proposal_id
+			LEFT OUTER JOIN (
+				SELECT * FROM crosstab(
+					$$SELECT addr, achievement_type, count(*) FROM community_users_achievements 
+					WHERE community_id = %d
+					GROUP BY addr, achievement_type
+					ORDER BY 1,2$$
+				) AS ct(address varchar(18), early_vote bigint)
+			) a ON v.addr = a.address
+			WHERE p.community_id = $1
+			GROUP BY v.addr, a.early_vote
+			LIMIT $2 OFFSET $3
+		`, communityId)
+
+	err := pgxscan.Select(db.Context, db.Conn, &userAchievements, sql, communityId, count, start)
+
+	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
+		return nil, err
+	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
+		return UserAchievements{}, nil
+	}
+
+	return userAchievements, nil
 }

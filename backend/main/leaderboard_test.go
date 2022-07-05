@@ -17,14 +17,8 @@ func TestGetCommunityLeaderboard(t *testing.T) {
 	clearTable("votes")
 
 	communityId := otu.AddCommunities(1)[0]
-	proposalIds := otu.AddActiveProposals(communityId, 3)
-	voteChoice := "a"
 
-	otu.CreateVoteAPI(proposalIds[0], otu.GenerateValidVotePayload("user1", proposalIds[0], voteChoice))
-	otu.CreateVoteAPI(proposalIds[1], otu.GenerateValidVotePayload("user1", proposalIds[1], voteChoice))
-	otu.CreateVoteAPI(proposalIds[2], otu.GenerateValidVotePayload("user1", proposalIds[2], voteChoice))
-	otu.CreateVoteAPI(proposalIds[0], otu.GenerateValidVotePayload("user2", proposalIds[0], voteChoice))
-	otu.CreateVoteAPI(proposalIds[1], otu.GenerateValidVotePayload("user2", proposalIds[1], voteChoice))
+	otu.GenerateLeaderboardBaseCase(communityId)
 
 	// Remove all achievements to test base case for scoring
 	clearTable("community_users_achievements")
@@ -48,15 +42,9 @@ func TestGetCommunityLeaderboardWithEarlyVotes(t *testing.T) {
 	clearTable("votes")
 
 	communityId := otu.AddCommunities(1)[0]
-	proposalIds := otu.AddActiveProposalsWithStartTimeNow(communityId, 3)
-	voteChoice := "a"
 	earlyVoteBonus := 1
-
-	otu.CreateVoteAPI(proposalIds[0], otu.GenerateValidVotePayload("user1", proposalIds[0], voteChoice))
-	otu.CreateVoteAPI(proposalIds[1], otu.GenerateValidVotePayload("user1", proposalIds[1], voteChoice))
-	otu.CreateVoteAPI(proposalIds[2], otu.GenerateValidVotePayload("user1", proposalIds[2], voteChoice))
-	otu.CreateVoteAPI(proposalIds[0], otu.GenerateValidVotePayload("user2", proposalIds[0], voteChoice))
-	otu.CreateVoteAPI(proposalIds[1], otu.GenerateValidVotePayload("user2", proposalIds[1], voteChoice))
+	
+	otu.GenerateLeaderboardWithEarlyVotes(communityId)
 
 	response := otu.GetCommunityLeaderboardAPI(communityId)
 	checkResponseCode(t, http.StatusOK, response.Code)
