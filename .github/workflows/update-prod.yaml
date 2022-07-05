@@ -7,8 +7,10 @@ on:
 
 env:
   db_username: ${{ secrets.DB_USERNAME }}
-  db_password: ${{ secrets.DB_PASSWORD_PROD }}
-  db_hostname: ${{ secrets.DB_HOSTNAME_PROD }}
+  db_password: ${{ secrets.DB_PASSWORD }}
+  db_hostname: ${{ secrets.DB_HOSTNAME }}
+  db_password_prod: ${{ secrets.DB_PASSWORD_PROD }}
+  db_hostname_prod: ${{ secrets.DB_HOSTNAME_PROD }}
   db_port: ${{ secrets.DB_PORT }}
   db_name: ${{ secrets.DB_NAME }}
   dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -40,7 +42,7 @@ jobs:
       run: |
         sudo curl -L https://github.com/golang-migrate/migrate/releases/download/v4.15.2/migrate.linux-amd64.tar.gz | tar xvz && sudo mv migrate /usr/local/bin && sudo chmod +x /usr/local/bin/migrate
         which migrate
-        sudo migrate -path ./backend/migrations -database 'postgres://${{ env.db_username }}:${{ env.db_password }}@${{ env.db_hostname }}:${{ env.db_port }}/${{ env.db_name }}?sslmode=disable' -verbose up
+        sudo migrate -path ./backend/migrations -database 'postgres://${{ env.db_username }}:${{ env.db_password_prod }}@${{ env.db_hostname_prod }}:${{ env.db_port }}/${{ env.db_name }}?sslmode=disable' -verbose up
 
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ##  BUILD AND PUSH BACKEND PROD - ARGO TIME!
