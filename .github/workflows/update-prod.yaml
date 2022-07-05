@@ -3,7 +3,7 @@ name: UPDATE PROD
 on:
   push:
     branches:
-      - production
+      - prod-gcp
 
 env:
   db_username: ${{ secrets.DB_USERNAME }}
