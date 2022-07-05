@@ -41,6 +41,7 @@ export default function HomePage() {
         <FadeIn>
           <CommunitiesPresenter title="Communities" communities={communities} />
           <CommunitiesPresenter
+            classNames="pt-6-mobile pt-6-tablet pt-9-desktop"
             title="Featured Communities"
             communities={featuredCommunities}
           />
