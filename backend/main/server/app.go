@@ -727,7 +727,6 @@ func (a *App) getProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	p.Snapshot = snapshotResponse
-
 	respondWithJSON(w, http.StatusOK, p)
 }
 
