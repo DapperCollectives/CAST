@@ -43,7 +43,7 @@ jobs:
         # sudo migrate -path ./backend/migrations -database 'postgres://${{ env.db_username }}:${{ env.db_password }}@${{ env.db_hostname }}:${{ env.db_port }}/${{ env.db_name }}?sslmode=disable' -verbose up
 
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-##  BUILD AND PUSH BACKEND STAGE - ARGO TIME!
+##  BUILD AND PUSH BACKEND PROD - ARGO TIME!
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   build-and-push-backend:
@@ -101,7 +101,7 @@ jobs:
         git commit -am "Added new backend value $TAG from GHA $TIME" && git push
 
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-##  BUILD AND PUSH FRONTEND STAGE - ARGO TIME!
+##  BUILD AND PUSH FRONTEND PROD - ARGO TIME!
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   build-and-push-frontend:
@@ -113,7 +113,7 @@ jobs:
     - name: checkout
       uses: actions/checkout@v3
       with:
-        ref: staging
+        ref: prod-gcp
 
     - name: Login to Docker Hub
       uses: docker/login-action@v2
@@ -121,7 +121,7 @@ jobs:
         username: ${{ env.dockerhub_username }}
         password: ${{ env.dockerhub_token }}
 
-    - name: Build Docker image from release
+    - name: Build Docker image from release #TEST THIS
       id: docker-from-release
       run: |
         export TAG=$(curl -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ env.github_token }}" https://api.github.com/repos/brudfyi/flow-voting-tool-argo/releases/latest | jq -r '.tag_name')
