@@ -17,18 +17,10 @@ func TestGetCommunityLeaderboard(t *testing.T) {
 	clearTable("votes")
 
 	communityId := otu.AddCommunities(1)[0]
-	proposalIds := otu.AddActiveProposals(communityId, 3)
-	voteChoice := "a"
 
-	otu.CreateVoteAPI(proposalIds[0], otu.GenerateValidVotePayload("user1", proposalIds[0], voteChoice))
-	otu.CreateVoteAPI(proposalIds[1], otu.GenerateValidVotePayload("user1", proposalIds[1], voteChoice))
-	otu.CreateVoteAPI(proposalIds[2], otu.GenerateValidVotePayload("user1", proposalIds[2], voteChoice))
-	otu.CreateVoteAPI(proposalIds[0], otu.GenerateValidVotePayload("user2", proposalIds[0], voteChoice))
-	otu.CreateVoteAPI(proposalIds[1], otu.GenerateValidVotePayload("user2", proposalIds[1], voteChoice))
+	otu.GenerateLeaderboardBaseCase(communityId)
 
 	// Remove all achievements to test base case for scoring
-	clearTable("community_users_achievements")
-
 	clearTable("community_users_achievements")
 
 	response := otu.GetCommunityLeaderboardAPI(communityId)
@@ -50,13 +42,9 @@ func TestGetCommunityLeaderboardWithEarlyVotes(t *testing.T) {
 	clearTable("votes")
 
 	communityId := otu.AddCommunities(1)[0]
-	proposalIds := otu.AddActiveProposalsWithStartTimeNow(communityId, 2)
-	voteChoice := "a"
 	earlyVoteBonus := 1
 
-	otu.CreateVoteAPI(proposalIds[0], otu.GenerateValidVotePayload("user1", proposalIds[0], voteChoice))
-	otu.CreateVoteAPI(proposalIds[1], otu.GenerateValidVotePayload("user1", proposalIds[1], voteChoice))
-	otu.CreateVoteAPI(proposalIds[0], otu.GenerateValidVotePayload("user2", proposalIds[0], voteChoice))
+	otu.GenerateLeaderboardWithEarlyVotes(communityId)
 
 	response := otu.GetCommunityLeaderboardAPI(communityId)
 	checkResponseCode(t, http.StatusOK, response.Code)
@@ -75,21 +63,11 @@ func TestGetCommunityLeaderboardWithSingleStreak(t *testing.T) {
 	clearTable("community_users_achievements")
 	clearTable("proposals")
 	clearTable("votes")
+
 	communityId := otu.AddCommunities(1)[0]
-	proposalIds := otu.AddActiveProposals(communityId, 4)
-	voteChoice := "a"
 	streakBonus := 1
 
-	// streak length of 3
-	otu.CreateVoteAPI(proposalIds[0], otu.GenerateValidVotePayload("user1", proposalIds[0], voteChoice))
-	otu.CreateVoteAPI(proposalIds[1], otu.GenerateValidVotePayload("user1", proposalIds[1], voteChoice))
-	otu.CreateVoteAPI(proposalIds[2], otu.GenerateValidVotePayload("user1", proposalIds[2], voteChoice))
-	
-	// streak length of 4
-	otu.CreateVoteAPI(proposalIds[0], otu.GenerateValidVotePayload("user2", proposalIds[0], voteChoice))
-	otu.CreateVoteAPI(proposalIds[1], otu.GenerateValidVotePayload("user2", proposalIds[1], voteChoice))
-	otu.CreateVoteAPI(proposalIds[2], otu.GenerateValidVotePayload("user2", proposalIds[2], voteChoice))
-	otu.CreateVoteAPI(proposalIds[3], otu.GenerateValidVotePayload("user2", proposalIds[3], voteChoice))
+	otu.GenerateLeaderboardWithSingleStreaks(communityId)
 
 	response := otu.GetCommunityLeaderboardAPI(communityId)
 	checkResponseCode(t, http.StatusOK, response.Code)
@@ -102,26 +80,16 @@ func TestGetCommunityLeaderboardWithSingleStreak(t *testing.T) {
 	assert.Equal(t, 4+1*streakBonus, p.Data[1].Score)
 }
 
-func TestGetCommunityLeaderboardWithMultiStreak(t *testing.T) {
+func TestGetCommunityLeaderboardWithMultiStreaks(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")
 	clearTable("community_users_achievements")
 	clearTable("proposals")
 	clearTable("votes")
 	communityId := otu.AddCommunities(1)[0]
-	proposalIds := otu.AddActiveProposals(communityId, 8)
-	voteChoice := "a"
 	streakBonus := 1
 
-	// First Streak
-	otu.CreateVoteAPI(proposalIds[0], otu.GenerateValidVotePayload("user1", proposalIds[0], voteChoice))
-	otu.CreateVoteAPI(proposalIds[1], otu.GenerateValidVotePayload("user1", proposalIds[1], voteChoice))
-	otu.CreateVoteAPI(proposalIds[2], otu.GenerateValidVotePayload("user1", proposalIds[2], voteChoice))
-	
-	// Second Streak
-	otu.CreateVoteAPI(proposalIds[5], otu.GenerateValidVotePayload("user1", proposalIds[5], voteChoice))
-	otu.CreateVoteAPI(proposalIds[6], otu.GenerateValidVotePayload("user1", proposalIds[6], voteChoice))
-	otu.CreateVoteAPI(proposalIds[7], otu.GenerateValidVotePayload("user1", proposalIds[7], voteChoice))
+	otu.GenerateLeaderboardWithMultiStreaks(communityId)
 
 	response := otu.GetCommunityLeaderboardAPI(communityId)
 	checkResponseCode(t, http.StatusOK, response.Code)
