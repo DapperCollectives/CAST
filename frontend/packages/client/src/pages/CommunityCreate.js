@@ -8,6 +8,7 @@ import {
   StepOne,
   StepTwo,
   StepThree,
+  StepFour,
 } from 'components/CommunityCreate';
 import useCommunity from 'hooks/useCommunity';
 import { generateSlug } from 'utils';
@@ -93,21 +94,20 @@ export default function CommunityCreate() {
     steps: [
       {
         label: 'Community Profile',
-        description:
-          'Some description of what you can write here that is useful.',
         component: <StepOne />,
       },
       {
         label: 'Community Details',
-        description:
-          'Some description of what you can write here that is useful.',
-        component: <StepTwo stepData={{ test: 'ok' }} />,
+        component: <StepTwo />,
       },
       {
         label: 'Proposal & Voting',
-        description:
-          'Some description of what you can write here that is useful.',
-        component: <StepThree stepData={{ test: 'ok' }} />,
+        description: '',
+        component: <StepThree />,
+      },
+      {
+        label: 'Voting Strategies',
+        component: <StepFour />,
       },
     ],
   };
