@@ -50,15 +50,13 @@ func TestGetCommunityLeaderboardWithEarlyVotes(t *testing.T) {
 	clearTable("votes")
 
 	communityId := otu.AddCommunities(1)[0]
-	proposalIds := otu.AddActiveProposalsWithStartTimeNow(communityId, 3)
+	proposalIds := otu.AddActiveProposalsWithStartTimeNow(communityId, 2)
 	voteChoice := "a"
 	earlyVoteBonus := 1
 
 	otu.CreateVoteAPI(proposalIds[0], otu.GenerateValidVotePayload("user1", proposalIds[0], voteChoice))
 	otu.CreateVoteAPI(proposalIds[1], otu.GenerateValidVotePayload("user1", proposalIds[1], voteChoice))
-	otu.CreateVoteAPI(proposalIds[2], otu.GenerateValidVotePayload("user1", proposalIds[2], voteChoice))
 	otu.CreateVoteAPI(proposalIds[0], otu.GenerateValidVotePayload("user2", proposalIds[0], voteChoice))
-	otu.CreateVoteAPI(proposalIds[1], otu.GenerateValidVotePayload("user2", proposalIds[1], voteChoice))
 
 	response := otu.GetCommunityLeaderboardAPI(communityId)
 	checkResponseCode(t, http.StatusOK, response.Code)
@@ -67,6 +65,70 @@ func TestGetCommunityLeaderboardWithEarlyVotes(t *testing.T) {
 	json.Unmarshal(response.Body.Bytes(), &p)
 
 	assert.Equal(t, 2, len(p.Data))
-	assert.Equal(t, 3+3*earlyVoteBonus, p.Data[0].Score)
-	assert.Equal(t, 2+2*earlyVoteBonus, p.Data[1].Score)
+	assert.Equal(t, 2+2*earlyVoteBonus, p.Data[0].Score)
+	assert.Equal(t, 2, p.Data[1].Score)
+}
+
+func TestGetCommunityLeaderboardWithSingleStreak(t *testing.T) {
+	clearTable("communities")
+	clearTable("community_users")
+	clearTable("community_users_achievements")
+	clearTable("proposals")
+	clearTable("votes")
+	communityId := otu.AddCommunities(1)[0]
+	proposalIds := otu.AddActiveProposals(communityId, 4)
+	voteChoice := "a"
+	streakBonus := 1
+
+	// streak length of 3
+	otu.CreateVoteAPI(proposalIds[0], otu.GenerateValidVotePayload("user1", proposalIds[0], voteChoice))
+	otu.CreateVoteAPI(proposalIds[1], otu.GenerateValidVotePayload("user1", proposalIds[1], voteChoice))
+	otu.CreateVoteAPI(proposalIds[2], otu.GenerateValidVotePayload("user1", proposalIds[2], voteChoice))
+	
+	// streak length of 4
+	otu.CreateVoteAPI(proposalIds[0], otu.GenerateValidVotePayload("user2", proposalIds[0], voteChoice))
+	otu.CreateVoteAPI(proposalIds[1], otu.GenerateValidVotePayload("user2", proposalIds[1], voteChoice))
+	otu.CreateVoteAPI(proposalIds[2], otu.GenerateValidVotePayload("user2", proposalIds[2], voteChoice))
+	otu.CreateVoteAPI(proposalIds[3], otu.GenerateValidVotePayload("user2", proposalIds[3], voteChoice))
+
+	response := otu.GetCommunityLeaderboardAPI(communityId)
+	checkResponseCode(t, http.StatusOK, response.Code)
+
+	var p test_utils.PaginatedResponseWithLeaderboardUser
+	json.Unmarshal(response.Body.Bytes(), &p)
+
+	assert.Equal(t, 2, len(p.Data))
+	assert.Equal(t, 3+1*streakBonus, p.Data[0].Score)
+	assert.Equal(t, 4+1*streakBonus, p.Data[1].Score)
+}
+
+func TestGetCommunityLeaderboardWithMultiStreak(t *testing.T) {
+	clearTable("communities")
+	clearTable("community_users")
+	clearTable("community_users_achievements")
+	clearTable("proposals")
+	clearTable("votes")
+	communityId := otu.AddCommunities(1)[0]
+	proposalIds := otu.AddActiveProposals(communityId, 8)
+	voteChoice := "a"
+	streakBonus := 1
+
+	// First Streak
+	otu.CreateVoteAPI(proposalIds[0], otu.GenerateValidVotePayload("user1", proposalIds[0], voteChoice))
+	otu.CreateVoteAPI(proposalIds[1], otu.GenerateValidVotePayload("user1", proposalIds[1], voteChoice))
+	otu.CreateVoteAPI(proposalIds[2], otu.GenerateValidVotePayload("user1", proposalIds[2], voteChoice))
+	
+	// Second Streak
+	otu.CreateVoteAPI(proposalIds[5], otu.GenerateValidVotePayload("user1", proposalIds[5], voteChoice))
+	otu.CreateVoteAPI(proposalIds[6], otu.GenerateValidVotePayload("user1", proposalIds[6], voteChoice))
+	otu.CreateVoteAPI(proposalIds[7], otu.GenerateValidVotePayload("user1", proposalIds[7], voteChoice))
+
+	response := otu.GetCommunityLeaderboardAPI(communityId)
+	checkResponseCode(t, http.StatusOK, response.Code)
+
+	var p test_utils.PaginatedResponseWithLeaderboardUser
+	json.Unmarshal(response.Body.Bytes(), &p)
+
+	assert.Equal(t, 1, len(p.Data))
+	assert.Equal(t, 6+2*streakBonus, p.Data[0].Score)
 }

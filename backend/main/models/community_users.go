@@ -105,9 +105,11 @@ func GetCommunityLeaderboard(db *s.Database, communityId, start, count int) ([]L
 		Address   string
 		NumVotes  int
 		EarlyVote int
+		Streak    int
 	}{}
 	var leaderboardUsers = []LeaderboardUserPayload{}
 	var defaultEarlyVoteWeight = 1
+	var defaultStreakWeight = 1
 
 	// Retrieve each user in the community with totals for
 	// their votes and achievements (e.g. early votes, streaks and winning choices)
@@ -116,7 +118,8 @@ func GetCommunityLeaderboard(db *s.Database, communityId, start, count int) ([]L
 	sql := fmt.Sprintf(
 		`
 		SELECT v.addr as address, count(*) as num_votes, 
-			CASE WHEN a.early_vote is NULL THEN 0 ELSE a.early_vote END as early_vote 
+			CASE WHEN a.early_vote is NULL THEN 0 ELSE a.early_vote END as early_vote, 
+			CASE WHEN a.streak is NULL THEN 0 ELSE a.streak END as streak 
 			FROM votes v 
 			LEFT OUTER JOIN proposals p ON p.id = v.proposal_id
 			LEFT OUTER JOIN (
@@ -125,10 +128,10 @@ func GetCommunityLeaderboard(db *s.Database, communityId, start, count int) ([]L
 					WHERE community_id = %d
 					GROUP BY addr, achievement_type
 					ORDER BY 1,2$$
-				) AS ct(address varchar(18), early_vote bigint)
+				) AS ct(address varchar(18), early_vote bigint, streak bigint)
 			) a ON v.addr = a.address
 			WHERE p.community_id = $1
-			GROUP BY v.addr, a.early_vote
+			GROUP BY v.addr, a.early_vote, a.streak
 			LIMIT $2 OFFSET $3
 		`, communityId)
 
@@ -143,7 +146,7 @@ func GetCommunityLeaderboard(db *s.Database, communityId, start, count int) ([]L
 	for _, user := range userAchievements {
 		var leaderboardUser = LeaderboardUserPayload{}
 		leaderboardUser.Addr = user.Address
-		leaderboardUser.Score = user.NumVotes + (user.EarlyVote * defaultEarlyVoteWeight)
+		leaderboardUser.Score = user.NumVotes + (user.EarlyVote * defaultEarlyVoteWeight) + (user.Streak * defaultStreakWeight)
 		leaderboardUsers = append(leaderboardUsers, leaderboardUser)
 	}
 

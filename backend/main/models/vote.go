@@ -3,6 +3,7 @@ package models
 import (
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -200,37 +201,27 @@ func (v *Vote) GetVoteById(db *s.Database) error {
 }
 
 func (v *Vote) CreateVote(db *s.Database) error {
-	var defaultEarlyVoteLength = 1
+	err := createVote(db, v)
 
-	// Create Vote
-	err := db.Conn.QueryRow(db.Context,
-		`
-		INSERT INTO votes(proposal_id, addr, choice, composite_signatures, cid, message)
-		VALUES($1, $2, $3, $4, $5, $6)
-		RETURNING id, created_at
-	`, v.Proposal_id, v.Addr, v.Choice, v.Composite_signatures, v.Cid, v.Message).Scan(&v.ID, &v.Created_at)
-
-	// Get Proposal Start time to check for early vote
-	var proposal Proposal
-	pgxscan.Get(db.Context, db.Conn, &proposal,
-		`SELECT start_time, community_id from proposals
-		WHERE id = $1`,
-		v.Proposal_id)
-
-	isEarlyVote := v.Created_at.Before(proposal.Start_time.Add(time.Hour * time.Duration(defaultEarlyVoteLength)))
-
-	if isEarlyVote {
-		err = db.Conn.QueryRow(db.Context,
-			`
-			INSERT INTO community_users_achievements(addr, achievement_type, community_id, proposals)
-			VALUES($1, $2, $3, $4)
-			RETURNING id
-		`, v.Addr, EarlyVote, proposal.Community_id, []int{v.Proposal_id}).Scan(&v.ID)
-
+	if checkError(err) {
 		return err
 	}
 
-	return err // will be nil unless something went wrong
+	proposal, err := getProposal(db, v.Proposal_id)
+
+	if checkError(err) {
+		return err
+	}
+
+	err = checkForEarlyVoteAchievement(db, v, proposal)
+
+	if checkError(err) {
+		return err
+	}
+
+	err = checkForStreakAchievement(db, v, proposal)
+
+	return err
 }
 
 func (v *Vote) ValidateMessage(proposal Proposal) error {
@@ -336,4 +327,146 @@ func DoesNFTExist(db *s.Database, v *VoteWithBalance) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func createVote(db *s.Database, v *Vote) error {
+	// Create Vote
+	err := db.Conn.QueryRow(db.Context,
+		`
+			INSERT INTO votes(proposal_id, addr, choice, composite_signatures, cid, message)
+			VALUES($1, $2, $3, $4, $5, $6)
+			RETURNING id, created_at
+		`, v.Proposal_id, v.Addr, v.Choice, v.Composite_signatures, v.Cid, v.Message).Scan(&v.ID, &v.Created_at)
+
+	return err
+}
+
+func getProposal(db *s.Database, proposalId int) (Proposal, error) {
+	var proposal Proposal
+	err := pgxscan.Get(db.Context, db.Conn, &proposal,
+		`SELECT start_time, community_id from proposals
+		WHERE id = $1`,
+		proposalId)
+
+	return proposal, err
+}
+
+func checkForEarlyVoteAchievement(db *s.Database, v *Vote, p Proposal) error {
+	var defaultEarlyVoteLength = 1
+
+	isEarlyVote := v.Created_at.Before(p.Start_time.Add(time.Hour * time.Duration(defaultEarlyVoteLength)))
+
+	if isEarlyVote {
+		//Unique identifier ensuring there are no duplicate early vote achievements
+		earlyVoteDetails := fmt.Sprintf("%s:%s:%d:%d", EarlyVote, v.Addr, p.Community_id, v.Proposal_id)
+		err := db.Conn.QueryRow(db.Context,
+			`
+			INSERT INTO community_users_achievements(addr, achievement_type, community_id, proposals, details)
+			VALUES($1, $2, $3, $4, $5)
+			ON CONFLICT (details)
+			DO NOTHING
+			RETURNING id
+		`, v.Addr, EarlyVote, p.Community_id, []int{v.Proposal_id}, earlyVoteDetails).Scan(&v.ID)
+
+		if checkErrorIgnoreNoRows(err) {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func checkForStreakAchievement(db *s.Database, v *Vote, p Proposal) error {
+	var defaultStreakLength = 3
+
+	// Determine if this vote is part of a streak
+	// Proposals with the user address count as a vote for that proposal
+	// NULL means the user did not vote
+	sql := fmt.Sprintf(`
+		SELECT p.id as id, 
+		CASE WHEN v.addr is NULL THEN '' ELSE v.addr END as addr 
+		FROM proposals p 
+    LEFT OUTER JOIN (
+        SELECT * FROM votes where addr = '%s'
+    ) v ON v.proposal_id = p.id 
+    where p.community_id = $1 
+    ORDER BY start_time ASC
+		`, v.Addr)
+
+	var votingStreak []struct {
+		ID   uint64
+		Addr string
+	}
+	err := pgxscan.Select(db.Context, db.Conn, &votingStreak, sql, p.Community_id)
+
+	if checkError(err) {
+		return err
+	}
+
+	if len(votingStreak) >= defaultStreakLength {
+		var proposals []uint64
+		i := 0
+		for i < len(votingStreak) {
+			v := votingStreak[i]
+			if v.Addr != "" {
+				proposals = append(proposals, v.ID)
+			}
+			if len(proposals) >= defaultStreakLength && (i == len(votingStreak)-1 || (i < len(votingStreak)-1 && votingStreak[i+1].Addr == "")) {
+
+				//Unique identifier for current streak
+				currentStreakDetails := fmt.Sprintf("%s:%s:%d:%s", Streak, v.Addr, p.Community_id, strings.Trim(strings.Join(strings.Fields(fmt.Sprint(proposals)), ","), "[]"))
+
+				var sql string
+				if len(proposals) == defaultStreakLength {
+					// Add default streak, or do nothing if streak already exists
+					sql = `
+						INSERT INTO community_users_achievements(addr, achievement_type, community_id, proposals, details)
+						VALUES($1, $2, $3, $4, $5)
+						ON CONFLICT (details)
+						DO NOTHING
+					`
+					err = db.Conn.QueryRow(db.Context, sql, v.Addr, Streak, p.Community_id, proposals, currentStreakDetails).Scan(&v.ID)
+				} else {
+					// If previous streak exists, then update with new streak details
+					// e.g. If previous streak = 1,2,3 and current streak = 1,2,3,4 then update row with current streak details
+					previousStreakDetails := fmt.Sprintf("%s:%s:%d:%s", Streak, v.Addr, p.Community_id, strings.Trim(strings.Join(strings.Fields(fmt.Sprint(proposals[:len(proposals)-1])), ","), "[]"))
+					sql = `
+						INSERT INTO community_users_achievements(addr, achievement_type, community_id, proposals, details)
+						VALUES($1, $2, $3, $4, $5)
+						ON CONFLICT (details)
+						DO UPDATE SET proposals = $4, details = $6
+						RETURNING id
+					`
+					err = db.Conn.QueryRow(db.Context, sql, v.Addr, Streak, p.Community_id, proposals, previousStreakDetails, currentStreakDetails).Scan(&v.ID)
+				}
+
+				if checkErrorIgnoreNoRows(err) {
+					return err
+				} else {
+					err = nil
+				}
+
+				// streak inserted, reset to check for other streaks
+				proposals = nil
+			}
+			if v.Addr == "" {
+				proposals = nil
+			}
+
+			i += 1
+		}
+	}
+
+	return nil
+}
+
+func checkError(err error) bool {
+	return err != nil
+}
+
+func checkErrorIgnoreNoRows(err error) bool {
+	if err != nil && fmt.Sprintf("%s", err) != pgx.ErrNoRows.Error() {
+		return true
+	}
+	return false
 }
