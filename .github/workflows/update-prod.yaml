@@ -121,7 +121,7 @@ jobs:
         username: ${{ env.dockerhub_username }}
         password: ${{ env.dockerhub_token }}
 
-    - name: Build Docker image from release #TEST THIS
+    - name: Build Docker image from release
       id: docker-from-release
       run: |
         export TAG=$(curl -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ env.github_token }}" https://api.github.com/repos/brudfyi/flow-voting-tool-argo/releases/latest | jq -r '.tag_name')
