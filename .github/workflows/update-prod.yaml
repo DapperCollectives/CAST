@@ -1,0 +1,157 @@
+name: UPDATE PROD
+
+on:
+  push:
+    branches:
+      - production
+
+env:
+  db_username: ${{ secrets.DB_USERNAME }}
+  db_password: ${{ secrets.DB_PASSWORD }}
+  db_hostname: ${{ secrets.DB_HOSTNAME }}
+  db_port: ${{ secrets.DB_PORT }}
+  db_name: ${{ secrets.DB_NAME }}
+  dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+  dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+  argo_repo: ${{ secrets.ARGO_REPO }}
+  argo_ref: ${{ secrets.ARGO_REF }}
+  argo_token: ${{ secrets.ARGO_TOKEN }}
+  backend_api: ${{ secrets.BACKEND_API }}
+  tx_options: ${{ secrets.TX_OPTIONS }}
+  github_token: ${{ secrets.GH_TOKEN }}
+
+jobs:
+
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##  MIGRATIONS
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  migrations:
+    name: Migrations
+    runs-on: self-hosted
+    if: "!contains(github.event.head_commit.message, 'cancel migrations')"
+    steps:
+
+    - name: checkout
+      uses: actions/checkout@v3
+      with:
+        ref: production
+    
+    - name: Install and run migrations
+      run: |
+        curl -L https://github.com/golang-migrate/migrate/releases/download/v4.15.2/migrate.linux-amd64.tar.gz | tar xvz && sudo mv migrate /usr/local/bin && sudo chmod +x /usr/local/bin/migrate
+        sudo migrate -path ./backend/migrations -database 'postgres://${{ env.db_username }}:${{ env.db_password }}@${{ env.db_hostname }}:${{ env.db_port }}/${{ env.db_name }}?sslmode=disable' -verbose up
+
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##  BUILD AND PUSH BACKEND STAGE - ARGO TIME!
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  build-and-push-backend:
+    name: Build and push backend
+    runs-on: ubuntu-20.04
+    if: "!contains(github.event.head_commit.message, 'cancel build backend')"
+    steps:
+
+    - name: checkout
+      uses: actions/checkout@v3
+      with:
+        ref: production
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ env.dockerhub_username }}
+        password: ${{ env.dockerhub_token }}
+
+
+    - name: Build Docker image from release
+      id: docker-from-release
+      run: |
+        export TAG=$(curl -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ env.github_token }}" https://api.github.com/repos/brudfyi/flow-voting-tool-argo/releases/latest | jq -r '.tag_name')
+        cd backend && docker build . -t bruddev/cast-backend:$TAG && docker push bruddev/cast-backend:$TAG
+
+## ARGO FROM HERE    
+
+    - name: Clone ArgoManifests
+      run: |
+        mkdir -p ./argo
+
+    - name: Checkout ArgoManifests
+      uses: actions/checkout@v3
+      with:
+        repository: ${{ env.argo_repo }}
+        ref: ${{ env.argo_ref }}
+        token: ${{ env.argo_token }}
+        path: ./argo
+
+    - name: time
+      id: time
+      run: echo "::set-output name=time::$(date "+%T")"
+
+    - name: Install Kustomize and update tag
+      env:
+        TIME: ${{ steps.time.outputs.time }}
+      run: |
+        curl -fL https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v4.5.5/kustomize_v4.5.5_linux_amd64.tar.gz| tar xz && \
+        chmod +x kustomize
+        export TAG=$(curl -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ env.github_token }}" https://api.github.com/repos/brudfyi/flow-voting-tool-argo/releases/latest | jq -r '.tag_name')
+        cd ./argo/voting-tool-stage-prod/backend/environments/prod && kustomize edit set image bruddev/cast-backend:$TAG
+        git config --global user.email "brunkins@brudfyi.com"
+        git config --global user.name "Brunkins" 
+        git commit -am "Added new backend value $TAG from GHA $TIME" && git push
+
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##  BUILD AND PUSH FRONTEND STAGE - ARGO TIME!
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  build-and-push-frontend:
+    name: Build and push frontend
+    runs-on: ubuntu-20.04
+    if: "!contains(github.event.head_commit.message, 'cancel build frontend')"
+    steps:
+
+    - name: checkout
+      uses: actions/checkout@v3
+      with:
+        ref: staging
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ env.dockerhub_username }}
+        password: ${{ env.dockerhub_token }}
+
+    - name: Build Docker image from release
+      id: docker-from-release
+      run: |
+        export TAG=$(curl -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ env.github_token }}" https://api.github.com/repos/brudfyi/flow-voting-tool-argo/releases/latest | jq -r '.tag_name')
+        cd backend && docker build . -t bruddev/cast-frontend:$TAG && docker push bruddev/cast-frontend:$TAG
+
+## ARGO FROM HERE
+
+    - name: Clone ArgoManifests
+      run: |
+        mkdir -p ./argo
+
+    - name: Checkout ArgoManifests
+      uses: actions/checkout@v3
+      with:
+        repository: ${{ env.argo_repo }}
+        ref: ${{ env.argo_ref }}
+        token: ${{ env.argo_token }}
+        path: ./argo
+
+    - name: time
+      id: time
+      run: echo "::set-output name=time::$(date "+%T")"
+
+    - name: Install Kustomize and update tag
+      env:
+        TIME: ${{ steps.time.outputs.time }}
+      run: |
+        curl -fL https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v4.5.5/kustomize_v4.5.5_linux_amd64.tar.gz| tar xz && \
+        chmod +x kustomize
+        export TAG=$(curl -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ env.github_token }}" https://api.github.com/repos/brudfyi/flow-voting-tool-argo/releases/latest | jq -r '.tag_name')
+        cd ./argo/voting-tool-stage-prod/frontend/environments/prod && kustomize edit set image bruddev/cast-frontend:$TAG
+        git config --global user.email "brunkins@brudfyi.com"
+        git config --global user.name "Brunkins" 
+        git commit -am "Added new frontend value $TAG from GHA $TIME" && git push
