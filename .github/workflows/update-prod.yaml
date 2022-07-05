@@ -7,8 +7,8 @@ on:
 
 env:
   db_username: ${{ secrets.DB_USERNAME }}
-  db_password: ${{ secrets.DB_PASSWORD }}
-  db_hostname: ${{ secrets.DB_HOSTNAME }}
+  db_password: ${{ secrets.DB_PASSWORD_PROD }}
+  db_hostname: ${{ secrets.DB_HOSTNAME_PROD }}
   db_port: ${{ secrets.DB_PORT }}
   db_name: ${{ secrets.DB_NAME }}
   dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
