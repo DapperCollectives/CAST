@@ -719,14 +719,19 @@ func (a *App) getProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	snapshotResponse, err := a.SnapshotClient.GetSnapshotStatus(strategy.Contract)
-	if err != nil {
-		log.Error().Err(err).Msg("error getting snapshot status")
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
+	var snapshotResponse shared.LatestBlockHeight
+
+	//check if strategy has a Contract field
+	if strategy.Contract.Name != nil {
+		snapshotResponse, err = a.SnapshotClient.GetSnapshotStatus(strategy.Contract)
+		if err != nil {
+			log.Error().Err(err).Msg("error getting snapshot status")
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
 	}
 
-	p.Snapshot = snapshotResponse
+	p.Snapshot = &snapshotResponse
 	respondWithJSON(w, http.StatusOK, p)
 }
 
@@ -817,20 +822,22 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if err := a.SnapshotClient.TakeSnapshot(strategy.Contract); err != nil {
-		log.Error().Err(err).Msg("error taking snapshot")
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
+	if strategy.Contract.Name != nil {
+		if err := a.SnapshotClient.TakeSnapshot(strategy.Contract); err != nil {
+			log.Error().Err(err).Msg("error taking snapshot")
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
 
-	snapshotResponse, err := a.SnapshotClient.GetSnapshotStatus(strategy.Contract)
-	if err != nil {
-		log.Error().Err(err).Msg("error getting snapshot status")
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
+		snapshotResponse, err := a.SnapshotClient.GetSnapshotStatus(strategy.Contract)
+		if err != nil {
+			log.Error().Err(err).Msg("error getting snapshot status")
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
 
-	p.Snapshot = snapshotResponse
+		p.Snapshot = &snapshotResponse
+	}
 
 	if os.Getenv("APP_ENV") != "TEST" {
 		pin, err := a.IpfsClient.PinJson(p)
