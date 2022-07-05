@@ -1,13 +1,24 @@
 import { useReducer, useCallback } from 'react';
-import { defaultReducer, INITIAL_STATE } from '../reducers';
+import {
+  paginationReducer,
+  PAGINATION_INITIAL_STATE,
+  INITIAL_STATE,
+} from '../reducers';
 import { checkResponse, getCompositeSigs } from 'utils';
 import { useErrorHandlerContext } from '../contexts/ErrorHandler';
 import { useFileUploader } from 'hooks';
 
-export default function useCommunity() {
-  const [state, dispatch] = useReducer(defaultReducer, {
+export default function useCommunity({
+  start = PAGINATION_INITIAL_STATE.start,
+  count = PAGINATION_INITIAL_STATE.count,
+} = {}) {
+  const [state, dispatch] = useReducer(paginationReducer, {
     ...INITIAL_STATE,
-    loading: false,
+    pagination: {
+      ...PAGINATION_INITIAL_STATE,
+      start,
+      count,
+    },
   });
   const { notifyError } = useErrorHandlerContext();
   // for now not using modal notification if there was an error uploading image
@@ -15,20 +26,20 @@ export default function useCommunity() {
 
   const getCommunities = useCallback(async () => {
     dispatch({ type: 'PROCESSING' });
-    const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities`;
+    const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities?count=${count}&start=${start}`;
     try {
       const response = await fetch(url);
       const communities = await checkResponse(response);
       dispatch({
         type: 'SUCCESS',
-        payload: communities?.data ?? [],
+        payload: communities ?? [],
       });
     } catch (err) {
       // notify user of error
       notifyError(err, url);
       dispatch({ type: 'ERROR', payload: { errorData: err.message } });
     }
-  }, [dispatch, notifyError]);
+  }, [dispatch, notifyError, count, start]);
 
   const createCommunity = useCallback(
     async (injectedProvider, communityData) => {
