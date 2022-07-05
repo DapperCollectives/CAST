@@ -86,10 +86,6 @@ export default function useLinkValidator({ links, initialValues }) {
     // chech if object fields has changed from original one
     const hasChanged = !isEqual(linksObjUpdated, initialProps);
 
-    console.log('initialProps ->', initialProps);
-    console.log('hasChanged', hasChanged);
-    console.log('linksObjUpdated', linksObjUpdated);
-
     if (isValid !== baseValidation || hasChangedFromOriginal !== hasChanged) {
       setValidations({
         isValid: baseValidation,
