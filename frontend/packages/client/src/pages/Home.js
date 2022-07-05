@@ -2,13 +2,20 @@ import React, { useEffect } from 'react';
 import { Message, Loader, FadeIn } from 'components';
 import CommunitiesPresenter from 'components/Community/CommunitiesPresenter';
 import useCommunity from 'hooks/useCommunity';
+import useFeaturedCommunities from 'hooks/useFeaturedCommunities';
 
 export default function HomePage() {
-  const { data, loading, getCommunities } = useCommunity();
+  const { data, loading, getCommunities } = useCommunity({ count: 25 });
+  const {
+    data: featuredCommunities,
+    loading: loadingFeaturedCommunities,
+    getFeaturedCommunities,
+  } = useFeaturedCommunities({ count: 25 });
 
   useEffect(() => {
     getCommunities();
-  }, [getCommunities]);
+    getFeaturedCommunities();
+  }, [getCommunities, getFeaturedCommunities]);
 
   const communities = loading
     ? []
@@ -25,14 +32,18 @@ export default function HomePage() {
         messageText="We are currently in alpha testing with the Flow developer community."
         labelText="Alpha"
       />
-      {loading && (
+      {(loading || loadingFeaturedCommunities) && (
         <div style={{ height: '50vh' }}>
           <Loader fullHeight />
         </div>
       )}
-      {!loading && (
+      {!(loading || loadingFeaturedCommunities) && (
         <FadeIn>
           <CommunitiesPresenter title="Communities" communities={communities} />
+          <CommunitiesPresenter
+            title="Featured Communities"
+            communities={featuredCommunities}
+          />
         </FadeIn>
       )}
     </section>
