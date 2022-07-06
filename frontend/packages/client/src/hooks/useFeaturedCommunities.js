@@ -1,62 +1,43 @@
-import { useReducer, useCallback } from 'react';
-import {
-  paginationReducer,
-  PAGINATION_INITIAL_STATE,
-  INITIAL_STATE,
-} from '../reducers';
+import { useInfiniteQuery } from 'react-query';
+import { PAGINATION_INITIAL_STATE } from '../reducers';
 import { checkResponse } from 'utils';
 import { useErrorHandlerContext } from '../contexts/ErrorHandler';
 
 export default function useFeaturedCommunities({
-  start = PAGINATION_INITIAL_STATE.start,
   count = PAGINATION_INITIAL_STATE.count,
 } = {}) {
-  const [state, dispatch] = useReducer(paginationReducer, {
-    ...INITIAL_STATE,
-    pagination: {
-      ...PAGINATION_INITIAL_STATE,
-      start,
-      count,
-    },
-  });
   const { notifyError } = useErrorHandlerContext();
 
-  const getFeaturedCommunities = useCallback(async () => {
-    dispatch({ type: 'PROCESSING' });
-    const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities-for-homepage?count=${count}&start=${start}`;
-    try {
-      const response = await fetch(url);
-      const communities = await checkResponse(response);
-      dispatch({
-        type: 'SUCCESS',
-        payload: communities ?? [],
-      });
-    } catch (err) {
-      // notify user of error
-      notifyError(err, url);
-      dispatch({ type: 'ERROR', payload: { errorData: err.message } });
+  const { isLoading, isError, data, error, fetchNextPage } = useInfiniteQuery(
+    'communities-for-homepage',
+    async ({ pageParam = 0 }) => {
+      const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities-for-homepage?count=${count}&start=${pageParam}`;
+      try {
+        const response = await fetch(url);
+        const communities = await checkResponse(response);
+        return communities;
+      } catch (err) {
+        throw err;
+      }
+    },
+    {
+      getNextPageParam: (lastPage, pages) => {
+        const { next, start, count } = lastPage;
+        return next > 0 ? start + count : undefined;
+      },
     }
-  }, [dispatch, notifyError, count, start]);
-
-  const fetchMore = useCallback(async () => {
-    dispatch({ type: 'PROCESSING' });
-    const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities-for-homepage?count=${state.pagination.count}&start=${state.pagination.start}`;
-    try {
-      const response = await fetch(url);
-      const communities = await checkResponse(response);
-
-      dispatch({
-        type: 'SUCCESS',
-        payload: communities,
-      });
-    } catch (err) {
-      notifyError(err, url);
-      dispatch({ type: 'ERROR', payload: { errorData: err.message } });
-    }
-  }, [state.pagination, notifyError]);
+  );
+  if (isError) {
+    notifyError(error);
+  }
   return {
-    ...state,
-    getFeaturedCommunities,
-    fetchMore,
+    isLoading,
+    isError,
+    data:
+      data?.pages?.reduce((prev, current) => [...prev, ...current.data], []) ??
+      [],
+    pages: data?.pages ?? [],
+    error,
+    fetchNextPage,
   };
 }
