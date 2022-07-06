@@ -86,6 +86,7 @@ export default function useCommunity() {
           storagePath: storageP,
           proposalThreshold: propThreshold,
           onlyAuthorsToSubmitProposals,
+          strategies,
         } = communityData;
 
         let communityLogo;
@@ -127,6 +128,7 @@ export default function useCommunity() {
             storagePath: setDefaultValue(storageP, 'flowTokenBalance'),
             proposalThreshold: setDefaultValue(propThreshold, '0'),
             onlyAuthorsToSubmit: Boolean(onlyAuthorsToSubmitProposals),
+            strategies,
             timestamp,
             compositeSignatures,
           }),
