@@ -80,6 +80,7 @@ export default function useCommunity() {
           contractName,
           storagePath,
           onlyAuthorsToSubmitProposals,
+          strategies,
         } = communityData;
 
         let communityLogo;
@@ -117,6 +118,7 @@ export default function useCommunity() {
             contractAddress,
             contractName,
             storagePath,
+            strategies,
             onlyAuthorsToSubmit: Boolean(onlyAuthorsToSubmitProposals),
             timestamp,
             compositeSignatures,
