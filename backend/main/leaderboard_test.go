@@ -12,16 +12,22 @@ import (
 func TestGetCommunityLeaderboard(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")
-	clearTable("community_users_achievements")
+	clearTable("user_achievements")
 	clearTable("proposals")
 	clearTable("votes")
 
 	communityId := otu.AddCommunities(1)[0]
 
-	otu.GenerateLeaderboardBaseCase(communityId)
+	expectedUsers := 2
+	expectedProposals := 2
+
+	// users get single vote for each proposal they voted on
+	expectedScore := expectedProposals
+
+	otu.GenerateVotes(communityId, expectedProposals, expectedUsers)
 
 	// Remove all achievements to test base case for scoring
-	clearTable("community_users_achievements")
+	clearTable("user_achievements")
 
 	response := otu.GetCommunityLeaderboardAPI(communityId)
 	checkResponseCode(t, http.StatusOK, response.Code)
@@ -29,22 +35,30 @@ func TestGetCommunityLeaderboard(t *testing.T) {
 	var p test_utils.PaginatedResponseWithLeaderboardUser
 	json.Unmarshal(response.Body.Bytes(), &p)
 
-	assert.Equal(t, 2, len(p.Data))
-	assert.Equal(t, 3, p.Data[0].Score)
-	assert.Equal(t, 2, p.Data[1].Score)
+	receivedUser1Score := p.Data[0].Score
+	receivedUser2Score := p.Data[0].Score
+
+	assert.Equal(t, expectedUsers, len(p.Data))
+	assert.Equal(t, expectedScore, receivedUser1Score)
+	assert.Equal(t, expectedScore, receivedUser2Score)
 }
 
 func TestGetCommunityLeaderboardWithEarlyVotes(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")
-	clearTable("community_users_achievements")
+	clearTable("user_achievements")
 	clearTable("proposals")
 	clearTable("votes")
 
 	communityId := otu.AddCommunities(1)[0]
 	earlyVoteBonus := 1
+	expectedUsers := 1
+	expectedProposals := 2
 
-	otu.GenerateLeaderboardWithEarlyVotes(communityId)
+	// user gets single vote for each proposal they voted on
+	expectedScore := expectedProposals + (expectedProposals * earlyVoteBonus)
+
+	otu.GenerateEarlyVoteAchievements(communityId, expectedProposals, expectedUsers)
 
 	response := otu.GetCommunityLeaderboardAPI(communityId)
 	checkResponseCode(t, http.StatusOK, response.Code)
@@ -52,22 +66,27 @@ func TestGetCommunityLeaderboardWithEarlyVotes(t *testing.T) {
 	var p test_utils.PaginatedResponseWithLeaderboardUser
 	json.Unmarshal(response.Body.Bytes(), &p)
 
-	assert.Equal(t, 2, len(p.Data))
-	assert.Equal(t, 2+2*earlyVoteBonus, p.Data[0].Score)
-	assert.Equal(t, 2, p.Data[1].Score)
+	receivedScore := p.Data[0].Score
+
+	assert.Equal(t, expectedUsers, len(p.Data))
+	assert.Equal(t, expectedScore, receivedScore)
 }
 
 func TestGetCommunityLeaderboardWithSingleStreak(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")
-	clearTable("community_users_achievements")
+	clearTable("user_achievements")
 	clearTable("proposals")
 	clearTable("votes")
 
 	communityId := otu.AddCommunities(1)[0]
+	streaks := []int{3, 4}
 	streakBonus := 1
+	expectedUsers := 2
+	expectedUser1Score := 3 + (1 * streakBonus)
+	expectedUser2Score := 4 + (1 * streakBonus)
 
-	otu.GenerateLeaderboardWithSingleStreaks(communityId)
+	otu.GenerateSingleStreakAchievements(communityId, streaks)
 
 	response := otu.GetCommunityLeaderboardAPI(communityId)
 	checkResponseCode(t, http.StatusOK, response.Code)
@@ -75,21 +94,29 @@ func TestGetCommunityLeaderboardWithSingleStreak(t *testing.T) {
 	var p test_utils.PaginatedResponseWithLeaderboardUser
 	json.Unmarshal(response.Body.Bytes(), &p)
 
-	assert.Equal(t, 2, len(p.Data))
-	assert.Equal(t, 3+1*streakBonus, p.Data[0].Score)
-	assert.Equal(t, 4+1*streakBonus, p.Data[1].Score)
+	receivedUser1Score := p.Data[0].Score
+	receivedUser2Score := p.Data[1].Score
+
+	assert.Equal(t, expectedUsers, len(p.Data))
+	assert.Equal(t, expectedUser1Score, receivedUser1Score)
+	assert.Equal(t, expectedUser2Score, receivedUser2Score)
 }
 
 func TestGetCommunityLeaderboardWithMultiStreaks(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")
-	clearTable("community_users_achievements")
+	clearTable("user_achievements")
 	clearTable("proposals")
 	clearTable("votes")
 	communityId := otu.AddCommunities(1)[0]
+	streaks := []int{3, 4}
 	streakBonus := 1
+	expectedUsers := 1
 
-	otu.GenerateLeaderboardWithMultiStreaks(communityId)
+	// user with 7 votes and 2 streaks
+	expectedUser1Score := 7 + (2 * streakBonus)
+
+	otu.GenerateMultiStreakAchievements(communityId, streaks)
 
 	response := otu.GetCommunityLeaderboardAPI(communityId)
 	checkResponseCode(t, http.StatusOK, response.Code)
@@ -97,6 +124,8 @@ func TestGetCommunityLeaderboardWithMultiStreaks(t *testing.T) {
 	var p test_utils.PaginatedResponseWithLeaderboardUser
 	json.Unmarshal(response.Body.Bytes(), &p)
 
-	assert.Equal(t, 1, len(p.Data))
-	assert.Equal(t, 6+2*streakBonus, p.Data[0].Score)
+	receivedUser1Score := p.Data[0].Score
+
+	assert.Equal(t, expectedUsers, len(p.Data))
+	assert.Equal(t, expectedUser1Score, receivedUser1Score)
 }

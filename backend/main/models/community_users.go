@@ -282,7 +282,7 @@ func getUserAchievements(db *s.Database, communityId int, start int, count int) 
 			LEFT OUTER JOIN proposals p ON p.id = v.proposal_id
 			LEFT OUTER JOIN (
 				SELECT * FROM crosstab(
-					$$SELECT addr, achievement_type, count(*) FROM community_users_achievements 
+					$$SELECT addr, achievement_type, count(*) FROM user_achievements 
 					WHERE community_id = %d
 					GROUP BY addr, achievement_type
 					ORDER BY 1,2$$
