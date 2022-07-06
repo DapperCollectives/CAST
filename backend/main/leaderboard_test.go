@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetCommunityLeaderboard(t *testing.T) {
+func TestGetLeaderboard(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")
 	clearTable("user_achievements")
@@ -43,7 +43,7 @@ func TestGetCommunityLeaderboard(t *testing.T) {
 	assert.Equal(t, expectedScore, receivedUser2Score)
 }
 
-func TestGetCommunityLeaderboardWithEarlyVotes(t *testing.T) {
+func TestGetLeaderboardWithEarlyVotes(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")
 	clearTable("user_achievements")
@@ -72,7 +72,7 @@ func TestGetCommunityLeaderboardWithEarlyVotes(t *testing.T) {
 	assert.Equal(t, expectedScore, receivedScore)
 }
 
-func TestGetCommunityLeaderboardWithSingleStreak(t *testing.T) {
+func TestGetLeaderboardWithSingleStreak(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")
 	clearTable("user_achievements")
@@ -94,15 +94,15 @@ func TestGetCommunityLeaderboardWithSingleStreak(t *testing.T) {
 	var p test_utils.PaginatedResponseWithLeaderboardUser
 	json.Unmarshal(response.Body.Bytes(), &p)
 
-	receivedUser1Score := p.Data[0].Score
-	receivedUser2Score := p.Data[1].Score
+	receivedUser1Score := p.Data[1].Score
+	receivedUser2Score := p.Data[0].Score
 
 	assert.Equal(t, expectedUsers, len(p.Data))
 	assert.Equal(t, expectedUser1Score, receivedUser1Score)
 	assert.Equal(t, expectedUser2Score, receivedUser2Score)
 }
 
-func TestGetCommunityLeaderboardWithMultiStreaks(t *testing.T) {
+func TestGetLeaderboardWithMultiStreaks(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")
 	clearTable("user_achievements")
@@ -128,4 +128,45 @@ func TestGetCommunityLeaderboardWithMultiStreaks(t *testing.T) {
 
 	assert.Equal(t, expectedUsers, len(p.Data))
 	assert.Equal(t, expectedUser1Score, receivedUser1Score)
+}
+
+func TestGetLeaderboardWithWinningVote(t *testing.T) {
+	clearTable("communities")
+	clearTable("community_users")
+	clearTable("community_users_achievements")
+	clearTable("proposals")
+	clearTable("proposal_results")
+	clearTable("votes")
+	communityId := otu.AddCommunities(1)[0]
+	winningVoteBonus := 1
+
+	proposalId := otu.GenerateWinningVoteAchievement(communityId, "one-address-one-vote")
+	otu.UpdateProposalStatus(proposalId, "closed")
+	otu.GetProposalResultsAPI(proposalId)
+
+	response := otu.GetCommunityLeaderboardAPI(communityId)
+	checkResponseCode(t, http.StatusOK, response.Code)
+
+	var p test_utils.PaginatedResponseWithLeaderboardUser
+	json.Unmarshal(response.Body.Bytes(), &p)
+
+	winningUserScore := 1 + 1*winningVoteBonus
+	losingUserScore := 1
+
+	receivedWinners := 0
+	receivedLosers := 0
+
+	for _, user := range p.Data {
+		if user.Score == winningUserScore {
+			receivedWinners += 1
+		} else if user.Score == losingUserScore {
+			receivedLosers += 1
+		}
+	}
+
+	expectedWinners := 3
+	expectedLosers := 1
+
+	assert.Equal(t, expectedWinners, receivedWinners)
+	assert.Equal(t, expectedLosers, receivedLosers)
 }

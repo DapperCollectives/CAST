@@ -259,6 +259,16 @@ func (otu *OverflowTestUtils) AddActiveProposalsWithStartTimeNow(cId int, count 
 	return retIds
 }
 
+func (otu *OverflowTestUtils) UpdateProposalStatus(pId int, status string) {
+	_, err := otu.A.DB.Conn.Exec(otu.A.DB.Context,
+		`
+		UPDATE proposals SET status = $2 WHERE id = $1
+		`, pId, status)
+	if err != nil {
+		log.Error().Err(err).Msg("update proposal status DB err")
+	}
+}
+
 func (otu *OverflowTestUtils) AddLists(cId int, count int) []int {
 	if count < 1 {
 		count = 1

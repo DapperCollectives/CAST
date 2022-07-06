@@ -1,6 +1,8 @@
 package test_utils
 
-import "strconv"
+import (
+	"strconv"
+)
 
 func (otu *OverflowTestUtils) GenerateVotes(communityId int, numProposals int, numUsers int) {
 	if numProposals == 0 {
@@ -71,6 +73,20 @@ func (otu *OverflowTestUtils) GenerateMultiStreakAchievements(communityId int, s
 		}
 		i++ // skip a proposal to start next streak
 	}
+}
+
+func (otu *OverflowTestUtils) GenerateWinningVoteAchievement(communityId int, strategy string) int {
+	proposalIds, _ := otu.AddProposalsForStrategy(communityId, strategy, 1)
+	proposalId := proposalIds[0]
+	winningChoice := "a"
+	losingChoice := "b"
+
+	otu.CreateVoteAPI(proposalId, otu.GenerateValidVotePayload("user1", proposalId, losingChoice))
+	otu.CreateVoteAPI(proposalId, otu.GenerateValidVotePayload("user2", proposalId, winningChoice))
+	otu.CreateVoteAPI(proposalId, otu.GenerateValidVotePayload("user3", proposalId, winningChoice))
+	otu.CreateVoteAPI(proposalId, otu.GenerateValidVotePayload("user4", proposalId, winningChoice))
+
+	return proposalId
 }
 
 func max(s []int) int {

@@ -221,13 +221,13 @@ func (v *Vote) CreateVote(db *s.Database) error {
 	isEarlyVote := v.Created_at.Before(proposal.Start_time.Add(time.Hour * time.Duration(defaultEarlyVoteLength)))
 
 	if isEarlyVote {
-		err = addEarlyVoteAchievement(db, v, proposal)
+		err = AddEarlyVoteAchievement(db, v, proposal)
 		if checkError(err) {
 			return err
 		}
 	}
 
-	err = addStreakAchievement(db, v, proposal)
+	err = AddStreakAchievement(db, v, proposal)
 	return err
 }
 
@@ -358,7 +358,7 @@ func getProposal(db *s.Database, proposalId int) (Proposal, error) {
 	return proposal, err
 }
 
-func addEarlyVoteAchievement(db *s.Database, v *Vote, p Proposal) error {
+func AddEarlyVoteAchievement(db *s.Database, v *Vote, p Proposal) error {
 
 	//Unique identifier ensuring there are no duplicate early vote achievements
 	earlyVoteDetails := fmt.Sprintf("%s:%s:%d:%d", EarlyVote, v.Addr, p.Community_id, v.Proposal_id)
@@ -378,7 +378,7 @@ func addEarlyVoteAchievement(db *s.Database, v *Vote, p Proposal) error {
 	return nil
 }
 
-func addStreakAchievement(db *s.Database, v *Vote, p Proposal) error {
+func AddStreakAchievement(db *s.Database, v *Vote, p Proposal) error {
 	var defaultStreakLength = 3
 
 	votingStreak, err := getUserVotingStreak(db, v.Addr, p.Community_id)
@@ -417,6 +417,35 @@ func addStreakAchievement(db *s.Database, v *Vote, p Proposal) error {
 		}
 	}
 
+	return nil
+}
+
+func AddWinningVoteAchievement(db *s.Database, votes []*VoteWithBalance, p ProposalResults, communityId int) error {
+	maxVotes := 0
+	winningChoice := ""
+	for k, v := range p.Results {
+		if v > maxVotes {
+			maxVotes = v
+			winningChoice = k
+		}
+	}
+	for _, v := range votes {
+		if v.Choice == winningChoice {
+			details := fmt.Sprintf("%s:%s:%d:%d", WinningVote, v.Addr, communityId, v.Proposal_id)
+			err := db.Conn.QueryRow(db.Context,
+				`
+					INSERT INTO user_achievements(addr, achievement_type, community_id, proposals, details)
+					VALUES($1, $2, $3, $4, $5)
+					ON CONFLICT (details)
+					DO NOTHING
+					RETURNING id
+				`, v.Addr, WinningVote, communityId, []int{v.Proposal_id}, details).Scan(&v.ID)
+
+			if checkErrorIgnoreNoRows(err) {
+				return err
+			}
+		}
+	}
 	return nil
 }
 
