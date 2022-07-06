@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import classnames from 'classnames';
 import { Message, Loader, FadeIn } from 'components';
 import { useWebContext } from 'contexts/Web3';
@@ -15,15 +15,9 @@ export default function HomePage() {
     count: 100,
     initialLoading: false,
   });
-  const {
-    data: featuredCommunities,
-    loading: loadingFeaturedCommunities,
-    getFeaturedCommunities,
-  } = useFeaturedCommunities({ count: 25 });
 
-  useEffect(() => {
-    getFeaturedCommunities();
-  }, [getFeaturedCommunities]);
+  const { isLoading: loadingFeaturedCommunities, data: featuredCommunities } =
+    useFeaturedCommunities();
 
   const myUserCommunities = loading
     ? []
