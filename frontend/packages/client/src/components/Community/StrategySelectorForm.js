@@ -1,23 +1,29 @@
 import React, { useEffect, useState } from 'react';
-import { useVotingStrategies } from 'hooks';
+import isEqual from 'lodash/isEqual';
 import { AddButton } from 'components';
 import { useModalContext } from 'contexts/NotificationModal';
 import StrategyEditorModal from './StrategyEditorModal';
-import StrategySelectorInput from './StrategySelectorInput';
+import StrategySelectorInput from 'components/Community/StrategySelectorInput';
+import { useVotingStrategies } from 'hooks';
 import { kebabToString } from 'utils';
 
 export default function StrategySelectorForm({
   existingStrategies = [],
   disableAddButton = false,
+  // this fc returns a component(Button) to render
   callToAction = () => {},
+  // callback to return strategies selected
+  onStrategySelection,
 } = {}) {
   // holds array of objects with strategy information
   const [strategies, setStrategies] = useState(existingStrategies);
 
-  // reloads lists if update is done
+  // only notify parent component if callback was passed
   useEffect(() => {
-    setStrategies(existingStrategies);
-  }, [existingStrategies]);
+    if (onStrategySelection && !isEqual(strategies, existingStrategies)) {
+      onStrategySelection(strategies);
+    }
+  }, [strategies, onStrategySelection, existingStrategies]);
 
   const { data: allVotingStrategies, loading: loadingAllStrategies } =
     useVotingStrategies();

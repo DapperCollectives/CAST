@@ -209,12 +209,12 @@ func (v *Vote) CreateVote(db *s.Database) error {
 	var defaultEarlyVoteLength = 1
 
 	err := createVote(db, v)
-	if checkError(err) {
+	if err != nil {
 		return err
 	}
 
 	proposal, err := getProposal(db, v.Proposal_id)
-	if checkError(err) {
+	if err != nil {
 		return err
 	}
 
@@ -222,7 +222,7 @@ func (v *Vote) CreateVote(db *s.Database) error {
 
 	if isEarlyVote {
 		err = addEarlyVoteAchievement(db, v, proposal)
-		if checkError(err) {
+		if err != nil {
 			return err
 		}
 	}
@@ -382,7 +382,7 @@ func addStreakAchievement(db *s.Database, v *Vote, p Proposal) error {
 	var defaultStreakLength = 3
 
 	votingStreak, err := getUserVotingStreak(db, v.Addr, p.Community_id)
-	if checkError(err) {
+	if err != nil {
 		return err
 	}
 
@@ -463,10 +463,6 @@ func addOrUpdateStreak(db *s.Database, addr string, communityId int, proposals [
 						RETURNING id
 					`
 	return db.Conn.QueryRow(db.Context, sql, addr, Streak, communityId, proposals, previousStreakDetails, details).Scan(&v.ID)
-}
-
-func checkError(err error) bool {
-	return err != nil
 }
 
 func checkErrorIgnoreNoRows(err error) bool {
