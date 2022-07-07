@@ -17,7 +17,6 @@ import {
   useCommunityDetails,
   useQueryParams,
   useCommunityUsers,
-  useVotingStrategies,
   useUserRoleOnCommunity,
   useCommunityMembers,
 } from '../hooks';
@@ -148,6 +147,8 @@ export default function Community() {
 
   const { data: community, loading, error } = useCommunityDetails(communityId);
 
+  const { strategies } = community || {};
+
   const {
     user: { addr },
   } = useWebContext();
@@ -167,8 +168,6 @@ export default function Community() {
     communityId,
     type: 'author',
   });
-
-  const { data: strategies } = useVotingStrategies();
 
   const {
     pagination: { totalRecords },
