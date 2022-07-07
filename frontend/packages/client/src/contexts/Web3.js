@@ -77,6 +77,15 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
 
   const { user, isLedger } = useFclUser(fcl, extraConfig.forceLedger);
 
+  // add check for address
+  const isValidFlowAddress = async (addr) => {
+    try {
+      // https://docs.onflow.org/fcl/reference/api/#account
+      return fcl.account(addr);
+    } catch (err) {
+      return false;
+    }
+  };
   // for Nextjs Builds, return null until "window" is available
   if (!global.window) {
     return null;
@@ -98,6 +107,7 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
     isLedger,
     network,
     logOut,
+    isValidFlowAddress,
     ...props,
   };
 
