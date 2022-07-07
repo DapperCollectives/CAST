@@ -5,35 +5,36 @@ package models
 /////////////////
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 
+	"github.com/DapperCollectives/CAST/backend/main/shared"
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/jackc/pgx/v4"
 )
 
 type Community struct {
-	ID                       int       `json:"id,omitempty"`
-	Name                     string    `json:"name"                            validate:"required"`
-	Category                 *string   `json:"category,omitempty"              validate:"required"`
-	Logo                     *string   `json:"logo,omitempty"`
-	Body                     *string   `json:"body,omitempty"                  validate:"required"`
-	Strategies               *[]string `json:"strategies,omitempty"`
-	Strategy                 *string   `json:"strategy,omitempty"`
-	Banner_img_url           *string   `json:"bannerImgUrl,omitempty"`
-	Website_url              *string   `json:"websiteUrl,omitempty"`
-	Twitter_url              *string   `json:"twitterUrl,omitempty"`
-	Github_url               *string   `json:"githubUrl,omitempty"`
-	Discord_url              *string   `json:"discordUrl,omitempty"`
-	Instagram_url            *string   `json:"instagramUrl,omitempty"`
-	Terms_and_conditions_url *string   `json:"termsAndConditionsUrl,omitempty"`
-	Only_authors_to_submit   *bool     `json:"onlyAuthorsToSubmit,omitempty"`
-	Proposal_validation      *string   `json:"proposalValidation,omitempty"`
-	Proposal_threshold       *string   `json:"proposalThreshold,omitempty"`
-	Slug                     *string   `json:"slug,omitempty"                  validate:"required"`
+	ID                       int         `json:"id,omitempty"`
+	Name                     string      `json:"name,omitempty"`
+	Category                 *string     `json:"category,omitempty"              validate:"required"`
+	Logo                     *string     `json:"logo,omitempty"`
+	Body                     *string     `json:"body,omitempty"`
+	Strategies               *[]Strategy `json:"strategies,omitempty"`
+	Strategy                 *string     `json:"strategy,omitempty"`
+	Banner_img_url           *string     `json:"bannerImgUrl,omitempty"`
+	Website_url              *string     `json:"websiteUrl,omitempty"`
+	Twitter_url              *string     `json:"twitterUrl,omitempty"`
+	Github_url               *string     `json:"githubUrl,omitempty"`
+	Discord_url              *string     `json:"discordUrl,omitempty"`
+	Instagram_url            *string     `json:"instagramUrl,omitempty"`
+	Terms_and_conditions_url *string     `json:"termsAndConditionsUrl,omitempty"`
+	Only_authors_to_submit   *bool       `json:"onlyAuthorsToSubmit,omitempty"`
+	Proposal_validation      *string     `json:"proposalValidation,omitempty"`
+	Proposal_threshold       *string     `json:"proposalThreshold,omitempty"`
+	Slug                     *string     `json:"slug,omitempty"                  validate:"required"`
 
+	//TODO we can remove this from the struct as contract data is inside Strategies now
 	Contract_name *string  `json:"contractName,omitempty"`
 	Contract_addr *string  `json:"contractAddr,omitempty"`
 	Public_path   *string  `json:"publicPath,omitempty"`
@@ -55,23 +56,28 @@ type CreateCommunityRequestPayload struct {
 }
 
 type UpdateCommunityRequestPayload struct {
-	Name                     *string   `json:"name,omitempty"`
-	Category                 *string   `json:"category,omitempty"`
-	Body                     *string   `json:"body,omitempty"`
-	Logo                     *string   `json:"logo,omitempty"`
-	Strategies               *[]string `json:"strategies,omitempty"`
-	Strategy                 *string   `json:"strategy,omitempty"`
-	Banner_img_url           *string   `json:"bannerImgUrl,omitempty"`
-	Website_url              *string   `json:"websiteUrl,omitempty"`
-	Twitter_url              *string   `json:"twitterUrl,omitempty"`
-	Github_url               *string   `json:"githubUrl,omitempty"`
-	Discord_url              *string   `json:"discordUrl,omitempty"`
-	Instagram_url            *string   `json:"instagramUrl,omitempty"`
-	Terms_and_conditions_url *string   `json:"termsAndConditionsUrl,omitempty"`
-	Proposal_validation      *string   `json:"proposalValidation,omitempty"`
-	Proposal_threshold       *string   `json:"proposalThreshold,omitempty"`
+	Name                     *string     `json:"name,omitempty"`
+	Category                 *string     `json:"category,omitempty"`
+	Body                     *string     `json:"body,omitempty"`
+	Logo                     *string     `json:"logo,omitempty"`
+	Strategies               *[]Strategy `json:"strategies,omitempty"`
+	Strategy                 *string     `json:"strategy,omitempty"`
+	Banner_img_url           *string     `json:"bannerImgUrl,omitempty"`
+	Website_url              *string     `json:"websiteUrl,omitempty"`
+	Twitter_url              *string     `json:"twitterUrl,omitempty"`
+	Github_url               *string     `json:"githubUrl,omitempty"`
+	Discord_url              *string     `json:"discordUrl,omitempty"`
+	Instagram_url            *string     `json:"instagramUrl,omitempty"`
+	Terms_and_conditions_url *string     `json:"termsAndConditionsUrl,omitempty"`
+	Proposal_validation      *string     `json:"proposalValidation,omitempty"`
+	Proposal_threshold       *string     `json:"proposalThreshold,omitempty"`
 
 	s.TimestampSignaturePayload
+}
+
+type Strategy struct {
+	Name            *string `json:"name,omitempty"`
+	shared.Contract `json:"contract,omitempty"`
 }
 
 type CommunityType struct {
@@ -178,46 +184,49 @@ func (c *Community) CreateCommunity(db *s.Database) error {
 	)
 	RETURNING id, created_at
 	`, c.Name, c.Category, c.Logo, c.Slug, c.Strategies, c.Strategy, c.Banner_img_url, c.Website_url, c.Twitter_url, c.Github_url, c.Discord_url, c.Instagram_url, c.Terms_and_conditions_url, c.Proposal_validation, c.Proposal_threshold, c.Body, c.Cid, c.Creator_addr, c.Contract_name, c.Contract_addr, c.Public_path, c.Threshold, c.Only_authors_to_submit).Scan(&c.ID, &c.Created_at)
-	return err // will be nil unless something went wrong
+	return err
 }
 
-func (c *Community) UpdateCommunity(db *s.Database, payload *UpdateCommunityRequestPayload) error {
-	// First, merge the CommunityRequst
-	data, err := json.Marshal(payload)
-	if err != nil {
-		return err
-	}
-
-	json.Unmarshal(data, c)
-
-	_, err = db.Conn.Exec(
+func (c *Community) UpdateCommunity(db *s.Database, p *UpdateCommunityRequestPayload) error {
+	_, err := db.Conn.Exec(
 		db.Context,
 		`
 	UPDATE communities
-	SET name = $1, body = $2, logo = $3, strategies = $4, strategy = $5, 
-		banner_img_url = $6, website_url = $7, twitter_url = $8, github_url = $9,
-		discord_url = $10, instagram_url = $11, proposal_validation = $12, proposal_threshold = $13, category = $14, terms_and_conditions_url = $15
+	SET name = COALESCE($1, name), 
+	body = COALESCE($2, body), 
+	logo = COALESCE($3, logo), 
+	strategies = COALESCE($4, strategies), 
+	strategy = COALESCE($5, strategy),
+	banner_img_url = COALESCE($6, banner_img_url),
+	website_url = COALESCE($7, website_url),
+	twitter_url = COALESCE($8, twitter_url),
+	github_url = COALESCE($9, github_url),
+	discord_url = COALESCE($10, discord_url),
+	instagram_url = COALESCE($11, instagram_url),
+	proposal_validation = COALESCE($12, proposal_validation),
+	proposal_threshold = COALESCE($13, proposal_threshold),
+	category = COALESCE($14, category),
+	terms_and_conditions_url = COALESCE($15, terms_and_conditions_url)
 	WHERE id = $16
 	`,
-		c.Name,
-		c.Body,
-		c.Logo,
-		c.Strategies,
-		c.Strategy,
-		c.Banner_img_url,
-		c.Website_url,
-		c.Twitter_url,
-		c.Github_url,
-		c.Discord_url,
-		c.Instagram_url,
-		c.Proposal_validation,
-		c.Proposal_threshold,
-		c.Category,
-		c.Terms_and_conditions_url,
+		p.Name,
+		p.Body,
+		p.Logo,
+		p.Strategies,
+		p.Strategy,
+		p.Banner_img_url,
+		p.Website_url,
+		p.Twitter_url,
+		p.Github_url,
+		p.Discord_url,
+		p.Instagram_url,
+		p.Proposal_validation,
+		p.Proposal_threshold,
+		p.Category,
+		p.Terms_and_conditions_url,
 		c.ID,
 	)
-
-	return err // will be nil unless something went wrong
+	return err
 }
 
 func (c *Community) CanUpdateCommunity(db *s.Database, addr string) error {
@@ -227,4 +236,15 @@ func (c *Community) CanUpdateCommunity(db *s.Database, addr string) error {
 		return fmt.Errorf("address %s does not have permission to update community with ID %d", addr, c.ID)
 	}
 	return nil
+}
+
+func MatchStrategyByProposal(s []Strategy, strategyToMatch string) (Strategy, error) {
+	var match Strategy
+	for _, strategy := range s {
+		if *strategy.Name == strategyToMatch {
+			match = strategy
+			return match, nil
+		}
+	}
+	return match, fmt.Errorf("Community does not have strategy avaliable")
 }

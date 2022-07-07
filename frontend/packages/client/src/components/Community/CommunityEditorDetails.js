@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Bin, ValidCheckMark, InvalidCheckMark } from 'components/Svg';
 import { WrapperResponsive, Loader, AddButton } from 'components';
 import { useCommunityUsers } from 'hooks';
@@ -23,8 +23,17 @@ export const CommunityUsersForm = ({
   submitComponent,
   validateEachAddress = false,
   onClearField = () => {},
+  autoFocusOnLoad = false,
 } = {}) => {
   const canDeleteAddress = addrList.length > 1;
+
+  const refOnFirstInput = useRef();
+
+  useEffect(() => {
+    if (refOnFirstInput.current) {
+      refOnFirstInput.current.focus();
+    }
+  }, [refOnFirstInput]);
   return (
     <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6 p-4-mobile mb-4-mobile">
       <div className="columns flex-1">
@@ -80,6 +89,11 @@ export const CommunityUsersForm = ({
                     width: '100%',
                     ...(isInvalid ? {} : undefined),
                   }}
+                  ref={
+                    addrList.length === 1 && addr === '' && autoFocusOnLoad
+                      ? refOnFirstInput
+                      : undefined
+                  }
                 />
                 <div
                   style={{

@@ -114,32 +114,6 @@ func TestCreateProposal(t *testing.T) {
 	})
 }
 
-func TestCreateProposalThreshold(t *testing.T) {
-	clearTable("communities")
-	clearTable("community_users")
-	clearTable("proposals")
-	communityId := otu.AddCommunitiesWithUsersAndThreshold(1, "user1")[0]
-
-	t.Run("Should be able to create a valid proposal given a token threshold", func(t *testing.T) {
-		proposalStruct := otu.GenerateProposalStruct("user1", communityId)
-		payload := otu.GenerateProposalPayload("user1", proposalStruct)
-
-		response := otu.CreateProposalAPI(payload)
-		CheckResponseCode(t, http.StatusCreated, response.Code)
-
-		var p models.Proposal
-		json.Unmarshal(response.Body.Bytes(), &p)
-
-		assert.NotNil(t, p.Cid)
-
-		assert.Equal(t, proposalStruct.Name, p.Name)
-		assert.Equal(t, *proposalStruct.Body, *p.Body)
-		assert.Equal(t, proposalStruct.Choices, p.Choices)
-		assert.Equal(t, proposalStruct.Community_id, p.Community_id)
-		assert.Equal(t, *proposalStruct.Strategy, *p.Strategy)
-	})
-}
-
 func TestUpdateProposal(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")

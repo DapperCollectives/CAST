@@ -12,3 +12,9 @@ export const FilterValues = {
   // group of closed and canceled
   terminated: 'Terminated',
 };
+
+export const CommunityEditPageTabs = {
+  profile: 'profile',
+  details: 'details',
+  proposalAndVoting: 'proposals-and-voting',
+};

@@ -33,7 +33,7 @@ const instagramValidator = (url) => {
 const discordValidator = (url) => {
   return (
     url === '' ||
-    /(https?:\/\/)?(www\.)?(discord\.(gg|io|me|li|com)|discordapp\.com\/invite)\/.+[a-z]/gim.test(
+    /(https?:\/\/)?(www\.)?(discord\.(gg|io|me|li|com)|discordapp\.com\/invite)\/.+[a-zA-Z0-9]/gim.test(
       url
     )
   );

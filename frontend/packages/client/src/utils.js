@@ -191,3 +191,12 @@ export const wait = async (milliSeconds = 5000) =>
       resolve(true);
     }, milliSeconds);
   });
+// converts kebab case to regular string
+const REVERSE_REGEX = /-[a-zA-Z]/g;
+
+export const kebabToString = (str = '') => {
+  const updated = str.replace(REVERSE_REGEX, function (match) {
+    return ' ' + match.slice(1);
+  });
+  return updated.charAt(0).toUpperCase() + updated.slice(1);
+};
