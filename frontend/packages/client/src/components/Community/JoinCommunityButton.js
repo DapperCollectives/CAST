@@ -24,9 +24,6 @@ export default function JoinCommunityButton({
   }, [user.addr, memberState]);
 
   const refresh = (updateFn) => {
-    // setting this to null and then to a valid address retriggers query to get memberState
-    setAddr(null);
-    setAddr(user.addr);
     setTotalMembers(updateFn);
   };
 
