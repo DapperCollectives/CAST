@@ -34,8 +34,11 @@ export default function useFeaturedCommunities({
     isLoading,
     isError,
     data:
-      data?.pages?.reduce((prev, current) => [...prev, ...current.data], []) ??
-      [],
+      data?.pages?.reduce(
+        (prev, current) =>
+          current?.data ? [...prev, ...current.data] : [...prev],
+        []
+      ) ?? [],
     pages: data?.pages ?? [],
     error,
     fetchNextPage,
