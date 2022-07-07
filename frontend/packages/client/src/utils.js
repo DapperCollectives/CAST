@@ -185,6 +185,12 @@ export const customDraftToHTML = (content) => {
 
 export const isValidAddress = (addr) => /0[x,X][a-zA-Z0-9]{16}$/gim.test(addr);
 
+export const wait = async (milliSeconds = 5000) =>
+  new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(true);
+    }, milliSeconds);
+  });
 // converts kebab case to regular string
 const REVERSE_REGEX = /-[a-zA-Z]/g;
 
