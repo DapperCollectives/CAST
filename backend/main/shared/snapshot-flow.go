@@ -88,22 +88,22 @@ func (c *SnapshotClient) TakeSnapshot(contract Contract) (*SnapshotResponse, err
 	return r, nil
 }
 
-func (c *SnapshotClient) GetSnapshotStatus(contract Contract) (LatestBlockHeight, error) {
-	var b LatestBlockHeight
+func (c *SnapshotClient) GetSnapshotStatus(contract Contract) (*SnapshotResponse, error) {
+	var r *SnapshotResponse = &SnapshotResponse{}
 
 	url := c.setSnapshotUrl(contract, "latest-blockheight")
 	req, err := c.setRequestMethod("GET", url)
 	if err != nil {
 		log.Debug().Err(err).Msg("SnapshotClient GetSnapshotStatus request error")
-		return b, err
+		return r, err
 	}
 
-	if err := c.sendRequest(req, &b); err != nil {
+	if err := c.sendRequest(req, &r); err != nil {
 		log.Debug().Err(err).Msg("SnapshotClient GetSnapshotStatus send request error")
-		return b, err
+		return r, err
 	}
 
-	return b, nil
+	return r, nil
 }
 
 func (c *SnapshotClient) GetAddressBalanceAtBlockHeight(

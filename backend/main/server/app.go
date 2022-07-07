@@ -719,19 +719,16 @@ func (a *App) getProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var snapshotResponse shared.LatestBlockHeight
-
-	//check if strategy has a Contract field
 	if strategy.Contract.Name != nil {
-		snapshotResponse, err = a.SnapshotClient.GetSnapshotStatus(strategy.Contract)
+		snapshotResponse, err := a.SnapshotClient.GetSnapshotStatus(strategy.Contract)
 		if err != nil {
 			log.Error().Err(err).Msg("error getting snapshot status")
 			respondWithError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
+		p.Snapshot_status = &snapshotResponse.Data.Status
 	}
 
-	p.Snapshot_status = &snapshotResponse.Status
 	respondWithJSON(w, http.StatusOK, p)
 }
 
@@ -827,18 +824,18 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		p.Block_height = snapshotResponse.Data.BlockHeight
 	}
 
-	if os.Getenv("APP_ENV") != "TEST" {
-		pin, err := a.IpfsClient.PinJson(p)
-		if err != nil {
-			log.Error().Err(err).Msg("error pinning proposal to IPFS")
-			respondWithError(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-		p.Cid = &pin.IpfsHash
-	} else {
-		dummyCid := "000000"
-		p.Cid = &dummyCid
-	}
+	// if os.Getenv("APP_ENV") != "TEST" {
+	// 	pin, err := a.IpfsClient.PinJson(p)
+	// 	if err != nil {
+	// 		log.Error().Err(err).Msg("error pinning proposal to IPFS")
+	// 		respondWithError(w, http.StatusInternalServerError, err.Error())
+	// 		return
+	// 	}
+	// 	p.Cid = &pin.IpfsHash
+	// } else {
+	// 	dummyCid := "000000"
+	// 	p.Cid = &dummyCid
+	// }
 
 	// validate proposal fields
 	validate := validator.New()
@@ -1037,17 +1034,17 @@ func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// pin to ipfs
-	if os.Getenv("APP_ENV") != "TEST" {
-		pin, err := a.IpfsClient.PinJson(c)
-		if err != nil {
-			respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
-			return
-		}
-		c.Cid = &pin.IpfsHash
-	} else {
-		dummyCid := "000000000000000"
-		c.Cid = &dummyCid
-	}
+	// if os.Getenv("APP_ENV") != "TEST" {
+	// 	pin, err := a.IpfsClient.PinJson(c)
+	// 	if err != nil {
+	// 		respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
+	// 		return
+	// 	}
+	// 	c.Cid = &pin.IpfsHash
+	// } else {
+	// 	dummyCid := "000000000000000"
+	// 	c.Cid = &dummyCid
+	// }
 
 	validate := validator.New()
 	vErr := validate.Struct(c)
