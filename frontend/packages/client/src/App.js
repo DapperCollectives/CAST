@@ -10,12 +10,14 @@ import NotificationModalProvider from './contexts/NotificationModal';
 import { ErrorBoundary } from 'react-error-boundary';
 import AppPages from './pages';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { ReactQueryDevtools } from 'react-query/devtools';
 
+const isLocalDevMode = process.env.NODE_ENV === 'development';
 // create react-query client
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      refetchOnWindowFocus: process.env.NODE_ENV !== 'development',
+      refetchOnWindowFocus: !isLocalDevMode,
     },
   },
 });
@@ -38,6 +40,7 @@ function App() {
             </Router>
           </NotificationModalProvider>
         </Web3Provider>
+        {isLocalDevMode && <ReactQueryDevtools />}
       </QueryClientProvider>
     </ErrorBoundary>
   );
