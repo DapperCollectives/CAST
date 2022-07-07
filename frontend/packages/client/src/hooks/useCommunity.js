@@ -11,9 +11,11 @@ import { useFileUploader } from 'hooks';
 export default function useCommunity({
   start = PAGINATION_INITIAL_STATE.start,
   count = PAGINATION_INITIAL_STATE.count,
+  initialLoading,
 } = {}) {
   const [state, dispatch] = useReducer(paginationReducer, {
     ...INITIAL_STATE,
+    loading: initialLoading ?? INITIAL_STATE.loading,
     pagination: {
       ...PAGINATION_INITIAL_STATE,
       start,

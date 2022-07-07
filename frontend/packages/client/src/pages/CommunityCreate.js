@@ -25,7 +25,7 @@ export default function CommunityCreate() {
     data,
     loading: creatingCommunity,
     error,
-  } = useCommunity();
+  } = useCommunity({ initialLoading: false });
 
   const history = useHistory();
 
