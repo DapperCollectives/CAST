@@ -15,7 +15,6 @@ export default function HomePage() {
     : (data || []).map((datum) => ({
         ...datum,
         // missing fields
-        logo: datum.logo || 'https://i.imgur.com/RMKXPCw.png',
         isComingSoon: datum.isComingSoon || false,
       }));
 

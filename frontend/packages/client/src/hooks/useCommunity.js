@@ -80,12 +80,13 @@ export default function useCommunity() {
           contractName,
           storagePath,
           onlyAuthorsToSubmitProposals,
+          strategies,
         } = communityData;
 
         let communityLogo;
-        // not handling upload error: there's a default image
+        // check for logo upload
         // admins can edit later the image
-        if (logo.file) {
+        if (logo?.file) {
           try {
             communityLogo = await uploadFile(logo.file);
           } catch (err) {
@@ -117,6 +118,7 @@ export default function useCommunity() {
             contractAddress,
             contractName,
             storagePath,
+            strategies,
             onlyAuthorsToSubmit: Boolean(onlyAuthorsToSubmitProposals),
             timestamp,
             compositeSignatures,

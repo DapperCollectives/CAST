@@ -139,7 +139,9 @@ function CommunityEditorProfile({
               width: '90px',
               overflow: 'hidden',
               position: 'relative',
-              ...(!image ? { border: '1px dashed #757575' } : undefined),
+              ...(!image?.imageUrl
+                ? { border: '1px dashed #757575' }
+                : undefined),
             }}
             {...getRootProps()}
           >
@@ -150,7 +152,7 @@ function CommunityEditorProfile({
                 <input {...getInputProps()} />
               </>
             )}
-            {image && (
+            {image?.imageUrl && (
               <div
                 className="is-flex flex-1 is-flex-direction-column is-align-items-center is-justify-content-center"
                 style={{

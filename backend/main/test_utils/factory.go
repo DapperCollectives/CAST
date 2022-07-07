@@ -232,7 +232,24 @@ func (otu *OverflowTestUtils) AddActiveProposals(cId int, count int) []int {
 	retIds := []int{}
 	for i := 0; i < count; i++ {
 		proposal := otu.GenerateProposalStruct("account", cId)
-		proposal.Start_time = time.Now().AddDate(0, -1, 0)
+		proposal.Start_time = time.Now().UTC().AddDate(0, -1, 0)
+		if err := proposal.CreateProposal(otu.A.DB); err != nil {
+			fmt.Printf("error in otu.AddActiveProposals")
+		}
+
+		retIds = append(retIds, proposal.ID)
+	}
+	return retIds
+}
+
+func (otu *OverflowTestUtils) AddActiveProposalsWithStartTimeNow(cId int, count int) []int {
+	if count < 1 {
+		count = 1
+	}
+	retIds := []int{}
+	for i := 0; i < count; i++ {
+		proposal := otu.GenerateProposalStruct("account", cId)
+		proposal.Start_time = time.Now().UTC()
 		if err := proposal.CreateProposal(otu.A.DB); err != nil {
 			fmt.Printf("error in otu.AddActiveProposals")
 		}
