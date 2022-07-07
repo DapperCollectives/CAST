@@ -775,14 +775,6 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	snapshot, err := a.SnapshotClient.GetLatestFlowSnapshot()
-	if err != nil {
-		log.Error().Err(err).Msg("error fetching latest snapshot")
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-	p.Block_height = snapshot.Block_height
-
 	var community models.Community
 	community.ID = communityId
 	if err := community.GetCommunity(a.DB); err != nil {
@@ -823,6 +815,7 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if strategy.Contract.Name != nil {
+		// add blockheight to this response
 		snapshotResponse, err := a.SnapshotClient.TakeSnapshot(strategy.Contract)
 		if err != nil {
 			log.Error().Err(err).Msg("error taking snapshot")
@@ -831,6 +824,7 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		}
 
 		p.Snapshot_status = &snapshotResponse.Data.Status
+		p.Block_height = snapshotResponse.Data.BlockHeight
 	}
 
 	if os.Getenv("APP_ENV") != "TEST" {

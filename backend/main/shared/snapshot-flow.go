@@ -47,8 +47,9 @@ type SnapshotResponse struct {
 }
 
 type SnapshotData struct {
-	Message string `json:"message"`
-	Status  string `json:"status"`
+	Message     string `json:"message"`
+	Status      string `json:"status"`
+	BlockHeight uint64 `json:"blockHeight"`
 }
 
 var (
