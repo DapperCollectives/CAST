@@ -209,12 +209,12 @@ func (v *Vote) CreateVote(db *s.Database) error {
 	var defaultEarlyVoteLength = 1
 
 	err := createVote(db, v)
-	if checkError(err) {
+	if err != nil {
 		return err
 	}
 
 	proposal, err := getProposal(db, v.Proposal_id)
-	if checkError(err) {
+	if err != nil {
 		return err
 	}
 
@@ -222,7 +222,7 @@ func (v *Vote) CreateVote(db *s.Database) error {
 
 	if isEarlyVote {
 		err = AddEarlyVoteAchievement(db, v, proposal)
-		if checkError(err) {
+		if err != nil {
 			return err
 		}
 	}
@@ -382,7 +382,7 @@ func AddStreakAchievement(db *s.Database, v *Vote, p Proposal) error {
 	var defaultStreakLength = 3
 
 	votingStreak, err := getUserVotingStreak(db, v.Addr, p.Community_id)
-	if checkError(err) {
+	if err != nil {
 		return err
 	}
 
@@ -442,6 +442,10 @@ func AddWinningVoteAchievement(db *s.Database, votes []*VoteWithBalance, p Propo
 				`, v.Addr, WinningVote, communityId, []int{v.Proposal_id}, details).Scan(&v.ID)
 
 			if checkErrorIgnoreNoRows(err) {
+				// Row already exists, so we have previously calculated
+				// winning achievements for this proposal
+				return nil
+			} else if err != nil {
 				return err
 			}
 		}
@@ -492,10 +496,6 @@ func addOrUpdateStreak(db *s.Database, addr string, communityId int, proposals [
 						RETURNING id
 					`
 	return db.Conn.QueryRow(db.Context, sql, addr, Streak, communityId, proposals, previousStreakDetails, details).Scan(&v.ID)
-}
-
-func checkError(err error) bool {
-	return err != nil
 }
 
 func checkErrorIgnoreNoRows(err error) bool {
