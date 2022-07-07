@@ -18,6 +18,7 @@ export default function CommunityCreate() {
   const {
     user: { addr: creatorAddr },
     injectedProvider,
+    isValidFlowAddress,
   } = useWebContext();
 
   const {
@@ -66,13 +67,70 @@ export default function CommunityCreate() {
     // create one object from steps data
     const fields = Object.assign({}, ...Object.values(stepsData));
 
-    const proposalData = {
+    const {
+      contractAddress,
+      listAddrAdmins = [],
+      listAddrAuthors = [],
+      strategies = [],
+    } = fields;
+
+    // validate Flow Addresses used
+    const addressesToValidate = {
+      'Contract Address': [contractAddress],
+      'Admin List': listAddrAdmins.map((e) => e.addr),
+      'Author List': listAddrAuthors.map((e) => e.addr),
+      Strategies: strategies,
+    };
+
+    const validation = Object.entries(addressesToValidate);
+    const errorMessages = [];
+    await Promise.all(
+      validation.map(async (ele) => {
+        try {
+          await Promise.all(
+            ele[1].map(async (addr) => {
+              await isValidFlowAddress(addr);
+            })
+          );
+        } catch (error) {
+          errorMessages.push(ele[0]);
+        }
+      })
+    );
+    // open modal if there are errors on addresses
+    if (!errorMessages.lenght) {
+      modalContext.openModal(
+        React.createElement(Error, {
+          error: (
+            <div className="mt-4">
+              <p className="is-size-6">
+                Addresses used are not valid Flow addresses:
+              </p>
+              <div className="is-flex is-align-items-center is-justify-content-center">
+                <ul>
+                  {errorMessages.map((type, index) => (
+                    <li key={`error-${index}`}>
+                      <p className="smaller-text mt-2 has-text-red">- {type}</p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          ),
+          errorTitle: 'Flow Address Error',
+        }),
+        { classNameModalContent: 'rounded-sm' }
+      );
+      return;
+    }
+
+    const communityData = {
       creatorAddr,
       ...fields,
       slug: generateSlug(),
     };
 
-    await createCommunity(injectedProvider, proposalData);
+    await createCommunity(injectedProvider, communityData);
   };
 
   const props = {
