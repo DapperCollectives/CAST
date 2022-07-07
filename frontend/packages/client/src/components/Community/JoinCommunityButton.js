@@ -31,22 +31,22 @@ export default function JoinCommunityButton({
   };
 
   const joinCommunity = async () => {
-    const { success } = await createCommunityUser(
+    const { success } = await createCommunityUser({
       communityId,
       user,
-      injectedProvider
-    );
+      injectedProvider,
+    });
     if (success) {
       refresh((totalMembers) => ++totalMembers);
     }
   };
 
   const leaveCommunity = async () => {
-    const { success } = await deleteUserFromCommunity(
+    const { success } = await deleteUserFromCommunity({
       communityId,
       user,
-      injectedProvider
-    );
+      injectedProvider,
+    });
 
     if (success) {
       refresh((totalMembers) => --totalMembers);
