@@ -42,6 +42,15 @@ type balanceAtBlockheight struct {
 	CreatedAt       time.Time `json:"createdAt"`
 }
 
+type SnapshotResponse struct {
+	Data SnapshotData `json:"data"`
+}
+
+type SnapshotData struct {
+	Message string `json:"message"`
+	Status  string `json:"status"`
+}
+
 var (
 	DummySnapshot = Snapshot{
 		ID:           "1",
@@ -61,22 +70,21 @@ func NewSnapshotClient(baseUrl string) *SnapshotClient {
 	}
 }
 
-func (c *SnapshotClient) TakeSnapshot(contract Contract) error {
-	var response interface{}
-	response = &struct{}{}
+func (c *SnapshotClient) TakeSnapshot(contract Contract) (*SnapshotResponse, error) {
+	var r *SnapshotResponse = &SnapshotResponse{}
 
 	url := c.setSnapshotUrl(contract, "take-snapshot")
 	req, err := c.setRequestMethod("POST", url)
 	if err != nil {
 		log.Debug().Err(err).Msg("SnapshotClient TakeSnapshot request error")
-		return err
+		return r, err
 	}
 
-	if err := c.sendRequest(req, response); err != nil {
+	if err := c.sendRequest(req, r); err != nil {
 		log.Debug().Err(err).Msg("SnapshotClient takeSnapshot request error")
-		return err
+		return r, err
 	}
-	return nil
+	return r, nil
 }
 
 func (c *SnapshotClient) GetSnapshotStatus(contract Contract) (LatestBlockHeight, error) {

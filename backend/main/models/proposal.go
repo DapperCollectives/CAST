@@ -35,7 +35,7 @@ type Proposal struct {
 	Timestamp            string                  `json:"timestamp" validate:"required"`
 	Composite_signatures *[]s.CompositeSignature `json:"compositeSignatures" validate:"required"`
 	Computed_status      *string                 `json:"computedStatus,omitempty"`
-	Snapshot             *s.LatestBlockHeight    `json:"snapshot,omitempty"`
+	Snapshot_status      *string                 `json:"snapshotStatus,omitempty"`
 }
 
 type UpdateProposalRequestPayload struct {
