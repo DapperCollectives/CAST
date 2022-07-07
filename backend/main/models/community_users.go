@@ -279,9 +279,9 @@ func getUserAchievements(db *s.Database, communityId int, start int, count int) 
 	sql := fmt.Sprintf(
 		`
 		SELECT v.addr as address, count(*) as num_votes, 
-		CASE WHEN a.early_vote is NULL THEN 0 ELSE a.early_vote END as early_vote,
-		CASE WHEN b.streak is NULL THEN 0 ELSE b.streak END as streak,
-		CASE WHEN c.winning_vote is NULL THEN 0 ELSE c.winning_vote END as winning_vote 
+		COALESCE(a.early_vote, 0) as early_vote,
+		COALESCE(b.streak, 0) as streak,
+		COALESCE(c.winning_vote, 0) as winning_vote 
 		FROM votes v 
 		LEFT OUTER JOIN proposals p ON p.id = v.proposal_id
 		LEFT OUTER JOIN (

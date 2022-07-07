@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -206,7 +207,7 @@ func (v *Vote) GetVoteById(db *s.Database) error {
 }
 
 func (v *Vote) CreateVote(db *s.Database) error {
-	var defaultEarlyVoteLength = 1
+	var defaultEarlyVoteLength = 2 // in hours
 
 	err := createVote(db, v)
 	if err != nil {
@@ -392,7 +393,14 @@ func AddStreakAchievement(db *s.Database, v *Vote, p Proposal) error {
 			if vote.Addr != "" {
 				proposals = append(proposals, vote.Proposal_id)
 			}
+
+			
 			if len(proposals) >= defaultStreakLength && (i == len(votingStreak)-1 || (i < len(votingStreak)-1 && votingStreak[i+1].Addr == "")) {
+				// ensure proposals always ordered to guarantee no duplicates
+				sort.Slice(proposals, func(i, j int) bool {
+					return proposals[i] < proposals[j]
+				})
+				
 				//Unique identifier for current streak
 				currentStreakDetails := fmt.Sprintf("%s:%s:%d:%s", Streak, v.Addr, p.Community_id, strings.Trim(strings.Join(strings.Fields(fmt.Sprint(proposals)), ","), "[]"))
 

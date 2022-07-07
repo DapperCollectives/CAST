@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"sort"
 	"testing"
 
 	"github.com/DapperCollectives/CAST/backend/main/test_utils"
@@ -83,8 +84,8 @@ func TestGetLeaderboardWithSingleStreak(t *testing.T) {
 	streaks := []int{3, 4}
 	streakBonus := 1
 	expectedUsers := 2
-	expectedUser1Score := 3 + (1 * streakBonus)
-	expectedUser2Score := 4 + (1 * streakBonus)
+	expectedScoreA := streaks[0] + (1 * streakBonus)
+	expectedScoreB := streaks[1] + (1 * streakBonus)
 
 	otu.GenerateSingleStreakAchievements(communityId, streaks)
 
@@ -94,12 +95,17 @@ func TestGetLeaderboardWithSingleStreak(t *testing.T) {
 	var p test_utils.PaginatedResponseWithLeaderboardUser
 	json.Unmarshal(response.Body.Bytes(), &p)
 
-	receivedUser1Score := p.Data[1].Score
-	receivedUser2Score := p.Data[0].Score
+	// ensure scores ordered for assert
+	sort.Slice(p.Data, func(i,j int) bool {
+		return p.Data[i].Score < p.Data[j].Score
+	})
+
+	receivedScoreA := p.Data[0].Score
+	receivedScoreB := p.Data[1].Score
 
 	assert.Equal(t, expectedUsers, len(p.Data))
-	assert.Equal(t, expectedUser1Score, receivedUser1Score)
-	assert.Equal(t, expectedUser2Score, receivedUser2Score)
+	assert.Equal(t, expectedScoreA, receivedScoreA)
+	assert.Equal(t, expectedScoreB, receivedScoreB)
 }
 
 func TestGetLeaderboardWithMultiStreaks(t *testing.T) {
@@ -133,7 +139,7 @@ func TestGetLeaderboardWithMultiStreaks(t *testing.T) {
 func TestGetLeaderboardWithWinningVote(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")
-	clearTable("community_users_achievements")
+	clearTable("user_achievements")
 	clearTable("proposals")
 	clearTable("proposal_results")
 	clearTable("votes")
