@@ -12,13 +12,7 @@ import AppPages from './pages';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
 // create react-query client
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: true,
-    },
-  },
-});
+const queryClient = new QueryClient();
 
 function App() {
   return (
