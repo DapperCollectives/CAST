@@ -163,7 +163,7 @@ func GetCommunitiesForUser(db *s.Database, addr string, start, count int) ([]Use
 	_ = db.Conn.QueryRow(db.Context, countSql, addr).Scan(&totalCommunities)
 
 	uniqueCommunities := getUniqueCommunities(communities)
-	return uniqueCommunities, totalCommunities, nil
+	return uniqueCommunities, len(uniqueCommunities), nil
 }
 
 func getUniqueCommunities(communities []UserCommunity) []UserCommunity {
