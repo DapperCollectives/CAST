@@ -14,13 +14,7 @@ import { ReactQueryDevtools } from 'react-query/devtools';
 
 const isLocalDevMode = process.env.NODE_ENV === 'development';
 // create react-query client
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: !isLocalDevMode,
-    },
-  },
-});
+const queryClient = new QueryClient();
 
 function App() {
   return (

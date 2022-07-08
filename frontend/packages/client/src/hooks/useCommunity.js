@@ -8,12 +8,20 @@ import { checkResponse, getCompositeSigs } from 'utils';
 import { useErrorHandlerContext } from '../contexts/ErrorHandler';
 import { useFileUploader } from 'hooks';
 
+const setDefaultValue = (field, fallbackValue) => {
+  if (field === undefined || field === '') {
+    return fallbackValue;
+  }
+  return field;
+};
 export default function useCommunity({
   start = PAGINATION_INITIAL_STATE.start,
   count = PAGINATION_INITIAL_STATE.count,
+  initialLoading,
 } = {}) {
   const [state, dispatch] = useReducer(paginationReducer, {
     ...INITIAL_STATE,
+    loading: initialLoading ?? INITIAL_STATE.loading,
     pagination: {
       ...PAGINATION_INITIAL_STATE,
       start,
@@ -80,24 +88,24 @@ export default function useCommunity({
           listAddrAuthors,
           creatorAddr,
           slug,
-          proposalThreshold,
           discordUrl,
           githubUrl,
           instagramUrl,
           twitterUrl,
           websiteUrl,
           logo,
-          contractAddress,
-          contractName,
-          storagePath,
+          contractAdrress: contractAddr,
+          contractName: contractN,
+          storagePath: storageP,
+          proposalThreshold: propThreshold,
           onlyAuthorsToSubmitProposals,
           strategies,
         } = communityData;
 
         let communityLogo;
-        // not handling upload error: there's a default image
+        // check for logo upload
         // admins can edit later the image
-        if (logo.file) {
+        if (logo?.file) {
           try {
             communityLogo = await uploadFile(logo.file);
           } catch (err) {
@@ -118,7 +126,6 @@ export default function useCommunity({
             creatorAddr,
             additionalAuthors: listAddrAuthors?.map((ele) => ele.addr),
             additionalAdmins: listAddrAdmins?.map((ele) => ele.addr),
-            proposalThreshold,
             slug,
             githubUrl,
             instagramUrl,
@@ -126,9 +133,13 @@ export default function useCommunity({
             websiteUrl,
             discordUrl,
             logo: communityLogo?.fileUrl,
-            contractAddress,
-            contractName,
-            storagePath,
+            contractAddress: setDefaultValue(
+              contractAddr,
+              '0x0ae53cb6e3f42a79'
+            ),
+            contractName: setDefaultValue(contractN, 'FlowToken'),
+            storagePath: setDefaultValue(storageP, 'flowTokenBalance'),
+            proposalThreshold: setDefaultValue(propThreshold, '0'),
             strategies,
             onlyAuthorsToSubmit: Boolean(onlyAuthorsToSubmitProposals),
             timestamp,

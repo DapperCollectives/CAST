@@ -1,5 +1,6 @@
 import React from 'react';
 import Blockies from 'react-blockies';
+import { kebabToString } from 'utils';
 
 const CommunityMemberInfo = ({ name }) => {
   return (
@@ -58,7 +59,12 @@ const CommunityAbout = ({
                   className="is-flex is-align-items-center py-1"
                   key={`strategy-${index}`}
                 >
-                  <p className="has-text-grey small-text">{item.name}</p>
+                  <p
+                    className="has-text-grey small-text"
+                    style={{ textTransform: 'capitalize' }}
+                  >
+                    {kebabToString(item.name)}
+                  </p>
                 </div>
               ))}
             </div>

@@ -17,6 +17,7 @@ const initialFormFields = {
   name: '',
   threshold: '',
   maxWeight: '',
+  publicPath: '',
 };
 
 const formFields = Object.keys(initialFormFields);
@@ -44,6 +45,8 @@ export default function StrategyEditorModal({
     const requiredFields = {
       addr: (addr) => addr?.trim().length > 0 && isValidAddress(addr),
       name: (name) => name?.trim().length > 0 && name?.trim().length <= 150,
+      publicPath: (path) =>
+        path?.trim().length > 0 && path?.trim().length <= 150,
       maxWeight: (maxWeight) =>
         maxWeight?.trim().length > 0 && /^[0-9]+$/.test(maxWeight),
       threshold: (threshold) =>

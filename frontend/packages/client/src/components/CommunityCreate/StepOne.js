@@ -107,10 +107,13 @@ export default function StepOne({
   useEffect(() => {
     const requiredFields = {
       communityName: (name) => name?.trim().length > 0,
-      communityDescription: (desc) => desc?.trim().length > 0,
-      logo: (logo) => logo?.file && logo?.imageUrl,
+      communityDescription: (desc) =>
+        desc?.trim().length ? desc?.trim().length < 1000 : true,
+      logo: (logo) =>
+        logo !== undefined ? logo?.file && logo?.imageUrl : true,
       communityTerms: (termsUrl) =>
-        termsUrl?.length > 0 && urlPatternValidation(termsUrl),
+        termsUrl?.length > 0 ? urlPatternValidation(termsUrl) : true,
+      category: (cat) => cat?.length > 0,
     };
     const isValid = Object.keys(requiredFields).every(
       (field) => stepData && requiredFields[field](stepData[field])
