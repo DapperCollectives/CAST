@@ -79,7 +79,7 @@ export default function CommunityCreate() {
       'Contract Address': [contractAddress],
       'Admin List': listAddrAdmins.map((e) => e.addr),
       'Author List': listAddrAuthors.map((e) => e.addr),
-      Strategies: strategies,
+      Strategies: strategies.map(({ contract }) => contract.addr),
     };
 
     const validation = Object.entries(addressesToValidate);
@@ -98,7 +98,7 @@ export default function CommunityCreate() {
       })
     );
     // open modal if there are errors on addresses
-    if (!errorMessages.lenght) {
+    if (errorMessages.lenght) {
       modalContext.openModal(
         React.createElement(Error, {
           error: (
