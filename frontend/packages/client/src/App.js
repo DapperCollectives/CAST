@@ -9,6 +9,10 @@ import { ErrorHandler } from './components';
 import NotificationModalProvider from './contexts/NotificationModal';
 import { ErrorBoundary } from 'react-error-boundary';
 import AppPages from './pages';
+import { QueryClient, QueryClientProvider } from 'react-query';
+
+// create react-query client
+const queryClient = new QueryClient();
 
 function App() {
   return (
@@ -18,15 +22,17 @@ function App() {
       )}
       onReset={() => (window.location.href = '/')}
     >
-      <Web3Provider network={process.env.REACT_APP_FLOW_ENV}>
-        <NotificationModalProvider>
-          <Router>
-            <ErrorHandler>
-              <AppPages />
-            </ErrorHandler>
-          </Router>
-        </NotificationModalProvider>
-      </Web3Provider>
+      <QueryClientProvider client={queryClient}>
+        <Web3Provider network={process.env.REACT_APP_FLOW_ENV}>
+          <NotificationModalProvider>
+            <Router>
+              <ErrorHandler>
+                <AppPages />
+              </ErrorHandler>
+            </Router>
+          </NotificationModalProvider>
+        </Web3Provider>
+      </QueryClientProvider>
     </ErrorBoundary>
   );
 }
