@@ -160,13 +160,19 @@ func (otu *OverflowTestUtils) CreateNFTVote(v models.Vote, ids []interface{}, co
 	return vote
 }
 
+func (otu *OverflowTestUtils) SetupAccountForNFTs(account string) {
+	otu.O.TransactionFromFile("setup_account").
+		SignProposeAndPayAs(account).
+		RunPrintEventsFull()
+}
+
 func (otu *OverflowTestUtils) CreateNFTCollection(account string) {
 	otu.O.TransactionFromFile("create_collection").
 		SignProposeAndPayAs(account).
 		RunPrintEventsFull()
 }
 
-func (otu *OverflowTestUtils) MintNFT(signer string, recipient string) {
+func (otu *OverflowTestUtils) MintNFT(signer, recipient string) {
 	otu.O.TransactionFromFile("mint_nft").
 		SignProposeAndPayAsService().
 		Args(otu.O.Arguments().
@@ -177,8 +183,11 @@ func (otu *OverflowTestUtils) MintNFT(signer string, recipient string) {
 		RunPrintEventsFull()
 }
 
-func (otu *OverflowTestUtils) SetupAccountForNFTs(account string) {
-	otu.O.TransactionFromFile("setup_account").
-		SignProposeAndPayAs(account).
+func (otu *OverflowTestUtils) TransferNFT(signer, recipient string, id uint64) {
+	otu.O.TransactionFromFile("transfer_nft").
+		SignProposeAndPayAs(signer).
+		Args(otu.O.Arguments().
+			Account(recipient).
+			UInt64(id)).
 		RunPrintEventsFull()
 }

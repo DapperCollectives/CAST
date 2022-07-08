@@ -162,6 +162,10 @@ func TestBalanceOfNFTsStrategy(t *testing.T) {
 		expectedWeight := float64(1.00)
 		assert.Equal(t, expectedWeight, *vote.Weight)
 	})
+
+	t.Run("Attempt to cheat the NFT strategy", func(t *testing.T) {
+		otu.TransferNFT("user1", "user2", 1)
+	})
 }
 
 /* Staked Token Weighted Default */
