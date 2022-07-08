@@ -19,13 +19,19 @@ export default function HomePage() {
   const { isLoading: loadingFeaturedCommunities, data: featuredCommunities } =
     useFeaturedCommunities();
 
-  const myUserCommunities = loading
+  let myUserCommunities = loading
     ? []
     : (communityUser || []).map((datum) => ({
         ...datum,
         // missing fields
         isComingSoon: datum.isComingSoon || false,
       }));
+
+  // Remove duplicates from array
+  myUserCommunities = myUserCommunities.filter(
+    (value, index, self) =>
+      index === self.findIndex((t) => t.name === value.name)
+  );
 
   const isMyCommunitiesVisible = myUserCommunities.length > 0;
 
