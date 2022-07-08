@@ -162,20 +162,27 @@ func GetCommunitiesForUser(db *s.Database, addr string, start, count int) ([]Use
 	`
 	_ = db.Conn.QueryRow(db.Context, countSql, addr).Scan(&totalCommunities)
 
-	uniqueCommunities := getUniqueCommunities(communities)
+	uniqueCommunities := filterDuplicateIDs(communities)
 	return uniqueCommunities, len(uniqueCommunities), nil
 }
 
-func getUniqueCommunities(communities []UserCommunity) []UserCommunity {
+func filterDuplicateIDs(communities []UserCommunity) []UserCommunity {
 	var uniqueCommunities []UserCommunity
-	communityIds := make(map[int]bool)
 	for _, community := range communities {
-		if _, ok := communityIds[community.ID]; !ok {
-			communityIds[community.ID] = true
+		if !containsID(uniqueCommunities, community) {
 			uniqueCommunities = append(uniqueCommunities, community)
 		}
 	}
 	return uniqueCommunities
+}
+
+func containsID(communities []UserCommunity, community UserCommunity) bool {
+	for _, c := range communities {
+		if c.ID == community.ID {
+			return true
+		}
+	}
+	return false
 }
 
 func (u *CommunityUser) GetCommunityUser(db *s.Database) error {
