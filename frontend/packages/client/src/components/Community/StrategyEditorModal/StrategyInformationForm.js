@@ -4,6 +4,7 @@ import { Input } from 'components';
 const staticPlaceholders = {
   addr: 'Contract Address',
   name: 'Contract Name',
+  publicPath: 'Storage Path',
   maxWeight: 'Max Weight',
   threshold: 'Minimum Balance',
 };

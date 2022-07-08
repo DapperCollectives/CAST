@@ -24,7 +24,6 @@ export default function HomePage() {
     : (communityUser || []).map((datum) => ({
         ...datum,
         // missing fields
-        logo: datum.logo || 'https://i.imgur.com/RMKXPCw.png',
         isComingSoon: datum.isComingSoon || false,
       }));
 
