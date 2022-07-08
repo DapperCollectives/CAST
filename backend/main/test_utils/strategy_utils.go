@@ -98,6 +98,33 @@ func (otu *OverflowTestUtils) GenerateListOfVotes(proposalId int, count int) *[]
 	return &votes
 }
 
+func (otu *OverflowTestUtils) GenerateCheatVote(proposalId int, count int) *[]VoteWithBalance {
+	votes := make([]VoteWithBalance, count)
+	choices := []string{"a", "b"}
+	for i := 0; i < count; i++ {
+		addr := "0x" + strconv.Itoa(i)
+		randomNumber := rand.Intn(2)
+		choice := choices[randomNumber]
+		v := models.Vote{
+			Proposal_id: proposalId, Addr: addr, Choice: choice,
+		}
+
+		// Balance is 1 FLOW * index
+		balance := 100000000 * (i + 1)
+
+		vote := VoteWithBalance{
+			Vote:                    v,
+			Primary_account_balance: uint64(balance),
+			Staking_balance:         uint64(balance * 5), // Make this different so staked/reg strats dont have same results
+			Block_height:            uint64(0),
+		}
+
+		votes[i] = vote
+	}
+
+	return &votes
+}
+
 func (otu *OverflowTestUtils) GenerateListOfVotesWithNFTs(
 	proposalId int,
 	count int,

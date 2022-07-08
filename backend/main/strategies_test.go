@@ -164,7 +164,25 @@ func TestBalanceOfNFTsStrategy(t *testing.T) {
 	})
 
 	t.Run("Attempt to cheat the NFT strategy", func(t *testing.T) {
-		otu.TransferNFT("user1", "user2", 1)
+		votes, err := otu.GenerateListOfVotesWithNFTs(proposalId, 5, contract)
+		if err != nil {
+			t.Error(err)
+		}
+
+		proposalWithChoices := models.NewProposalResults(proposalId, choices)
+		_results := otu.TallyResultsForBalanceOfNfts(votes, proposalWithChoices)
+
+		response := otu.GetProposalResultsAPI(proposalId)
+		CheckResponseCode(t, http.StatusOK, response.Code)
+
+		var results models.ProposalResults
+		json.Unmarshal(response.Body.Bytes(), &results)
+
+		assert.Equal(t, _results.Proposal_id, results.Proposal_id)
+		assert.Equal(t, _results.Results_float["a"], results.Results_float["a"])
+		assert.Equal(t, _results.Results_float["b"], results.Results_float["b"])
+
+		otu.TransferNFT("user2", "user6", 1)
 	})
 }
 
