@@ -162,7 +162,20 @@ func GetCommunitiesForUser(db *s.Database, addr string, start, count int) ([]Use
 	`
 	_ = db.Conn.QueryRow(db.Context, countSql, addr).Scan(&totalCommunities)
 
-	return communities, totalCommunities, nil
+	uniqueCommunities := getUniqueCommunities(communities)
+	return uniqueCommunities, totalCommunities, nil
+}
+
+func getUniqueCommunities(communities []UserCommunity) []UserCommunity {
+	var uniqueCommunities []UserCommunity
+	communityIds := make(map[int]bool)
+	for _, community := range communities {
+		if _, ok := communityIds[community.ID]; !ok {
+			communityIds[community.ID] = true
+			uniqueCommunities = append(uniqueCommunities, community)
+		}
+	}
+	return uniqueCommunities
 }
 
 func (u *CommunityUser) GetCommunityUser(db *s.Database) error {
