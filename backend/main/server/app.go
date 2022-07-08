@@ -715,15 +715,6 @@ func (a *App) getProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	strategy, err := models.MatchStrategyByProposal(*c.Strategies, *p.Strategy)
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	if strategy.Contract.Name != nil && os.Getenv("APP_ENV") == "PRODUCTION" {
-		p.SetStatus()
-	}
 	respondWithJSON(w, http.StatusOK, p)
 }
 
@@ -836,9 +827,10 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if strategy.Contract.Name != nil && os.Getenv("APP_ENV") == "PRODUCTION" {
-		p.SetStatus()
+	if strategy.Contract.Name != nil && p.Start_time.Before(time.Now().Add(time.Hour)) {
+		p.Start_time = time.Now().Add(time.Hour)
 	}
+
 	// create proposal
 	if err := p.CreateProposal(a.DB); err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
@@ -875,8 +867,6 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
-
-	log.Debug().Msgf("payload: %s", payload.Signing_addr)
 
 	// Check that status update is valid
 	// For now we are assuming proposals are creating with status 'published' and may be cancelled.

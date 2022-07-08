@@ -171,29 +171,6 @@ func (p *Proposal) IsLive() bool {
 	return now.After(p.Start_time) && now.Before(p.End_time)
 }
 
-func (p *Proposal) SetStatus() string {
-	var active = "active"
-	var pending = "pending"
-
-	pastGracePeriod := p.CheckGracePeriod()
-
-	if pastGracePeriod {
-		p.Status = &active
-	} else {
-		p.Status = &pending
-	}
-
-	return *p.Status
-}
-
-func (p *Proposal) CheckGracePeriod() bool {
-	oneHourSinceCreated := p.Start_time.Add(time.Hour)
-	if time.Now().UTC().After(oneHourSinceCreated) {
-		return true
-	}
-	return false
-}
-
 // Validations
 
 // Returns an error if the account's balance is insufficient to cast
