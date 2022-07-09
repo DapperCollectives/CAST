@@ -148,7 +148,7 @@ export default function useCommunity({
         };
         const response = await fetch(url, fetchOptions);
         const json = await checkResponse(response);
-        dispatch({ type: 'SUCCESS', payload: json });
+        dispatch({ type: 'SUCCESS', payload: { data: [json] } });
       } catch (err) {
         notifyError(err, url, 'Something went wrong with your proposal.');
         dispatch({ type: 'ERROR', payload: { errorData: err.message } });
