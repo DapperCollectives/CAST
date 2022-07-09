@@ -66,7 +66,7 @@ const ErrorHandlerProvider = ({ children }) => {
       setError({
         status: err?.status ?? 500,
         statusText: err?.statusText || `Server not available: ${err?.message}`,
-        url,
+        url: url ?? '',
       });
     }
   }, []);

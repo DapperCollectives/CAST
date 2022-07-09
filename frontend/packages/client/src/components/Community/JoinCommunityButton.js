@@ -24,29 +24,26 @@ export default function JoinCommunityButton({
   }, [user.addr, memberState]);
 
   const refresh = (updateFn) => {
-    // setting this to null and then to a valid address retriggers query to get memberState
-    setAddr(null);
-    setAddr(user.addr);
     setTotalMembers(updateFn);
   };
 
   const joinCommunity = async () => {
-    const { success } = await createCommunityUser(
+    const { success } = await createCommunityUser({
       communityId,
       user,
-      injectedProvider
-    );
+      injectedProvider,
+    });
     if (success) {
       refresh((totalMembers) => ++totalMembers);
     }
   };
 
   const leaveCommunity = async () => {
-    const { success } = await deleteUserFromCommunity(
+    const { success } = await deleteUserFromCommunity({
       communityId,
       user,
-      injectedProvider
-    );
+      injectedProvider,
+    });
 
     if (success) {
       refresh((totalMembers) => --totalMembers);

@@ -26,15 +26,15 @@ export default function CommunityCreate() {
     data,
     loading: creatingCommunity,
     error,
-  } = useCommunity();
+  } = useCommunity({ initialLoading: false });
 
   const history = useHistory();
 
   const modalContext = useModalContext();
 
   useEffect(() => {
-    if (data?.id) {
-      history.push(`/community/${data.id}`);
+    if (data && data[0]?.id) {
+      history.push(`/community/${data[0].id}`);
     }
   }, [data, history]);
 
