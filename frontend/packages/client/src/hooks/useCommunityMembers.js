@@ -11,8 +11,10 @@ export default function useCommunityMembers({
 
   const { notifyError } = useErrorHandlerContext();
 
+  const queryUniqueKey = ['all-community-users', communityId];
+
   const { isLoading, isError, data, error, fetchNextPage } = useInfiniteQuery(
-    ['all-community-users', communityId],
+    queryUniqueKey,
     async ({ pageParam = initialPageParam, queryKey }) => {
       const [start, count] = pageParam;
       const communityId = queryKey[1];
@@ -55,5 +57,6 @@ export default function useCommunityMembers({
       totalRecords,
     },
     fetchNextPage,
+    queryKey: queryUniqueKey,
   };
 }

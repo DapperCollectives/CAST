@@ -22,6 +22,7 @@ import {
 } from '../hooks';
 import { useWebContext } from '../contexts/Web3';
 import Blockies from 'react-blockies';
+import { useQueryClient } from 'react-query';
 
 const CommunitySettingsButton = ({ communityId } = {}) => {
   return (
@@ -139,6 +140,8 @@ const MembersLayout = ({
 };
 
 export default function Community() {
+  const queryClient = useQueryClient();
+
   const { communityId } = useParams();
 
   const history = useHistory();
@@ -172,7 +175,7 @@ export default function Community() {
   const {
     data: members,
     pagination: { totalRecords },
-    reFetch: reFectchMembers,
+    queryKey,
   } = useCommunityMembers({ communityId });
 
   const [totalMembers, setTotalMembers] = useState();
@@ -203,7 +206,13 @@ export default function Community() {
 
   const onUserLeaveCommunity = async () => {
     if (members?.find((member) => member.addr === addr)) {
-      await reFectchMembers();
+      await queryClient.invalidateQueries(queryKey);
+    }
+  };
+
+  const onUserJoinCommunity = async () => {
+    if (members?.length < 6) {
+      await queryClient.invalidateQueries(queryKey);
     }
   };
 
@@ -306,6 +315,7 @@ export default function Community() {
               communityId={communityId}
               setTotalMembers={setTotalMembers}
               onLeaveCommunity={onUserLeaveCommunity}
+              onJoinCommunity={onUserJoinCommunity}
             />
           </div>
         </div>
