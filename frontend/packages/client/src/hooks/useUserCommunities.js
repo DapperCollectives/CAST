@@ -5,7 +5,7 @@ import { useErrorHandlerContext } from '../contexts/ErrorHandler';
 
 export default function useUserCommunities({
   addr,
-  countParam = PAGINATION_INITIAL_STATE.count,
+  count: countParam = PAGINATION_INITIAL_STATE.count,
 } = {}) {
   const initialPageParam = [0, countParam, 0, -1];
 
