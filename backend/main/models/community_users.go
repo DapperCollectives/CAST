@@ -43,6 +43,7 @@ type UserAchievements = []struct {
 	Address   string
 	NumVotes  int
 	EarlyVote int
+	Streak    int
 }
 
 type LeaderboardUserPayload struct {
@@ -107,13 +108,9 @@ func GetUsersForCommunityByType(db *s.Database, communityId, start, count int, u
 }
 
 func GetCommunityLeaderboard(db *s.Database, communityId, start, count int) ([]LeaderboardUserPayload, int, error) {
-	var userAchievements = []struct {
-		Address   string
-		NumVotes  int
-		EarlyVote int
-	}{}
 	var leaderboardUsers = []LeaderboardUserPayload{}
 	var defaultEarlyVoteWeight = 1
+	var defaultStreakWeight = 1
 
 	userAchievements, err := getUserAchievements(db, communityId, start, count)
 
@@ -124,7 +121,7 @@ func GetCommunityLeaderboard(db *s.Database, communityId, start, count int) ([]L
 	for _, user := range userAchievements {
 		var leaderboardUser = LeaderboardUserPayload{}
 		leaderboardUser.Addr = user.Address
-		leaderboardUser.Score = user.NumVotes + (user.EarlyVote * defaultEarlyVoteWeight)
+		leaderboardUser.Score = user.NumVotes + (user.EarlyVote * defaultEarlyVoteWeight) + (user.Streak * defaultStreakWeight)
 		leaderboardUsers = append(leaderboardUsers, leaderboardUser)
 	}
 
@@ -285,7 +282,7 @@ func getUserAchievements(db *s.Database, communityId int, start int, count int) 
 			LEFT OUTER JOIN proposals p ON p.id = v.proposal_id
 			LEFT OUTER JOIN (
 				SELECT * FROM crosstab(
-					$$SELECT addr, achievement_type, count(*) FROM community_users_achievements 
+					$$SELECT addr, achievement_type, count(*) FROM user_achievements 
 					WHERE community_id = %d
 					GROUP BY addr, achievement_type
 					ORDER BY 1,2$$

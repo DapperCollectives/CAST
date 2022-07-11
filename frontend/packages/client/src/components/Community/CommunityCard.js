@@ -67,7 +67,7 @@ const CommunityCard = ({ logo, name, description, id, slug }) => {
                 />
               ) : (
                 <Blockies
-                  seed={slug}
+                  seed={slug ?? `seed-${id}`}
                   size={10}
                   scale={9.6}
                   className="rounded-sm"

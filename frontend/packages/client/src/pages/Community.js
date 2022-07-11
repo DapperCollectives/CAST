@@ -22,6 +22,7 @@ import {
 } from '../hooks';
 import { useWebContext } from '../contexts/Web3';
 import Blockies from 'react-blockies';
+import { useQueryClient } from 'react-query';
 
 const CommunitySettingsButton = ({ communityId } = {}) => {
   return (
@@ -139,6 +140,8 @@ const MembersLayout = ({
 };
 
 export default function Community() {
+  const queryClient = useQueryClient();
+
   const { communityId } = useParams();
 
   const history = useHistory();
@@ -159,19 +162,22 @@ export default function Community() {
     roles: ['admin'],
   });
 
-  const { data: admins, reFetch: reFectAdmins } = useCommunityUsers({
+  const { data: admins, reFetch: reFetchAdmins } = useCommunityUsers({
     communityId,
     type: 'admin',
   });
 
-  const { data: authors, reFetch: reFectAuthors } = useCommunityUsers({
+  const { data: authors, reFetch: reFetchAuthors } = useCommunityUsers({
     communityId,
     type: 'author',
   });
 
   const {
+    data: members,
     pagination: { totalRecords },
-  } = useCommunityMembers({ communityId });
+    queryKey,
+  } = useCommunityMembers({ communityId, count: 18 });
+
   const [totalMembers, setTotalMembers] = useState();
   useEffect(() => {
     setTotalMembers(totalRecords);
@@ -202,11 +208,19 @@ export default function Community() {
     // if current user leaving community is admin or author
     // trigger update on admin and author list
     if (authors?.find((author) => author.addr === addr)) {
-      await reFectAuthors();
+      await reFetchAuthors();
     }
     if (admins?.find((admin) => admin.addr === addr)) {
-      await reFectAdmins();
+      await reFetchAdmins();
     }
+
+    if (members?.find((member) => member.addr === addr)) {
+      await queryClient.invalidateQueries(queryKey);
+    }
+  };
+
+  const onUserJoinCommunity = async () => {
+    await queryClient.invalidateQueries(queryKey);
   };
 
   if (error) {
@@ -274,7 +288,7 @@ export default function Community() {
                   />
                 ) : (
                   <Blockies
-                    seed={slug ?? id}
+                    seed={slug ?? `seed-${id}`}
                     size={10}
                     scale={9.6}
                     className="blockies"
@@ -285,15 +299,15 @@ export default function Community() {
                 <h2 className={titleClassNames}>{community.name}</h2>
                 <p className={memberClassNames}>{totalMembers} members</p>
                 <div className="is-flex">
-                  {admins
-                    ? admins.slice(0, 5).map(({ addr: adminAddr }, idx) => (
+                  {members
+                    ? members.slice(0, 6).map(({ addr }, idx) => (
                         <div
                           key={`${idx}`}
                           className="blockies-wrapper is-relative"
                           style={{ right: `${idx * (notMobile ? 12 : 6)}px` }}
                         >
                           <Blockies
-                            seed={adminAddr}
+                            seed={addr}
                             size={notMobile ? 10 : 6}
                             scale={4}
                             className="blockies blockies-border"
@@ -308,6 +322,7 @@ export default function Community() {
               communityId={communityId}
               setTotalMembers={setTotalMembers}
               onLeaveCommunity={onUserLeaveCommunity}
+              onJoinCommunity={onUserJoinCommunity}
             />
           </div>
         </div>
