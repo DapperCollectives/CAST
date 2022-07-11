@@ -58,6 +58,8 @@ func (b *BalanceOfNfts) FetchBalance(
 			return nil, err
 		}
 
+		//only if the NFT ID is not already in the DB,
+		//do we add the balance
 		if !doesExist && err == nil {
 			err = models.CreateUserNFTRecord(db, vb)
 			balance.NFTCount = len(vb.NFTs)
