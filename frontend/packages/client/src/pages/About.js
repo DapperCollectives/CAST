@@ -7,7 +7,12 @@ const AboutPage = () => {
   const navigate = useNavigate();
   const modal = state?.modal ?? true;
   const closeModal = () => {
-    navigate('/');
+    // // user landed on about page: no history
+    // if (history.length <= 2) {
+    //   navigate('/');
+    //   return;
+    // }
+    navigate(-1);
   };
   return (
     <div className={modal ? 'modal is-active' : undefined}>
