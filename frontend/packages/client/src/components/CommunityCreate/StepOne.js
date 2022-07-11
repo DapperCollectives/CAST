@@ -35,9 +35,12 @@ export default function StepOne({
 
   const { data: communityCategory } = useCommunityCategory();
 
-  const setData = (data) => {
-    onDataChange(data);
-  };
+  const setData = useCallback(
+    (data) => {
+      onDataChange(data);
+    },
+    [onDataChange]
+  );
 
   const onDrop = useCallback(
     (acceptedFiles) => {
