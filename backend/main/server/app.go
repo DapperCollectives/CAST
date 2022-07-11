@@ -827,8 +827,10 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if strategy.Contract.Name != nil && p.Start_time.Before(time.Now().Add(time.Hour)) {
-		p.Start_time = time.Now().Add(time.Hour)
+	if os.Getenv("APP_ENV") != "PRODUCTION" {
+		if strategy.Contract.Name != nil && p.Start_time.Before(time.Now().Add(time.Hour)) {
+			p.Start_time = time.Now().Add(time.Hour)
+		}
 	}
 
 	// create proposal
