@@ -175,7 +175,6 @@ export default function Community() {
     reFetch: reFectchMembers,
   } = useCommunityMembers({ communityId });
 
-  console.log('members', members);
   const [totalMembers, setTotalMembers] = useState();
   useEffect(() => {
     setTotalMembers(totalRecords);
