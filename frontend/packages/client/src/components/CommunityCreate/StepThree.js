@@ -29,7 +29,7 @@ export default function StepThree({
   setStepValid,
   onDataChange,
   isStepValid,
-  moveToNextStep,
+  tryToGoForward,
 }) {
   const {
     proposalThreshold = '',
@@ -148,7 +148,7 @@ export default function StepThree({
             className={`button vote-button transition-all is-flex has-background-yellow rounded-sm is-size-6 is-uppercase is-${
               isStepValid ? 'enabled' : 'disabled'
             }`}
-            onClick={isStepValid ? () => moveToNextStep() : () => {}}
+            onClick={isStepValid ? () => tryToGoForward() : () => {}}
           >
             Next: VOTING STRATEGIES
           </button>

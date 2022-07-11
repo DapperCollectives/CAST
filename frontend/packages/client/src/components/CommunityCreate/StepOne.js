@@ -28,16 +28,19 @@ export default function StepOne({
   stepData,
   setStepValid,
   onDataChange,
-  moveToNextStep,
+  tryToGoForward,
   isStepValid,
 }) {
   const { notifyError } = useErrorHandlerContext();
 
   const { data: communityCategory } = useCommunityCategory();
 
-  const setData = (data) => {
-    onDataChange(data);
-  };
+  const setData = useCallback(
+    (data) => {
+      onDataChange(data);
+    },
+    [onDataChange]
+  );
 
   const onDrop = useCallback(
     (acceptedFiles) => {
@@ -270,7 +273,7 @@ export default function StepOne({
             className={`button vote-button transition-all is-flex has-background-yellow rounded-sm is-size-6 is-uppercase is-${
               isStepValid ? 'enabled' : 'disabled'
             }`}
-            onClick={isStepValid ? () => moveToNextStep() : () => {}}
+            onClick={isStepValid ? () => tryToGoForward() : () => {}}
           >
             Next: COMMUNITY DETAILS
           </button>

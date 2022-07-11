@@ -7,11 +7,11 @@ const AboutPage = () => {
   const navigate = useNavigate();
   const modal = state?.modal ?? true;
   const closeModal = () => {
-    // // user landed on about page: no history
-    // if (history.length <= 2) {
-    //   navigate('/');
-    //   return;
-    // }
+    // user landed on about page: no history
+    if (window.history.length <= 2) {
+      navigate('/');
+      return;
+    }
     navigate(-1);
   };
   return (

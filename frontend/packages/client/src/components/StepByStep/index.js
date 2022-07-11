@@ -18,6 +18,11 @@ const defaultStyles = {
   },
 };
 
+const allValidSteps = (validStepsVals, displayStepNum) => {
+  const sliceUpTo = displayStepNum >= 1 ? displayStepNum : 1;
+  return validStepsVals.slice(0, sliceUpTo).every((val) => val === true);
+};
+
 /**
  * NOTE:
  * currentStep is the number representing the index in the steps array (0 to n)
@@ -96,18 +101,24 @@ function StepByStep({
     const displayStepNum = !isNaN(Number(displayStep))
       ? Number(displayStep)
       : -1;
+
+    if (showPreStep && displayStepNum <= 1) return;
+
     if (
       displayStep === null || // first time, need to set step in URL
       displayStep === undefined || // first time, need to set step in URL
       displayStepNum <= 0 || // prevent out-of-bounds values
-      displayStepNum > steps.length // prevent out-of-bounds values
+      displayStepNum > steps.length || // prevent out-of-bounds values
+      (showPreStep && displayStepNum > 1) // correct displayStep if preStep not dismissed
     ) {
       setValidSteps({});
       goToStep(0, true);
     }
-  }, [searchParams, steps.length, setValidSteps, goToStep]);
+  }, [searchParams, steps.length, setValidSteps, goToStep, showPreStep]);
 
   useEffect(() => {
+    if (showPreStep) return;
+
     // check if valid condition to go forward/back
     const displayStep = searchParams.get('step');
     const displayStepNum = !isNaN(Number(displayStep))
@@ -115,13 +126,15 @@ function StepByStep({
       : -1;
     const validStepsVals = Object.values(validSteps);
     const numValidSteps = validStepsVals.length;
-    const allValidSteps = () =>
-      validStepsVals.slice(0, displayStepNum - 1).every((val) => val === true);
     if (
-      // prevent reaching a subsequent step until prior steps have data
-      (displayStepNum > 1 && (!numValidSteps || !allValidSteps())) ||
-      // or in the case of a mismatch
-      (!Object.keys(stepsData).length && numValidSteps)
+      (!preStep &&
+        // prevent reaching a subsequent step until prior steps have data
+        ((displayStepNum > 1 && (!numValidSteps || !allValidSteps())) ||
+          // or in the case of a mismatch
+          (!Object.keys(stepsData).length && numValidSteps))) ||
+      (preStep &&
+        ((displayStepNum > 2 && (!numValidSteps || !allValidSteps())) ||
+          (!Object.keys(stepsData).length && numValidSteps > 1)))
     ) {
       setValidSteps({});
       goToStep(0, true);
@@ -137,6 +150,8 @@ function StepByStep({
     validSteps,
     setValidSteps,
     setCurrentStep,
+    showPreStep,
+    preStep,
   ]);
 
   const getStepIcon = (stepIdx, stepLabel) => {
