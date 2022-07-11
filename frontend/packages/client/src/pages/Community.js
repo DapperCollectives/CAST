@@ -302,7 +302,7 @@ export default function Community() {
                 <p className={memberClassNames}>{totalMembers} members</p>
                 <div className="is-flex">
                   {members
-                    ? members.slice(0, 5).map(({ addr }, idx) => (
+                    ? members.slice(0, 6).map(({ addr }, idx) => (
                         <div
                           key={`${idx}`}
                           className="blockies-wrapper is-relative"
