@@ -997,7 +997,6 @@ func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 
 	c = payload.Community
 
-	// validate timestamp of request/message
 	if err := a.validateTimestamp(c.Timestamp, 60); err != nil {
 		respondWithError(w, http.StatusForbidden, err.Error())
 		return

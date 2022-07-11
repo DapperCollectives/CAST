@@ -162,6 +162,33 @@ func (otu *OverflowTestUtils) GenerateListOfVotesWithNFTs(
 	return &votes, nil
 }
 
+func (otu *OverflowTestUtils) GenerateSingleVoteWithNFT(
+	proposalId int,
+	accountNumber int,
+	contract *shared.Contract,
+) (*VoteWithBalance, error) {
+	addr := otu.ResolveUser(1)
+	randomNumber := rand.Intn(2)
+	choices := []string{"a", "b"}
+	choice := choices[randomNumber]
+	v := models.Vote{
+		Proposal_id: proposalId, Addr: addr, Choice: choice,
+	}
+
+	nftIds, err := otu.Adapter.GetNFTIds(addr, contract)
+	if err != nil {
+		return nil, err
+	}
+
+	vote := otu.CreateNFTVote(v, nftIds, contract)
+	balance := 100000000 * (accountNumber)
+	vote.Primary_account_balance = uint64(balance)
+	vote.Staking_balance = uint64(balance * 5)
+	vote.Block_height = uint64(0)
+
+	return &vote, nil
+}
+
 func (otu *OverflowTestUtils) CreateNFTVote(v models.Vote, ids []interface{}, contract *shared.Contract) VoteWithBalance {
 	nfts := []models.NFT{}
 
