@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from 'react-query';
 import { PAGINATION_INITIAL_STATE } from '../reducers';
-import { checkResponse } from '../utils';
+import { checkResponse, getPaginationInfo } from '../utils';
 import { useErrorHandlerContext } from '../contexts/ErrorHandler';
 
 export default function useUserCommunities({
@@ -38,17 +38,15 @@ export default function useUserCommunities({
   }
 
   const [start, count, totalRecords, next] =
-    data?.pageParams || initialPageParam;
+    data?.pageParams || getPaginationInfo(data?.pages);
 
   return {
     isLoading,
     isError,
-    data:
-      data?.pages?.reduce(
-        (prev, current) =>
-          current?.data ? [...prev, ...current.data] : [...prev],
-        []
-      ) ?? [],
+    data: data?.pages?.reduce(
+      (prev, current) => (current.data ? [...prev, ...current.data] : prev),
+      []
+    ),
     error,
     pagination: {
       count,
