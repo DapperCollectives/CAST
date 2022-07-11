@@ -162,12 +162,12 @@ export default function Community() {
     roles: ['admin'],
   });
 
-  const { data: admins } = useCommunityUsers({
+  const { data: admins, reFetch: reFetchAdmins } = useCommunityUsers({
     communityId,
     type: 'admin',
   });
 
-  const { data: authors } = useCommunityUsers({
+  const { data: authors, reFetch: reFetchAuthors } = useCommunityUsers({
     communityId,
     type: 'author',
   });
@@ -205,6 +205,15 @@ export default function Community() {
   const notMobile = useMediaQuery();
 
   const onUserLeaveCommunity = async () => {
+    // if current user leaving community is admin or author
+    // trigger update on admin and author list
+    if (authors?.find((author) => author.addr === addr)) {
+      await reFetchAuthors();
+    }
+    if (admins?.find((admin) => admin.addr === addr)) {
+      await reFetchAdmins();
+    }
+
     if (members?.find((member) => member.addr === addr)) {
       await queryClient.invalidateQueries(queryKey);
     }
