@@ -87,8 +87,13 @@ export default function StepOne({
     accept: 'image/jpeg,image/png',
   });
 
-  const { communityName, communityDescription, logo, communityTerms } =
-    stepData || {};
+  const {
+    communityName,
+    communityDescription,
+    logo,
+    communityTerms,
+    category,
+  } = stepData || {};
 
   // handle links form
   const linksFieldsObj = Object.assign(
@@ -103,6 +108,20 @@ export default function StepOne({
     links: linksFieldsObj,
   });
 
+  const setCategoryValue = useCallback(
+    (value) => {
+      const selectedCat = (communityCategory ?? []).find(
+        (cat) => cat.key === value
+      );
+      if (selectedCat) {
+        setData({
+          category: { value: selectedCat.key, label: selectedCat.description },
+        });
+      }
+    },
+    [communityCategory, setData]
+  );
+
   // handles form validation
   useEffect(() => {
     const requiredFields = {
@@ -113,7 +132,7 @@ export default function StepOne({
         logo !== undefined ? logo?.file && logo?.imageUrl : true,
       communityTerms: (termsUrl) =>
         termsUrl?.length > 0 ? urlPatternValidation(termsUrl) : true,
-      category: (cat) => cat?.length > 0,
+      category: (cat) => cat?.value.length > 0,
     };
     const isValid = Object.keys(requiredFields).every(
       (field) => stepData && requiredFields[field](stepData[field])
@@ -221,11 +240,12 @@ export default function StepOne({
         <Dropdown
           label="Category"
           margin="mt-4"
+          defaultValue={category}
           values={(communityCategory ?? []).map((cat) => ({
             label: cat.description,
             value: cat.key,
           }))}
-          onSelectValue={(value) => setData({ category: value })}
+          onSelectValue={setCategoryValue}
         />
         <input
           type="text"
