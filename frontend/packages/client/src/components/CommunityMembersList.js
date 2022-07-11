@@ -9,7 +9,7 @@ export default function CommunityMembersList({ communityId } = {}) {
   // number of users brought at each pull based on design
   const pageSize = 18;
 
-  const { data, pagination, loading, fetchMore } = useCommunityMembers({
+  const { data, pagination, isLoading, fetchNextPage } = useCommunityMembers({
     communityId,
     count: pageSize,
   });
@@ -22,9 +22,9 @@ export default function CommunityMembersList({ communityId } = {}) {
 
   useEffect(() => {
     document.hasMore = hasMore;
-    document.loadingProposals = loading;
-    document.fetchMore = fetchMore;
-  }, [hasMore, loading, fetchMore]);
+    document.loadingProposals = isLoading;
+    document.fetchMore = fetchNextPage;
+  }, [hasMore, isLoading, fetchNextPage]);
 
   // this hook takes care of fetching more members when user scrolls to bottom of the page
   useEffect(() => {
@@ -57,8 +57,8 @@ export default function CommunityMembersList({ communityId } = {}) {
       <div className="is-flex flex-1">
         <TableMembers
           data={data}
-          loading={loading && Array.isArray(data)}
-          initialLoading={loading && !data}
+          loading={isLoading && Array.isArray(data)}
+          initialLoading={isLoading && !data}
           userAddr={userAddr}
         />
       </div>

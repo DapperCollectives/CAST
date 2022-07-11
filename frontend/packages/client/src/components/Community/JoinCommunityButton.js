@@ -7,6 +7,7 @@ export default function JoinCommunityButton({
   setTotalMembers = () => {},
   // callback to notify leaveCommunity was called
   onLeaveCommunity = async () => {},
+  onJoinCommunity = async () => {},
 }) {
   const { createCommunityUser, deleteUserFromCommunity } = useJoinCommunity();
   const { injectedProvider, user } = useWebContext();
@@ -35,6 +36,7 @@ export default function JoinCommunityButton({
     });
     if (success) {
       refresh((totalMembers) => ++totalMembers);
+      await onJoinCommunity();
     }
   };
 
