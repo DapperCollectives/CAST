@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useWebContext } from 'contexts/Web3';
+import { useModalContext } from 'contexts/NotificationModal';
 import { useJoinCommunity, useUserRoleOnCommunity } from 'hooks';
+import { WalletConnect, Error } from 'components';
 
 export default function JoinCommunityButton({
   communityId,
@@ -8,9 +10,10 @@ export default function JoinCommunityButton({
   // callback to notify leaveCommunity was called
   onLeaveCommunity = async () => {},
 }) {
+  const [isModalErrorOpened, setIsModalErrorOpened] = useState(false);
   const { createCommunityUser, deleteUserFromCommunity } = useJoinCommunity();
   const { injectedProvider, user } = useWebContext();
-
+  const { openModal, closeModal } = useModalContext();
   const isMember = useUserRoleOnCommunity({
     addr: user?.addr,
     communityId,
@@ -21,7 +24,30 @@ export default function JoinCommunityButton({
     setTotalMembers(updateFn);
   };
 
+  useEffect(() => {
+    if (user?.addr && isModalErrorOpened) {
+      closeModal();
+      setIsModalErrorOpened(false);
+    }
+  }, [user?.addr, isModalErrorOpened, closeModal, setIsModalErrorOpened]);
+
   const joinCommunity = async () => {
+    if (!user?.addr) {
+      openModal(
+        React.createElement(Error, {
+          error: (
+            <div className="mt-5">
+              <WalletConnect />
+            </div>
+          ),
+
+          errorTitle: 'Please connect a wallet.',
+        }),
+        { classNameModalContent: 'rounded-sm' }
+      );
+      setIsModalErrorOpened(true);
+      return;
+    }
     const { success } = await createCommunityUser({
       communityId,
       user,
