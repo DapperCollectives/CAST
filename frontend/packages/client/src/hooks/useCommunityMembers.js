@@ -92,10 +92,16 @@ export default function useCommunityMembers({
     getCommunityMembers();
   }, [getCommunityMembers]);
 
+  // clears all results and pulls again
+  const reFetch = async () => {
+    resetResults();
+    await getCommunityMembers();
+  };
   return {
     ...state,
     getCommunityMembers,
     fetchMore,
     resetResults,
+    reFetch,
   };
 }
