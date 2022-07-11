@@ -1,107 +1,59 @@
-import { useReducer, useEffect, useCallback } from 'react';
-import {
-  paginationReducer,
-  PAGINATION_INITIAL_STATE,
-  INITIAL_STATE,
-} from '../reducers';
-import { checkResponse } from '../utils';
+import { useInfiniteQuery } from 'react-query';
+import { PAGINATION_INITIAL_STATE } from '../reducers';
+import { checkResponse, getPaginationInfo } from '../utils';
 import { useErrorHandlerContext } from '../contexts/ErrorHandler';
 
-function getRandomInt(max) {
-  return Math.floor(Math.random() * max);
-}
-
-/**
- * Hook to return community members. Results are paginated
- * @param  {int} communityId community Id to get members from
- * @param  {int} count page size, used for pagination limiting the number of elements returned. Defaults to 10. Max value is 25.
- * @param  {int} start indicates the start index for paginated results. Defaults to 0.
- */
 export default function useCommunityMembers({
   communityId,
-  start = PAGINATION_INITIAL_STATE.start,
-  count = PAGINATION_INITIAL_STATE.count,
+  count: countParam = PAGINATION_INITIAL_STATE.count,
 } = {}) {
-  const [state, dispatch] = useReducer(paginationReducer, {
-    ...INITIAL_STATE,
-    pagination: {
-      ...PAGINATION_INITIAL_STATE,
-      start,
-      count,
-    },
-  });
+  const initialPageParam = [0, countParam, 0, -1];
 
   const { notifyError } = useErrorHandlerContext();
-  /**
-   * Function to fetch more results based on pagination configuration
-   */
-  const fetchMore = useCallback(async () => {
-    dispatch({ type: 'PROCESSING' });
-    const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}/users?count=${state.pagination.count}&start=${state.pagination.start}`;
-    try {
-      const response = await fetch(url);
-      const members = await checkResponse(response);
 
-      // this needs to be replaced with real data from backend on votingStreak and score
-      const membersMocked = members?.data.map((member) => ({
-        ...member,
-        // see how these two fields get implemented
-        votingStreak: getRandomInt(50),
-        score: getRandomInt(500),
-      }));
-
-      dispatch({
-        type: 'SUCCESS',
-        payload: { ...members, data: membersMocked },
-      });
-    } catch (err) {
-      notifyError(err, url);
-      dispatch({ type: 'ERROR', payload: { errorData: err.message } });
+  const { isLoading, isError, data, error, fetchNextPage } = useInfiniteQuery(
+    ['all-community-users', communityId],
+    async ({ pageParam = initialPageParam, queryKey }) => {
+      const [start, count] = pageParam;
+      const communityId = queryKey[1];
+      const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}/users?count=${count}&start=${start}`;
+      try {
+        const response = await fetch(url);
+        const members = await checkResponse(response);
+        return members;
+      } catch (err) {
+        throw err;
+      }
+    },
+    {
+      getNextPageParam: (lastPage, pages) => {
+        const { next, start, count, totalRecords } = lastPage;
+        return [start, count, totalRecords, next];
+      },
+      enabled: !!communityId,
     }
-  }, [state.pagination, communityId, notifyError]);
+  );
+  if (isError) {
+    notifyError(error);
+  }
 
-  const getCommunityMembers = useCallback(async () => {
-    dispatch({ type: 'PROCESSING' });
-    const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}/users?count=${count}&start=${start}`;
-    try {
-      const response = await fetch(url);
-      const members = await checkResponse(response);
-      // this needs to be replaced with real data from backend on votingStreak and score
-      const membersMocked = members?.data.map((member) => ({
-        ...member,
-        // see how these two fields get implemented
-        votingStreak: getRandomInt(50),
-        score: getRandomInt(500),
-      }));
+  const [start = 0, count = countParam, totalRecords = 0, next = -1] =
+    data?.pageParam ?? getPaginationInfo(data?.pages);
 
-      dispatch({
-        type: 'SUCCESS',
-        payload: { ...members, data: membersMocked },
-      });
-    } catch (err) {
-      notifyError(err, url);
-      dispatch({ type: 'ERROR', payload: { errorData: err.message } });
-    }
-  }, [dispatch, communityId, count, start, notifyError]);
-
-  const resetResults = () => {
-    dispatch({ type: 'RESET_RESULTS' });
-  };
-
-  useEffect(() => {
-    getCommunityMembers();
-  }, [getCommunityMembers]);
-
-  // clears all results and pulls again
-  const reFetch = async () => {
-    resetResults();
-    await getCommunityMembers();
-  };
   return {
-    ...state,
-    getCommunityMembers,
-    fetchMore,
-    resetResults,
-    reFetch,
+    isLoading,
+    isError,
+    data: data?.pages?.reduce(
+      (prev, current) => (current.data ? [...prev, ...current.data] : prev),
+      []
+    ),
+    error,
+    pagination: {
+      count,
+      next,
+      start,
+      totalRecords,
+    },
+    fetchNextPage,
   };
 }
