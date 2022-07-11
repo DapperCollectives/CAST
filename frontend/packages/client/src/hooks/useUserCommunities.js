@@ -28,7 +28,7 @@ export default function useUserCommunities({
     {
       getNextPageParam: (lastPage, pages) => {
         const { next, start, count, totalRecords } = lastPage;
-        return [start, count, totalRecords, next];
+        return [start + count, count, totalRecords, next];
       },
       enabled: !!addr,
     }

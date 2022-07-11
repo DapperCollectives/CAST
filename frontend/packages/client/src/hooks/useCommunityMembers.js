@@ -11,7 +11,7 @@ export default function useCommunityMembers({
 
   const { notifyError } = useErrorHandlerContext();
 
-  const queryUniqueKey = ['all-community-users', communityId];
+  const queryUniqueKey = ['all-community-users', String(communityId)];
 
   const { isLoading, isError, data, error, fetchNextPage } = useInfiniteQuery(
     queryUniqueKey,
@@ -30,7 +30,7 @@ export default function useCommunityMembers({
     {
       getNextPageParam: (lastPage, pages) => {
         const { next, start, count, totalRecords } = lastPage;
-        return [start, count, totalRecords, next];
+        return [start + count, count, totalRecords, next];
       },
       enabled: !!communityId,
     }
