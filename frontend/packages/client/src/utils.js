@@ -67,10 +67,7 @@ export const getCompositeSigs = (sigArr) => {
     return [sigArr[0].signature];
   }
 
-  if (
-    typeof sigArr === 'string' &&
-    sigArr.includes('Declined: No reason supplied')
-  ) {
+  if (typeof sigArr === 'string' && sigArr.includes('Declined:')) {
     return null;
   }
   return sigArr;
