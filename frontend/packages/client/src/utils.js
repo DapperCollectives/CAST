@@ -200,3 +200,16 @@ export const kebabToString = (str = '') => {
   });
   return updated.charAt(0).toUpperCase() + updated.slice(1);
 };
+
+export const getPaginationInfo = (pages) => {
+  if (!pages) {
+    return [];
+  }
+  const lastPage = [...pages].pop();
+  return [
+    lastPage?.start ?? 0,
+    lastPage?.count ?? 0,
+    lastPage?.totalRecords ?? 0,
+    lastPage?.next ?? -1,
+  ];
+};
