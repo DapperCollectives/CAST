@@ -220,9 +220,7 @@ export default function Community() {
   };
 
   const onUserJoinCommunity = async () => {
-    if (members?.length < 6) {
-      await queryClient.invalidateQueries(queryKey);
-    }
+    await queryClient.invalidateQueries(queryKey);
   };
 
   if (error) {
