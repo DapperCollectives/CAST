@@ -176,7 +176,7 @@ export default function Community() {
     data: members,
     pagination: { totalRecords },
     queryKey,
-  } = useCommunityMembers({ communityId });
+  } = useCommunityMembers({ communityId, count: 18 });
 
   const [totalMembers, setTotalMembers] = useState();
   useEffect(() => {
