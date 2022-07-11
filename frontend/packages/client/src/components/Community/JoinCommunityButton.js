@@ -10,18 +10,12 @@ export default function JoinCommunityButton({
 }) {
   const { createCommunityUser, deleteUserFromCommunity } = useJoinCommunity();
   const { injectedProvider, user } = useWebContext();
-  const [addr, setAddr] = useState();
-  const memberState = useUserRoleOnCommunity({
-    addr,
+
+  const isMember = useUserRoleOnCommunity({
+    addr: user?.addr,
     communityId,
     roles: ['member'],
   });
-  const [isMember, setIsMember] = useState();
-
-  useEffect(() => {
-    setAddr(user.addr);
-    setIsMember(memberState);
-  }, [user.addr, memberState]);
 
   const refresh = (updateFn) => {
     setTotalMembers(updateFn);
@@ -50,8 +44,6 @@ export default function JoinCommunityButton({
       await onLeaveCommunity();
     }
   };
-
-  if (!addr || (isMember !== true && isMember !== false)) return null;
 
   return (
     <div
