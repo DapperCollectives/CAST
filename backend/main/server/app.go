@@ -826,11 +826,6 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if os.Getenv("APP_ENV") == "DEV" {
-		var devStatus = "published"
-		p.Status = &devStatus
-	}
-
 	// create proposal
 	if err := p.CreateProposal(a.DB); err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
