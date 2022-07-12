@@ -643,9 +643,6 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 		v.Cid = &dummyCid
 	}
 
-	//log the vote.Choice
-	log.Info().Msgf("Vote : %+v", v)
-
 	if err := v.CreateVote(a.DB); err != nil {
 		log.Error().Err(err).Msg("Couldnt create vote")
 		respondWithError(w, http.StatusInternalServerError, err.Error())
@@ -833,9 +830,6 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		var devStatus = "published"
 		p.Status = &devStatus
 	}
-
-	//print the proposal
-	log.Info().Msgf("Proposal: %+v", p)
 
 	// create proposal
 	if err := p.CreateProposal(a.DB); err != nil {

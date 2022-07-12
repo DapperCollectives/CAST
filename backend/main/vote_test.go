@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 	"testing"
@@ -114,7 +113,6 @@ func TestCreateVote(t *testing.T) {
 		voteChoice := "a"
 
 		votePayload := otu.GenerateValidVotePayload("user1", proposalId, voteChoice)
-		fmt.Printf("vote Payload%+v\n", votePayload)
 
 		response := otu.CreateVoteAPI(proposalId, votePayload)
 		CheckResponseCode(t, http.StatusCreated, response.Code)

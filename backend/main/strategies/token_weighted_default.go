@@ -26,8 +26,6 @@ func (s *TokenWeightedDefault) FetchBalance(
 		return nil, err
 	}
 
-	fmt.Printf("b: %+v\n", b)
-
 	if b.ID == "" {
 		if err := b.CreateBalance(db); err != nil {
 			log.Error().Err(err).Msg("error saving b to DB")
