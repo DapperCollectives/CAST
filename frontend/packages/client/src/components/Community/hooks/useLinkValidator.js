@@ -25,7 +25,7 @@ const twitterValidator = (url) => {
 const instagramValidator = (url) => {
   return (
     url === '' ||
-    /(?:(?:http|https):\/\/)?(?:www.)?(?:instagram.com|instagr.am|instagr.com)\/(\w+)/gim.test(
+    /(https?:\/\/)?(www\.)?(?:www.)?(?:instagram.com|instagr.am|instagr.com)\/(\w+)/gim.test(
       url
     )
   );
@@ -39,7 +39,10 @@ const discordValidator = (url) => {
   );
 };
 const githubValidator = (url) => {
-  return url === '' || /https?:\/\/github\.com\/(?:[^/\s]+)/gim.test(url);
+  return (
+    url === '' ||
+    /(https?:\/\/)?(www\.)?(github\.com)\/(?:[^/\s]+)/gim.test(url)
+  );
 };
 
 const removeUndefinedProps = (obj) => pickBy(obj, (e) => e !== undefined);
