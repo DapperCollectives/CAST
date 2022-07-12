@@ -13,6 +13,7 @@ import (
 
 type StakedTokenWeightedDefault struct {
 	shared.StrategyStruct
+	shared.SnapshotClient
 }
 
 func (s *StakedTokenWeightedDefault) FetchBalance(
@@ -95,7 +96,12 @@ func (s *StakedTokenWeightedDefault) GetVotes(
 	return votes, nil
 }
 
-func (s *StakedTokenWeightedDefault) InitStrategy(f *shared.FlowAdapter, db *shared.Database) {
+func (s *StakedTokenWeightedDefault) InitStrategy(
+	f *shared.FlowAdapter,
+	db *shared.Database,
+	sc *s.SnapshotClient,
+) {
 	s.FlowAdapter = f
 	s.DB = db
+	s.SnapshotClient = *sc
 }

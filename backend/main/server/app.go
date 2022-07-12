@@ -67,7 +67,7 @@ type Strategy interface {
 	GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error)
 	FetchBalance(db *shared.Database, b *models.Balance, sc *shared.SnapshotClient) (*models.Balance, error)
 	GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error)
-	InitStrategy(f *shared.FlowAdapter, db *shared.Database)
+	InitStrategy(f *shared.FlowAdapter, db *shared.Database, sc *shared.SnapshotClient)
 }
 
 var strategyMap = map[string]Strategy{
@@ -376,7 +376,7 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.InitStrategy(a.FlowAdapter, a.DB)
+	s.InitStrategy(a.FlowAdapter, a.DB, a.SnapshotClient)
 
 	votesWithWeights, err := s.GetVotes(votes, &proposal)
 	if err != nil {
@@ -530,8 +530,6 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 
 	v.Proposal_id = proposalId
 
-	fmt.Printf("%+v\n", v)
-
 	// validate user hasn't already voted
 	existingVote := models.Vote{Proposal_id: v.Proposal_id, Addr: v.Addr}
 	if err := existingVote.GetVote(a.DB); err == nil {
@@ -603,7 +601,7 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 		Proposal_id: p.ID,
 	}
 
-	s.InitStrategy(a.FlowAdapter, a.DB)
+	s.InitStrategy(a.FlowAdapter, a.DB, a.SnapshotClient)
 
 	balance, err := s.FetchBalance(a.DB, emptyBalance, a.SnapshotClient)
 	if err != nil {

@@ -23,12 +23,35 @@ type Snapshot struct {
 	Finished     time.Time `json:"finished"`
 }
 
+// copied this quick and dirty from models to get around circular dependency
+// move to shared?
+type Balance struct {
+	ID                      string    `json:"id"`
+	Addr                    string    `json:"addr"`
+	PrimaryAccountBalance   uint64    `json:"primaryAccountBalance"`
+	SecondaryAddress        string    `json:"secondaryAddress"`
+	SecondaryAccountBalance uint64    `json:"secondaryAccountBalance"`
+	StakingBalance          uint64    `json:"stakingBalance"`
+	ScriptResult            string    `json:"scriptResult"`
+	Stakes                  []string  `json:"stakes"`
+	BlockHeight             uint64    `json:"blockHeight"`
+	Proposal_id             int       `json:"proposal_id"`
+	NFTCount                int       `json:"nftCount"`
+	CreatedAt               time.Time `json:"createdAt"`
+}
+
 var (
 	DummySnapshot = Snapshot{
 		ID:           "1",
 		Block_height: 1000000,
 		Started:      time.Now(),
 		Finished:     time.Now(),
+	}
+
+	DummyBalance = Balance{
+		Addr:                  "0x0000000000000000000000000000000000000000",
+		PrimaryAccountBalance: 100,
+		BlockHeight:           1000000,
 	}
 )
 
@@ -66,8 +89,9 @@ func (c *SnapshotClient) sendRequest(req *http.Request, pointer interface{}) err
 }
 
 func (c *SnapshotClient) GetAddressBalanceAtBlockHeight(address string, blockheight uint64, balancePointer interface{}) error {
+	// Send dummy data for tests
 	if c.bypass() {
-		// TODO: return dummy balance
+		balancePointer = &DummyBalance
 		return nil
 	}
 

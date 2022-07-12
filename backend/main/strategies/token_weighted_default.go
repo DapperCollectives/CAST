@@ -97,7 +97,12 @@ func (s *TokenWeightedDefault) GetVotes(
 	return votes, nil
 }
 
-func (s *TokenWeightedDefault) InitStrategy(f *shared.FlowAdapter, db *shared.Database) {
+func (s *TokenWeightedDefault) InitStrategy(
+	f *shared.FlowAdapter,
+	db *shared.Database,
+	sc *s.SnapshotClient,
+) {
 	s.FlowAdapter = f
 	s.DB = db
+	s.SnapshotClient = *sc
 }
