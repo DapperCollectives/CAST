@@ -11,17 +11,17 @@ const FormFieldsConfig = [
   },
   {
     fieldName: 'twitterUrl',
-    placeHolder: 'https://twitter.com/account',
+    placeHolder: 'https://www.twitter.com/account',
     iconComponent: <Twitter width="16px" height="16px" />,
   },
   {
     fieldName: 'githubUrl',
-    placeHolder: 'https://github.com/repository-name',
+    placeHolder: 'https://www.github.com/repository-name',
     iconComponent: <Github width="16px" height="16px" />,
   },
   {
     fieldName: 'discordUrl',
-    placeHolder: 'https://discord.com/channel-name',
+    placeHolder: 'https://www.discord.com/channel-name',
     iconComponent: <Discord width="16px" height="16px" />,
   },
   {
