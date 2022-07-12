@@ -263,7 +263,7 @@ export default function Community() {
         !notMobile,
     }
   );
-  const imageClases = classnames(
+  const imageClasses = classnames(
     {
       'rounded-full community-logo-mobile': !notMobile,
     },
@@ -279,13 +279,19 @@ export default function Community() {
             <div className="is-flex community-specific">
               <div className={imageContainerClasses}>
                 {logo ? (
-                  <img
-                    className={imageClases}
-                    alt="community banner"
-                    src={logo}
-                    height="85px"
-                    width="85px"
-                  />
+                  <div
+                    role="img"
+                    aria-label="community banner"
+                    className={imageClasses}
+                    style={{
+                      width: 85,
+                      height: 85,
+                      backgroundImage: `url(${logo})`,
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'center',
+                      backgroundSize: 'cover',
+                    }}
+                  ></div>
                 ) : (
                   <Blockies
                     seed={slug ?? `seed-${id}`}
