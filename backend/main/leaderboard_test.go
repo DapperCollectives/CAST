@@ -163,36 +163,47 @@ func TestGetLeaderboardPaging(t *testing.T) {
 
 	communityId := otu.AddCommunities(1)[0]
 
-	numUsers := 6
-	numProposals := 1
-
-	otu.GenerateVotes(communityId, numProposals, numUsers)
+	otu.AddActiveProposals(communityId, 1)
 
 	count := 3
 
-	// First Page
+	// Leaderboard with no users because no votes yet
 	response1 := otu.GetCommunityLeaderboardAPIWithPaging(communityId, 0, count)
 	checkResponseCode(t, http.StatusOK, response1.Code)
 
 	var p1 test_utils.PaginatedResponseWithLeaderboardUser
 	json.Unmarshal(response1.Body.Bytes(), &p1)
 
-	// Second Page
-	response2 := otu.GetCommunityLeaderboardAPIWithPaging(communityId, 1, count)
+	numUsers := 6
+	numProposals := 1
+
+	otu.GenerateVotes(communityId, numProposals, numUsers)
+
+	// First Page
+	response2 := otu.GetCommunityLeaderboardAPIWithPaging(communityId, 0, count)
 	checkResponseCode(t, http.StatusOK, response2.Code)
 
 	var p2 test_utils.PaginatedResponseWithLeaderboardUser
 	json.Unmarshal(response2.Body.Bytes(), &p2)
 
-	// Invalid Page
-	response3 := otu.GetCommunityLeaderboardAPIWithPaging(communityId, 3, count)
+	// Second Page
+	response3 := otu.GetCommunityLeaderboardAPIWithPaging(communityId, 1, count)
 	checkResponseCode(t, http.StatusOK, response3.Code)
 
 	var p3 test_utils.PaginatedResponseWithLeaderboardUser
-	json.Unmarshal(response2.Body.Bytes(), &p3)
+	json.Unmarshal(response3.Body.Bytes(), &p3)
 
+	// Invalid Page
+	response4 := otu.GetCommunityLeaderboardAPIWithPaging(communityId, 3, count)
+	checkResponseCode(t, http.StatusOK, response4.Code)
+
+	var p4 test_utils.PaginatedResponseWithLeaderboardUser
+	json.Unmarshal(response4.Body.Bytes(), &p4)
+
+	expectedNoUsersLength := 0
 	expectedLength := 3
-	assert.Equal(t, expectedLength, len(p1.Data))
+	assert.Equal(t, expectedNoUsersLength, len(p1.Data))
 	assert.Equal(t, expectedLength, len(p2.Data))
 	assert.Equal(t, expectedLength, len(p3.Data))
+	assert.Equal(t, expectedLength, len(p4.Data))
 }

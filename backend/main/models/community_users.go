@@ -113,10 +113,16 @@ func GetCommunityLeaderboard(db *s.Database, communityId, start, count int) ([]L
 	var defaultEarlyVoteWeight = 1
 	var defaultStreakWeight = 1
 
+	fmt.Println(start, count)
+
 	userAchievements, err := getUserAchievements(db, communityId)
 
 	if err != nil {
 		return leaderboardUsers, 0, err
+	}
+
+	if len(userAchievements) == 0 {
+		return leaderboardUsers, 0, nil
 	}
 
 	for _, user := range userAchievements {
@@ -140,7 +146,11 @@ func GetCommunityLeaderboard(db *s.Database, communityId, start, count int) ([]L
 
 		// If index invalid, set to last page
 		if startIndex >= len(leaderboardUsers) {
-			startIndex = len(leaderboardUsers) - count
+			if len(leaderboardUsers)-count >= 0 {
+				startIndex = len(leaderboardUsers) - count
+			} else {
+				startIndex = 0
+			}
 		}
 
 		if endIndex <= len(leaderboardUsers) {
