@@ -35,9 +35,12 @@ export default function StepOne({
 
   const { data: communityCategory } = useCommunityCategory();
 
-  const setData = (data) => {
-    onDataChange(data);
-  };
+  const setData = useCallback(
+    (data) => {
+      onDataChange(data);
+    },
+    [onDataChange]
+  );
 
   const onDrop = useCallback(
     (acceptedFiles) => {
@@ -87,8 +90,13 @@ export default function StepOne({
     accept: 'image/jpeg,image/png',
   });
 
-  const { communityName, communityDescription, logo, communityTerms } =
-    stepData || {};
+  const {
+    communityName,
+    communityDescription,
+    logo,
+    communityTerms,
+    category,
+  } = stepData || {};
 
   // handle links form
   const linksFieldsObj = Object.assign(
@@ -103,14 +111,31 @@ export default function StepOne({
     links: linksFieldsObj,
   });
 
+  const setCategoryValue = useCallback(
+    (value) => {
+      const selectedCat = (communityCategory ?? []).find(
+        (cat) => cat.key === value
+      );
+      if (selectedCat) {
+        setData({
+          category: { value: selectedCat.key, label: selectedCat.description },
+        });
+      }
+    },
+    [communityCategory, setData]
+  );
+
   // handles form validation
   useEffect(() => {
     const requiredFields = {
       communityName: (name) => name?.trim().length > 0,
-      communityDescription: (desc) => desc?.trim().length > 0,
-      logo: (logo) => logo?.file && logo?.imageUrl,
+      communityDescription: (desc) =>
+        desc?.trim().length ? desc?.trim().length < 1000 : true,
+      logo: (logo) =>
+        logo !== undefined ? logo?.file && logo?.imageUrl : true,
       communityTerms: (termsUrl) =>
-        termsUrl?.length > 0 && urlPatternValidation(termsUrl),
+        termsUrl?.length > 0 ? urlPatternValidation(termsUrl) : true,
+      category: (cat) => cat?.value.length > 0,
     };
     const isValid = Object.keys(requiredFields).every(
       (field) => stepData && requiredFields[field](stepData[field])
@@ -218,11 +243,12 @@ export default function StepOne({
         <Dropdown
           label="Category"
           margin="mt-4"
+          defaultValue={category}
           values={(communityCategory ?? []).map((cat) => ({
             label: cat.description,
             value: cat.key,
           }))}
-          onSelectValue={(value) => setData({ category: value })}
+          onSelectValue={setCategoryValue}
         />
         <input
           type="text"

@@ -1,27 +1,21 @@
-import { useReducer, useCallback } from 'react';
-import { defaultReducer, INITIAL_STATE } from '../reducers';
+import { useMutation, useQueryClient } from 'react-query';
 import { useErrorHandlerContext } from '../contexts/ErrorHandler';
 import { getCompositeSigs } from 'utils';
 
 export default function useJoinCommunity() {
-  const [state, dispatch] = useReducer(defaultReducer, {
-    ...INITIAL_STATE,
-    loading: false,
-  });
+  const queryClient = useQueryClient();
   const { notifyError } = useErrorHandlerContext();
 
-  const createCommunityUser = useCallback(
-    async (communityId, user, injectedProvider) => {
+  const { mutateAsync: createCommunityUserMutation } = useMutation(
+    async ({ communityId, user, injectedProvider }) => {
       const { addr } = user;
       const { currentUser } = injectedProvider;
       const { signUserMessage } = currentUser();
-      dispatch({ type: 'PROCESSING' });
       const timestamp = Date.now().toString();
       const hexTime = Buffer.from(timestamp).toString('hex');
       const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}/users`;
       const _compositeSignatures = await signUserMessage(hexTime);
       if (_compositeSignatures.indexOf('Declined:') > -1) {
-        dispatch({ type: 'SUCCESS' });
         return { success: false };
       }
       const compositeSignatures = getCompositeSigs(_compositeSignatures);
@@ -47,28 +41,36 @@ export default function useJoinCommunity() {
 
         const response = await fetch(url, fetchOptions);
         const json = await response.json();
-        dispatch({ type: 'SUCCESS', payload: json });
-        return { success: true };
+        return { success: true, data: json };
       } catch (err) {
         notifyError(err, url);
-        dispatch({ type: 'ERROR', payload: { errorData: err.message } });
       }
     },
-    [notifyError]
+    {
+      onSuccess: async (_, variables) => {
+        const {
+          user: { addr },
+        } = variables;
+
+        await queryClient.invalidateQueries('communities-for-homepage');
+        await queryClient.invalidateQueries([
+          'connected-user-communities',
+          addr,
+        ]);
+      },
+    }
   );
 
-  const deleteUserFromCommunity = useCallback(
-    async (communityId, user, injectedProvider) => {
+  const { mutateAsync: deleteUserFromCommunityMutation } = useMutation(
+    async ({ communityId, user, injectedProvider }) => {
       const { addr } = user;
       const { currentUser } = injectedProvider;
       const { signUserMessage } = currentUser();
-      dispatch({ type: 'PROCESSING' });
       const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}/users/${addr}/member`;
       const timestamp = Date.now().toString();
       const hexTime = Buffer.from(timestamp).toString('hex');
       const _compositeSignatures = await signUserMessage(hexTime);
       if (_compositeSignatures.indexOf('Declined:') > -1) {
-        dispatch({ type: 'SUCCESS' });
         return { success: false };
       }
       const compositeSignatures = getCompositeSigs(_compositeSignatures);
@@ -94,18 +96,35 @@ export default function useJoinCommunity() {
 
         const response = await fetch(url, fetchOptions);
         const json = await response.json();
-        dispatch({ type: 'SUCCESS', payload: json });
-        return { success: true };
+        return { success: true, data: json };
       } catch (err) {
         notifyError(err, url);
-        dispatch({ type: 'ERROR', payload: { errorData: err.message } });
       }
     },
-    [notifyError]
+    {
+      onSuccess: async (_, variables) => {
+        const {
+          user: { addr },
+        } = variables;
+
+        await queryClient.invalidateQueries('communities-for-homepage');
+        await queryClient.invalidateQueries([
+          'connected-user-communities',
+          addr,
+        ]);
+      },
+    }
   );
 
+  const createCommunityUser = async (props) => {
+    return createCommunityUserMutation(props);
+  };
+
+  const deleteUserFromCommunity = async (props) => {
+    return deleteUserFromCommunityMutation(props);
+  };
+
   return {
-    ...state,
     createCommunityUser,
     deleteUserFromCommunity,
   };

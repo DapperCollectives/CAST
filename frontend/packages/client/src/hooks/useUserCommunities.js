@@ -1,77 +1,59 @@
-import { useReducer, useEffect, useCallback } from 'react';
-import {
-  paginationReducer,
-  INITIAL_STATE,
-  PAGINATION_INITIAL_STATE,
-} from '../reducers';
-import { checkResponse } from '../utils';
+import { useInfiniteQuery } from 'react-query';
+import { PAGINATION_INITIAL_STATE } from '../reducers';
+import { checkResponse, getPaginationInfo } from '../utils';
 import { useErrorHandlerContext } from '../contexts/ErrorHandler';
 
 export default function useUserCommunities({
   addr,
-  count = PAGINATION_INITIAL_STATE.count,
-  start = PAGINATION_INITIAL_STATE.start,
+  count: countParam = PAGINATION_INITIAL_STATE.count,
 } = {}) {
-  const [state, dispatch] = useReducer(paginationReducer, {
-    ...INITIAL_STATE,
-    pagination: {
-      ...PAGINATION_INITIAL_STATE,
-      count,
-      start,
-    },
-  });
+  const initialPageParam = [0, countParam, 0, -1];
+
   const { notifyError } = useErrorHandlerContext();
 
-  const resetResults = useCallback(() => {
-    dispatch({ type: 'RESET_RESULTS' });
-  }, []);
+  const { isLoading, isError, data, error, fetchNextPage } = useInfiniteQuery(
+    ['connected-user-communities', addr],
+    async ({ pageParam = initialPageParam, queryKey }) => {
+      const [start, count] = pageParam;
+      const userAddr = queryKey[1];
+      const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/users/${userAddr}/communities?count=${count}&start=${start}`;
+      try {
+        const response = await fetch(url);
+        const communities = await checkResponse(response);
+        return communities;
+      } catch (err) {
+        throw err;
+      }
+    },
+    {
+      getNextPageParam: (lastPage, pages) => {
+        const { next, start, count, totalRecords } = lastPage;
+        return [start + count, count, totalRecords, next];
+      },
+      enabled: !!addr,
+    }
+  );
+  if (isError) {
+    notifyError(error);
+  }
 
-  const getUserCommunities = useCallback(async () => {
-    dispatch({ type: 'PROCESSING' });
-    const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/users/${addr}/communities?count=${count}&start=${start}`;
-    try {
-      const response = await fetch(url);
-      const userCommunities = await checkResponse(response);
-      dispatch({
-        type: 'SUCCESS',
-        payload: userCommunities,
-      });
-    } catch (err) {
-      // notify user of error
-      notifyError(err, url);
-      dispatch({ type: 'ERROR', payload: { errorData: err.message } });
-    }
-  }, [dispatch, notifyError, addr, count, start]);
-
-  const fetchMore = useCallback(async () => {
-    dispatch({ type: 'PROCESSING' });
-    const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/users/${addr}/communities?count=${state.pagination.count}&start=${state.pagination.start}`;
-    try {
-      const response = await fetch(url);
-      const userCommunities = await checkResponse(response);
-      dispatch({
-        type: 'SUCCESS',
-        payload: userCommunities,
-      });
-    } catch (err) {
-      notifyError(err, url);
-      dispatch({ type: 'ERROR', payload: { errorData: err.message } });
-    }
-  }, [state.pagination, addr, notifyError]);
-
-  useEffect(() => {
-    if (addr) {
-      getUserCommunities();
-    }
-    if (addr === null) {
-      resetResults();
-    }
-  }, [getUserCommunities, resetResults, addr]);
+  const [start, count, totalRecords, next] =
+    data?.pageParams || getPaginationInfo(data?.pages);
 
   return {
-    ...state,
-    getUserCommunities,
-    fetchMore,
-    resetResults,
+    isLoading,
+    isError,
+    data: data?.pages?.reduce(
+      (prev, current) => (current.data ? [...prev, ...current.data] : prev),
+      []
+    ),
+    error,
+    pagination: {
+      count,
+      next,
+      start,
+      totalRecords,
+    },
+    fetchNextPage,
   };
 }
