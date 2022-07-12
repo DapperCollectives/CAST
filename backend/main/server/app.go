@@ -530,6 +530,8 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 
 	v.Proposal_id = proposalId
 
+	fmt.Printf("%+v\n", v)
+
 	// validate user hasn't already voted
 	existingVote := models.Vote{Proposal_id: v.Proposal_id, Addr: v.Addr}
 	if err := existingVote.GetVote(a.DB); err == nil {
@@ -547,11 +549,13 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check that proposal is live
-	if !p.IsLive() {
-		err = errors.New("user cannot vote on inactive proposal")
-		log.Error().Err(err)
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
+	if os.Getenv("APP_ENV") != "DEV" {
+		if !p.IsLive() {
+			err = errors.New("user cannot vote on inactive proposal")
+			log.Error().Err(err)
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
 	}
 
 	// validate the user is not on community's blocklist
@@ -562,7 +566,7 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// validate proper message format
-	// <proposalId>:<choice>:<timestamp>
+	//<proposalId>:<choice>:<timestamp>
 	if err := v.ValidateMessage(p); err != nil && v.TransactionId == "" {
 		log.Error().Err(err)
 		respondWithError(w, http.StatusInternalServerError, err.Error())
@@ -640,6 +644,9 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 		dummyCid := "0000000000"
 		v.Cid = &dummyCid
 	}
+
+	//log the vote.Choice
+	log.Info().Msgf("Vote : %+v", v)
 
 	if err := v.CreateVote(a.DB); err != nil {
 		log.Error().Err(err).Msg("Couldnt create vote")
@@ -746,23 +753,25 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusForbidden, errMsg)
 		return
 	}
+
 	if err := a.validateSignature(p.Creator_addr, p.Timestamp, p.Composite_signatures); err != nil {
 		log.Error().Err(err)
 		respondWithError(w, http.StatusForbidden, err.Error())
 		return
 	}
 
-	// get latest snapshotted blockheight
 	snapshot, err := a.SnapshotClient.GetLatestSnapshot()
 	if err != nil {
 		log.Error().Err(err).Msg("error fetching latest snapshot")
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+
 	p.Block_height = snapshot.Block_height
 
 	var community models.Community
 	community.ID = communityId
+
 	if err := community.GetCommunity(a.DB); err != nil {
 		log.Error().Err(err).Msg("error fetching community")
 		respondWithError(w, http.StatusInternalServerError, err.Error())
@@ -821,6 +830,14 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, vErr.Error())
 		return
 	}
+
+	if os.Getenv("APP_ENV") == "DEV" {
+		var devStatus = "published"
+		p.Status = &devStatus
+	}
+
+	//print the proposal
+	log.Info().Msgf("Proposal: %+v", p)
 
 	// create proposal
 	if err := p.CreateProposal(a.DB); err != nil {
