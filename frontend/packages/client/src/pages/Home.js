@@ -6,7 +6,7 @@ import CommunitiesPresenter from 'components/Community/CommunitiesPresenter';
 import useUserCommunities from 'hooks/useUserCommunities';
 import useFeaturedCommunities from 'hooks/useFeaturedCommunities';
 
-const LinkToTemplate = () => (
+const LinkToIssueTemplate = () => (
   <a
     target="_blank"
     rel="noreferrer noopener"
@@ -56,7 +56,7 @@ export default function HomePage() {
         messageText={
           <p>
             This is an open beta of CAST.
-            <LinkToTemplate />
+            <LinkToIssueTemplate />
           </p>
         }
         labelText="Beta"
