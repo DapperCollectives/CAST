@@ -325,6 +325,10 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if *p.Computed_status == "closed" {
+		models.AddWinningVoteAchievement(a.DB, votes, proposalResults, p.Community_id)
+	}
+
 	// Send Proposal Results
 	respondWithJSON(w, http.StatusOK, proposalResults)
 }
