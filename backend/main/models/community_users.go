@@ -134,6 +134,7 @@ func GetCommunityLeaderboard(db *s.Database, communityId, start, count int) ([]L
 }
 
 func GetCommunitiesForUser(db *s.Database, addr string, start, count int) ([]UserCommunity, int, error) {
+	fmt.Printf("GetCommunitiesForUser: %s\n", addr)
 	var communities = []UserCommunity{}
 	err := pgxscan.Select(db.Context, db.Conn, &communities,
 		`
@@ -162,27 +163,7 @@ func GetCommunitiesForUser(db *s.Database, addr string, start, count int) ([]Use
 	`
 	_ = db.Conn.QueryRow(db.Context, countSql, addr).Scan(&totalCommunities)
 
-	uniqueCommunities := filterDuplicateIDs(communities)
-	return uniqueCommunities, len(uniqueCommunities), nil
-}
-
-func filterDuplicateIDs(communities []UserCommunity) []UserCommunity {
-	var uniqueCommunities []UserCommunity
-	for _, community := range communities {
-		if !containsID(uniqueCommunities, community) {
-			uniqueCommunities = append(uniqueCommunities, community)
-		}
-	}
-	return uniqueCommunities
-}
-
-func containsID(communities []UserCommunity, community UserCommunity) bool {
-	for _, c := range communities {
-		if c.ID == community.ID {
-			return true
-		}
-	}
-	return false
+	return communities, totalCommunities, nil
 }
 
 func (u *CommunityUser) GetCommunityUser(db *s.Database) error {
