@@ -278,15 +278,15 @@ func getUserAchievements(db *s.Database, communityId int, start int, count int) 
 	// substituted in string first.
 	sql := fmt.Sprintf(
 		`
-		SELECT v.addr as address, count(*) as num_votes, 
+		SELECT v.addr as address, count(*) as num_votes,
 		COALESCE(a.early_vote, 0) as early_vote,
 		COALESCE(b.streak, 0) as streak,
-		COALESCE(c.winning_vote, 0) as winning_vote 
-		FROM votes v 
+		COALESCE(c.winning_vote, 0) as winning_vote
+		FROM votes v
 		LEFT OUTER JOIN proposals p ON p.id = v.proposal_id
 		LEFT OUTER JOIN (
 			SELECT * FROM crosstab(
-				$$SELECT addr, achievement_type, count(*) FROM user_achievements 
+				$$SELECT addr, achievement_type, count(*) FROM user_achievements
 				WHERE community_id = %d and achievement_type = 'earlyVote'
 				GROUP BY addr, achievement_type
 				ORDER BY 1,2$$
@@ -294,7 +294,7 @@ func getUserAchievements(db *s.Database, communityId int, start int, count int) 
 		) a ON v.addr = a.address
 		LEFT OUTER JOIN (
 			SELECT * FROM crosstab(
-				$$SELECT addr, achievement_type, count(*) FROM user_achievements 
+				$$SELECT addr, achievement_type, count(*) FROM user_achievements
 				WHERE community_id = %d and achievement_type = 'streak'
 				GROUP BY addr, achievement_type
 				ORDER BY 1,2$$
@@ -302,7 +302,7 @@ func getUserAchievements(db *s.Database, communityId int, start int, count int) 
 		) b ON v.addr = b.address
 		LEFT OUTER JOIN (
 			SELECT * FROM crosstab(
-				$$SELECT addr, achievement_type, count(*) FROM user_achievements 
+				$$SELECT addr, achievement_type, count(*) FROM user_achievements
 				WHERE community_id = %d and achievement_type = 'winningVote'
 				GROUP BY addr, achievement_type
 				ORDER BY 1,2$$

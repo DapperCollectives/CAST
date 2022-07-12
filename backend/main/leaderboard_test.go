@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"sort"
 	"testing"
+	"time"
 
 	"github.com/DapperCollectives/CAST/backend/main/test_utils"
 	"github.com/stretchr/testify/assert"
@@ -96,7 +97,7 @@ func TestGetLeaderboardWithSingleStreak(t *testing.T) {
 	json.Unmarshal(response.Body.Bytes(), &p)
 
 	// ensure scores ordered for assert
-	sort.Slice(p.Data, func(i,j int) bool {
+	sort.Slice(p.Data, func(i, j int) bool {
 		return p.Data[i].Score < p.Data[j].Score
 	})
 
@@ -147,7 +148,7 @@ func TestGetLeaderboardWithWinningVote(t *testing.T) {
 	winningVoteBonus := 1
 
 	proposalId := otu.GenerateWinningVoteAchievement(communityId, "one-address-one-vote")
-	otu.UpdateProposalStatus(proposalId, "closed")
+	otu.UpdateProposalEndTime(proposalId, time.Now().UTC())
 	otu.GetProposalResultsAPI(proposalId)
 
 	response := otu.GetCommunityLeaderboardAPI(communityId)
