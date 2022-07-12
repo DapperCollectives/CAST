@@ -6,22 +6,27 @@ import useLinkValidator from './hooks/useLinkValidator';
 const FormFieldsConfig = [
   {
     fieldName: 'websiteUrl',
+    placeHolder: 'https://www.community-site-name.com',
     iconComponent: <Website width="16px" height="16px" />,
   },
   {
     fieldName: 'twitterUrl',
+    placeHolder: 'https://twitter.com/account',
     iconComponent: <Twitter width="16px" height="16px" />,
   },
   {
     fieldName: 'githubUrl',
+    placeHolder: 'https://github.com/repository-name',
     iconComponent: <Github width="16px" height="16px" />,
   },
   {
     fieldName: 'discordUrl',
+    placeHolder: 'https://discord.com/channel-name',
     iconComponent: <Discord width="16px" height="16px" />,
   },
   {
     fieldName: 'instagramUrl',
+    placeHolder: 'https://www.instagram.com/profile-name',
     iconComponent: <Instagram width="16px" height="16px" />,
   },
 ];
@@ -70,6 +75,7 @@ export const CommunityLinksForm = ({
             type="text"
             name="web"
             className="rounded-sm border-light py-3 pr-3 column is-full"
+            placeHolder={formField?.placeHolder}
             value={fields[formField.fieldName]}
             maxLength={200}
             onChange={(event) =>
