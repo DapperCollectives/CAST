@@ -49,7 +49,6 @@ var (
 	}
 
 	DummyBalance = Balance{
-		Addr:                  "0x0000000000000000000000000000000000000000",
 		PrimaryAccountBalance: 100,
 		BlockHeight:           1000000,
 	}
@@ -91,6 +90,7 @@ func (c *SnapshotClient) sendRequest(req *http.Request, pointer interface{}) err
 func (c *SnapshotClient) GetAddressBalanceAtBlockHeight(address string, blockheight uint64, balancePointer interface{}) error {
 	// Send dummy data for tests
 	if c.bypass() {
+		DummyBalance.Addr = address
 		balancePointer = &DummyBalance
 		return nil
 	}
