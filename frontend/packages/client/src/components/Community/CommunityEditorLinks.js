@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, Fragment } from 'react';
 import { Website, Instagram, Twitter, Discord, Github } from 'components/Svg';
 import { WrapperResponsive, Loader } from 'components';
 import useLinkValidator from './hooks/useLinkValidator';
+import { useFormContext } from 'react-hook-form';
 
 const FormFieldsConfig = [
   {
@@ -39,6 +40,8 @@ export const CommunityLinksForm = ({
   wrapperMargin = 'mb-6',
   wrapperMarginMobile = 'mb-4',
 }) => {
+  const { register, formState } = useFormContext();
+
   return (
     <WrapperResponsive
       classNames="border-light rounded-lg columns is-flex-direction-column is-mobile m-0"
@@ -66,37 +69,41 @@ export const CommunityLinksForm = ({
         </div>
       </div>
       {formFields.map((formField, index) => (
-        <div
-          style={{ position: 'relative' }}
-          className="is-flex is-align-items-center mt-4"
-          key={`form-field-${index}`}
-        >
-          <input
-            type="text"
-            name="web"
-            className="rounded-sm border-light py-3 pr-3 column is-full"
-            placeHolder={formField?.placeHolder}
-            value={fields[formField.fieldName]}
-            maxLength={200}
-            onChange={(event) =>
-              onChangeHandler(formField.fieldName)(event.target.value)
-            }
-            style={{
-              paddingLeft: '34px',
-            }}
-            disabled={isUpdating}
-          />
+        <Fragment key={`form-field-${index}`}>
           <div
-            className="pl-3"
-            style={{
-              position: 'absolute',
-              height: 18,
-              opacity: 0.3,
-            }}
+            style={{ position: 'relative' }}
+            className="is-flex is-align-items-center mt-4"
           >
-            {formField.iconComponent}
+            <input
+              type="text"
+              className="rounded-sm border-light py-3 pr-3 column is-full"
+              placeholder={formField?.placeHolder}
+              {...register(`${formField.fieldName}`, {
+                pattern: /^[A-Za-z]+$/i,
+                message: 'Please check format',
+              })}
+              style={{
+                paddingLeft: '34px',
+              }}
+              disabled={isUpdating}
+            />
+            <div
+              className="pl-3"
+              style={{
+                position: 'absolute',
+                height: 18,
+                opacity: 0.3,
+              }}
+            >
+              {formField.iconComponent}
+            </div>
           </div>
-        </div>
+          {formState.errors[formField.fieldName] && (
+            <div className="pl-1 mt-2">
+              <p className="smaller-text has-text-red">Invalid url format</p>
+            </div>
+          )}
+        </Fragment>
       ))}
       {submitComponent}
     </WrapperResponsive>
