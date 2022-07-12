@@ -21,8 +21,11 @@ const Row = ({ index, addr, score, classNameIndex }) => {
   );
 };
 
-export default function LeaderBoard({ onClickViewMore = () => {} } = {}) {
-  const { data, loading } = useLeaderBoard();
+export default function LeaderBoard({
+  onClickViewMore = () => {},
+  communityId,
+} = {}) {
+  const { data, isLoading } = useLeaderBoard({ communityId });
   const style = {};
 
   return (
@@ -36,7 +39,7 @@ export default function LeaderBoard({ onClickViewMore = () => {} } = {}) {
       </WrapperResponsive>
       <table className="table is-fullwidth">
         <tbody className="is-scrollable-table" style={style}>
-          {!loading &&
+          {!isLoading &&
             data?.leaderBoard.map((datum, index) => {
               const userIndex = index + 1;
               const styleIndex =
@@ -74,7 +77,7 @@ export default function LeaderBoard({ onClickViewMore = () => {} } = {}) {
             })}
         </tbody>
       </table>
-      {!loading && data?.currentUser && (
+      {!isLoading && data?.currentUser && (
         <table className="table is-fullwidth">
           <tbody className="is-scrollable-table" style={style}>
             <Row
