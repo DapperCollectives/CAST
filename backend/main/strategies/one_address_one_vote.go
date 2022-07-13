@@ -12,6 +12,7 @@ import (
 
 type OneAddressOneVote struct {
 	shared.StrategyStruct
+	shared.SnapshotClient
 }
 
 func (s *OneAddressOneVote) FetchBalance(db *s.Database, b *models.Balance, sc *s.SnapshotClient) (*models.Balance, error) {
@@ -22,13 +23,7 @@ func (s *OneAddressOneVote) FetchBalance(db *s.Database, b *models.Balance, sc *
 	}
 
 	if b.ID == "" {
-		err := b.FetchAddressBalanceAtBlockHeight(sc, b.Addr, b.BlockHeight)
-		if err != nil {
-			log.Error().Err(err).Msg("error fetching address b at blockheight.")
-			return nil, err
-		}
-
-		if err = b.CreateBalance(db); err != nil {
+		if err := b.CreateBalance(db); err != nil {
 			log.Error().Err(err).Msg("error saving b to DB")
 			return nil, err
 		}
@@ -80,7 +75,12 @@ func (s *OneAddressOneVote) GetVotes(
 	return votes, nil
 }
 
-func (s *OneAddressOneVote) InitStrategy(f *shared.FlowAdapter, db *shared.Database) {
+func (s *OneAddressOneVote) InitStrategy(
+	f *shared.FlowAdapter,
+	db *shared.Database,
+	sc *s.SnapshotClient,
+) {
 	s.FlowAdapter = f
 	s.DB = db
+	s.SnapshotClient = *sc
 }

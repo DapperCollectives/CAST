@@ -13,6 +13,7 @@ import (
 
 type StakedTokenWeightedDefault struct {
 	shared.StrategyStruct
+	shared.SnapshotClient
 }
 
 func (s *StakedTokenWeightedDefault) FetchBalance(
@@ -27,13 +28,7 @@ func (s *StakedTokenWeightedDefault) FetchBalance(
 	}
 
 	if b.ID == "" {
-		err := b.FetchAddressBalanceAtBlockHeight(sc, b.Addr, b.BlockHeight)
-		if err != nil {
-			log.Error().Err(err).Msg("error fetching address b at blockheight.")
-			return nil, err
-		}
-
-		if err = b.CreateBalance(db); err != nil {
+		if err := b.CreateBalance(db); err != nil {
 			log.Error().Err(err).Msg("error saving b to DB")
 			return nil, err
 		}
@@ -101,7 +96,12 @@ func (s *StakedTokenWeightedDefault) GetVotes(
 	return votes, nil
 }
 
-func (s *StakedTokenWeightedDefault) InitStrategy(f *shared.FlowAdapter, db *shared.Database) {
+func (s *StakedTokenWeightedDefault) InitStrategy(
+	f *shared.FlowAdapter,
+	db *shared.Database,
+	sc *s.SnapshotClient,
+) {
 	s.FlowAdapter = f
 	s.DB = db
+	s.SnapshotClient = *sc
 }

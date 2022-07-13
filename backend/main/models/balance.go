@@ -31,18 +31,6 @@ func (b *Balance) GetBalanceByAddressAndBlockHeight(db *s.Database) error {
 	return pgxscan.Get(db.Context, db.Conn, b, sql, b.Addr, b.BlockHeight)
 }
 
-func (b *Balance) FetchAddressBalanceAtBlockHeight(c *s.SnapshotClient, address string, blockheight uint64) error {
-	flowToken := "FlowToken"
-	defaultContract := s.Contract{
-		Name: &flowToken,
-	}
-	err := c.GetAddressBalanceAtBlockHeight(address, blockheight, b, defaultContract)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func (b *Balance) CreateBalance(db *s.Database) error {
 	// Skip for test/dev.
 	if *db.Env == "TEST" || *db.Env == "DEV" {

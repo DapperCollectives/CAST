@@ -52,12 +52,34 @@ type SnapshotData struct {
 	BlockHeight uint64 `json:"blockHeight"`
 }
 
+// copied this quick and dirty from models to get around circular dependency
+// move to shared?
+type Balance struct {
+	ID                      string    `json:"id"`
+	Addr                    string    `json:"addr"`
+	PrimaryAccountBalance   uint64    `json:"primaryAccountBalance"`
+	SecondaryAddress        string    `json:"secondaryAddress"`
+	SecondaryAccountBalance uint64    `json:"secondaryAccountBalance"`
+	StakingBalance          uint64    `json:"stakingBalance"`
+	ScriptResult            string    `json:"scriptResult"`
+	Stakes                  []string  `json:"stakes"`
+	BlockHeight             uint64    `json:"blockHeight"`
+	Proposal_id             int       `json:"proposal_id"`
+	NFTCount                int       `json:"nftCount"`
+	CreatedAt               time.Time `json:"createdAt"`
+}
+
 var (
 	DummySnapshot = Snapshot{
 		ID:           "1",
 		Block_height: 1000000,
 		Started:      time.Now(),
 		Finished:     time.Now(),
+	}
+
+	DummyBalance = Balance{
+		PrimaryAccountBalance: 100,
+		BlockHeight:           1000000,
 	}
 )
 
@@ -111,12 +133,13 @@ func (c *SnapshotClient) GetAddressBalanceAtBlockHeight(
 	blockheight uint64,
 	balancePointer interface{},
 	contract Contract) error {
-	var url string
-
+	// Send dummy data for tests
 	if c.bypass() {
-		// TODO: return dummy balance
+		DummyBalance.Addr = address
+		balancePointer = &DummyBalance
 		return nil
 	}
+	var url string
 
 	if *contract.Name == "FlowToken" {
 		url = fmt.Sprintf(`%s/balance-at-blockheight/%s/%d`, c.BaseURL, address, blockheight)
