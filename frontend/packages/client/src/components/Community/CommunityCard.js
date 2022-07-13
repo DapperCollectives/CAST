@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import JoinCommunityButton from './JoinCommunityButton';
+import WrapperResponsive from 'components/WrapperResponsive';
 import Blockies from 'react-blockies';
 import { useMediaQuery } from 'hooks';
 /**
@@ -13,19 +14,6 @@ const CommunityCard = ({ logo, name, body, id, slug }) => {
     maxHeight: '3rem',
     overflow: 'hidden',
   };
-
-  const isNotMobile = useMediaQuery();
-  const avatarSize = isNotMobile
-    ? {
-        logo: { width: 96, height: 96 },
-        blockie: { size: 10, scale: 9.6 },
-        columnStyle: { maxHeight: '120px' },
-      }
-    : {
-        logo: { width: 48, height: 48 },
-        blockie: { size: 10, scale: 4.8 },
-        columnStyle: { maxHeight: '72px' },
-      };
 
   return (
     <>
@@ -71,7 +59,7 @@ const CommunityCard = ({ logo, name, body, id, slug }) => {
                 {body}
               </p>
             </div>
-            <div className="column is-12-mobile p-0-mobile is-narrow-tablet is-flex is-flex-direction-column is-justify-content-start">
+            <div className="column is-narrow is-flex is-flex-direction-column is-justify-content-start">
               <JoinCommunityButton communityId={id} darkMode={false} />
             </div>
           </div>
