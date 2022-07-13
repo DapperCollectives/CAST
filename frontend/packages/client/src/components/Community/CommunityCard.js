@@ -8,7 +8,7 @@ import Blockies from 'react-blockies';
  * CommunityCard will group communities on a row bases,
  * will use elementsPerRow to determine how many communities to render per row
  */
-const CommunityCard = ({ logo, name, description, id, slug }) => {
+const CommunityCard = ({ logo, name, body, id, slug }) => {
   const descriptionStyle = {
     lineHeight: '1.5em',
     height: '3em',
@@ -74,16 +74,16 @@ const CommunityCard = ({ logo, name, description, id, slug }) => {
                 />
               )}
             </div>
-            <div className="column">
+            <div className="column is-flex is-flex-direction-column is-justify-content-center">
               <WrapperResponsive
-                classNames="title mb-2"
+                classNames="is-size-5 mb-2"
                 extraClasses="is-4 pt-1"
                 extraClassesMobile="is-6 pt-2"
               >
                 {name}
               </WrapperResponsive>
               <p className="has-text-grey" style={descriptionStyle}>
-                {description}
+                {body}
               </p>
             </div>
           </div>
@@ -96,7 +96,7 @@ const CommunityCard = ({ logo, name, description, id, slug }) => {
         </div>
       </Link>
       <div style={{ position: 'absolute', margin: 0, ...joinBtnTopRight }}>
-        <JoinCommunityButton communityId={id} />
+        <JoinCommunityButton communityId={id} darkMode={false} />
       </div>
     </>
   );
