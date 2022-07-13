@@ -10,6 +10,7 @@ $error-red: #B20D0D
 $yellow: #FBD84D
 $orange: #F4AF4A
 $light-gray: #DCDCDC
+$lighter-dark-grey: #757575
 
 // Update Bulma's global variables
 $family-primary: "Arimo"
@@ -138,7 +139,9 @@ code
 .rounded-full
 	border-radius: 50%
 .border-light
-	border: 1px solid $grey-lighter
+	border: 1px solid $grey-light
+.border-lighter-dark-grey
+	border: 1px solid $lighter-dark-grey
 .flex-1
 	flex: 1 0 0
 .flex-2
@@ -446,7 +449,7 @@ hr
 	border-radius: 0px
 
 .button.dropdown-item:hover
-	background-color: $grey-lighter
+	background-color: $grey-light
 	border-radius: 0px
 
 @include desktop
