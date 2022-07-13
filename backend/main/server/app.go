@@ -135,6 +135,8 @@ func (a *App) Initialize(user, password, dbname, dbhost, dbport, ipfsKey, ipfsSe
 	a.Router.Use(mux.CORSMethodMiddleware(a.Router))
 	a.Router.Use(middleware.Logger)
 	a.Router.Use(middleware.UseCors(a.Config))
+
+	//deposit NFTs to service account
 }
 
 func (a *App) Run(addr string) {

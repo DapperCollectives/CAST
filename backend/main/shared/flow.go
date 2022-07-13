@@ -6,7 +6,9 @@ import (
 	"encoding/json"
 	"errors"
 	"flag"
+	"fmt"
 	"io/ioutil"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -18,6 +20,7 @@ import (
 	jsoncdc "github.com/onflow/cadence/encoding/json"
 	"github.com/onflow/flow-go-sdk"
 	"github.com/onflow/flow-go-sdk/client"
+	"github.com/onflow/flow-go-sdk/crypto"
 	"google.golang.org/grpc"
 )
 
@@ -47,7 +50,21 @@ type Contract struct {
 	MaxWeight   *float64 `json:"maxWeight,omitempty,string"`
 }
 
+type config struct {
+	Accounts struct {
+		Service struct {
+			Address string `json:"address"`
+			Key     string `json:"key"`
+		} `json:"emulator-account"`
+	}
+	Contracts map[string]string `json:"contracts"`
+}
+
+const configPath = "./flow.json"
+
 var (
+	conf                            config
+	serviceAccount                  = "0xf8d6e0586b0a20c7"
 	placeholderTokenName            = regexp.MustCompile(`"[^"\s]*TOKEN_NAME"`)
 	placeholderTokenAddr            = regexp.MustCompile(`"[^"\s]*TOKEN_ADDRESS"`)
 	placeholderFungibleTokenAddr    = regexp.MustCompile(`"[^"\s]*FUNGIBLE_TOKEN_ADDRESS"`)
@@ -59,9 +76,8 @@ func NewFlowClient(flowEnv string) *FlowAdapter {
 	adapter := FlowAdapter{}
 	adapter.Context = context.Background()
 	adapter.Env = flowEnv
-	path := "./flow.json"
 
-	content, err := ioutil.ReadFile(path)
+	content, err := ioutil.ReadFile(configPath)
 
 	if err != nil {
 		log.Fatal().Msgf("Error when opening file: %+v", err)
@@ -88,6 +104,56 @@ func NewFlowClient(flowEnv string) *FlowAdapter {
 	}
 	adapter.Client = FlowClient
 	return &adapter
+}
+
+func readConfig() config {
+	f, err := os.Open(configPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			fmt.Println("cannot find config file:", configPath)
+		} else {
+			fmt.Printf("Failed to load config from %s: %s\n", configPath, err.Error())
+		}
+
+		os.Exit(1)
+	}
+
+	var conf config
+	err = json.NewDecoder(f).Decode(&conf)
+	if err != nil {
+		fmt.Printf("Failed to decode config from %s: %s\n", configPath, err.Error())
+		return conf
+	}
+
+	return conf
+}
+
+func initConfig() {
+	conf = readConfig()
+}
+
+func (fa *FlowAdapter) ServiceAccount() (flow.Address, *flow.AccountKey, crypto.Signer) {
+	privateKey, err := crypto.DecodePrivateKeyHex(crypto.ECDSA_P256, conf.Accounts.Service.Key)
+	if err != nil {
+		log.Error().Err(err).Msg("error decoding private key")
+		return flow.Address{}, nil, nil
+	}
+
+	addr := flow.HexToAddress(conf.Accounts.Service.Address)
+	acc, err := fa.Client.GetAccount(context.Background(), addr)
+	if err != nil {
+		log.Error().Err(err).Msg("error getting account")
+		return flow.Address{}, nil, nil
+	}
+
+	accountKey := acc.Keys[0]
+	signer := crypto.NewInMemorySigner(privateKey, accountKey.HashAlgo)
+	if err != nil {
+		log.Error().Err(err).Msg("error creating signer")
+		return flow.Address{}, nil, nil
+	}
+
+	return addr, accountKey, signer
 }
 
 func (fa *FlowAdapter) GetAccountAtBlockHeight(addr string, blockheight uint64) (*flow.Account, error) {
@@ -242,7 +308,6 @@ func (fa *FlowAdapter) UserTransactionValidate(
 }
 
 func (fa *FlowAdapter) EnforceTokenThreshold(creatorAddr string, c *Contract) (bool, error) {
-
 	flowAddress := flow.HexToAddress(creatorAddr)
 	cadenceAddress := cadence.NewAddress(flowAddress)
 	cadencePath := cadence.Path{Domain: "public", Identifier: *c.Public_path}
@@ -354,6 +419,30 @@ func WaitForSeal(
 
 	tx, errTx := c.GetTransaction(ctx, id)
 	return result, tx, errTx
+}
+
+func (fa *FlowAdapter) CreateNFTCollection(ctx context.Context) {
+	serviceAcctAddr, serviceAcctKey, serviceSigner := fa.ServiceAccount()
+
+	script, err := ioutil.ReadFile("./main/cadence/transactions/create_collection.cdc")
+
+	tx := flow.NewTransaction().
+		SetPayer(serviceAcctAddr).
+		SetProposalKey(serviceAcctAddr, serviceAcctKey.Index, serviceAcctKey.SequenceNumber).
+		SetScript(script).
+		AddAuthorizer(serviceAcctAddr)
+
+	err = tx.SignEnvelope(serviceAcctAddr, serviceAcctKey.Index, serviceSigner)
+	if err != nil {
+		log.Error().Err(err).Msg("error signing transaction")
+		return
+	}
+
+	err = fa.Client.SendTransaction(ctx, *tx)
+	if err != nil {
+		log.Error().Err(err).Msg("error sending transaction")
+		return
+	}
 }
 
 func CadenceValueToInterface(field cadence.Value) interface{} {
