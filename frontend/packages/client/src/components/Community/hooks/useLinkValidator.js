@@ -16,13 +16,13 @@ export const urlPatternValidation = (url) => {
   return url === '' || !!regex.test(url);
 };
 const twitterValidator = (url) => {
-  const regex = new RegExp('(https://)(www\\.)twitter\\.com/(\\w+)', 'i');
+  const regex = new RegExp('(https://)(www\\.)?twitter\\.com/(\\w+)', 'i');
   return url === '' || !!regex.test(url);
 };
 const instagramValidator = (url) => {
   return (
     url === '' ||
-    /(https:\/\/)(www\.)(?:instagram.com|instagr.am|instagr.com)\/(\w+)/gim.test(
+    /(https:\/\/)(www\.)?(?:instagram.com|instagr.am|instagr.com)\/(\w+)/gim.test(
       url
     )
   );
@@ -30,14 +30,14 @@ const instagramValidator = (url) => {
 const discordValidator = (url) => {
   return (
     url === '' ||
-    /(https:\/\/)(www\.)(discord\.(gg|io|me|li|com)|discordapp\.com\/invite)\/.+[a-zA-Z0-9]/gim.test(
+    /(https:\/\/)(www\.)?(discord\.(gg|io|me|li|com)|discordapp\.com\/invite)\/.+[a-zA-Z0-9]/gim.test(
       url
     )
   );
 };
 const githubValidator = (url) => {
   return (
-    url === '' || /(https:\/\/)(www\.)(github\.com)\/(?:[^/\s]+)/gim.test(url)
+    url === '' || /(https:\/\/)(www\.)?(github\.com)\/(?:[^/\s]+)/gim.test(url)
   );
 };
 
