@@ -1,8 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import JoinCommunityButton from './JoinCommunityButton';
 import WrapperResponsive from 'components/WrapperResponsive';
-import { useWindowDimensions } from 'hooks';
 import Blockies from 'react-blockies';
 /**
  * CommunityCard will group communities on a row bases,
@@ -14,40 +13,6 @@ const CommunityCard = ({ logo, name, body, id, slug }) => {
     height: '3em',
     overflow: 'hidden',
   };
-
-  const { width: windowWidth } = useWindowDimensions();
-  const joinBtnPositions = useMemo(
-    () => ({
-      bigger: { top: '52px', right: '74px' },
-      smaller: { top: '144px', right: '332px' },
-    }),
-    []
-  );
-  const joinBtnDefault =
-    windowWidth >= 500 ? joinBtnPositions.bigger : joinBtnPositions.smaller;
-  const [joinBtnTopRight, setJoinBtnTopRight] = useState(joinBtnDefault);
-  const [bottomSpacer, setBottomSpacer] = useState();
-
-  useEffect(() => {
-    if (
-      windowWidth < 500 &&
-      joinBtnTopRight.top !== joinBtnPositions.smaller.top &&
-      bottomSpacer === false
-    ) {
-      setJoinBtnTopRight({
-        top: joinBtnPositions.smaller.top,
-        right: joinBtnPositions.smaller.top - windowWidth + 500,
-      });
-      setBottomSpacer(true);
-    } else if (
-      windowWidth >= 500 &&
-      joinBtnTopRight.top !== joinBtnPositions.bigger.top &&
-      bottomSpacer
-    ) {
-      setJoinBtnTopRight(joinBtnPositions.bigger);
-      setBottomSpacer(false);
-    }
-  }, [joinBtnTopRight.top, windowWidth, bottomSpacer, joinBtnPositions]);
 
   return (
     <>
@@ -86,18 +51,12 @@ const CommunityCard = ({ logo, name, body, id, slug }) => {
                 {body}
               </p>
             </div>
+            <div className="column is-narrow is-flex is-flex-direction-column is-justify-content-start">
+              <JoinCommunityButton communityId={id} darkMode={false} />
+            </div>
           </div>
-          {bottomSpacer ? (
-            <div
-              className="columns is-flex-grow-1 is-mobile"
-              style={{ minHeight: '64px' }}
-            />
-          ) : null}
         </div>
       </Link>
-      <div style={{ position: 'absolute', margin: 0, ...joinBtnTopRight }}>
-        <JoinCommunityButton communityId={id} darkMode={false} />
-      </div>
     </>
   );
 };
