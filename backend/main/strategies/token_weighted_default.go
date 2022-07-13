@@ -21,7 +21,17 @@ func (s *TokenWeightedDefault) FetchBalance(
 	sc *s.SnapshotClient,
 ) (*models.Balance, error) {
 
-	if err := s.SnapshotClient.GetAddressBalanceAtBlockHeight(b.Addr, b.BlockHeight, b); err != nil {
+	var c models.Community
+	if err := c.GetCommunityByProposalId(db, b.Proposal_id); err != nil {
+		return nil, err
+	}
+
+	var contract = &shared.Contract{
+		Name: c.Contract_name,
+		Addr: c.Contract_addr,
+	}
+
+	if err := s.SnapshotClient.GetAddressBalanceAtBlockHeight(b.Addr, b.BlockHeight, b, *contract); err != nil {
 		log.Error().Err(err).Msg("error querying address b at blockheight")
 		return nil, err
 	}
@@ -40,7 +50,7 @@ func (s *TokenWeightedDefault) TallyVotes(
 	votes []*models.VoteWithBalance,
 	p *models.ProposalResults,
 ) (models.ProposalResults, error) {
-	//tally votes
+
 	for _, vote := range votes {
 		if vote.PrimaryAccountBalance != nil {
 			p.Results[vote.Choice] += int(float64(*vote.PrimaryAccountBalance) * math.Pow(10, -8))

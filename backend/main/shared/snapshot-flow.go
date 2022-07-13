@@ -94,6 +94,16 @@ func NewSnapshotClient(baseUrl string) *SnapshotClient {
 }
 
 func (c *SnapshotClient) TakeSnapshot(contract Contract) (*SnapshotResponse, error) {
+	if c.bypass() {
+		return &SnapshotResponse{
+			Data: SnapshotData{
+				Message:     "",
+				Status:      "success",
+				BlockHeight: 1000000,
+			},
+		}, nil
+	}
+
 	var r *SnapshotResponse = &SnapshotResponse{}
 
 	url := c.setSnapshotUrl(contract, "take-snapshot")
@@ -111,6 +121,16 @@ func (c *SnapshotClient) TakeSnapshot(contract Contract) (*SnapshotResponse, err
 }
 
 func (c *SnapshotClient) GetSnapshotStatus(contract Contract) (*SnapshotResponse, error) {
+	if c.bypass() {
+		return &SnapshotResponse{
+			Data: SnapshotData{
+				Message:     "",
+				Status:      "success",
+				BlockHeight: 1000000,
+			},
+		}, nil
+	}
+
 	var r *SnapshotResponse = &SnapshotResponse{}
 
 	url := c.setSnapshotUrl(contract, "latest-blockheight")
@@ -166,6 +186,34 @@ func (c *SnapshotClient) GetAddressBalanceAtBlockHeight(
 	}
 
 	return nil
+}
+
+func (c *SnapshotClient) GetLatestSnapshot(contract Contract) (*Snapshot, error) {
+	var snapshot Snapshot
+	var url string
+
+	if c.bypass() {
+		return &DummySnapshot, nil
+	}
+
+	if *contract.Name == "FlowToken" {
+		url = fmt.Sprintf(`%s/latest-snapshot`, c.BaseURL)
+	} else {
+		url = fmt.Sprintf(`%s/latest-snapshot/%s, %s`, c.BaseURL, *contract.Addr, *contract.Name)
+	}
+
+	req, err := c.setRequestMethod("GET", url)
+	if err != nil {
+		log.Debug().Err(err).Msg("SnapshotClient GetAddressBalanceAtBlockHeight request error")
+		return &snapshot, err
+	}
+
+	if err := c.sendRequest(req, snapshot); err != nil {
+		log.Debug().Err(err).Msgf("Snapshot GetAddressBalanceAtBlockHeight send request error.")
+		return &snapshot, err
+	}
+
+	return &snapshot, nil
 }
 
 func (c *SnapshotClient) GetLatestFlowSnapshot() (*Snapshot, error) {

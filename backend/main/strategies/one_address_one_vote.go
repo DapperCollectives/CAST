@@ -15,7 +15,11 @@ type OneAddressOneVote struct {
 	shared.SnapshotClient
 }
 
-func (s *OneAddressOneVote) FetchBalance(db *s.Database, b *models.Balance, sc *s.SnapshotClient) (*models.Balance, error) {
+func (s *OneAddressOneVote) FetchBalance(
+	db *s.Database,
+	b *models.Balance,
+	sc *s.SnapshotClient,
+) (*models.Balance, error) {
 
 	if err := b.GetBalanceByAddressAndBlockHeight(db); err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		log.Error().Err(err).Msg("error querying address b at blockheight")

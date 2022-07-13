@@ -779,15 +779,6 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	snapshot, err := a.SnapshotClient.GetLatestSnapshot()
-	if err != nil {
-		log.Error().Err(err).Msg("error fetching latest snapshot")
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	p.Block_height = snapshot.Block_height
-
 	var community models.Community
 	community.ID = communityId
 
@@ -796,13 +787,21 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-
 	strategy, err := models.MatchStrategyByProposal(*community.Strategies, *p.Strategy)
 	if err != nil {
 		log.Error().Err(err).Msg("Community does not have this strategy availabe")
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
+
 	}
+	snapshot, err := a.SnapshotClient.GetLatestSnapshot(strategy.Contract)
+	if err != nil {
+		log.Error().Err(err).Msg("error fetching latest snapshot")
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	p.Block_height = snapshot.Block_height
 
 	//@TODO this whole if else block should be moved into to its own func
 	if *community.Only_authors_to_submit == true {
