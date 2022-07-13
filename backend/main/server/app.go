@@ -325,6 +325,10 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if *p.Computed_status == "closed" {
+		models.AddWinningVoteAchievement(a.DB, votes, proposalResults, p.Community_id)
+	}
+
 	// Send Proposal Results
 	respondWithJSON(w, http.StatusOK, proposalResults)
 }
@@ -846,6 +850,12 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if os.Getenv("APP_ENV") == "PRODUCTION" {
+		if strategy.Contract.Name != nil && p.Start_time.Before(time.Now().UTC().Add(time.Hour)) {
+			p.Start_time = time.Now().UTC().Add(time.Hour)
+		}
+	}
+
 	// create proposal
 	if err := p.CreateProposal(a.DB); err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
@@ -882,8 +892,6 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
-
-	log.Debug().Msgf("payload: %s", payload.Signing_addr)
 
 	// Check that status update is valid
 	// For now we are assuming proposals are creating with status 'published' and may be cancelled.

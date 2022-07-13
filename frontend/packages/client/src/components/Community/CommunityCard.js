@@ -3,12 +3,12 @@ import { Link } from 'react-router-dom';
 import JoinCommunityButton from './JoinCommunityButton';
 import WrapperResponsive from 'components/WrapperResponsive';
 import { useWindowDimensions } from 'hooks';
-
+import Blockies from 'react-blockies';
 /**
  * CommunityCard will group communities on a row bases,
  * will use elementsPerRow to determine how many communities to render per row
  */
-const CommunityCard = ({ logo, name, description, id }) => {
+const CommunityCard = ({ logo, name, description, id, slug }) => {
   const descriptionStyle = {
     lineHeight: '1.5em',
     height: '3em',
@@ -51,19 +51,28 @@ const CommunityCard = ({ logo, name, description, id }) => {
 
   return (
     <>
-      <Link to={`/community/${id}?tab=about`} style={{ color: 'inherit' }}>
+      <Link to={`/community/${id}?tab=proposals`} style={{ color: 'inherit' }}>
         <div className="is-flex is-flex-grow-1 rounded-sm border-light p-5 is-flex-direction-column transition-all community-card">
           <div className="columns is-multiline is-flex-grow-1 is-mobile">
             <div className="column is-narrow">
-              <div
-                className="border-light rounded-sm"
-                style={{
-                  width: 96,
-                  height: 96,
-                  backgroundImage: `url(${logo})`,
-                  backgroundSize: 'cover',
-                }}
-              />
+              {logo ? (
+                <div
+                  className="border-light rounded-sm"
+                  style={{
+                    width: 96,
+                    height: 96,
+                    backgroundImage: `url(${logo})`,
+                    backgroundSize: 'cover',
+                  }}
+                />
+              ) : (
+                <Blockies
+                  seed={slug ?? `seed-${id}`}
+                  size={10}
+                  scale={9.6}
+                  className="rounded-sm"
+                />
+              )}
             </div>
             <div className="column">
               <WrapperResponsive

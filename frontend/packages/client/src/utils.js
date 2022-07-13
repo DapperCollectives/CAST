@@ -67,10 +67,7 @@ export const getCompositeSigs = (sigArr) => {
     return [sigArr[0].signature];
   }
 
-  if (
-    typeof sigArr === 'string' &&
-    sigArr.includes('Declined: No reason supplied')
-  ) {
+  if (typeof sigArr === 'string' && sigArr.includes('Declined:')) {
     return null;
   }
   return sigArr;
@@ -185,6 +182,12 @@ export const customDraftToHTML = (content) => {
 
 export const isValidAddress = (addr) => /0[x,X][a-zA-Z0-9]{16}$/gim.test(addr);
 
+export const wait = async (milliSeconds = 5000) =>
+  new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(true);
+    }, milliSeconds);
+  });
 // converts kebab case to regular string
 const REVERSE_REGEX = /-[a-zA-Z]/g;
 
@@ -193,4 +196,17 @@ export const kebabToString = (str = '') => {
     return ' ' + match.slice(1);
   });
   return updated.charAt(0).toUpperCase() + updated.slice(1);
+};
+
+export const getPaginationInfo = (pages) => {
+  if (!pages) {
+    return [];
+  }
+  const lastPage = [...pages].pop();
+  return [
+    lastPage?.start ?? 0,
+    lastPage?.count ?? 0,
+    lastPage?.totalRecords ?? 0,
+    lastPage?.next ?? -1,
+  ];
 };

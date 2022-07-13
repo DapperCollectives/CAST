@@ -1,60 +1,77 @@
 import React, { useEffect, useState } from 'react';
 import { useWebContext } from 'contexts/Web3';
+import { useModalContext } from 'contexts/NotificationModal';
 import { useJoinCommunity, useUserRoleOnCommunity } from 'hooks';
+import { WalletConnect, Error } from 'components';
 
 export default function JoinCommunityButton({
   communityId,
   setTotalMembers = () => {},
   // callback to notify leaveCommunity was called
   onLeaveCommunity = async () => {},
+  onJoinCommunity = async () => {},
 }) {
+  const [isModalErrorOpened, setIsModalErrorOpened] = useState(false);
   const { createCommunityUser, deleteUserFromCommunity } = useJoinCommunity();
   const { injectedProvider, user } = useWebContext();
-  const [addr, setAddr] = useState();
-  const memberState = useUserRoleOnCommunity({
-    addr,
+  const { openModal, closeModal } = useModalContext();
+  const isMember = useUserRoleOnCommunity({
+    addr: user?.addr,
     communityId,
     roles: ['member'],
   });
-  const [isMember, setIsMember] = useState();
-
-  useEffect(() => {
-    setAddr(user.addr);
-    setIsMember(memberState);
-  }, [user.addr, memberState]);
 
   const refresh = (updateFn) => {
-    // setting this to null and then to a valid address retriggers query to get memberState
-    setAddr(null);
-    setAddr(user.addr);
     setTotalMembers(updateFn);
   };
 
+  useEffect(() => {
+    if (user?.addr && isModalErrorOpened) {
+      closeModal();
+      setIsModalErrorOpened(false);
+    }
+  }, [user?.addr, isModalErrorOpened, closeModal, setIsModalErrorOpened]);
+
   const joinCommunity = async () => {
-    const { success } = await createCommunityUser(
+    if (!user?.addr) {
+      openModal(
+        React.createElement(Error, {
+          error: (
+            <div className="mt-5">
+              <WalletConnect />
+            </div>
+          ),
+
+          errorTitle: 'Please connect a wallet.',
+        }),
+        { classNameModalContent: 'rounded-sm' }
+      );
+      setIsModalErrorOpened(true);
+      return;
+    }
+    const { success } = await createCommunityUser({
       communityId,
       user,
-      injectedProvider
-    );
+      injectedProvider,
+    });
     if (success) {
       refresh((totalMembers) => ++totalMembers);
+      await onJoinCommunity();
     }
   };
 
   const leaveCommunity = async () => {
-    const { success } = await deleteUserFromCommunity(
+    const { success } = await deleteUserFromCommunity({
       communityId,
       user,
-      injectedProvider
-    );
+      injectedProvider,
+    });
 
     if (success) {
       refresh((totalMembers) => --totalMembers);
       await onLeaveCommunity();
     }
   };
-
-  if (!addr || (isMember !== true && isMember !== false)) return null;
 
   return (
     <div

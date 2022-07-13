@@ -232,7 +232,7 @@ func (otu *OverflowTestUtils) AddActiveProposals(cId int, count int) []int {
 	retIds := []int{}
 	for i := 0; i < count; i++ {
 		proposal := otu.GenerateProposalStruct("account", cId)
-		proposal.Start_time = time.Now().AddDate(0, -1, 0)
+		proposal.Start_time = time.Now().UTC().AddDate(0, -1, 0)
 		if err := proposal.CreateProposal(otu.A.DB); err != nil {
 			fmt.Printf("error in otu.AddActiveProposals")
 		}
@@ -240,6 +240,33 @@ func (otu *OverflowTestUtils) AddActiveProposals(cId int, count int) []int {
 		retIds = append(retIds, proposal.ID)
 	}
 	return retIds
+}
+
+func (otu *OverflowTestUtils) AddActiveProposalsWithStartTimeNow(cId int, count int) []int {
+	if count < 1 {
+		count = 1
+	}
+	retIds := []int{}
+	for i := 0; i < count; i++ {
+		proposal := otu.GenerateProposalStruct("account", cId)
+		proposal.Start_time = time.Now().UTC()
+		if err := proposal.CreateProposal(otu.A.DB); err != nil {
+			fmt.Printf("error in otu.AddActiveProposals")
+		}
+
+		retIds = append(retIds, proposal.ID)
+	}
+	return retIds
+}
+
+func (otu *OverflowTestUtils) UpdateProposalEndTime(pId int, endTime time.Time) {
+	_, err := otu.A.DB.Conn.Exec(otu.A.DB.Context,
+		`
+		UPDATE proposals SET end_time = $2 WHERE id = $1
+		`, pId, endTime)
+	if err != nil {
+		log.Error().Err(err).Msg("update proposal end_time DB err")
+	}
 }
 
 func (otu *OverflowTestUtils) AddLists(cId int, count int) []int {

@@ -5,9 +5,14 @@ import { Gitbook, Github } from '../components/Svg';
 const AboutPage = ({ location }) => {
   const { state = {} } = location;
   const history = useHistory();
-  const { modal } = state;
+  const { modal = true } = state;
   const closeModal = () => {
-    history.push('/');
+    // user landed on about page: no history
+    if (history.length <= 2) {
+      history.push('/');
+      return;
+    }
+    history.goBack();
   };
   return (
     <div className={modal ? 'modal is-active' : undefined}>

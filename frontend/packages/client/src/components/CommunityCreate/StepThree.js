@@ -2,12 +2,34 @@ import React, { useEffect } from 'react';
 import { WrapperResponsive } from 'components';
 import { isValidAddress } from 'utils';
 
+const allEmptyFields = (data) => {
+  // all fields are undefined: form untouched or empty strings
+  const fields = [
+    'contractAddress',
+    'contractName',
+    'storagePath',
+    'proposalThreshold',
+  ];
+  return (
+    fields.every((field) => data[field] === undefined) ||
+    fields.every((field) => data[field] === '')
+  );
+};
+const allFieldsFilled = (data) => {
+  // all fields have data and are not empty strings: form touched
+  return [
+    'contractAddress',
+    'contractName',
+    'storagePath',
+    'proposalThreshold',
+  ].every((field) => data[field] !== undefined && data[field] !== '');
+};
 export default function StepThree({
-  stepData,
+  stepData = {},
   setStepValid,
   onDataChange,
-  onSubmit,
   isStepValid,
+  moveToNextStep,
 }) {
   const {
     proposalThreshold = '',
@@ -15,24 +37,33 @@ export default function StepThree({
     contractName = '',
     storagePath = '',
     onlyAuthorsToSubmitProposals = false,
-  } = stepData || {};
+  } = stepData;
 
   useEffect(() => {
     const requiredFields = {
       contractAddress: (addr) =>
-        addr?.trim().length > 0 && isValidAddress(addr),
-      proposalThreshold: (threshold) =>
-        threshold?.trim().length > 0 && /^[0-9]+$/.test(threshold),
+        addr?.trim().length > 0 ? isValidAddress(addr) : true,
       contractName: (name) =>
-        name?.trim().length > 0 && name?.trim().length <= 150,
+        name?.trim().length > 0 ? name?.trim().length <= 150 : true,
       storagePath: (path) =>
-        path?.trim().length > 0 && path?.trim().length <= 150,
+        path?.trim().length > 0 ? path?.trim().length <= 150 : true,
+      proposalThreshold: (threshold) =>
+        threshold?.trim().length > 0 ? /^[0-9]+$/.test(threshold) : true,
     };
-    const isValid = Object.keys(requiredFields).every(
-      (field) => stepData && requiredFields[field](stepData[field])
-    );
+
+    const isValid =
+      Object.keys(requiredFields).every(
+        (field) => stepData && requiredFields[field](stepData[field])
+      ) &&
+      // only autors can submit, Ignore all other fields they must be empty
+      ((allEmptyFields(stepData) && onlyAuthorsToSubmitProposals) ||
+        // all fields are complete with valid data
+        // (onlyAuthorsToSubmitProposals could be checked or not)
+        allFieldsFilled(stepData));
+
     setStepValid(isValid);
-  }, [stepData, setStepValid]);
+  }, [stepData, setStepValid, onlyAuthorsToSubmitProposals]);
+
   return (
     <>
       <WrapperResponsive
@@ -94,7 +125,7 @@ export default function StepThree({
           }
         />
 
-        <label className="checkbox column is-flex is-align-items-center is-full is-full-mobile px-0 mt-4">
+        <label className="checkbox column is-flex is-align-items-center is-full is-full-mobile px-0 mt-4 mb-4">
           <input
             type="checkbox"
             className="mr-2 form-checkbox"
@@ -110,16 +141,18 @@ export default function StepThree({
           </p>
         </label>
       </WrapperResponsive>
-      <div className="column p-0 is-12 mt-4">
-        <button
-          style={{ height: 48, width: '100%' }}
-          className={`button vote-button transition-all is-flex has-background-yellow rounded-sm is-enabled is-size-6 ${
-            !isStepValid ? 'is-disabled' : ''
-          }`}
-          onClick={isStepValid ? () => onSubmit() : () => {}}
-        >
-          CREATE COMMUNITY
-        </button>
+      <div className="columns mb-5">
+        <div className="column is-12">
+          <button
+            style={{ height: 48, width: '100%' }}
+            className={`button vote-button transition-all is-flex has-background-yellow rounded-sm is-size-6 is-uppercase is-${
+              isStepValid ? 'enabled' : 'disabled'
+            }`}
+            onClick={isStepValid ? () => moveToNextStep() : () => {}}
+          >
+            Next: VOTING STRATEGIES
+          </button>
+        </div>
       </div>
     </>
   );

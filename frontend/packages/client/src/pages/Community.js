@@ -17,12 +17,12 @@ import {
   useCommunityDetails,
   useQueryParams,
   useCommunityUsers,
-  useVotingStrategies,
   useUserRoleOnCommunity,
   useCommunityMembers,
 } from '../hooks';
 import { useWebContext } from '../contexts/Web3';
 import Blockies from 'react-blockies';
+import { useQueryClient } from 'react-query';
 
 const CommunitySettingsButton = ({ communityId } = {}) => {
   return (
@@ -140,6 +140,8 @@ const MembersLayout = ({
 };
 
 export default function Community() {
+  const queryClient = useQueryClient();
+
   const { communityId } = useParams();
 
   const history = useHistory();
@@ -147,6 +149,8 @@ export default function Community() {
   const { activeTab } = useQueryParams({ activeTab: 'tab' });
 
   const { data: community, loading, error } = useCommunityDetails(communityId);
+
+  const { strategies } = community || {};
 
   const {
     user: { addr },
@@ -158,21 +162,22 @@ export default function Community() {
     roles: ['admin'],
   });
 
-  const { data: admins, reFetch: reFectAdmins } = useCommunityUsers({
+  const { data: admins, reFetch: reFetchAdmins } = useCommunityUsers({
     communityId,
     type: 'admin',
   });
 
-  const { data: authors, reFetch: reFectAuthors } = useCommunityUsers({
+  const { data: authors, reFetch: reFetchAuthors } = useCommunityUsers({
     communityId,
     type: 'author',
   });
 
-  const { data: strategies } = useVotingStrategies();
-
   const {
+    data: members,
     pagination: { totalRecords },
-  } = useCommunityMembers({ communityId });
+    queryKey,
+  } = useCommunityMembers({ communityId, count: 18 });
+
   const [totalMembers, setTotalMembers] = useState();
   useEffect(() => {
     setTotalMembers(totalRecords);
@@ -184,7 +189,7 @@ export default function Community() {
 
   // check for allowing only three options
   if (!['proposals', 'about', 'members'].includes(activeTab)) {
-    history.push(`/community/${communityId}?tab=about`);
+    history.push(`/community/${communityId}?tab=proposals`);
   }
   // navigation from leader board to member list
   const onClickViewMore = () => {
@@ -203,11 +208,19 @@ export default function Community() {
     // if current user leaving community is admin or author
     // trigger update on admin and author list
     if (authors?.find((author) => author.addr === addr)) {
-      await reFectAuthors();
+      await reFetchAuthors();
     }
     if (admins?.find((admin) => admin.addr === addr)) {
-      await reFectAdmins();
+      await reFetchAdmins();
     }
+
+    if (members?.find((member) => member.addr === addr)) {
+      await queryClient.invalidateQueries(queryKey);
+    }
+  };
+
+  const onUserJoinCommunity = async () => {
+    await queryClient.invalidateQueries(queryKey);
   };
 
   if (error) {
@@ -217,8 +230,16 @@ export default function Community() {
     return null;
   }
 
-  const { instagramUrl, twitterUrl, websiteUrl, discordUrl, githubUrl } =
-    community ?? {};
+  const {
+    instagramUrl,
+    twitterUrl,
+    websiteUrl,
+    discordUrl,
+    githubUrl,
+    logo,
+    slug,
+    id,
+  } = community ?? {};
 
   const titleClassNames = classnames(
     'is-size-5 has-text-weight-bold',
@@ -234,43 +255,65 @@ export default function Community() {
     'is-flex container community-header section',
     { 'is-justify-content-space-between': notMobile }
   );
+
+  const imageContainerClasses = classnames(
+    { '': notMobile },
+    {
+      'is-flex is-flex-direction-column is-justify-content-center m-0 community-logo-wrapper':
+        !notMobile,
+    }
+  );
+  const imageClasses = classnames(
+    {
+      'rounded-full community-logo-mobile': !notMobile,
+    },
+    {
+      'rounded-full': notMobile,
+    }
+  );
   return (
     <section className="full-height pt-0">
       {community ? (
         <div className="is-flex community-header-wrapper">
           <div className={headerContainerClassNames}>
             <div className="is-flex community-specific">
-              <div className="is-hidden-tablet is-mobile is-flex is-flex-direction-column is-justify-content-center m-0 community-logo-wrapper">
-                <img
-                  className="rounded-full community-logo-mobile"
-                  alt="community banner"
-                  src={community.logo}
-                  height="85px"
-                  width="85px"
-                />
-              </div>
-              <div className="is-hidden-mobile">
-                <img
-                  alt="community banner"
-                  className="rounded-full"
-                  src={community.logo}
-                  height="149px"
-                  width="149px"
-                />
+              <div className={imageContainerClasses}>
+                {logo ? (
+                  <div
+                    role="img"
+                    aria-label="community banner"
+                    className={imageClasses}
+                    style={{
+                      width: 85,
+                      height: 85,
+                      backgroundImage: `url(${logo})`,
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'center',
+                      backgroundSize: 'cover',
+                    }}
+                  ></div>
+                ) : (
+                  <Blockies
+                    seed={slug ?? `seed-${id}`}
+                    size={10}
+                    scale={9.6}
+                    className="blockies"
+                  />
+                )}
               </div>
               <div className="column community-info is-justify-content-space-evenly">
                 <h2 className={titleClassNames}>{community.name}</h2>
                 <p className={memberClassNames}>{totalMembers} members</p>
                 <div className="is-flex">
-                  {admins
-                    ? admins.slice(0, 5).map(({ addr: adminAddr }, idx) => (
+                  {members
+                    ? members.slice(0, 6).map(({ addr }, idx) => (
                         <div
                           key={`${idx}`}
                           className="blockies-wrapper is-relative"
                           style={{ right: `${idx * (notMobile ? 12 : 6)}px` }}
                         >
                           <Blockies
-                            seed={adminAddr}
+                            seed={addr}
                             size={notMobile ? 10 : 6}
                             scale={4}
                             className="blockies blockies-border"
@@ -285,28 +328,20 @@ export default function Community() {
               communityId={communityId}
               setTotalMembers={setTotalMembers}
               onLeaveCommunity={onUserLeaveCommunity}
+              onJoinCommunity={onUserJoinCommunity}
             />
           </div>
         </div>
       ) : null}
       <div className="section pt-0">
         <div className="container full-height community-content">
-          {loading && <Loader fullHeight />}
-          {!loading && (
+          {loading ? (
+            <Loader fullHeight />
+          ) : (
             <div className="columns m-0 p-0">
               <div className="column p-0">
                 <div className="tabs tabs-community is-medium small-text">
                   <ul className="tabs-community-list">
-                    <li
-                      className={`${activeTabMap['about'] ? 'is-active' : ''}`}
-                    >
-                      <Tablink
-                        linkText="About"
-                        linkUrl={`/community/${community.id}?tab=about`}
-                        isActive={activeTabMap['about']}
-                        className="tab-community pb-4 pl-2 pr-0 mr-4"
-                      />
-                    </li>
                     <li
                       className={`${
                         activeTabMap['proposals'] ? 'is-active' : ''
@@ -316,7 +351,7 @@ export default function Community() {
                         linkText="Proposals"
                         linkUrl={`/community/${community.id}?tab=proposals`}
                         isActive={activeTabMap['proposals']}
-                        className="tab-community pb-4 pr-1 pl-0 mx-4"
+                        className="tab-community pb-4 px-2 mr-4"
                       />
                     </li>
                     <li
@@ -328,7 +363,17 @@ export default function Community() {
                         linkText="Members"
                         linkUrl={`/community/${community.id}?tab=members`}
                         isActive={activeTabMap['members']}
-                        className="tab-community pb-4 pr-1 pl-0 ml-4"
+                        className="tab-community pb-4 px-2 mx-4"
+                      />
+                    </li>
+                    <li
+                      className={`${activeTabMap['about'] ? 'is-active' : ''}`}
+                    >
+                      <Tablink
+                        linkText="About"
+                        linkUrl={`/community/${community.id}?tab=about`}
+                        isActive={activeTabMap['about']}
+                        className="tab-community pb-4 px-2 ml-4"
                       />
                     </li>
                   </ul>

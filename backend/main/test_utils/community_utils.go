@@ -30,11 +30,11 @@ type PaginatedResponseWithUserType struct {
 }
 
 type PaginatedResponseWithLeaderboardUser struct {
-	Data         []models.LeaderboardUser `json:"data"`
-	Start        int                          `json:"start"`
-	Count        int                          `json:"count"`
-	TotalRecords int                          `json:"totalRecords"`
-	Next         int                          `json:"next"`
+	Data         []models.LeaderboardUserPayload `json:"data"`
+	Start        int                             `json:"start"`
+	Count        int                             `json:"count"`
+	TotalRecords int                             `json:"totalRecords"`
+	Next         int                             `json:"next"`
 }
 
 var (

@@ -157,6 +157,7 @@ func GetCommunitiesForHomePage(db *s.Database, start, count int) ([]*Community, 
     	GROUP BY community_id
     	HAVING COUNT(*) >= 2
   	)
+	OR id = 1
 		LIMIT $1 OFFSET $2
 		`, count, start)
 

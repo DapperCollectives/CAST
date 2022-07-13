@@ -15,12 +15,13 @@ import {
   SelectionState,
 } from 'draft-js';
 import { Map } from 'immutable';
-import { useVotingStrategies } from 'hooks';
+import { useQueryParams, useCommunityDetails } from 'hooks';
 import { useModalContext } from 'contexts/NotificationModal';
 import { Dropdown, Error, UploadImageModal } from 'components';
 import TextBasedChoices from './TextBasedChoices';
 import ImageChoices from './ImageChoices';
 import { Image } from 'components/Svg';
+import { kebabToString } from 'utils';
 
 // using a React component to render custom blocks
 const ImageCaptionCustomBlock = (props) => {
@@ -63,8 +64,21 @@ const StepOne = ({
   setPreCheckStepAdvance,
 }) => {
   const dropDownRef = useRef();
-  const { data: votingStrategies, loading: loadingStrategies } =
-    useVotingStrategies();
+
+  const { communityId } = useQueryParams({ communityId: 'communityId' });
+
+  const { data: community } = useCommunityDetails(communityId);
+
+  const { strategies = [] } = community || {};
+
+  const votingStrategies = useMemo(
+    () =>
+      strategies.map((st) => ({
+        key: st.name,
+        name: kebabToString(st.name),
+      })),
+    [strategies]
+  );
 
   const { openModal, closeModal } = useModalContext();
 
@@ -430,7 +444,7 @@ const StepOne = ({
                 value: vs.key,
               })) ?? []
             }
-            disabled={loadingStrategies}
+            disabled={votingStrategies.length === 0}
             onSelectValue={onSelectStrategy}
             ref={dropDownRef}
           />

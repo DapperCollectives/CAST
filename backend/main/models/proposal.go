@@ -112,13 +112,41 @@ func (p *Proposal) GetProposalById(db *s.Database) error {
 }
 
 func (p *Proposal) CreateProposal(db *s.Database) error {
-	// signaturesJSON := json.Marshal(p.Composite_signatures)
 	err := db.Conn.QueryRow(db.Context,
 		`
-	INSERT INTO proposals(community_id, name, choices, strategy, min_balance, max_weight, creator_addr, start_time, end_time, status, body, block_height, cid, composite_signatures)
+	INSERT INTO proposals(community_id, 
+	name, 
+	choices, 
+	strategy, 
+	min_balance, 
+	max_weight, 
+	creator_addr, 
+	start_time, 
+	end_time, 
+	status, 
+	body, 
+	block_height, 
+	cid, 
+	composite_signatures
+	)
 	VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
 	RETURNING id, created_at
-	`, p.Community_id, p.Name, p.Choices, p.Strategy, p.Min_balance, p.Max_weight, p.Creator_addr, p.Start_time, p.End_time, p.Status, p.Body, p.Block_height, p.Cid, p.Composite_signatures).Scan(&p.ID, &p.Created_at)
+	`,
+		p.Community_id,
+		p.Name,
+		p.Choices,
+		p.Strategy,
+		p.Min_balance,
+		p.Max_weight,
+		p.Creator_addr,
+		p.Start_time,
+		p.End_time,
+		p.Status,
+		p.Body,
+		p.Block_height,
+		p.Cid,
+		p.Composite_signatures,
+	).Scan(&p.ID, &p.Created_at)
 
 	return err // will be nil unless something went wrong
 }
