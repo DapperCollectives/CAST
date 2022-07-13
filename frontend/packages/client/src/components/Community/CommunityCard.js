@@ -54,7 +54,7 @@ const CommunityCard = ({ logo, name, body, id, slug }) => {
       <Link to={`/community/${id}?tab=proposals`} style={{ color: 'inherit' }}>
         <div className="is-flex is-flex-grow-1 rounded-sm border-light p-5 is-flex-direction-column transition-all community-card">
           <div className="columns is-multiline is-flex-grow-1 is-mobile">
-            <div className="column is-narrow">
+            <div className="column is-narrow" style={{ maxHeight: '120px' }}>
               {logo ? (
                 <div
                   className="border-light rounded-sm"
