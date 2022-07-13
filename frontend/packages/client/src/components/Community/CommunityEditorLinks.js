@@ -68,7 +68,7 @@ export const CommunityLinksForm = ({
         >
           <input
             type="text"
-            name="web"
+            name={formField.fieldName}
             className="rounded-sm border-light py-3 pr-3 column is-full"
             value={fields[formField.fieldName]}
             maxLength={200}
