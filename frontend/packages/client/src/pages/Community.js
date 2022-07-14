@@ -66,7 +66,6 @@ const AboutLayout = ({
         <div className="column">{communityLinks}</div>
         <div className="column">
           {showEdit && <CommunitySettingsButton communityId={communityId} />}
-          <p className="smaller-text has-text-grey">Founded 2022</p>
         </div>
       </div>
     );
@@ -83,9 +82,8 @@ const AboutLayout = ({
         ) : (
           <div style={{ paddingTop: '28px' }}>{communityLinks}</div>
         )}
-        <hr style={{ marginTop: '32px', marginBottom: '32px' }} />
+        {showEdit && <hr style={{ marginTop: '32px', marginBottom: '32px' }} />}
         {showEdit && <CommunitySettingsButton communityId={communityId} />}
-        <p className="smaller-text has-text-grey">Founded 2022</p>
       </div>
       <div
         className="column is-8-desktop is-9-widescreen is-7-tablet"
@@ -118,8 +116,6 @@ const MembersLayout = ({
         style={{ paddingTop: '28px' }}
       >
         {communityLinks}
-        <hr style={{ marginTop: '32px', marginBottom: '32px' }} />
-        <p className="smaller-text has-text-grey">Founded 2022</p>
       </div>
       <div
         className="column pt-0 is-9-desktop is-7-tablet"
@@ -132,8 +128,6 @@ const MembersLayout = ({
         style={{ paddingTop: '20px' }}
       >
         {communityLinks}
-        <hr style={{ marginTop: '32px', marginBottom: '32px' }} />
-        <p className="smaller-text has-text-grey">Founded 2022</p>
       </div>
     </div>
   );
