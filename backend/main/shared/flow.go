@@ -434,16 +434,33 @@ func WaitForSeal(
 }
 
 func (fa *FlowAdapter) MintNFTsToServiceAccount(ctx context.Context) error {
+	basePath := "./main/cadence/contracts"
+
+	nftStandard := Deploy{
+		Name: "NonFungibleToken",
+		Path: basePath + "/NonFungibleToken.cdc",
+	}
 	exampleNFT := Deploy{
 		Name: "Example NFT",
-		Path: "./main/cadence/contracts/ExampleNFT.cdc",
+		Path: basePath + "/ExampleNFT.cdc",
 	}
 
-	if err := fa.deployContract(ctx, exampleNFT); err != nil {
+	if err := fa.deployContract(ctx, nftStandard); err != nil {
+		log.Error().Err(err).Msg("error deploying nft standard contract")
 		return err
 	}
 
+	log.Info().Msgf("deployed contract: %s", nftStandard.Name)
+
+	if err := fa.deployContract(ctx, exampleNFT); err != nil {
+		log.Error().Err(err).Msg("error deploying example nft contract")
+		return err
+	}
+
+	log.Info().Msgf("deployed contract: %s", exampleNFT.Name)
+
 	if err := fa.createNFTCollection(ctx); err != nil {
+		log.Error().Err(err).Msg("error creating nft collection")
 		return err
 	}
 
@@ -490,12 +507,15 @@ type Deploy struct {
 func (fa *FlowAdapter) deployContract(ctx context.Context, d Deploy) error {
 	referenceBlockID, err := fa.getReferenceBlockId()
 	if err != nil {
+		log.Error().Err(err).Msg("error getting reference block id")
 		return err
 	}
 
 	serviceAcctAddr, serviceAcctKey, serviceSigner := fa.ServiceAccount()
+
 	contents, err := ioutil.ReadFile(d.Path)
 	if err != nil {
+		log.Error().Err(err).Msg("error reading contract file")
 		return err
 	}
 
@@ -510,7 +530,18 @@ func (fa *FlowAdapter) deployContract(ctx context.Context, d Deploy) error {
 	deployContractTx.SetPayer(serviceAcctAddr)
 
 	err = deployContractTx.SignEnvelope(serviceAcctAddr, serviceAcctKey.Index, serviceSigner)
-	return nil
+	if err != nil {
+		log.Error().Err(err).Msg("error signing transaction")
+		return err
+	}
+
+	err = fa.Client.SendTransaction(ctx, *deployContractTx)
+	if err != nil {
+		log.Error().Err(err).Msg("error sending transaction")
+		return err
+	}
+
+	return err
 }
 
 func (fa *FlowAdapter) getReferenceBlockId() (flow.Identifier, error) {
