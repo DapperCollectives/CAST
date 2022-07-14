@@ -10,9 +10,8 @@ const allEmptyFields = (data) => {
     'storagePath',
     'proposalThreshold',
   ];
-  return (
-    fields.every((field) => data[field] === undefined) ||
-    fields.every((field) => data[field] === '')
+  return fields.every(
+    (field) => data[field] === undefined || data[field] === ''
   );
 };
 const allFieldsFilled = (data) => {
