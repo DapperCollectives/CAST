@@ -179,7 +179,7 @@ export default function Community() {
 
   // these two fields should be coming from backend as configuration
   const showPulse = false;
-  const showLeaderBoard = false;
+  const showLeaderBoard = true;
 
   // check for allowing only three options
   if (!['proposals', 'about', 'members'].includes(activeTab)) {
@@ -378,7 +378,10 @@ export default function Community() {
                     communityPulse={showPulse && <CommunityPulse />}
                     leaderBoard={
                       showLeaderBoard && (
-                        <LeaderBoard onClickViewMore={onClickViewMore} />
+                        <LeaderBoard
+                          onClickViewMore={onClickViewMore}
+                          communityId={community.id}
+                        />
                       )
                     }
                     communityLinks={

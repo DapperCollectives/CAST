@@ -221,6 +221,12 @@ func (otu *OverflowTestUtils) GetCommunityLeaderboardAPI(id int) *httptest.Respo
 	return response
 }
 
+func (otu *OverflowTestUtils) GetCommunityLeaderboardAPIWithPaging(id, start, count int) *httptest.ResponseRecorder {
+	req, _ := http.NewRequest("GET", "/communities/"+strconv.Itoa(id)+"/leaderboard?start="+strconv.Itoa(start)+"&count="+strconv.Itoa(count), nil)
+	response := otu.ExecuteRequest(req)
+	return response
+}
+
 func (otu *OverflowTestUtils) GetCommunityUsersAPI(id int) *httptest.ResponseRecorder {
 	req, _ := http.NewRequest("GET", "/communities/"+strconv.Itoa(id)+"/users", nil)
 	response := otu.ExecuteRequest(req)
