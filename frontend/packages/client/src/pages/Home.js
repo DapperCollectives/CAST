@@ -10,10 +10,10 @@ const LinkToIssueTemplate = () => (
   <a
     target="_blank"
     rel="noreferrer noopener"
-    href="https://github.com/DapperCollectives/CAST/issues/new?assignees=markedconfidential&labels=bug&template=bug-report.md&title=%5BBUG%5D"
+    href="https://docs.cast.fyi"
     className="pl-1 py-4"
   >
-    <span className="mr-2">Please report bugs here.</span>
+    <span className="mr-2">Learn more about decision-making on Flow here.</span>
   </a>
 );
 
