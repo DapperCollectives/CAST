@@ -77,7 +77,7 @@ function CommunityEditorProfile({
         if (imageFile.size > MAX_FILE_SIZE) {
           notifyError({
             status: 'Image file size not allowed',
-            statusText: 'Please upload a new file (smaller than 5mb)',
+            statusText: 'The selected file exceeds the 5MB limit.',
           });
           return;
         }
