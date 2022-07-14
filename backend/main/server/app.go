@@ -635,17 +635,12 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if os.Getenv("APP_ENV") != "TEST" {
-		pin, err := a.IpfsClient.PinJson(v)
-		if err != nil {
-			log.Error().Err(err).Msg("error pinning vote to IPFS")
-		} else {
-			v.Cid = &pin.IpfsHash
-		}
-	} else {
-		dummyCid := "0000000000"
-		v.Cid = &dummyCid
+	pin, err := a.IpfsClient.PinJson(p)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
+		return
 	}
+	v.Cid = &pin.IpfsHash
 
 	if err := v.CreateVote(a.DB); err != nil {
 		log.Error().Err(err).Msg("Couldnt create vote")
@@ -827,31 +822,18 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if strategy.Contract.Name != nil {
-		// add blockheight to this response
-		snapshotResponse, err := a.SnapshotClient.TakeSnapshot(strategy.Contract)
-		if err != nil {
-			log.Error().Err(err).Msg("error taking snapshot")
-			respondWithError(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-
-		p.Snapshot_status = &snapshotResponse.Data.Status
-		p.Block_height = snapshotResponse.Data.BlockHeight
+	if err := a.processSnapshotStatus(&strategy, &p); err != nil {
+		log.Error().Err(err).Msg("error processing snapshot status")
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
 	}
 
-	if os.Getenv("APP_ENV") != "TEST" {
-		pin, err := a.IpfsClient.PinJson(p)
-		if err != nil {
-			log.Error().Err(err).Msg("error pinning proposal to IPFS")
-			respondWithError(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-		p.Cid = &pin.IpfsHash
-	} else {
-		dummyCid := "000000"
-		p.Cid = &dummyCid
+	pin, err := a.IpfsClient.PinJson(p)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
+		return
 	}
+	p.Cid = &pin.IpfsHash
 
 	// validate proposal fields
 	validate := validator.New()
@@ -935,18 +917,12 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 	// Set new status
 	p.Status = &payload.Status // pin to ipfs
 
-	// Pin to ipfs
-	if os.Getenv("APP_ENV") != "TEST" {
-		pin, err := a.IpfsClient.PinJson(p)
-		if err != nil {
-			respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
-			return
-		}
-		p.Cid = &pin.IpfsHash
-	} else {
-		dummyCid := "000000"
-		p.Cid = &dummyCid
+	pin, err := a.IpfsClient.PinJson(p)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
+		return
 	}
+	p.Cid = &pin.IpfsHash
 
 	// Finally, update DB
 	if err := p.UpdateProposal(a.DB); err != nil {
@@ -1053,18 +1029,12 @@ func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//pin to ipfs
-	if os.Getenv("APP_ENV") != "TEST" {
-		pin, err := a.IpfsClient.PinJson(c)
-		if err != nil {
-			respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
-			return
-		}
-		c.Cid = &pin.IpfsHash
-	} else {
-		dummyCid := "000000000000000"
-		c.Cid = &dummyCid
+	pin, err := a.IpfsClient.PinJson(c)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
+		return
 	}
+	c.Cid = &pin.IpfsHash
 
 	validate := validator.New()
 	vErr := validate.Struct(c)
@@ -1290,18 +1260,14 @@ func (a *App) createListForCommunity(w http.ResponseWriter, r *http.Request) {
 
 	l := payload.List
 
-	if os.Getenv("APP_ENV") != "TEST" {
-		pin, err := a.IpfsClient.PinJson(l)
-		if err != nil {
-			log.Error().Err(err).Msg("error pinning list to IPFS")
-			respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
-			return
-		}
-		l.Cid = &pin.IpfsHash
-	} else {
-		dummyCid := "000000"
-		l.Cid = &dummyCid
+	pin, err := a.IpfsClient.PinJson(l)
+	if err != nil {
+		log.Error().Err(err).Msg("error pinning list to IPFS")
+		respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
+		return
 	}
+
+	l.Cid = &pin.IpfsHash
 
 	// create proposal
 	if err := l.CreateList(a.DB); err != nil {
@@ -1372,19 +1338,13 @@ func (a *App) addAddressesToList(w http.ResponseWriter, r *http.Request) {
 	// Add specified addresses to list
 	l.AddAddresses(payload.Addresses)
 
-	// Pin to ipfs
-	if os.Getenv("APP_ENV") != "TEST" {
-		pin, err := a.IpfsClient.PinJson(l)
-		if err != nil {
-			log.Error().Err(err).Msg("error pinning to ipfs")
-			respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
-			return
-		}
-		l.Cid = &pin.IpfsHash
-	} else {
-		dummyCid := "000000"
-		l.Cid = &dummyCid
+	pin, err := a.IpfsClient.PinJson(l)
+	if err != nil {
+		log.Error().Err(err).Msg("error pinning to ipfs")
+		respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
+		return
 	}
+	l.Cid = &pin.IpfsHash
 
 	// Finally, update DB
 	if err := l.UpdateList(a.DB); err != nil {
@@ -1454,19 +1414,13 @@ func (a *App) removeAddressesFromList(w http.ResponseWriter, r *http.Request) {
 	// Remove specified addresses
 	l.RemoveAddresses(payload.Addresses)
 
-	// Pin to ipfs
-	if os.Getenv("APP_ENV") != "TEST" {
-		pin, err := a.IpfsClient.PinJson(l)
-		if err != nil {
-			log.Error().Err(err).Msg("ipfs error")
-			respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
-			return
-		}
-		l.Cid = &pin.IpfsHash
-	} else {
-		dummyCid := "000000"
-		l.Cid = &dummyCid
+	pin, err := a.IpfsClient.PinJson(l)
+	if err != nil {
+		log.Error().Err(err).Msg("ipfs error")
+		respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
+		return
 	}
+	l.Cid = &pin.IpfsHash
 
 	// Finally, update DB
 	if err := l.UpdateList(a.DB); err != nil {
@@ -1908,6 +1862,24 @@ func (a *App) validateTimestamp(timestamp string, expiry int) error {
 		err := errors.New("timestamp on request has expired")
 		log.Error().Err(err).Msgf("expiry error: %v", diff)
 		return err
+	}
+	return nil
+}
+
+func (a *App) processSnapshotStatus(s *models.Strategy, p *models.Proposal) error {
+	var processing = "processing"
+	if s.Contract.Name != nil && p.Snapshot_status == &processing {
+		snapshotResponse, err := a.SnapshotClient.GetSnapshotStatus(s.Contract)
+		if err != nil {
+			return err
+		}
+
+		p.Snapshot_status = &snapshotResponse.Data.Status
+		p.Block_height = snapshotResponse.Data.BlockHeight
+
+		if err := p.UpdateSnapshotStatus(a.DB); err != nil {
+			return err
+		}
 	}
 	return nil
 }

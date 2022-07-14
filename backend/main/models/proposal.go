@@ -148,7 +148,7 @@ func (p *Proposal) CreateProposal(db *s.Database) error {
 		p.Composite_signatures,
 	).Scan(&p.ID, &p.Created_at)
 
-	return err // will be nil unless something went wrong
+	return err
 }
 
 func (p *Proposal) UpdateProposal(db *s.Database) error {
@@ -164,7 +164,23 @@ func (p *Proposal) UpdateProposal(db *s.Database) error {
 	}
 
 	err = p.GetProposalById(db)
-	return err // will be nil unless something went wrong
+	return err
+}
+
+func (p *Proposal) UpdateSnapshotStatus(db *s.Database) error {
+	_, err := db.Conn.Exec(db.Context,
+		`
+	UPDATE proposals
+	SET snapshot_status = $1
+	WHERE id = $2
+	`, p.Snapshot_status, p.ID)
+
+	if err != nil {
+		return err
+	}
+
+	err = p.GetProposalById(db)
+	return err
 }
 
 func (p *Proposal) IsLive() bool {
