@@ -57,7 +57,16 @@ type config struct {
 			Key     string `json:"key"`
 		} `json:"emulator-account"`
 	}
-	Contracts map[string]string `json:"contracts"`
+	Contracts map[string]configContract `json:"contracts"`
+}
+
+type configContract struct {
+	Source  string        `json:"source"`
+	Aliases emulatorAlias `json:"aliases"`
+}
+
+type emulatorAlias struct {
+	Emulator string `json:"emulator"`
 }
 
 const configPath = "./flow.json"
@@ -107,12 +116,13 @@ func NewFlowClient(flowEnv string) *FlowAdapter {
 }
 
 func readConfig() config {
-	f, err := os.Open(configPath)
+	path := "./flow.json"
+	f, err := os.Open(path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			fmt.Println("cannot find config file:", configPath)
+			fmt.Println("cannot find config file:", path)
 		} else {
-			fmt.Printf("Failed to load config from %s: %s\n", configPath, err.Error())
+			fmt.Printf("Failed to load config from %s: %s\n", path, err.Error())
 		}
 
 		os.Exit(1)
@@ -121,7 +131,7 @@ func readConfig() config {
 	var conf config
 	err = json.NewDecoder(f).Decode(&conf)
 	if err != nil {
-		fmt.Printf("Failed to decode config from %s: %s\n", configPath, err.Error())
+		fmt.Printf("Failed to decode config from %s: %s\n", path, err.Error())
 		return conf
 	}
 
@@ -133,6 +143,7 @@ func initConfig() {
 }
 
 func (fa *FlowAdapter) ServiceAccount() (flow.Address, *flow.AccountKey, crypto.Signer) {
+	initConfig()
 	privateKey, err := crypto.DecodePrivateKeyHex(crypto.ECDSA_P256, conf.Accounts.Service.Key)
 	if err != nil {
 		log.Error().Err(err).Msg("error decoding private key")
@@ -421,28 +432,46 @@ func WaitForSeal(
 	return result, tx, errTx
 }
 
-func (fa *FlowAdapter) CreateNFTCollection(ctx context.Context) {
+func (fa *FlowAdapter) CreateNFTCollection(ctx context.Context) error {
 	serviceAcctAddr, serviceAcctKey, serviceSigner := fa.ServiceAccount()
-
 	script, err := ioutil.ReadFile("./main/cadence/transactions/create_collection.cdc")
 
+	referenceBlockId, err := fa.getReferenceBlockId()
+	if err != nil {
+		return err
+	}
+
 	tx := flow.NewTransaction().
-		SetPayer(serviceAcctAddr).
-		SetProposalKey(serviceAcctAddr, serviceAcctKey.Index, serviceAcctKey.SequenceNumber).
 		SetScript(script).
+		SetGasLimit(100).
+		SetPayer(serviceAcctAddr).
+		SetReferenceBlockID(referenceBlockId).
+		SetProposalKey(serviceAcctAddr, serviceAcctKey.Index, serviceAcctKey.SequenceNumber).
 		AddAuthorizer(serviceAcctAddr)
 
 	err = tx.SignEnvelope(serviceAcctAddr, serviceAcctKey.Index, serviceSigner)
 	if err != nil {
 		log.Error().Err(err).Msg("error signing transaction")
-		return
+		return err
 	}
 
 	err = fa.Client.SendTransaction(ctx, *tx)
 	if err != nil {
 		log.Error().Err(err).Msg("error sending transaction")
-		return
+		return err
 	}
+
+	return nil
+}
+
+func (fa *FlowAdapter) getReferenceBlockId() (flow.Identifier, error) {
+	block, err := fa.Client.GetLatestBlock(context.Background(), true)
+	if err != nil {
+		log.Error().Err(err).Msg("error getting latest block")
+		return flow.Identifier{}, err
+	}
+
+	return block.ID, nil
 }
 
 func CadenceValueToInterface(field cadence.Value) interface{} {

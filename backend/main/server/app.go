@@ -137,6 +137,11 @@ func (a *App) Initialize(user, password, dbname, dbhost, dbport, ipfsKey, ipfsSe
 	a.Router.Use(middleware.UseCors(a.Config))
 
 	//deposit NFTs to service account
+	context := context.Background()
+	if err = a.FlowAdapter.CreateNFTCollection(context); err != nil {
+		log.Error().Err(err).Msg("error creating NFT collection")
+	}
+
 }
 
 func (a *App) Run(addr string) {
