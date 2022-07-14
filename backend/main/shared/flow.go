@@ -21,6 +21,7 @@ import (
 	"github.com/onflow/flow-go-sdk"
 	"github.com/onflow/flow-go-sdk/client"
 	"github.com/onflow/flow-go-sdk/crypto"
+	"github.com/onflow/flow-go-sdk/templates"
 	"google.golang.org/grpc"
 )
 
@@ -432,7 +433,19 @@ func WaitForSeal(
 	return result, tx, errTx
 }
 
-func (fa *FlowAdapter) CreateNFTCollection(ctx context.Context) error {
+func (fa *FlowAdapter) MintNFTsToServiceAccount(ctx context.Context) error {
+	if err := fa.deployNFTContract(ctx); err != nil {
+		return err
+	}
+
+	if err := fa.createNFTCollection(ctx); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (fa *FlowAdapter) createNFTCollection(ctx context.Context) error {
 	serviceAcctAddr, serviceAcctKey, serviceSigner := fa.ServiceAccount()
 	script, err := ioutil.ReadFile("./main/cadence/transactions/create_collection.cdc")
 
@@ -461,6 +474,32 @@ func (fa *FlowAdapter) CreateNFTCollection(ctx context.Context) error {
 		return err
 	}
 
+	return nil
+}
+
+func (fa *FlowAdapter) deployNFTContract(ctx context.Context) error {
+	referenceBlockID, err := fa.getReferenceBlockId()
+	if err != nil {
+		return err
+	}
+
+	serviceAcctAddr, serviceAcctKey, serviceSigner := fa.ServiceAccount()
+	contents, err := ioutil.ReadFile("./main/cadence/contracts/ExampleNFT.cdc")
+	if err != nil {
+		return err
+	}
+
+	nftCode := string(contents)
+	deployContractTx := templates.CreateAccount(nil,
+		[]templates.Contract{{
+			Name:   "ExampleNFT",
+			Source: nftCode,
+		}}, serviceAcctAddr)
+
+	deployContractTx.SetReferenceBlockID(referenceBlockID)
+	deployContractTx.SetPayer(serviceAcctAddr)
+
+	err = deployContractTx.SignEnvelope(serviceAcctAddr, serviceAcctKey.Index, serviceSigner)
 	return nil
 }
 

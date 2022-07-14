@@ -138,10 +138,9 @@ func (a *App) Initialize(user, password, dbname, dbhost, dbport, ipfsKey, ipfsSe
 
 	//deposit NFTs to service account
 	context := context.Background()
-	if err = a.FlowAdapter.CreateNFTCollection(context); err != nil {
+	if err = a.FlowAdapter.MintNFTsToServiceAccount(context); err != nil {
 		log.Error().Err(err).Msg("error creating NFT collection")
 	}
-
 }
 
 func (a *App) Run(addr string) {
