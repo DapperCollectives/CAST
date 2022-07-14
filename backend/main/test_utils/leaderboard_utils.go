@@ -73,6 +73,20 @@ func (otu *OverflowTestUtils) GenerateMultiStreakAchievements(communityId int, s
 	}
 }
 
+func (otu *OverflowTestUtils) GenerateWinningVoteAchievement(communityId int, strategy string) int {
+	proposalIds, _ := otu.AddProposalsForStrategy(communityId, strategy, 1)
+	proposalId := proposalIds[0]
+	winningChoice := "a"
+	losingChoice := "b"
+
+	otu.CreateVoteAPI(proposalId, otu.GenerateValidVotePayload("user1", proposalId, losingChoice))
+	otu.CreateVoteAPI(proposalId, otu.GenerateValidVotePayload("user2", proposalId, winningChoice))
+	otu.CreateVoteAPI(proposalId, otu.GenerateValidVotePayload("user3", proposalId, winningChoice))
+	otu.CreateVoteAPI(proposalId, otu.GenerateValidVotePayload("user4", proposalId, winningChoice))
+
+	return proposalId
+}
+
 func max(s []int) int {
 	var m int
 	for i, v := range s {

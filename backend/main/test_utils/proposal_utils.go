@@ -98,6 +98,21 @@ func (otu *OverflowTestUtils) GenerateCancelProposalStruct(
 	return &payload
 }
 
+func (otu *OverflowTestUtils) GenerateClosedProposalStruct(
+	signer string,
+	proposalId int,
+) *models.UpdateProposalRequestPayload {
+	payload := models.UpdateProposalRequestPayload{Status: "closed"}
+	timestamp := fmt.Sprint(time.Now().UnixNano() / int64(time.Millisecond))
+	compositeSignatures := otu.GenerateCompositeSignatures(signer, timestamp)
+	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", signer))
+	payload.Signing_addr = fmt.Sprintf("0x%s", account.Address().String())
+	payload.Timestamp = timestamp
+	payload.Composite_signatures = compositeSignatures
+
+	return &payload
+}
+
 func (otu *OverflowTestUtils) GenerateProposalPayload(signer string, proposal *models.Proposal) *models.Proposal {
 	timestamp := fmt.Sprint(time.Now().UnixNano() / int64(time.Millisecond))
 	compositeSignatures := otu.GenerateCompositeSignatures(signer, timestamp)
