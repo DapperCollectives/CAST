@@ -144,7 +144,43 @@ export default function StepTwo({
         autoFocusOnLoad={true}
       />
       <CommunityUsersForm
-        title="Authors"
+        title={
+          <>
+            Authors
+            <div className="popover is-popover-bottom">
+              <button
+                className="delete has-text-grey rounded-full cursor-pointer popover-trigger"
+                style={buttonStyle}
+              >
+                ?
+              </button>
+              <div className="popover-content">
+                <div className={popoverClassName}>
+                  <div className="column is-12 p-0">
+                    <p
+                      className="small-text has-text-weight-normal has-text-grey small-text mb-1"
+                      style={{
+                        lineHeight: '20px',
+                      }}
+                    >
+                      Author addresses will be added automatically as members
+                      for the community.
+                    </p>
+                    <p
+                      className="small-text has-text-weight-normal has-text-grey small-text"
+                      style={{
+                        lineHeight: '20px',
+                      }}
+                    >
+                      In addition, community creator address will be set as
+                      author and member by default.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        }
         description="Authors can post proposals regardless of their voting power."
         addrList={listAddrAuthors}
         onAddressChange={onAuthorAddressChange}
@@ -165,7 +201,7 @@ export default function StepTwo({
             }`}
             onClick={isStepValid ? () => moveToNextStep() : () => {}}
           >
-            Next: PROPOSALS & VOTING
+            Next: PROPOSAL & VOTING
           </button>
         </div>
       </div>
