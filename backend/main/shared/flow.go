@@ -434,7 +434,12 @@ func WaitForSeal(
 }
 
 func (fa *FlowAdapter) MintNFTsToServiceAccount(ctx context.Context) error {
-	if err := fa.deployNFTContract(ctx); err != nil {
+	exampleNFT := Deploy{
+		Name: "Example NFT",
+		Path: "./main/cadence/contracts/ExampleNFT.cdc",
+	}
+
+	if err := fa.deployContract(ctx, exampleNFT); err != nil {
 		return err
 	}
 
@@ -477,14 +482,19 @@ func (fa *FlowAdapter) createNFTCollection(ctx context.Context) error {
 	return nil
 }
 
-func (fa *FlowAdapter) deployNFTContract(ctx context.Context) error {
+type Deploy struct {
+	Name string
+	Path string
+}
+
+func (fa *FlowAdapter) deployContract(ctx context.Context, d Deploy) error {
 	referenceBlockID, err := fa.getReferenceBlockId()
 	if err != nil {
 		return err
 	}
 
 	serviceAcctAddr, serviceAcctKey, serviceSigner := fa.ServiceAccount()
-	contents, err := ioutil.ReadFile("./main/cadence/contracts/ExampleNFT.cdc")
+	contents, err := ioutil.ReadFile(d.Path)
 	if err != nil {
 		return err
 	}
@@ -492,7 +502,7 @@ func (fa *FlowAdapter) deployNFTContract(ctx context.Context) error {
 	nftCode := string(contents)
 	deployContractTx := templates.CreateAccount(nil,
 		[]templates.Contract{{
-			Name:   "ExampleNFT",
+			Name:   d.Name,
 			Source: nftCode,
 		}}, serviceAcctAddr)
 
