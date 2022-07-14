@@ -58,6 +58,8 @@ func (b *BalanceOfNfts) FetchBalance(
 			return nil, err
 		}
 
+		//only if the NFT ID is not already in the DB,
+		//do we add the balance
 		if !doesExist && err == nil {
 			err = models.CreateUserNFTRecord(db, vb)
 			balance.NFTCount = len(vb.NFTs)
@@ -73,7 +75,6 @@ func (b *BalanceOfNfts) TallyVotes(
 ) (models.ProposalResults, error) {
 
 	for _, v := range votes {
-		//print the length of v.NFTs
 		nftCount := len(v.NFTs)
 		r.Results_float[v.Choice] += float64(nftCount) * math.Pow(10, -8)
 	}
