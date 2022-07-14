@@ -4,7 +4,6 @@ const { exit } = require("process");
 
 const directoryPath = path.join(__dirname, "../migrations");
 const filenames = fs.readdirSync(directoryPath);
-console.log({ filenames });
 
 let prevUp = 0;
 let prevDown = 0;
@@ -29,7 +28,6 @@ filenames.forEach((filename) => {
   }
 });
 
-console.log({ prevDown, prevUp, errors });
 if (errors.length > 0) {
   console.log(errors.join("\n"));
   exit(1);
