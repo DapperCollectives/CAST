@@ -46,7 +46,6 @@ func (s *TokenWeightedDefault) TallyVotes(
 	votes []*models.VoteWithBalance,
 	p *models.ProposalResults,
 ) (models.ProposalResults, error) {
-
 	//tally votes
 	for _, vote := range votes {
 		if vote.PrimaryAccountBalance != nil {
