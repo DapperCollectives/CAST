@@ -14,9 +14,7 @@ const Row = ({ index, addr, score, classNameIndex }) => {
     <tr className="table-row">
       <td className={clnIndex}>{index}</td>
       <td>{addr}</td>
-      <td style={smallRowStyle} className="smaller-text">
-        {score}
-      </td>
+      <td style={smallRowStyle}>{score}</td>
     </tr>
   );
 };
@@ -70,7 +68,9 @@ export default function LeaderBoard({
                     </div>
                   }
                   score={
-                    <div className="has-text-weight-bold">{datum?.score}</div>
+                    <div className="is-flex flex-1 is-justify-content-center has-text-weight-bold smaller-text">
+                      {datum?.score}
+                    </div>
                   }
                 />
               );
@@ -99,7 +99,7 @@ export default function LeaderBoard({
                 </div>
               }
               score={
-                <div className="has-text-weight-bold">
+                <div className="is-flex flex-1 is-justify-content-center has-text-weight-bold smaller-text">
                   {data?.currentUser.score}
                 </div>
               }

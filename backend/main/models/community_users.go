@@ -115,8 +115,6 @@ func GetCommunityLeaderboard(db *s.Database, communityId, start, count int) ([]L
 	var defaultStreakWeight = 1
 	var defaultWinningVoteWeight = 1
 
-	fmt.Println(start, count)
-
 	userAchievements, err := getUserAchievements(db, communityId)
 
 	if err != nil {
