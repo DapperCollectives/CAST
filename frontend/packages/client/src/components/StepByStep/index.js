@@ -1,4 +1,10 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, {
+  useState,
+  useCallback,
+  useRef,
+  useEffect,
+  useMemo,
+} from 'react';
 import { ArrowLeft, CheckMark } from '../Svg';
 import Loader from '../Loader';
 import defaultsDeep from 'lodash/defaultsDeep';
@@ -18,9 +24,11 @@ const defaultStyles = {
   },
 };
 
-const allValidSteps = (validStepsVals, displayStepNum) => {
-  const sliceUpTo = displayStepNum >= 1 ? displayStepNum : 1;
-  return validStepsVals.slice(0, sliceUpTo).every((val) => val === true);
+const allValidSteps = (validStepVals, displayStepNum) => {
+  if (validStepVals.length < 1) return false;
+
+  const sliceUpTo = displayStepNum >= 1 ? displayStepNum - 1 : 1;
+  return validStepVals.slice(0, sliceUpTo).every((val) => val === true);
 };
 
 /**
@@ -116,6 +124,23 @@ function StepByStep({
     }
   }, [searchParams, steps.length, setValidSteps, goToStep, showPreStep]);
 
+  const dataValidForStep = useMemo(() => {
+    const displayStep = searchParams.get('step');
+    const displayStepNum = !isNaN(Number(displayStep))
+      ? Number(displayStep)
+      : -1;
+    const validStepVals = Object.values(validSteps);
+
+    return (
+      (preStep &&
+        (displayStepNum <= 2 ||
+          (allValidSteps(validStepVals, displayStepNum) &&
+            validStepVals.length > 1))) ||
+      (!preStep &&
+        (displayStepNum <= 1 || allValidSteps(validStepVals, displayStepNum)))
+    );
+  }, [searchParams, preStep, validSteps]);
+
   useEffect(() => {
     if (showPreStep) return;
 
@@ -124,35 +149,17 @@ function StepByStep({
     const displayStepNum = !isNaN(Number(displayStep))
       ? Number(displayStep)
       : -1;
-    const validStepsVals = Object.values(validSteps);
-    const numValidSteps = validStepsVals.length;
-    if (
-      (!preStep &&
-        // prevent reaching a subsequent step until prior steps have data
-        ((displayStepNum > 1 && (!numValidSteps || !allValidSteps())) ||
-          // or in the case of a mismatch
-          (!Object.keys(stepsData).length && numValidSteps))) ||
-      (preStep &&
-        ((displayStepNum > 2 && (!numValidSteps || !allValidSteps())) ||
-          (!Object.keys(stepsData).length && numValidSteps > 1)))
-    ) {
+
+    if (!dataValidForStep) {
+      // prevent reaching a subsequent step if prior steps have mismatched or no data
       setValidSteps({});
       goToStep(0, true);
     } else if (displayStepNum - 1 !== currentStep) {
       // navigated, so update currentStep to match
       setCurrentStep(displayStepNum - 1);
-    } // else valid & matching, so do nothing
-  }, [
-    currentStep,
-    goToStep,
-    searchParams,
-    stepsData,
-    validSteps,
-    setValidSteps,
-    setCurrentStep,
-    showPreStep,
-    preStep,
-  ]);
+    }
+    // else valid & matching, so do nothing
+  }, [currentStep, goToStep, searchParams, showPreStep, dataValidForStep]);
 
   const getStepIcon = (stepIdx, stepLabel) => {
     const stepClasses = [];
