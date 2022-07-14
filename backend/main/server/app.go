@@ -327,6 +327,10 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if *p.Computed_status == "closed" {
+		models.AddWinningVoteAchievement(a.DB, votes, proposalResults, p.Community_id)
+	}
+
 	// Send Proposal Results
 	respondWithJSON(w, http.StatusOK, proposalResults)
 }
@@ -713,6 +717,12 @@ func (a *App) getProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	c := models.Community{ID: p.Community_id}
+	if err := c.GetCommunity(a.DB); err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
 	respondWithJSON(w, http.StatusOK, p)
 }
 
@@ -805,7 +815,6 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// pin to ipfs
 	if os.Getenv("APP_ENV") != "TEST" {
 		pin, err := a.IpfsClient.PinJson(p)
 		if err != nil {
@@ -826,6 +835,12 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		log.Error().Err(vErr).Msg("invalid proposal")
 		respondWithError(w, http.StatusBadRequest, vErr.Error())
 		return
+	}
+
+	if os.Getenv("APP_ENV") == "PRODUCTION" {
+		if strategy.Contract.Name != nil && p.Start_time.Before(time.Now().UTC().Add(time.Hour)) {
+			p.Start_time = time.Now().UTC().Add(time.Hour)
+		}
 	}
 
 	// create proposal
@@ -864,8 +879,6 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
-
-	log.Debug().Msgf("payload: %s", payload.Signing_addr)
 
 	// Check that status update is valid
 	// For now we are assuming proposals are creating with status 'published' and may be cancelled.
@@ -1003,7 +1016,6 @@ func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 
 	c = payload.Community
 
-	// validate timestamp of request/message
 	if err := a.validateTimestamp(c.Timestamp, 60); err != nil {
 		respondWithError(w, http.StatusForbidden, err.Error())
 		return

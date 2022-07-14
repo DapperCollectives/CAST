@@ -1,11 +1,11 @@
 import { useInfiniteQuery } from 'react-query';
 import { PAGINATION_INITIAL_STATE } from '../reducers';
-import { checkResponse } from '../utils';
+import { checkResponse, getPaginationInfo } from '../utils';
 import { useErrorHandlerContext } from '../contexts/ErrorHandler';
 
 export default function useUserCommunities({
   addr,
-  countParam = PAGINATION_INITIAL_STATE.count,
+  count: countParam = PAGINATION_INITIAL_STATE.count,
 } = {}) {
   const initialPageParam = [0, countParam, 0, -1];
 
@@ -28,7 +28,7 @@ export default function useUserCommunities({
     {
       getNextPageParam: (lastPage, pages) => {
         const { next, start, count, totalRecords } = lastPage;
-        return [start, count, totalRecords, next];
+        return [start + count, count, totalRecords, next];
       },
       enabled: !!addr,
     }
@@ -38,17 +38,15 @@ export default function useUserCommunities({
   }
 
   const [start, count, totalRecords, next] =
-    data?.pageParams || initialPageParam;
+    data?.pageParams || getPaginationInfo(data?.pages);
 
   return {
     isLoading,
     isError,
-    data:
-      data?.pages?.reduce(
-        (prev, current) =>
-          current?.data ? [...prev, ...current.data] : [...prev],
-        []
-      ) ?? [],
+    data: data?.pages?.reduce(
+      (prev, current) => (current.data ? [...prev, ...current.data] : prev),
+      []
+    ),
     error,
     pagination: {
       count,
