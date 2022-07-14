@@ -75,7 +75,7 @@ export const CommunityLinksForm = ({
             type="text"
             name={formField.fieldName}
             className="rounded-sm border-light py-3 pr-3 column is-full"
-            placeHolder={formField?.placeHolder}
+            placeholder={formField?.placeHolder}
             value={fields[formField.fieldName]}
             maxLength={200}
             onChange={(event) =>
