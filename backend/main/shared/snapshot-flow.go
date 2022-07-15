@@ -78,8 +78,10 @@ var (
 	}
 
 	DummyBalance = Balance{
-		PrimaryAccountBalance: 100,
-		BlockHeight:           1000000,
+		PrimaryAccountBalance:   100,
+		SecondaryAccountBalance: 100,
+		StakingBalance:          100,
+		BlockHeight:             1000000,
 	}
 )
 
