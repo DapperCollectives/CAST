@@ -224,6 +224,7 @@ export default function StepOne({
           name="community_name"
           className="rounded-sm border-light p-3 column is-full mt-2"
           value={communityName || ''}
+          maxLength={50}
           onChange={(event) => setData({ communityName: event.target.value })}
         />
         <textarea
