@@ -198,6 +198,7 @@ function CommunityEditorProfile({
         value={communityName}
         onChange={(event) => setCommunityName(event.target.value)}
         disabled={isUpdating}
+        maxLength={50}
       />
       <textarea
         className="text-area rounded-sm border-light p-3 column is-full mt-5"
