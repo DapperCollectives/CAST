@@ -5,6 +5,7 @@ import (
 
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/georgysavva/scany/pgxscan"
+	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 )
 
@@ -31,14 +32,6 @@ func (b *Balance) GetBalanceByAddressAndBlockHeight(db *s.Database) error {
 	return pgxscan.Get(db.Context, db.Conn, b, sql, b.Addr, b.BlockHeight)
 }
 
-func (b *Balance) FetchAddressBalanceAtBlockHeight(c *s.SnapshotClient, address string, blockheight uint64) error {
-	err := c.GetAddressBalanceAtBlockHeight(address, blockheight, b)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func (b *Balance) CreateBalance(db *s.Database) error {
 	// Skip for test/dev.
 	if *db.Env == "TEST" || *db.Env == "DEV" {
@@ -53,7 +46,7 @@ func (b *Balance) CreateBalance(db *s.Database) error {
 	`
 	_, err := db.Conn.Exec(db.Context, sql,
 		b.Addr, b.PrimaryAccountBalance, b.SecondaryAddress, b.SecondaryAccountBalance,
-		b.StakingBalance, b.ScriptResult, b.Stakes, b.BlockHeight, b.ID,
+		b.StakingBalance, b.ScriptResult, b.Stakes, b.BlockHeight, uuid.New(),
 	)
 
 	if err != nil {

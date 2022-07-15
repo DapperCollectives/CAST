@@ -166,7 +166,7 @@ func TestUpdateProposal(t *testing.T) {
 		var created models.Proposal
 		json.Unmarshal(response.Body.Bytes(), &created)
 
-		assert.Equal(t, "pending", *created.Computed_status)
+		assert.Equal(t, "active", *created.Computed_status)
 
 		cancelPayload := otu.GenerateCancelProposalStruct(authorName, communityId)
 		response = otu.UpdateProposalAPI(p.ID, cancelPayload)
