@@ -7,12 +7,12 @@ import (
 	"github.com/DapperCollectives/CAST/backend/main/models"
 	"github.com/DapperCollectives/CAST/backend/main/shared"
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
-	"github.com/jackc/pgx/v4"
 	"github.com/rs/zerolog/log"
 )
 
 type StakedTokenWeightedDefault struct {
 	shared.StrategyStruct
+	shared.SnapshotClient
 }
 
 func (s *StakedTokenWeightedDefault) FetchBalance(
@@ -21,7 +21,17 @@ func (s *StakedTokenWeightedDefault) FetchBalance(
 	sc *s.SnapshotClient,
 ) (*models.Balance, error) {
 
-	if err := b.GetBalanceByAddressAndBlockHeight(db); err != nil && err.Error() != pgx.ErrNoRows.Error() {
+	var c models.Community
+	if err := c.GetCommunityByProposalId(db, b.Proposal_id); err != nil {
+		return nil, err
+	}
+
+	var contract = &shared.Contract{
+		Name: c.Contract_name,
+		Addr: c.Contract_addr,
+	}
+
+	if err := s.SnapshotClient.GetAddressBalanceAtBlockHeight(b.Addr, b.BlockHeight, b, *contract); err != nil {
 		log.Error().Err(err).Msg("error querying address b at blockheight")
 		return nil, err
 	}
@@ -95,7 +105,12 @@ func (s *StakedTokenWeightedDefault) GetVotes(
 	return votes, nil
 }
 
-func (s *StakedTokenWeightedDefault) InitStrategy(f *shared.FlowAdapter, db *shared.Database) {
+func (s *StakedTokenWeightedDefault) InitStrategy(
+	f *shared.FlowAdapter,
+	db *shared.Database,
+	sc *s.SnapshotClient,
+) {
 	s.FlowAdapter = f
 	s.DB = db
+	s.SnapshotClient = *sc
 }
