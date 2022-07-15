@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Link, useParams, useHistory } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useWebContext } from 'contexts/Web3';
 import {
   CommunityEditorProfile,
@@ -107,7 +107,7 @@ const DropdownMenu = ({ communityId, onClickButtonTab = () => {} } = {}) => {
 };
 export default function CommunityEditorPage() {
   const { communityId } = useParams();
-  const history = useHistory();
+  const navigate = useNavigate();
   const {
     user: { addr },
   } = useWebContext();
@@ -146,10 +146,10 @@ export default function CommunityEditorPage() {
   // otherwise it's redirected to previous location
   useEffect(() => {
     if ((!isAdmin && addr === null) || (isAdmin === false && addr)) {
-      history.push('/');
+      navigate('/');
       return;
     }
-  }, [isAdmin, addr, history]);
+  }, [isAdmin, addr, navigate]);
 
   // initial loading
   if (loading && !community) {

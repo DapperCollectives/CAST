@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from 'react';
-import { Switch, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import Loader from '../components/Loader';
 
 const Header = lazy(() => import('../components/Header'));
@@ -20,30 +20,19 @@ export default function AppPages() {
         <Header />
         <div className="Body">
           <Transactions />
-          <Switch>
-            <Route exact path="/">
-              <Home />
-            </Route>
-            <Route exact path="/about" component={About} />
-            <Route exact path="/community/create">
-              <CommunityCreate />
-            </Route>
-            <Route path="/community/:communityId/edit" exact={true}>
-              <CommunityEditor />
-            </Route>
-            <Route path="/community/:communityId">
-              <Community />
-            </Route>
-            <Route exact path="/proposal/create">
-              <ProposalCreate />
-            </Route>
-            <Route path="/proposal/:proposalId">
-              <Proposal />
-            </Route>
-            <Route exact path="/debug-contract">
-              <Debug />
-            </Route>
-          </Switch>
+          <Routes>
+            <Route path="/about" element={<About />} />
+            <Route path="/community/create" element={<CommunityCreate />} />
+            <Route
+              path="/community/:communityId/edit"
+              element={<CommunityEditor />}
+            />
+            <Route path="/community/:communityId" element={<Community />} />
+            <Route path="/proposal/create" element={<ProposalCreate />} />
+            <Route path="/proposal/:proposalId" element={<Proposal />} />
+            <Route path="/debug-contract" element={<Debug />} />
+            <Route path="/" element={<Home />} />
+          </Routes>
         </div>
       </div>
     </Suspense>

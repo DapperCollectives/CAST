@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { StepByStep, WalletConnect, Error } from 'components';
 import { useWebContext } from 'contexts/Web3';
 import { useModalContext } from 'contexts/NotificationModal';
@@ -28,15 +28,15 @@ export default function CommunityCreate() {
     error,
   } = useCommunity({ initialLoading: false });
 
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const modalContext = useModalContext();
 
   useEffect(() => {
     if (data && data[0]?.id) {
-      history.push(`/community/${data[0].id}`);
+      navigate(`/community/${data[0].id}`);
     }
-  }, [data, history]);
+  }, [data, navigate]);
 
   // closes modal when user is connected with wallet
   useEffect(() => {

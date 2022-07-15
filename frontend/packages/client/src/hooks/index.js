@@ -12,7 +12,6 @@ export { default as useCommunityMembers } from './useCommunityMembers';
 export { default as useMediaQuery } from './useMediaQuery';
 export { default as useLeaderBoard } from './useLeaderBoard';
 export { default as useCommunityDetails } from './useCommunityDetails';
-export { default as useQueryParams } from './useQueryParams';
 export { default as useFileUploader } from './useFileUploader';
 export { default as useUserCommunities } from './useUserCommunities';
 export { default as useUserRoleOnCommunity } from './useUserRoleOnCommunity';

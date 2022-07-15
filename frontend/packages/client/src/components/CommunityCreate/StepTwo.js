@@ -18,7 +18,7 @@ export default function StepTwo({
   stepData,
   setStepValid,
   onDataChange,
-  moveToNextStep,
+  tryToGoForward,
   isStepValid,
 }) {
   const notMobile = useMediaQuery();
@@ -163,7 +163,7 @@ export default function StepTwo({
             className={`button vote-button transition-all is-flex has-background-yellow rounded-sm is-size-6 is-uppercase is-${
               isStepValid ? 'enabled' : 'disabled'
             }`}
-            onClick={isStepValid ? () => moveToNextStep() : () => {}}
+            onClick={isStepValid ? () => tryToGoForward() : () => {}}
           >
             Next: PROPOSALS & VOTING
           </button>

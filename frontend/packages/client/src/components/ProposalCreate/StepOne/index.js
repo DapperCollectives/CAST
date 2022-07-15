@@ -15,13 +15,14 @@ import {
   SelectionState,
 } from 'draft-js';
 import { Map } from 'immutable';
-import { useQueryParams, useCommunityDetails } from 'hooks';
+import { useCommunityDetails } from 'hooks';
 import { useModalContext } from 'contexts/NotificationModal';
 import { Dropdown, Error, UploadImageModal } from 'components';
 import TextBasedChoices from './TextBasedChoices';
 import ImageChoices from './ImageChoices';
 import { Image } from 'components/Svg';
 import { kebabToString } from 'utils';
+import { useSearchParams } from 'react-router-dom';
 
 // using a React component to render custom blocks
 const ImageCaptionCustomBlock = (props) => {
@@ -65,7 +66,8 @@ const StepOne = ({
 }) => {
   const dropDownRef = useRef();
 
-  const { communityId } = useQueryParams({ communityId: 'communityId' });
+  const [searchParams] = useSearchParams();
+  const communityId = searchParams.get('communityId');
 
   const { data: community } = useCommunityDetails(communityId);
 

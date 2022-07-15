@@ -1,18 +1,18 @@
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Gitbook, Github } from '../components/Svg';
 
-const AboutPage = ({ location }) => {
-  const { state = {} } = location;
-  const history = useHistory();
-  const { modal = true } = state;
+const AboutPage = () => {
+  const { state } = useLocation();
+  const navigate = useNavigate();
+  const modal = state?.modal ?? true;
   const closeModal = () => {
     // user landed on about page: no history
-    if (history.length <= 2) {
-      history.push('/');
+    if (window.history.length <= 2) {
+      navigate('/');
       return;
     }
-    history.goBack();
+    navigate(-1);
   };
   return (
     <div className={modal ? 'modal is-active' : undefined}>
