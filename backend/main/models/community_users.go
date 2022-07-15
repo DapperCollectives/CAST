@@ -143,6 +143,17 @@ func GetCommunitiesForUser(db *s.Database, addr string, start, count int) ([]Use
 			community_users.user_type as membership_type
 		FROM communities
 		LEFT JOIN community_users ON community_users.community_id = communities.id
+		LEFT JOIN (
+			SELECT DISTINCT ON (community_users.community_id) community_users.*,
+				ARRAY(
+					SELECT community_users.user_type
+					FROM community_users
+					WHERE addr = $1
+					GROUP BY community_users.user_type
+				) as roles
+				FROM community_users
+				WHERE addr = $1
+		) a ON community_users.addr = a.addr
 		WHERE community_users.addr = $1
 		LIMIT $2 OFFSET $3
 		`, addr, count, start)
