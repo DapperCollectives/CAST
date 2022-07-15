@@ -64,7 +64,7 @@ const CommunityCard = ({ logo, name, body, id, slug }) => {
                   : {}
               }
             >
-              <div className="is-size-5 is-size-6-mobile mb-2 is-4 is-6-mobile pt-0-mobile">
+              <div className="is-size-5 is-size-6-mobile mb-2 is-4 is-6-mobile pt-0-mobile line-clamp-2">
                 {name}
               </div>
               <p className="has-text-grey small-text" style={descriptionStyle}>
