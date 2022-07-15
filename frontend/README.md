@@ -4,7 +4,7 @@
 
 - [Yarn](https://classic.yarnpkg.com/lang/en/docs/install)
 - [GoLang 1.6](https://golang.org/doc/install)
-- [Node/NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
+- [Node/NPM v16](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
 - [Flow CLI](https://docs.onflow.org/flow-cli/install/)
   - Note: See below for how install v0.30.2 (required)
 

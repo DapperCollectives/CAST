@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- [GoLang 1.6](https://golang.org/doc/install)
+- [GoLang 1.16](https://golang.org/doc/install)
 - [PostgreSQL 14.1](https://www.postgresql.org/download/)
 - [Flow CLI](https://docs.onflow.org/flow-cli/install/)
   - Note: See below for how install v0.30.2 (required)
@@ -43,6 +43,17 @@ sudo -i -u postgres
 psql
 CREATE DATABASE flow_snapshot;
 CREATE DATABASE flow_snapshot_test;
+```
+
+NOTE: in some system configurations `sudo -i -u postgres` will return an error so you can run the following:
+
+```bash
+psql
+CREATE USER postgres;
+ALTER USER postgres PASSWORD 'admin';
+ALTER USER postgres WITH SUPERUSER;
+CREATE DATABASE flow_snapshot WITH OWNER = postgres;
+CREATE DATABASE flow_snapshot_test WITH OWNER = postgres;
 ```
 
 #### Install Migrate Tool
@@ -87,10 +98,14 @@ make testmigratedown
 
 #### Dealing with Dirty Schema Migrations
 
+Reset Schema Migrations
+```bash
+UPDATE schema_migrations SET dirty = false
+```
 
 ### Testing
 
-1. Run `flow emulator` from this top-level directory (the private key for the `emulator-account` in `flow.json` must match the private key hard-coded in the test suite). Install the `flow` CLI [here](https://docs.onflow.org/flow-cli/install/)
+1. Run `flow emulator --dev-wallet` from this top-level directory (the private key for the `emulator-account` in top level `flow.json` must match the private key hard-coded in the test suite eg. `backend/cadence/V2/tests/flow.json`). Install the `flow` CLI [here](https://docs.onflow.org/flow-cli/install/)
 2. Run migrations against the test database (if migrations aren't up to date): `make testmigrateup`
 3. Run the test suite: `make test`
 
@@ -110,7 +125,7 @@ docker run -it --network=host --rm --name vt-test vt-test:latest
 
 Before running the app you should:
 
-1. Run `flow emulator` from this top-level directory (the private key for the `emulator-account` in `flow.json` must match the private key hard-coded in the test suite). Install the `flow` CLI [here](https://docs.onflow.org/flow-cli/install/)
+1. Run `flow emulator --dev-wallet` from this top-level directory (the private key for the `emulator-account` in top level`flow.json` must match the private key hard-coded in the test suite eg. `backend/cadence/V2/tests/flow.json`). Install the `flow` CLI [here](https://docs.onflow.org/flow-cli/install/)
 2. Run migrations against the database (if migrations aren't up to date): `make migrateup`
 
 #### Go Executable
