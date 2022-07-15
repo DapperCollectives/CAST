@@ -288,5 +288,5 @@ func (c *SnapshotClient) sendRequest(req *http.Request, pointer interface{}) err
 
 // Don't hit snapshot service if ENV is TEST or DEV
 func (c *SnapshotClient) bypass() bool {
-	return c.Env == "TEST" || c.Env == "DEV"
+	return c.Env == "TEST" || c.Env == "DEV" || c.Env == "STAGING"
 }
