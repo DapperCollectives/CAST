@@ -30,7 +30,7 @@ type Proposal struct {
 	Cid                  *string                 `json:"cid,omitempty"`
 	Status               *string                 `json:"status,omitempty"`
 	Body                 *string                 `json:"body,omitempty" validate:"required"`
-	Block_height         uint64                  `json:"block_height"`
+	Block_height         *uint64                 `json:"block_height"`
 	Total_votes          int                     `json:"total_votes"`
 	Timestamp            string                  `json:"timestamp" validate:"required"`
 	Composite_signatures *[]s.CompositeSignature `json:"compositeSignatures" validate:"required"`

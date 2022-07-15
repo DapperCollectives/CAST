@@ -601,7 +601,7 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 
 	emptyBalance := &models.Balance{
 		Addr:        v.Addr,
-		BlockHeight: p.Block_height,
+		BlockHeight: *p.Block_height,
 		Proposal_id: p.ID,
 	}
 
@@ -793,7 +793,7 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p.Block_height = snapshotResponse.Data.BlockHeight
+	p.Block_height = &snapshotResponse.Data.BlockHeight
 	p.Snapshot_status = &snapshotResponse.Data.Status
 
 	//@TODO this whole if else block should be moved into to its own func
@@ -1870,7 +1870,7 @@ func (a *App) processSnapshotStatus(s *models.Strategy, p *models.Proposal) erro
 		snapshotResponse, err := a.SnapshotClient.
 			GetSnapshotStatusAtBlockHeight(
 				s.Contract,
-				p.Block_height,
+				*p.Block_height,
 			)
 		if err != nil {
 			return err
