@@ -10,6 +10,7 @@ $error-red: #B20D0D
 $yellow: #FBD84D
 $orange: #F4AF4A
 $light-gray: #DCDCDC
+$lighter-dark-grey: #757575
 
 // Update Bulma's global variables
 $family-primary: "Arimo"
@@ -20,6 +21,7 @@ $title-family: $family-secondary
 $body-color: black
 $body-background-color: white
 $primary: $yellow
+$spacing-values: ("0": 0, "1": 0.25rem, "2": 0.5rem, "3": 0.75rem, "4": 1rem, "5": 1.5rem, "6": 3rem, "7": 4.5rem,"8": 6rem, "9": 9rem, "auto": auto) !default
 
 // Update some of Bulma's component variables
 $control-border-width: 2px
@@ -29,8 +31,6 @@ $button-background-color: transparent
 $button-border-color: black
 $button-color: black
 $button-border-width: 1px
-$button-hover-color: $yellow
-$button-hover-border-color: $yellow
 $title-size: 2.5rem
 $progress-bar-background-color: $yellow
 $input-color: black
@@ -58,12 +58,56 @@ $border-color-light: #DBDBDB
 @import '~bulma/sass/helpers/visibility.sass'
 @import '~bulma/sass/helpers/typography.sass'
 @import '~bulma/sass/helpers/flexbox.sass'
+@import '~bulma/sass/helpers/position.sass'
 
 $tooltip-radius: 6px
 $popover-max-width: 20rem
 @import '@creativebulma/bulma-tooltip'
 @import 'bulma-popover'
 
+=spacing-helpers($suffix: '')
+	$suffix: if($suffix == '', '', '-' + $suffix)
+	@each $property, $shortcut in $spacing-shortcuts
+		@each $name, $value in $spacing-values
+			@if $property == 'padding' and $value == 'auto'
+				// Exclude padding value auto
+			@else
+				// All directions
+				.#{$shortcut}-#{$name}#{$suffix}
+					#{$property}: $value !important
+				// Cardinal directions
+				@each $direction, $direction-suffix in $spacing-directions
+					.#{$shortcut}#{$direction-suffix}-#{$name}#{$suffix}
+						#{$property}-#{$direction}: $value !important
+				// Horizontal axis
+				@if $spacing-horizontal != null
+					.#{$shortcut}#{$spacing-horizontal}-#{$name}#{$suffix}
+						#{$property}-left: $value !important
+						#{$property}-right: $value !important
+				// Vertical axis
+				@if $spacing-vertical != null
+					.#{$shortcut}#{$spacing-vertical}-#{$name}#{$suffix}
+						#{$property}-top: $value !important
+						#{$property}-bottom: $value !important	
+@include spacing-helpers('')
+
++mobile
+	@include spacing-helpers('mobile')
+
++mobile
+	@include spacing-helpers('mobile-only')
+
++tablet
+	@include spacing-helpers('tablet')
+
++tablet-only
+	@include spacing-helpers('tablet-only')
+
++desktop
+	@include spacing-helpers('desktop')
+
++desktop-only
+	@include spacing-helpers('desktop-only')							
 // custom css
 .App, #root
 	height: 100%
@@ -88,12 +132,16 @@ code
 	border-top-left-radius: 8px
 .rounded-sm-bl
 	border-bottom-left-radius: 8px
+.rounded-sm-br
+	border-bottom-right-radius: 8px
 .rounded-lg
 	border-radius: 20px
 .rounded-full
 	border-radius: 50%
 .border-light
 	border: 1px solid $grey-lighter
+.border-lighter-dark-grey
+	border: 1px solid $lighter-dark-grey
 .flex-1
 	flex: 1 0 0
 .flex-2
@@ -109,7 +157,6 @@ code
 		&.vote-button:hover
 			color: black
 			border: 1px solid rgba(0, 0, 0, 0.4) !important
-			transform: scale(1.01)
 .button.is-disabled
 	pointer-events: none
 	opacity: 0.5
@@ -246,8 +293,6 @@ hr
 	border-bottom-width: 0px
 	&.tab-community
 		border-bottom-width: 2px
-		&:hover
-			transform: scale(1.04)
 
 .tabs li.is-active a
 	border-bottom-color: $yellow
@@ -275,9 +320,11 @@ hr
 .blockies-wrapper
 	border-radius: 133.333px
 	max-height: 40px
+	background-color: transparent
 .blockies
-	border-radius: 133.333px
-	border: 4px solid #F2F2F2
+	border-radius: 50%
+	&.blockies-border
+		border: 4px solid #F2F2F2
 .rounded-top
 	border-top-left-radius: 8px
 	border-top-right-radius: 8px
@@ -291,9 +338,6 @@ hr
 .community-info
 	padding: 19.5px 24px
 	max-width: 225px
-.community-numbers
-	color: #757575
-	font-size: 14px
 .community-content
 	padding-top: 31px
 .proposal-title
@@ -361,8 +405,6 @@ hr
 		padding: 40px 20px 0px 20px
 	.spacing-right-panel
 		padding: 24px 24px 0px 24px
-	.community-numbers
-		font-size: 16px
 	.community-content
 		padding-top: 0
 		margin-top: -70px
@@ -429,18 +471,13 @@ span[data-tooltip]
 .wallet-connect.button.is-primary:hover, .button-vote:hover
 	border-color: rgba(0, 0, 0, 0.4) !important
 	border-width: 1px !important
-	transform: scale(1.01)
+
 .wallet-connect.button.is-primary
 	color: #000000 !important
 
-.community-card:hover, .proposal-card:hover
+.community-card:hover, .proposal-card:hover, .strategy-selector:hover
 	border-color: rgba(0, 0, 0, 0.4)
 	border-width: 1px
-	transform: scale(1.01)
-
-.tab-link:hover
-	padding-left: 0.3rem
-	transform: scale(1.04)
 
 .back-button:hover
 	margin-left: -0.25rem
@@ -451,7 +488,6 @@ span[data-tooltip]
 	border-width: 1px
 
 .navbar-item-hover:hover
-	transform: scale(1.1)
 	color: rgba(0, 0, 0, 0.7)
 
 .button:hover
@@ -577,7 +613,7 @@ span[data-tooltip]
 		box-shadow: none
 
 .form-error-input-icon
-	padding-right: 4.5rem !important	
+	padding-right: 4.5rem !important
 .form-error-input-border
 	border-color: $error-red  !important
 
@@ -606,7 +642,7 @@ span[data-tooltip]
 		color: #757575
 
 // overwrite default conent from bulma
-.content 
+.content
 	figure
 		margin-left: 0em
 		margin-right: 0em
@@ -617,4 +653,4 @@ span[data-tooltip]
 
 @include mobile
 	.popover .popover-content
-		max-width: 10rem !important	
+		max-width: 10rem !important

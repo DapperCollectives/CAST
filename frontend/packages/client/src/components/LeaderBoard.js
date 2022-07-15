@@ -1,50 +1,51 @@
-import React from "react";
-import Blockies from "react-blockies";
-import { WrapperResponsive } from "../components";
-import { useLeaderBoard } from "../hooks";
+import React from 'react';
+import Blockies from 'react-blockies';
+import { WrapperResponsive } from '../components';
+import { useLeaderBoard } from '../hooks';
 
 const Row = ({ index, addr, score, classNameIndex }) => {
-  const smallRowStyle = { width: "30%" };
+  const smallRowStyle = { width: '30%' };
 
   const clnIndex = `${
-    classNameIndex ?? "has-background-white-ter index-cell"
+    classNameIndex ?? 'has-background-white-ter index-cell'
   }  `.trim();
 
   return (
     <tr className="table-row">
       <td className={clnIndex}>{index}</td>
       <td>{addr}</td>
-      <td style={smallRowStyle} className="smaller-text">
-        {score}
-      </td>
+      <td style={smallRowStyle}>{score}</td>
     </tr>
   );
 };
 
-export default function LeaderBoard({ onClickViewMore = () => {} } = {}) {
-  const { data, loading } = useLeaderBoard();
+export default function LeaderBoard({
+  onClickViewMore = () => {},
+  communityId,
+} = {}) {
+  const { data, isLoading } = useLeaderBoard({ communityId });
   const style = {};
 
   return (
     <div className="is-flex is-flex-direction-column">
       <WrapperResponsive
         classNames="is-flex flex-1 has-text-weight-bold is-uppercase small-text"
-        extraStyles={{ marginBottom: "32px", marginTop: "28px" }}
-        extraStylesMobile={{ marginBottom: "32px", marginTop: "24px" }}
+        extraStyles={{ marginBottom: '32px', marginTop: '28px' }}
+        extraStylesMobile={{ marginBottom: '32px', marginTop: '24px' }}
       >
         LEADERBOARD
       </WrapperResponsive>
       <table className="table is-fullwidth">
         <tbody className="is-scrollable-table" style={style}>
-          {!loading &&
+          {!isLoading &&
             data?.leaderBoard.map((datum, index) => {
               const userIndex = index + 1;
               const styleIndex =
                 index === 0
-                  ? "rounded-sm-tl has-background-white-ter index-cell"
+                  ? 'rounded-sm-tl has-background-white-ter index-cell'
                   : index === 4
-                  ? "rounded-sm-bl has-background-white-ter index-cell"
-                  : "has-background-white-ter index-cell";
+                  ? 'rounded-sm-bl has-background-white-ter index-cell'
+                  : 'has-background-white-ter index-cell';
 
               return (
                 <Row
@@ -67,14 +68,16 @@ export default function LeaderBoard({ onClickViewMore = () => {} } = {}) {
                     </div>
                   }
                   score={
-                    <div className="has-text-weight-bold">{datum?.score}</div>
+                    <div className="is-flex flex-1 is-justify-content-center has-text-weight-bold smaller-text">
+                      {datum?.score}
+                    </div>
                   }
                 />
               );
             })}
         </tbody>
       </table>
-      {!loading && data?.currentUser && (
+      {!isLoading && data?.currentUser && (
         <table className="table is-fullwidth">
           <tbody className="is-scrollable-table" style={style}>
             <Row
@@ -96,7 +99,7 @@ export default function LeaderBoard({ onClickViewMore = () => {} } = {}) {
                 </div>
               }
               score={
-                <div className="has-text-weight-bold">
+                <div className="is-flex flex-1 is-justify-content-center has-text-weight-bold smaller-text">
                   {data?.currentUser.score}
                 </div>
               }

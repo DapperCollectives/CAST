@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from "react";
-import { Plus, Bin, ValidCheckMark, InvalidCheckMark } from "components/Svg";
-import { WrapperResponsive, Loader } from "components";
-import { useCommunityUsers } from "hooks";
-import { useErrorHandlerContext } from "contexts/ErrorHandler";
-import { useWebContext } from "contexts/Web3";
-import { getCompositeSigs } from "utils";
+import React, { useState, useEffect, useRef } from 'react';
+import { Bin, ValidCheckMark, InvalidCheckMark } from 'components/Svg';
+import { WrapperResponsive, Loader, AddButton } from 'components';
+import { useCommunityUsers } from 'hooks';
+import { useErrorHandlerContext } from 'contexts/ErrorHandler';
+import { useWebContext } from 'contexts/Web3';
+import { getCompositeSigs } from 'utils';
 import useFlowAddrValidator, {
   validateAddrInList,
-} from "./hooks/useFlowAddrValidator";
-import FadeIn from "components/FadeIn";
+} from './hooks/useFlowAddrValidator';
+import FadeIn from 'components/FadeIn';
 
 export const CommunityUsersForm = ({
   title,
@@ -18,19 +18,24 @@ export const CommunityUsersForm = ({
   onAddressChange,
   onDeleteAddress,
   onAddAddress,
-  addrType = "Admins",
+  addrType = 'Admins',
   label,
   submitComponent,
   validateEachAddress = false,
   onClearField = () => {},
+  autoFocusOnLoad = false,
 } = {}) => {
   const canDeleteAddress = addrList.length > 1;
+
+  const refOnFirstInput = useRef();
+
+  useEffect(() => {
+    if (refOnFirstInput.current) {
+      refOnFirstInput.current.focus();
+    }
+  }, [refOnFirstInput]);
   return (
-    <WrapperResponsive
-      classNames="border-light rounded-lg columns is-flex-direction-column is-mobile m-0"
-      extraClasses="p-6 mb-6"
-      extraClassesMobile="p-4 mb-4"
-    >
+    <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6 p-4-mobile mb-4-mobile">
       <div className="columns flex-1">
         <div className="column">
           <div className="is-flex flex-1">
@@ -61,36 +66,41 @@ export const CommunityUsersForm = ({
 
             const inputStyle = validateAddr
               ? `form-error-input-icon ${
-                  isInvalid ? "form-error-input-border" : ""
+                  isInvalid ? 'form-error-input-border' : ''
                 }`
-              : "pr-6";
+              : 'pr-6';
             return (
               <div
                 key={`index-${index}`}
                 className="column is-12 is-mobile p-0 m-0 mb-4 fade-in"
-                style={{ position: "relative" }}
+                style={{ position: 'relative' }}
               >
                 <input
                   type="text"
                   placeholder={label || `Enter ${title}`}
                   className={`border-light rounded-sm p-3 column is-full ${inputStyle}`}
-                  value={addr || ""}
+                  value={addr || ''}
                   onChange={(event) =>
                     onAddressChange(index, event.target.value)
                   }
-                  autoFocus={addrList.length === index + 1 && addr === ""}
+                  autoFocus={addrList.length === index + 1 && addr === ''}
                   disabled={fromServer ?? false}
                   style={{
-                    width: "100%",
+                    width: '100%',
                     ...(isInvalid ? {} : undefined),
                   }}
+                  ref={
+                    addrList.length === 1 && addr === '' && autoFocusOnLoad
+                      ? refOnFirstInput
+                      : undefined
+                  }
                 />
                 <div
                   style={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    alignContent: "center",
-                    position: "absolute",
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    alignContent: 'center',
+                    position: 'absolute',
                     right: 15,
                     top: 9,
                   }}
@@ -131,27 +141,21 @@ export const CommunityUsersForm = ({
           })}
         </div>
       )}
-      <div
-        className={`mt-2 is-flex is-align-items-centered ${
-          loadingUsers ? "is-disabled has-text-grey" : "cursor-pointer"
-        }`}
-        onClick={onAddAddress}
-        style={loadingUsers ? { opacity: 0.5 } : {}}
-      >
-        <Plus />{" "}
-        <span className="ml-2 small-text is-flex is-align-items-center">
-          Add{` ${addrType}`}
-        </span>
-      </div>
+      <AddButton
+        disabled={loadingUsers}
+        addText={addrType}
+        onAdd={onAddAddress}
+        className="mt-2"
+      />
       {submitComponent}
-    </WrapperResponsive>
+    </div>
   );
 };
 
 const CommunityMembersEditor = ({
-  title = "Admins",
-  description = "",
-  addrType = "Admin",
+  title = 'Admins',
+  description = '',
+  addrType = 'Admin',
   communityId,
 } = {}) => {
   const {
@@ -191,7 +195,7 @@ const CommunityMembersEditor = ({
   const saveData = async () => {
     setSavingData(true);
     const timestamp = Date.now().toString();
-    const hexTime = Buffer.from(timestamp).toString("hex");
+    const hexTime = Buffer.from(timestamp).toString('hex');
     const _compositeSignatures = await injectedProvider
       .currentUser()
       .signUserMessage(hexTime);
@@ -203,11 +207,11 @@ const CommunityMembersEditor = ({
       notifyError(
         {
           message: JSON.stringify({
-            status: "401",
+            status: '401',
             statusText: `No valid user signature found.`,
           }),
         },
-        ""
+        ''
       );
       setSavingData(false);
       return;
@@ -248,11 +252,11 @@ const CommunityMembersEditor = ({
       notifyError(
         {
           message: JSON.stringify({
-            status: "401",
+            status: '401',
             statusText: `Something went wrong adding/removing ${addrType} list`,
           }),
         },
-        ""
+        ''
       );
       // un-do changes if there was an error on front
       setAddrList(userAddrList);
@@ -267,7 +271,7 @@ const CommunityMembersEditor = ({
   };
 
   const onAddAddr = () => {
-    setAddrList((list) => [...list, { addr: "" }]);
+    setAddrList((list) => [...list, { addr: '' }]);
   };
 
   const setAddress = (index, value) => {
@@ -298,9 +302,9 @@ const CommunityMembersEditor = ({
     <CommunityUsersForm
       submitComponent={
         <button
-          style={{ height: 48, width: "100%" }}
-          className={`button transition-all is-flex has-background-yellow rounded-sm mt-5 is-uppercase is-${
-            enableSave ? "enabled" : "disabled"
+          style={{ height: 48, width: '100%' }}
+          className={`button transition-all is-flex has-background-yellow rounded-sm mt-5 is-uppercase is-uppercase is-${
+            enableSave ? 'enabled' : 'disabled'
           }`}
           onClick={!enableSave ? () => {} : saveData}
         >

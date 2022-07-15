@@ -1,55 +1,61 @@
-import { useReducer, useCallback } from "react";
-import { defaultReducer, INITIAL_STATE } from "../reducers";
-import { checkResponse, getCompositeSigs } from "utils";
-import { useErrorHandlerContext } from "../contexts/ErrorHandler";
-import { useFileUploader } from "hooks";
-const mockData = {
-  createdAt: new Date().toISOString(),
-  creatorAddr: "0xf8d6e0586b0a20c7",
-  description: "Coming soon...",
-  isComingSoon: true,
-  logo: "/miquelahead.png",
-  id: 2,
-  name: "?????",
-  sig: "",
-  timestamp: "",
+import { useReducer, useCallback } from 'react';
+import {
+  paginationReducer,
+  PAGINATION_INITIAL_STATE,
+  INITIAL_STATE,
+} from '../reducers';
+import { checkResponse, getCompositeSigs } from 'utils';
+import { useErrorHandlerContext } from '../contexts/ErrorHandler';
+import { useFileUploader } from 'hooks';
+
+const setDefaultValue = (field, fallbackValue) => {
+  if (field === undefined || field === '') {
+    return fallbackValue;
+  }
+  return field;
 };
-
-const addMockData = (data) => [...data, mockData];
-
-export default function useCommunity() {
-  const [state, dispatch] = useReducer(defaultReducer, {
+export default function useCommunity({
+  start = PAGINATION_INITIAL_STATE.start,
+  count = PAGINATION_INITIAL_STATE.count,
+  initialLoading,
+} = {}) {
+  const [state, dispatch] = useReducer(paginationReducer, {
     ...INITIAL_STATE,
-    loading: false,
+    loading: initialLoading ?? INITIAL_STATE.loading,
+    pagination: {
+      ...PAGINATION_INITIAL_STATE,
+      start,
+      count,
+    },
   });
   const { notifyError } = useErrorHandlerContext();
   // for now not using modal notification if there was an error uploading image
   const { uploadFile } = useFileUploader({ useModalNotifications: false });
 
   const getCommunities = useCallback(async () => {
-    dispatch({ type: "PROCESSING" });
-    const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities`;
+    dispatch({ type: 'PROCESSING' });
+    const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities?count=${count}&start=${start}`;
     try {
       const response = await fetch(url);
       const communities = await checkResponse(response);
       dispatch({
-        type: "SUCCESS",
-        payload: addMockData(communities?.data ?? []),
+        type: 'SUCCESS',
+        payload: communities ?? [],
       });
     } catch (err) {
       // notify user of error
       notifyError(err, url);
-      dispatch({ type: "ERROR", payload: { errorData: err.message } });
+      dispatch({ type: 'ERROR', payload: { errorData: err.message } });
     }
-  }, [dispatch, notifyError]);
+  }, [dispatch, notifyError, count, start]);
 
   const createCommunity = useCallback(
     async (injectedProvider, communityData) => {
-      dispatch({ type: "PROCESSING" });
+      dispatch({ type: 'PROCESSING' });
       const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities`;
       try {
         const timestamp = Date.now().toString();
-        const hexTime = Buffer.from(timestamp).toString("hex");
+        const hexTime = Buffer.from(timestamp).toString('hex');
         const _compositeSignatures = await injectedProvider
           .currentUser()
           .signUserMessage(hexTime);
@@ -57,17 +63,17 @@ export default function useCommunity() {
         const compositeSignatures = getCompositeSigs(_compositeSignatures);
 
         if (!compositeSignatures) {
-          const statusText = "No valid user signature found.";
+          const statusText = 'No valid user signature found.';
           // modal error will open
           notifyError(
             {
-              status: "Something went wrong with creating the community.",
+              status: 'Something went wrong with creating the community.',
               statusText,
             },
             url
           );
           dispatch({
-            type: "ERROR",
+            type: 'ERROR',
             payload: { errorData: statusText },
           });
           return;
@@ -76,29 +82,30 @@ export default function useCommunity() {
         const {
           communityName: name,
           communityDescription: body,
-          category,
+          category: categorySelected,
           communityTerms: termsAndConditionsUrl,
           listAddrAdmins,
           listAddrAuthors,
           creatorAddr,
           slug,
-          proposalThreshold,
           discordUrl,
           githubUrl,
           instagramUrl,
           twitterUrl,
           websiteUrl,
           logo,
-          contractAddress,
-          contractName,
-          storagePath,
+          contractAdrress: contractAddr,
+          contractName: contractN,
+          storagePath: storageP,
+          proposalThreshold: propThreshold,
           onlyAuthorsToSubmitProposals,
+          strategies,
         } = communityData;
 
         let communityLogo;
-        // not handling upload error: there's a default image
+        // check for logo upload
         // admins can edit later the image
-        if (logo.file) {
+        if (logo?.file) {
           try {
             communityLogo = await uploadFile(logo.file);
           } catch (err) {
@@ -107,19 +114,18 @@ export default function useCommunity() {
         }
 
         const fetchOptions = {
-          method: "POST",
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             name,
             body,
-            category,
+            category: categorySelected?.value,
             termsAndConditionsUrl,
             creatorAddr,
             additionalAuthors: listAddrAuthors?.map((ele) => ele.addr),
             additionalAdmins: listAddrAdmins?.map((ele) => ele.addr),
-            proposalThreshold,
             slug,
             githubUrl,
             instagramUrl,
@@ -127,20 +133,25 @@ export default function useCommunity() {
             websiteUrl,
             discordUrl,
             logo: communityLogo?.fileUrl,
-            contractAddress,
-            contractName,
-            storagePath,
-            onlyAuthorsToSubmitProposals: Boolean(onlyAuthorsToSubmitProposals),
+            contractAddress: setDefaultValue(
+              contractAddr,
+              '0x0ae53cb6e3f42a79'
+            ),
+            contractName: setDefaultValue(contractN, 'FlowToken'),
+            storagePath: setDefaultValue(storageP, 'flowTokenBalance'),
+            proposalThreshold: setDefaultValue(propThreshold, '0'),
+            strategies,
+            onlyAuthorsToSubmit: Boolean(onlyAuthorsToSubmitProposals),
             timestamp,
             compositeSignatures,
           }),
         };
         const response = await fetch(url, fetchOptions);
         const json = await checkResponse(response);
-        dispatch({ type: "SUCCESS", payload: json });
+        dispatch({ type: 'SUCCESS', payload: { data: [json] } });
       } catch (err) {
-        notifyError(err, url, "Something went wrong with your proposal.");
-        dispatch({ type: "ERROR", payload: { errorData: err.message } });
+        notifyError(err, url, 'Something went wrong with your proposal.');
+        dispatch({ type: 'ERROR', payload: { errorData: err.message } });
       }
     },
     [dispatch, notifyError, uploadFile]

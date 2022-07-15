@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState } from 'react';
 
 /**
  *
@@ -22,7 +22,7 @@ export const useModalContext = () => {
   const context = React.useContext(NotificationModalContext);
   if (context === undefined) {
     throw new Error(
-      "`useModalContext` must be used within a `NotificationModalProvider`."
+      '`useModalContext` must be used within a `NotificationModalProvider`.'
     );
   }
   return context;
@@ -35,7 +35,7 @@ const NotificationModalProvider = ({ children }) => {
     // more configuration can be added here
     closeOnBackgroundClick: true,
     showCloseButton: true,
-    classNameModalContent: "",
+    classNameModalContent: '',
     onClose: () => {},
   });
 
@@ -48,7 +48,7 @@ const NotificationModalProvider = ({ children }) => {
           // this is when two components are using the modal with different configuration at the same time
           closeOnBackgroundClick: true,
           showCloseButton: true,
-          classNameModalContent: "",
+          classNameModalContent: '',
           ...customModalConfig,
         }));
       }
@@ -60,6 +60,8 @@ const NotificationModalProvider = ({ children }) => {
 
   const closeModal = useCallback(() => {
     setModal(false);
+    // this unmounts the component
+    setContent(null);
     modalConfig.onClose();
   }, [modalConfig]);
 
@@ -76,7 +78,7 @@ const NotificationModalProvider = ({ children }) => {
     isOpen: modal,
   };
 
-  const className = `modal${modal ? " is-active" : ""}`;
+  const className = `modal${modal ? ' is-active' : ''}`;
 
   return (
     <NotificationModalContext.Provider value={providerProps}>
@@ -90,7 +92,7 @@ const NotificationModalProvider = ({ children }) => {
             className={`modal-content ${
               modalConfig.backgroundColor
                 ? modalConfig.backgroundColor
-                : " has-background-white"
+                : ' has-background-white'
             } ${modalConfig.classNameModalContent}`}
           >
             {!!content ? content : <p>Empty Modal</p>}

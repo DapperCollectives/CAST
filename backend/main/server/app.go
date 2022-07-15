@@ -63,16 +63,18 @@ type App struct {
 var allowedFileTypes = []string{"image/jpg", "image/jpeg", "image/png", "image/gif"}
 
 type Strategy interface {
-	FetchBalance(db *shared.Database, b *models.Balance, sc *shared.SnapshotClient) (*models.Balance, error)
-	TallyVotes(votes []*models.VoteWithBalance, proposalId int) (models.ProposalResults, error)
-	GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error)
+	TallyVotes(votes []*models.VoteWithBalance, p *models.ProposalResults) (models.ProposalResults, error)
 	GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error)
+	FetchBalance(db *shared.Database, b *models.Balance, sc *shared.SnapshotClient) (*models.Balance, error)
+	GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error)
+	InitStrategy(f *shared.FlowAdapter, db *shared.Database)
 }
 
 var strategyMap = map[string]Strategy{
 	"token-weighted-default":        &strategies.TokenWeightedDefault{},
 	"staked-token-weighted-default": &strategies.StakedTokenWeightedDefault{},
 	"one-address-one-vote":          &strategies.OneAddressOneVote{},
+	"balance-of-nfts":               &strategies.BalanceOfNfts{},
 }
 
 const (
@@ -148,7 +150,20 @@ func (a *App) ConnectDB(database_url string) {
 
 	database.Context = context.Background()
 	database.Name = "flow_snapshot"
-	database.Conn, err = pgxpool.Connect(database.Context, database_url)
+
+	pconf, confErr := pgxpool.ParseConfig(database_url)
+	if confErr != nil {
+		log.Fatal().Err(err).Msg("Unable to parse database config url")
+	}
+
+	if os.Getenv("APP_ENV") == "TEST" {
+		log.Info().Msg("Setting MIN/MAX connections to 1")
+		pconf.MinConns = 1
+		pconf.MaxConns = 1
+	}
+
+	database.Conn, err = pgxpool.ConnectConfig(database.Context, pconf)
+
 	database.Env = &a.Env
 	if err != nil {
 		log.Fatal().Err(err).Msg("Error creating Postsgres conn pool")
@@ -176,7 +191,8 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/proposals", a.getProposalsForCommunity).Methods("GET")
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/proposals/{id:[0-9]+}", a.getProposal).Methods("GET")
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/proposals", a.createProposal).Methods("POST", "OPTIONS")
-	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/proposals/{id:[0-9]+}", a.updateProposal).Methods("PUT", "OPTIONS")
+	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/proposals/{id:[0-9]+}", a.updateProposal).
+		Methods("PUT", "OPTIONS")
 	// Lists
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/lists", a.getListsForCommunity).Methods("GET")
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/lists", a.createListForCommunity).Methods("POST", "OPTIONS")
@@ -198,11 +214,17 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/users/{addr:0x[a-zA-Z0-9]{16}}/communities", a.handleGetUserCommunities).Methods("GET")
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users", a.handleCreateCommunityUser).Methods("POST", "OPTIONS")
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users", a.handleGetCommunityUsers).Methods("GET")
-	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users/{addr:0x[a-zA-Z0-9]{16}}/{userType:[a-zA-Z]+}", a.handleRemoveUserRole).Methods("DELETE", "OPTIONS")
+	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users/type/{userType:[a-zA-Z]+}", a.handleGetCommunityUsersByType).
+		Methods("GET")
+	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users/{addr:0x[a-zA-Z0-9]{16}}/{userType:[a-zA-Z]+}", a.handleRemoveUserRole).
+		Methods("DELETE", "OPTIONS")
+	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/leaderboard", a.handleGetCommunityLeaderboard).Methods("GET")
 	// Utilities
 	a.Router.HandleFunc("/accounts/admin", a.getAdminList).Methods("GET")
 	a.Router.HandleFunc("/accounts/blocklist", a.getCommunityBlocklist).Methods("GET")
 	a.Router.HandleFunc("/accounts/{addr:0x[a-zA-Z0-9]{16}}/{blockHeight:[0-9]+}", a.getAccountAtBlockHeight).Methods("GET")
+
+	//this JSON for snapshotter api
 	a.Router.HandleFunc("/latest-snapshot", a.getLatestSnapshot).Methods("GET")
 }
 
@@ -281,7 +303,7 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get the votes for proposal
-	votes, err := models.GetAllVotesForProposal(a.DB, proposalId)
+	votes, err := models.GetAllVotesForProposal(a.DB, proposalId, *p.Strategy)
 	if err != nil {
 		// print the error to the console
 		log.Error().Err(err).Msg("Error getting votes for proposal")
@@ -296,10 +318,15 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	proposalResults, err := s.TallyVotes(votes, proposalId)
+	proposalWithChoices := models.NewProposalResults(proposalId, p.Choices)
+	proposalResults, err := s.TallyVotes(votes, proposalWithChoices)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
+	}
+
+	if *p.Computed_status == "closed" {
+		models.AddWinningVoteAchievement(a.DB, votes, proposalResults, p.Community_id)
 	}
 
 	// Send Proposal Results
@@ -335,7 +362,7 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//get the proposal by Id
+	//get the proposal
 	proposal := models.Proposal{ID: proposalId}
 	if err := proposal.GetProposalById(a.DB); err != nil {
 		switch err.Error() {
@@ -352,6 +379,8 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, "Invalid Strategy")
 		return
 	}
+
+	s.InitStrategy(a.FlowAdapter, a.DB)
 
 	votesWithWeights, err := s.GetVotes(votes, &proposal)
 	if err != nil {
@@ -571,7 +600,10 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 	emptyBalance := &models.Balance{
 		Addr:        v.Addr,
 		BlockHeight: p.Block_height,
+		Proposal_id: p.ID,
 	}
+
+	s.InitStrategy(a.FlowAdapter, a.DB)
 
 	balance, err := s.FetchBalance(a.DB, emptyBalance, a.SnapshotClient)
 	if err != nil {
@@ -601,14 +633,16 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//pin to ipfs
-	pin, err := a.IpfsClient.PinJson(v)
-	// If request fails, it may be because of an issue with Pinata.
-	// Continue on, and worker will retroactively populate
-	if err != nil {
-		log.Error().Err(err).Msg("error pinning vote to IPFS")
+	if os.Getenv("APP_ENV") != "TEST" {
+		pin, err := a.IpfsClient.PinJson(v)
+		if err != nil {
+			log.Error().Err(err).Msg("error pinning vote to IPFS")
+		} else {
+			v.Cid = &pin.IpfsHash
+		}
 	} else {
-		v.Cid = &pin.IpfsHash
+		dummyCid := "0000000000"
+		v.Cid = &dummyCid
 	}
 
 	if err := v.CreateVote(a.DB); err != nil {
@@ -679,6 +713,12 @@ func (a *App) getProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	c := models.Community{ID: p.Community_id}
+	if err := c.GetCommunity(a.DB); err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
 	respondWithJSON(w, http.StatusOK, p)
 }
 
@@ -739,7 +779,14 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if *community.Only_authors_to_submit {
+	strategy, err := models.MatchStrategyByProposal(*community.Strategies, *p.Strategy)
+	if err != nil {
+		log.Error().Err(err).Msg("Community does not have this strategy availabe")
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if *community.Only_authors_to_submit == true {
 		if err := models.EnsureRoleForCommunity(a.DB, p.Creator_addr, communityId, "author"); err != nil {
 			errMsg := fmt.Sprintf("account %s is not an author for community %d", p.Creator_addr, p.Community_id)
 			log.Error().Err(err).Msg(errMsg)
@@ -747,14 +794,7 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		var contract = &shared.Contract{
-			Name:        community.Contract_name,
-			Addr:        community.Contract_addr,
-			Public_path: community.Public_path,
-			Threshold:   community.Threshold,
-		}
-
-		hasBalance, err := a.FlowAdapter.EnforceTokenThreshold(p.Creator_addr, contract)
+		hasBalance, err := a.FlowAdapter.EnforceTokenThreshold(p.Creator_addr, &strategy.Contract)
 		if err != nil {
 			log.Error().Err(err).Msg("error enforcing token threshold")
 			respondWithError(w, http.StatusInternalServerError, err.Error())
@@ -769,14 +809,18 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// pin to ipfs
-	pin, err := a.IpfsClient.PinJson(p)
-	if err != nil {
-		log.Error().Err(err).Msg("error pinning proposal to IPFS")
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
+	if os.Getenv("APP_ENV") != "TEST" {
+		pin, err := a.IpfsClient.PinJson(p)
+		if err != nil {
+			log.Error().Err(err).Msg("error pinning proposal to IPFS")
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		p.Cid = &pin.IpfsHash
+	} else {
+		dummyCid := "000000"
+		p.Cid = &dummyCid
 	}
-	p.Cid = &pin.IpfsHash
 
 	// validate proposal fields
 	validate := validator.New()
@@ -785,6 +829,12 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		log.Error().Err(vErr).Msg("invalid proposal")
 		respondWithError(w, http.StatusBadRequest, vErr.Error())
 		return
+	}
+
+	if os.Getenv("APP_ENV") == "PRODUCTION" {
+		if strategy.Contract.Name != nil && p.Start_time.Before(time.Now().UTC().Add(time.Hour)) {
+			p.Start_time = time.Now().UTC().Add(time.Hour)
+		}
 	}
 
 	// create proposal
@@ -824,8 +874,6 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	log.Debug().Msgf("payload: %s", payload.Signing_addr)
-
 	// Check that status update is valid
 	// For now we are assuming proposals are creating with status 'published' and may be cancelled.
 	if payload.Status != "cancelled" {
@@ -854,15 +902,20 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Set new status
-	p.Status = &payload.Status
+	p.Status = &payload.Status // pin to ipfs
 
 	// Pin to ipfs
-	pin, err := a.IpfsClient.PinJson(p)
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
-		return
+	if os.Getenv("APP_ENV") != "TEST" {
+		pin, err := a.IpfsClient.PinJson(p)
+		if err != nil {
+			respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
+			return
+		}
+		p.Cid = &pin.IpfsHash
+	} else {
+		dummyCid := "000000"
+		p.Cid = &dummyCid
 	}
-	p.Cid = &pin.IpfsHash
 
 	// Finally, update DB
 	if err := p.UpdateProposal(a.DB); err != nil {
@@ -945,6 +998,7 @@ func (a *App) getCommunitiesForHomePage(w http.ResponseWriter, r *http.Request) 
 func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 	var c models.Community
 	var payload models.CreateCommunityRequestPayload
+
 	decoder := json.NewDecoder(r.Body)
 
 	if err := decoder.Decode(&payload); err != nil {
@@ -956,26 +1010,29 @@ func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 
 	c = payload.Community
 
-	// validate timestamp of request/message
 	if err := a.validateTimestamp(c.Timestamp, 60); err != nil {
 		respondWithError(w, http.StatusForbidden, err.Error())
 		return
 	}
 
 	// TODO: since we removed the allowlist, some sort of rate limiting will probably be necessary
-
 	if err := a.validateSignature(c.Creator_addr, c.Timestamp, c.Composite_signatures); err != nil {
 		respondWithError(w, http.StatusForbidden, err.Error())
 		return
 	}
 
 	// pin to ipfs
-	pin, err := a.IpfsClient.PinJson(c)
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
-		return
+	if os.Getenv("APP_ENV") != "TEST" {
+		pin, err := a.IpfsClient.PinJson(c)
+		if err != nil {
+			respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
+			return
+		}
+		c.Cid = &pin.IpfsHash
+	} else {
+		dummyCid := "000000000000000"
+		c.Cid = &dummyCid
 	}
-	c.Cid = &pin.IpfsHash
 
 	validate := validator.New()
 	vErr := validate.Struct(c)
@@ -1026,7 +1083,6 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, "Invalid community ID")
 		return
 	}
-
 	var payload models.UpdateCommunityRequestPayload
 
 	decoder := json.NewDecoder(r.Body)
@@ -1035,9 +1091,9 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
+
 	defer r.Body.Close()
 
-	// Fetch community
 	var c = models.Community{ID: id}
 	if err := c.GetCommunity(a.DB); err != nil {
 		log.Error().Err(err)
@@ -1165,7 +1221,11 @@ func (a *App) createListForCommunity(w http.ResponseWriter, r *http.Request) {
 	// Ensure list doesnt already exist
 
 	if existingList, _ := models.GetListForCommunityByType(a.DB, communityId, *payload.List_type); existingList.ID > 0 {
-		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("list of type %s already exists for community %d", *payload.List_type, communityId))
+		respondWithError(
+			w,
+			http.StatusBadRequest,
+			fmt.Sprintf("list of type %s already exists for community %d", *payload.List_type, communityId),
+		)
 		return
 	}
 
@@ -1198,14 +1258,18 @@ func (a *App) createListForCommunity(w http.ResponseWriter, r *http.Request) {
 
 	l := payload.List
 
-	// pin to ipfs
-	pin, err := a.IpfsClient.PinJson(l)
-	if err != nil {
-		log.Error().Err(err).Msg("error pinning list to IPFS")
-		respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
-		return
+	if os.Getenv("APP_ENV") != "TEST" {
+		pin, err := a.IpfsClient.PinJson(l)
+		if err != nil {
+			log.Error().Err(err).Msg("error pinning list to IPFS")
+			respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
+			return
+		}
+		l.Cid = &pin.IpfsHash
+	} else {
+		dummyCid := "000000"
+		l.Cid = &dummyCid
 	}
-	l.Cid = &pin.IpfsHash
 
 	// create proposal
 	if err := l.CreateList(a.DB); err != nil {
@@ -1277,13 +1341,18 @@ func (a *App) addAddressesToList(w http.ResponseWriter, r *http.Request) {
 	l.AddAddresses(payload.Addresses)
 
 	// Pin to ipfs
-	pin, err := a.IpfsClient.PinJson(l)
-	if err != nil {
-		log.Error().Err(err).Msg("error pinning to ipfs")
-		respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
-		return
+	if os.Getenv("APP_ENV") != "TEST" {
+		pin, err := a.IpfsClient.PinJson(l)
+		if err != nil {
+			log.Error().Err(err).Msg("error pinning to ipfs")
+			respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
+			return
+		}
+		l.Cid = &pin.IpfsHash
+	} else {
+		dummyCid := "000000"
+		l.Cid = &dummyCid
 	}
-	l.Cid = &pin.IpfsHash
 
 	// Finally, update DB
 	if err := l.UpdateList(a.DB); err != nil {
@@ -1354,13 +1423,18 @@ func (a *App) removeAddressesFromList(w http.ResponseWriter, r *http.Request) {
 	l.RemoveAddresses(payload.Addresses)
 
 	// Pin to ipfs
-	pin, err := a.IpfsClient.PinJson(l)
-	if err != nil {
-		log.Error().Err(err).Msg("ipfs error")
-		respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
-		return
+	if os.Getenv("APP_ENV") != "TEST" {
+		pin, err := a.IpfsClient.PinJson(l)
+		if err != nil {
+			log.Error().Err(err).Msg("ipfs error")
+			respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
+			return
+		}
+		l.Cid = &pin.IpfsHash
+	} else {
+		dummyCid := "000000"
+		l.Cid = &dummyCid
 	}
-	l.Cid = &pin.IpfsHash
 
 	// Finally, update DB
 	if err := l.UpdateList(a.DB); err != nil {
@@ -1468,7 +1542,9 @@ func (a *App) handleCreateCommunityUser(w http.ResponseWriter, r *http.Request) 
 	// only an account can add itself as a "member", unless an admin is granting
 	// an address a priviledged role
 	if payload.User_type == "member" && payload.Addr != payload.Signing_addr {
-		CANNOT_ADD_MEMBER_ERR := errors.New("an account can only add itself as a community member, unless an admin is granting priviledged role")
+		CANNOT_ADD_MEMBER_ERR := errors.New(
+			"an account can only add itself as a community member, unless an admin is granting priviledged role",
+		)
 		log.Error().Err(CANNOT_ADD_MEMBER_ERR)
 		respondWithError(w, http.StatusForbidden, CANNOT_ADD_MEMBER_ERR.Error())
 		return
@@ -1490,7 +1566,11 @@ func (a *App) handleCreateCommunityUser(w http.ResponseWriter, r *http.Request) 
 	// should throw a "ErrNoRows" error
 	u := payload.CommunityUser
 	if err := u.GetCommunityUser(a.DB); err == nil {
-		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Error: Address %s is already a %s of community %d\n", u.Addr, u.User_type, u.Community_id))
+		respondWithError(
+			w,
+			http.StatusBadRequest,
+			fmt.Sprintf("Error: Address %s is already a %s of community %d\n", u.Addr, u.User_type, u.Community_id),
+		)
 		return
 	}
 
@@ -1527,7 +1607,6 @@ func (a *App) handleGetCommunityUsers(w http.ResponseWriter, r *http.Request) {
 
 	count, _ := strconv.Atoi(r.FormValue("count"))
 	start, _ := strconv.Atoi(r.FormValue("start"))
-	userType := r.FormValue("userType")
 	if count > 100 || count < 1 {
 		count = 100
 	}
@@ -1535,26 +1614,79 @@ func (a *App) handleGetCommunityUsers(w http.ResponseWriter, r *http.Request) {
 		start = 0
 	}
 
-	// if userType param is not passed, fetch all, if it is passed fetch by type
-	if userType == "" {
-		users, totalRecords, err := models.GetUsersForCommunity(a.DB, communityId, start, count)
-		if err != nil {
-			respondWithError(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-
-		response := shared.GetPaginatedResponseWithPayload(users, start, count, totalRecords)
-		respondWithJSON(w, http.StatusOK, response)
-	} else {
-		users, totalRecords, err := models.GetUsersForCommunityByType(a.DB, communityId, start, count, userType)
-		if err != nil {
-			respondWithError(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-
-		response := shared.GetPaginatedResponseWithPayload(users, start, count, totalRecords)
-		respondWithJSON(w, http.StatusOK, response)
+	users, totalRecords, err := models.GetUsersForCommunity(a.DB, communityId, start, count)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
 	}
+
+	response := shared.GetPaginatedResponseWithPayload(users, start, count, totalRecords)
+	respondWithJSON(w, http.StatusOK, response)
+
+}
+
+func (a *App) handleGetCommunityUsersByType(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	communityId, err := strconv.Atoi(vars["communityId"])
+
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid Community ID")
+		return
+	}
+
+	userType := vars["userType"]
+	if !models.EnsureValidRole(userType) {
+		respondWithError(w, http.StatusBadRequest, "Invalid userType")
+		return
+	}
+
+	count, _ := strconv.Atoi(r.FormValue("count"))
+	start, _ := strconv.Atoi(r.FormValue("start"))
+	if count > 100 || count < 1 {
+		count = 100
+	}
+	if start < 0 {
+		start = 0
+	}
+
+	users, totalRecords, err := models.GetUsersForCommunityByType(a.DB, communityId, start, count, userType)
+
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response := shared.GetPaginatedResponseWithPayload(users, start, count, totalRecords)
+	respondWithJSON(w, http.StatusOK, response)
+}
+
+func (a *App) handleGetCommunityLeaderboard(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	communityId, err := strconv.Atoi(vars["communityId"])
+
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid Community ID")
+		return
+	}
+
+	count, _ := strconv.Atoi(r.FormValue("count"))
+	start, _ := strconv.Atoi(r.FormValue("start"))
+	if count > 100 || count < 1 {
+		count = 100
+	}
+	if start < 0 {
+		start = 0
+	}
+
+	users, totalRecords, err := models.GetCommunityLeaderboard(a.DB, communityId, start, count)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response := shared.GetPaginatedResponseWithPayload(users, start, count, totalRecords)
+	respondWithJSON(w, http.StatusOK, response)
+
 }
 
 func (a *App) handleGetUserCommunities(w http.ResponseWriter, r *http.Request) {

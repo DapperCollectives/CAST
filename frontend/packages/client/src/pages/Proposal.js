@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Link, useParams, useLocation } from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import { Link, useParams, useLocation } from 'react-router-dom';
 import {
   Message,
   VotesList,
@@ -10,25 +10,30 @@ import {
   Loader,
   WrapperResponsive,
   Tablink,
-} from "components";
-import { CheckMark, ArrowLeft, Bin } from "components/Svg";
-import { useProposal, useVotingStrategies, useMediaQuery } from "hooks";
-import { useModalContext } from "contexts/NotificationModal";
-import { useWebContext } from "contexts/Web3";
-import { FilterValues } from "const";
+} from 'components';
+import { CheckMark, ArrowLeft, Bin } from 'components/Svg';
+import {
+  useProposal,
+  useVotingStrategies,
+  useMediaQuery,
+  useUserRoleOnCommunity,
+} from 'hooks';
+import { useModalContext } from 'contexts/NotificationModal';
+import { useWebContext } from 'contexts/Web3';
+import { FilterValues } from 'const';
 import {
   CancelProposalModalConfirmation,
   ProposalStatus,
   VoteOptions,
-} from "../components/Proposal";
-import { getProposalType } from "../utils";
+} from 'components/Proposal';
+import { getProposalType } from 'utils';
 
 function useQueryParams() {
   const { search } = useLocation();
   return React.useMemo(() => {
     const params = new URLSearchParams(search);
     return {
-      forceLedger: params.get("ledger") === "true",
+      forceLedger: params.get('ledger') === 'true',
     };
   }, [search]);
 }
@@ -38,7 +43,7 @@ const VoteUserError = () => (
     <div className="column is-full m-0 p-0 is-flex is-justify-content-center py-5">
       <div
         className="rounded-full is-size-2 has-text-white is-flex is-align-items-center is-justify-content-center"
-        style={{ height: 50, width: 50, background: "red" }}
+        style={{ height: 50, width: 50, background: 'red' }}
       >
         X
       </div>
@@ -99,7 +104,12 @@ export default function ProposalPage() {
     error: strategiesError,
   } = useVotingStrategies();
 
-  const isAdmin = proposal && proposal?.creatorAddr === user?.addr;
+  // only authors on community can cancel the proposal
+  const canCancelProposal = useUserRoleOnCommunity({
+    addr: user?.addr,
+    communityId: proposal?.communityId,
+    roles: ['author'],
+  });
 
   const proposalStrategy =
     votingStrategies && !loadingStrategies && proposal && !loading
@@ -143,7 +153,7 @@ export default function ProposalPage() {
 
   const onCancelVote = () => {
     // clean option selected only if it's image based option
-    if (getProposalType(proposal.choices) === "image") {
+    if (getProposalType(proposal.choices) === 'image') {
       setOptionChosen(null);
     }
     setConfirmingVote(false);
@@ -162,7 +172,7 @@ export default function ProposalPage() {
 
     const onCancelProposal = async () => {
       const response = await updateProposal(injectedProvider, proposal, {
-        status: "cancelled",
+        status: 'cancelled',
         signingAddr: user?.addr,
       });
       if (response.error) {
@@ -179,7 +189,7 @@ export default function ProposalPage() {
       />,
       {
         showCloseButton: false,
-        classNameModalContent: "rounded-sm",
+        classNameModalContent: 'rounded-sm',
       }
     );
   };
@@ -213,10 +223,10 @@ export default function ProposalPage() {
               <b>{response.error}</b>
             </p>
           ),
-          errorTitle: "Something went wrong with your vote.",
+          errorTitle: 'Something went wrong with your vote.',
         }),
         {
-          classNameModalContent: "rounded-sm",
+          classNameModalContent: 'rounded-sm',
         }
       );
       setCastingVote(false);
@@ -249,8 +259,8 @@ export default function ProposalPage() {
 
   const setTab = (tab) => () => {
     setVisibleTab({
-      proposal: tab === "proposal",
-      summary: tab === "summary",
+      proposal: tab === 'proposal',
+      summary: tab === 'summary',
     });
   };
 
@@ -336,7 +346,7 @@ export default function ProposalPage() {
             <section
               className="modal-card-body p-6 has-text-centered"
               style={{
-                margin: "150px 0",
+                margin: '150px 0',
               }}
             >
               <Loader className="mb-4" />
@@ -381,7 +391,11 @@ export default function ProposalPage() {
       />
       <section className="section">
         <div className="container">
-          <WrapperResponsive extraClasses="mb-6" extraClassesMobile="mb-3">
+          <WrapperResponsive
+            classNames="is-flex"
+            extraClasses="mb-6"
+            extraClassesMobile="mb-3"
+          >
             <Link to={`/community/${proposal.communityId}?tab=proposals`}>
               <span className="has-text-grey is-flex is-align-items-center back-button transition-all">
                 <ArrowLeft /> <span className="ml-3">Back</span>
@@ -404,7 +418,7 @@ export default function ProposalPage() {
               proposal={proposal}
               className="is-flex is-align-items-center smaller-text"
             />
-            {showCancelButton && isAdmin && (
+            {showCancelButton && canCancelProposal && (
               <div className="is-flex is-align-items-center">
                 <button
                   className="button is-white has-text-grey small-text"
@@ -426,24 +440,24 @@ export default function ProposalPage() {
               <WrapperResponsive
                 as="h2"
                 classNames="title mt-5 is-4 has-text-back has-text-weight-normal"
-                extraStylesMobile={{ marginBottom: "30px" }}
+                extraStylesMobile={{ marginBottom: '30px' }}
               >
                 {proposal.name}
               </WrapperResponsive>
               <div className="tabs is-medium">
                 <ul>
-                  <li className={`${visibleTab.proposal ? "is-active" : ""}`}>
+                  <li className={`${visibleTab.proposal ? 'is-active' : ''}`}>
                     <Tablink
                       linkText="Proposal"
-                      onClick={setTab("proposal")}
+                      onClick={setTab('proposal')}
                       isActive={visibleTab.proposal}
                       onlyLink
                     />
                   </li>
-                  <li className={`${visibleTab.summary ? "is-active" : ""}`}>
+                  <li className={`${visibleTab.summary ? 'is-active' : ''}`}>
                     <Tablink
                       linkText="Summary"
-                      onClick={setTab("summary")}
+                      onClick={setTab('summary')}
                       isActive={visibleTab.summary}
                       onlyLink
                     />
@@ -463,7 +477,7 @@ export default function ProposalPage() {
                         }}
                       />
                     )}
-                    {proposal.strategy === "bpt" && (
+                    {proposal.strategy === 'bpt' && (
                       <div className="mt-6 mb-6 has-background-white-ter has-text-grey p-5 rounded-sm">
                         This snapshot was re-uploaded with the BPT token
                         strategy, allowing for BANK holders to vote with tokens
@@ -518,7 +532,7 @@ export default function ProposalPage() {
                     }}
                   />
                 )}
-                {proposal.strategy === "bpt" && (
+                {proposal.strategy === 'bpt' && (
                   <div className="mt-6 mb-6 has-background-white-ter has-text-grey p-5 rounded-sm">
                     This snapshot was re-uploaded with the BPT token strategy,
                     allowing for BANK holders to vote with tokens held in

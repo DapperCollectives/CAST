@@ -1,25 +1,30 @@
-import React from "react";
-import { useHistory } from "react-router-dom";
-import { Gitbook, Github } from "../components/Svg";
+import React from 'react';
+import { useHistory } from 'react-router-dom';
+import { Gitbook, Github } from '../components/Svg';
 
 const AboutPage = ({ location }) => {
   const { state = {} } = location;
   const history = useHistory();
-  const { modal } = state;
+  const { modal = true } = state;
   const closeModal = () => {
-    history.push("/");
+    // user landed on about page: no history
+    if (history.length <= 2) {
+      history.push('/');
+      return;
+    }
+    history.goBack();
   };
   return (
-    <div className={modal ? "modal is-active" : undefined}>
+    <div className={modal ? 'modal is-active' : undefined}>
       <div className="modal-background" onClick={closeModal} />
       <div
         className="modal-card rounded-sm px-4"
-        style={{ maxHeight: "calc(100vh - 85px)" }}
+        style={{ maxHeight: 'calc(100vh - 85px)' }}
       >
         <header
           className="modal-card-head is-flex-direction-column has-background-white columns is-mobile m-0 py-2"
           style={{
-            borderBottom: "none",
+            borderBottom: 'none',
           }}
         >
           <div className="column is-full has-text-right is-size-2 p-0 leading-tight">
@@ -36,7 +41,7 @@ const AboutPage = ({ location }) => {
             <p className="has-text-grey mb-4 small-text">
               CAST is a voting tool for communities in the Flow network. It
               allows groups of builders, creators, and fans to make choices
-              together — transparently and in public.{" "}
+              together — transparently and in public.{' '}
             </p>
             <p className="has-text-grey mb-4 small-text">
               This governance tool is being made available first, in its alpha

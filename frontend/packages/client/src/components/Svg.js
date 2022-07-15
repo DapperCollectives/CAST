@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 export const Gitbook = () => (
   <svg
@@ -59,7 +59,7 @@ export const Bin = () => (
   </svg>
 );
 
-export const Plus = () => (
+export const Plus = ({ fill = 'black' } = {}) => (
   <svg
     width="24"
     height="24"
@@ -67,7 +67,7 @@ export const Plus = () => (
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" fill="black" />
+    <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" fill={fill} />
   </svg>
 );
 
@@ -106,10 +106,10 @@ export const ArrowLeftBold = () => (
 );
 
 export const CheckMark = ({
-  width = "30",
-  height = "30",
-  circleFill = "#0E5B20",
-  checkFill = "white",
+  width = '30',
+  height = '30',
+  circleFill = '#0E5B20',
+  checkFill = 'white',
   style = {},
 }) => (
   <svg
@@ -128,7 +128,7 @@ export const CheckMark = ({
   </svg>
 );
 
-export const Star = ({ width = "64", height = "64", fill = "none" }) => (
+export const Star = ({ width = '64', height = '64', fill = 'none' }) => (
   <svg
     width={width}
     height={height}
@@ -173,7 +173,7 @@ export const Add = () => (
   </svg>
 );
 
-export const LinkOut = ({ width = "18", height = "18" }) => (
+export const LinkOut = ({ width = '18', height = '18' }) => (
   <svg
     width={width}
     height={height}
@@ -192,7 +192,7 @@ export const LinkOut = ({ width = "18", height = "18" }) => (
   </svg>
 );
 
-export const Logo = ({ width = "110", height = "32" }) => (
+export const Logo = ({ width = '110', height = '32' }) => (
   <svg
     width={width}
     height={height}
@@ -204,7 +204,7 @@ export const Logo = ({ width = "110", height = "32" }) => (
       <mask
         id="b"
         style={{
-          maskType: "alpha",
+          maskType: 'alpha',
         }}
         maskUnits="userSpaceOnUse"
         x={0}
@@ -251,7 +251,7 @@ export const Logo = ({ width = "110", height = "32" }) => (
       <mask
         id="c"
         style={{
-          maskType: "alpha",
+          maskType: 'alpha',
         }}
         maskUnits="userSpaceOnUse"
         x={480}
@@ -270,7 +270,7 @@ export const Logo = ({ width = "110", height = "32" }) => (
       <mask
         id="d"
         style={{
-          maskType: "alpha",
+          maskType: 'alpha',
         }}
         maskUnits="userSpaceOnUse"
         x={720}
@@ -294,7 +294,7 @@ export const Logo = ({ width = "110", height = "32" }) => (
   </svg>
 );
 
-export const Twitter = ({ width = "24", height = "18" }) => {
+export const Twitter = ({ width = '24', height = '18' }) => {
   return (
     <svg
       width={width}
@@ -316,7 +316,7 @@ export const Twitter = ({ width = "24", height = "18" }) => {
   );
 };
 
-export const Discord = ({ width = "24", height = "18" }) => (
+export const Discord = ({ width = '24', height = '18' }) => (
   <svg
     width={width}
     height={height}
@@ -336,7 +336,7 @@ export const Discord = ({ width = "24", height = "18" }) => (
   </svg>
 );
 
-export const Github = ({ width = "24", height = "18" }) => (
+export const Github = ({ width = '24', height = '18' }) => (
   <svg
     width={width}
     height={height}
@@ -357,9 +357,9 @@ export const Github = ({ width = "24", height = "18" }) => (
 );
 
 export const StrategyIcon = ({
-  width = "24",
-  height = "24",
-  className = "",
+  width = '24',
+  height = '24',
+  className = '',
 }) => {
   return (
     <img
@@ -372,7 +372,7 @@ export const StrategyIcon = ({
   );
 };
 
-export const CaretDown = ({ width = "30", height = "15", className = "" }) => {
+export const CaretDown = ({ width = '30', height = '15', className = '' }) => {
   return (
     <svg
       width={width}
@@ -395,9 +395,9 @@ export const CaretDown = ({ width = "30", height = "15", className = "" }) => {
 };
 
 export const CheckCircle = ({
-  width = "30",
-  height = "30",
-  className = "",
+  width = '30',
+  height = '30',
+  className = '',
 }) => {
   return (
     <svg
@@ -420,7 +420,7 @@ export const CheckCircle = ({
     </svg>
   );
 };
-export const AngleDown = ({ width = "30", height = "15", className }) => (
+export const AngleDown = ({ width = '30', height = '15', className }) => (
   <svg
     width={width}
     height={height}
@@ -440,7 +440,7 @@ export const AngleDown = ({ width = "30", height = "15", className }) => (
   </svg>
 );
 
-export const AngleUp = ({ width = "30", height = "15", className }) => (
+export const AngleUp = ({ width = '30', height = '15', className }) => (
   <svg
     width={width}
     height={height}
@@ -493,9 +493,9 @@ export const Image = () => (
 );
 
 export const Upload = ({
-  width = "25",
-  height = "25",
-  className = "",
+  width = '25',
+  height = '25',
+  className = '',
 } = {}) => {
   return (
     <svg
@@ -540,9 +540,9 @@ export const Upload = ({
   );
 };
 export const Website = ({
-  width = "30",
-  height = "15",
-  className = "",
+  width = '30',
+  height = '15',
+  className = '',
 } = {}) => (
   <svg
     width={width}
@@ -570,9 +570,9 @@ export const Website = ({
 );
 
 export const Instagram = ({
-  width = "20",
-  height = "24",
-  className = "",
+  width = '20',
+  height = '24',
+  className = '',
 } = {}) => (
   <svg
     width={width}
@@ -617,10 +617,10 @@ export const ValidCheckMark = () => (
     <path
       d="M10 17.5C14.1421 17.5 17.5 14.1421 17.5 10C17.5 5.85786 14.1421 2.5 10 2.5C5.85786 2.5 2.5 5.85786 2.5 10C2.5 14.1421 5.85786 17.5 10 17.5Z"
       stroke="#5ECE84"
-      stroke-width="2"
-      stroke-miterlimit="10"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      strokeWidth="2"
+      strokeMiterlimit="10"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
     <path
       d="M13.2071 9.04011C13.5976 8.64959 13.5976 8.01643 13.2071 7.6259C12.8166 7.23538 12.1834 7.23538 11.7929 7.6259L13.2071 9.04011ZM9.16667 11.6663L8.45956 12.3734C8.85008 12.764 9.48325 12.764 9.87377 12.3734L9.16667 11.6663ZM8.20711 9.29257C7.81658 8.90204 7.18342 8.90204 6.79289 9.29257C6.40237 9.68309 6.40237 10.3163 6.79289 10.7068L8.20711 9.29257ZM11.7929 7.6259L8.45956 10.9592L9.87377 12.3734L13.2071 9.04011L11.7929 7.6259ZM9.87377 10.9592L8.20711 9.29257L6.79289 10.7068L8.45956 12.3734L9.87377 10.9592Z"

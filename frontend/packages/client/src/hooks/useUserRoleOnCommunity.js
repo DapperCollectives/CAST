@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import useUserCommunities from "./useUserCommunities";
+import { useEffect } from 'react';
+import useUserCommunities from './useUserCommunities';
 
 export default function useUserRoleOnCommunity({
   addr,
@@ -36,7 +36,7 @@ export default function useUserRoleOnCommunity({
     return false;
   }
 
-  if (loading || roles.length === 0) {
+  if (loading || roles.length === 0 || !communityId) {
     return null;
   }
   if (pagination.next > 0) {

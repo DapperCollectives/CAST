@@ -1,25 +1,30 @@
-import React, { useEffect } from "react";
-import { useCommunityMembers } from "../hooks";
-import TableMembers from "./TableMembers";
-import { debounce } from "../utils";
-import WrapperResponsive from "./WrapperResponsive";
+import React, { useEffect } from 'react';
+import { useWebContext } from 'contexts/Web3';
+import { useCommunityMembers } from 'hooks';
+import TableMembers from './TableMembers';
+import { debounce } from 'utils';
+import WrapperResponsive from './WrapperResponsive';
 
 export default function CommunityMembersList({ communityId } = {}) {
   // number of users brought at each pull based on design
   const pageSize = 18;
 
-  const { data, pagination, loading, fetchMore } = useCommunityMembers({
+  const { data, pagination, isLoading, fetchNextPage } = useCommunityMembers({
     communityId,
     count: pageSize,
   });
 
   const hasMore = pagination.next > 0;
 
+  const {
+    user: { addr: userAddr },
+  } = useWebContext();
+
   useEffect(() => {
     document.hasMore = hasMore;
-    document.loadingProposals = loading;
-    document.fetchMore = fetchMore;
-  }, [hasMore, loading, fetchMore]);
+    document.loadingProposals = isLoading;
+    document.fetchMore = fetchNextPage;
+  }, [hasMore, isLoading, fetchNextPage]);
 
   // this hook takes care of fetching more members when user scrolls to bottom of the page
   useEffect(() => {
@@ -34,26 +39,27 @@ export default function CommunityMembersList({ communityId } = {}) {
           }
         }
       }, 500);
-    document.addEventListener("scroll", pullDataFromApi());
-    return () => document.removeEventListener("scroll", pullDataFromApi());
+    document.addEventListener('scroll', pullDataFromApi());
+    return () => document.removeEventListener('scroll', pullDataFromApi());
   }, []);
 
   return (
     <div className="is-flex is-flex-direction-column">
       <WrapperResponsive
         commonClasses="is-flex flex-1"
-        extraStyles={{ marginBottom: "40px", marginTop: "40px" }}
-        extraStylesMobile={{ marginBottom: "32px", marginTop: "24px" }}
+        extraStyles={{ marginBottom: '40px', marginTop: '40px' }}
+        extraStylesMobile={{ marginBottom: '32px', marginTop: '24px' }}
       >
         <p className="has-text-weight-bold is-uppercase small-text">
-          {pagination?.totalRecords ?? "..."} members
+          {pagination?.totalRecords ?? '...'} members
         </p>
       </WrapperResponsive>
       <div className="is-flex flex-1">
         <TableMembers
           data={data}
-          loading={loading && Array.isArray(data)}
-          initialLoading={loading && !data}
+          loading={isLoading && Array.isArray(data)}
+          initialLoading={isLoading && !data}
+          userAddr={userAddr}
         />
       </div>
     </div>

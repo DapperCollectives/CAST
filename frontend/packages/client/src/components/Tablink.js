@@ -1,6 +1,6 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { Star } from "components/Svg";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Star } from 'components/Svg';
 
 const Tablink = ({
   linkText,
@@ -8,11 +8,10 @@ const Tablink = ({
   isActive,
   onlyLink,
   onClick = () => {},
-  animateHover = false,
-  className = "",
+  className = '',
 }) => {
   const textClass = `${className} ${
-    isActive ? "has-text-black" : "has-text-grey"
+    isActive ? 'has-text-black' : 'has-text-grey'
   }`;
 
   if (!linkUrl) {
@@ -34,20 +33,16 @@ const Tablink = ({
 
   const link = isActive ? (
     <>
-      <b className="pr-2">{linkText + " "}</b>
+      <b className="pr-2">{linkText + ' '}</b>
       <Star width="13" height="13" fill="black" />
     </>
   ) : (
     <>{linkText}</>
   );
 
-  const animateClasses = animateHover ? " tab-link transition-all" : "";
-
   return (
     <Link to={linkUrl} className={textClass}>
-      <div
-        className={`is-flex is-align-items-center is-justify-content-left ${animateClasses}`}
-      >
+      <div className={`is-flex is-align-items-center is-justify-content-left`}>
         {link}
       </div>
     </Link>

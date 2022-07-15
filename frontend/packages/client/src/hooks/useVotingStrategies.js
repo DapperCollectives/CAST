@@ -1,21 +1,21 @@
-import { useReducer, useEffect, useCallback } from "react";
-import { defaultReducer, INITIAL_STATE } from "../reducers";
-import { checkResponse } from "../utils";
-import { useErrorHandlerContext } from "../contexts/ErrorHandler";
+import { useReducer, useEffect, useCallback } from 'react';
+import { defaultReducer, INITIAL_STATE } from '../reducers';
+import { checkResponse } from '../utils';
+import { useErrorHandlerContext } from '../contexts/ErrorHandler';
 
 export default function useVotingStrategies() {
   const [state, dispatch] = useReducer(defaultReducer, INITIAL_STATE);
   const { notifyError } = useErrorHandlerContext();
   const getVotingStrategies = useCallback(async () => {
-    dispatch({ type: "PROCESSING" });
+    dispatch({ type: 'PROCESSING' });
     const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/voting-strategies`;
     try {
       const response = await fetch(url);
       const strategies = await checkResponse(response);
-      dispatch({ type: "SUCCESS", payload: strategies });
+      dispatch({ type: 'SUCCESS', payload: strategies });
     } catch (err) {
       notifyError(err, url);
-      dispatch({ type: "ERROR", payload: { errorData: err.message } });
+      dispatch({ type: 'ERROR', payload: { errorData: err.message } });
     }
   }, [dispatch, notifyError]);
 

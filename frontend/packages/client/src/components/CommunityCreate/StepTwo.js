@@ -1,17 +1,17 @@
-import React, { useEffect } from "react";
-import { CommunityUsersForm } from "../Community/CommunityEditorDetails";
-import useFlowAddrValidator from "../Community/hooks/useFlowAddrValidator";
-import { useMediaQuery } from "hooks";
-import classnames from "classnames";
+import React, { useEffect } from 'react';
+import { CommunityUsersForm } from '../Community/CommunityEditorDetails';
+import useFlowAddrValidator from '../Community/hooks/useFlowAddrValidator';
+import { useMediaQuery } from 'hooks';
+import classnames from 'classnames';
 
 const isInitialList = (listAddr) => {
-  return listAddr?.length === 1 && listAddr[0].addr === "";
+  return listAddr?.length === 1 && listAddr[0].addr === '';
 };
 
 const buttonStyle = {
-  border: "none",
-  fontSize: "12px",
-  marginLeft: "4px",
+  border: 'none',
+  fontSize: '12px',
+  marginLeft: '4px',
 };
 
 export default function StepTwo({
@@ -23,7 +23,7 @@ export default function StepTwo({
 }) {
   const notMobile = useMediaQuery();
 
-  const { listAddrAdmins = [{ addr: "" }], listAddrAuthors = [{ addr: "" }] } =
+  const { listAddrAdmins = [{ addr: '' }], listAddrAuthors = [{ addr: '' }] } =
     stepData || {};
 
   const { isValid: isValidAdmins } = useFlowAddrValidator({
@@ -66,7 +66,7 @@ export default function StepTwo({
   };
 
   const onAdminAddressAdd = () => {
-    onDataChange({ listAddrAdmins: [...listAddrAdmins, { addr: "" }] });
+    onDataChange({ listAddrAdmins: [...listAddrAdmins, { addr: '' }] });
   };
 
   const onAuthorAddressChange = (index, value) => {
@@ -84,13 +84,13 @@ export default function StepTwo({
   };
 
   const onAuthorAddressAdd = () => {
-    onDataChange({ listAddrAuthors: [...listAddrAuthors, { addr: "" }] });
+    onDataChange({ listAddrAuthors: [...listAddrAuthors, { addr: '' }] });
   };
 
   const popoverClassName = classnames(
-    "columns",
-    { "m-4": notMobile },
-    { "m-2": !notMobile }
+    'columns',
+    { 'm-4': notMobile },
+    { 'm-2': !notMobile }
   );
   return (
     <>
@@ -111,7 +111,7 @@ export default function StepTwo({
                     <p
                       className="small-text has-text-weight-normal has-text-grey small-text mb-1"
                       style={{
-                        lineHeight: "20px",
+                        lineHeight: '20px',
                       }}
                     >
                       Admin addresses will be added automatically as authors and
@@ -120,7 +120,7 @@ export default function StepTwo({
                     <p
                       className="small-text has-text-weight-normal has-text-grey small-text"
                       style={{
-                        lineHeight: "20px",
+                        lineHeight: '20px',
                       }}
                     >
                       In addition, community creator address will be set as
@@ -138,9 +138,10 @@ export default function StepTwo({
         onDeleteAddress={onAdminAddressDelete}
         onAddAddress={onAdminAddressAdd}
         addrType="Admins"
-        label="Domain name or wallet address"
+        label="Flow wallet address"
         validateEachAddress
-        onClearField={(index) => onAdminAddressChange(index, "")}
+        onClearField={(index) => onAdminAddressChange(index, '')}
+        autoFocusOnLoad={true}
       />
       <CommunityUsersForm
         title="Authors"
@@ -150,16 +151,17 @@ export default function StepTwo({
         onDeleteAddress={onAuthorAddressDelete}
         onAddAddress={onAuthorAddressAdd}
         addrType="Authors"
-        label="Domain name or wallet address"
+        label="Flow wallet address"
         validateEachAddress
-        onClearField={(index) => onAuthorAddressChange(index, "")}
+        onClearField={(index) => onAuthorAddressChange(index, '')}
+        autoFocusOnLoad={false}
       />
       <div className="columns mb-5">
         <div className="column is-12">
           <button
-            style={{ height: 48, width: "100%" }}
+            style={{ height: 48, width: '100%' }}
             className={`button vote-button transition-all is-flex has-background-yellow rounded-sm is-size-6 is-uppercase is-${
-              isStepValid ? "enabled" : "disabled"
+              isStepValid ? 'enabled' : 'disabled'
             }`}
             onClick={isStepValid ? () => moveToNextStep() : () => {}}
           >

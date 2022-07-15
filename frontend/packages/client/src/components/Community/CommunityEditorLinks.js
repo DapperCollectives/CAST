@@ -1,27 +1,32 @@
-import React, { useEffect, useState } from "react";
-import { Website, Instagram, Twitter, Discord, Github } from "components/Svg";
-import { WrapperResponsive, Loader } from "components";
-import useLinkValidator from "./hooks/useLinkValidator";
+import React, { useState } from 'react';
+import { Website, Instagram, Twitter, Discord, Github } from 'components/Svg';
+import { WrapperResponsive, Loader } from 'components';
+import useLinkValidator from './hooks/useLinkValidator';
 
 const FormFieldsConfig = [
   {
-    fieldName: "websiteUrl",
+    fieldName: 'websiteUrl',
+    placeholder: 'https://www.community-site-name.com',
     iconComponent: <Website width="16px" height="16px" />,
   },
   {
-    fieldName: "twitterUrl",
+    fieldName: 'twitterUrl',
+    placeholder: 'https://www.twitter.com/account',
     iconComponent: <Twitter width="16px" height="16px" />,
   },
   {
-    fieldName: "githubUrl",
+    fieldName: 'githubUrl',
+    placeholder: 'https://www.github.com/repository-name',
     iconComponent: <Github width="16px" height="16px" />,
   },
   {
-    fieldName: "discordUrl",
+    fieldName: 'discordUrl',
+    placeholder: 'https://www.discord.com/channel-name',
     iconComponent: <Discord width="16px" height="16px" />,
   },
   {
-    fieldName: "instagramUrl",
+    fieldName: 'instagramUrl',
+    placeholder: 'https://www.instagram.com/profile-name',
     iconComponent: <Instagram width="16px" height="16px" />,
   },
 ];
@@ -31,8 +36,8 @@ export const CommunityLinksForm = ({
   onChangeHandler,
   fields,
   isUpdating = false,
-  wrapperMargin = "mb-6",
-  wrapperMarginMobile = "mb-4",
+  wrapperMargin = 'mb-6',
+  wrapperMarginMobile = 'mb-4',
 }) => {
   return (
     <WrapperResponsive
@@ -62,28 +67,29 @@ export const CommunityLinksForm = ({
       </div>
       {formFields.map((formField, index) => (
         <div
-          style={{ position: "relative" }}
+          style={{ position: 'relative' }}
           className="is-flex is-align-items-center mt-4"
           key={`form-field-${index}`}
         >
           <input
             type="text"
-            name="web"
+            name={formField.fieldName}
             className="rounded-sm border-light py-3 pr-3 column is-full"
+            placeholder={formField?.placeholder}
             value={fields[formField.fieldName]}
             maxLength={200}
             onChange={(event) =>
               onChangeHandler(formField.fieldName)(event.target.value)
             }
             style={{
-              paddingLeft: "34px",
+              paddingLeft: '34px',
             }}
             disabled={isUpdating}
           />
           <div
             className="pl-3"
             style={{
-              position: "absolute",
+              position: 'absolute',
               height: 18,
               opacity: 0.3,
             }}
@@ -97,15 +103,14 @@ export const CommunityLinksForm = ({
   );
 };
 export default function CommunityEditorLinks(props = {}) {
+  const { updateCommunity, ...fields } = props;
   const {
-    websiteUrl = "",
-    twitterUrl = "",
-    instagramUrl = "",
-    discordUrl = "",
-    githubUrl = "",
-    updateCommunity,
-  } = props;
-  const [enableSave, setEnableSave] = useState(false);
+    websiteUrl = '',
+    twitterUrl = '',
+    instagramUrl = '',
+    discordUrl = '',
+    githubUrl = '',
+  } = fields;
   const [isUpdating, setIsUpdating] = useState(false);
   const [links, setLinks] = useState({
     websiteUrl,
@@ -118,7 +123,7 @@ export default function CommunityEditorLinks(props = {}) {
   const saveData = async () => {
     setIsUpdating(true);
     const updatedKeys = Object.keys(links).filter(
-      (key) => links[key] !== (props[key] ?? "")
+      (key) => links[key] !== (fields[key] ?? '')
     );
 
     const updatedFields = Object.assign(
@@ -129,11 +134,12 @@ export default function CommunityEditorLinks(props = {}) {
     setIsUpdating(false);
   };
 
-  const { isValid } = useLinkValidator({ links, initialValues: props });
+  const { isValid, hasChangedFromOriginal } = useLinkValidator({
+    links,
+    initialValues: fields,
+  });
 
-  useEffect(() => {
-    setEnableSave(isValid);
-  }, [isValid]);
+  const enableSave = isValid && hasChangedFromOriginal;
 
   const changeHandler = (field) => (value) =>
     setLinks((state) => ({
@@ -145,9 +151,9 @@ export default function CommunityEditorLinks(props = {}) {
     <CommunityLinksForm
       submitComponent={
         <button
-          style={{ height: 48, width: "100%" }}
-          className={`button vote-button transition-all is-flex has-background-yellow rounded-sm mt-5 is-${
-            enableSave && !isUpdating ? "enabled" : "disabled"
+          style={{ height: 48, width: '100%' }}
+          className={`button vote-button transition-all is-flex has-background-yellow rounded-sm mt-5 is-uppercase is-${
+            enableSave && !isUpdating ? 'enabled' : 'disabled'
           }`}
           onClick={!enableSave ? () => {} : saveData}
         >

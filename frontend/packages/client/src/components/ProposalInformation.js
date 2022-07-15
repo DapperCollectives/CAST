@@ -1,23 +1,23 @@
-import React, { useEffect, useRef, useState } from "react";
-import Blockies from "react-blockies";
-import { LinkOut, StrategyIcon } from "./Svg";
-import { parseDateFromServer } from "../utils";
-import { useVotingResults, useWindowDimensions } from "../hooks";
-import useMediaQuery, { mediaMatchers } from "../hooks/useMediaQuery";
-import Tooltip from "./Tooltip";
+import React, { useEffect, useRef, useState } from 'react';
+import Blockies from 'react-blockies';
+import { LinkOut, StrategyIcon } from './Svg';
+import { parseDateFromServer } from '../utils';
+import { useVotingResults, useWindowDimensions } from '../hooks';
+import useMediaQuery, { mediaMatchers } from '../hooks/useMediaQuery';
+import Tooltip from './Tooltip';
 
 const InfoBlock = ({ title, content }) => {
   return (
     <div className="columns is-mobile p-0 m-0 mb-5 small-text">
       <div
         className="column p-0 is-flex is-align-items-center flex-1 has-text-grey"
-        style={{ maxWidth: "40%" }}
+        style={{ maxWidth: '40%' }}
       >
         {title}
       </div>
       <div
         className="column p-0 is-flex flex-1 is-align-items-center"
-        style={{ height: "1.5rem" }}
+        style={{ height: '1.5rem' }}
       >
         {content}
       </div>
@@ -45,9 +45,9 @@ const Results = ({ voteResults }) => {
         const optionText =
           option.length > 120 ? `${option.substring(0, 120)}...` : option;
         return (
-          <div key={`result-item-${index}`} style={{ marginBottom: "2.5rem" }}>
+          <div key={`result-item-${index}`} style={{ marginBottom: '2.5rem' }}>
             <div className="columns is-mobile mb-2">
-              <div className="column small-text has-text-grey has-text-justified word-break">
+              <div className="column small-text has-text-grey has-text-left word-break">
                 {optionText}
               </div>
               <div className="column is-3 is-flex is-justify-content-flex-end small-text has-text-grey">
@@ -55,15 +55,15 @@ const Results = ({ voteResults }) => {
               </div>
             </div>
             <div
-              style={{ height: 8, background: "#DCDCDC" }}
+              style={{ height: 8, background: '#DCDCDC' }}
               className="has-background-grey-light rounded-lg"
             >
               <div
                 className="rounded-lg"
                 style={{
                   width: `${percentage}%`,
-                  height: "100%",
-                  background: "#747474",
+                  height: '100%',
+                  background: '#747474',
                 }}
               />
             </div>
@@ -87,15 +87,15 @@ const WrapperSpacingTop = ({
   isDesktopOnly,
   children,
 }) => {
-  let classNames = "";
+  let classNames = '';
   if (isMobileOnly) {
-    classNames = "px-1 pb-0 pt-1";
+    classNames = 'px-1 pb-0 pt-1';
   }
   if (isTabletOnly) {
-    classNames = "px-5 pb-0 pt-5";
+    classNames = 'px-5 pb-0 pt-5';
   }
   if (isDesktopOnly) {
-    classNames = "px-6 pb-0 pt-6";
+    classNames = 'px-6 pb-0 pt-6';
   }
   return <div className={classNames}>{children}</div>;
 };
@@ -106,37 +106,37 @@ const WrapperSpacingBottom = ({
   isDesktopOnly,
   children,
 }) => {
-  let classNames = "";
+  let classNames = '';
   if (isMobileOnly) {
-    classNames = "px-1 pt-1 pb-1";
+    classNames = 'px-1 pt-1 pb-1';
   }
   if (isTabletOnly) {
-    classNames = "px-5 pt-3 pb-4";
+    classNames = 'px-5 pt-3 pb-4';
   }
   if (isDesktopOnly) {
-    classNames = "px-6 pt-2 pb-6";
+    classNames = 'px-6 pt-2 pb-6';
   }
   return <div className={classNames}>{children}</div>;
 };
 
 const ProposalInformation = ({
-  creatorAddr = "",
+  creatorAddr = '',
   strategies = [],
   isCoreCreator = false,
-  ipfs = "",
-  ipfsUrl = "",
-  startTime = "",
-  endTime = "",
-  proposalId = "",
+  ipfs = '',
+  ipfsUrl = '',
+  startTime = '',
+  endTime = '',
+  proposalId = '',
   openStrategyModal = () => {},
-  className = "",
+  className = '',
 }) => {
   const dateFormatConf = {
-    day: "numeric",
-    hour: "numeric",
-    minute: "numeric",
-    month: "short",
-    year: "numeric",
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    month: 'short',
+    year: 'numeric',
     hour12: true,
   };
   // stores navbar height calculated after component is mounted
@@ -146,7 +146,7 @@ const ProposalInformation = ({
   const isTabletOnly = useMediaQuery(mediaMatchers.tabletOnly);
 
   useEffect(() => {
-    setNavbarHeight(document.querySelector("header").offsetHeight);
+    setNavbarHeight(document.querySelector('header').offsetHeight);
   }, []);
 
   const { height: windowHeight, width: windowWidth } = useWindowDimensions();
@@ -187,7 +187,7 @@ const ProposalInformation = ({
             topRef.current.pointStatic = winScroll;
           }
           setFixedStyle({
-            className: " is-panel-fixed",
+            className: ' is-panel-fixed',
             // use width of parent component
             style: {
               width,
@@ -230,15 +230,15 @@ const ProposalInformation = ({
 
   // this effect watches for window scrolling
   useEffect(() => {
-    document.addEventListener("scroll", handleScroll);
-    return () => document.removeEventListener("scroll", handleScroll);
+    document.addEventListener('scroll', handleScroll);
+    return () => document.removeEventListener('scroll', handleScroll);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <div ref={parentRef}>
       <div
-        className={`${className} rounded-sm${fixedStyle?.className || ""}`}
+        className={`${className} rounded-sm${fixedStyle?.className || ''}`}
         ref={ref}
         style={fixedStyle?.style || {}}
       >
@@ -249,7 +249,7 @@ const ProposalInformation = ({
         >
           <p className="mb-5">Information</p>
           <InfoBlock
-            title={"Stategie(s)"}
+            title={'Stategie(s)'}
             content={
               <div className="is-flex flex-1" onClick={openStrategyModal}>
                 {strategies.map((st, index) => {
@@ -263,7 +263,7 @@ const ProposalInformation = ({
             }
           />
           <InfoBlock
-            title={"Author"}
+            title={'Author'}
             content={
               <div className="columns is-mobile m-0">
                 <div className="column is-narrow is-flex is-align-items-center p-0">
@@ -280,7 +280,7 @@ const ProposalInformation = ({
                 {isCoreCreator && (
                   <div
                     className="column p-0 is-flex is-align-items-center is-justify-content-center-tablet subtitle is-size-7"
-                    style={{ fontFamily: "Roboto Mono" }}
+                    style={{ fontFamily: 'Roboto Mono' }}
                   >
                     Core
                   </div>
@@ -290,14 +290,14 @@ const ProposalInformation = ({
           />
           {ipfs && (
             <InfoBlock
-              title={"IPFS"}
+              title={'IPFS'}
               content={
                 <a
                   href={ipfsUrl}
                   rel="noopener noreferrer"
                   target="_blank"
                   className="button is-text p-0 small-text"
-                  style={{ height: "2rem !important" }}
+                  style={{ height: '2rem !important' }}
                 >
                   <Tooltip
                     classNames="is-flex is-flex-grow-1 is-align-items-center"
@@ -312,14 +312,14 @@ const ProposalInformation = ({
             />
           )}
           <InfoBlock
-            title={"Start date"}
+            title={'Start date'}
             content={parseDateFromServer(startTime).date.toLocaleString(
               undefined,
               dateFormatConf
             )}
           />
           <InfoBlock
-            title={"End date"}
+            title={'End date'}
             content={parseDateFromServer(endTime).date.toLocaleString(
               undefined,
               dateFormatConf

@@ -1,115 +1,82 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-import JoinCommunityButton from "./JoinCommunityButton";
-import WrapperResponsive from "components/WrapperResponsive";
-import { useWindowDimensions } from "hooks";
-
-const ComingSoon = () => {
-  return (
-    <span className="has-background-light rounded-sm px-2 py-2 mr-1 is-size-7">
-      Coming Soon
-    </span>
-  );
-};
+import React from 'react';
+import { Link } from 'react-router-dom';
+import JoinCommunityButton from './JoinCommunityButton';
+import Blockies from 'react-blockies';
+import { useMediaQuery } from 'hooks';
 /**
  * CommunityCard will group communities on a row bases,
  * will use elementsPerRow to determine how many communities to render per row
  */
-const CommunityCard = ({
-  logo,
-  name,
-  description,
-  id,
-  isComingSoon = false,
-}) => {
+const CommunityCard = ({ logo, name, body, id, slug }) => {
   const descriptionStyle = {
-    lineHeight: "1.5em",
-    height: "3em",
-    overflow: "hidden",
+    lineHeight: '1.5em',
+    maxHeight: '3rem',
+    overflow: 'hidden',
   };
 
-  const hoverClasses = !isComingSoon ? " transition-all community-card" : "";
-
-  const { width: windowWidth } = useWindowDimensions();
-  const joinBtnPositions = useMemo(() => ({
-    bigger: { top: "52px", right: "74px" },
-    smaller: { top: "144px", right: "332px" }
-  }), []);
-  const joinBtnDefault = windowWidth >= 500 ? joinBtnPositions.bigger : joinBtnPositions.smaller;
-  const [joinBtnTopRight, setJoinBtnTopRight] = useState(joinBtnDefault);
-  const [bottomSpacer, setBottomSpacer] = useState();
-
-  useEffect(() => {
-    if (windowWidth < 500 && joinBtnTopRight.top !== joinBtnPositions.smaller.top && bottomSpacer === false) {
-      setJoinBtnTopRight({
-        top: joinBtnPositions.smaller.top,
-        right: joinBtnPositions.smaller.top - windowWidth + 500
-      });
-      setBottomSpacer(true);
-    } else if (windowWidth >= 500 && joinBtnTopRight.top !== joinBtnPositions.bigger.top && bottomSpacer) {
-      setJoinBtnTopRight(joinBtnPositions.bigger);
-      setBottomSpacer(false);
-    }
-  }, [joinBtnTopRight.top, windowWidth, bottomSpacer, joinBtnPositions]);
-
-  const Body = (
-    <div
-      className={`is-flex is-flex-grow-1 rounded-sm border-light p-5 is-flex-direction-column${hoverClasses}`}
-    >
-      <div className="columns is-multiline is-flex-grow-1 is-mobile">
-        <div className="column is-narrow">
-          <div
-            className="border-light rounded-sm"
-            style={{
-              width: 96,
-              height: 96,
-              backgroundImage: `url(${logo})`,
-              backgroundSize: "cover",
-            }}
-          />
-        </div>
-        <div className="column">
-          <WrapperResponsive
-            classNames="title mb-2"
-            extraClasses="is-4 pt-1"
-            extraClassesMobile="is-6 pt-2"
-          >
-            {name}
-          </WrapperResponsive>
-          {isComingSoon ? (
-            <ComingSoon />
-          ) : (
-            <p className="has-text-grey" style={descriptionStyle}>
-              {description}
-            </p>
-          )}
-        </div>
-      </div>
-      {bottomSpacer ? (
-        <div
-          className="columns is-flex-grow-1 is-mobile"
-          style={{ minHeight: "64px" }}
-        />
-      ) : (
-        null
-      )}
-    </div>
-  );
-
-  if (isComingSoon) {
-    return Body;
-  }
+  const isNotMobile = useMediaQuery();
+  const avatarSize = isNotMobile
+    ? {
+        logo: { width: 96, height: 96 },
+        blockie: { size: 10, scale: 9.6 },
+        columnStyle: { maxHeight: '120px' },
+      }
+    : {
+        logo: { width: 48, height: 48 },
+        blockie: { size: 10, scale: 4.8 },
+        columnStyle: { maxHeight: '72px' },
+      };
 
   return (
     <>
-      <Link to={`/community/${id}?tab=about`} style={{ color: "inherit" }}>
-        {Body}
+      <Link to={`/community/${id}?tab=proposals`} style={{ color: 'inherit' }}>
+        <div className="is-flex is-flex-grow-1 rounded-sm border-light p-5 p-3-mobile is-flex-direction-column transition-all community-card">
+          <div className="columns is-multiline is-flex-grow-1 is-mobile">
+            <div
+              className="column is-narrow pr-2-mobile"
+              style={avatarSize.columnStyle}
+            >
+              {logo ? (
+                <div
+                  className="border-light rounded-sm"
+                  style={{
+                    ...avatarSize.logo,
+                    backgroundImage: `url(${logo})`,
+                    backgroundSize: 'cover',
+                  }}
+                />
+              ) : (
+                <Blockies
+                  seed={slug ?? `seed-${id}`}
+                  size={avatarSize.blockie.size}
+                  scale={avatarSize.blockie.scale}
+                  className="rounded-sm"
+                />
+              )}
+            </div>
+            <div
+              className="column pl-2-mobile pb-0-mobile is-flex is-flex-direction-column"
+              style={
+                isNotMobile
+                  ? {
+                      justifyContent: 'center',
+                    }
+                  : {}
+              }
+            >
+              <div className="is-size-5 is-size-6-mobile mb-2 is-4 is-6-mobile pt-0-mobile">
+                {name}
+              </div>
+              <p className="has-text-grey small-text" style={descriptionStyle}>
+                {body}
+              </p>
+            </div>
+            <div className="column is-12-mobile p-0-mobile is-narrow-tablet is-flex is-flex-direction-column is-justify-content-start">
+              <JoinCommunityButton communityId={id} darkMode={false} />
+            </div>
+          </div>
+        </div>
       </Link>
-      <div
-        style={{ position: "absolute", margin: 0, ...joinBtnTopRight }}
-      >
-        <JoinCommunityButton communityId={id} />
-      </div>
     </>
   );
 };

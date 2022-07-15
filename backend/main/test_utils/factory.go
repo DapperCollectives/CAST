@@ -45,7 +45,7 @@ func (otu *OverflowTestUtils) AddDummyVotesAndBalances(votes *[]VoteWithBalance)
 			log.Error().Err(err).Msg("AddDummyVotesAndBalances DB err - votes")
 		}
 
-		// Insert Balance
+		//Insert Balance
 		_, err = otu.A.DB.Conn.Exec(otu.A.DB.Context, `
 			INSERT INTO balances(id, addr, primary_account_balance, secondary_address, secondary_account_balance, staking_balance, script_result, stakes, block_height)
 			VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)
@@ -56,15 +56,46 @@ func (otu *OverflowTestUtils) AddDummyVotesAndBalances(votes *[]VoteWithBalance)
 	}
 }
 
+func (otu *OverflowTestUtils) AddDummyVotesAndNFTs(votes *[]VoteWithBalance) {
+	for _, vote := range *votes {
+		// Insert Vote
+		_, err := otu.A.DB.Conn.Exec(otu.A.DB.Context, `
+			INSERT INTO votes(proposal_id, addr, choice, composite_signatures, message)
+			VALUES($1, $2, $3, $4, $5)
+		`, vote.Vote.Proposal_id, vote.Vote.Addr, vote.Vote.Choice, "[]", "__msg__")
+		if err != nil {
+			log.Error().Err(err).Msg("AddDummyVotesAndNFTS DB err - votes")
+			return
+		}
+
+		// Insert all the NFTs
+		for _, NFT := range vote.NFTs {
+			_, err = otu.A.DB.Conn.Exec(otu.A.DB.Context, `
+			INSERT INTO nfts(uuid, owner_addr, proposal_id, id)
+			VALUES($1, $2, $3, $4)
+		`, uuid.New(), vote.Addr, vote.Vote.Proposal_id, NFT.ID)
+		}
+		if err != nil {
+			log.Error().Err(err).Msg("error inserting NFTs to the DB")
+			return
+		}
+	}
+}
+
+func (otu *OverflowTestUtils) ResolveUser(user int) string {
+	accountName := "emulator-user" + strconv.Itoa(user)
+	account, _ := otu.O.State.Accounts().ByName(accountName)
+	addr := "0x" + account.Address().String()
+	return addr
+}
+
 func (otu *OverflowTestUtils) AddVotes(pId int, count int) {
 	if count < 1 {
 		count = 1
 	}
 	var addr string
 	for i := 1; i < count+1; i++ {
-		accountName := "emulator-user" + strconv.Itoa(i)
-		account, _ := otu.O.State.Accounts().ByName(accountName)
-		addr = "0x" + account.Address().String()
+		addr = otu.ResolveUser(i)
 
 		_, err := otu.A.DB.Conn.Exec(otu.A.DB.Context, `
 			INSERT INTO votes(proposal_id, addr, choice, composite_signatures, message)
@@ -135,6 +166,27 @@ func (otu *OverflowTestUtils) AddCommunitiesWithUsersAndThreshold(count int, sig
 	return retIds
 }
 
+func (otu *OverflowTestUtils) AddCommunitiesWithNFTContract(count int, signer string) ([]int, *models.Community) {
+	var community *models.Community
+	retIds := []int{}
+
+	if count < 1 {
+		count = 1
+	}
+	for i := 0; i < count; i++ {
+		community = otu.GenerateCommunityWithNFTContractStruct(signer)
+		if err := community.CreateCommunity(otu.A.DB); err != nil {
+			log.Error().Err(err).Msg("error in otu.AddCommunities")
+		}
+
+		models.GrantRolesToCommunityCreator(otu.A.DB, community.Creator_addr, community.ID)
+
+		id := community.ID
+		retIds = append(retIds, id)
+	}
+	return retIds, community
+}
+
 func (otu *OverflowTestUtils) AddProposals(cId int, count int) []int {
 	if count < 1 {
 		count = 1
@@ -152,22 +204,25 @@ func (otu *OverflowTestUtils) AddProposals(cId int, count int) []int {
 	return retIds
 }
 
-func (otu *OverflowTestUtils) AddProposalsForStrategy(cId int, strategy string, count int) []int {
+func (otu *OverflowTestUtils) AddProposalsForStrategy(cId int, strategy string, count int) ([]int, []*models.Proposal) {
 	if count < 1 {
 		count = 1
 	}
 	retIds := []int{}
+	proposals := []*models.Proposal{}
 	for i := 0; i < count; i++ {
 		proposal := otu.GenerateProposalStruct("account", cId)
 		proposal.Strategy = &strategy
+		proposal.Start_time = time.Now().AddDate(0, -1, 0)
 		if err := proposal.CreateProposal(otu.A.DB); err != nil {
 			fmt.Printf("error in otu.AddProposals")
 			fmt.Printf("err: %v\n", err.Error())
 		}
 
 		retIds = append(retIds, proposal.ID)
+		proposals = append(proposals, proposal)
 	}
-	return retIds
+	return retIds, proposals
 }
 
 func (otu *OverflowTestUtils) AddActiveProposals(cId int, count int) []int {
@@ -177,7 +232,7 @@ func (otu *OverflowTestUtils) AddActiveProposals(cId int, count int) []int {
 	retIds := []int{}
 	for i := 0; i < count; i++ {
 		proposal := otu.GenerateProposalStruct("account", cId)
-		proposal.Start_time = time.Now().AddDate(0, -1, 0)
+		proposal.Start_time = time.Now().UTC().AddDate(0, -1, 0)
 		if err := proposal.CreateProposal(otu.A.DB); err != nil {
 			fmt.Printf("error in otu.AddActiveProposals")
 		}
@@ -185,6 +240,33 @@ func (otu *OverflowTestUtils) AddActiveProposals(cId int, count int) []int {
 		retIds = append(retIds, proposal.ID)
 	}
 	return retIds
+}
+
+func (otu *OverflowTestUtils) AddActiveProposalsWithStartTimeNow(cId int, count int) []int {
+	if count < 1 {
+		count = 1
+	}
+	retIds := []int{}
+	for i := 0; i < count; i++ {
+		proposal := otu.GenerateProposalStruct("account", cId)
+		proposal.Start_time = time.Now().UTC()
+		if err := proposal.CreateProposal(otu.A.DB); err != nil {
+			fmt.Printf("error in otu.AddActiveProposals")
+		}
+
+		retIds = append(retIds, proposal.ID)
+	}
+	return retIds
+}
+
+func (otu *OverflowTestUtils) UpdateProposalEndTime(pId int, endTime time.Time) {
+	_, err := otu.A.DB.Conn.Exec(otu.A.DB.Context,
+		`
+		UPDATE proposals SET end_time = $2 WHERE id = $1
+		`, pId, endTime)
+	if err != nil {
+		log.Error().Err(err).Msg("update proposal end_time DB err")
+	}
 }
 
 func (otu *OverflowTestUtils) AddLists(cId int, count int) []int {

@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"testing"
 
@@ -52,10 +51,8 @@ func TestCreateCommunity(t *testing.T) {
 	// Create Community
 	communityStruct := otu.GenerateCommunityStruct("account")
 	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
-	response := otu.CreateCommunityAPI(communityPayload)
-	fmt.Printf("%+v\n", response.Body)
 
-	// Check response code
+	response := otu.CreateCommunityAPI(communityPayload)
 	checkResponseCode(t, http.StatusCreated, response.Code)
 
 	// Parse
@@ -63,7 +60,6 @@ func TestCreateCommunity(t *testing.T) {
 	json.Unmarshal(response.Body.Bytes(), &community)
 
 	// Validate
-	assert.NotEqual(t, nil, community.Cid)
 	assert.Equal(t, utils.DefaultCommunity.Name, community.Name)
 	assert.Equal(t, utils.DefaultCommunity.Body, community.Body)
 	assert.Equal(t, utils.DefaultCommunity.Logo, community.Logo)
@@ -88,21 +84,13 @@ func TestCommunityAdminRoles(t *testing.T) {
 	response = otu.GetCommunityUsersAPI(community.ID)
 	checkResponseCode(t, http.StatusOK, response.Code)
 
-	var p test_utils.PaginatedResponseWithUser
+	var p test_utils.PaginatedResponseWithUserType
 	json.Unmarshal(response.Body.Bytes(), &p)
 
-	//loop through response, validate user types for specific index
-	for i, u := range p.Data {
-		if i == 0 && u.Addr == test_utils.AdminAddr {
-			assert.Equal(t, "member", u.User_type)
-		}
-		if i == 1 && u.Addr == test_utils.AdminAddr {
-			assert.Equal(t, "author", u.User_type)
-		}
-		if i == 2 && u.Addr == test_utils.AdminAddr {
-			assert.Equal(t, "admin", u.User_type)
-		}
-	}
+	//Admin user has all possible roles
+	assert.Equal(t, true, p.Data[0].Is_admin)
+	assert.Equal(t, true, p.Data[0].Is_author)
+	assert.Equal(t, true, p.Data[0].Is_member)
 }
 
 func TestCommunityAuthorRoles(t *testing.T) {
@@ -131,18 +119,12 @@ func TestCommunityAuthorRoles(t *testing.T) {
 	response = otu.GetCommunityUsersAPI(community.ID)
 	checkResponseCode(t, http.StatusOK, response.Code)
 
-	var p test_utils.PaginatedResponseWithUser
+	var p test_utils.PaginatedResponseWithUserType
 	json.Unmarshal(response.Body.Bytes(), &p)
 
-	//loop through response, validate user types for specific index
-	for i, u := range p.Data {
-		if i == 3 && u.Addr == test_utils.UserOneAddr {
-			assert.Equal(t, "author", u.User_type)
-		}
-		if i == 4 && u.Addr == test_utils.UserOneAddr {
-			assert.Equal(t, "member", u.User_type)
-		}
-	}
+	assert.Equal(t, false, p.Data[0].Is_admin)
+	assert.Equal(t, true, p.Data[0].Is_author)
+	assert.Equal(t, true, p.Data[0].Is_member)
 }
 
 func TestGetCommunityAPI(t *testing.T) {
@@ -175,8 +157,7 @@ func TestUpdateCommunity(t *testing.T) {
 	json.Unmarshal(response.Body.Bytes(), &oldCommunity)
 
 	// Update some fields
-	communityToUpdate := utils.UpdatedCommunity
-	payload := otu.GenerateCommunityPayload("account", &communityToUpdate)
+	payload := otu.GenerateCommunityPayload("account", &utils.UpdatedCommunity)
 
 	response = otu.UpdateCommunityAPI(oldCommunity.ID, payload)
 	checkResponseCode(t, http.StatusOK, response.Code)
@@ -187,8 +168,8 @@ func TestUpdateCommunity(t *testing.T) {
 	json.Unmarshal(response.Body.Bytes(), &updatedCommunity)
 
 	assert.Equal(t, oldCommunity.ID, updatedCommunity.ID)
-	assert.Equal(t, utils.UpdatedCommunity.Name, updatedCommunity.Name)
 	assert.Equal(t, *utils.UpdatedCommunity.Logo, *updatedCommunity.Logo)
+	assert.Equal(t, *utils.UpdatedCommunity.Strategies, *updatedCommunity.Strategies)
 	assert.Equal(t, *utils.UpdatedCommunity.Banner_img_url, *updatedCommunity.Banner_img_url)
 	assert.Equal(t, *utils.UpdatedCommunity.Website_url, *updatedCommunity.Website_url)
 	assert.Equal(t, *utils.UpdatedCommunity.Twitter_url, *updatedCommunity.Twitter_url)
@@ -196,3 +177,23 @@ func TestUpdateCommunity(t *testing.T) {
 	assert.Equal(t, *utils.UpdatedCommunity.Discord_url, *updatedCommunity.Discord_url)
 	assert.Equal(t, *utils.UpdatedCommunity.Instagram_url, *updatedCommunity.Instagram_url)
 }
+
+// func TestUpdateStrategies(t *testing.T) {
+// 	clearTable("communities")
+// 	clearTable("community_users")
+
+// 	communityStruct := otu.GenerateCommunityStruct("account")
+// 	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
+// 	response := otu.CreateCommunityAPI(communityPayload)
+
+// 	// Check response code
+// 	checkResponseCode(t, http.StatusCreated, response.Code)
+
+// 	// Fetch community to compare updated version against
+// 	response = otu.GetCommunityAPI(1)
+
+// 	// Get the original community from the API
+// 	var oldCommunity models.Community
+// 	json.Unmarshal(response.Body.Bytes(), &oldCommunity)
+
+// }
