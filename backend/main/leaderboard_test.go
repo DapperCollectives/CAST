@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"sort"
 	"testing"
@@ -13,7 +12,6 @@ import (
 )
 
 func TestGetLeaderboard(t *testing.T) {
-	fmt.Printf("TestGetLeaderboard")
 
 	clearTable("communities")
 	clearTable("community_users")
@@ -22,7 +20,6 @@ func TestGetLeaderboard(t *testing.T) {
 	clearTable("votes")
 
 	communityId := otu.AddCommunities(1)[0]
-	fmt.Printf("communityId: %d\n", communityId)
 
 	expectedUsers := 2
 	expectedProposals := 2
@@ -31,13 +28,10 @@ func TestGetLeaderboard(t *testing.T) {
 	expectedScore := expectedProposals
 
 	otu.GenerateVotes(communityId, expectedProposals, expectedUsers)
-	fmt.Printf("Generated Votes")
 
 	// Remove all achievements to test base case for scoring
-	clearTable("user_achievements")
 
 	response := otu.GetCommunityLeaderboardAPI(communityId)
-	fmt.Printf("Response %+v", response.Body)
 	checkResponseCode(t, http.StatusOK, response.Code)
 
 	var p test_utils.PaginatedResponseWithLeaderboardUser
@@ -45,8 +39,6 @@ func TestGetLeaderboard(t *testing.T) {
 
 	receivedUser1Score := p.Data[0].Score
 	receivedUser2Score := p.Data[0].Score
-
-	fmt.Printf("p %+v", p)
 
 	assert.Equal(t, expectedUsers, len(p.Data))
 	assert.Equal(t, expectedScore, receivedUser1Score)
