@@ -4,6 +4,8 @@ const networksConfig = {
     walletDiscovery:
       process.env.REACT_APP_EMULATOR_WALLET_DISCOVERY ||
       'http://localhost:8701/fcl/authn',
+    walletDiscoveryApi: null,
+    walletDiscoveryInclude: [],
     strategiesConfig: {
       'one-address-one-vote': {
         name: 'FlowToken',
@@ -15,6 +17,8 @@ const networksConfig = {
   testnet: {
     accessApi: 'https://access-testnet.onflow.org',
     walletDiscovery: 'https://fcl-discovery.onflow.org/testnet/authn',
+    walletDiscoveryApi: 'https://fcl-discovery.onflow.org/api/testnet/authn',
+    walletDiscoveryInclude: ['0x82ec283f88a62e65'],
     strategiesConfig: {
       'one-address-one-vote': {
         name: 'FlowToken',
@@ -26,6 +30,8 @@ const networksConfig = {
   mainnet: {
     accessApi: 'https://mainnet.onflow.org',
     walletDiscovery: 'https://fcl-discovery.onflow.org/authn',
+    walletDiscoveryApi: 'https://fcl-discovery.onflow.org/api/authn',
+    walletDiscoveryInclude: ['0xead892083b3e2c6c'],
     strategiesConfig: {
       'one-address-one-vote': {
         name: 'FlowToken',

@@ -54,14 +54,21 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
   };
 
   useEffect(() => {
-    const { accessApi, walletDiscovery } = networks[network];
+    const {
+      accessApi,
+      walletDiscovery,
+      walletDiscoveryApi,
+      walletDiscoveryInclude,
+    } = networks[network];
     fcl
       .config({
         '0xFUNGIBLETOKENADDRESS':
           network === 'testnet' ? '0x9a0766d93b6608b7' : '0xf233dcee88fe0abe',
       })
       .put('accessNode.api', accessApi) // connect to Flow
-      .put('discovery.wallet', walletDiscovery); // use Blocto wallet
+      .put('discovery.wallet', walletDiscovery) // use wallets on public discovery
+      .put('discovery.authn.endpoint', walletDiscoveryApi) // public discovery api endpoint
+      .put('discovery.authn.include', walletDiscoveryInclude); // opt-in wallets
 
     try {
       const contracts = require('../contracts.json');
