@@ -11,7 +11,7 @@ export default function CommunityLinks({
 } = {}) {
   return (
     <div className="columns my-0 is-multiline">
-      <Title>Links</Title>
+      <Title className="column is-12 py-0">Links</Title>
       {websiteUrl && (
         <a
           className="column pt-0 pb-1 is-12 is-flex is-align-items-center has-text-black"
