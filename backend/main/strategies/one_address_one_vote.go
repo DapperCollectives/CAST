@@ -22,13 +22,7 @@ func (s *OneAddressOneVote) FetchBalance(db *s.Database, b *models.Balance, sc *
 	}
 
 	if b.ID == "" {
-		err := b.FetchAddressBalanceAtBlockHeight(sc, b.Addr, b.BlockHeight)
-		if err != nil {
-			log.Error().Err(err).Msg("error fetching address b at blockheight.")
-			return nil, err
-		}
-
-		if err = b.CreateBalance(db); err != nil {
+		if err := b.CreateBalance(db); err != nil {
 			log.Error().Err(err).Msg("error saving b to DB")
 			return nil, err
 		}
