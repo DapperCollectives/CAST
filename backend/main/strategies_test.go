@@ -162,6 +162,39 @@ func TestBalanceOfNFTsStrategy(t *testing.T) {
 		expectedWeight := float64(1.00)
 		assert.Equal(t, expectedWeight, *vote.Weight)
 	})
+
+	t.Run("Attempt to cheat the NFT strategy", func(t *testing.T) {
+		proposalWithChoices := models.NewProposalResults(proposalId, choices)
+		_ = otu.TallyResultsForBalanceOfNfts(votes, proposalWithChoices)
+
+		response := otu.GetProposalResultsAPI(proposalId)
+		CheckResponseCode(t, http.StatusOK, response.Code)
+
+		var correctResults models.ProposalResults
+		json.Unmarshal(response.Body.Bytes(), &correctResults)
+
+		otu.SetupAccountForNFTs("user6")
+		otu.TransferNFT("user2", "user3", 1)
+
+		cheatVote, err := otu.GenerateSingleVoteWithNFT(proposalId, 3, contract)
+		if err != nil {
+			t.Error(err)
+		}
+		votesWithCheat := append(*votes, *cheatVote)
+		cheatResults := otu.TallyResultsForBalanceOfNfts(&votesWithCheat, proposalWithChoices)
+
+		response = otu.GetProposalResultsAPI(proposalId)
+		CheckResponseCode(t, http.StatusOK, response.Code)
+
+		json.Unmarshal(response.Body.Bytes(), &cheatResults)
+
+		//weight should be the same as before the cheat vote was added
+		//because the cheat vote should be ignored by the server
+		//therefor the cheatResults should be the same as the correctResults
+		assert.Equal(t, correctResults.Proposal_id, cheatResults.Proposal_id)
+		assert.Equal(t, correctResults.Results_float["a"], cheatResults.Results_float["a"])
+		assert.Equal(t, correctResults.Results_float["b"], cheatResults.Results_float["b"])
+	})
 }
 
 /* Staked Token Weighted Default */

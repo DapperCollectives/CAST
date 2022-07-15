@@ -98,6 +98,33 @@ func (otu *OverflowTestUtils) GenerateListOfVotes(proposalId int, count int) *[]
 	return &votes
 }
 
+func (otu *OverflowTestUtils) GenerateCheatVote(proposalId int, count int) *[]VoteWithBalance {
+	votes := make([]VoteWithBalance, count)
+	choices := []string{"a", "b"}
+	for i := 0; i < count; i++ {
+		addr := "0x" + strconv.Itoa(i)
+		randomNumber := rand.Intn(2)
+		choice := choices[randomNumber]
+		v := models.Vote{
+			Proposal_id: proposalId, Addr: addr, Choice: choice,
+		}
+
+		// Balance is 1 FLOW * index
+		balance := 100000000 * (i + 1)
+
+		vote := VoteWithBalance{
+			Vote:                    v,
+			Primary_account_balance: uint64(balance),
+			Staking_balance:         uint64(balance * 5), // Make this different so staked/reg strats dont have same results
+			Block_height:            uint64(0),
+		}
+
+		votes[i] = vote
+	}
+
+	return &votes
+}
+
 func (otu *OverflowTestUtils) GenerateListOfVotesWithNFTs(
 	proposalId int,
 	count int,
@@ -135,6 +162,33 @@ func (otu *OverflowTestUtils) GenerateListOfVotesWithNFTs(
 	return &votes, nil
 }
 
+func (otu *OverflowTestUtils) GenerateSingleVoteWithNFT(
+	proposalId int,
+	accountNumber int,
+	contract *shared.Contract,
+) (*VoteWithBalance, error) {
+	addr := otu.ResolveUser(1)
+	randomNumber := rand.Intn(2)
+	choices := []string{"a", "b"}
+	choice := choices[randomNumber]
+	v := models.Vote{
+		Proposal_id: proposalId, Addr: addr, Choice: choice,
+	}
+
+	nftIds, err := otu.Adapter.GetNFTIds(addr, contract)
+	if err != nil {
+		return nil, err
+	}
+
+	vote := otu.CreateNFTVote(v, nftIds, contract)
+	balance := 100000000 * (accountNumber)
+	vote.Primary_account_balance = uint64(balance)
+	vote.Staking_balance = uint64(balance * 5)
+	vote.Block_height = uint64(0)
+
+	return &vote, nil
+}
+
 func (otu *OverflowTestUtils) CreateNFTVote(v models.Vote, ids []interface{}, contract *shared.Contract) VoteWithBalance {
 	nfts := []models.NFT{}
 
@@ -160,13 +214,19 @@ func (otu *OverflowTestUtils) CreateNFTVote(v models.Vote, ids []interface{}, co
 	return vote
 }
 
+func (otu *OverflowTestUtils) SetupAccountForNFTs(account string) {
+	otu.O.TransactionFromFile("setup_account").
+		SignProposeAndPayAs(account).
+		RunPrintEventsFull()
+}
+
 func (otu *OverflowTestUtils) CreateNFTCollection(account string) {
 	otu.O.TransactionFromFile("create_collection").
 		SignProposeAndPayAs(account).
 		RunPrintEventsFull()
 }
 
-func (otu *OverflowTestUtils) MintNFT(signer string, recipient string) {
+func (otu *OverflowTestUtils) MintNFT(signer, recipient string) {
 	otu.O.TransactionFromFile("mint_nft").
 		SignProposeAndPayAsService().
 		Args(otu.O.Arguments().
@@ -177,8 +237,11 @@ func (otu *OverflowTestUtils) MintNFT(signer string, recipient string) {
 		RunPrintEventsFull()
 }
 
-func (otu *OverflowTestUtils) SetupAccountForNFTs(account string) {
-	otu.O.TransactionFromFile("setup_account").
-		SignProposeAndPayAs(account).
+func (otu *OverflowTestUtils) TransferNFT(signer, recipient string, id uint64) {
+	otu.O.TransactionFromFile("transfer_nft").
+		SignProposeAndPayAs(signer).
+		Args(otu.O.Arguments().
+			Account(recipient).
+			UInt64(id)).
 		RunPrintEventsFull()
 }

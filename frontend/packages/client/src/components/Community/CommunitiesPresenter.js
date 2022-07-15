@@ -37,7 +37,7 @@ const CommunitiesPresenter = ({
       <h1 className="is-uppercase small-text communities">{title}</h1>
       <div className="columns is-multiline">
         {communities.map((community, index) => {
-          const { logo, name, description, id, isComingSoon, slug } = community;
+          const { logo, name, body, id, isComingSoon, slug } = community;
           return (
             <div
               className={`column ${columnSize} is-12-tablet`}
@@ -47,7 +47,7 @@ const CommunitiesPresenter = ({
               <CommunityCard
                 logo={logo}
                 name={name}
-                description={description}
+                body={body}
                 id={id}
                 isComingSoon={isComingSoon}
                 key={index}
