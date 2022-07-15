@@ -106,5 +106,5 @@ func (c *SnapshotClient) GetLatestSnapshot() (*Snapshot, error) {
 
 // Don't hit snapshot service if ENV is TEST or DEV
 func (c *SnapshotClient) bypass() bool {
-	return c.Env == "TEST" || c.Env == "DEV"
+	return c.Env == "TEST" || c.Env == "DEV" || c.Env == "STAGING"
 }
