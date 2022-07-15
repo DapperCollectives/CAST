@@ -2,11 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"testing"
 
 	"github.com/DapperCollectives/CAST/backend/main/models"
-	"github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/DapperCollectives/CAST/backend/main/test_utils"
 	utils "github.com/DapperCollectives/CAST/backend/main/test_utils"
 	"github.com/stretchr/testify/assert"
@@ -143,10 +143,12 @@ func TestGetUserCommunities(t *testing.T) {
 	response = otu.GetUserCommunitiesAPI(utils.AdminAddr)
 	checkResponseCode(t, http.StatusOK, response.Code)
 
-	var p shared.PaginatedResponse
+	var p test_utils.PaginatedResponseWithUserCommunity
 	json.Unmarshal(response.Body.Bytes(), &p)
+	fmt.Println(p.Data[0].Roles)
 
-	assert.Equal(t, 3, p.TotalRecords)
+	assert.Equal(t, 1, p.TotalRecords)
+	assert.Equal(t, "member,author,admin", p.Data[0].Roles)
 }
 
 func TestDeleteUserFromCommunity(t *testing.T) {
