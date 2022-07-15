@@ -1,21 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { ArrowLeft, CheckMark } from '../Svg';
 import Loader from '../Loader';
-import defaultsDeep from 'lodash/defaultsDeep';
-
-const defaultStyles = {
-  currentStep: {
-    icon: {
-      textColor: 'has-text-black',
-      hexBackgroundColor: 'has-background-orange',
-    },
-  },
-  completeStep: {
-    icon: {
-      hexBackgroundColor: '#44C42F',
-    },
-  },
-};
 
 function StepByStep({
   finalLabel,
@@ -26,10 +11,7 @@ function StepByStep({
   submittingMessage,
   passNextToComp = false,
   passSubmitToComp = false,
-  styleConfig = {},
 } = {}) {
-  const customStyle = defaultsDeep(styleConfig, defaultStyles);
-
   const [currentStep, setCurrentStep] = useState(0);
   const [showPreStep, setShowPreStep] = useState(!!preStep);
   const [isStepValid, setStepValid] = useState(false);
@@ -94,15 +76,12 @@ function StepByStep({
       stepClasses.push('mb-6 is-align-items-center');
     }
 
-    const currentStepIconStyle = Object.values(
-      customStyle.currentStep.icon
-    ).join(' ');
-
     if (!showPreStep && stepIdx === currentStep) {
       return (
         <div className={`is-flex ${stepClasses.join(' ')}`} key={stepIdx}>
           <div
-            className={`rounded-full ${currentStepIconStyle} is-flex is-align-items-center is-justify-content-center`}
+            className="rounded-full has-text-black has-background-orange is-flex 
+              is-align-items-center is-justify-content-center"
             style={{
               width: 30,
               height: 30,
@@ -116,9 +95,7 @@ function StepByStep({
     } else if (!showPreStep && currentStep > stepIdx) {
       return (
         <div className={`is-flex ${stepClasses.join(' ')}`} key={stepIdx}>
-          <CheckMark
-            circleFill={customStyle.completeStep.icon.hexBackgroundColor}
-          />
+          <CheckMark circleFill="#44C42F" />
           {stepLabel ? <span className="ml-4">{stepLabel}</span> : divider}
         </div>
       );

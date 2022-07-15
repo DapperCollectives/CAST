@@ -137,14 +137,6 @@ export default function CommunityCreate() {
     finalLabel: 'Publish',
     onSubmit,
     isSubmitting: creatingCommunity && !error,
-    styleConfig: {
-      currentStep: {
-        icon: {
-          textColor: 'has-text-white',
-          backgroundColor: 'has-background-black',
-        },
-      },
-    },
     submittingMessage: 'Creating community...',
     passNextToComp: true,
     passSubmitToComp: true,

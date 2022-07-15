@@ -34,7 +34,9 @@ export default function JoinCommunityButton({
     }
   }, [user?.addr, isModalErrorOpened, closeModal, setIsModalErrorOpened]);
 
-  const joinCommunity = async () => {
+  const joinCommunity = async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
     if (!user?.addr) {
       openModal(
         React.createElement(Error, {
@@ -62,7 +64,9 @@ export default function JoinCommunityButton({
     }
   };
 
-  const leaveCommunity = async () => {
+  const leaveCommunity = async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
     const { success } = await deleteUserFromCommunity({
       communityId,
       user,
