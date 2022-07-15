@@ -5,6 +5,7 @@ import (
 
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/georgysavva/scany/pgxscan"
+	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 )
 
@@ -45,7 +46,7 @@ func (b *Balance) CreateBalance(db *s.Database) error {
 	`
 	_, err := db.Conn.Exec(db.Context, sql,
 		b.Addr, b.PrimaryAccountBalance, b.SecondaryAddress, b.SecondaryAccountBalance,
-		b.StakingBalance, b.ScriptResult, b.Stakes, b.BlockHeight, b.ID,
+		b.StakingBalance, b.ScriptResult, b.Stakes, b.BlockHeight, uuid.New(),
 	)
 
 	if err != nil {
