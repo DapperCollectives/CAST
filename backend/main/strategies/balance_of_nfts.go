@@ -12,6 +12,7 @@ import (
 
 type BalanceOfNfts struct {
 	shared.StrategyStruct
+	shared.SnapshotClient
 }
 
 func (b *BalanceOfNfts) FetchBalance(
@@ -58,6 +59,8 @@ func (b *BalanceOfNfts) FetchBalance(
 			return nil, err
 		}
 
+		//only if the NFT ID is not already in the DB,
+		//do we add the balance
 		if !doesExist && err == nil {
 			err = models.CreateUserNFTRecord(db, vb)
 			balance.NFTCount = len(vb.NFTs)
@@ -73,7 +76,6 @@ func (b *BalanceOfNfts) TallyVotes(
 ) (models.ProposalResults, error) {
 
 	for _, v := range votes {
-		//print the length of v.NFTs
 		nftCount := len(v.NFTs)
 		r.Results_float[v.Choice] += float64(nftCount) * math.Pow(10, -8)
 	}
@@ -125,7 +127,12 @@ func (s *BalanceOfNfts) GetVotes(
 	return votes, nil
 }
 
-func (b *BalanceOfNfts) InitStrategy(f *shared.FlowAdapter, db *shared.Database) {
-	b.FlowAdapter = f
-	b.DB = db
+func (s *BalanceOfNfts) InitStrategy(
+	f *shared.FlowAdapter,
+	db *shared.Database,
+	sc *s.SnapshotClient,
+) {
+	s.FlowAdapter = f
+	s.DB = db
+	s.SnapshotClient = *sc
 }

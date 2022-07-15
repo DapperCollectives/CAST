@@ -1,14 +1,15 @@
 import React from 'react';
 import CommunityCard from './CommunityCard';
-
+import classnames from 'classnames';
 /**
  * CommunitiesPresenter will group communities on a row bases,
  * will use elementsPerRow to determine how many communities to render per row
  */
 const CommunitiesPresenter = ({
+  classNames,
   title,
   elementsPerRow = 2,
-  communities,
+  communities = [],
 } = {}) => {
   // used to get column size based on number of elements
   // per row
@@ -27,12 +28,16 @@ const CommunitiesPresenter = ({
     }
   }
 
+  const containerClasses = classnames('container', {
+    [classNames]: !!classNames,
+  });
+
   return (
-    <div className="container">
+    <div className={containerClasses}>
       <h1 className="is-uppercase small-text communities">{title}</h1>
       <div className="columns is-multiline">
         {communities.map((community, index) => {
-          const { logo, name, description, id, isComingSoon, slug } = community;
+          const { logo, name, body, id, isComingSoon, slug } = community;
           return (
             <div
               className={`column ${columnSize} is-12-tablet`}
@@ -42,7 +47,7 @@ const CommunitiesPresenter = ({
               <CommunityCard
                 logo={logo}
                 name={name}
-                description={description}
+                body={body}
                 id={id}
                 isComingSoon={isComingSoon}
                 key={index}

@@ -3,6 +3,8 @@ package models
 import (
 	"encoding/hex"
 	"errors"
+	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -43,6 +45,11 @@ type NFT struct {
 	ID            uint64    `json:"id"`
 	Contract_addr string    `json:"contract_addr"`
 	Created_at    time.Time `json:"created_at"`
+}
+
+type VotingStreak struct {
+	Proposal_id uint64
+	Addr        string
 }
 
 const (
@@ -200,37 +207,29 @@ func (v *Vote) GetVoteById(db *s.Database) error {
 }
 
 func (v *Vote) CreateVote(db *s.Database) error {
-	var defaultEarlyVoteLength = 1
+	var defaultEarlyVoteLength = 2 // in hours
 
-	// Create Vote
-	err := db.Conn.QueryRow(db.Context,
-		`
-		INSERT INTO votes(proposal_id, addr, choice, composite_signatures, cid, message)
-		VALUES($1, $2, $3, $4, $5, $6)
-		RETURNING id, created_at
-	`, v.Proposal_id, v.Addr, v.Choice, v.Composite_signatures, v.Cid, v.Message).Scan(&v.ID, &v.Created_at)
+	err := createVote(db, v)
+	if err != nil {
+		return err
+	}
 
-	// Get Proposal Start time to check for early vote
-	var proposal Proposal
-	pgxscan.Get(db.Context, db.Conn, &proposal,
-		`SELECT start_time, community_id from proposals
-		WHERE id = $1`,
-		v.Proposal_id)
+	proposal, err := getProposal(db, v.Proposal_id)
+	if err != nil {
+		return err
+	}
 
 	isEarlyVote := v.Created_at.Before(proposal.Start_time.Add(time.Hour * time.Duration(defaultEarlyVoteLength)))
 
 	if isEarlyVote {
-		err = db.Conn.QueryRow(db.Context,
-			`
-			INSERT INTO community_users_achievements(addr, achievement_type, community_id, proposals)
-			VALUES($1, $2, $3, $4)
-			RETURNING id
-		`, v.Addr, EarlyVote, proposal.Community_id, []int{v.Proposal_id}).Scan(&v.ID)
-
-		return err
+		err = AddEarlyVoteAchievement(db, v, proposal)
+		if err != nil {
+			return err
+		}
 	}
 
-	return err // will be nil unless something went wrong
+	err = AddStreakAchievement(db, v, proposal)
+	return err
 }
 
 func (v *Vote) ValidateMessage(proposal Proposal) error {
@@ -336,4 +335,180 @@ func DoesNFTExist(db *s.Database, v *VoteWithBalance) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func createVote(db *s.Database, v *Vote) error {
+	// Create Vote
+	err := db.Conn.QueryRow(db.Context,
+		`
+			INSERT INTO votes(proposal_id, addr, choice, composite_signatures, cid, message)
+			VALUES($1, $2, $3, $4, $5, $6)
+			RETURNING id, created_at
+		`, v.Proposal_id, v.Addr, v.Choice, v.Composite_signatures, v.Cid, v.Message).Scan(&v.ID, &v.Created_at)
+
+	return err
+}
+
+func getProposal(db *s.Database, proposalId int) (Proposal, error) {
+	var proposal Proposal
+	err := pgxscan.Get(db.Context, db.Conn, &proposal,
+		`SELECT start_time, community_id from proposals
+		WHERE id = $1`,
+		proposalId)
+
+	return proposal, err
+}
+
+func AddEarlyVoteAchievement(db *s.Database, v *Vote, p Proposal) error {
+
+	//Unique identifier ensuring there are no duplicate early vote achievements
+	earlyVoteDetails := fmt.Sprintf("%s:%s:%d:%d", EarlyVote, v.Addr, p.Community_id, v.Proposal_id)
+	err := db.Conn.QueryRow(db.Context,
+		`
+			INSERT INTO user_achievements(addr, achievement_type, community_id, proposals, details)
+			VALUES($1, $2, $3, $4, $5)
+			ON CONFLICT (details)
+			DO NOTHING
+			RETURNING id
+		`, v.Addr, EarlyVote, p.Community_id, []int{v.Proposal_id}, earlyVoteDetails).Scan(&v.ID)
+
+	if checkErrorIgnoreNoRows(err) {
+		return err
+	}
+
+	return nil
+}
+
+func AddStreakAchievement(db *s.Database, v *Vote, p Proposal) error {
+	var defaultStreakLength = 3
+
+	votingStreak, err := getUserVotingStreak(db, v.Addr, p.Community_id)
+	if err != nil {
+		return err
+	}
+
+	if len(votingStreak) >= defaultStreakLength {
+		var proposals []uint64
+		for i, vote := range votingStreak {
+			if vote.Addr != "" {
+				proposals = append(proposals, vote.Proposal_id)
+			}
+
+			
+			if len(proposals) >= defaultStreakLength && (i == len(votingStreak)-1 || (i < len(votingStreak)-1 && votingStreak[i+1].Addr == "")) {
+				// ensure proposals always ordered to guarantee no duplicates
+				sort.Slice(proposals, func(i, j int) bool {
+					return proposals[i] < proposals[j]
+				})
+				
+				//Unique identifier for current streak
+				currentStreakDetails := fmt.Sprintf("%s:%s:%d:%s", Streak, v.Addr, p.Community_id, strings.Trim(strings.Join(strings.Fields(fmt.Sprint(proposals)), ","), "[]"))
+
+				if len(proposals) == defaultStreakLength {
+					err = addDefaultStreak(db, vote.Addr, p.Community_id, proposals, currentStreakDetails)
+				} else {
+					err = addOrUpdateStreak(db, vote.Addr, p.Community_id, proposals, currentStreakDetails)
+				}
+
+				if checkErrorIgnoreNoRows(err) {
+					return err
+				} else {
+					err = nil
+				}
+
+				// streak inserted, reset to check for other streaks
+				proposals = nil
+			}
+			if v.Addr == "" {
+				proposals = nil
+			}
+		}
+	}
+
+	return nil
+}
+
+func AddWinningVoteAchievement(db *s.Database, votes []*VoteWithBalance, p ProposalResults, communityId int) error {
+	maxVotes := 0
+	winningChoice := ""
+	for k, v := range p.Results {
+		if v > maxVotes {
+			maxVotes = v
+			winningChoice = k
+		}
+	}
+	for _, v := range votes {
+		if v.Choice == winningChoice {
+			details := fmt.Sprintf("%s:%s:%d:%d", WinningVote, v.Addr, communityId, v.Proposal_id)
+			err := db.Conn.QueryRow(db.Context,
+				`
+					INSERT INTO user_achievements(addr, achievement_type, community_id, proposals, details)
+					VALUES($1, $2, $3, $4, $5)
+					ON CONFLICT (details)
+					DO NOTHING
+					RETURNING id
+				`, v.Addr, WinningVote, communityId, []int{v.Proposal_id}, details).Scan(&v.ID)
+
+			if checkErrorIgnoreNoRows(err) {
+				// Row already exists, so we have previously calculated
+				// winning achievements for this proposal
+				return nil
+			} else if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func getUserVotingStreak(db *s.Database, addr string, communityId int) ([]VotingStreak, error) {
+	// Determine if this vote is part of a streak
+	// Proposals with the user address count as a vote for that proposal
+	// NULL means the user did not vote
+	sql := fmt.Sprintf(`
+		SELECT p.id as proposal_id, 
+		CASE WHEN v.addr is NULL THEN '' ELSE v.addr END as addr 
+		FROM proposals p 
+    LEFT OUTER JOIN (
+        SELECT * FROM votes where addr = '%s'
+    ) v ON v.proposal_id = p.id 
+    where p.community_id = $1 
+    ORDER BY start_time ASC
+		`, addr)
+	var votingStreak []VotingStreak
+	err := pgxscan.Select(db.Context, db.Conn, &votingStreak, sql, communityId)
+	return votingStreak, err
+}
+
+func addDefaultStreak(db *s.Database, addr string, communityId int, proposals []uint64, details string) error {
+	v := new(Vote)
+	sql := `
+						INSERT INTO user_achievements(addr, achievement_type, community_id, proposals, details)
+						VALUES($1, $2, $3, $4, $5)
+						ON CONFLICT (details)
+						DO NOTHING
+					`
+	return db.Conn.QueryRow(db.Context, sql, addr, Streak, communityId, proposals, details).Scan(&v.ID)
+}
+
+func addOrUpdateStreak(db *s.Database, addr string, communityId int, proposals []uint64, details string) error {
+	v := new(Vote)
+	// If previous streak exists, then update with new streak details, or insert new streak
+	// e.g. If previous streak = 1,2,3 and current streak = 1,2,3,4 then update row with current streak details
+	previousStreakDetails := fmt.Sprintf("%s:%s:%d:%s", Streak, addr, communityId, strings.Trim(strings.Join(strings.Fields(fmt.Sprint(proposals[:len(proposals)-1])), ","), "[]"))
+	sql := `
+						INSERT INTO user_achievements(addr, achievement_type, community_id, proposals, details)
+						VALUES($1, $2, $3, $4, $5)
+						ON CONFLICT (details)
+						DO UPDATE SET proposals = $4, details = $6
+						RETURNING id
+					`
+	return db.Conn.QueryRow(db.Context, sql, addr, Streak, communityId, proposals, previousStreakDetails, details).Scan(&v.ID)
+}
+
+func checkErrorIgnoreNoRows(err error) bool {
+	if err != nil && fmt.Sprintf("%s", err) != pgx.ErrNoRows.Error() {
+		return true
+	}
+	return false
 }

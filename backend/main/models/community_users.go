@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"sort"
 
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/georgysavva/scany/pgxscan"
@@ -40,9 +41,11 @@ type CommunityUserPayload struct {
 }
 
 type UserAchievements = []struct {
-	Address   string
-	NumVotes  int
-	EarlyVote int
+	Address     string
+	NumVotes    int
+	EarlyVote   int
+	Streak      int
+	WinningVote int
 }
 
 type LeaderboardUserPayload struct {
@@ -107,25 +110,54 @@ func GetUsersForCommunityByType(db *s.Database, communityId, start, count int, u
 }
 
 func GetCommunityLeaderboard(db *s.Database, communityId, start, count int) ([]LeaderboardUserPayload, int, error) {
-	var userAchievements = []struct {
-		Address   string
-		NumVotes  int
-		EarlyVote int
-	}{}
 	var leaderboardUsers = []LeaderboardUserPayload{}
 	var defaultEarlyVoteWeight = 1
+	var defaultStreakWeight = 1
+	var defaultWinningVoteWeight = 1
 
-	userAchievements, err := getUserAchievements(db, communityId, start, count)
+	userAchievements, err := getUserAchievements(db, communityId)
 
 	if err != nil {
 		return leaderboardUsers, 0, err
 	}
 
+	if len(userAchievements) == 0 {
+		return leaderboardUsers, 0, nil
+	}
+
 	for _, user := range userAchievements {
 		var leaderboardUser = LeaderboardUserPayload{}
 		leaderboardUser.Addr = user.Address
-		leaderboardUser.Score = user.NumVotes + (user.EarlyVote * defaultEarlyVoteWeight)
+		leaderboardUser.Score = user.NumVotes + (user.EarlyVote * defaultEarlyVoteWeight) + (user.Streak * defaultStreakWeight) + (user.WinningVote * defaultWinningVoteWeight)
 		leaderboardUsers = append(leaderboardUsers, leaderboardUser)
+	}
+
+	// Order by score descending
+	sort.Slice(leaderboardUsers, func(i, j int) bool {
+		return leaderboardUsers[i].Score > leaderboardUsers[j].Score
+	})
+
+	// Top users on leaderboard (e.g 10)
+	if start == 0 && len(leaderboardUsers) >= count {
+		leaderboardUsers = leaderboardUsers[0:count]
+	} else {
+		startIndex := start * count
+		endIndex := start*count + count
+
+		// If index invalid, set to last page
+		if startIndex >= len(leaderboardUsers) {
+			if len(leaderboardUsers)-count >= 0 {
+				startIndex = len(leaderboardUsers) - count
+			} else {
+				startIndex = 0
+			}
+		}
+
+		if endIndex <= len(leaderboardUsers) {
+			leaderboardUsers = leaderboardUsers[startIndex:endIndex]
+		} else {
+			leaderboardUsers = leaderboardUsers[startIndex:]
+		}
 	}
 
 	totalUsers := getTotalUsersForCommunity(db, communityId)
@@ -281,34 +313,51 @@ func getTotalUsersForCommunity(db *s.Database, communityId int) int {
 	return totalUsers
 }
 
-func getUserAchievements(db *s.Database, communityId int, start int, count int) (UserAchievements, error) {
+func getUserAchievements(db *s.Database, communityId int) (UserAchievements, error) {
 	var userAchievements UserAchievements
 	// Retrieve each user in the community with totals for
 	// their votes and achievements (e.g. early votes, streaks and winning choices)
 	// Note 1: crosstab is a postgres extension that creates a pivot table.
 	// Achievements are joined as columns for each user.
-	// Note 2: Subselect community_id not replaced properly by $1, so has been
+	// Note 2: Subselects community_id not replaced properly by $1, so has been
 	// substituted in string first.
 	sql := fmt.Sprintf(
 		`
-		SELECT v.addr as address, count(*) as num_votes, 
-			CASE WHEN a.early_vote is NULL THEN 0 ELSE a.early_vote END as early_vote 
-			FROM votes v 
-			LEFT OUTER JOIN proposals p ON p.id = v.proposal_id
-			LEFT OUTER JOIN (
-				SELECT * FROM crosstab(
-					$$SELECT addr, achievement_type, count(*) FROM community_users_achievements 
-					WHERE community_id = %d
-					GROUP BY addr, achievement_type
-					ORDER BY 1,2$$
-				) AS ct(address varchar(18), early_vote bigint)
-			) a ON v.addr = a.address
+		SELECT v.addr as address, count(*) as num_votes,
+		COALESCE(a.early_vote, 0) as early_vote,
+		COALESCE(b.streak, 0) as streak,
+		COALESCE(c.winning_vote, 0) as winning_vote
+		FROM votes v
+		LEFT OUTER JOIN proposals p ON p.id = v.proposal_id
+		LEFT OUTER JOIN (
+			SELECT * FROM crosstab(
+				$$SELECT addr, achievement_type, count(*) FROM user_achievements
+				WHERE community_id = %d and achievement_type = 'earlyVote'
+				GROUP BY addr, achievement_type
+				ORDER BY 1,2$$
+			) AS ct(address varchar(18), early_vote bigint)
+		) a ON v.addr = a.address
+		LEFT OUTER JOIN (
+			SELECT * FROM crosstab(
+				$$SELECT addr, achievement_type, count(*) FROM user_achievements
+				WHERE community_id = %d and achievement_type = 'streak'
+				GROUP BY addr, achievement_type
+				ORDER BY 1,2$$
+			) AS ct(address varchar(18), streak bigint)
+		) b ON v.addr = b.address
+		LEFT OUTER JOIN (
+			SELECT * FROM crosstab(
+				$$SELECT addr, achievement_type, count(*) FROM user_achievements
+				WHERE community_id = %d and achievement_type = 'winningVote'
+				GROUP BY addr, achievement_type
+				ORDER BY 1,2$$
+			) AS ct(address varchar(18), winning_vote bigint)
+		) c ON v.addr = c.address
 			WHERE p.community_id = $1
-			GROUP BY v.addr, a.early_vote
-			LIMIT $2 OFFSET $3
-		`, communityId)
+			GROUP BY v.addr, a.early_vote, b.streak, c.winning_vote
+		`, communityId, communityId, communityId)
 
-	err := pgxscan.Select(db.Context, db.Conn, &userAchievements, sql, communityId, count, start)
+	err := pgxscan.Select(db.Context, db.Conn, &userAchievements, sql, communityId)
 
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		return nil, err

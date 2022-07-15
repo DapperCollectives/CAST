@@ -138,7 +138,7 @@ export default function StepTwo({
         onDeleteAddress={onAdminAddressDelete}
         onAddAddress={onAdminAddressAdd}
         addrType="Admins"
-        label="Domain name or wallet address"
+        label="Flow wallet address"
         validateEachAddress
         onClearField={(index) => onAdminAddressChange(index, '')}
         autoFocusOnLoad={true}
@@ -151,7 +151,7 @@ export default function StepTwo({
         onDeleteAddress={onAuthorAddressDelete}
         onAddAddress={onAuthorAddressAdd}
         addrType="Authors"
-        label="Domain name or wallet address"
+        label="Flow wallet address"
         validateEachAddress
         onClearField={(index) => onAuthorAddressChange(index, '')}
         autoFocusOnLoad={false}
