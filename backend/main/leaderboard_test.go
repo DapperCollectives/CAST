@@ -13,6 +13,7 @@ import (
 )
 
 func TestGetLeaderboard(t *testing.T) {
+
 	clearTable("communities")
 	clearTable("community_users")
 	clearTable("user_achievements")
@@ -30,7 +31,6 @@ func TestGetLeaderboard(t *testing.T) {
 	otu.GenerateVotes(communityId, expectedProposals, expectedUsers)
 
 	// Remove all achievements to test base case for scoring
-	clearTable("user_achievements")
 
 	response := otu.GetCommunityLeaderboardAPI(communityId)
 	checkResponseCode(t, http.StatusOK, response.Code)

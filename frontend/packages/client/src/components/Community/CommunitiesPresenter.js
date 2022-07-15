@@ -9,7 +9,7 @@ const CommunitiesPresenter = ({
   classNames,
   title,
   elementsPerRow = 2,
-  communities,
+  communities = [],
 } = {}) => {
   // used to get column size based on number of elements
   // per row
