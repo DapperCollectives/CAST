@@ -4,7 +4,7 @@ import { Upload } from 'components/Svg';
 import { WrapperResponsive, Loader } from 'components';
 import { getReducedImg } from 'utils';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
-import { MAX_FILE_SIZE } from 'const';
+import { MAX_AVATAR_FILE_SIZE } from 'const';
 
 function CommunityEditorProfile({
   name,
@@ -74,10 +74,10 @@ function CommunityEditorProfile({
           return;
         }
         // validate size
-        if (imageFile.size > MAX_FILE_SIZE) {
+        if (imageFile.size > MAX_AVATAR_FILE_SIZE) {
           notifyError({
             status: 'Image file size not allowed',
-            statusText: 'Please upload a new file (smaller than 5mb)',
+            statusText: 'The selected file exceeds the 2MB limit.',
           });
           return;
         }
