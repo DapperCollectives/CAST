@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"testing"
 
@@ -145,7 +144,6 @@ func TestGetUserCommunities(t *testing.T) {
 
 	var p test_utils.PaginatedResponseWithUserCommunity
 	json.Unmarshal(response.Body.Bytes(), &p)
-	fmt.Println(p.Data[0].Roles)
 
 	assert.Equal(t, 1, p.TotalRecords)
 	assert.Equal(t, "member,author,admin", p.Data[0].Roles)
