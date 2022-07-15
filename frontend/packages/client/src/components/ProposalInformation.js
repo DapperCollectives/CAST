@@ -121,7 +121,7 @@ const WrapperSpacingBottom = ({
 
 const ProposalInformation = ({
   creatorAddr = '',
-  strategies = [],
+  strategy = {},
   isCoreCreator = false,
   ipfs = '',
   ipfsUrl = '',
@@ -249,16 +249,10 @@ const ProposalInformation = ({
         >
           <p className="mb-5">Information</p>
           <InfoBlock
-            title={strategies.length === 1 ? 'Strategy' : 'Strategies'}
+            title="Strategy"
             content={
               <div className="is-flex flex-1" onClick={openStrategyModal}>
-                {strategies.map((st, index) => {
-                  return (
-                    <div className="pr-2" key={`${st}-${index}`}>
-                      {st.name}
-                    </div>
-                  );
-                })}
+                <div className="pr-2">{strategy.name}</div>
               </div>
             }
           />

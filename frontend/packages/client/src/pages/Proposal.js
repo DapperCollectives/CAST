@@ -387,7 +387,7 @@ export default function ProposalPage() {
       <StrategyModal
         isOpen={isStrategyModalOpen}
         closeModal={closeStrategyModal}
-        strategies={!strategiesError ? [proposalStrategy] : []}
+        strategy={!strategiesError ? proposalStrategy : {}}
       />
       <section className="section">
         <div className="container">
@@ -505,7 +505,7 @@ export default function ProposalPage() {
                       proposalId={proposal.id}
                       creatorAddr={proposal.creatorAddr}
                       isCoreCreator={proposal.isCore}
-                      strategies={[proposalStrategy]}
+                      strategy={proposalStrategy}
                       ipfs={proposal.ipfs}
                       ipfsUrl={proposal.ipfsUrl}
                       startTime={proposal.startTime}
@@ -556,7 +556,7 @@ export default function ProposalPage() {
                   proposalId={proposal.id}
                   creatorAddr={proposal.creatorAddr}
                   isCoreCreator={proposal.isCore}
-                  strategies={[proposalStrategy]}
+                  strategy={proposalStrategy}
                   ipfs={proposal.ipfs}
                   ipfsUrl={proposal.ipfsUrl}
                   startTime={proposal.startTime}

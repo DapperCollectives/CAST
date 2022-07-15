@@ -1,6 +1,6 @@
 import React from 'react';
 
-const StrategyModal = ({ isOpen, closeModal, strategies }) => {
+const StrategyModal = ({ isOpen, closeModal, strategy }) => {
   return (
     <div className={`modal ${isOpen ? 'is-active' : undefined}`}>
       <div className="modal-background" onClick={closeModal} />
@@ -13,7 +13,7 @@ const StrategyModal = ({ isOpen, closeModal, strategies }) => {
         >
           <div className="columns is-mobile m-0 flex-1">
             <div className="column is-flex is-align-items-center px-4 has-text-left">
-              <p className="modal-card-title">Strategies</p>
+              <p className="modal-card-title">Strategy</p>
             </div>
             <div className="column is-narrow">
               <div
@@ -26,18 +26,14 @@ const StrategyModal = ({ isOpen, closeModal, strategies }) => {
           </div>
         </header>
         <section className="modal-card-body pb-4 pt-2">
-          {strategies.map((strategy, index) => {
-            return (
-              <div className="columns m-0 is-mobile" key={`strategy-${index}`}>
-                <div className="column px-4  is-full">
-                  <p className="mb-4">{strategy.name}</p>
-                  <p className="has-text-grey mb-4 small-text">
-                    {strategy.description}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
+          <div className="columns m-0 is-mobile">
+            <div className="column px-4  is-full">
+              <p className="mb-4">{strategy.name}</p>
+              <p className="has-text-grey mb-4 small-text">
+                {strategy.description}
+              </p>
+            </div>
+          </div>
         </section>
         <footer
           className="modal-card-foot has-background-white"
