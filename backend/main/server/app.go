@@ -793,6 +793,7 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	p.Block_height = snapshotResponse.Data.BlockHeight
 	p.Snapshot_status = &snapshotResponse.Data.Status
 
 	//@TODO this whole if else block should be moved into to its own func
