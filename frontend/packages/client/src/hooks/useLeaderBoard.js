@@ -13,8 +13,8 @@ export default function useLeaderBoard({ communityId = 0, addr = '' } = {}) {
     notifyError(error);
   }
 
-  const users = data?.data?.Users ?? [];
-  const currentUser = data?.data?.CurrentUser;
+  const users = data?.data?.users ?? [];
+  const currentUser = data?.data?.currentUser;
 
   return {
     isLoading,

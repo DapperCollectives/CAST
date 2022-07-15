@@ -55,8 +55,8 @@ type LeaderboardUser struct {
 }
 
 type LeaderboardPayload struct {
-	Users       []LeaderboardUser
-	CurrentUser LeaderboardUser
+	Users       []LeaderboardUser `json:"users"`
+	CurrentUser LeaderboardUser   `json:"currentUser"`
 }
 
 func GetUsersForCommunity(db *s.Database, communityId, start, count int) ([]CommunityUserType, int, error) {
