@@ -720,14 +720,9 @@ func (a *App) getProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if strategy.Contract.Name != nil {
-		snapshotResponse, err := a.SnapshotClient.GetSnapshotStatus(strategy.Contract)
-		if err != nil {
-			log.Error().Err(err).Msg("error getting snapshot status")
-			respondWithError(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-		p.Snapshot_status = &snapshotResponse.Data.Status
+	if err := a.processSnapshotStatus(&strategy, &p); err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
 	}
 
 	respondWithJSON(w, http.StatusOK, p)
@@ -782,6 +777,7 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+
 	strategy, err := models.MatchStrategyByProposal(*community.Strategies, *p.Strategy)
 	if err != nil {
 		log.Error().Err(err).Msg("Community does not have this strategy availabe")
@@ -789,14 +785,15 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		return
 
 	}
-	snapshot, err := a.SnapshotClient.GetLatestSnapshot(strategy.Contract)
+
+	snapshotResponse, err := a.SnapshotClient.TakeSnapshot(strategy.Contract)
 	if err != nil {
-		log.Error().Err(err).Msg("error fetching latest snapshot")
+		log.Error().Err(err).Msg("error taking snapshot")
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	p.Block_height = snapshot.Block_height
+	p.Snapshot_status = &snapshotResponse.Data.Status
 
 	//@TODO this whole if else block should be moved into to its own func
 	if *community.Only_authors_to_submit == true {
@@ -1867,18 +1864,23 @@ func (a *App) validateTimestamp(timestamp string, expiry int) error {
 
 func (a *App) processSnapshotStatus(s *models.Strategy, p *models.Proposal) error {
 	var processing = "processing"
+
 	if s.Contract.Name != nil && p.Snapshot_status == &processing {
-		snapshotResponse, err := a.SnapshotClient.GetSnapshotStatus(s.Contract)
+		snapshotResponse, err := a.SnapshotClient.
+			GetSnapshotStatusAtBlockHeight(
+				s.Contract,
+				p.Block_height,
+			)
 		if err != nil {
 			return err
 		}
 
 		p.Snapshot_status = &snapshotResponse.Data.Status
-		p.Block_height = snapshotResponse.Data.BlockHeight
 
 		if err := p.UpdateSnapshotStatus(a.DB); err != nil {
 			return err
 		}
 	}
 	return nil
+
 }
