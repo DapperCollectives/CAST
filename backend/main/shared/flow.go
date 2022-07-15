@@ -469,6 +469,11 @@ func (fa *FlowAdapter) MintNFTsToServiceAccount(ctx context.Context) error {
 
 func (fa *FlowAdapter) createNFTCollection(ctx context.Context) error {
 	serviceAcctAddr, serviceAcctKey, serviceSigner := fa.ServiceAccount()
+	//print serviceAddr, AcctKey and Signer
+	log.Info().Msgf("service account address: %s", serviceAcctAddr)
+	log.Info().Msgf("service account key: %v", serviceAcctKey)
+	log.Info().Msgf("service account signer: %s", serviceSigner)
+
 	script, err := ioutil.ReadFile("./main/cadence/transactions/create_collection.cdc")
 
 	referenceBlockId, err := fa.getReferenceBlockId()
@@ -513,6 +518,10 @@ func (fa *FlowAdapter) deployContract(ctx context.Context, d Deploy) error {
 
 	serviceAcctAddr, serviceAcctKey, serviceSigner := fa.ServiceAccount()
 
+	log.Info().Msgf("service account address: %s", serviceAcctAddr)
+	log.Info().Msgf("service account key: %v", serviceAcctKey)
+	log.Info().Msgf("service account signer: %s", serviceSigner)
+
 	contents, err := ioutil.ReadFile(d.Path)
 	if err != nil {
 		log.Error().Err(err).Msg("error reading contract file")
@@ -531,13 +540,13 @@ func (fa *FlowAdapter) deployContract(ctx context.Context, d Deploy) error {
 
 	err = deployContractTx.SignEnvelope(serviceAcctAddr, serviceAcctKey.Index, serviceSigner)
 	if err != nil {
-		log.Error().Err(err).Msg("error signing transaction")
+		log.Error().Err(err).Msg("error signing deploy transaction")
 		return err
 	}
 
 	err = fa.Client.SendTransaction(ctx, *deployContractTx)
 	if err != nil {
-		log.Error().Err(err).Msg("error sending transaction")
+		log.Error().Err(err).Msg("error sending deploy transaction")
 		return err
 	}
 
