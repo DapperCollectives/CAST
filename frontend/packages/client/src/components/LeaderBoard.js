@@ -41,7 +41,7 @@ const LeaderBoard = ({
       <table className="table is-fullwidth">
         <tbody className="is-scrollable-table" style={style}>
           {!isLoading &&
-            data?.leaderBoard.map((datum, index) => {
+            data?.users.map((datum, index) => {
               const userIndex = index + 1;
               const styleIndex =
                 index === 0

@@ -13,7 +13,7 @@ export default function useLeaderBoard({ communityId = 0, addr = '' } = {}) {
     notifyError(error);
   }
 
-  const leaderBoard = data?.data?.Users ?? [];
+  const users = data?.data?.Users ?? [];
   const currentUser = data?.data?.CurrentUser;
 
   return {
@@ -21,7 +21,7 @@ export default function useLeaderBoard({ communityId = 0, addr = '' } = {}) {
     isError,
     error,
     data: {
-      leaderBoard,
+      users,
       currentUser: currentUser?.addr ? currentUser : undefined,
     },
   };
