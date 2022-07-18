@@ -34,3 +34,4 @@ export {
 export { default as FadeIn } from './FadeIn';
 export { default as UploadImageModal } from './UploadImageModal';
 export { default as Tablink } from './Tablink';
+export { default as Popover } from './Popover';
