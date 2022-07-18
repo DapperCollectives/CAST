@@ -2,12 +2,18 @@ import { checkResponse } from '../utils';
 import { COMMUNITIES_URL } from './constants';
 
 const DEFAULT_PAGE_SIZE = 10;
-const getLeaderBoardUrl = (communityId, pageSize) =>
-  `${COMMUNITIES_URL}/${communityId}/leaderboard?count=${pageSize}`;
+const getLeaderBoardUrl = (communityId, addr, pageSize) =>
+  `${COMMUNITIES_URL}/${communityId}/leaderboard?count=${pageSize}&addr=${addr}`;
 
-const fetchLeaderBoard = async (communityId, pageSize = DEFAULT_PAGE_SIZE) => {
+const fetchLeaderBoard = async (
+  communityId,
+  addr,
+  pageSize = DEFAULT_PAGE_SIZE
+) => {
   try {
-    const response = await fetch(getLeaderBoardUrl(communityId, pageSize));
+    const response = await fetch(
+      getLeaderBoardUrl(communityId, addr, pageSize)
+    );
     return await checkResponse(response);
   } catch (err) {
     throw err;

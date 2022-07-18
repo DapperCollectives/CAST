@@ -148,9 +148,7 @@ export default function ImageChoiceUploader({
       acceptedFiles.forEach((imageFile) => {
         setErrorMessage(null);
         if (imageFile.size > MAX_FILE_SIZE) {
-          setErrorMessage(
-            'Image file size not allowed: Please upload a new file (smaller than 5mb)'
-          );
+          setErrorMessage('The selected file exceeds the 5MB limit.');
           return;
         }
         const imageAsURL = URL.createObjectURL(imageFile);

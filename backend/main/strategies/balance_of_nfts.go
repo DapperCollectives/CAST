@@ -12,6 +12,7 @@ import (
 
 type BalanceOfNfts struct {
 	shared.StrategyStruct
+	shared.SnapshotClient
 }
 
 func (b *BalanceOfNfts) FetchBalance(
@@ -126,7 +127,12 @@ func (s *BalanceOfNfts) GetVotes(
 	return votes, nil
 }
 
-func (b *BalanceOfNfts) InitStrategy(f *shared.FlowAdapter, db *shared.Database) {
-	b.FlowAdapter = f
-	b.DB = db
+func (s *BalanceOfNfts) InitStrategy(
+	f *shared.FlowAdapter,
+	db *shared.Database,
+	sc *s.SnapshotClient,
+) {
+	s.FlowAdapter = f
+	s.DB = db
+	s.SnapshotClient = *sc
 }
