@@ -286,7 +286,7 @@ export default function UploadImageModal({
                   />
                 </div>
                 <div className="column pt-0 pr-0 p-0-mobile is-6">
-                  <p className="has-text-weight-bold pb-5pb-2-mobile">
+                  <p className="has-text-weight-bold pb-5 pb-2-mobile">
                     Uploaded file
                   </p>
                   <div className="columns is-multiline m-0 is-mobile">
