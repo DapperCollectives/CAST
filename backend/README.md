@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- [GoLang 1.16](https://golang.org/doc/install)
+- [GoLang 1.16+](https://golang.org/doc/install)
 - [PostgreSQL 14.1](https://www.postgresql.org/download/)
 - [Flow CLI](https://docs.onflow.org/flow-cli/install/)
   - Note: See below for how install v0.30.2 (required)
