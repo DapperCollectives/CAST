@@ -8,6 +8,8 @@ COPY ./packages/client/ ./
 
 ENV NODE_ENV=production
 
+ENV REACT_APP_FRONTEND_URL=cast.fyi
+
 RUN npm run build
 
 # DEPLOY CLIENT
