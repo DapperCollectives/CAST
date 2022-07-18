@@ -17,23 +17,25 @@ import (
 // PROPOSALS
 //////////////
 
-var strategy = "token-weighted-default"
-var proposalBody = "<html>something</html>"
-var published = "published"
-var blockHeight uint64 = 1
+var (
+	proposalBody                = "<html>something</html>"
+	published                   = "published"
+	tokenWeightedDefault        = "token-weighted-default"
+	blockHeight          uint64 = 1
 
-var DefaultProposalStruct = models.Proposal{
-	Name: "Test Proposal",
-	Body: &proposalBody,
-	Choices: []shared.Choice{
-		{Choice_text: "a"},
-		{Choice_text: "b"},
-	},
-	Creator_addr: ServiceAccountAddress,
-	Strategy:     &strategy,
-	Status:       &published,
-	Block_height: &blockHeight,
-}
+	DefaultProposalStruct = models.Proposal{
+		Name: "Test Proposal",
+		Body: &proposalBody,
+		Choices: []shared.Choice{
+			{Choice_text: "a"},
+			{Choice_text: "b"},
+		},
+		Creator_addr: ServiceAccountAddress,
+		Strategy:     &tokenWeightedDefault,
+		Status:       &published,
+		Block_height: &blockHeight,
+	}
+)
 
 func (otu *OverflowTestUtils) GetProposalsForCommunityAPI(communityId int) *httptest.ResponseRecorder {
 	req, _ := http.NewRequest("GET", "/communities/"+strconv.Itoa(communityId)+"/proposals", nil)

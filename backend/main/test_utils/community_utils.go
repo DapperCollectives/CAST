@@ -244,18 +244,3 @@ func (otu *OverflowTestUtils) GetCommunityUsersAPIByType(id int, userType string
 	response := otu.ExecuteRequest(req)
 	return response
 }
-
-// func GenerateValidUpdateCommunityPayload(addr string) []byte {
-// 	// this does a deep copy
-// 	community := ValidUpdateCommunityStruct
-
-// 	community.Signing_addr = addr
-// 	timestamp := fmt.Sprint(time.Now().UnixNano() / int64(time.Millisecond))
-// 	community.Timestamp = timestamp
-// 	compositeSignatures := SignMessage(ServiceAccountAddress, ValidServiceAccountKey, timestamp)
-
-// 	community.Composite_signatures = compositeSignatures
-
-// 	jsonStr, _ := json.Marshal(community)
-// 	fmt.Printf("payload: %v\n", string(jsonStr))
-// 	return []byte(jsonStr)
