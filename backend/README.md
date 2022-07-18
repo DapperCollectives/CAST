@@ -105,7 +105,7 @@ UPDATE schema_migrations SET dirty = false
 
 ### Testing
 
-1. Run `flow emulator --dev-wallet` from this top-level directory (the private key for the `emulator-account` in top level `flow.json` must match the private key hard-coded in the test suite eg. `backend/cadence/V2/tests/flow.json`). Install the `flow` CLI [here](https://docs.onflow.org/flow-cli/install/)
+1. Run `flow emulator` from this top-level directory (the private key for the `emulator-account` in top level `flow.json` must match the private key hard-coded in the test suite eg. `backend/cadence/V2/tests/flow.json`). Install the `flow` CLI [here](https://docs.onflow.org/flow-cli/install/)
 2. Run migrations against the test database (if migrations aren't up to date): `make testmigrateup`
 3. Run the test suite: `make test`
 
@@ -125,7 +125,7 @@ docker run -it --network=host --rm --name vt-test vt-test:latest
 
 Before running the app you should:
 
-1. Run `flow emulator --dev-wallet` from this top-level directory (the private key for the `emulator-account` in top level`flow.json` must match the private key hard-coded in the test suite eg. `backend/cadence/V2/tests/flow.json`). Install the `flow` CLI [here](https://docs.onflow.org/flow-cli/install/)
+1. Run `flow emulator` from this top-level directory (the private key for the `emulator-account` in top level`flow.json` must match the private key hard-coded in the test suite eg. `backend/cadence/V2/tests/flow.json`). Install the `flow` CLI [here](https://docs.onflow.org/flow-cli/install/)
 2. Run migrations against the database (if migrations aren't up to date): `make migrateup`
 
 #### Go Executable
