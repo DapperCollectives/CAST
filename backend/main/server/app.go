@@ -292,6 +292,7 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 
 	// First, get the proposal by proposalId
 	p := models.Proposal{ID: proposalId}
+
 	if err := p.GetProposalById(a.DB); err != nil {
 		switch err.Error() {
 		case pgx.ErrNoRows.Error():

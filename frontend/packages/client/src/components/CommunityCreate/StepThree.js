@@ -115,7 +115,7 @@ export default function StepThree({
         />
         <input
           type="text"
-          placeholder="Proposal threshold"
+          placeholder="Proposal Threshold"
           name="proposal_threshold"
           className="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
           value={proposalThreshold}
