@@ -98,6 +98,8 @@ export default function ProposalPage() {
     error,
   } = useProposal();
 
+  // we need to get all strategies to obtain
+  // description text to display on modal
   const {
     loading: loadingStrategies,
     data: votingStrategies,
@@ -387,7 +389,7 @@ export default function ProposalPage() {
       <StrategyModal
         isOpen={isStrategyModalOpen}
         closeModal={closeStrategyModal}
-        strategies={!strategiesError ? [proposalStrategy] : []}
+        strategy={!strategiesError ? proposalStrategy : {}}
       />
       <section className="section">
         <div className="container">
@@ -505,7 +507,7 @@ export default function ProposalPage() {
                       proposalId={proposal.id}
                       creatorAddr={proposal.creatorAddr}
                       isCoreCreator={proposal.isCore}
-                      strategies={[proposalStrategy]}
+                      strategyName={proposalStrategy?.name}
                       ipfs={proposal.ipfs}
                       ipfsUrl={proposal.ipfsUrl}
                       startTime={proposal.startTime}
@@ -556,7 +558,7 @@ export default function ProposalPage() {
                   proposalId={proposal.id}
                   creatorAddr={proposal.creatorAddr}
                   isCoreCreator={proposal.isCore}
-                  strategies={[proposalStrategy]}
+                  strategyName={proposalStrategy?.name}
                   ipfs={proposal.ipfs}
                   ipfsUrl={proposal.ipfsUrl}
                   startTime={proposal.startTime}
