@@ -1,5 +1,6 @@
 import React from 'react';
 import { Twitter, Discord, Website, Instagram, Github } from './Svg';
+import { Title } from '.';
 
 export default function CommunityLinks({
   instagramUrl,
@@ -10,12 +11,7 @@ export default function CommunityLinks({
 } = {}) {
   return (
     <div className="columns my-0 is-multiline">
-      <div
-        className="column is-12 has-text-weight-bold is-uppercase small-text"
-        style={{ marginBottom: '20px' }}
-      >
-        Links
-      </div>
+      <Title className="column is-12 py-0">Links</Title>
       {websiteUrl && (
         <a
           className="column pt-0 pb-1 is-12 is-flex is-align-items-center has-text-black"
