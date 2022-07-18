@@ -1,3 +1,4 @@
+import { Web3Consumer } from 'contexts/Web3';
 import React from 'react';
 import Blockies from 'react-blockies';
 import { WrapperResponsive } from '../components';
@@ -14,15 +15,18 @@ const Row = ({ index, addr, score, classNameIndex }) => {
     <tr className="table-row">
       <td className={clnIndex}>{index}</td>
       <td>{addr}</td>
-      <td style={smallRowStyle} className="smaller-text">
-        {score}
-      </td>
+      <td style={smallRowStyle}>{score}</td>
     </tr>
   );
 };
 
-export default function LeaderBoard({ onClickViewMore = () => {} } = {}) {
-  const { data, loading } = useLeaderBoard();
+const LeaderBoard = ({
+  onClickViewMore = () => {},
+  communityId,
+  web3,
+} = {}) => {
+  const { user } = web3;
+  const { data, isLoading } = useLeaderBoard({ communityId, addr: user?.addr });
   const style = {};
 
   return (
@@ -36,8 +40,8 @@ export default function LeaderBoard({ onClickViewMore = () => {} } = {}) {
       </WrapperResponsive>
       <table className="table is-fullwidth">
         <tbody className="is-scrollable-table" style={style}>
-          {!loading &&
-            data?.leaderBoard.map((datum, index) => {
+          {!isLoading &&
+            data?.users.map((datum, index) => {
               const userIndex = index + 1;
               const styleIndex =
                 index === 0
@@ -67,14 +71,16 @@ export default function LeaderBoard({ onClickViewMore = () => {} } = {}) {
                     </div>
                   }
                   score={
-                    <div className="has-text-weight-bold">{datum?.score}</div>
+                    <div className="is-flex flex-1 is-justify-content-center has-text-weight-bold smaller-text">
+                      {datum?.score}
+                    </div>
                   }
                 />
               );
             })}
         </tbody>
       </table>
-      {!loading && data?.currentUser && (
+      {!isLoading && data?.currentUser && (
         <table className="table is-fullwidth">
           <tbody className="is-scrollable-table" style={style}>
             <Row
@@ -96,7 +102,7 @@ export default function LeaderBoard({ onClickViewMore = () => {} } = {}) {
                 </div>
               }
               score={
-                <div className="has-text-weight-bold">
+                <div className="is-flex flex-1 is-justify-content-center has-text-weight-bold smaller-text">
                   {data?.currentUser.score}
                 </div>
               }
@@ -111,4 +117,6 @@ export default function LeaderBoard({ onClickViewMore = () => {} } = {}) {
       </div>
     </div>
   );
-}
+};
+
+export default Web3Consumer(LeaderBoard);

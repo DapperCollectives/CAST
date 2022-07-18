@@ -6,6 +6,17 @@ import CommunitiesPresenter from 'components/Community/CommunitiesPresenter';
 import useUserCommunities from 'hooks/useUserCommunities';
 import useFeaturedCommunities from 'hooks/useFeaturedCommunities';
 
+const LinkToIssueTemplate = () => (
+  <a
+    target="_blank"
+    rel="noreferrer noopener"
+    href="https://docs.cast.fyi"
+    className="pl-1 py-4"
+  >
+    <span className="mr-2">Learn more about decision-making on Flow here.</span>
+  </a>
+);
+
 export default function HomePage() {
   const {
     user: { addr },
@@ -42,8 +53,13 @@ export default function HomePage() {
   return (
     <section className="section">
       <Message
-        messageText="We are currently in alpha testing with the Flow developer community."
-        labelText="Alpha"
+        messageText={
+          <p>
+            This is an open beta of CAST.
+            <LinkToIssueTemplate />
+          </p>
+        }
+        labelText="Beta"
       />
       {(loading || loadingFeaturedCommunities) && (
         <div style={{ height: '50vh' }}>

@@ -10,6 +10,7 @@ $error-red: #B20D0D
 $yellow: #FBD84D
 $orange: #F4AF4A
 $light-gray: #DCDCDC
+$lighter-dark-grey: #757575
 
 // Update Bulma's global variables
 $family-primary: "Arimo"
@@ -139,6 +140,8 @@ code
 	border-radius: 50%
 .border-light
 	border: 1px solid $grey-lighter
+.border-lighter-dark-grey
+	border: 1px solid $lighter-dark-grey
 .flex-1
 	flex: 1 0 0
 .flex-2
@@ -529,9 +532,14 @@ span[data-tooltip]
 
 .word-break-all
 	word-break: break-all
-
 .word-break
 	word-break: break-word
+.line-clamp-2
+	display: -webkit-box
+	-webkit-line-clamp: 2
+	-webkit-box-orient: vertical
+	overflow: hidden
+
 .mx-loader
 	margin-left: 0.1rem !important
 	margin-right: 0.1rem !important

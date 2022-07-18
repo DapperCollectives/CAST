@@ -30,11 +30,11 @@ type PaginatedResponseWithUserType struct {
 }
 
 type PaginatedResponseWithLeaderboardUser struct {
-	Data         []models.LeaderboardUserPayload `json:"data"`
-	Start        int                             `json:"start"`
-	Count        int                             `json:"count"`
-	TotalRecords int                             `json:"totalRecords"`
-	Next         int                             `json:"next"`
+	Data         models.LeaderboardPayload `json:"data"`
+	Start        int                       `json:"start"`
+	Count        int                       `json:"count"`
+	TotalRecords int                       `json:"totalRecords"`
+	Next         int                       `json:"next"`
 }
 
 var (
@@ -217,6 +217,18 @@ func (otu *OverflowTestUtils) GetCommunityAPI(id int) *httptest.ResponseRecorder
 
 func (otu *OverflowTestUtils) GetCommunityLeaderboardAPI(id int) *httptest.ResponseRecorder {
 	req, _ := http.NewRequest("GET", "/communities/"+strconv.Itoa(id)+"/leaderboard", nil)
+	response := otu.ExecuteRequest(req)
+	return response
+}
+
+func (otu *OverflowTestUtils) GetCommunityLeaderboardAPIWithCurrentUser(id int, addr string) *httptest.ResponseRecorder {
+	req, _ := http.NewRequest("GET", "/communities/"+strconv.Itoa(id)+"/leaderboard?addr="+addr, nil)
+	response := otu.ExecuteRequest(req)
+	return response
+}
+
+func (otu *OverflowTestUtils) GetCommunityLeaderboardAPIWithPaging(id, start, count int) *httptest.ResponseRecorder {
+	req, _ := http.NewRequest("GET", "/communities/"+strconv.Itoa(id)+"/leaderboard?start="+strconv.Itoa(start)+"&count="+strconv.Itoa(count), nil)
 	response := otu.ExecuteRequest(req)
 	return response
 }

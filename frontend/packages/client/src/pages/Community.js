@@ -66,7 +66,6 @@ const AboutLayout = ({
         <div className="column">{communityLinks}</div>
         <div className="column">
           {showEdit && <CommunitySettingsButton communityId={communityId} />}
-          <p className="smaller-text has-text-grey">Founded 2022</p>
         </div>
       </div>
     );
@@ -83,9 +82,8 @@ const AboutLayout = ({
         ) : (
           <div style={{ paddingTop: '28px' }}>{communityLinks}</div>
         )}
-        <hr style={{ marginTop: '32px', marginBottom: '32px' }} />
+        {showEdit && <hr style={{ marginTop: '32px', marginBottom: '32px' }} />}
         {showEdit && <CommunitySettingsButton communityId={communityId} />}
-        <p className="smaller-text has-text-grey">Founded 2022</p>
       </div>
       <div
         className="column is-8-desktop is-9-widescreen is-7-tablet"
@@ -118,8 +116,6 @@ const MembersLayout = ({
         style={{ paddingTop: '28px' }}
       >
         {communityLinks}
-        <hr style={{ marginTop: '32px', marginBottom: '32px' }} />
-        <p className="smaller-text has-text-grey">Founded 2022</p>
       </div>
       <div
         className="column pt-0 is-9-desktop is-7-tablet"
@@ -132,8 +128,6 @@ const MembersLayout = ({
         style={{ paddingTop: '20px' }}
       >
         {communityLinks}
-        <hr style={{ marginTop: '32px', marginBottom: '32px' }} />
-        <p className="smaller-text has-text-grey">Founded 2022</p>
       </div>
     </div>
   );
@@ -185,11 +179,11 @@ export default function Community() {
 
   // these two fields should be coming from backend as configuration
   const showPulse = false;
-  const showLeaderBoard = false;
+  const showLeaderBoard = true;
 
   // check for allowing only three options
   if (!['proposals', 'about', 'members'].includes(activeTab)) {
-    history.push(`/community/${communityId}?tab=about`);
+    history.push(`/community/${communityId}?tab=proposals`);
   }
   // navigation from leader board to member list
   const onClickViewMore = () => {
@@ -263,7 +257,7 @@ export default function Community() {
         !notMobile,
     }
   );
-  const imageClases = classnames(
+  const imageClasses = classnames(
     {
       'rounded-full community-logo-mobile': !notMobile,
     },
@@ -279,13 +273,19 @@ export default function Community() {
             <div className="is-flex community-specific">
               <div className={imageContainerClasses}>
                 {logo ? (
-                  <img
-                    className={imageClases}
-                    alt="community banner"
-                    src={logo}
-                    height="85px"
-                    width="85px"
-                  />
+                  <div
+                    role="img"
+                    aria-label="community banner"
+                    className={imageClasses}
+                    style={{
+                      width: 85,
+                      height: 85,
+                      backgroundImage: `url(${logo})`,
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'center',
+                      backgroundSize: 'cover',
+                    }}
+                  ></div>
                 ) : (
                   <Blockies
                     seed={slug ?? `seed-${id}`}
@@ -329,22 +329,13 @@ export default function Community() {
       ) : null}
       <div className="section pt-0">
         <div className="container full-height community-content">
-          {loading && <Loader fullHeight />}
-          {!loading && (
+          {loading ? (
+            <Loader fullHeight />
+          ) : (
             <div className="columns m-0 p-0">
               <div className="column p-0">
                 <div className="tabs tabs-community is-medium small-text">
                   <ul className="tabs-community-list">
-                    <li
-                      className={`${activeTabMap['about'] ? 'is-active' : ''}`}
-                    >
-                      <Tablink
-                        linkText="About"
-                        linkUrl={`/community/${community.id}?tab=about`}
-                        isActive={activeTabMap['about']}
-                        className="tab-community pb-4 pl-2 pr-0 mr-4"
-                      />
-                    </li>
                     <li
                       className={`${
                         activeTabMap['proposals'] ? 'is-active' : ''
@@ -354,7 +345,7 @@ export default function Community() {
                         linkText="Proposals"
                         linkUrl={`/community/${community.id}?tab=proposals`}
                         isActive={activeTabMap['proposals']}
-                        className="tab-community pb-4 pr-1 pl-0 mx-4"
+                        className="tab-community pb-4 px-2 mr-4"
                       />
                     </li>
                     <li
@@ -366,7 +357,17 @@ export default function Community() {
                         linkText="Members"
                         linkUrl={`/community/${community.id}?tab=members`}
                         isActive={activeTabMap['members']}
-                        className="tab-community pb-4 pr-1 pl-0 ml-4"
+                        className="tab-community pb-4 px-2 mx-4"
+                      />
+                    </li>
+                    <li
+                      className={`${activeTabMap['about'] ? 'is-active' : ''}`}
+                    >
+                      <Tablink
+                        linkText="About"
+                        linkUrl={`/community/${community.id}?tab=about`}
+                        isActive={activeTabMap['about']}
+                        className="tab-community pb-4 px-2 ml-4"
                       />
                     </li>
                   </ul>
@@ -377,7 +378,10 @@ export default function Community() {
                     communityPulse={showPulse && <CommunityPulse />}
                     leaderBoard={
                       showLeaderBoard && (
-                        <LeaderBoard onClickViewMore={onClickViewMore} />
+                        <LeaderBoard
+                          onClickViewMore={onClickViewMore}
+                          communityId={community.id}
+                        />
                       )
                     }
                     communityLinks={

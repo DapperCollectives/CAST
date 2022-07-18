@@ -1,70 +1,28 @@
-import { useReducer, useEffect, useCallback } from 'react';
-import { defaultReducer, INITIAL_STATE } from '../reducers';
-// import { checkResponse } from "../utils";
+import { useQuery } from 'react-query';
 import { useErrorHandlerContext } from '../contexts/ErrorHandler';
+import fetchLeaderBoard from 'api/leaderboard';
 
-export default function useLeaderBoard() {
-  const [state, dispatch] = useReducer(defaultReducer, INITIAL_STATE);
+export default function useLeaderBoard({ communityId = 0, addr = '' } = {}) {
   const { notifyError } = useErrorHandlerContext();
+  const { isLoading, isError, data, error } = useQuery(
+    ['leaderboard', addr],
+    async () => fetchLeaderBoard(communityId, addr)
+  );
 
-  const getLeaderBoard = useCallback(async () => {
-    dispatch({ type: 'PROCESSING' });
-    // const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/..`;
-    try {
-      // uncomment this lines when endpoint is ready
-      // const response = await fetch(url);
-      // const allowList = await checkResponse(response);
+  if (isError) {
+    notifyError(error);
+  }
 
-      // fake data
-      const result = {
-        leaderBoard: [
-          {
-            addr: 'nick.fn',
-            score: '123 $XYZ',
-          },
-          {
-            addr: 'askash.find',
-            score: '123 $XYZ',
-          },
-          {
-            addr: 'm33stie.fn',
-            score: '123 $XYZ',
-          },
-          {
-            addr: '0xd1...0b9b',
-            score: '123 $XYZ',
-          },
-          {
-            addr: '0ak.fn',
-            score: '123 $XYZ',
-          },
-        ],
-        currentUser: {
-          addr: 'joshprin...',
-          score: '123 $XYZ',
-          index: 122,
-        },
-      };
-
-      dispatch({ type: 'SUCCESS', payload: result });
-    } catch (err) {
-      // notify user of error
-      notifyError(
-        err,
-        // uncomment this line when endpoint is ready
-        //url
-        'urlToEndpoint'
-      );
-      dispatch({ type: 'ERROR', payload: { errorData: err.message } });
-    }
-  }, [dispatch, notifyError]);
-
-  useEffect(() => {
-    getLeaderBoard();
-  }, [getLeaderBoard]);
+  const users = data?.data?.users ?? [];
+  const currentUser = data?.data?.currentUser;
 
   return {
-    ...state,
-    getLeaderBoard,
+    isLoading,
+    isError,
+    error,
+    data: {
+      users,
+      currentUser: currentUser?.addr ? currentUser : undefined,
+    },
   };
 }

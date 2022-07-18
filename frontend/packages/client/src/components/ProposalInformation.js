@@ -47,7 +47,7 @@ const Results = ({ voteResults }) => {
         return (
           <div key={`result-item-${index}`} style={{ marginBottom: '2.5rem' }}>
             <div className="columns is-mobile mb-2">
-              <div className="column small-text has-text-grey has-text-justified word-break">
+              <div className="column small-text has-text-grey has-text-left word-break">
                 {optionText}
               </div>
               <div className="column is-3 is-flex is-justify-content-flex-end small-text has-text-grey">

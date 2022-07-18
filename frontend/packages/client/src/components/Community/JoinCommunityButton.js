@@ -3,6 +3,7 @@ import { useWebContext } from 'contexts/Web3';
 import { useModalContext } from 'contexts/NotificationModal';
 import { useJoinCommunity, useUserRoleOnCommunity } from 'hooks';
 import { WalletConnect, Error } from 'components';
+import classnames from 'classnames';
 
 export default function JoinCommunityButton({
   communityId,
@@ -10,6 +11,7 @@ export default function JoinCommunityButton({
   // callback to notify leaveCommunity was called
   onLeaveCommunity = async () => {},
   onJoinCommunity = async () => {},
+  darkMode = true,
 }) {
   const [isModalErrorOpened, setIsModalErrorOpened] = useState(false);
   const { createCommunityUser, deleteUserFromCommunity } = useJoinCommunity();
@@ -32,7 +34,9 @@ export default function JoinCommunityButton({
     }
   }, [user?.addr, isModalErrorOpened, closeModal, setIsModalErrorOpened]);
 
-  const joinCommunity = async () => {
+  const joinCommunity = async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
     if (!user?.addr) {
       openModal(
         React.createElement(Error, {
@@ -60,7 +64,9 @@ export default function JoinCommunityButton({
     }
   };
 
-  const leaveCommunity = async () => {
+  const leaveCommunity = async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
     const { success } = await deleteUserFromCommunity({
       communityId,
       user,
@@ -73,18 +79,18 @@ export default function JoinCommunityButton({
     }
   };
 
+  const classNamesButton = classnames('button is-uppercase is-fullwidth ', {
+    'rounded-lg has-background-black has-text-white-bis': darkMode,
+    'rounded-sm has-text-black border-lighter-dark-grey small-text': !darkMode,
+  });
+
   return (
     <div
       className="column is-narrow-tablet is-full-mobile is-align-self-center"
       style={{ minWidth: '117px' }}
     >
       <button
-        className="button is-uppercase is-fullwidth"
-        style={{
-          backgroundColor: 'black',
-          borderRadius: '200px',
-          color: 'white',
-        }}
+        className={classNamesButton}
         onClick={isMember ? leaveCommunity : joinCommunity}
       >
         {isMember ? 'Leave' : 'Join'}
