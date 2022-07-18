@@ -8,7 +8,7 @@ import useLinkValidator, {
 } from '../Community/hooks/useLinkValidator';
 import { getReducedImg } from 'utils';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
-import { MAX_FILE_SIZE } from 'const';
+import { MAX_AVATAR_FILE_SIZE } from 'const';
 import pick from 'lodash/pick';
 import { useCommunityCategory } from 'hooks';
 
@@ -50,16 +50,16 @@ export default function StepOne({
           !['image/png', 'image/jpeg', 'image/jpg'].includes(imageFile.type)
         ) {
           notifyError({
-            status: 'Image Type not supported',
+            status: 'Image type not supported',
             statusText: 'Please upload a .png or .jpeg file type extension',
           });
           return;
         }
         // validate size
-        if (imageFile.size > MAX_FILE_SIZE) {
+        if (imageFile.size > MAX_AVATAR_FILE_SIZE) {
           notifyError({
             status: 'Image file size not allowed',
-            statusText: 'Please upload a new file (smaller than 5mb)',
+            statusText: 'The selected file exceeds the 2MB limit.',
           });
           return;
         }
@@ -224,6 +224,7 @@ export default function StepOne({
           name="community_name"
           className="rounded-sm border-light p-3 column is-full mt-2"
           value={communityName || ''}
+          maxLength={50}
           onChange={(event) => setData({ communityName: event.target.value })}
         />
         <textarea

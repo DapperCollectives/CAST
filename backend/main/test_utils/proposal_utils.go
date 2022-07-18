@@ -20,6 +20,7 @@ import (
 var strategy = "token-weighted-default"
 var proposalBody = "<html>something</html>"
 var published = "published"
+var blockHeight uint64 = 1
 
 var DefaultProposalStruct = models.Proposal{
 	Name: "Test Proposal",
@@ -31,6 +32,7 @@ var DefaultProposalStruct = models.Proposal{
 	Creator_addr: ServiceAccountAddress,
 	Strategy:     &strategy,
 	Status:       &published,
+	Block_height: &blockHeight,
 }
 
 func (otu *OverflowTestUtils) GetProposalsForCommunityAPI(communityId int) *httptest.ResponseRecorder {

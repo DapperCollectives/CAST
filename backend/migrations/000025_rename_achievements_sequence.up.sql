@@ -1,0 +1,1 @@
+ALTER SEQUENCE IF EXISTS community_users_achievements_id_seq RENAME TO user_achievements_id_seq
