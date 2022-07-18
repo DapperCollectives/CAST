@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"sort"
 
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/georgysavva/scany/pgxscan"
@@ -114,10 +115,14 @@ func GetCommunityLeaderboard(db *s.Database, communityId, start, count int) ([]L
 	var defaultStreakWeight = 1
 	var defaultWinningVoteWeight = 1
 
-	userAchievements, err := getUserAchievements(db, communityId, start, count)
+	userAchievements, err := getUserAchievements(db, communityId)
 
 	if err != nil {
 		return leaderboardUsers, 0, err
+	}
+
+	if len(userAchievements) == 0 {
+		return leaderboardUsers, 0, nil
 	}
 
 	for _, user := range userAchievements {
@@ -125,6 +130,34 @@ func GetCommunityLeaderboard(db *s.Database, communityId, start, count int) ([]L
 		leaderboardUser.Addr = user.Address
 		leaderboardUser.Score = user.NumVotes + (user.EarlyVote * defaultEarlyVoteWeight) + (user.Streak * defaultStreakWeight) + (user.WinningVote * defaultWinningVoteWeight)
 		leaderboardUsers = append(leaderboardUsers, leaderboardUser)
+	}
+
+	// Order by score descending
+	sort.Slice(leaderboardUsers, func(i, j int) bool {
+		return leaderboardUsers[i].Score > leaderboardUsers[j].Score
+	})
+
+	// Top users on leaderboard (e.g 10)
+	if start == 0 && len(leaderboardUsers) >= count {
+		leaderboardUsers = leaderboardUsers[0:count]
+	} else {
+		startIndex := start * count
+		endIndex := start*count + count
+
+		// If index invalid, set to last page
+		if startIndex >= len(leaderboardUsers) {
+			if len(leaderboardUsers)-count >= 0 {
+				startIndex = len(leaderboardUsers) - count
+			} else {
+				startIndex = 0
+			}
+		}
+
+		if endIndex <= len(leaderboardUsers) {
+			leaderboardUsers = leaderboardUsers[startIndex:endIndex]
+		} else {
+			leaderboardUsers = leaderboardUsers[startIndex:]
+		}
 	}
 
 	totalUsers := getTotalUsersForCommunity(db, communityId)
@@ -268,7 +301,7 @@ func getTotalUsersForCommunity(db *s.Database, communityId int) int {
 	return totalUsers
 }
 
-func getUserAchievements(db *s.Database, communityId int, start int, count int) (UserAchievements, error) {
+func getUserAchievements(db *s.Database, communityId int) (UserAchievements, error) {
 	var userAchievements UserAchievements
 	// Retrieve each user in the community with totals for
 	// their votes and achievements (e.g. early votes, streaks and winning choices)
@@ -310,10 +343,9 @@ func getUserAchievements(db *s.Database, communityId int, start int, count int) 
 		) c ON v.addr = c.address
 			WHERE p.community_id = $1
 			GROUP BY v.addr, a.early_vote, b.streak, c.winning_vote
-			LIMIT $2 OFFSET $3
 		`, communityId, communityId, communityId)
 
-	err := pgxscan.Select(db.Context, db.Conn, &userAchievements, sql, communityId, count, start)
+	err := pgxscan.Select(db.Context, db.Conn, &userAchievements, sql, communityId)
 
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		return nil, err
