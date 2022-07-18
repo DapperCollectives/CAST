@@ -28,9 +28,9 @@ const StrategyModal = ({ isOpen, closeModal, strategy }) => {
         <section className="modal-card-body pb-4 pt-2">
           <div className="columns m-0 is-mobile">
             <div className="column px-4  is-full">
-              <p className="mb-4">{strategy.name}</p>
+              <p className="mb-4">{strategy?.name}</p>
               <p className="has-text-grey mb-4 small-text">
-                {strategy.description}
+                {strategy?.description}
               </p>
             </div>
           </div>
