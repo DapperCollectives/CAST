@@ -165,7 +165,7 @@ export default function StepTwo({
             }`}
             onClick={isStepValid ? () => moveToNextStep() : () => {}}
           >
-            Next: PROPOSALS & VOTING
+            Next: PROPOSAL & VOTING
           </button>
         </div>
       </div>
