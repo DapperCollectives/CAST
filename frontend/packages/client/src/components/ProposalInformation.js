@@ -252,7 +252,7 @@ const ProposalInformation = ({
             title="Strategy"
             content={
               <div className="is-flex flex-1" onClick={openStrategyModal}>
-                <div className="pr-2">{strategy.name}</div>
+                <div className="pr-2 cursor-pointer">{strategy.name}</div>
               </div>
             }
           />
