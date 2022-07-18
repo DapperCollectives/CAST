@@ -31,12 +31,7 @@ var USER_TYPES = UserTypes{"member", "author", "admin"}
 
 type UserCommunity struct {
 	Community
-	Roles string
-}
-
-type UserCommunityPayload struct {
-	Community
-	Roles []string `json:"roles" validate:"required"`
+	Roles string `json:"roles" validate:"required"`
 }
 
 type CommunityUserPayload struct {
