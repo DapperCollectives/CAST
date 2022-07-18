@@ -1,8 +1,11 @@
 import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { useFileUploader } from '../hooks';
-import { Upload, Bin } from '../components/Svg';
-import { Loader } from '../components';
+import { useFileUploader, useMediaQuery } from 'hooks';
+import { Upload, Bin } from 'components/Svg';
+import { Loader } from 'components';
+import { MAX_PROPOSAL_IMAGE_FILE_SIZE } from 'const';
+
+const MAX_IMAGE_FILES = 1;
 
 const IMAGE_STATUS = {
   notStarted: 'not-started',
@@ -85,7 +88,7 @@ function ImageUploader({
       <div className="column is-flex is-align-items-center p-2 is-9">
         <p className="smaller-text has-text-grey">{reducedFileName}</p>
       </div>
-      <div className="column column is-flex is-align-items-center pr-0 py-2 pl-3 is-1">
+      <div className="column column is-flex is-align-items-center is-justify-content-flex-end p-0 is-1">
         <div className="cursor-pointer" onClick={() => deleteImage(imageKey)}>
           <Bin />
         </div>
@@ -95,6 +98,7 @@ function ImageUploader({
 }
 
 const UploadArea = ({ getRootProps, getInputProps, enableUpload }) => {
+  const notMobile = useMediaQuery();
   return (
     <div
       className={`is-flex is-flex-direction-column is-align-items-center is-justify-content-center ${
@@ -107,6 +111,7 @@ const UploadArea = ({ getRootProps, getInputProps, enableUpload }) => {
         position: 'relative',
         height: '100%',
         width: '100%',
+        ...(!notMobile ? { minHeight: '150px' } : {}),
       }}
       disabled={enableUpload}
       {...(enableUpload ? getRootProps() : undefined)}
@@ -134,12 +139,13 @@ export default function UploadImageModal({
   onDismiss,
   isCancelling = false,
   onDone,
+  maxImageFiles = MAX_IMAGE_FILES,
 }) {
-  const MAX_IMAGE_FILES = 1;
   const [images, setImages] = useState([]);
   // when more than one image is added this will be an array mapping the images array
   const [captionValues, setCaptionValues] = useState(['']);
 
+  const [errorMessage, setErrorMessage] = useState(null);
   const _onDismiss = () => {
     onDismiss();
   };
@@ -166,7 +172,15 @@ export default function UploadImageModal({
 
   const onDrop = useCallback(
     (acceptedFiles) => {
+      // clean previous error message
+      if (errorMessage) {
+        setErrorMessage(null);
+      }
       acceptedFiles.forEach((imageFile) => {
+        if (imageFile.size > MAX_PROPOSAL_IMAGE_FILE_SIZE) {
+          setErrorMessage('The selected file exceeds the 2MB limit.');
+          return;
+        }
         const imageAsURL = URL.createObjectURL(imageFile);
 
         const img = new Image();
@@ -183,12 +197,12 @@ export default function UploadImageModal({
         img.src = imageAsURL;
       });
     },
-    [setImages]
+    [setImages, errorMessage, setErrorMessage]
   );
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
-    maxFiles: MAX_IMAGE_FILES,
+    maxFiles: maxImageFiles,
     accept: 'image/jpeg,image/png,image/gif',
   });
 
@@ -264,15 +278,17 @@ export default function UploadImageModal({
             )}
             {images.length > 0 && (
               <div className="columns m-0 p-0 flex-1">
-                <div className="column py-0 pl-0 is-6">
+                <div className="column py-0 pl-0 pr-0-mobile is-6 mb-4-mobile">
                   <UploadArea
                     getRootProps={getRootProps}
                     getInputProps={getInputProps}
                     enableUpload={images.length < MAX_IMAGE_FILES}
                   />
                 </div>
-                <div className="column pt-0 is-6">
-                  <p className="has-text-weight-bold pb-5">Uploaded file</p>
+                <div className="column pt-0 pr-0 p-0-mobile is-6">
+                  <p className="has-text-weight-bold pb-5 pb-2-mobile">
+                    Uploaded file
+                  </p>
                   <div className="columns is-multiline m-0 is-mobile">
                     {images.map((image, i) => {
                       return (
@@ -295,6 +311,11 @@ export default function UploadImageModal({
                 Accepted files: PNG, JPG, GIF
               </p>
             </div>
+            {errorMessage && (
+              <div className="pb-4 transition-all">
+                <p className="smaller-text has-text-red">{errorMessage}</p>
+              </div>
+            )}
             {/* For now this is a single input */}
             <input
               type="text"
@@ -303,6 +324,7 @@ export default function UploadImageModal({
               className="border-light rounded-sm p-3 column is-full pr-6"
               onChange={(e) => setCaptionValues([`${e.target.value}`])}
               autoFocus
+              style={{ maxHeight: '42px' }}
             />
           </div>
         </section>
