@@ -98,6 +98,8 @@ export default function ProposalPage() {
     error,
   } = useProposal();
 
+  // we need to get all strategies to obtain
+  // description text to display on modal
   const {
     loading: loadingStrategies,
     data: votingStrategies,
