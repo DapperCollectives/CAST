@@ -46,9 +46,9 @@ export default function CommunityMembersList({ communityId } = {}) {
   return (
     <div className="is-flex is-flex-direction-column">
       <WrapperResponsive
-        commonClasses="is-flex flex-1"
-        extraStyles={{ marginBottom: '40px', marginTop: '40px' }}
-        extraStylesMobile={{ marginBottom: '32px', marginTop: '24px' }}
+        classNames="is-flex flex-1 mb-3"
+        extraStyles={{ marginTop: '40px' }}
+        extraStylesMobile={{ marginTop: '24px' }}
       >
         <p className="has-text-weight-bold is-uppercase small-text">
           {pagination?.totalRecords ?? '...'} members

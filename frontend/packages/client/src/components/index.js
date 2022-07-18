@@ -26,6 +26,7 @@ export { default as CommunityPropsAndVoting } from './Community/CommunityPropsAn
 export { default as AddButton } from './AddButton';
 export { default as ActionButton } from './ActionButton';
 export { default as Input } from './Input';
+export { default as Title } from './Title';
 export {
   PropCreateStepOne,
   PropCreateStepTwo,
