@@ -31,16 +31,19 @@ func (s *StakedTokenWeightedDefault) FetchBalance(
 		Addr: c.Contract_addr,
 	}
 
-	if err := s.SnapshotClient.GetAddressBalanceAtBlockHeight(b.Addr, b.BlockHeight, b, *contract); err != nil {
-		log.Error().Err(err).Msg("error querying address b at blockheight")
+	if err := s.SnapshotClient.GetAddressBalanceAtBlockHeight(
+		b.Addr,
+		b.BlockHeight,
+		b,
+		*contract,
+	); err != nil {
+		log.Error().Err(err).Msg("error fetching balance")
 		return nil, err
 	}
 
-	if b.ID == "" {
-		if err := b.CreateBalance(db); err != nil {
-			log.Error().Err(err).Msg("error saving b to DB")
-			return nil, err
-		}
+	if err := b.CreateBalance(db); err != nil {
+		log.Error().Err(err).Msg("error creating balance in the DB")
+		return nil, err
 	}
 
 	return b, nil
