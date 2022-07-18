@@ -292,6 +292,7 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 
 	// First, get the proposal by proposalId
 	p := models.Proposal{ID: proposalId}
+
 	if err := p.GetProposalById(a.DB); err != nil {
 		switch err.Error() {
 		case pgx.ErrNoRows.Error():
@@ -1657,6 +1658,7 @@ func (a *App) handleGetCommunityLeaderboard(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	addr := r.FormValue("addr")
 	count, _ := strconv.Atoi(r.FormValue("count"))
 	start, _ := strconv.Atoi(r.FormValue("start"))
 	if count > 100 || count < 1 {
@@ -1666,15 +1668,15 @@ func (a *App) handleGetCommunityLeaderboard(w http.ResponseWriter, r *http.Reque
 		start = 0
 	}
 
-	users, totalRecords, err := models.GetCommunityLeaderboard(a.DB, communityId, start, count)
+	leaderboard, totalRecords, err := models.GetCommunityLeaderboard(a.DB, communityId, addr, start, count)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	response := shared.GetPaginatedResponseWithPayload(users, start, count, totalRecords)
+	response := shared.GetPaginatedResponseWithPayload(leaderboard.Users, start, count, totalRecords)
+	response.Data = leaderboard
 	respondWithJSON(w, http.StatusOK, response)
-
 }
 
 func (a *App) handleGetUserCommunities(w http.ResponseWriter, r *http.Request) {
