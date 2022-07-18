@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useHistory, useParams, Link } from 'react-router-dom';
 import classnames from 'classnames';
 import {
@@ -137,6 +137,9 @@ export default function Community() {
 
   const history = useHistory();
 
+  const [activeWidth, setActiveWidth] = useState(105);
+  const [activeLeft, setActiveLeft] = useState(0);
+
   const { activeTab } = useQueryParams({ activeTab: 'tab' });
 
   const { data: community, loading, error } = useCommunityDetails(communityId);
@@ -192,6 +195,27 @@ export default function Community() {
     proposals: activeTab === 'proposals',
     members: activeTab === 'members',
   };
+
+  const wrapperRef = useRef();
+  const aboutRef = useRef();
+  const proposalRef = useRef();
+  const memberRef = useRef();
+
+  useEffect(() => {
+    const refMap = {
+      about: aboutRef,
+      proposals: proposalRef,
+      members: memberRef,
+    };
+    const el = refMap[activeTab].current;
+    if (!el) return;
+
+    const elRect = el.getBoundingClientRect();
+    const parentRect = wrapperRef.current.getBoundingClientRect();
+    const offsetLeft = elRect.left - parentRect.left;
+    setActiveWidth(el.offsetWidth);
+    setActiveLeft(offsetLeft);
+  }, [activeTab]);
 
   const notMobile = useMediaQuery();
 
@@ -262,6 +286,7 @@ export default function Community() {
       'rounded-full': notMobile,
     }
   );
+
   return (
     <section className="full-height pt-0">
       {community ? (
@@ -333,13 +358,29 @@ export default function Community() {
             <div className="columns m-0 p-0">
               <div className="column p-0">
                 <div className="tabs tabs-community is-medium small-text">
-                  <ul className="tabs-community-list">
+                  <ul
+                    ref={wrapperRef}
+                    className="tabs-community-list"
+                    style={{ position: 'relative' }}
+                  >
+                    <div
+                      style={{
+                        transition: '0.1s all',
+                        position: 'absolute',
+                        bottom: 0,
+                        height: 2,
+                        backgroundColor: '#00EF8B',
+                        width: activeWidth,
+                        left: activeLeft,
+                      }}
+                    />
                     <li
                       className={`${
                         activeTabMap['proposals'] ? 'is-active' : ''
                       }`}
                     >
                       <Tablink
+                        ref={proposalRef}
                         linkText="Proposals"
                         linkUrl={`/community/${community.id}?tab=proposals`}
                         isActive={activeTabMap['proposals']}
@@ -352,6 +393,7 @@ export default function Community() {
                       }`}
                     >
                       <Tablink
+                        ref={memberRef}
                         linkText="Members"
                         linkUrl={`/community/${community.id}?tab=members`}
                         isActive={activeTabMap['members']}
@@ -362,6 +404,7 @@ export default function Community() {
                       className={`${activeTabMap['about'] ? 'is-active' : ''}`}
                     >
                       <Tablink
+                        ref={aboutRef}
                         linkText="About"
                         linkUrl={`/community/${community.id}?tab=about`}
                         isActive={activeTabMap['about']}
