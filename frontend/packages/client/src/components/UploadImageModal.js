@@ -88,7 +88,7 @@ function ImageUploader({
       <div className="column is-flex is-align-items-center p-2 is-9">
         <p className="smaller-text has-text-grey">{reducedFileName}</p>
       </div>
-      <div className="column column is-flex is-align-items-center pr-0 py-2 pl-3 is-1">
+      <div className="column column is-flex is-align-items-center is-justify-content-flex-end p-0 is-1">
         <div className="cursor-pointer" onClick={() => deleteImage(imageKey)}>
           <Bin />
         </div>
@@ -285,7 +285,7 @@ export default function UploadImageModal({
                     enableUpload={images.length < MAX_IMAGE_FILES}
                   />
                 </div>
-                <div className="column pt-0 p-0-mobile is-6">
+                <div className="column pt-0 pr-0 p-0-mobile is-6">
                   <p className="has-text-weight-bold pb-5pb-2-mobile">
                     Uploaded file
                   </p>
