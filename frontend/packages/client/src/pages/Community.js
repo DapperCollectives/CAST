@@ -414,7 +414,7 @@ export default function Community() {
                 {activeTabMap['proposals'] && (
                   <CommunityProposals
                     communityId={community.id}
-                    admins={admins}
+                    admins={admins ?? []}
                   />
                 )}
                 {activeTabMap['members'] && (

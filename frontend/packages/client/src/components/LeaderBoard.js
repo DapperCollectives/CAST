@@ -1,3 +1,4 @@
+import { Web3Consumer } from 'contexts/Web3';
 import React from 'react';
 import Blockies from 'react-blockies';
 import { WrapperResponsive } from '../components';
@@ -19,11 +20,13 @@ const Row = ({ index, addr, score, classNameIndex }) => {
   );
 };
 
-export default function LeaderBoard({
+const LeaderBoard = ({
   onClickViewMore = () => {},
   communityId,
-} = {}) {
-  const { data, isLoading } = useLeaderBoard({ communityId });
+  web3,
+} = {}) => {
+  const { user } = web3;
+  const { data, isLoading } = useLeaderBoard({ communityId, addr: user?.addr });
   const style = {};
 
   return (
@@ -38,7 +41,7 @@ export default function LeaderBoard({
       <table className="table is-fullwidth">
         <tbody className="is-scrollable-table" style={style}>
           {!isLoading &&
-            data?.leaderBoard.map((datum, index) => {
+            data?.users.map((datum, index) => {
               const userIndex = index + 1;
               const styleIndex =
                 index === 0
@@ -114,4 +117,6 @@ export default function LeaderBoard({
       </div>
     </div>
   );
-}
+};
+
+export default Web3Consumer(LeaderBoard);
