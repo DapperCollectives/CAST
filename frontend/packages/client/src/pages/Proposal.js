@@ -505,7 +505,7 @@ export default function ProposalPage() {
                       proposalId={proposal.id}
                       creatorAddr={proposal.creatorAddr}
                       isCoreCreator={proposal.isCore}
-                      strategy={proposalStrategy}
+                      strategyName={proposalStrategy?.name}
                       ipfs={proposal.ipfs}
                       ipfsUrl={proposal.ipfsUrl}
                       startTime={proposal.startTime}
@@ -556,7 +556,7 @@ export default function ProposalPage() {
                   proposalId={proposal.id}
                   creatorAddr={proposal.creatorAddr}
                   isCoreCreator={proposal.isCore}
-                  strategy={proposalStrategy}
+                  strategyName={proposalStrategy?.name}
                   ipfs={proposal.ipfs}
                   ipfsUrl={proposal.ipfsUrl}
                   startTime={proposal.startTime}
