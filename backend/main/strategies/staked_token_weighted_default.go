@@ -7,7 +7,6 @@ import (
 	"github.com/DapperCollectives/CAST/backend/main/models"
 	"github.com/DapperCollectives/CAST/backend/main/shared"
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
-	"github.com/jackc/pgx/v4"
 	"github.com/rs/zerolog/log"
 )
 
@@ -22,16 +21,29 @@ func (s *StakedTokenWeightedDefault) FetchBalance(
 	sc *s.SnapshotClient,
 ) (*models.Balance, error) {
 
-	if err := b.GetBalanceByAddressAndBlockHeight(db); err != nil && err.Error() != pgx.ErrNoRows.Error() {
-		log.Error().Err(err).Msg("error querying address b at blockheight")
+	var c models.Community
+	if err := c.GetCommunityByProposalId(db, b.Proposal_id); err != nil {
 		return nil, err
 	}
 
-	if b.ID == "" {
-		if err := b.CreateBalance(db); err != nil {
-			log.Error().Err(err).Msg("error saving b to DB")
-			return nil, err
-		}
+	var contract = &shared.Contract{
+		Name: c.Contract_name,
+		Addr: c.Contract_addr,
+	}
+
+	if err := s.SnapshotClient.GetAddressBalanceAtBlockHeight(
+		b.Addr,
+		b.BlockHeight,
+		b,
+		*contract,
+	); err != nil {
+		log.Error().Err(err).Msg("error fetching balance")
+		return nil, err
+	}
+
+	if err := b.CreateBalance(db); err != nil {
+		log.Error().Err(err).Msg("error creating balance in the DB")
+		return nil, err
 	}
 
 	return b, nil

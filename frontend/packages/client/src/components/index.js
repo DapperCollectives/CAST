@@ -26,6 +26,7 @@ export { default as CommunityPropsAndVoting } from './Community/CommunityPropsAn
 export { default as AddButton } from './AddButton';
 export { default as ActionButton } from './ActionButton';
 export { default as Input } from './Input';
+export { default as Title } from './Title';
 export {
   PropCreateStepOne,
   PropCreateStepTwo,
@@ -34,3 +35,4 @@ export {
 export { default as FadeIn } from './FadeIn';
 export { default as UploadImageModal } from './UploadImageModal';
 export { default as Tablink } from './Tablink';
+export { default as Popover } from './Popover';

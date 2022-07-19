@@ -23,6 +23,35 @@ type Snapshot struct {
 	Finished     time.Time `json:"finished"`
 }
 
+type LatestBlockHeight struct {
+	ID              string    `json:"id"`
+	FungibleTokenID string    `json:"fungibleTokenId"`
+	BlockHeight     uint64    `json:"blockHeight"`
+	Started         time.Time `json:"started"`
+	Finished        time.Time `json:"finished"`
+	Status          string    `json:"status"`
+	Attempts        int       `json:"attempts"`
+}
+
+type balanceAtBlockheight struct {
+	ID              string    `json:"id"`
+	FungibleTokenID string    `json:"fungibleTokenId"`
+	Addr            string    `json:"address"`
+	Balance         uint64    `json:"balance"`
+	BlockHeight     uint64    `json:"blockHeight"`
+	CreatedAt       time.Time `json:"createdAt"`
+}
+
+type SnapshotResponse struct {
+	Data SnapshotData `json:"data"`
+}
+
+type SnapshotData struct {
+	Message     string `json:"message"`
+	Status      string `json:"status"`
+	BlockHeight uint64 `json:"blockHeight"`
+}
+
 // copied this quick and dirty from models to get around circular dependency
 // move to shared?
 type Balance struct {
@@ -49,8 +78,10 @@ var (
 	}
 
 	DummyBalance = Balance{
-		PrimaryAccountBalance: 100,
-		BlockHeight:           1000000,
+		PrimaryAccountBalance:   100,
+		SecondaryAccountBalance: 100,
+		StakingBalance:          100,
+		BlockHeight:             1000000,
 	}
 )
 
@@ -64,8 +95,174 @@ func NewSnapshotClient(baseUrl string) *SnapshotClient {
 	}
 }
 
-func (c *SnapshotClient) sendRequest(req *http.Request, pointer interface{}) error {
+func (c *SnapshotClient) TakeSnapshot(contract Contract) (*SnapshotResponse, error) {
+	if c.bypass() {
+		return &SnapshotResponse{
+			Data: SnapshotData{
+				Message:     "",
+				Status:      "success",
+				BlockHeight: 1000000,
+			},
+		}, nil
+	}
 
+	var r *SnapshotResponse = &SnapshotResponse{}
+
+	url := c.setSnapshotUrl(contract, "take-snapshot")
+	req, err := c.setRequestMethod("POST", url)
+	if err != nil {
+		log.Debug().Err(err).Msg("SnapshotClient TakeSnapshot request error")
+		return r, err
+	}
+
+	if err := c.sendRequest(req, r); err != nil {
+		log.Debug().Err(err).Msg("SnapshotClient takeSnapshot request error")
+		return r, err
+	}
+	return r, nil
+}
+
+func (c *SnapshotClient) GetSnapshotStatusAtBlockHeight(
+	contract Contract,
+	blockHeight uint64,
+) (*SnapshotResponse, error) {
+	if c.bypass() {
+		return &SnapshotResponse{
+			Data: SnapshotData{
+				Message:     "",
+				Status:      "success",
+				BlockHeight: 1000000,
+			},
+		}, nil
+	}
+
+	var r *SnapshotResponse = &SnapshotResponse{}
+
+	url := c.setSnapshotUrl(contract, "status-at-blockheight"+fmt.Sprintf("%d", blockHeight))
+	req, err := c.setRequestMethod("GET", url)
+	if err != nil {
+		log.Debug().Err(err).Msg("SnapshotClient GetSnapshotStatus request error")
+		return r, err
+	}
+
+	if err := c.sendRequest(req, &r); err != nil {
+		log.Debug().Err(err).Msg("SnapshotClient GetSnapshotStatus send request error")
+		return r, err
+	}
+
+	return r, nil
+}
+
+func (c *SnapshotClient) GetAddressBalanceAtBlockHeight(
+	address string,
+	blockheight uint64,
+	balancePointer interface{},
+	contract Contract,
+) error {
+	if c.bypass() {
+		return nil
+	}
+	var url string
+
+	if *contract.Name == "FlowToken" {
+		url = fmt.Sprintf(`%s/balance-at-blockheight/%s/%d`, c.BaseURL, address, blockheight)
+	} else {
+		url = fmt.Sprintf(
+			`%s/balance-at-blockheight/%s/%d/%v/%v`,
+			c.BaseURL,
+			address,
+			blockheight,
+			contract.Addr,
+			contract.Name,
+		)
+	}
+
+	req, err := c.setRequestMethod("GET", url)
+	if err != nil {
+		log.Debug().Err(err).Msg("SnapshotClient GetAddressBalanceAtBlockHeight request error")
+		return err
+	}
+
+	if err := c.sendRequest(req, balancePointer); err != nil {
+		log.Debug().Err(err).Msgf("Snapshot GetAddressBalanceAtBlockHeight send request error.")
+		return err
+	}
+
+	return nil
+}
+
+func (c *SnapshotClient) GetLatestSnapshot(contract Contract) (*Snapshot, error) {
+	var snapshot Snapshot
+	var url string
+
+	if c.bypass() {
+		return &DummySnapshot, nil
+	}
+
+	//@TODO repeating logic here, refactor
+	if *contract.Name == "FlowToken" {
+		url = fmt.Sprintf(`%s/latest-snapshot`, c.BaseURL)
+	} else {
+		url = fmt.Sprintf(`%s/latest-snapshot/%s, %s`, c.BaseURL, *contract.Addr, *contract.Name)
+	}
+
+	req, err := c.setRequestMethod("GET", url)
+	if err != nil {
+		log.Debug().Err(err).Msg("SnapshotClient GetAddressBalanceAtBlockHeight request error")
+		return &snapshot, err
+	}
+
+	if err := c.sendRequest(req, snapshot); err != nil {
+		log.Debug().Err(err).Msgf("Snapshot GetAddressBalanceAtBlockHeight send request error.")
+		return &snapshot, err
+	}
+
+	return &snapshot, nil
+}
+
+func (c *SnapshotClient) GetLatestFlowSnapshot() (*Snapshot, error) {
+	var snapshot Snapshot
+
+	// Send dummy data for tests
+	if c.bypass() {
+		return &DummySnapshot, nil
+	}
+
+	url := c.BaseURL + "/latest-blockheight"
+	req, _ := http.NewRequest("GET", url, nil)
+	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+
+	if err := c.sendRequest(req, &snapshot); err != nil {
+		log.Debug().Err(err).Msg("SnapshotClient GetLatestBlockHeightSnapshot request error")
+		return nil, err
+	}
+
+	return &snapshot, nil
+}
+
+func (c *SnapshotClient) setSnapshotUrl(contract Contract, route string) string {
+	var url string
+	if *contract.Name == "FlowToken" {
+		url = fmt.Sprintf(`%s/%s`, c.BaseURL, route)
+	} else {
+		url = fmt.Sprintf(`%s/%s/%v/%v`, c.BaseURL, route, contract.Addr, contract.Name)
+	}
+
+	return url
+}
+
+func (c *SnapshotClient) setRequestMethod(method, url string) (*http.Request, error) {
+	req, err := http.NewRequest(method, url, nil)
+	if err != nil {
+		log.Debug().Err(err).Msg("SnapshotClient TakeSnapshot request error")
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+
+	return req, nil
+}
+
+func (c *SnapshotClient) sendRequest(req *http.Request, pointer interface{}) error {
 	res, err := c.HTTPClient.Do(req)
 	if err != nil {
 		log.Debug().Err(err).Msg("snapshot http client error")
@@ -87,48 +284,7 @@ func (c *SnapshotClient) sendRequest(req *http.Request, pointer interface{}) err
 	return nil
 }
 
-func (c *SnapshotClient) GetAddressBalanceAtBlockHeight(address string, blockheight uint64, balancePointer interface{}) error {
-	// Send dummy data for tests
-	if c.bypass() {
-		DummyBalance.Addr = address
-		balancePointer = &DummyBalance
-		return nil
-	}
-
-	url := fmt.Sprintf(`%s/balance-at-blockheight/%s/%d`, c.BaseURL, address, blockheight)
-
-	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
-
-	if err := c.sendRequest(req, balancePointer); err != nil {
-		log.Debug().Err(err).Msgf("Snapshot GetAddressBalanceAtBlockHeight send request error.")
-		return err
-	}
-
-	return nil
-}
-
-func (c *SnapshotClient) GetLatestSnapshot() (*Snapshot, error) {
-	var snapshot Snapshot
-
-	// Send dummy data for tests
-	if c.bypass() {
-		return &DummySnapshot, nil
-	}
-
-	url := c.BaseURL + "/latest-blockheight"
-	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
-
-	if err := c.sendRequest(req, &snapshot); err != nil {
-		log.Debug().Err(err).Msg("SnapshotClient GetLatestBlockHeightSnapshot request error")
-		return nil, err
-	}
-
-	return &snapshot, nil
-}
-
 // Don't hit snapshot service if ENV is TEST or DEV
 func (c *SnapshotClient) bypass() bool {
-	return c.Env == "TEST" || c.Env == "DEV"
+	return c.Env == "TEST" || c.Env == "DEV" || c.Env == "STAGING"
 }
