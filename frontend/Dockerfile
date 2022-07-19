@@ -1,14 +1,18 @@
 # BUILD CLIENT
-FROM node:14-alpine as build-stage
+FROM node:16.3.0-alpine as build-stage
 
+WORKDIR /app
+COPY ./package*.json ./
+COPY ./yarn.lock ./
 WORKDIR /app/packages/client
-COPY ./packages/client/package*.json ./
-RUN npm install
 COPY ./packages/client/ ./
+WORKDIR /app
+RUN yarn install
 
+ENV REACT_APP_FRONTEND_URL=cast.fyi
 ENV NODE_ENV=production
-
-RUN npm run build
+ENV APP_ENV=production
+RUN yarn build
 
 # DEPLOY CLIENT
 FROM nginx:latest as production-stage
