@@ -3,14 +3,22 @@
 ## Prerequisites
 
 - [Yarn](https://classic.yarnpkg.com/lang/en/docs/install)
-- [GoLang 1.6](https://golang.org/doc/install)
-- [Node/NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
+
+- [GoLang 1.16+](https://golang.org/doc/install)
+- [Node/NPM v16](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
 - [Flow CLI v0.37.5](https://docs.onflow.org/flow-cli/install/)
 
 ## Installation
 
 ```bash
 yarn install
+```
+
+Installing Node via [NVM](https://github.com/nvm-sh/nvm#installation-and-update)
+```bash
+nvm install v16.13.0
+nvm use 16
+node -v
 ```
 
 ## Development

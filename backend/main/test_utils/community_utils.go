@@ -21,6 +21,14 @@ type PaginatedResponseWithUser struct {
 	Next         int                    `json:"next"`
 }
 
+type PaginatedResponseWithUserCommunity struct {
+	Data         []models.UserCommunity `json:"data"`
+	Start        int                    `json:"start"`
+	Count        int                    `json:"count"`
+	TotalRecords int                    `json:"totalRecords"`
+	Next         int                    `json:"next"`
+}
+
 type PaginatedResponseWithUserType struct {
 	Data         []models.CommunityUserType `json:"data"`
 	Start        int                        `json:"start"`
@@ -30,11 +38,11 @@ type PaginatedResponseWithUserType struct {
 }
 
 type PaginatedResponseWithLeaderboardUser struct {
-	Data         []models.LeaderboardUserPayload `json:"data"`
-	Start        int                             `json:"start"`
-	Count        int                             `json:"count"`
-	TotalRecords int                             `json:"totalRecords"`
-	Next         int                             `json:"next"`
+	Data         models.LeaderboardPayload `json:"data"`
+	Start        int                       `json:"start"`
+	Count        int                       `json:"count"`
+	TotalRecords int                       `json:"totalRecords"`
+	Next         int                       `json:"next"`
 }
 
 var (
@@ -221,6 +229,12 @@ func (otu *OverflowTestUtils) GetCommunityLeaderboardAPI(id int) *httptest.Respo
 	return response
 }
 
+func (otu *OverflowTestUtils) GetCommunityLeaderboardAPIWithCurrentUser(id int, addr string) *httptest.ResponseRecorder {
+	req, _ := http.NewRequest("GET", "/communities/"+strconv.Itoa(id)+"/leaderboard?addr="+addr, nil)
+	response := otu.ExecuteRequest(req)
+	return response
+}
+
 func (otu *OverflowTestUtils) GetCommunityLeaderboardAPIWithPaging(id, start, count int) *httptest.ResponseRecorder {
 	req, _ := http.NewRequest("GET", "/communities/"+strconv.Itoa(id)+"/leaderboard?start="+strconv.Itoa(start)+"&count="+strconv.Itoa(count), nil)
 	response := otu.ExecuteRequest(req)
@@ -238,18 +252,3 @@ func (otu *OverflowTestUtils) GetCommunityUsersAPIByType(id int, userType string
 	response := otu.ExecuteRequest(req)
 	return response
 }
-
-// func GenerateValidUpdateCommunityPayload(addr string) []byte {
-// 	// this does a deep copy
-// 	community := ValidUpdateCommunityStruct
-
-// 	community.Signing_addr = addr
-// 	timestamp := fmt.Sprint(time.Now().UnixNano() / int64(time.Millisecond))
-// 	community.Timestamp = timestamp
-// 	compositeSignatures := SignMessage(ServiceAccountAddress, ValidServiceAccountKey, timestamp)
-
-// 	community.Composite_signatures = compositeSignatures
-
-// 	jsonStr, _ := json.Marshal(community)
-// 	fmt.Printf("payload: %v\n", string(jsonStr))
-// 	return []byte(jsonStr)

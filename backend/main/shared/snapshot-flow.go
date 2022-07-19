@@ -157,11 +157,9 @@ func (c *SnapshotClient) GetAddressBalanceAtBlockHeight(
 	address string,
 	blockheight uint64,
 	balancePointer interface{},
-	contract Contract) error {
-	// Send dummy data for tests
+	contract *Contract,
+) error {
 	if c.bypass() {
-		DummyBalance.Addr = address
-		balancePointer = &DummyBalance
 		return nil
 	}
 	var url string

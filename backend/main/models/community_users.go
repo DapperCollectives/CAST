@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"sort"
+	"strings"
 
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/georgysavva/scany/pgxscan"
@@ -30,7 +31,7 @@ var USER_TYPES = UserTypes{"member", "author", "admin"}
 
 type UserCommunity struct {
 	Community
-	Membership_type string `json:"membershipType,omitempty"`
+	Roles string `json:"roles" validate:"required"`
 }
 
 type CommunityUserPayload struct {
@@ -48,9 +49,15 @@ type UserAchievements = []struct {
 	WinningVote int
 }
 
-type LeaderboardUserPayload struct {
+type LeaderboardUser struct {
 	Addr  string `json:"addr" validate:"required"`
 	Score int    `json:"score,omitempty"`
+	Index int    `json:"index,omitempty"`
+}
+
+type LeaderboardPayload struct {
+	Users       []LeaderboardUser `json:"users"`
+	CurrentUser LeaderboardUser   `json:"currentUser"`
 }
 
 func GetUsersForCommunity(db *s.Database, communityId, start, count int) ([]CommunityUserType, int, error) {
@@ -109,72 +116,52 @@ func GetUsersForCommunityByType(db *s.Database, communityId, start, count int, u
 	return users, totalUsers, nil
 }
 
-func GetCommunityLeaderboard(db *s.Database, communityId, start, count int) ([]LeaderboardUserPayload, int, error) {
-	var leaderboardUsers = []LeaderboardUserPayload{}
-	var defaultEarlyVoteWeight = 1
-	var defaultStreakWeight = 1
-	var defaultWinningVoteWeight = 1
+func GetCommunityLeaderboard(db *s.Database, communityId int, addr string, start, count int) (LeaderboardPayload, int, error) {
+	var payload = LeaderboardPayload{}
 
 	userAchievements, err := getUserAchievements(db, communityId)
 
 	if err != nil {
-		return leaderboardUsers, 0, err
+		return payload, 0, err
 	}
 
 	if len(userAchievements) == 0 {
-		return leaderboardUsers, 0, nil
+		return payload, 0, nil
 	}
 
-	for _, user := range userAchievements {
-		var leaderboardUser = LeaderboardUserPayload{}
-		leaderboardUser.Addr = user.Address
-		leaderboardUser.Score = user.NumVotes + (user.EarlyVote * defaultEarlyVoteWeight) + (user.Streak * defaultStreakWeight) + (user.WinningVote * defaultWinningVoteWeight)
-		leaderboardUsers = append(leaderboardUsers, leaderboardUser)
-	}
-
-	// Order by score descending
-	sort.Slice(leaderboardUsers, func(i, j int) bool {
-		return leaderboardUsers[i].Score > leaderboardUsers[j].Score
-	})
-
-	// Top users on leaderboard (e.g 10)
-	if start == 0 && len(leaderboardUsers) >= count {
-		leaderboardUsers = leaderboardUsers[0:count]
-	} else {
-		startIndex := start * count
-		endIndex := start*count + count
-
-		// If index invalid, set to last page
-		if startIndex >= len(leaderboardUsers) {
-			if len(leaderboardUsers)-count >= 0 {
-				startIndex = len(leaderboardUsers) - count
-			} else {
-				startIndex = 0
-			}
-		}
-
-		if endIndex <= len(leaderboardUsers) {
-			leaderboardUsers = leaderboardUsers[startIndex:endIndex]
-		} else {
-			leaderboardUsers = leaderboardUsers[startIndex:]
-		}
-	}
+	leaderboardUsers, currentUser := getLeaderboardUsers(userAchievements, addr, start, count)
 
 	totalUsers := getTotalUsersForCommunity(db, communityId)
 
-	return leaderboardUsers, totalUsers, nil
+	payload.Users = leaderboardUsers
+	payload.CurrentUser = currentUser
+
+	return payload, totalUsers, nil
 }
 
 func GetCommunitiesForUser(db *s.Database, addr string, start, count int) ([]UserCommunity, int, error) {
 	var communities = []UserCommunity{}
+
 	err := pgxscan.Select(db.Context, db.Conn, &communities,
 		`
 		SELECT
-			communities.*,
-			community_users.user_type as membership_type
+	  communities.*,
+	  a.roles
 		FROM communities
 		LEFT JOIN community_users ON community_users.community_id = communities.id
+		LEFT JOIN (
+				SELECT DISTINCT ON (community_users.community_id) community_users.*,
+						ARRAY(
+								SELECT community_users.user_type
+								FROM community_users
+								WHERE addr = $1
+								GROUP BY community_users.user_type
+						) as roles
+						FROM community_users
+						WHERE addr = $1
+		) a ON community_users.addr = a.addr
 		WHERE community_users.addr = $1
+		GROUP BY communities.id, a.roles
 		LIMIT $2 OFFSET $3
 		`, addr, count, start)
 
@@ -184,13 +171,29 @@ func GetCommunitiesForUser(db *s.Database, addr string, start, count int) ([]Use
 		return []UserCommunity{}, 0, nil
 	}
 
+	for i := range communities {
+		communities[i].Roles = strings.Trim(communities[i].Roles, "{}")
+	}
+
 	var totalCommunities int
 	countSql := `
 	SELECT
-		COUNT(communities.id)
+		COUNT(DISTINCT communities.id)
 	FROM communities
 	LEFT JOIN community_users ON community_users.community_id = communities.id
+	LEFT JOIN (
+		SELECT DISTINCT ON (community_users.community_id) community_users.*,
+				ARRAY(
+						SELECT community_users.user_type
+						FROM community_users
+						WHERE addr = $1
+						GROUP BY community_users.user_type
+				) as roles
+				FROM community_users
+				WHERE addr = $1
+	) a ON community_users.addr = a.addr
 	WHERE community_users.addr = $1
+	GROUP BY communities.id, a.roles
 	`
 	_ = db.Conn.QueryRow(db.Context, countSql, addr).Scan(&totalCommunities)
 
@@ -307,7 +310,7 @@ func getUserAchievements(db *s.Database, communityId int) (UserAchievements, err
 	// their votes and achievements (e.g. early votes, streaks and winning choices)
 	// Note 1: crosstab is a postgres extension that creates a pivot table.
 	// Achievements are joined as columns for each user.
-	// Note 2: Subselects community_id not replaced properly by $1, so has been
+	// Note 2: crosstab Subselects in community_id not replaced properly by $1, so has been
 	// substituted in string first.
 	sql := fmt.Sprintf(
 		`
@@ -354,4 +357,64 @@ func getUserAchievements(db *s.Database, communityId int) (UserAchievements, err
 	}
 
 	return userAchievements, nil
+}
+
+func getLeaderboardUsers(userAchievements UserAchievements, currentUserAddr string, start, count int) ([]LeaderboardUser, LeaderboardUser) {
+	var leaderboardUsers = []LeaderboardUser{}
+	var currentUser = LeaderboardUser{}
+	var defaultEarlyVoteWeight = 1
+	var defaultStreakWeight = 1
+	var defaultWinningVoteWeight = 1
+
+	for _, user := range userAchievements {
+		score := user.NumVotes + (user.EarlyVote * defaultEarlyVoteWeight) + (user.Streak * defaultStreakWeight) + (user.WinningVote * defaultWinningVoteWeight)
+
+		var leaderboardUser = LeaderboardUser{}
+		leaderboardUser.Addr = user.Address
+		leaderboardUser.Score = score
+		leaderboardUsers = append(leaderboardUsers, leaderboardUser)
+		if user.Address == currentUserAddr {
+			currentUser = LeaderboardUser{}
+			currentUser.Addr = user.Address
+			currentUser.Score = score
+		}
+	}
+
+	// Order by score descending
+	sort.Slice(leaderboardUsers, func(i, j int) bool {
+		return leaderboardUsers[i].Score > leaderboardUsers[j].Score
+	})
+
+	// Include indexes for ranking
+	for i := range leaderboardUsers {
+		leaderboardUsers[i].Index = i + 1
+		if leaderboardUsers[i].Addr == currentUser.Addr {
+			currentUser.Index = i + 1
+		}
+	}
+
+	// Top users on leaderboard (e.g 10)
+	if start == 0 && len(leaderboardUsers) >= count {
+		leaderboardUsers = leaderboardUsers[0:count]
+	} else {
+		startIndex := start * count
+		endIndex := start*count + count
+
+		// If index invalid, set to last page
+		if startIndex >= len(leaderboardUsers) {
+			if len(leaderboardUsers)-count >= 0 {
+				startIndex = len(leaderboardUsers) - count
+			} else {
+				startIndex = 0
+			}
+		}
+
+		if endIndex <= len(leaderboardUsers) {
+			leaderboardUsers = leaderboardUsers[startIndex:endIndex]
+		} else {
+			leaderboardUsers = leaderboardUsers[startIndex:]
+		}
+	}
+
+	return leaderboardUsers, currentUser
 }
