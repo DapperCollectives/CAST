@@ -65,7 +65,7 @@ var allowedFileTypes = []string{"image/jpg", "image/jpeg", "image/png", "image/g
 type Strategy interface {
 	TallyVotes(votes []*models.VoteWithBalance, p *models.ProposalResults) (models.ProposalResults, error)
 	GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error)
-	FetchBalance(db *shared.Database, b *models.Balance, sc *shared.SnapshotClient) (*models.Balance, error)
+	FetchBalance(db *shared.Database, b *models.Balance, sc *shared.SnapshotClient, p *models.Proposal) (*models.Balance, error)
 	GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error)
 	InitStrategy(f *shared.FlowAdapter, db *shared.Database, sc *shared.SnapshotClient)
 }
@@ -608,7 +608,7 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 
 	s.InitStrategy(a.FlowAdapter, a.DB, a.SnapshotClient)
 
-	balance, err := s.FetchBalance(a.DB, emptyBalance, a.SnapshotClient)
+	balance, err := s.FetchBalance(a.DB, emptyBalance, a.SnapshotClient, &p)
 	if err != nil {
 		log.Error().Err(err).Msgf("error fetching balance for address %v", v.Addr)
 	}
@@ -1451,7 +1451,7 @@ func (a *App) getAccountAtBlockHeight(w http.ResponseWriter, r *http.Request) {
 	}
 
 	b := Balance{}
-	if err = a.SnapshotClient.GetAddressBalanceAtBlockHeight(addr, blockHeight, &b, defaultFlowContract); err != nil {
+	if err = a.SnapshotClient.GetAddressBalanceAtBlockHeight(addr, blockHeight, &b, &defaultFlowContract); err != nil {
 		log.Error().Err(err).Msgf("error getting account %s at blockheight %d", addr, blockHeight)
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return

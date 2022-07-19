@@ -20,6 +20,7 @@ func (s *TokenWeightedDefault) FetchBalance(
 	db *s.Database,
 	b *models.Balance,
 	sc *s.SnapshotClient,
+	p *models.Proposal,
 ) (*models.Balance, error) {
 
 	var c models.Community
@@ -32,17 +33,17 @@ func (s *TokenWeightedDefault) FetchBalance(
 		return nil, err
 	}
 
-	//@TODO should get contract by matching strategy name
-	var contract = &shared.Contract{
-		Name: c.Contract_name,
-		Addr: c.Contract_addr,
+	strategy, err := models.MatchStrategyByProposal(*c.Strategies, *p.Strategy)
+	if err != nil {
+		log.Error().Err(err).Msg("Unable to find strategy for contract")
+		return nil, err
 	}
 
 	if err := s.SnapshotClient.GetAddressBalanceAtBlockHeight(
 		b.Addr,
 		b.BlockHeight,
 		b,
-		*contract,
+		&strategy.Contract,
 	); err != nil {
 		log.Error().Err(err).Msg("error fetching balance")
 		return nil, err

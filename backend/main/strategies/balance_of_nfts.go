@@ -19,6 +19,7 @@ func (b *BalanceOfNfts) FetchBalance(
 	db *s.Database,
 	balance *models.Balance,
 	sc *s.SnapshotClient,
+	p *models.Proposal,
 ) (*models.Balance, error) {
 
 	vb := &models.VoteWithBalance{
@@ -36,13 +37,14 @@ func (b *BalanceOfNfts) FetchBalance(
 		return nil, err
 	}
 
-	var contract = &shared.Contract{
-		Name: c.Contract_name,
-		Addr: c.Contract_addr,
+	strategy, err := models.MatchStrategyByProposal(*c.Strategies, *p.Strategy)
+	if err != nil {
+		log.Error().Err(err).Msg("Unable to find strategy for contract")
+		return nil, err
 	}
 
 	if len(nftIds) == 0 {
-		nftIds, err := b.FlowAdapter.GetNFTIds(balance.Addr, contract)
+		nftIds, err := b.FlowAdapter.GetNFTIds(balance.Addr, &strategy.Contract)
 		if err != nil {
 			return nil, err
 		}

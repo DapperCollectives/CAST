@@ -19,6 +19,7 @@ func (s *OneAddressOneVote) FetchBalance(
 	db *s.Database,
 	b *models.Balance,
 	sc *s.SnapshotClient,
+	p *models.Proposal,
 ) (*models.Balance, error) {
 
 	if err := b.GetBalanceByAddressAndBlockHeight(db); err != nil && err.Error() != pgx.ErrNoRows.Error() {
