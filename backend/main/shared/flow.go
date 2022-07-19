@@ -366,7 +366,7 @@ func (fa *FlowAdapter) GetNFTIds(voterAddr string, c *Contract) ([]interface{}, 
 
 	script, err := ioutil.ReadFile("./main/cadence/scripts/get_nfts_ids.cdc")
 	if err != nil {
-		log.Error().Err(err).Msgf("error reading cadence script file")
+		log.Error().Err(err).Msgf("Error reading cadence script file")
 		return nil, err
 	}
 

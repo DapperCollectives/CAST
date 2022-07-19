@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"sort"
+	"strings"
 
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/georgysavva/scany/pgxscan"
@@ -30,7 +31,7 @@ var USER_TYPES = UserTypes{"member", "author", "admin"}
 
 type UserCommunity struct {
 	Community
-	Membership_type string `json:"membershipType,omitempty"`
+	Roles string `json:"roles" validate:"required"`
 }
 
 type CommunityUserPayload struct {
@@ -140,14 +141,27 @@ func GetCommunityLeaderboard(db *s.Database, communityId int, addr string, start
 
 func GetCommunitiesForUser(db *s.Database, addr string, start, count int) ([]UserCommunity, int, error) {
 	var communities = []UserCommunity{}
+
 	err := pgxscan.Select(db.Context, db.Conn, &communities,
 		`
 		SELECT
-			communities.*,
-			community_users.user_type as membership_type
+	  communities.*,
+	  a.roles
 		FROM communities
 		LEFT JOIN community_users ON community_users.community_id = communities.id
+		LEFT JOIN (
+				SELECT DISTINCT ON (community_users.community_id) community_users.*,
+						ARRAY(
+								SELECT community_users.user_type
+								FROM community_users
+								WHERE addr = $1
+								GROUP BY community_users.user_type
+						) as roles
+						FROM community_users
+						WHERE addr = $1
+		) a ON community_users.addr = a.addr
 		WHERE community_users.addr = $1
+		GROUP BY communities.id, a.roles
 		LIMIT $2 OFFSET $3
 		`, addr, count, start)
 
@@ -157,13 +171,29 @@ func GetCommunitiesForUser(db *s.Database, addr string, start, count int) ([]Use
 		return []UserCommunity{}, 0, nil
 	}
 
+	for i := range communities {
+		communities[i].Roles = strings.Trim(communities[i].Roles, "{}")
+	}
+
 	var totalCommunities int
 	countSql := `
 	SELECT
-		COUNT(communities.id)
+		COUNT(DISTINCT communities.id)
 	FROM communities
 	LEFT JOIN community_users ON community_users.community_id = communities.id
+	LEFT JOIN (
+		SELECT DISTINCT ON (community_users.community_id) community_users.*,
+				ARRAY(
+						SELECT community_users.user_type
+						FROM community_users
+						WHERE addr = $1
+						GROUP BY community_users.user_type
+				) as roles
+				FROM community_users
+				WHERE addr = $1
+	) a ON community_users.addr = a.addr
 	WHERE community_users.addr = $1
+	GROUP BY communities.id, a.roles
 	`
 	_ = db.Conn.QueryRow(db.Context, countSql, addr).Scan(&totalCommunities)
 
@@ -280,7 +310,7 @@ func getUserAchievements(db *s.Database, communityId int) (UserAchievements, err
 	// their votes and achievements (e.g. early votes, streaks and winning choices)
 	// Note 1: crosstab is a postgres extension that creates a pivot table.
 	// Achievements are joined as columns for each user.
-	// Note 2: Subselects community_id not replaced properly by $1, so has been
+	// Note 2: crosstab Subselects in community_id not replaced properly by $1, so has been
 	// substituted in string first.
 	sql := fmt.Sprintf(
 		`
