@@ -86,7 +86,7 @@ const AboutLayout = ({
         {showEdit && <CommunitySettingsButton communityId={communityId} />}
       </div>
       <div
-        className="column is-8-desktop is-9-widescreen is-7-tablet"
+        className="column pt-0 is-8-desktop is-9-widescreen is-7-tablet"
         style={{ paddingLeft: '12%' }}
       >
         {communityPulse ? (
@@ -111,11 +111,8 @@ const MembersLayout = ({
 } = {}) => {
   return (
     <div className="columns mt-0">
-      <div
-        className="column is-3-desktop is-4-tablet is-hidden-mobile"
-        style={{ paddingTop: '28px' }}
-      >
-        {communityLinks}
+      <div className="column is-3-desktop is-4-tablet is-hidden-mobile">
+        <div style={{ paddingTop: '28px' }}>{communityLinks}</div>
       </div>
       <div
         className="column pt-0 is-9-desktop is-7-tablet"
@@ -417,7 +414,7 @@ export default function Community() {
                 {activeTabMap['proposals'] && (
                   <CommunityProposals
                     communityId={community.id}
-                    admins={admins}
+                    admins={admins ?? []}
                   />
                 )}
                 {activeTabMap['members'] && (
