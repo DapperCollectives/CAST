@@ -3,6 +3,8 @@ export const MAX_FILE_SIZE = 5242880;
 // 1024 * 1024 * 2 = 2MB
 export const MAX_AVATAR_FILE_SIZE = 2097152;
 
+export const MAX_PROPOSAL_IMAGE_FILE_SIZE = 2097152;
+
 export const FilterValues = {
   all: 'All',
   active: 'Active',
