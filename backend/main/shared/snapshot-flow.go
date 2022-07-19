@@ -157,7 +157,7 @@ func (c *SnapshotClient) GetAddressBalanceAtBlockHeight(
 	address string,
 	blockheight uint64,
 	balancePointer interface{},
-	contract Contract,
+	contract *Contract,
 ) error {
 	if c.bypass() {
 		return nil
