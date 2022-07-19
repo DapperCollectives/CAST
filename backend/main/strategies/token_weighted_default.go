@@ -12,23 +12,22 @@ import (
 )
 
 type TokenWeightedDefault struct {
-	shared.StrategyStruct
-	shared.SnapshotClient
+	s.StrategyStruct
+	SC s.SnapshotClient
+	DB *s.Database
 }
 
 func (s *TokenWeightedDefault) FetchBalance(
-	db *s.Database,
 	b *models.Balance,
-	sc *s.SnapshotClient,
 	p *models.Proposal,
 ) (*models.Balance, error) {
 
 	var c models.Community
-	if err := c.GetCommunityByProposalId(db, b.Proposal_id); err != nil {
+	if err := c.GetCommunityByProposalId(s.DB, b.Proposal_id); err != nil {
 		return nil, err
 	}
 
-	if err := b.GetBalanceByAddressAndBlockHeight(db); err != nil && err.Error() != pgx.ErrNoRows.Error() {
+	if err := b.GetBalanceByAddressAndBlockHeight(s.DB); err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		log.Error().Err(err).Msg("error fetching balance from DB")
 		return nil, err
 	}
@@ -39,7 +38,7 @@ func (s *TokenWeightedDefault) FetchBalance(
 		return nil, err
 	}
 
-	if err := s.SnapshotClient.GetAddressBalanceAtBlockHeight(
+	if err := s.SC.GetAddressBalanceAtBlockHeight(
 		b.Addr,
 		b.BlockHeight,
 		b,
@@ -49,7 +48,7 @@ func (s *TokenWeightedDefault) FetchBalance(
 		return nil, err
 	}
 
-	if err := b.CreateBalance(db); err != nil {
+	if err := b.CreateBalance(s.DB); err != nil {
 		log.Error().Err(err).Msg("error creating balance in the DB")
 		return nil, err
 	}
@@ -122,5 +121,5 @@ func (s *TokenWeightedDefault) InitStrategy(
 ) {
 	s.FlowAdapter = f
 	s.DB = db
-	s.SnapshotClient = *sc
+	s.SC = *sc
 }

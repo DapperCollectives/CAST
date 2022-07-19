@@ -11,14 +11,13 @@ import (
 )
 
 type BalanceOfNfts struct {
-	shared.StrategyStruct
-	shared.SnapshotClient
+	s.StrategyStruct
+	SC s.SnapshotClient
+	DB *s.Database
 }
 
 func (b *BalanceOfNfts) FetchBalance(
-	db *s.Database,
 	balance *models.Balance,
-	sc *s.SnapshotClient,
 	p *models.Proposal,
 ) (*models.Balance, error) {
 
@@ -27,11 +26,11 @@ func (b *BalanceOfNfts) FetchBalance(
 	}
 
 	var c models.Community
-	if err := c.GetCommunityByProposalId(db, balance.Proposal_id); err != nil {
+	if err := c.GetCommunityByProposalId(b.DB, balance.Proposal_id); err != nil {
 		return nil, err
 	}
 
-	nftIds, err := models.GetUserNFTs(db, vb)
+	nftIds, err := models.GetUserNFTs(b.DB, vb)
 	if err != nil {
 		log.Error().Err(err).Msg("error getting user nfts")
 		return nil, err
@@ -56,7 +55,7 @@ func (b *BalanceOfNfts) FetchBalance(
 			vb.NFTs = append(vb.NFTs, nft)
 		}
 
-		doesExist, err := models.DoesNFTExist(db, vb)
+		doesExist, err := models.DoesNFTExist(b.DB, vb)
 		if err != nil {
 			return nil, err
 		}
@@ -64,7 +63,7 @@ func (b *BalanceOfNfts) FetchBalance(
 		//only if the NFT ID is not already in the DB,
 		//do we add the balance
 		if !doesExist && err == nil {
-			err = models.CreateUserNFTRecord(db, vb)
+			err = models.CreateUserNFTRecord(b.DB, vb)
 			balance.NFTCount = len(vb.NFTs)
 		}
 	}
@@ -136,5 +135,5 @@ func (s *BalanceOfNfts) InitStrategy(
 ) {
 	s.FlowAdapter = f
 	s.DB = db
-	s.SnapshotClient = *sc
+	s.SC = *sc
 }
