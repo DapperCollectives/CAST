@@ -284,6 +284,7 @@ func TestOneTokenOneVoteStrategy(t *testing.T) {
 	clearTable("proposals")
 	clearTable("votes")
 	clearTable("balances")
+	clearTable("nfts")
 
 	communityId := otu.AddCommunities(1)[0]
 	proposalIds, proposals := otu.AddProposalsForStrategy(communityId, "one-address-one-vote", 2)
@@ -352,5 +353,48 @@ func TestOneTokenOneVoteStrategy(t *testing.T) {
 			expectedWeight := float64(1.00)
 			assert.Equal(t, expectedWeight, *v.Weight)
 		}
+	})
+}
+
+func TestOneTokenOneVoteStrategyRestrictions(t *testing.T) {
+	clearTable("communities")
+	clearTable("community_users")
+	clearTable("proposals")
+	clearTable("votes")
+	clearTable("balances")
+	clearTable("nfts")
+
+	otu.CreateNFTCollection("user1")
+
+	communityId, community := otu.AddCommunitiesWithNFTContract(1, "user1")
+	proposalIds, proposals := otu.AddProposalsForStrategy(communityId[0], "one-address-one-vote", 1)
+	proposalId := proposalIds[0]
+	choices := proposals[0].Choices
+
+	var contract = &shared.Contract{
+		Name: community.Contract_name,
+		Addr: community.Contract_addr,
+	}
+
+	votes, err := otu.GenerateListOfVotesWithNFTs(proposalId, 5, contract)
+	if err != nil {
+		t.Error(err)
+	}
+
+	otu.AddDummyVotesAndNFTs(votes)
+	t.Run("Test Voting with valid NFT only", func(t *testing.T) {
+
+		proposalWithChoices := models.NewProposalResults(proposalId, choices)
+		_results := otu.TallyResultsForOneAddressOneVote(votes, proposalWithChoices)
+
+		response := otu.GetProposalResultsAPI(proposalId)
+		CheckResponseCode(t, http.StatusOK, response.Code)
+
+		var results models.ProposalResults
+		json.Unmarshal(response.Body.Bytes(), &results)
+
+		assert.Equal(t, _results.Proposal_id, results.Proposal_id)
+		assert.Equal(t, _results.Results_float["a"], results.Results_float["a"])
+		assert.Equal(t, _results.Results_float["b"], results.Results_float["b"])
 	})
 }
