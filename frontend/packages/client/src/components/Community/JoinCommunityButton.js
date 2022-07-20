@@ -12,6 +12,7 @@ export default function JoinCommunityButton({
   onLeaveCommunity = async () => {},
   onJoinCommunity = async () => {},
   darkMode = true,
+  classNames,
 }) {
   const [isModalErrorOpened, setIsModalErrorOpened] = useState(false);
   const { createCommunityUser, deleteUserFromCommunity } = useJoinCommunity();
@@ -79,16 +80,20 @@ export default function JoinCommunityButton({
     }
   };
 
-  const classNamesButton = classnames('button is-uppercase is-fullwidth ', {
+  const classNamesContainer = classnames(
+    'column is-narrow-tablet is-full-mobile is-align-self-center',
+    {
+      [classNames]: !!classNames,
+    }
+  );
+
+  const classNamesButton = classnames('button is-uppercase is-fullwidth', {
     'rounded-lg has-background-black has-text-white-bis': darkMode,
     'rounded-sm has-text-black border-lighter-dark-grey small-text': !darkMode,
   });
 
   return (
-    <div
-      className="column is-narrow-tablet is-full-mobile is-align-self-center"
-      style={{ minWidth: '117px' }}
-    >
+    <div className={classNamesContainer} style={{ minWidth: '117px' }}>
       <button
         className={classNamesButton}
         onClick={isMember ? leaveCommunity : joinCommunity}
