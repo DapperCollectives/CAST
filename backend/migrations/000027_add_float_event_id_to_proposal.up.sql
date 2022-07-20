@@ -1,0 +1,1 @@
+ALTER TABLE proposals ADD COLUMN float_event_id INT;

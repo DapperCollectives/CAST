@@ -22,6 +22,7 @@ type Proposal struct {
 	Strategy             *string                 `json:"strategy,omitempty"`
 	Max_weight           *float64                `json:"maxWeight,omitempty"`
 	Min_balance          *uint64                 `json:"minBalance,omitempty"`
+	Float_event_id       *uint64                 `json:"floatEventId,omitempty"`
 	Creator_addr         string                  `json:"creatorAddr" validate:"required"`
 	Start_time           time.Time               `json:"startTime" validate:"required"`
 	Result               *string                 `json:"result,omitempty"`
