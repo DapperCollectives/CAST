@@ -265,7 +265,16 @@ export default function Community() {
   return (
     <section className="full-height pt-0">
       {community ? (
-        <div className="is-flex community-header-wrapper">
+        <div
+          className="is-flex community-header-wrapper"
+          style={{
+            backgroundImage: community?.bannerImgUrl
+              ? `url(${community.bannerImgUrl})`
+              : 'none',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        >
           <div className={headerContainerClassNames}>
             <div className="is-flex community-specific">
               <div className={imageContainerClasses}>
