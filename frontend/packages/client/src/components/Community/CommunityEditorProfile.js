@@ -174,7 +174,7 @@ function CommunityEditorProfile({
             }}
             {...getLogoRootProps()}
           >
-            {!image && !isUpdating && (
+            {!isUpdating && !image?.imageUrl && !image?.file && (
               <>
                 <Upload />
                 <span className="smaller-text">Avatar</span>
@@ -193,7 +193,7 @@ function CommunityEditorProfile({
                 }}
               />
             )}
-            {!(isUpdating && image.file) ? (
+            {!isUpdating && (image?.imageUrl || image?.file) && (
               <div
                 className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center"
                 style={{
@@ -207,7 +207,8 @@ function CommunityEditorProfile({
                 <Upload className="has-text-white" />
                 <input {...getLogoInputProps()} />
               </div>
-            ) : (
+            )}
+            {isUpdating && (
               <div
                 className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center"
                 style={{
@@ -227,7 +228,7 @@ function CommunityEditorProfile({
             style={{ minHeight: 200 }}
             {...getBannerRootProps()}
           >
-            {!bannerImage && !isUpdating && (
+            {!isUpdating && !bannerImage?.imageUrl && (
               <>
                 <Upload />
                 <span className="smaller-text">Community Banner Image</span>
@@ -250,7 +251,7 @@ function CommunityEditorProfile({
                 }}
               />
             )}
-            {!(isUpdating && bannerImage.file) ? (
+            {!isUpdating && (bannerImage.imageUrl || bannerImage.file) && (
               <div
                 className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center"
                 style={{
@@ -265,7 +266,8 @@ function CommunityEditorProfile({
                 <Upload className="has-text-white" />
                 <input {...getBannerInputProps()} />
               </div>
-            ) : (
+            )}
+            {isUpdating && (
               <div
                 className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center"
                 style={{
