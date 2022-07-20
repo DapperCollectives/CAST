@@ -22,6 +22,11 @@ macdev:
 dev:
 	APP_ENV=DEV make build_and_run
 
+floats: 
+	flow accounts add-contract GrantedAccountAccess ./main/cadence/float/GrantedAccountAccess.cdc && \
+		flow accounts add-contract FLOAT ./main/cadence/float/FLOAT.cdc && \ 
+		flow accounts add-contract FLOAT ./main/cadence/float/FLOATVerifiers.cdc 
+
 migrateup:
 	migrate -path ./migrations -database "postgres://postgres:admin@localhost:5432/flow_snapshot?sslmode=disable" -verbose up
 
