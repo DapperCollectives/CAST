@@ -9,13 +9,13 @@ import (
 	"github.com/DapperCollectives/CAST/backend/main/server"
 	"github.com/DapperCollectives/CAST/backend/main/shared"
 	utils "github.com/DapperCollectives/CAST/backend/main/test_utils"
-	"github.com/bjartek/overflow/overflow"
+	. "github.com/bjartek/overflow/overflow"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
 )
 
 var A server.App
-var O *overflow.Overflow
+var O *OverflowState
 var otu *utils.OverflowTestUtils
 
 const ServiceAddress = "0xf8d6e0586b0a20c7"
@@ -23,7 +23,8 @@ const ServiceAddress = "0xf8d6e0586b0a20c7"
 func TestMain(m *testing.M) {
 	var err error
 
-	emulator := overflow.NewOverflowEmulator()
+	os.Setenv("OVERFLOW_ENV", "emulator")
+	emulator := NewOverflow()
 	emulator.Config("../flow.json")
 	emulator.BasePath("./main/cadence")
 	O = emulator.Start()
