@@ -1,8 +1,8 @@
 // This is an example implementation of a Flow Non-Fungible Token
 // It is not part of the official standard but it assumed to be
 // very similar to how many NFTs would implement the core functionality.
-import NonFungibleToken from "./NonFungibleToken.cdc"
-import MetadataViews from "./MetadataViews.cdc"
+import NonFungibleToken from 0xf8d6e0586b0a20c7
+import MetadataViews from 0xf8d6e0586b0a20c7
 
 pub contract ExampleNFT: NonFungibleToken {
 
