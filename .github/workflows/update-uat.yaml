@@ -4,7 +4,7 @@ on:
   # Trigger the workflow on push or pull request merge
   push:
     branches:
-      - uat
+      - uat #We need to test this environment.
 
 env:
   TAG: ${{ github.sha }}

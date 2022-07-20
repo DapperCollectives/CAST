@@ -191,6 +191,7 @@ func TestBalanceOfNFTsStrategy(t *testing.T) {
 		//weight should be the same as before the cheat vote was added
 		//because the cheat vote should be ignored by the server
 		//therefor the cheatResults should be the same as the correctResults
+
 		assert.Equal(t, correctResults.Proposal_id, cheatResults.Proposal_id)
 		assert.Equal(t, correctResults.Results_float["a"], cheatResults.Results_float["a"])
 		assert.Equal(t, correctResults.Results_float["b"], cheatResults.Results_float["b"])

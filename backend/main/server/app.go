@@ -65,9 +65,9 @@ var allowedFileTypes = []string{"image/jpg", "image/jpeg", "image/png", "image/g
 type Strategy interface {
 	TallyVotes(votes []*models.VoteWithBalance, p *models.ProposalResults) (models.ProposalResults, error)
 	GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error)
-	FetchBalance(db *shared.Database, b *models.Balance, sc *shared.SnapshotClient) (*models.Balance, error)
 	GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error)
 	InitStrategy(f *shared.FlowAdapter, db *shared.Database, sc *shared.SnapshotClient)
+	FetchBalance(b *models.Balance, p *models.Proposal) (*models.Balance, error)
 }
 
 var strategyMap = map[string]Strategy{
@@ -292,6 +292,7 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 
 	// First, get the proposal by proposalId
 	p := models.Proposal{ID: proposalId}
+
 	if err := p.GetProposalById(a.DB); err != nil {
 		switch err.Error() {
 		case pgx.ErrNoRows.Error():
@@ -319,6 +320,8 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	proposalWithChoices := models.NewProposalResults(proposalId, p.Choices)
+	s.InitStrategy(a.FlowAdapter, a.DB, a.SnapshotClient)
+
 	proposalResults, err := s.TallyVotes(votes, proposalWithChoices)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
@@ -607,7 +610,7 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 
 	s.InitStrategy(a.FlowAdapter, a.DB, a.SnapshotClient)
 
-	balance, err := s.FetchBalance(a.DB, emptyBalance, a.SnapshotClient)
+	balance, err := s.FetchBalance(emptyBalance, &p)
 	if err != nil {
 		log.Error().Err(err).Msgf("error fetching balance for address %v", v.Addr)
 	}
@@ -1450,7 +1453,7 @@ func (a *App) getAccountAtBlockHeight(w http.ResponseWriter, r *http.Request) {
 	}
 
 	b := Balance{}
-	if err = a.SnapshotClient.GetAddressBalanceAtBlockHeight(addr, blockHeight, &b, defaultFlowContract); err != nil {
+	if err = a.SnapshotClient.GetAddressBalanceAtBlockHeight(addr, blockHeight, &b, &defaultFlowContract); err != nil {
 		log.Error().Err(err).Msgf("error getting account %s at blockheight %d", addr, blockHeight)
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
