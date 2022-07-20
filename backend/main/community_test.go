@@ -137,6 +137,23 @@ func TestGetCommunityAPI(t *testing.T) {
 	checkResponseCode(t, http.StatusOK, response.Code)
 }
 
+func TestGetCommunitiesForHomepageAPI(t *testing.T) {
+	clearTable("communities")
+	clearTable("community_users")
+	communityIds := otu.AddCommunities(2)
+	otu.MakeFeaturedCommunity(communityIds[0])
+
+	response := otu.GetCommunitiesForHomepageAPI()
+
+	checkResponseCode(t, http.StatusOK, response.Code)
+
+	//Parse the response
+	var p test_utils.PaginatedResponseWithCommunity
+	json.Unmarshal(response.Body.Bytes(), &p)
+	
+	assert.Equal(t, 1, len(p.Data))
+}
+
 func TestUpdateCommunity(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")
