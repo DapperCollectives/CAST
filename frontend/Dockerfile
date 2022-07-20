@@ -9,10 +9,10 @@ COPY ./packages/client/ ./
 WORKDIR /app
 RUN yarn install
 
+#ENVS FOR PROD FRONTEND
 ENV APP_ENV "production"
 ENV NODE_ENV "production"
 ENV REACT_APP_FRONTEND_URL "cast.fyi"
-ENV NODE_ENV "production"
 ENV REACT_APP_BACK_END_SERVER_API "https://api.cast.fyi"
 ENV REACT_APP_IPFS_GATEWAY "https://gateway.pinata.cloud/ipfs/"
 ENV REACT_APP_FLOW_ENV "mainnet"
@@ -22,6 +22,7 @@ RUN yarn build
 
 # DEPLOY CLIENT
 FROM nginx:latest as production-stage
+RUN mkdir -p /var/run/nginx-cache && chmod 0755 /var/run/nginx-cache
 WORKDIR /app
 COPY --from=build-stage /app/packages/client/build /app
 COPY ./deploy/nginx.conf /etc/nginx/nginx.conf
