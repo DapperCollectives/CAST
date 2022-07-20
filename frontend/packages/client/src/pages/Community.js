@@ -320,6 +320,7 @@ export default function Community() {
               setTotalMembers={setTotalMembers}
               onLeaveCommunity={onUserLeaveCommunity}
               onJoinCommunity={onUserJoinCommunity}
+              classNames="mt-2-mobile"
             />
           </div>
         </div>
