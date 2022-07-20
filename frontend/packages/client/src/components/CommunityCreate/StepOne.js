@@ -43,7 +43,7 @@ export default function StepOne({
   );
 
   const onDrop = useCallback(
-    (filename, dataKey, maxFileSize) => (acceptedFiles) => {
+    (filename, dataKey, maxFileSize, maxWidth) => (acceptedFiles) => {
       acceptedFiles.forEach((imageFile) => {
         // validate type
         if (
@@ -69,9 +69,9 @@ export default function StepOne({
 
         const img = new Image();
         img.onload = function (e) {
-          // reduce logo images if necessary before upload
-          if (e.target.width > 150 && dataKey === 'logo') {
-            getReducedImg(e.target, 150, filename).then((result) => {
+          // reduce images if necessary before upload
+          if (e.target.width > maxWidth) {
+            getReducedImg(e.target, maxWidth, filename).then((result) => {
               onDataChange({
                 [dataKey]: { imageUrl: imageAsURL, file: result.imageFile },
               });
@@ -90,7 +90,7 @@ export default function StepOne({
 
   const { getRootProps: getLogoRootProps, getInputProps: getLogoInputProps } =
     useDropzone({
-      onDrop: onDrop('community_image', 'logo', MAX_AVATAR_FILE_SIZE),
+      onDrop: onDrop('community_image', 'logo', MAX_AVATAR_FILE_SIZE, 150),
       maxFiles: 1,
       accept: 'image/jpeg,image/png',
     });
@@ -99,7 +99,7 @@ export default function StepOne({
     getRootProps: getBannerRootProps,
     getInputProps: getBannerInputProps,
   } = useDropzone({
-    onDrop: onDrop('community_banner', 'banner', MAX_FILE_SIZE),
+    onDrop: onDrop('community_banner', 'banner', MAX_FILE_SIZE, 1200),
     maxFiles: 1,
     accept: 'image/jpeg,image/png',
   });
