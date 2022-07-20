@@ -3,6 +3,7 @@
 
 FROM golang:1.17.7 as vt-init
 # Install go modules
+
 WORKDIR /flow-voting-tool
 COPY ./go.mod ./
 ADD ./main ./main
