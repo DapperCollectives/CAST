@@ -98,7 +98,7 @@ export default function CommunityCreate() {
       })
     );
     // open modal if there are errors on addresses
-    if (errorMessages.lenght) {
+    if (errorMessages.length) {
       modalContext.openModal(
         React.createElement(Error, {
           error: (
