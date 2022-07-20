@@ -22,6 +22,7 @@ RUN yarn build
 
 # DEPLOY CLIENT
 FROM nginx:latest as production-stage
+RUN mkdir -p /var/run/nginx-cache && chmod 0755 /var/run/nginx-cache
 WORKDIR /app
 COPY --from=build-stage /app/packages/client/build /app
 COPY ./deploy/nginx.conf /etc/nginx/nginx.conf
