@@ -76,29 +76,32 @@ export default function CommunityCreate() {
 
     // validate Flow Addresses used
     const addressesToValidate = {
-      'Contract Address': [contractAddress],
-      'Admin List': listAddrAdmins.map((e) => e.addr),
-      'Author List': listAddrAuthors.map((e) => e.addr),
+      'Contract Address': contractAddress ? [contractAddress] : [],
+      'Admin List': listAddrAdmins.map((e) => e.addr).filter((addr) => !!addr),
+      'Author List': listAddrAuthors
+        .map((e) => e.addr)
+        .filter((addr) => !!addr),
       Strategies: strategies.map(({ contract }) => contract.addr),
     };
 
     const validation = Object.entries(addressesToValidate);
+
+    console.log('Validation for addreses', validation);
+
     const errorMessages = [];
-    await Promise.all(
-      validation.map(async (ele) => {
-        try {
-          await Promise.all(
-            ele[1].map(async (addr) => {
-              await isValidFlowAddress(addr);
-            })
-          );
-        } catch (error) {
-          errorMessages.push(ele[0]);
-        }
-      })
-    );
+
+    validation.map(async ([name, addrs]) => {
+      try {
+        await Promise.all(addrs.map((addr) => isValidFlowAddress(addr)));
+      } catch (error) {
+        console.log('error pushed', error);
+        errorMessages.push(name);
+      }
+    });
+
+    console.log(errorMessages);
     // open modal if there are errors on addresses
-    if (errorMessages.lenght) {
+    if (errorMessages.length) {
       modalContext.openModal(
         React.createElement(Error, {
           error: (
@@ -130,7 +133,7 @@ export default function CommunityCreate() {
       slug: generateSlug(),
     };
 
-    await createCommunity(injectedProvider, communityData);
+    // await createCommunity(injectedProvider, communityData);
   };
 
   const props = {

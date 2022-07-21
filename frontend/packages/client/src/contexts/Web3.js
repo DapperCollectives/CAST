@@ -87,10 +87,12 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
 
   // add check for address
   const isValidFlowAddress = async (addr) => {
+    console.log('Getting address info => ', addr);
     try {
       // https://docs.onflow.org/fcl/reference/api/#account
-      return fcl.account(addr);
+      return await fcl.account(addr);
     } catch (err) {
+      console.log('Error from FCL', err);
       return false;
     }
   };
