@@ -80,6 +80,7 @@ func NewFlowClient(flowEnv string) *FlowAdapter {
 	if flag.Lookup("test.v") != nil {
 		adapter.URL = "127.0.0.1:3569"
 	}
+	log.Info().Msgf("FLOW URL: %s", adapter.URL)
 
 	// create flow client
 	FlowClient, err := client.New(adapter.URL, grpc.WithInsecure())
