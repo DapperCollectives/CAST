@@ -1,7 +1,7 @@
-import NonFungibleToken from "NON_FUNGIBLE_TOKEN_ADDRESS" 
-import "TOKEN_NAME" from "TOKEN_ADDRESS" 
+import NonFungibleToken from "NON_FUNGIBLE_TOKEN_ADDRESS"
+import "TOKEN_NAME" from "TOKEN_ADDRESS"
 
-pub fun main(address: Address): [UInt64]{
+pub fun main(address: Address): [UInt64] {
     let account = getAccount(address)
 
     let collectionRef = account
@@ -11,4 +11,3 @@ pub fun main(address: Address): [UInt64]{
     
     return collectionRef.getIDs()
 }
-

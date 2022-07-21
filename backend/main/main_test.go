@@ -15,7 +15,7 @@ import (
 )
 
 var A server.App
-var O *overflow.Overflow
+var O *overflow.OverflowState
 var otu *utils.OverflowTestUtils
 
 const ServiceAddress = "0xf8d6e0586b0a20c7"

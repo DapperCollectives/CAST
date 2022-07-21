@@ -102,8 +102,6 @@ func TestBalanceOfNFTsStrategy(t *testing.T) {
 	clearTable("balances")
 	clearTable("nfts")
 
-	otu.CreateNFTCollection("user1")
-
 	communityId, community := otu.AddCommunitiesWithNFTContract(1, "user1")
 	proposalIds, proposals := otu.AddProposalsForStrategy(communityId[0], "balance-of-nfts", 1)
 	proposalId := proposalIds[0]

@@ -1,7 +1,6 @@
 package strategies
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/DapperCollectives/CAST/backend/main/models"
@@ -30,42 +29,34 @@ func (b *BalanceOfNfts) FetchBalance(
 		return nil, err
 	}
 
-	nftIds, err := models.GetUserNFTs(b.DB, vb)
-	if err != nil {
-		log.Error().Err(err).Msg("error getting user nfts")
-		return nil, err
-	}
-
 	strategy, err := models.MatchStrategyByProposal(*c.Strategies, *p.Strategy)
 	if err != nil {
 		log.Error().Err(err).Msg("Unable to find strategy for contract")
 		return nil, err
 	}
 
-	if len(nftIds) == 0 {
-		nftIds, err := b.FlowAdapter.GetNFTIds(balance.Addr, &strategy.Contract)
-		if err != nil {
-			return nil, err
-		}
+	nftIds, err := b.FlowAdapter.GetNFTIds(balance.Addr, &strategy.Contract)
+	if err != nil {
+		return nil, err
+	}
 
-		for _, nftId := range nftIds {
-			nft := &models.NFT{
-				ID: nftId.(uint64),
-			}
-			vb.NFTs = append(vb.NFTs, nft)
+	for _, nftId := range nftIds {
+		nft := &models.NFT{
+			ID: nftId,
 		}
+		vb.NFTs = append(vb.NFTs, nft)
+	}
 
-		doesExist, err := models.DoesNFTExist(b.DB, vb)
-		if err != nil {
-			return nil, err
-		}
+	doesExist, err := models.DoesNFTExist(b.DB, vb)
+	if err != nil {
+		return nil, err
+	}
 
-		//only if the NFT ID is not already in the DB,
-		//do we add the balance
-		if !doesExist && err == nil {
-			err = models.CreateUserNFTRecord(b.DB, vb)
-			balance.NFTCount = len(vb.NFTs)
-		}
+	//only if the NFT ID is not already in the DB,
+	//do we add the balance
+	if !doesExist && err == nil {
+		err = models.CreateUserNFTRecord(b.DB, vb)
+		balance.NFTCount = len(vb.NFTs)
 	}
 
 	return balance, nil
@@ -86,29 +77,13 @@ func (b *BalanceOfNfts) TallyVotes(
 
 func (b *BalanceOfNfts) GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error) {
 	var weight float64
-	var ERROR error = fmt.Errorf("this address has no nfts")
 
-	// get the nfts for this address
 	var c models.Community
 	if err := c.GetCommunityByProposalId(b.DB, proposal.ID); err != nil {
 		return 0, err
 	}
 
-	var contract = &shared.Contract{
-		Name: c.Contract_name,
-		Addr: c.Contract_addr,
-	}
-
-	nftIds, err := b.FlowAdapter.GetNFTIds(vote.Addr, contract)
-	if err != nil {
-		return 0, err
-	}
-
-	if len(nftIds) == 0 {
-		return 0.00, ERROR
-	}
-	nftCount := len(nftIds)
-	weight = float64(nftCount)
+	weight = float64(len(vote.NFTs))
 	return weight, nil
 }
 

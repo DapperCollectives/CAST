@@ -76,7 +76,7 @@
 	},
 	"deployments": {
 		"emulator": {
-			"emulator-account": ["NonFungibleToken", "ExampleNFT", "MetadataViews"],
+			"emulator-account": ["NonFungibleToken", "MetadataViews", "ExampleNFT"],
 			"emulator-user1": [],
 			"emulator-user2": [],
 			"emulator-user3": [],
