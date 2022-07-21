@@ -96,7 +96,6 @@ export default function CommunityCreate() {
         try {
           await Promise.all(addrs.map((addr) => isValidFlowAddress(addr)));
         } catch (error) {
-          console.log(error);
           if (
             process.env.APP_ENV !== 'PRODUCTION' &&
             !error?.message.includes(
