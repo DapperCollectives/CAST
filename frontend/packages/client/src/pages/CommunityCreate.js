@@ -98,6 +98,7 @@ export default function CommunityCreate() {
         } catch (error) {
           console.log(error);
           if (
+            process.env.APP_ENV !== 'PRODUCTION' &&
             !error?.message.includes(
               "Cannot read properties of undefined (reading 'map')"
             )
