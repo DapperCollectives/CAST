@@ -21,8 +21,14 @@ func (b *FLOATEvent) FetchBalance(
 	p *models.Proposal,
 ) (*models.Balance, error) {
 
+	// Create VoteWithBalance struct to call CreateUserNFTRecord
+	v := &models.Vote{
+		Proposal_id: p.ID,
+		Addr:        balance.Addr,
+	}
 	vb := &models.VoteWithBalance{
 		NFTs: []*models.NFT{},
+		Vote: *v,
 	}
 
 	var c models.Community
@@ -30,43 +36,36 @@ func (b *FLOATEvent) FetchBalance(
 		return nil, err
 	}
 
-	nftIds, err := models.GetUserNFTs(b.DB, vb)
+	floatIds, err := b.FlowAdapter.GetFLOATsForEventId(balance.Addr, *p.Float_event_id)
 	if err != nil {
-		log.Error().Err(err).Msg("error getting user nfts")
 		return nil, err
 	}
 
-	strategy, err := models.MatchStrategyByProposal(*c.Strategies, *p.Strategy)
-	if err != nil {
-		log.Error().Err(err).Msg("Unable to find strategy for contract")
-		return nil, err
-	}
-
-	if len(nftIds) == 0 {
-		nftIds, err := b.FlowAdapter.GetNFTIds(balance.Addr, &strategy.Contract)
+	// Check if each FLOAT ID exists already.  If it doesnt, append to list of NFTs
+	for _, floatId := range floatIds {
+		doesExist, err := p.DoesNFTExistForProposal(b.DB, floatId)
 		if err != nil {
+			log.Error().Err(err).Msgf("error calling p.DoesNFTExistForProposal")
 			return nil, err
 		}
 
-		for _, nftId := range nftIds {
+		// Append if ID doesnt exist
+		if !doesExist {
 			nft := &models.NFT{
-				ID: nftId.(uint64),
+				ID: floatId,
 			}
 			vb.NFTs = append(vb.NFTs, nft)
 		}
-
-		doesExist, err := models.DoesNFTExist(b.DB, vb)
-		if err != nil {
-			return nil, err
-		}
-
-		//only if the NFT ID is not already in the DB,
-		//do we add the balance
-		if !doesExist && err == nil {
-			err = models.CreateUserNFTRecord(b.DB, vb)
-			balance.NFTCount = len(vb.NFTs)
-		}
 	}
+
+	if len(vb.NFTs) > 0 {
+		err = models.CreateUserNFTRecord(b.DB, vb)
+	}
+	if err != nil {
+		log.Error().Err(err).Msgf("error calling CreateUserNFTRecord")
+		return nil, err
+	}
+	balance.NFTCount = len(vb.NFTs)
 
 	return balance, nil
 }

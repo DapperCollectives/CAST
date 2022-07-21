@@ -189,6 +189,21 @@ func (p *Proposal) IsLive() bool {
 	return now.After(p.Start_time) && now.Before(p.End_time)
 }
 
+func (p *Proposal) DoesNFTExistForProposal(db *s.Database, _nftId uint64) (bool, error) {
+	var nftId uint64
+	sql := `select id from nfts
+	where proposal_id = $1 and id = $2
+	`
+	err := pgxscan.Get(db.Context, db.Conn, &nftId, sql, p.ID, _nftId)
+	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
+		return false, err
+	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
+		return false, nil
+	}
+
+	return true, nil
+}
+
 // Validations
 
 // Returns an error if the account's balance is insufficient to cast
