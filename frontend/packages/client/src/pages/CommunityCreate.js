@@ -96,6 +96,9 @@ export default function CommunityCreate() {
         try {
           await Promise.all(addrs.map((addr) => isValidFlowAddress(addr)));
         } catch (error) {
+          // This is to bypass error on local
+          // emulator when keys field is not present
+          // on flow emulator response
           if (
             process.env.APP_ENV !== 'PRODUCTION' &&
             !error?.message.includes(
