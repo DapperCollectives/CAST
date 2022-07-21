@@ -19,6 +19,7 @@ import {
   useCommunityUsers,
   useUserRoleOnCommunity,
   useCommunityMembers,
+  useWindowDimensions,
 } from '../hooks';
 import { useWebContext } from '../contexts/Web3';
 import Blockies from 'react-blockies';
@@ -137,6 +138,7 @@ export default function Community() {
 
   const history = useHistory();
 
+  const { width: windowWidth } = useWindowDimensions();
   const [activeWidth, setActiveWidth] = useState(105);
   const [activeLeft, setActiveLeft] = useState(0);
 
@@ -215,7 +217,7 @@ export default function Community() {
     const offsetLeft = elRect.left - parentRect.left;
     setActiveWidth(el.offsetWidth);
     setActiveLeft(offsetLeft);
-  }, [activeTab]);
+  }, [activeTab, windowWidth]);
 
   const notMobile = useMediaQuery();
 
