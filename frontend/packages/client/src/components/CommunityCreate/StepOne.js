@@ -1,4 +1,5 @@
 import React, { useEffect, useCallback } from 'react';
+import classnames from 'classnames';
 import { useDropzone } from 'react-dropzone';
 import { Upload } from 'components/Svg';
 import { WrapperResponsive, Dropdown } from 'components';
@@ -158,6 +159,13 @@ export default function StepOne({
     setStepValid(isValid && isCommunityLinksValid);
   }, [stepData, setStepValid, onDataChange, isCommunityLinksValid]);
 
+  const imageDropClasses = classnames(
+    'is-flex is-flex-direction-column is-align-items-center is-justify-content-center cursor-pointer rounded-lg',
+    {
+      'border-dashed-dark': !banner?.file,
+    }
+  );
+
   return (
     <>
       <WrapperResponsive
@@ -192,7 +200,7 @@ export default function StepOne({
                 width: '90px',
                 overflow: 'hidden',
                 position: 'relative',
-                ...(!logo ? { border: '1px dashed #757575' } : undefined),
+                ...(!logo ? { border: '2px dashed #757575' } : undefined),
               }}
               {...getLogoRootProps()}
             >
@@ -235,13 +243,13 @@ export default function StepOne({
         <div className="columns">
           <div className="column is-12">
             <div
-              className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center cursor-pointer rounded-lg border-dashed-dark"
+              className={imageDropClasses}
               style={{ minHeight: 200 }}
               {...getBannerRootProps()}
             >
               {banner ? (
                 <div
-                  className="is-flex flex-1 is-flex-direction-column is-align-items-center is-justify-content-center"
+                  className="is-flex flex-1 is-flex-direction-column is-align-items-center is-justify-content-center rounded-lg"
                   style={{
                     backgroundImage: `url(${banner.imageUrl})`,
                     backgroundRepeat: 'no-repeat',

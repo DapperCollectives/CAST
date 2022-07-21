@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import classnames from 'classnames';
 import { useDropzone } from 'react-dropzone';
 import { Upload } from 'components/Svg';
 import { WrapperResponsive, Loader } from 'components';
@@ -19,6 +20,8 @@ function CommunityEditorProfile({
   const [communityName, setCommunityName] = useState(name);
   const [communityDescription, setCommunityDescription] = useState(body);
   const [isUpdating, setIsUpdating] = useState('');
+  const [isUpdatingImage, setIsUpdatingImage] = useState(false);
+  const [isUpdatingBanner, setIsUpdatingBanner] = useState(false);
   const [enableSave, setEnableSave] = useState(false);
   const [image, setImage] = useState({ imageUrl: logo });
   const [bannerImage, setBannerImage] = useState({ imageUrl: banner });
@@ -50,9 +53,11 @@ function CommunityEditorProfile({
     let newImageUrl;
     let newBannerImageUrl;
     if (image.file) {
+      setIsUpdatingImage(true);
       newImageUrl = await uploadFile(image.file);
     }
     if (bannerImage.file) {
+      setIsUpdatingBanner(true);
       newBannerImageUrl = await uploadFile(bannerImage.file);
     }
     const updates = {
@@ -68,6 +73,8 @@ function CommunityEditorProfile({
     // updated fields
     if (Object.keys(updates).length > 0) await updateCommunity(updates);
     setIsUpdating(false);
+    setIsUpdatingImage(false);
+    setIsUpdatingBanner(false);
     setEnableSave(false);
   };
 
@@ -135,6 +142,13 @@ function CommunityEditorProfile({
     accept: 'image/jpeg,image/png',
   });
 
+  const imageDropClasses = classnames(
+    'is-flex is-flex-direction-column is-align-items-center is-justify-content-center cursor-pointer rounded-lg',
+    {
+      'border-dashed-dark': !bannerImage.file && !bannerImage.imageUrl,
+    }
+  );
+
   return (
     <WrapperResponsive
       classNames="border-light rounded-lg columns is-flex-direction-column is-mobile m-0"
@@ -169,12 +183,12 @@ function CommunityEditorProfile({
               overflow: 'hidden',
               position: 'relative',
               ...(!image?.imageUrl
-                ? { border: '1px dashed #757575' }
+                ? { border: '2px dashed #757575' }
                 : undefined),
             }}
             {...getLogoRootProps()}
           >
-            {!isUpdating && !image?.imageUrl && !image?.file && (
+            {!isUpdatingImage && !image?.imageUrl && !image?.file && (
               <>
                 <Upload />
                 <span className="smaller-text">Avatar</span>
@@ -193,7 +207,7 @@ function CommunityEditorProfile({
                 }}
               />
             )}
-            {!isUpdating && (image?.imageUrl || image?.file) && (
+            {!isUpdatingImage && (image?.imageUrl || image?.file) && (
               <div
                 className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center"
                 style={{
@@ -208,7 +222,7 @@ function CommunityEditorProfile({
                 <input {...getLogoInputProps()} />
               </div>
             )}
-            {isUpdating && (
+            {isUpdatingImage && (
               <div
                 className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center"
                 style={{
@@ -224,11 +238,11 @@ function CommunityEditorProfile({
       <div className="columns">
         <div className="column is-12">
           <div
-            className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center cursor-pointer rounded-lg border-dashed-dark"
+            className={imageDropClasses}
             style={{ minHeight: 200 }}
             {...getBannerRootProps()}
           >
-            {!isUpdating && !bannerImage?.imageUrl && (
+            {!isUpdatingBanner && !bannerImage?.imageUrl && (
               <>
                 <Upload />
                 <span className="smaller-text">Community Banner Image</span>
@@ -240,7 +254,7 @@ function CommunityEditorProfile({
             )}
             {bannerImage?.imageUrl && (
               <div
-                className="is-flex flex-1 is-flex-direction-column is-align-items-center is-justify-content-center"
+                className="is-flex flex-1 is-flex-direction-column is-align-items-center is-justify-content-center rounded-lg"
                 style={{
                   backgroundImage: `url(${bannerImage.imageUrl})`,
                   backgroundRepeat: 'no-repeat',
@@ -251,7 +265,7 @@ function CommunityEditorProfile({
                 }}
               />
             )}
-            {!isUpdating && (bannerImage.imageUrl || bannerImage.file) && (
+            {!isUpdatingBanner && (bannerImage.imageUrl || bannerImage.file) && (
               <div
                 className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center"
                 style={{
@@ -267,7 +281,7 @@ function CommunityEditorProfile({
                 <input {...getBannerInputProps()} />
               </div>
             )}
-            {isUpdating && (
+            {isUpdatingBanner && (
               <div
                 className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center"
                 style={{
