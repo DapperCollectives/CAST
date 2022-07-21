@@ -18,9 +18,13 @@ const getFormFields = (strategyName) => {
     publicPath: '',
   };
 
-  if (strategyName === 'one-address-one-vote') {
+  if (
+    strategyName === 'one-address-one-vote-nft' ||
+    strategyName === 'one-address-one-vote-ft'
+  ) {
     initialFormFields = {
       addr: '',
+      name: '',
       publicPath: '',
     };
   }
@@ -37,9 +41,13 @@ const getRequiredFields = (strategyName) => {
     threshold: (threshold) =>
       threshold?.trim().length > 0 && /^[0-9]+$/.test(threshold),
   };
-  if (strategyName === 'one-address-one-vote') {
+  if (
+    strategyName === 'one-address-one-vote-nft' ||
+    strategyName === 'one-address-one-vote-ft'
+  ) {
     requiredFields = {
       addr: (addr) => addr?.trim().length > 0 && isValidAddress(addr),
+      name: (name) => name?.trim().length > 0 && name?.trim().length <= 150,
       publicPath: (path) =>
         path?.trim().length > 0 && path?.trim().length <= 150,
     };

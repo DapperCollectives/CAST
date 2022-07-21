@@ -5,7 +5,7 @@ export default function StrategySelector({
   strategies = [],
   onSelectStrategy,
 } = {}) {
-  const selectStrategy = (stratgy) => () => onSelectStrategy(stratgy);
+  const selectStrategy = (strategy) => () => onSelectStrategy(strategy);
   return (
     <div
       className="is-flex is-flex-direction-column flex-1"
