@@ -1,14 +1,13 @@
-import NonFungibleToken from 0xf8d6e0586b0a20c7
-import ExampleNFT from 0xf8d6e0586b0a20c7
+import NonFungibleToken from "NON_FUNGIBLE_TOKEN_ADDRESS"
+import "TOKEN_NAME" from "TOKEN_ADDRESS"
 
 pub fun main(address: Address): Int {
     let account = getAccount(address)
 
     let collectionRef = account
-        .getCapability(ExampleNFT.CollectionPublicPath)
+        .getCapability("TOKEN_NAME".CollectionPublicPath)
         .borrow<&{NonFungibleToken.CollectionPublic}>()
         ?? panic("Could not borrow capability from public collection")
     
     return collectionRef.getIDs().length
 }
-

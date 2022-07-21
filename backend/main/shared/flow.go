@@ -7,6 +7,7 @@ import (
 	"errors"
 	"flag"
 	"io/ioutil"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -241,32 +242,53 @@ func (fa *FlowAdapter) UserTransactionValidate(
 	return nil
 }
 
-func (fa *FlowAdapter) EnforceTokenThreshold(creatorAddr string, c *Contract) (bool, error) {
+func (fa *FlowAdapter) EnforceTokenThreshold(scriptPath, creatorAddr string, c *Contract) (bool, error) {
+	log.Info().Msgf("EnforceTokenThreshold: %s %s", scriptPath, creatorAddr)
 
 	flowAddress := flow.HexToAddress(creatorAddr)
 	cadenceAddress := cadence.NewAddress(flowAddress)
 	cadencePath := cadence.Path{Domain: "public", Identifier: *c.Public_path}
 
-	script, err := ioutil.ReadFile("./main/cadence/scripts/get_balance.cdc")
+	script, err := ioutil.ReadFile(scriptPath)
 	if err != nil {
 		log.Error().Err(err).Msgf("error reading cadence script file")
 		return false, err
 	}
 
-	script = fa.ReplaceContractPlaceholders(string(script[:]), c, true)
+	var cadenceValue cadence.Value
 
-	//call the script to verify balance
-	cadenceValue, err := fa.Client.ExecuteScriptAtLatestBlock(
-		fa.Context,
-		script,
-		[]cadence.Value{
-			cadencePath,
-			cadenceAddress,
-		},
-	)
-	if err != nil {
-		log.Error().Err(err).Msg("error executing script")
-		return false, err
+	if scriptPath == "./main/cadence/scripts/get_nfts_ids.cdc" {
+		isFungible := false
+		script = fa.ReplaceContractPlaceholders(string(script[:]), c, isFungible)
+
+		//call the non-fungible token script to verify balance
+		cadenceValue, err = fa.Client.ExecuteScriptAtLatestBlock(
+			fa.Context,
+			script,
+			[]cadence.Value{
+				cadenceAddress,
+			})
+		if err != nil {
+			log.Error().Err(err).Msg("error executing non-fungible-token script")
+			return false, err
+		}
+
+	} else {
+		isFungible := true
+		script = fa.ReplaceContractPlaceholders(string(script[:]), c, isFungible)
+
+		//call the fungible token script to verify balance
+		cadenceValue, err = fa.Client.ExecuteScriptAtLatestBlock(
+			fa.Context,
+			script,
+			[]cadence.Value{
+				cadencePath,
+				cadenceAddress,
+			})
+		if err != nil {
+			log.Error().Err(err).Msg("error executing funigble-token script")
+			return false, err
+		}
 	}
 
 	value := CadenceValueToInterface(cadenceValue)
@@ -316,9 +338,36 @@ func (fa *FlowAdapter) GetNFTIds(voterAddr string, c *Contract) ([]interface{}, 
 }
 
 func (fa *FlowAdapter) ReplaceContractPlaceholders(code string, c *Contract, isFungible bool) []byte {
-	fungibleTokenAddr := fa.Config.Contracts["FungibleToken"].Aliases[fa.Env]
-	nonFungibleTokenAddr := fa.Config.Contracts["NonFungibleToken"].Aliases[fa.Env]
-	metadataViewsAddr := fa.Config.Contracts["MetadataViews"].Aliases[fa.Env]
+	var (
+		fungibleTokenAddr    string
+		nonFungibleTokenAddr string
+		metadataViewsAddr    string
+	)
+
+	if os.Getenv("APP_ENV") == "DEV" || os.Getenv("APP_ENV") == "TEST" {
+		//emulator addresses
+		nonFungibleTokenAddr = "0xf8d6e0586b0a20c7"
+		fungibleTokenAddr = "0xee82856bf20e2aa6"
+		metadataViewsAddr = "0xf8d6e0586b0a20c7"
+
+	} else if os.Getenv("APP_ENV") == "STAGING" {
+		//testnet addresses
+		nonFungibleTokenAddr = "0x631e88ae7f1d7c20"
+		fungibleTokenAddr = "0x1654653399040a61"
+		metadataViewsAddr = "0x631e88ae7f1d7c20"
+
+	} else if os.Getenv("APP_ENV") == "PROD" {
+		//mainnet addresses
+		nonFungibleTokenAddr = "0x1d7e57aa55817448"
+		fungibleTokenAddr = "0x1654653399040a61"
+		metadataViewsAddr = "0x1d7e57aa55817448"
+	}
+
+	//print out all the token addresses
+	log.Info().Msgf("isFungible %t", isFungible)
+	log.Info().Msgf("fungibleTokenAddr: %s", fungibleTokenAddr)
+	log.Info().Msgf("nonFungibleTokenAddr: %s", nonFungibleTokenAddr)
+	log.Info().Msgf("metadataViewsAddr: %s", metadataViewsAddr)
 
 	if isFungible {
 		code = placeholderFungibleTokenAddr.ReplaceAllString(code, fungibleTokenAddr)

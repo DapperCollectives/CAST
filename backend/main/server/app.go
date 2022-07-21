@@ -799,7 +799,6 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 	p.Block_height = &snapshotResponse.Data.BlockHeight
 	p.Snapshot_status = &snapshotResponse.Data.Status
 
-	//@TODO this whole if else block should be moved into to its own func
 	if *community.Only_authors_to_submit == true {
 		if err := models.EnsureRoleForCommunity(a.DB, p.Creator_addr, communityId, "author"); err != nil {
 			errMsg := fmt.Sprintf("account %s is not an author for community %d", p.Creator_addr, p.Community_id)
@@ -808,9 +807,9 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		hasBalance, err := a.FlowAdapter.EnforceTokenThreshold(p.Creator_addr, &strategy.Contract)
+		hasBalance, err := a.processTokenThreshold(p.Creator_addr, strategy)
 		if err != nil {
-			log.Error().Err(err).Msg("error enforcing token threshold")
+			log.Error().Err(err).Msg("error processing Token Threshold")
 			respondWithError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
@@ -1888,4 +1887,23 @@ func (a *App) processSnapshotStatus(s *models.Strategy, p *models.Proposal) erro
 	}
 	return nil
 
+}
+
+func (a *App) processTokenThreshold(address string, s models.Strategy) (bool, error) {
+	var scriptPath string
+	stratName := *s.Name
+
+	if stratName == "balance-of-nfts" {
+		scriptPath = "./main/cadence/scripts/get_nfts_ids.cdc"
+	} else {
+		scriptPath = "./main/cadence/scripts/get_balance.cdc"
+
+	}
+
+	hasBalance, err := a.FlowAdapter.EnforceTokenThreshold(scriptPath, address, &s.Contract)
+	if err != nil {
+		return false, err
+	}
+
+	return hasBalance, nil
 }
