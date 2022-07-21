@@ -209,7 +209,7 @@ export default function Community() {
       proposals: proposalRef,
       members: memberRef,
     };
-    const el = refMap[activeTab].current;
+    const el = refMap[activeTab]?.current;
     if (!el) return;
 
     const elRect = el.getBoundingClientRect();
