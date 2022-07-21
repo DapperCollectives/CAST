@@ -243,8 +243,8 @@ func (fa *FlowAdapter) UserTransactionValidate(
 }
 
 func (fa *FlowAdapter) EnforceTokenThreshold(scriptPath, creatorAddr string, c *Contract) (bool, error) {
-	log.Info().Msgf("EnforceTokenThreshold: %s %s", scriptPath, creatorAddr)
 
+	var balance float64
 	flowAddress := flow.HexToAddress(creatorAddr)
 	cadenceAddress := cadence.NewAddress(flowAddress)
 	cadencePath := cadence.Path{Domain: "public", Identifier: *c.Public_path}
@@ -272,12 +272,16 @@ func (fa *FlowAdapter) EnforceTokenThreshold(scriptPath, creatorAddr string, c *
 			log.Error().Err(err).Msg("error executing non-fungible-token script")
 			return false, err
 		}
+		value := CadenceValueToInterface(cadenceValue)
+
+		nftIds := value.([]interface{})
+		balance = float64(len(nftIds))
 
 	} else {
 		isFungible := true
 		script = fa.ReplaceContractPlaceholders(string(script[:]), c, isFungible)
 
-		//call the fungible token script to verify balance
+		//call the fungible-token script to verify balance
 		cadenceValue, err = fa.Client.ExecuteScriptAtLatestBlock(
 			fa.Context,
 			script,
@@ -289,15 +293,17 @@ func (fa *FlowAdapter) EnforceTokenThreshold(scriptPath, creatorAddr string, c *
 			log.Error().Err(err).Msg("error executing funigble-token script")
 			return false, err
 		}
+
+		value := CadenceValueToInterface(cadenceValue)
+		balance, err = strconv.ParseFloat(value.(string), 64)
+		if err != nil {
+			log.Error().Err(err).Msg("error converting cadence value to float")
+			return false, err
+		}
+
 	}
 
-	value := CadenceValueToInterface(cadenceValue)
-	balance, err := strconv.ParseFloat(value.(string), 64)
-	if err != nil {
-		log.Error().Err(err).Msg("error converting cadence value to float")
-		return false, err
-	}
-
+	//check if balance is greater than threshold
 	if balance < *c.Threshold {
 		return false, nil
 	}
