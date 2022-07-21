@@ -1,9 +1,11 @@
 const networksConfig = {
   emulator: {
-    accessApi: process.env.REACT_APP_EMULATOR_API || 'http://localhost:8080',
+    accessApi: process.env.REACT_APP_EMULATOR_API || 'http://localhost:8888',
     walletDiscovery:
       process.env.REACT_APP_EMULATOR_WALLET_DISCOVERY ||
       'http://localhost:8701/fcl/authn',
+    walletDiscoveryApi: null,
+    walletDiscoveryInclude: [],
     strategiesConfig: {
       'one-address-one-vote': {
         name: 'FlowToken',
@@ -13,8 +15,13 @@ const networksConfig = {
     },
   },
   testnet: {
-    accessApi: 'https://access-testnet.onflow.org',
+    accessApi: 'https://rest-testnet.onflow.org',
     walletDiscovery: 'https://fcl-discovery.onflow.org/testnet/authn',
+    walletDiscoveryApi: 'https://fcl-discovery.onflow.org/api/testnet/authn',
+    walletDiscoveryInclude: [
+      '0x9d2e44203cb13051', // Ledger
+      // '0x82ec283f88a62e65' // Dapper Wallet
+    ],
     strategiesConfig: {
       'one-address-one-vote': {
         name: 'FlowToken',
@@ -24,8 +31,13 @@ const networksConfig = {
     },
   },
   mainnet: {
-    accessApi: 'https://mainnet.onflow.org',
+    accessApi: 'https://rest-mainnet.onflow.org',
     walletDiscovery: 'https://fcl-discovery.onflow.org/authn',
+    walletDiscoveryApi: 'https://fcl-discovery.onflow.org/api/authn',
+    walletDiscoveryInclude: [
+      '0xe5cd26afebe62781', // Ledger
+      // '0xead892083b3e2c6c' // Dapper Wallet
+    ],
     strategiesConfig: {
       'one-address-one-vote': {
         name: 'FlowToken',
