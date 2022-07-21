@@ -361,12 +361,6 @@ func (fa *FlowAdapter) ReplaceContractPlaceholders(code string, c *Contract, isF
 		metadataViewsAddr = "0x1d7e57aa55817448"
 	}
 
-	//print out all the token addresses
-	log.Info().Msgf("isFungible %t", isFungible)
-	log.Info().Msgf("fungibleTokenAddr: %s", fungibleTokenAddr)
-	log.Info().Msgf("nonFungibleTokenAddr: %s", nonFungibleTokenAddr)
-	log.Info().Msgf("metadataViewsAddr: %s", metadataViewsAddr)
-
 	if isFungible {
 		code = placeholderFungibleTokenAddr.ReplaceAllString(code, fungibleTokenAddr)
 	} else {

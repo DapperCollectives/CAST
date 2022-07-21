@@ -40,8 +40,6 @@ func (otu *OverflowTestUtils) TallyResultsForStakedTokenWeightedDefault(
 	r *models.ProposalResults,
 ) *models.ProposalResults {
 
-	fmt.Printf("Tallying results for staked token weighted default\n")
-
 	for _, v := range *votes {
 		r.Results_float[v.Choice] += float64(v.Staking_balance) * math.Pow(10, -8)
 	}
