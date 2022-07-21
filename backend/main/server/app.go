@@ -786,7 +786,6 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		log.Error().Err(err).Msg("Community does not have this strategy availabe")
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
-
 	}
 
 	snapshotResponse, err := a.SnapshotClient.TakeSnapshot(strategy.Contract)

@@ -281,6 +281,37 @@ func (fa *FlowAdapter) EnforceTokenThreshold(creatorAddr string, c *Contract) (b
 	return true, nil
 }
 
+func (fa *FlowAdapter) GetFLOATsForEventId(voterAddr string, eventId uint64) ([]uint64, error) {
+	flowAddress := flow.HexToAddress(voterAddr)
+	cadenceAddress := cadence.NewAddress(flowAddress)
+
+	script, err := ioutil.ReadFile("./main/cadence/scripts/get_floats_for_event_by_address.cdc")
+	if err != nil {
+		log.Error().Err(err).Msgf("Error reading cadence script file")
+		return nil, err
+	}
+
+	cadenceValue, err := fa.Client.ExecuteScriptAtLatestBlock(
+		fa.Context,
+		script,
+		[]cadence.Value{
+			cadenceAddress,
+			cadence.NewUInt64(eventId),
+		},
+	)
+	if err != nil {
+		log.Error().Err(err).Msg("error executing script")
+		return nil, err
+	}
+
+	var result []uint64
+	for _, item := range cadenceValue.(cadence.Array).Values {
+		result = append(result, item.ToGoValue().(uint64))
+	}
+
+	return result, nil
+}
+
 func (fa *FlowAdapter) GetNFTIds(voterAddr string, c *Contract) ([]interface{}, error) {
 	flowAddress := flow.HexToAddress(voterAddr)
 	cadenceAddress := cadence.NewAddress(flowAddress)
