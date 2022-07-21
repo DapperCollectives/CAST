@@ -150,6 +150,7 @@ func (otu *OverflowTestUtils) GenerateListOfVotesWithNFTs(
 
 		mintParams.Name = accountName
 
+		otu.SetupAccountForNFTs(accountName)
 		otu.SetupAccountForFlow(accountName)
 		otu.SetupToReceiveRoyalty(accountName)
 		otu.MintNFT(mintParams)
@@ -232,7 +233,7 @@ func (otu *OverflowTestUtils) CreateNFTVote(v models.Vote, ids []interface{}, co
 }
 
 func (otu *OverflowTestUtils) SetupAccountForNFTs(account string) {
-	otu.O.TransactionFromFile("setup_account").
+	otu.O.TransactionFromFile("setup_account_nfts").
 		SignProposeAndPayAs(account).
 		RunPrintEventsFull()
 }
@@ -240,7 +241,7 @@ func (otu *OverflowTestUtils) SetupAccountForNFTs(account string) {
 func (otu *OverflowTestUtils) SetupToReceiveRoyalty(account string) {
 	otu.O.TransactionFromFile("setup_account_to_receive_royalty").
 		SignProposeAndPayAs(account).
-		Args(otu.O.Arguments().StoragePath("/storage/flowTokenVault")).
+		Args(otu.O.Arguments()).
 		RunPrintEventsFull()
 }
 
@@ -252,7 +253,7 @@ func (otu *OverflowTestUtils) SetupAccountForFlow(account string) {
 
 func (otu *OverflowTestUtils) MintNFT(p shared.MintParams) {
 	otu.O.TransactionFromFile("mint_nft").
-		SignProposeAndPayAsService().
+		SignProposeAndPayAs(p.Name).
 		Args(otu.O.Arguments().
 			Account(p.Recipient).
 			String(p.Name).
