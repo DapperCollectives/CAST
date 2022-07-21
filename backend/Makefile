@@ -35,10 +35,12 @@ macdev:
 dev:
 	APP_ENV=DEV make build_and_run
 
-
+migrateup:
+	migrate -path ./migrations -database "postgres://postgres:admin@localhost:5432/flow_snapshot?sslmode=disable" -verbose up
 
 migratedown:
 	migrate -path ./migrations -database "postgres://postgres:admin@localhost:5432/flow_snapshot?sslmode=disable" -verbose down
+
 
 testmigrateup:
 	migrate -path ./migrations -database "postgres://postgres:admin@localhost:5432/flow_snapshot_test?sslmode=disable" -verbose up
