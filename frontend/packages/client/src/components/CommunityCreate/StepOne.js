@@ -283,7 +283,7 @@ export default function StepOne({
         <div className="column is-12">
           <button
             style={{ height: 48, width: '100%' }}
-            className={`button vote-button transition-all is-flex has-background-yellow rounded-sm is-size-6 is-uppercase is-${
+            className={`button vote-button is-flex has-background-yellow rounded-sm is-size-6 is-uppercase is-${
               isStepValid ? 'enabled' : 'disabled'
             }`}
             onClick={isStepValid ? () => moveToNextStep() : () => {}}
