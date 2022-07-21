@@ -109,6 +109,7 @@ func (c *SnapshotClient) TakeSnapshot(contract Contract) (*SnapshotResponse, err
 	var r *SnapshotResponse = &SnapshotResponse{}
 
 	url := c.setSnapshotUrl(contract, "take-snapshot")
+	log.Info().Msgf("Taking token snapshot. Url: %s", url)
 	req, err := c.setRequestMethod("POST", url)
 	if err != nil {
 		log.Debug().Err(err).Msg("SnapshotClient TakeSnapshot request error")
@@ -245,7 +246,7 @@ func (c *SnapshotClient) setSnapshotUrl(contract Contract, route string) string 
 	if *contract.Name == "FlowToken" {
 		url = fmt.Sprintf(`%s/%s`, c.BaseURL, route)
 	} else {
-		url = fmt.Sprintf(`%s/%s/%v/%v`, c.BaseURL, route, contract.Addr, contract.Name)
+		url = fmt.Sprintf(`%s/%s/%v/%v`, c.BaseURL, route, *contract.Addr, *contract.Name)
 	}
 
 	return url
