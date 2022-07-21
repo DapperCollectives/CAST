@@ -20,7 +20,7 @@ nft:
 		flow accounts add-contract NonFungibleToken ./main/cadence/contracts/NonFungibleToken.cdc && \
 		flow accounts add-contract MetadataViews ./main/cadence/contracts/MetadataViews.cdc && \
 		flow accounts add-contract ExampleNFT ./main/cadence/contracts/ExampleNFT.cdc && \
-		flow transactions send ./main/cadence/transactions/flow-ft/setup_account.cdc && \
+		flow transactions send ./main/cadence/transactions/setup_flow_token_account.cdc && \
 		flow transactions send ./main/cadence/transactions/setup_account_to_receive_royalty.cdc /storage/flowTokenVault && \
 		flow transactions send ./main/cadence/transactions/mint_nft.cdc 0xf8d6e0586b0a20c7 "dev_nft" "don't try at home" "thumnbail goes here" '[0.8]' '["royalties"]' '[0xf8d6e0586b0a20c7]' 
 
