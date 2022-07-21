@@ -32,7 +32,7 @@ func (b *BalanceOfNfts) FetchBalance(
 
 	nftIds, err := models.GetUserNFTs(db, vb)
 	if err != nil {
-		log.Error().Err(err).Msg("error getting user nfts")
+		log.Error().Err(err).Msg("Error getting user NFTs.")
 		return nil, err
 	}
 

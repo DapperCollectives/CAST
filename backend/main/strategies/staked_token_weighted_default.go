@@ -37,12 +37,12 @@ func (s *StakedTokenWeightedDefault) FetchBalance(
 		b,
 		*contract,
 	); err != nil {
-		log.Error().Err(err).Msg("error fetching balance")
+		log.Error().Err(err).Msg("Error fetching balance.")
 		return nil, err
 	}
 
 	if err := b.CreateBalance(db); err != nil {
-		log.Error().Err(err).Msg("error creating balance in the DB")
+		log.Error().Err(err).Msg("Error creating balance in the database.")
 		return nil, err
 	}
 

@@ -64,13 +64,13 @@ func NewFlowClient(flowEnv string) *FlowAdapter {
 	content, err := ioutil.ReadFile(path)
 
 	if err != nil {
-		log.Fatal().Msgf("Error when opening file: %+v", err)
+		log.Fatal().Msgf("Error when opening file: %+v.", err)
 	}
 
 	var config FlowConfig
 	err = json.Unmarshal(content, &config)
 	if err != nil {
-		log.Fatal().Msgf("Error parsing flow.json: %+v", err)
+		log.Fatal().Msgf("Error parsing flow.json: %+v.", err)
 	}
 
 	adapter.Config = config
@@ -84,7 +84,7 @@ func NewFlowClient(flowEnv string) *FlowAdapter {
 	// create flow client
 	FlowClient, err := client.New(adapter.URL, grpc.WithInsecure())
 	if err != nil {
-		log.Panic().Msgf("failed to connect to %s", adapter.URL)
+		log.Panic().Msgf("Failed to connect to %s.", adapter.URL)
 	}
 	adapter.Client = FlowClient
 	return &adapter
@@ -114,7 +114,7 @@ func (fa *FlowAdapter) UserSignatureValidate(
 		return nil
 	}
 
-	log.Debug().Msgf("UserSignature validate: %s [%s] %v", address, message, *sigs)
+	log.Debug().Msgf("UserSignature validate: %s [%s] %v.", address, message, *sigs)
 
 	flowAddress := flow.HexToAddress(address)
 	cadenceAddress := cadence.NewAddress(flowAddress)
@@ -130,7 +130,7 @@ func (fa *FlowAdapter) UserSignatureValidate(
 	// Load script
 	script, err := ioutil.ReadFile("./main/cadence/scripts/validate_signature_v2.cdc")
 	if err != nil {
-		log.Error().Err(err).Msgf("error reading cadence script file")
+		log.Error().Err(err).Msgf("Error reading cadence script file.")
 		return err
 	}
 
@@ -148,9 +148,9 @@ func (fa *FlowAdapter) UserSignatureValidate(
 
 	if err != nil && strings.Contains(err.Error(), "ledger returns unsuccessful") {
 		log.Error().Err(err).Msg("signature validation error")
-		return errors.New("flow access node error, please cast your vote again")
+		return errors.New("Flow access node error, please cast your vote again.")
 	} else if err != nil {
-		log.Error().Err(err).Msg("signature validation error")
+		log.Error().Err(err).Msg("Signature validation error.")
 		return err
 	}
 
@@ -159,7 +159,7 @@ func (fa *FlowAdapter) UserSignatureValidate(
 	}
 
 	if value != cadence.NewBool(true) {
-		return errors.New("invalid signature")
+		return errors.New("Invalid signature.")
 	}
 
 	return nil
@@ -177,42 +177,42 @@ func (fa *FlowAdapter) UserTransactionValidate(
 		// need user signature validation
 		return nil
 	}
-	log.Info().Msgf("Process Vote TXID %s", transactionId)
+	log.Info().Msgf("Process Vote TXID %s.", transactionId)
 
 	// wait on transaction details and verify
 	txId := flow.HexToID(transactionId)
 	txr, tx, err := WaitForSeal(fa.Context, fa.Client, txId)
 	if err != nil || txr.Error != nil {
-		log.Error().Err(err).Msgf("Tranaction vote has error %s", txr.Error.Error())
-		return errors.New("transaction vote invalid")
+		log.Error().Err(err).Msgf("Tranaction vote has error %s.", txr.Error.Error())
+		return errors.New("Transaction vote invalid.")
 	}
 
 	isSealed := txr.Status.String() == "SEALED"
 	isVoter := "0x"+tx.ProposalKey.Address.String() == address
 	if !isSealed {
-		return errors.New("transaction vote not processed")
+		return errors.New("Transaction vote not processed.")
 	} else if !isVoter {
-		return errors.New("invalid voter address")
+		return errors.New("Invalid voter address.")
 	}
 
 	txBlockByID, errBlockHeader := fa.Client.GetBlockHeaderByID(fa.Context, tx.ReferenceBlockID)
 	if errBlockHeader != nil {
-		log.Error().Err(err).Msgf("Get block header has error %s", errBlockHeader.Error())
-		return errors.New("can not verify tx is recent")
+		log.Error().Err(err).Msgf("Get block header has error %s.", errBlockHeader.Error())
+		return errors.New("Cannot verify transaction is recent.")
 	}
 
 	if txBlockByID.Timestamp.Before(time.Now().Add(-15 * time.Minute)) {
 		log.Error().
 			Err(err).
-			Msgf("Tx timestamp too old, now: %s block: %s, blockId %s", time.Now(), txBlockByID.Timestamp, txBlockByID.ID)
-		return errors.New("voting transaction is invalid")
+			Msgf("Transaction timestamp too old, now: %s block: %s, blockId %s.", time.Now(), txBlockByID.Timestamp, txBlockByID.ID)
+		return errors.New("Voting transaction is invalid.")
 	}
 
 	// validate transaction arguments
 	toAddressDecoded, errAddress := jsoncdc.Decode(tx.Arguments[1])
 	if errAddress != nil {
-		log.Error().Err(err).Msgf("toAddress in tx invalid %s", errAddress.Error())
-		return errors.New("transaction vote is invalid, option not found")
+		log.Error().Err(err).Msgf("'toAddress' in transaction invalid %s.", errAddress.Error())
+		return errors.New("Transaction vote is invalid, option not found.")
 	}
 
 	toAddress := toAddressDecoded.(cadence.Address)
@@ -221,7 +221,7 @@ func (fa *FlowAdapter) UserTransactionValidate(
 	choiceBytes, errChoice := hex.DecodeString(encodedChoice)
 
 	if errChoice != nil {
-		return errors.New("couldnt decode choice in message from hex string")
+		return errors.New("Couldn't decode choice in message from hex string.")
 	}
 
 	isToAddressValid := false
@@ -230,13 +230,13 @@ func (fa *FlowAdapter) UserTransactionValidate(
 		if element == addr {
 			isToAddressValid = true
 			if choices[index].Choice_text != string(choiceBytes) {
-				return errors.New("vote choice does not match tx to address")
+				return errors.New("Vote choice does not match transaction 'toAddress'.")
 			}
 		}
 	}
 
 	if !isToAddressValid {
-		return errors.New("transaction to address not recognized")
+		return errors.New("Transaction 'toAddress' not recognized.")
 	}
 	return nil
 }
@@ -249,7 +249,7 @@ func (fa *FlowAdapter) EnforceTokenThreshold(creatorAddr string, c *Contract) (b
 
 	script, err := ioutil.ReadFile("./main/cadence/scripts/get_balance.cdc")
 	if err != nil {
-		log.Error().Err(err).Msgf("error reading cadence script file")
+		log.Error().Err(err).Msgf("Error reading cadence script file.")
 		return false, err
 	}
 
@@ -265,14 +265,14 @@ func (fa *FlowAdapter) EnforceTokenThreshold(creatorAddr string, c *Contract) (b
 		},
 	)
 	if err != nil {
-		log.Error().Err(err).Msg("error executing script")
+		log.Error().Err(err).Msg("Error executing script.")
 		return false, err
 	}
 
 	value := CadenceValueToInterface(cadenceValue)
 	balance, err := strconv.ParseFloat(value.(string), 64)
 	if err != nil {
-		log.Error().Err(err).Msg("error converting cadence value to float")
+		log.Error().Err(err).Msg("Error converting cadence value to float.")
 		return false, err
 	}
 
@@ -289,7 +289,7 @@ func (fa *FlowAdapter) GetNFTIds(voterAddr string, c *Contract) ([]interface{}, 
 
 	script, err := ioutil.ReadFile("./main/cadence/scripts/get_nfts_ids.cdc")
 	if err != nil {
-		log.Error().Err(err).Msgf("error reading cadence script file")
+		log.Error().Err(err).Msgf("Error reading cadence script file.")
 		return nil, err
 	}
 
@@ -303,7 +303,7 @@ func (fa *FlowAdapter) GetNFTIds(voterAddr string, c *Contract) ([]interface{}, 
 		},
 	)
 	if err != nil {
-		log.Error().Err(err).Msg("error executing script")
+		log.Error().Err(err).Msg("Error executing script.")
 		return nil, err
 	}
 

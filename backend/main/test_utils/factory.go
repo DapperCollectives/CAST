@@ -29,7 +29,7 @@ func (otu *OverflowTestUtils) AddDummyVotesAndBalances(votes *[]VoteWithBalance)
 			VALUES($1, $2, $3, $4, $5)
 		`, vote.Vote.Proposal_id, vote.Vote.Addr, vote.Vote.Choice, "[]", "__msg__")
 		if err != nil {
-			log.Error().Err(err).Msg("AddDummyVotesAndBalances DB err - votes")
+			log.Error().Err(err).Msg("AddDummyVotesAndBalances database error - votes.")
 		}
 
 		//Insert Balance
@@ -38,7 +38,7 @@ func (otu *OverflowTestUtils) AddDummyVotesAndBalances(votes *[]VoteWithBalance)
 			VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)
 		`, uuid.New(), vote.Addr, vote.Primary_account_balance, "0x0", 0, vote.Staking_balance, "SUCCESS", []string{}, 1)
 		if err != nil {
-			log.Error().Err(err).Msg("AddDummyVotesAndBalances DB err - balances")
+			log.Error().Err(err).Msg("AddDummyVotesAndBalances database error - balances.")
 		}
 	}
 }
@@ -52,7 +52,7 @@ func (otu *OverflowTestUtils) AddDummyVotesAndNFTs(votes *[]VoteWithBalance) {
 			VALUES($1, $2, $3, $4, $5)
 		`, vote.Vote.Proposal_id, vote.Vote.Addr, vote.Vote.Choice, "[]", "__msg__")
 		if err != nil {
-			log.Error().Err(err).Msg("AddDummyVotesAndNFTS DB err - votes")
+			log.Error().Err(err).Msg("AddDummyVotesAndNFTS database error- votes.")
 			return
 		}
 
@@ -64,7 +64,7 @@ func (otu *OverflowTestUtils) AddDummyVotesAndNFTs(votes *[]VoteWithBalance) {
 		`, uuid.New(), vote.Addr, vote.Vote.Proposal_id, NFT.ID)
 		}
 		if err != nil {
-			log.Error().Err(err).Msg("error inserting NFTs to the DB")
+			log.Error().Err(err).Msg("Error inserting NFTs to the database.")
 			return
 		}
 	}
@@ -90,7 +90,7 @@ func (otu *OverflowTestUtils) AddVotes(pId int, count int) {
 			VALUES($1, $2, $3, $4, $5)
 			`, pId, addr, "yes", "[]", "__msg__")
 		if err != nil {
-			log.Error().Err(err).Msg("addVotes DB err")
+			log.Error().Err(err).Msg("'addVotes' database error.")
 		}
 	}
 }
@@ -107,7 +107,7 @@ func (otu *OverflowTestUtils) AddCommunities(count int) []int {
 	for i := 0; i < count; i++ {
 		community := otu.GenerateCommunityStruct("account")
 		if err := community.CreateCommunity(otu.A.DB); err != nil {
-			fmt.Printf("error in otu.AddCommunities")
+			fmt.Printf("Error in otu.AddCommunities.")
 		}
 
 		id := community.ID
@@ -124,7 +124,7 @@ func (otu *OverflowTestUtils) AddCommunitiesWithUsers(count int, signer string) 
 	for i := 0; i < count; i++ {
 		community := otu.GenerateCommunityStruct(signer)
 		if err := community.CreateCommunity(otu.A.DB); err != nil {
-			fmt.Printf("error in otu.AddCommunities")
+			fmt.Printf("Error in otu.AddCommunities.")
 		}
 		// Add community_user roles for the creator
 		models.GrantRolesToCommunityCreator(otu.A.DB, community.Creator_addr, community.ID)
@@ -143,7 +143,7 @@ func (otu *OverflowTestUtils) AddCommunitiesWithUsersAndThreshold(count int, sig
 	for i := 0; i < count; i++ {
 		community := otu.GenerateCommunityWithThresholdStruct(signer)
 		if err := community.CreateCommunity(otu.A.DB); err != nil {
-			fmt.Printf("error in otu.CreateCommunityWithContract: %v", err)
+			fmt.Printf("Error in otu.CreateCommunityWithContract: %v.", err)
 		}
 		// Add community_user roles for the creator
 		models.GrantRolesToCommunityCreator(otu.A.DB, community.Creator_addr, community.ID)
@@ -164,7 +164,7 @@ func (otu *OverflowTestUtils) AddCommunitiesWithNFTContract(count int, signer st
 	for i := 0; i < count; i++ {
 		community = otu.GenerateCommunityWithNFTContractStruct(signer)
 		if err := community.CreateCommunity(otu.A.DB); err != nil {
-			log.Error().Err(err).Msg("error in otu.AddCommunities")
+			log.Error().Err(err).Msg("Error in otu.AddCommunities.")
 		}
 
 		models.GrantRolesToCommunityCreator(otu.A.DB, community.Creator_addr, community.ID)
@@ -183,8 +183,8 @@ func (otu *OverflowTestUtils) AddProposals(cId int, count int) []int {
 	for i := 0; i < count; i++ {
 		proposal := otu.GenerateProposalStruct("account", cId)
 		if err := proposal.CreateProposal(otu.A.DB); err != nil {
-			fmt.Printf("error in otu.AddProposals")
-			fmt.Printf("err: %v\n", err.Error())
+			fmt.Printf("Error in otu.AddProposals.")
+			fmt.Printf("Err: %v\n.", err.Error())
 		}
 
 		retIds = append(retIds, proposal.ID)
@@ -203,8 +203,8 @@ func (otu *OverflowTestUtils) AddProposalsForStrategy(cId int, strategy string, 
 		proposal.Strategy = &strategy
 		proposal.Start_time = time.Now().AddDate(0, -1, 0)
 		if err := proposal.CreateProposal(otu.A.DB); err != nil {
-			fmt.Printf("error in otu.AddProposals")
-			fmt.Printf("err: %v\n", err.Error())
+			fmt.Printf("Error in otu.AddProposals.")
+			fmt.Printf("Err: %v\n.", err.Error())
 		}
 
 		retIds = append(retIds, proposal.ID)
@@ -222,7 +222,7 @@ func (otu *OverflowTestUtils) AddActiveProposals(cId int, count int) []int {
 		proposal := otu.GenerateProposalStruct("account", cId)
 		proposal.Start_time = time.Now().UTC().AddDate(0, -1, 0)
 		if err := proposal.CreateProposal(otu.A.DB); err != nil {
-			fmt.Printf("error in otu.AddActiveProposals")
+			fmt.Printf("Error in otu.AddActiveProposals.")
 		}
 
 		retIds = append(retIds, proposal.ID)
@@ -239,7 +239,7 @@ func (otu *OverflowTestUtils) AddActiveProposalsWithStartTimeNow(cId int, count 
 		proposal := otu.GenerateProposalStruct("account", cId)
 		proposal.Start_time = time.Now().UTC()
 		if err := proposal.CreateProposal(otu.A.DB); err != nil {
-			fmt.Printf("error in otu.AddActiveProposals")
+			fmt.Printf("Error in otu.AddActiveProposals.")
 		}
 
 		retIds = append(retIds, proposal.ID)
@@ -253,7 +253,7 @@ func (otu *OverflowTestUtils) UpdateProposalEndTime(pId int, endTime time.Time) 
 		UPDATE proposals SET end_time = $2 WHERE id = $1
 		`, pId, endTime)
 	if err != nil {
-		log.Error().Err(err).Msg("update proposal end_time DB err")
+		log.Error().Err(err).Msg("Update proposal end_time database err.")
 	}
 }
 
@@ -265,7 +265,7 @@ func (otu *OverflowTestUtils) AddLists(cId int, count int) []int {
 	for i := 0; i < count; i++ {
 		list := otu.GenerateBlockListStruct(cId)
 		if err := list.CreateList(otu.A.DB); err != nil {
-			fmt.Printf("error in otu.AddLists: %v\n", err.Error())
+			fmt.Printf("Error in otu.AddLists: %v.\n", err.Error())
 		}
 		retIds = append(retIds, list.ID)
 	}

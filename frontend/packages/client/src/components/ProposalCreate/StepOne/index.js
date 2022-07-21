@@ -183,7 +183,7 @@ const StepOne = ({
                 </button>
               </div>
             ),
-            errorTitle: 'Please select a strategy',
+            errorTitle: 'Please select a strategy.',
           }),
           { classNameModalContent: 'rounded-sm' }
         );
