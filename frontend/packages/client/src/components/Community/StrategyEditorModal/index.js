@@ -145,7 +145,7 @@ export default function StrategyEditorModal({
                 label="done"
                 enabled={formIsValid}
                 onClick={onConfirmDone}
-                classNames="mt-5"
+                classNames="mt-5 has-button-border-hover"
               />
             }
           />
