@@ -15,7 +15,7 @@ const networksConfig = {
     },
   },
   testnet: {
-    accessApi: 'https://access-testnet.onflow.org',
+    accessApi: 'https://rest-testnet.onflow.org',
     walletDiscovery: 'https://fcl-discovery.onflow.org/testnet/authn',
     walletDiscoveryApi: 'https://fcl-discovery.onflow.org/api/testnet/authn',
     walletDiscoveryInclude: [
@@ -31,7 +31,7 @@ const networksConfig = {
     },
   },
   mainnet: {
-    accessApi: 'https://mainnet.onflow.org',
+    accessApi: 'https://rest-mainnet.onflow.org',
     walletDiscovery: 'https://fcl-discovery.onflow.org/authn',
     walletDiscoveryApi: 'https://fcl-discovery.onflow.org/api/authn',
     walletDiscoveryInclude: [
