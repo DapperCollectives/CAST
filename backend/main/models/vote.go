@@ -42,9 +42,9 @@ type VoteWithBalance struct {
 }
 
 type NFT struct {
-	ID            uint64    `json:"id"`
-	Contract_addr string    `json:"contract_addr"`
-	Created_at    time.Time `json:"created_at"`
+	ID            interface{} `json:"id"`
+	Contract_addr string      `json:"contract_addr"`
+	Created_at    time.Time   `json:"created_at"`
 }
 
 type VotingStreak struct {
@@ -394,13 +394,12 @@ func AddStreakAchievement(db *s.Database, v *Vote, p Proposal) error {
 				proposals = append(proposals, vote.Proposal_id)
 			}
 
-			
 			if len(proposals) >= defaultStreakLength && (i == len(votingStreak)-1 || (i < len(votingStreak)-1 && votingStreak[i+1].Addr == "")) {
 				// ensure proposals always ordered to guarantee no duplicates
 				sort.Slice(proposals, func(i, j int) bool {
 					return proposals[i] < proposals[j]
 				})
-				
+
 				//Unique identifier for current streak
 				currentStreakDetails := fmt.Sprintf("%s:%s:%d:%s", Streak, v.Addr, p.Community_id, strings.Trim(strings.Join(strings.Fields(fmt.Sprint(proposals)), ","), "[]"))
 

@@ -1,7 +1,7 @@
 import NonFungibleToken from "NON_FUNGIBLE_TOKEN_ADDRESS"
 import "TOKEN_NAME" from "TOKEN_ADDRESS"
 
-pub fun main(address: Address): Int {
+pub fun main(address: Address): [UInt64] {
     let account = getAccount(address)
 
     let collectionRef = account
@@ -9,5 +9,5 @@ pub fun main(address: Address): Int {
         .borrow<&{NonFungibleToken.CollectionPublic}>()
         ?? panic("Could not borrow capability from public collection")
     
-    return collectionRef.getIDs().length
+    return collectionRef.getIDs()
 }

@@ -331,8 +331,6 @@ func (fa *FlowAdapter) GetNFTIds(voterAddr string, c *Contract) ([]interface{}, 
 
 	value := CadenceValueToInterface(cadenceValue)
 
-	// we can cast cadence type [Uint64] as Go type []interface{}
-	// In the case where ids are of string type we need an if statement somewhere to handle
 	nftIds := value.([]interface{})
 	return nftIds, nil
 }

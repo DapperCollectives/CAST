@@ -29,42 +29,34 @@ func (b *BalanceOfNfts) FetchBalance(
 		return nil, err
 	}
 
-	nftIds, err := models.GetUserNFTs(b.DB, vb)
-	if err != nil {
-		log.Error().Err(err).Msg("error getting user nfts")
-		return nil, err
-	}
-
 	strategy, err := models.MatchStrategyByProposal(*c.Strategies, *p.Strategy)
 	if err != nil {
 		log.Error().Err(err).Msg("Unable to find strategy for contract")
 		return nil, err
 	}
 
-	if len(nftIds) == 0 {
-		nftIds, err := b.FlowAdapter.GetNFTIds(balance.Addr, &strategy.Contract)
-		if err != nil {
-			return nil, err
-		}
+	nftIds, err := b.FlowAdapter.GetNFTIds(balance.Addr, &strategy.Contract)
+	if err != nil {
+		return nil, err
+	}
 
-		for _, nftId := range nftIds {
-			nft := &models.NFT{
-				ID: nftId.(uint64),
-			}
-			vb.NFTs = append(vb.NFTs, nft)
+	for _, nftId := range nftIds {
+		nft := &models.NFT{
+			ID: nftId,
 		}
+		vb.NFTs = append(vb.NFTs, nft)
+	}
 
-		doesExist, err := models.DoesNFTExist(b.DB, vb)
-		if err != nil {
-			return nil, err
-		}
+	doesExist, err := models.DoesNFTExist(b.DB, vb)
+	if err != nil {
+		return nil, err
+	}
 
-		//only if the NFT ID is not already in the DB,
-		//do we add the balance
-		if !doesExist && err == nil {
-			err = models.CreateUserNFTRecord(b.DB, vb)
-			balance.NFTCount = len(vb.NFTs)
-		}
+	//only if the NFT ID is not already in the DB,
+	//do we add the balance
+	if !doesExist && err == nil {
+		err = models.CreateUserNFTRecord(b.DB, vb)
+		balance.NFTCount = len(vb.NFTs)
 	}
 
 	return balance, nil
