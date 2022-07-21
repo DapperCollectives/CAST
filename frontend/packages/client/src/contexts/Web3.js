@@ -91,6 +91,7 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
       // https://docs.onflow.org/fcl/reference/api/#account
       return fcl.account(addr);
     } catch (err) {
+      console.log(err);
       return false;
     }
   };

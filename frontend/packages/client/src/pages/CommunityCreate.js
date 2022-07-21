@@ -96,7 +96,14 @@ export default function CommunityCreate() {
         try {
           await Promise.all(addrs.map((addr) => isValidFlowAddress(addr)));
         } catch (error) {
-          errorMessages.push(name);
+          console.log(error);
+          if (
+            !error?.message.includes(
+              "Cannot read properties of undefined (reading 'map')"
+            )
+          ) {
+            errorMessages.push(name);
+          }
         }
       })
     );
