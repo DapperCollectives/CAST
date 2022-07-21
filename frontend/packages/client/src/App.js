@@ -17,6 +17,7 @@ const isLocalDevMode = process.env.NODE_ENV === 'development';
 const queryClient = new QueryClient();
 
 function App() {
+  console.log({ FLOW: process.env.REACT_APP_FLOW_ENV });
   return (
     <ErrorBoundary
       fallbackRender={({ error, resetErrorBoundary }) => (
