@@ -11,37 +11,38 @@ import (
 )
 
 type StakedTokenWeightedDefault struct {
-	shared.StrategyStruct
-	shared.SnapshotClient
+	s.StrategyStruct
+	SC s.SnapshotClient
+	DB *s.Database
 }
 
 func (s *StakedTokenWeightedDefault) FetchBalance(
-	db *s.Database,
 	b *models.Balance,
-	sc *s.SnapshotClient,
+	p *models.Proposal,
 ) (*models.Balance, error) {
 
 	var c models.Community
-	if err := c.GetCommunityByProposalId(db, b.Proposal_id); err != nil {
+	if err := c.GetCommunityByProposalId(s.DB, b.Proposal_id); err != nil {
 		return nil, err
 	}
 
-	var contract = &shared.Contract{
-		Name: c.Contract_name,
-		Addr: c.Contract_addr,
+	strategy, err := models.MatchStrategyByProposal(*c.Strategies, *p.Strategy)
+	if err != nil {
+		log.Error().Err(err).Msg("Unable to find strategy for contract")
+		return nil, err
 	}
 
-	if err := s.SnapshotClient.GetAddressBalanceAtBlockHeight(
+	if err := s.SC.GetAddressBalanceAtBlockHeight(
 		b.Addr,
 		b.BlockHeight,
 		b,
-		*contract,
+		&strategy.Contract,
 	); err != nil {
 		log.Error().Err(err).Msg("Error fetching balance.")
 		return nil, err
 	}
 
-	if err := b.CreateBalance(db); err != nil {
+	if err := b.CreateBalance(s.DB); err != nil {
 		log.Error().Err(err).Msg("Error creating balance in the database.")
 		return nil, err
 	}
@@ -115,5 +116,5 @@ func (s *StakedTokenWeightedDefault) InitStrategy(
 ) {
 	s.FlowAdapter = f
 	s.DB = db
-	s.SnapshotClient = *sc
+	s.SC = *sc
 }
