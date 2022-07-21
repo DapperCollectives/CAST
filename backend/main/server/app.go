@@ -589,10 +589,10 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// validate user signature
-	if err := a.FlowAdapter.UserTransactionValidate(v.Addr, v.Message, v.Composite_signatures, v.TransactionId, a.TxOptionsAddresses, p.Choices); err != nil {
-		respondWithError(w, http.StatusBadRequest, err.Error())
-		return
-	}
+	// if err := a.FlowAdapter.UserTransactionValidate(v.Addr, v.Message, v.Composite_signatures, v.TransactionId, a.TxOptionsAddresses, p.Choices); err != nil {
+	// 	respondWithError(w, http.StatusBadRequest, err.Error())
+	// 	return
+	// }
 
 	v.Proposal_id = proposalId
 
