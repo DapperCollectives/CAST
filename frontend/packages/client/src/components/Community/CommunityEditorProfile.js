@@ -204,6 +204,7 @@ function CommunityEditorProfile({
         className="text-area rounded-sm border-light p-3 column is-full mt-5"
         type="text"
         value={communityDescription}
+        placeholder="Short Description"
         name="community_details"
         rows="3"
         cols="30"
