@@ -54,14 +54,22 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
   };
 
   useEffect(() => {
-    const { accessApi, walletDiscovery } = networks[network];
-    fcl
-      .config({
-        '0xFUNGIBLETOKENADDRESS':
-          network === 'testnet' ? '0x9a0766d93b6608b7' : '0xf233dcee88fe0abe',
-      })
-      .put('accessNode.api', accessApi) // connect to Flow
-      .put('discovery.wallet', walletDiscovery); // use Blocto wallet
+    const {
+      accessApi,
+      walletDiscovery,
+      walletDiscoveryApi,
+      walletDiscoveryInclude,
+    } = networks[network];
+    const iconUrl = window.location.origin + '/logo.png';
+
+    fcl.config({
+      'app.detail.title': 'CAST',
+      'app.detail.icon': iconUrl,
+      'accessNode.api': accessApi, // connect to Flow
+      'discovery.wallet': walletDiscovery, // use wallets on public discovery
+      'discovery.authn.endpoint': walletDiscoveryApi, // public discovery api endpoint
+      'discovery.authn.include': walletDiscoveryInclude, // opt-in wallets
+    });
 
     try {
       const contracts = require('../contracts.json');

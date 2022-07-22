@@ -40,8 +40,6 @@ func (otu *OverflowTestUtils) TallyResultsForStakedTokenWeightedDefault(
 	r *models.ProposalResults,
 ) *models.ProposalResults {
 
-	fmt.Printf("Tallying results for staked token weighted default\n")
-
 	for _, v := range *votes {
 		r.Results_float[v.Choice] += float64(v.Staking_balance) * math.Pow(10, -8)
 	}
@@ -68,7 +66,7 @@ func (otu *OverflowTestUtils) TallyResultsForBalanceOfNfts(
 
 	for _, v := range *votes {
 		nfts := len(v.NFTs)
-		r.Results_float[v.Choice] += float64(nfts) * math.Pow(10, -8)
+		r.Results_float[v.Choice] += float64(nfts)
 	}
 	return r
 }
@@ -132,12 +130,31 @@ func (otu *OverflowTestUtils) GenerateListOfVotesWithNFTs(
 	count int,
 	contract *shared.Contract,
 ) (*[]VoteWithBalance, error) {
+
+	mintParams := shared.MintParams{
+		Recipient:            "user1",
+		Description:          "the best NFT",
+		Cuts:                 []float64{0.8},
+		RoyaltyDescriptions:  []string{"the best NFT"},
+		RoyaltyBeneficiaries: []string{"0xf8d6e0586b0a20c7"},
+	}
+
 	var votes []VoteWithBalance
 	choices := []string{"a", "b"}
+
+	otu.SetupAccountForFlow("account")
+	otu.SetupToReceiveRoyalty("account")
+
 	for i := 0; i < count; i++ {
 		accountName := "user" + strconv.Itoa(i+1)
+
+		mintParams.Name = accountName
+		mintParams.Recipient = accountName
+
 		otu.SetupAccountForNFTs(accountName)
-		otu.MintNFT("user1", accountName)
+		otu.SetupAccountForFlow(accountName)
+		otu.SetupToReceiveRoyalty(accountName)
+		otu.MintNFT(mintParams)
 
 		addr := otu.ResolveUser(i + 1)
 		randomNumber := rand.Intn(2)
@@ -217,25 +234,35 @@ func (otu *OverflowTestUtils) CreateNFTVote(v models.Vote, ids []interface{}, co
 }
 
 func (otu *OverflowTestUtils) SetupAccountForNFTs(account string) {
-	otu.O.TransactionFromFile("setup_account").
+	otu.O.TransactionFromFile("setup_account_nfts").
 		SignProposeAndPayAs(account).
 		RunPrintEventsFull()
 }
 
-func (otu *OverflowTestUtils) CreateNFTCollection(account string) {
-	otu.O.TransactionFromFile("create_collection").
+func (otu *OverflowTestUtils) SetupToReceiveRoyalty(account string) {
+	otu.O.TransactionFromFile("setup_account_to_receive_royalty").
+		SignProposeAndPayAs(account).
+		Args(otu.O.Arguments()).
+		RunPrintEventsFull()
+}
+
+func (otu *OverflowTestUtils) SetupAccountForFlow(account string) {
+	otu.O.TransactionFromFile("setup_flow_token_account").
 		SignProposeAndPayAs(account).
 		RunPrintEventsFull()
 }
 
-func (otu *OverflowTestUtils) MintNFT(signer, recipient string) {
+func (otu *OverflowTestUtils) MintNFT(p shared.MintParams) {
 	otu.O.TransactionFromFile("mint_nft").
 		SignProposeAndPayAsService().
 		Args(otu.O.Arguments().
-			Account(recipient).
-			String("name").
-			String("description").
-			String("thumbnail")).
+			Account(p.Recipient).
+			String(p.Name).
+			String(p.Description).
+			String(p.Thumbnail).
+			UFix64Array(0.8).
+			StringArray("royalties").
+			AccountArray(p.Recipient)).
 		RunPrintEventsFull()
 }
 
