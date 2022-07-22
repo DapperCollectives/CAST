@@ -239,7 +239,7 @@ func GrantAdminRolesToAddress(db *s.Database, communityId int, addr string) erro
 		userRole := CommunityUser{Addr: addr, Community_id: communityId, User_type: role}
 		if err := userRole.GetCommunityUser(db); err != nil {
 			if err := userRole.CreateCommunityUser(db); err != nil {
-				log.Error().Err(err).Msgf("db error creating role %s for addr %s for communityId %d", role, addr, communityId)
+				log.Error().Err(err).Msgf("Database error creating role %s for Address: %s and Communuity Id: %d.", role, addr, communityId)
 				return err
 			}
 		}
@@ -253,7 +253,7 @@ func GrantAuthorRolesToAddress(db *s.Database, communityId int, addr string) err
 		userRole := CommunityUser{Addr: addr, Community_id: communityId, User_type: role}
 		if err := userRole.GetCommunityUser(db); err != nil {
 			if err := userRole.CreateCommunityUser(db); err != nil {
-				log.Error().Err(err).Msgf("db error creating role %s for addr %s for communityId %d", role, addr, communityId)
+				log.Error().Err(err).Msgf("Database error creating role %s for Address: %s and Community Id: %d.", role, addr, communityId)
 				return err
 			}
 		}
