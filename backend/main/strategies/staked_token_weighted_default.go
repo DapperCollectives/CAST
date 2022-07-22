@@ -109,6 +109,10 @@ func (s *StakedTokenWeightedDefault) GetVotes(
 	return votes, nil
 }
 
+func (s *StakedTokenWeightedDefault) RequiresSnapshot() bool {
+	return true
+}
+
 func (s *StakedTokenWeightedDefault) InitStrategy(
 	f *shared.FlowAdapter,
 	db *shared.Database,
