@@ -142,7 +142,7 @@ func GetAllVotesForProposal(db *s.Database, proposalId int, strategy string) ([]
 	return votes, nil
 }
 
-func GetVotesForProposal(db *s.Database, start, count int, order string, proposalId int) ([]*VoteWithBalance, int, error) {
+func GetVotesForProposal(db *s.Database, start, count int, order string, proposalId int, strategy string) ([]*VoteWithBalance, int, error) {
 	var votes []*VoteWithBalance
 	var orderBySql string
 	if order == "desc" {
@@ -173,6 +173,13 @@ func GetVotesForProposal(db *s.Database, start, count int, order string, proposa
 		return []*VoteWithBalance{}, 0, nil
 	}
 
+	if strategy == "balance-of-nfts" {
+		votes, err = getUsersNFTs(db, votes)
+		if err != nil {
+			return nil, 0, err
+		}
+	}
+
 	// Get total number of votes on proposal
 	var totalRecords int
 	countSql := `SELECT COUNT(*) FROM votes WHERE proposal_id = $1`
@@ -188,7 +195,7 @@ func (v *Vote) GetVote(db *s.Database) error {
 }
 
 func (vb *VoteWithBalance) GetVote(db *s.Database) error {
-	return pgxscan.Get(db.Context, db.Conn, vb,
+	err := pgxscan.Get(db.Context, db.Conn, vb,
 		`select v.*, 
 		b.primary_account_balance,
 		b.secondary_account_balance,
@@ -197,6 +204,13 @@ func (vb *VoteWithBalance) GetVote(db *s.Database) error {
 		left join balances b on b.addr = v.addr
 		WHERE proposal_id = $1 AND v.addr = $2`,
 		vb.Proposal_id, vb.Addr)
+	if err != nil {
+		return err
+	}
+
+	nftIds, err := GetUserNFTs(db, vb)
+	vb.NFTs = nftIds
+	return err
 }
 
 func (v *Vote) GetVoteById(db *s.Database) error {

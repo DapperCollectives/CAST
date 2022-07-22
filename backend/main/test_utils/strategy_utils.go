@@ -149,6 +149,7 @@ func (otu *OverflowTestUtils) GenerateListOfVotesWithNFTs(
 		accountName := "user" + strconv.Itoa(i+1)
 
 		mintParams.Name = accountName
+		mintParams.Recipient = accountName
 
 		otu.SetupAccountForNFTs(accountName)
 		otu.SetupAccountForFlow(accountName)
@@ -253,7 +254,7 @@ func (otu *OverflowTestUtils) SetupAccountForFlow(account string) {
 
 func (otu *OverflowTestUtils) MintNFT(p shared.MintParams) {
 	otu.O.TransactionFromFile("mint_nft").
-		SignProposeAndPayAs(p.Name).
+		SignProposeAndPayAsService().
 		Args(otu.O.Arguments().
 			Account(p.Recipient).
 			String(p.Name).
