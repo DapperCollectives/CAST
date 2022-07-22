@@ -29,6 +29,11 @@ const LeaderBoard = ({
   const { data, isLoading } = useLeaderBoard({ communityId, addr: user?.addr });
   const style = {};
 
+  const showCurrentUser =
+    !isLoading &&
+    data?.users &&
+    data.users.find(({ addr }) => addr === user?.addr) === -1;
+
   return (
     <div className="is-flex is-flex-direction-column">
       <WrapperResponsive
@@ -80,7 +85,7 @@ const LeaderBoard = ({
             })}
         </tbody>
       </table>
-      {!isLoading && data?.currentUser && (
+      {showCurrentUser && (
         <table className="table is-fullwidth">
           <tbody className="is-scrollable-table" style={style}>
             <Row
