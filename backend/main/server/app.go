@@ -359,12 +359,6 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 		start = 0
 	}
 
-	votes, totalRecords, err := models.GetVotesForProposal(a.DB, start, count, order, proposalId)
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
 	//get the proposal
 	proposal := models.Proposal{ID: proposalId}
 	if err := proposal.GetProposalById(a.DB); err != nil {
@@ -384,6 +378,12 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	s.InitStrategy(a.FlowAdapter, a.DB, a.SnapshotClient)
+
+	votes, totalRecords, err := models.GetVotesForProposal(a.DB, start, count, order, proposalId, *proposal.Strategy)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
 
 	votesWithWeights, err := s.GetVotes(votes, &proposal)
 	if err != nil {
