@@ -17,9 +17,10 @@ const BlockieWithAddress = React.forwardRef(
     const { width } = useWindowDimensions();
 
     useEffect(() => {
-      if (ref?.current.clientWidth <= 260 && creatorAddr === addr) {
+      console.log(ref?.current.clientWidth);
+      if (ref?.current.clientWidth <= 223 && creatorAddr === addr) {
         setAdd(truncate(creatorAddr));
-      } else if (ref?.current.clientWidth > 260 && creatorAddr !== addr) {
+      } else if (ref?.current.clientWidth > 223 && creatorAddr !== addr) {
         setAdd(creatorAddr);
       }
     }, [ref, width, creatorAddr, addr]);
@@ -61,7 +62,7 @@ const InfoBlock = ({ title, content, component }) => {
       className="columns is-mobile p-0 m-0 mb-5 small-text"
       ref={containerRef}
     >
-      <div className="column p-0 is-flex is-align-items-center flex-1 has-text-grey is-5">
+      <div className="column p-0 is-flex is-align-items-center flex-1 has-text-grey is-4 is-5-desktop">
         {title}
       </div>
       <div
