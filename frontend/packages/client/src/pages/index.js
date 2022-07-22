@@ -7,6 +7,8 @@ const Transactions = lazy(() => import('../components/Transactions'));
 const Home = lazy(() => import('./Home'));
 const Proposal = lazy(() => import('./Proposal'));
 const About = lazy(() => import('./About'));
+const PrivacyPolicy = lazy(() => import('./PrivacyPolicy'));
+const TermsOfService = lazy(() => import('./TermsOfService'));
 const Debug = lazy(() => import('./Debug'));
 const ProposalCreate = lazy(() => import('./ProposalCreate'));
 const Community = lazy(() => import('./Community'));
@@ -25,6 +27,8 @@ export default function AppPages() {
               <Home />
             </Route>
             <Route exact path="/about" component={About} />
+            <Route exact path="/privacy-policy" component={PrivacyPolicy} />
+            <Route exact path="/terms-of-service" component={TermsOfService} />
             <Route exact path="/community/create">
               <CommunityCreate />
             </Route>

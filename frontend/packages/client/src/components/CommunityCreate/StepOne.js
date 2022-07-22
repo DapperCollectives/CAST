@@ -24,6 +24,9 @@ const initialValues = Object.assign(
   {},
   ...linksFields.map((key) => ({ [key]: '' }))
 );
+
+const checkValidNameLength = (name) => name?.length <= 50;
+
 export default function StepOne({
   stepData,
   setStepValid,
@@ -128,7 +131,8 @@ export default function StepOne({
   // handles form validation
   useEffect(() => {
     const requiredFields = {
-      communityName: (name) => name?.trim().length > 0,
+      communityName: (name) =>
+        name?.trim().length > 0 && checkValidNameLength(name),
       communityDescription: (desc) =>
         desc?.trim().length ? desc?.trim().length < 1000 : true,
       logo: (logo) =>
@@ -142,6 +146,8 @@ export default function StepOne({
     );
     setStepValid(isValid && isCommunityLinksValid);
   }, [stepData, setStepValid, onDataChange, isCommunityLinksValid]);
+
+  const showNameInputError = !checkValidNameLength(communityName ?? '');
 
   return (
     <>
@@ -224,9 +230,15 @@ export default function StepOne({
           name="community_name"
           className="rounded-sm border-light p-3 column is-full mt-2"
           value={communityName || ''}
-          maxLength={50}
           onChange={(event) => setData({ communityName: event.target.value })}
         />
+        {showNameInputError && (
+          <div className="pl-1 mt-2 transition-all">
+            <p className="smaller-text has-text-red">
+              The maximum length for Community Name is 50 characters
+            </p>
+          </div>
+        )}
         <textarea
           className="text-area rounded-sm border-light p-3 column is-full mt-4"
           type="text"
@@ -271,7 +283,7 @@ export default function StepOne({
         <div className="column is-12">
           <button
             style={{ height: 48, width: '100%' }}
-            className={`button vote-button transition-all is-flex has-background-yellow rounded-sm is-size-6 is-uppercase is-${
+            className={`button vote-button is-flex has-background-yellow rounded-sm is-size-6 is-uppercase is-${
               isStepValid ? 'enabled' : 'disabled'
             }`}
             onClick={isStepValid ? () => moveToNextStep() : () => {}}

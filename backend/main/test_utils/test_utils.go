@@ -11,7 +11,7 @@ import (
 )
 
 type OverflowTestUtils struct {
-	O       *overflow.Overflow
+	O       *overflow.OverflowState
 	T       *testing.T
 	A       *server.App
 	Adapter *shared.FlowAdapter
