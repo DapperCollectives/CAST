@@ -1,6 +1,5 @@
 import React from 'react';
 import classnames from 'classnames';
-import { Link } from 'react-router-dom';
 import { Loader, FadeIn, HomeFooter, HomeHeader } from 'components';
 import { useWebContext } from 'contexts/Web3';
 import CommunitiesPresenter from 'components/Community/CommunitiesPresenter';
