@@ -29,7 +29,7 @@ const LeaderBoard = ({
   const { user } = web3;
   const { data, isLoading } = useLeaderBoard({ communityId, addr: user?.addr });
   const style = {};
-  const currentUserInTop10 = data?.users?.some(
+  const currentUserInLeaderboard = data?.users?.some(
     (datum) => datum.addr === user?.addr
   );
 
@@ -51,9 +51,9 @@ const LeaderBoard = ({
                 'index-cell': index !== 0 && index !== 4,
                 'rounded-sm-tl': index === 0,
                 'rounded-sm-bl': index === 4,
-                'has-background-white-ter': !currentUserInTop10,
-                'has-background-black-bis': currentUserInTop10,
-                'has-text-white': currentUserInTop10,
+                'has-background-white-ter': !currentUserInLeaderboard,
+                'has-background-black-bis': currentUserInLeaderboard,
+                'has-text-white': currentUserInLeaderboard,
               });
 
               return (
@@ -86,7 +86,7 @@ const LeaderBoard = ({
             })}
         </tbody>
       </table>
-      {!isLoading && data?.currentUser && !currentUserInTop10 && (
+      {!isLoading && data?.currentUser && !currentUserInLeaderboard && (
         <table className="table is-fullwidth">
           <tbody className="is-scrollable-table" style={style}>
             <Row
