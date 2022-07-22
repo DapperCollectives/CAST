@@ -1,9 +1,6 @@
 package strategies
 
 import (
-	"fmt"
-	"math"
-
 	"github.com/DapperCollectives/CAST/backend/main/models"
 	"github.com/DapperCollectives/CAST/backend/main/shared"
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
@@ -21,18 +18,14 @@ func (b *BalanceOfNfts) FetchBalance(
 	p *models.Proposal,
 ) (*models.Balance, error) {
 
+	v := models.Vote{Proposal_id: balance.Proposal_id, Addr: balance.Addr}
 	vb := &models.VoteWithBalance{
 		NFTs: []*models.NFT{},
+		Vote: v,
 	}
 
 	var c models.Community
 	if err := c.GetCommunityByProposalId(b.DB, balance.Proposal_id); err != nil {
-		return nil, err
-	}
-
-	nftIds, err := models.GetUserNFTs(b.DB, vb)
-	if err != nil {
-		log.Error().Err(err).Msg("error getting user nfts")
 		return nil, err
 	}
 
@@ -42,30 +35,28 @@ func (b *BalanceOfNfts) FetchBalance(
 		return nil, err
 	}
 
-	if len(nftIds) == 0 {
-		nftIds, err := b.FlowAdapter.GetNFTIds(balance.Addr, &strategy.Contract)
-		if err != nil {
-			return nil, err
-		}
+	nftIds, err := b.FlowAdapter.GetNFTIds(balance.Addr, &strategy.Contract)
+	if err != nil {
+		return nil, err
+	}
 
-		for _, nftId := range nftIds {
-			nft := &models.NFT{
-				ID: nftId.(uint64),
-			}
-			vb.NFTs = append(vb.NFTs, nft)
+	for _, nftId := range nftIds {
+		nft := &models.NFT{
+			ID: nftId,
 		}
+		vb.NFTs = append(vb.NFTs, nft)
+	}
 
-		doesExist, err := models.DoesNFTExist(b.DB, vb)
-		if err != nil {
-			return nil, err
-		}
+	doesExist, err := models.DoesNFTExist(b.DB, vb)
+	if err != nil {
+		return nil, err
+	}
 
-		//only if the NFT ID is not already in the DB,
-		//do we add the balance
-		if !doesExist && err == nil {
-			err = models.CreateUserNFTRecord(b.DB, vb)
-			balance.NFTCount = len(vb.NFTs)
-		}
+	//only if the NFT ID is not already in the DB,
+	//do we add the balance
+	if !doesExist && err == nil {
+		err = models.CreateUserNFTRecord(b.DB, vb)
+		balance.NFTCount = len(vb.NFTs)
 	}
 
 	return balance, nil
@@ -78,38 +69,15 @@ func (b *BalanceOfNfts) TallyVotes(
 
 	for _, v := range votes {
 		nftCount := len(v.NFTs)
-		r.Results_float[v.Choice] += float64(nftCount) * math.Pow(10, -8)
+		r.Results_float[v.Choice] += float64(nftCount)
+		r.Results[v.Choice] += nftCount
 	}
 
 	return *r, nil
 }
 
 func (b *BalanceOfNfts) GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error) {
-	var weight float64
-	var ERROR error = fmt.Errorf("this address has no nfts")
-
-	// get the nfts for this address
-	var c models.Community
-	if err := c.GetCommunityByProposalId(b.DB, proposal.ID); err != nil {
-		return 0, err
-	}
-
-	var contract = &shared.Contract{
-		Name: c.Contract_name,
-		Addr: c.Contract_addr,
-	}
-
-	nftIds, err := b.FlowAdapter.GetNFTIds(vote.Addr, contract)
-	if err != nil {
-		return 0, err
-	}
-
-	if len(nftIds) == 0 {
-		return 0.00, ERROR
-	}
-	nftCount := len(nftIds)
-	weight = float64(nftCount)
-	return weight, nil
+	return float64(len(vote.NFTs)), nil
 }
 
 func (s *BalanceOfNfts) GetVotes(
@@ -126,6 +94,10 @@ func (s *BalanceOfNfts) GetVotes(
 	}
 
 	return votes, nil
+}
+
+func (s *BalanceOfNfts) RequiresSnapshot() bool {
+	return false
 }
 
 func (s *BalanceOfNfts) InitStrategy(

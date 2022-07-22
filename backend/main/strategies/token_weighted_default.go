@@ -3,6 +3,7 @@ package strategies
 import (
 	"fmt"
 	"math"
+	"time"
 
 	"github.com/DapperCollectives/CAST/backend/main/models"
 	"github.com/DapperCollectives/CAST/backend/main/shared"
@@ -15,6 +16,16 @@ type TokenWeightedDefault struct {
 	s.StrategyStruct
 	SC s.SnapshotClient
 	DB *s.Database
+}
+
+type FTBalanceResponse struct {
+	ID              string    `json:"id"`
+	FungibleTokenID string    `json:"fungibleTokenId"`
+	Addr            string    `json:"addr"`
+	Balance         uint64    `json:"balance"`
+	BlockHeight     uint64    `json:"blockHeight"`
+	CreatedAt       time.Time `json:"createdAt"`
+	HasVault        bool      `json:"hasVault"`
 }
 
 func (s *TokenWeightedDefault) FetchBalance(
@@ -38,15 +49,20 @@ func (s *TokenWeightedDefault) FetchBalance(
 		return nil, err
 	}
 
+	var ftBalance = &FTBalanceResponse{}
 	if err := s.SC.GetAddressBalanceAtBlockHeight(
 		b.Addr,
 		b.BlockHeight,
-		b,
+		ftBalance,
 		&strategy.Contract,
 	); err != nil {
 		log.Error().Err(err).Msg("error fetching balance")
 		return nil, err
 	}
+
+	b.PrimaryAccountBalance = ftBalance.Balance
+	b.SecondaryAccountBalance = 0
+	b.StakingBalance = 0
 
 	if err := b.CreateBalance(s.DB); err != nil {
 		log.Error().Err(err).Msg("error creating balance in the DB")
@@ -112,6 +128,10 @@ func (s *TokenWeightedDefault) GetVotes(
 		vote.Weight = &weight
 	}
 	return votes, nil
+}
+
+func (s *TokenWeightedDefault) RequiresSnapshot() bool {
+	return true
 }
 
 func (s *TokenWeightedDefault) InitStrategy(

@@ -55,6 +55,16 @@ type Choice struct {
 	Choice_img_url *string `json:"choiceImgUrl"`
 }
 
+type MintParams struct {
+	Recipient            string
+	Name                 string
+	Description          string
+	Thumbnail            string
+	Cuts                 []float64
+	RoyaltyDescriptions  []string
+	RoyaltyBeneficiaries []string
+}
+
 // Underlying value of payload needs to be a slice
 func GetPaginatedResponseWithPayload(payload interface{}, start, count, totalRecords int) *PaginatedResponse {
 	// Tricky way of getting the length of a slice
