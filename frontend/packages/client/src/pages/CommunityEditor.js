@@ -190,6 +190,7 @@ export default function CommunityEditorPage() {
                   name={community?.name}
                   body={community?.body}
                   logo={community?.logo}
+                  banner={community?.bannerImgUrl}
                   updateCommunity={updateCommunity}
                   uploadFile={uploadFile}
                 />

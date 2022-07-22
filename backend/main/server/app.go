@@ -68,13 +68,14 @@ type Strategy interface {
 	GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error)
 	InitStrategy(f *shared.FlowAdapter, db *shared.Database, sc *shared.SnapshotClient)
 	FetchBalance(b *models.Balance, p *models.Proposal) (*models.Balance, error)
+	RequiresSnapshot() bool
 }
 
 var strategyMap = map[string]Strategy{
-	"token-weighted-default":        &strategies.TokenWeightedDefault{RequiresSnapshot: true},
-	"staked-token-weighted-default": &strategies.StakedTokenWeightedDefault{RequiresSnapshot: true},
-	"one-address-one-vote":          &strategies.OneAddressOneVote{RequiresSnapshot: false},
-	"balance-of-nfts":               &strategies.BalanceOfNfts{RequiresSnapshot: false},
+	"token-weighted-default":        &strategies.TokenWeightedDefault{},
+	"staked-token-weighted-default": &strategies.StakedTokenWeightedDefault{},
+	"one-address-one-vote":          &strategies.OneAddressOneVote{},
+	"balance-of-nfts":               &strategies.BalanceOfNfts{},
 }
 
 const (
@@ -793,9 +794,11 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		return
 
 	}
+	s := strategyMap[*p.Strategy]
+	s.InitStrategy(a.FlowAdapter, a.DB, a.SnapshotClient)
 
 	var snapshotResponse *shared.SnapshotResponse
-	if strategy.RequiresSnapshot {
+	if s.RequiresSnapshot() {
 		snapshotResponse, err = a.SnapshotClient.TakeSnapshot(strategy.Contract)
 		if err != nil {
 			log.Error().Err(err).Msg("error taking snapshot")

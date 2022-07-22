@@ -11,8 +11,6 @@ type BalanceOfNfts struct {
 	s.StrategyStruct
 	SC s.SnapshotClient
 	DB *s.Database
-
-	RequiresSnapshot bool
 }
 
 func (b *BalanceOfNfts) FetchBalance(
@@ -96,6 +94,10 @@ func (s *BalanceOfNfts) GetVotes(
 	}
 
 	return votes, nil
+}
+
+func (s *BalanceOfNfts) RequiresSnapshot() bool {
+	return false
 }
 
 func (s *BalanceOfNfts) InitStrategy(

@@ -16,8 +16,6 @@ type TokenWeightedDefault struct {
 	s.StrategyStruct
 	SC s.SnapshotClient
 	DB *s.Database
-
-	RequiresSnapshot bool
 }
 
 type FTBalanceResponse struct {
@@ -130,6 +128,10 @@ func (s *TokenWeightedDefault) GetVotes(
 		vote.Weight = &weight
 	}
 	return votes, nil
+}
+
+func (s *TokenWeightedDefault) RequiresSnapshot() bool {
+	return true
 }
 
 func (s *TokenWeightedDefault) InitStrategy(
