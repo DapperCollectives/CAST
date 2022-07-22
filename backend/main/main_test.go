@@ -15,7 +15,7 @@ import (
 )
 
 var A server.App
-var O *overflow.Overflow
+var O *overflow.OverflowState
 var otu *utils.OverflowTestUtils
 
 const ServiceAddress = "0xf8d6e0586b0a20c7"
@@ -41,6 +41,7 @@ func TestMain(m *testing.M) {
 
 	os.Chdir(CWD)
 	os.Unsetenv("FVT_FEATURES")
+	os.Setenv("FLOW_ENV", "emulator")
 
 	A.Initialize(
 		os.Getenv("DB_USERNAME"),
