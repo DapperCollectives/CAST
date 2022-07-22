@@ -79,6 +79,10 @@ func (s *OneAddressOneVote) GetVotes(
 	return votes, nil
 }
 
+func (s *OneAddressOneVote) RequiresSnapshot() bool {
+	return false
+}
+
 func (s *OneAddressOneVote) InitStrategy(
 	f *shared.FlowAdapter,
 	db *shared.Database,
