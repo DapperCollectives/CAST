@@ -104,7 +104,7 @@ func (a *App) Initialize(user, password, dbname, dbhost, dbport, ipfsKey, ipfsSe
 	// Set App-wide Config
 	err := envconfig.Process("FVT", &a.Config)
 	if err != nil {
-		log.Error().Err(err).Msg("error reading configuration ")
+		log.Error().Err(err).Msg("Error Reading Configuration.")
 		os.Exit(1)
 	}
 
@@ -242,14 +242,14 @@ func (a *App) health(w http.ResponseWriter, r *http.Request) {
 func (a *App) upload(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, maxFileSize)
 	if err := r.ParseMultipartForm(maxFileSize); err != nil {
-		log.Error().Err(err).Msgf("file larger than max file size of %v\n", maxFileSize)
+		log.Error().Err(err).Msgf("File cannot be larger than max file size of %v.\n", maxFileSize)
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	file, handler, err := r.FormFile("file")
 	if err != nil {
-		log.Error().Err(err).Msg("FormFile retrieval error")
+		log.Error().Err(err).Msg("FormFile Retrieval Error.")
 		respondWithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -258,7 +258,7 @@ func (a *App) upload(w http.ResponseWriter, r *http.Request) {
 	// pin file to ipfs
 	pin, err := a.IpfsClient.PinFile(file, handler.Filename)
 	if err != nil {
-		log.Error().Err(err).Msg("Error pinning file to IPFS")
+		log.Error().Err(err).Msg("Error pinning file to IPFS.")
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -266,7 +266,7 @@ func (a *App) upload(w http.ResponseWriter, r *http.Request) {
 	// ensure mime type is allowed
 	mime := handler.Header.Get("Content-Type")
 	if !funk.Contains(allowedFileTypes, mime) {
-		msg := fmt.Sprintf("uploaded file type %s not allowed", mime)
+		msg := fmt.Sprintf("Uploaded file type of '%s' is not allowed.", mime)
 		log.Error().Msg(msg)
 		respondWithError(w, http.StatusBadRequest, msg)
 		return
@@ -288,7 +288,7 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	proposalId, err := strconv.Atoi(vars["proposalId"])
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID")
+		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID.")
 		return
 	}
 
@@ -298,7 +298,7 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 	if err := p.GetProposalById(a.DB); err != nil {
 		switch err.Error() {
 		case pgx.ErrNoRows.Error():
-			respondWithError(w, http.StatusNotFound, "Proposal not found")
+			respondWithError(w, http.StatusNotFound, "Proposal not found.")
 		default:
 			respondWithError(w, http.StatusInternalServerError, err.Error())
 		}
@@ -309,7 +309,7 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 	votes, err := models.GetAllVotesForProposal(a.DB, proposalId, *p.Strategy)
 	if err != nil {
 		// print the error to the console
-		log.Error().Err(err).Msg("Error getting votes for proposal")
+		log.Error().Err(err).Msg("Error getting votes for proposal.")
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -317,7 +317,7 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 	// look up the strategy for proposal
 	s := strategyMap[*p.Strategy]
 	if s == nil {
-		respondWithError(w, http.StatusInternalServerError, "Strategy not found")
+		respondWithError(w, http.StatusInternalServerError, "Proposal strategy not found.")
 		return
 	}
 
@@ -343,7 +343,7 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 	proposalId, err := strconv.Atoi(vars["proposalId"])
 
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID")
+		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID.")
 		return
 	}
 
@@ -366,7 +366,7 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 	if err := proposal.GetProposalById(a.DB); err != nil {
 		switch err.Error() {
 		case pgx.ErrNoRows.Error():
-			respondWithError(w, http.StatusNotFound, "Proposal not found")
+			respondWithError(w, http.StatusNotFound, "Proposal not found.")
 		default:
 			respondWithError(w, http.StatusInternalServerError, err.Error())
 		}
@@ -375,7 +375,7 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 
 	s := strategyMap[*proposal.Strategy]
 	if s == nil {
-		respondWithError(w, http.StatusInternalServerError, "Invalid Strategy")
+		respondWithError(w, http.StatusInternalServerError, "Invalid Strategy.")
 		return
 	}
 
@@ -402,7 +402,7 @@ func (a *App) getVoteForAddress(w http.ResponseWriter, r *http.Request) {
 	addr := vars["addr"]
 
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID")
+		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID.")
 		return
 	}
 
@@ -415,7 +415,7 @@ func (a *App) getVoteForAddress(w http.ResponseWriter, r *http.Request) {
 	if err := voteWithBalance.GetVote(a.DB); err != nil {
 		switch err.Error() {
 		case pgx.ErrNoRows.Error():
-			respondWithError(w, http.StatusNotFound, "Vote not found")
+			respondWithError(w, http.StatusNotFound, "Vote not found.")
 		default:
 			respondWithError(w, http.StatusInternalServerError, err.Error())
 		}
@@ -427,7 +427,7 @@ func (a *App) getVoteForAddress(w http.ResponseWriter, r *http.Request) {
 	if err := proposal.GetProposalById(a.DB); err != nil {
 		switch err.Error() {
 		case pgx.ErrNoRows.Error():
-			respondWithError(w, http.StatusNotFound, "Proposal not found")
+			respondWithError(w, http.StatusNotFound, "Proposal not found.")
 		default:
 			respondWithError(w, http.StatusInternalServerError, err.Error())
 		}
@@ -437,7 +437,7 @@ func (a *App) getVoteForAddress(w http.ResponseWriter, r *http.Request) {
 	//lookup the strategy for proposal
 	s := strategyMap[*proposal.Strategy]
 	if s == nil {
-		respondWithError(w, http.StatusInternalServerError, "Strategy not found")
+		respondWithError(w, http.StatusInternalServerError, "Proposal strategy not found.")
 		return
 	}
 
@@ -462,7 +462,7 @@ func (a *App) getVotesForAddress(w http.ResponseWriter, r *http.Request) {
 
 	err := json.Unmarshal([]byte(r.FormValue("proposalIds")), &proposalIds)
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID")
+		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID.")
 		return
 	}
 
@@ -475,7 +475,7 @@ func (a *App) getVotesForAddress(w http.ResponseWriter, r *http.Request) {
 
 	votes, totalRecords, err := models.GetVotesForAddress(a.DB, start, count, addr, &proposalIds)
 	if err != nil {
-		log.Error().Err(err).Msg("error getting votes for address")
+		log.Error().Err(err).Msg("Error getting votes for address.")
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 	}
 
@@ -488,7 +488,7 @@ func (a *App) getVotesForAddress(w http.ResponseWriter, r *http.Request) {
 		if err := proposal.GetProposalById(a.DB); err != nil {
 			switch err.Error() {
 			case pgx.ErrNoRows.Error():
-				respondWithError(w, http.StatusNotFound, "Proposal not found")
+				respondWithError(w, http.StatusNotFound, "Proposal not found.")
 			default:
 				respondWithError(w, http.StatusInternalServerError, err.Error())
 			}
@@ -498,7 +498,7 @@ func (a *App) getVotesForAddress(w http.ResponseWriter, r *http.Request) {
 		//lookup the stratefy for this proposal
 		s := strategyMap[*proposal.Strategy]
 		if s == nil {
-			respondWithError(w, http.StatusInternalServerError, "Strategy not found")
+			respondWithError(w, http.StatusInternalServerError, "Strategy not found.")
 			return
 		}
 
@@ -522,7 +522,7 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	proposalId, err := strconv.Atoi(vars["proposalId"])
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID")
+		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID.")
 		return
 	}
 
@@ -530,8 +530,8 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 
 	if err := decoder.Decode(&v); err != nil {
-		log.Error().Err(err).Msg("Invalid request payload")
-		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
+		log.Error().Err(err).Msg("Invalid request payload.")
+		respondWithError(w, http.StatusBadRequest, "Invalid request payload.")
 		return
 	}
 
@@ -542,7 +542,7 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 	// validate user hasn't already voted
 	existingVote := models.Vote{Proposal_id: v.Proposal_id, Addr: v.Addr}
 	if err := existingVote.GetVote(a.DB); err == nil {
-		log.Error().Msgf("address %s has already voted for proposal %d", v.Addr, v.Proposal_id)
+		log.Error().Msgf("Address %s has already voted for proposal %d.", v.Addr, v.Proposal_id)
 		respondWithError(w, http.StatusInternalServerError, errors.New("address has already voted").Error())
 		return
 	}
@@ -550,7 +550,7 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 	// get the proposal for extra validations
 	p := models.Proposal{ID: proposalId}
 	if err := p.GetProposalById(a.DB); err != nil {
-		log.Error().Err(err).Msgf("error fetching proposal by id: %v", proposalId)
+		log.Error().Err(err).Msgf("Error fetching proposal by id: %v.", proposalId)
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -558,7 +558,7 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 	// check that proposal is live
 	if os.Getenv("APP_ENV") != "DEV" {
 		if !p.IsLive() {
-			err = errors.New("user cannot vote on inactive proposal")
+			err = errors.New("User cannot vote on inactive proposal.")
 			log.Error().Err(err)
 			respondWithError(w, http.StatusInternalServerError, err.Error())
 			return
@@ -567,7 +567,7 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 
 	// validate the user is not on community's blocklist
 	if err = a.validateBlocklist(v.Addr, p.Community_id); err != nil {
-		log.Error().Err(err).Msgf(fmt.Sprintf("Address %v is on blocklist for community id %v\n", v.Addr, p.Community_id))
+		log.Error().Err(err).Msgf(fmt.Sprintf("Address %v is on blocklist for community id %v.\n", v.Addr, p.Community_id))
 		respondWithError(w, http.StatusForbidden, err.Error())
 		return
 	}
@@ -600,7 +600,7 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 
 	s := strategyMap[*p.Strategy]
 	if s == nil {
-		respondWithError(w, http.StatusInternalServerError, "Strategy not found")
+		respondWithError(w, http.StatusInternalServerError, "Proposal strategy not found.")
 		return
 	}
 
@@ -616,8 +616,8 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 
 	balance, err := s.FetchBalance(emptyBalance, &p)
 	if err != nil {
-		log.Error().Err(err).Msgf("error fetching balance for address %v", v.Addr)
-		respondWithError(w, http.StatusInternalServerError, "error fetching balance")
+		log.Error().Err(err).Msgf("Error fetching balance for address %v.", v.Addr)
+		respondWithError(w, http.StatusInternalServerError, "Error fetching balance.")
 		return
 	}
 
@@ -632,14 +632,14 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 	//get the vote weight
 	weight, err := s.GetVoteWeightForBalance(&vb, &p)
 	if err != nil {
-		log.Error().Err(err).Msg("error getting vote weight")
-		respondWithError(w, http.StatusInternalServerError, "error getting vote weight")
+		log.Error().Err(err).Msg("Error getting vote weight.")
+		respondWithError(w, http.StatusInternalServerError, "Error getting vote weight.")
 		return
 	}
 
 	// Validate balance is sufficient to cast vote
 	if err = p.ValidateBalance(weight); err != nil {
-		log.Error().Err(err).Msg("Account may not vote on proposal: insufficient balance")
+		log.Error().Err(err).Msg("Account may not vote on proposal: insufficient balance.")
 		respondWithError(w, http.StatusForbidden, err.Error())
 		return
 	}
@@ -652,7 +652,7 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 	v.Cid = &pin.IpfsHash
 
 	if err := v.CreateVote(a.DB); err != nil {
-		log.Error().Err(err).Msg("Couldnt create vote")
+		log.Error().Err(err).Msg("Couldnt create vote.")
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -666,7 +666,7 @@ func (a *App) getProposalsForCommunity(w http.ResponseWriter, r *http.Request) {
 	communityId, err := strconv.Atoi(vars["communityId"])
 
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Community ID")
+		respondWithError(w, http.StatusBadRequest, "Invalid Community ID.")
 		return
 	}
 
@@ -702,7 +702,7 @@ func (a *App) getProposal(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(vars["id"])
 
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID")
+		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID.")
 		return
 	}
 
@@ -710,7 +710,7 @@ func (a *App) getProposal(w http.ResponseWriter, r *http.Request) {
 	if err := p.GetProposalById(a.DB); err != nil {
 		switch err.Error() {
 		case pgx.ErrNoRows.Error():
-			respondWithError(w, http.StatusNotFound, "Proposal not found")
+			respondWithError(w, http.StatusNotFound, "Proposal not found.")
 		default:
 			respondWithError(w, http.StatusInternalServerError, err.Error())
 		}
@@ -741,7 +741,7 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	communityId, err := strconv.Atoi(vars["communityId"])
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Community ID")
+		respondWithError(w, http.StatusBadRequest, "Invalid Community ID.")
 		return
 	}
 
@@ -751,7 +751,7 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 
 	if err := decoder.Decode(&p); err != nil {
-		msg := "Invalid request payload"
+		msg := "Invalid request payload."
 		log.Error().Err(err).Msg(msg)
 		respondWithError(w, http.StatusBadRequest, msg)
 		return
@@ -766,7 +766,7 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := models.EnsureRoleForCommunity(a.DB, p.Creator_addr, communityId, "author"); err != nil {
-		errMsg := fmt.Sprintf("account %s is not an author for community %d", p.Creator_addr, p.Community_id)
+		errMsg := fmt.Sprintf("Account %s is not an author for community %d.", p.Creator_addr, p.Community_id)
 		log.Error().Err(err).Msg(errMsg)
 		respondWithError(w, http.StatusForbidden, errMsg)
 		return
@@ -782,14 +782,14 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 	community.ID = communityId
 
 	if err := community.GetCommunity(a.DB); err != nil {
-		log.Error().Err(err).Msg("error fetching community")
+		log.Error().Err(err).Msg("Error fetching community.")
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	strategy, err := models.MatchStrategyByProposal(*community.Strategies, *p.Strategy)
 	if err != nil {
-		log.Error().Err(err).Msg("Community does not have this strategy availabe")
+		log.Error().Err(err).Msg("Community does not have this strategy available.")
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 
@@ -801,7 +801,7 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 	if s.RequiresSnapshot() {
 		snapshotResponse, err = a.SnapshotClient.TakeSnapshot(strategy.Contract)
 		if err != nil {
-			log.Error().Err(err).Msg("error taking snapshot")
+			log.Error().Err(err).Msg("Error taking snapshot.")
 			respondWithError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
@@ -811,7 +811,7 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 
 	if *community.Only_authors_to_submit {
 		if err := models.EnsureRoleForCommunity(a.DB, p.Creator_addr, communityId, "author"); err != nil {
-			errMsg := fmt.Sprintf("account %s is not an author for community %d", p.Creator_addr, p.Community_id)
+			errMsg := fmt.Sprintf("Account %s is not an author for community %d.", p.Creator_addr, p.Community_id)
 			log.Error().Err(err).Msg(errMsg)
 			respondWithError(w, http.StatusForbidden, errMsg)
 			return
@@ -819,13 +819,13 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 	} else {
 		hasBalance, err := a.processTokenThreshold(p.Creator_addr, strategy)
 		if err != nil {
-			log.Error().Err(err).Msg("error processing Token Threshold")
+			log.Error().Err(err).Msg("Error processing Token Threshold.")
 			respondWithError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 
 		if !hasBalance {
-			errMsg := "insufficient token balance to create proposal"
+			errMsg := "Insufficient token balance to create proposal."
 			log.Error().Err(err).Msg(errMsg)
 			respondWithError(w, http.StatusForbidden, errMsg)
 			return
@@ -833,14 +833,14 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := a.processSnapshotStatus(&strategy, &p); err != nil {
-		log.Error().Err(err).Msg("error processing snapshot status")
+		log.Error().Err(err).Msg("Error processing snapshot status.")
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	pin, err := a.IpfsClient.PinJson(p)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
+		respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error()+".")
 		return
 	}
 	p.Cid = &pin.IpfsHash
@@ -849,7 +849,7 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 	validate := validator.New()
 	vErr := validate.Struct(p)
 	if vErr != nil {
-		log.Error().Err(vErr).Msg("invalid proposal")
+		log.Error().Err(vErr).Msg("Invalid proposal.")
 		respondWithError(w, http.StatusBadRequest, vErr.Error())
 		return
 	}
@@ -873,8 +873,8 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		log.Error().Err(err).Msg("Invalid proposal ID")
-		respondWithError(w, http.StatusBadRequest, "Invalid proposal ID")
+		log.Error().Err(err).Msg("Invalid proposal ID.")
+		respondWithError(w, http.StatusBadRequest, "Invalid proposal ID.")
 		return
 	}
 
@@ -891,8 +891,8 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 
 	if err := decoder.Decode(&payload); err != nil {
-		log.Error().Err(err).Msg("Invalid request payload")
-		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
+		log.Error().Err(err).Msg("Invalid request payload.")
+		respondWithError(w, http.StatusBadRequest, "Invalid request payload.")
 		return
 	}
 	defer r.Body.Close()
@@ -900,12 +900,12 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 	// Check that status update is valid
 	// For now we are assuming proposals are creating with status 'published' and may be cancelled.
 	if payload.Status != "cancelled" {
-		respondWithError(w, http.StatusBadRequest, "You may only change a proposal's status to 'cancelled'")
+		respondWithError(w, http.StatusBadRequest, "You may only change a proposal's status to 'cancelled'.")
 		return
 	}
 	// validate that the signing address is an author for the community
 	if err := models.EnsureRoleForCommunity(a.DB, payload.Signing_addr, p.Community_id, "author"); err != nil {
-		errMsg := fmt.Sprintf("account %s is not an author for community %d", p.Creator_addr, p.Community_id)
+		errMsg := fmt.Sprintf("Account %s is not an author for community %d.", p.Creator_addr, p.Community_id)
 		log.Error().Err(err).Msg(errMsg)
 		respondWithError(w, http.StatusForbidden, errMsg)
 		return
@@ -929,7 +929,7 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 
 	pin, err := a.IpfsClient.PinJson(p)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
+		respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error()+".")
 		return
 	}
 	p.Cid = &pin.IpfsHash
@@ -971,7 +971,7 @@ func (a *App) getCommunity(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(vars["id"])
 
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Community ID")
+		respondWithError(w, http.StatusBadRequest, "Invalid Community ID.")
 		return
 	}
 
@@ -981,7 +981,7 @@ func (a *App) getCommunity(w http.ResponseWriter, r *http.Request) {
 		// So I've added .Error() to convert to a string comparison
 		switch err.Error() {
 		case pgx.ErrNoRows.Error():
-			respondWithError(w, http.StatusNotFound, "Community not found")
+			respondWithError(w, http.StatusNotFound, "Community not found.")
 		default:
 			respondWithError(w, http.StatusInternalServerError, err.Error())
 		}
@@ -1020,7 +1020,7 @@ func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 
 	if err := decoder.Decode(&payload); err != nil {
 		log.Error().Err(err)
-		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
+		respondWithError(w, http.StatusBadRequest, "Invalid request payload.")
 		return
 	}
 	defer r.Body.Close()
@@ -1040,7 +1040,7 @@ func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 
 	pin, err := a.IpfsClient.PinJson(c)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
+		respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error()+".")
 		return
 	}
 	c.Cid = &pin.IpfsHash
@@ -1048,20 +1048,20 @@ func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 	validate := validator.New()
 	vErr := validate.Struct(c)
 	if vErr != nil {
-		log.Error().Err(vErr).Msg("invalid community")
+		log.Error().Err(vErr).Msg("Invalid community.")
 		respondWithError(w, http.StatusBadRequest, vErr.Error())
 		return
 	}
 
 	// Create Community
 	if err := c.CreateCommunity(a.DB); err != nil {
-		log.Error().Err(err).Msg("db error creating community")
+		log.Error().Err(err).Msg("Database error creating community.")
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 	// Grant roles to community creator
 	if err := models.GrantRolesToCommunityCreator(a.DB, c.Creator_addr, c.ID); err != nil {
-		log.Error().Err(err).Msg("db error adding community creator roles")
+		log.Error().Err(err).Msg("Database error adding community creator roles.")
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 	}
 
@@ -1091,7 +1091,7 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid community ID")
+		respondWithError(w, http.StatusBadRequest, "Invalid community ID.")
 		return
 	}
 	var payload models.UpdateCommunityRequestPayload
@@ -1099,7 +1099,7 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&payload); err != nil {
 		log.Error().Err(err)
-		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
+		respondWithError(w, http.StatusBadRequest, "Invalid request payload.")
 		return
 	}
 
@@ -1108,7 +1108,7 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 	var c = models.Community{ID: id}
 	if err := c.GetCommunity(a.DB); err != nil {
 		log.Error().Err(err)
-		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Invalid request: no community with ID %d", id))
+		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Invalid request: no community with ID %d.", id))
 		return
 	}
 
@@ -1178,7 +1178,7 @@ func (a *App) getListsForCommunity(w http.ResponseWriter, r *http.Request) {
 	communityId, err := strconv.Atoi(vars["communityId"])
 
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Community ID")
+		respondWithError(w, http.StatusBadRequest, "Invalid Community ID.")
 		return
 	}
 
@@ -1196,7 +1196,7 @@ func (a *App) getList(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(vars["id"])
 
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Community ID")
+		respondWithError(w, http.StatusBadRequest, "Invalid Community ID.")
 		return
 	}
 	list := models.List{ID: id}
@@ -1213,7 +1213,7 @@ func (a *App) createListForCommunity(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	communityId, err := strconv.Atoi(vars["communityId"])
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Community ID")
+		respondWithError(w, http.StatusBadRequest, "Invalid Community ID.")
 	}
 
 	payload := models.ListPayload{}
@@ -1224,7 +1224,7 @@ func (a *App) createListForCommunity(w http.ResponseWriter, r *http.Request) {
 
 	if err := decoder.Decode(&payload); err != nil {
 		log.Error().Err(err)
-		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
+		respondWithError(w, http.StatusBadRequest, "Invalid request payload.")
 		return
 	}
 	defer r.Body.Close()
@@ -1235,7 +1235,7 @@ func (a *App) createListForCommunity(w http.ResponseWriter, r *http.Request) {
 		respondWithError(
 			w,
 			http.StatusBadRequest,
-			fmt.Sprintf("list of type %s already exists for community %d", *payload.List_type, communityId),
+			fmt.Sprintf("List of type %s already exists for community %d.", *payload.List_type, communityId),
 		)
 		return
 	}
@@ -1243,7 +1243,7 @@ func (a *App) createListForCommunity(w http.ResponseWriter, r *http.Request) {
 	// validate payload fields
 	validate := validator.New()
 	if vErr := validate.Struct(payload); vErr != nil {
-		log.Error().Err(vErr).Msg("validation error in list payload")
+		log.Error().Err(vErr).Msg("Validation error in list payload.")
 		respondWithError(w, http.StatusBadRequest, vErr.Error())
 		return
 	}
@@ -1255,7 +1255,7 @@ func (a *App) createListForCommunity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := models.EnsureRoleForCommunity(a.DB, payload.Signing_addr, payload.Community_id, "admin"); err != nil {
-		errMsg := fmt.Sprintf("account %s is not an admin for community %d", payload.Signing_addr, payload.Community_id)
+		errMsg := fmt.Sprintf("Account %s is not an admin for community %d.", payload.Signing_addr, payload.Community_id)
 		log.Error().Err(err).Msg(errMsg)
 		respondWithError(w, http.StatusForbidden, errMsg)
 		return
@@ -1271,8 +1271,8 @@ func (a *App) createListForCommunity(w http.ResponseWriter, r *http.Request) {
 
 	pin, err := a.IpfsClient.PinJson(l)
 	if err != nil {
-		log.Error().Err(err).Msg("error pinning list to IPFS")
-		respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
+		log.Error().Err(err).Msg("Error pinning list to IPFS.")
+		respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error()+".")
 		return
 	}
 
@@ -1291,7 +1291,7 @@ func (a *App) addAddressesToList(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid list ID")
+		respondWithError(w, http.StatusBadRequest, "Invalid list ID.")
 		return
 	}
 
@@ -1299,8 +1299,8 @@ func (a *App) addAddressesToList(w http.ResponseWriter, r *http.Request) {
 
 	// get current proposal from DB
 	if err := l.GetListById(a.DB); err != nil {
-		log.Error().Err(err).Msgf("error querying list with id %v", id)
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		log.Error().Err(err).Msgf("Error querying list with id %v.", id)
+		respondWithError(w, http.StatusInternalServerError, err.Error()+".")
 		return
 	}
 
@@ -1308,8 +1308,8 @@ func (a *App) addAddressesToList(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 
 	if err := decoder.Decode(&payload); err != nil {
-		log.Error().Err(err).Msg("error decoding ListUpdate payload")
-		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
+		log.Error().Err(err).Msg("Error decoding ListUpdate payload.")
+		respondWithError(w, http.StatusBadRequest, "Invalid request payload.")
 		return
 	}
 	defer r.Body.Close()
@@ -1319,14 +1319,14 @@ func (a *App) addAddressesToList(w http.ResponseWriter, r *http.Request) {
 	// payload fields
 	validate := validator.New()
 	if vErr := validate.Struct(payload); vErr != nil {
-		log.Error().Err(vErr).Msg("add to list validation error")
+		log.Error().Err(vErr).Msg("Add to list validation error.")
 		respondWithError(w, http.StatusBadRequest, vErr.Error())
 		return
 	}
 
 	// Ensure user is a community Admin
 	if err := models.EnsureRoleForCommunity(a.DB, payload.Signing_addr, l.Community_id, "admin"); err != nil {
-		errMsg := fmt.Sprintf("account %s is not an admin for community %d", payload.Signing_addr, l.Community_id)
+		errMsg := fmt.Sprintf("Account %s is not an admin for community %d.", payload.Signing_addr, l.Community_id)
 		log.Error().Err(err).Msg(errMsg)
 		respondWithError(w, http.StatusForbidden, errMsg)
 		return
@@ -1349,8 +1349,8 @@ func (a *App) addAddressesToList(w http.ResponseWriter, r *http.Request) {
 
 	pin, err := a.IpfsClient.PinJson(l)
 	if err != nil {
-		log.Error().Err(err).Msg("error pinning to ipfs")
-		respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
+		log.Error().Err(err).Msg("Error pinning to IPFS.")
+		respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error()+".")
 		return
 	}
 	l.Cid = &pin.IpfsHash
@@ -1369,7 +1369,7 @@ func (a *App) removeAddressesFromList(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid list ID")
+		respondWithError(w, http.StatusBadRequest, "Invalid list ID.")
 		return
 	}
 
@@ -1377,7 +1377,7 @@ func (a *App) removeAddressesFromList(w http.ResponseWriter, r *http.Request) {
 
 	// get current proposal from DB
 	if err := l.GetListById(a.DB); err != nil {
-		log.Error().Err(err).Msgf("error querying list with id %v", id)
+		log.Error().Err(err).Msgf("Error querying list with id %v.", id)
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -1386,8 +1386,8 @@ func (a *App) removeAddressesFromList(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 
 	if err := decoder.Decode(&payload); err != nil {
-		log.Error().Err(err).Msg("error decoding ListUpdate payload")
-		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
+		log.Error().Err(err).Msg("Error decoding ListUpdate payload.")
+		respondWithError(w, http.StatusBadRequest, "Invalid request payload.")
 		return
 	}
 	defer r.Body.Close()
@@ -1397,12 +1397,12 @@ func (a *App) removeAddressesFromList(w http.ResponseWriter, r *http.Request) {
 	// payload fields
 	validate := validator.New()
 	if vErr := validate.Struct(payload); vErr != nil {
-		log.Error().Err(vErr).Msg("remove from list validation error")
+		log.Error().Err(vErr).Msg("Remove from list validation error.")
 		respondWithError(w, http.StatusBadRequest, vErr.Error())
 		return
 	}
 	if err := models.EnsureRoleForCommunity(a.DB, payload.Signing_addr, l.Community_id, "admin"); err != nil {
-		errMsg := fmt.Sprintf("account %s is not an admin for community %d", payload.Signing_addr, l.Community_id)
+		errMsg := fmt.Sprintf("Account %s is not an admin for community %d.", payload.Signing_addr, l.Community_id)
 		log.Error().Err(err).Msg(errMsg)
 		respondWithError(w, http.StatusForbidden, errMsg)
 		return
@@ -1425,15 +1425,15 @@ func (a *App) removeAddressesFromList(w http.ResponseWriter, r *http.Request) {
 
 	pin, err := a.IpfsClient.PinJson(l)
 	if err != nil {
-		log.Error().Err(err).Msg("ipfs error")
-		respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
+		log.Error().Err(err).Msg("IPFS error.")
+		respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error()+".")
 		return
 	}
 	l.Cid = &pin.IpfsHash
 
 	// Finally, update DB
 	if err := l.UpdateList(a.DB); err != nil {
-		log.Error().Err(err).Msg("db error updating list")
+		log.Error().Err(err).Msg("Database error updating list.")
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -1451,7 +1451,7 @@ func (a *App) getAccountAtBlockHeight(w http.ResponseWriter, r *http.Request) {
 	var blockHeight uint64
 	blockHeight, err := strconv.ParseUint(vars["blockHeight"], 10, 64)
 	if err != nil {
-		log.Error().Err(err).Msg("error parsing blockHeight param")
+		log.Error().Err(err).Msg("Error parsing blockHeight param.")
 		respondWithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -1463,7 +1463,7 @@ func (a *App) getAccountAtBlockHeight(w http.ResponseWriter, r *http.Request) {
 
 	b := Balance{}
 	if err = a.SnapshotClient.GetAddressBalanceAtBlockHeight(addr, blockHeight, &b, &defaultFlowContract); err != nil {
-		log.Error().Err(err).Msgf("error getting account %s at blockheight %d", addr, blockHeight)
+		log.Error().Err(err).Msgf("Error getting account %s at blockheight %d.", addr, blockHeight)
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -1496,7 +1496,7 @@ func (a *App) handleCreateCommunityUser(w http.ResponseWriter, r *http.Request) 
 	vars := mux.Vars(r)
 	communityId, err := strconv.Atoi(vars["communityId"])
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Community ID")
+		respondWithError(w, http.StatusBadRequest, "Invalid Community ID.")
 		return
 	}
 
@@ -1506,7 +1506,7 @@ func (a *App) handleCreateCommunityUser(w http.ResponseWriter, r *http.Request) 
 	decoder := json.NewDecoder(r.Body)
 
 	if err := decoder.Decode(&payload); err != nil {
-		msg := "Invalid request payload"
+		msg := "Invalid request payload."
 		log.Error().Err(err).Msg(msg)
 		respondWithError(w, http.StatusBadRequest, msg)
 		return
@@ -1517,14 +1517,14 @@ func (a *App) handleCreateCommunityUser(w http.ResponseWriter, r *http.Request) 
 	validate := validator.New()
 	vErr := validate.Struct(payload)
 	if vErr != nil {
-		log.Error().Err(vErr).Msg("invalid community user")
+		log.Error().Err(vErr).Msg("Invalid community user.")
 		respondWithError(w, http.StatusBadRequest, vErr.Error())
 		return
 	}
 	// validate user is allowed to create this user
 	if payload.User_type != "member" {
 		if payload.Signing_addr == payload.Addr {
-			CANNOT_GRANT_SELF_ERR := errors.New("users cannot grant themselves a priviledged user_type")
+			CANNOT_GRANT_SELF_ERR := errors.New("Users cannot grant themselves a priviledged user_type.")
 			log.Error().Err(CANNOT_GRANT_SELF_ERR)
 			respondWithError(w, http.StatusForbidden, CANNOT_GRANT_SELF_ERR.Error())
 			return
@@ -1532,8 +1532,8 @@ func (a *App) handleCreateCommunityUser(w http.ResponseWriter, r *http.Request) 
 		// If signing address is not user address, verify they have admin status in this community
 		var communityAdmin = models.CommunityUser{Community_id: payload.Community_id, Addr: payload.Signing_addr, User_type: "admin"}
 		if err := communityAdmin.GetCommunityUser(a.DB); err != nil {
-			USER_MUST_BE_ADMIN_ERR := errors.New("user must be community admin to grant priviledges")
-			log.Error().Err(err).Msg("db error")
+			USER_MUST_BE_ADMIN_ERR := errors.New("User must be community admin to grant priviledges.")
+			log.Error().Err(err).Msg("Database error.")
 			log.Error().Err(USER_MUST_BE_ADMIN_ERR)
 			respondWithError(w, http.StatusForbidden, USER_MUST_BE_ADMIN_ERR.Error())
 			return
@@ -1543,7 +1543,7 @@ func (a *App) handleCreateCommunityUser(w http.ResponseWriter, r *http.Request) 
 	// an address a priviledged role
 	if payload.User_type == "member" && payload.Addr != payload.Signing_addr {
 		CANNOT_ADD_MEMBER_ERR := errors.New(
-			"an account can only add itself as a community member, unless an admin is granting priviledged role",
+			"An account can only add itself as a community member, unless an admin is granting priviledged role.",
 		)
 		log.Error().Err(CANNOT_ADD_MEMBER_ERR)
 		respondWithError(w, http.StatusForbidden, CANNOT_ADD_MEMBER_ERR.Error())
@@ -1569,7 +1569,7 @@ func (a *App) handleCreateCommunityUser(w http.ResponseWriter, r *http.Request) 
 		respondWithError(
 			w,
 			http.StatusBadRequest,
-			fmt.Sprintf("Error: Address %s is already a %s of community %d\n", u.Addr, u.User_type, u.Community_id),
+			fmt.Sprintf("Error: Address %s is already a %s of community %d.\n", u.Addr, u.User_type, u.Community_id),
 		)
 		return
 	}
@@ -1601,7 +1601,7 @@ func (a *App) handleGetCommunityUsers(w http.ResponseWriter, r *http.Request) {
 	communityId, err := strconv.Atoi(vars["communityId"])
 
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Community ID")
+		respondWithError(w, http.StatusBadRequest, "Invalid Community ID.")
 		return
 	}
 
@@ -1630,13 +1630,13 @@ func (a *App) handleGetCommunityUsersByType(w http.ResponseWriter, r *http.Reque
 	communityId, err := strconv.Atoi(vars["communityId"])
 
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Community ID")
+		respondWithError(w, http.StatusBadRequest, "Invalid Community ID.")
 		return
 	}
 
 	userType := vars["userType"]
 	if !models.EnsureValidRole(userType) {
-		respondWithError(w, http.StatusBadRequest, "Invalid userType")
+		respondWithError(w, http.StatusBadRequest, "Invalid userType.")
 		return
 	}
 
@@ -1721,7 +1721,7 @@ func (a *App) handleRemoveUserRole(w http.ResponseWriter, r *http.Request) {
 	communityId, err := strconv.Atoi(vars["communityId"])
 
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Community ID")
+		respondWithError(w, http.StatusBadRequest, "Invalid Community ID.")
 		return
 	}
 
@@ -1733,7 +1733,7 @@ func (a *App) handleRemoveUserRole(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 
 	if err := decoder.Decode(&payload); err != nil {
-		msg := "Invalid request payload"
+		msg := "Invalid request payload."
 		log.Error().Err(err).Msg(msg)
 		respondWithError(w, http.StatusBadRequest, msg)
 		return
@@ -1769,7 +1769,7 @@ func (a *App) handleRemoveUserRole(w http.ResponseWriter, r *http.Request) {
 			}
 		} else {
 			// validate someone else is not removing a "member" role
-			CANNOT_REMOVE_MEMBER_ERR := errors.New("cannot remove another member from a community")
+			CANNOT_REMOVE_MEMBER_ERR := errors.New("Cannot remove another member from a community.")
 			log.Error().Err(CANNOT_REMOVE_MEMBER_ERR)
 			respondWithError(w, http.StatusForbidden, CANNOT_REMOVE_MEMBER_ERR.Error())
 			return
@@ -1782,8 +1782,8 @@ func (a *App) handleRemoveUserRole(w http.ResponseWriter, r *http.Request) {
 		// validate signer is admin
 		var adminUser = models.CommunityUser{Addr: payload.Signing_addr, Community_id: payload.Community_id, User_type: "admin"}
 		if err := adminUser.GetCommunityUser(a.DB); err != nil {
-			USER_MUST_BE_ADMIN_ERR := errors.New("user must be community admin") // this
-			log.Error().Err(err).Msg("db error")
+			USER_MUST_BE_ADMIN_ERR := errors.New("User must be community admin.") // this
+			log.Error().Err(err).Msg("Database error.")
 			log.Error().Err(USER_MUST_BE_ADMIN_ERR)
 			respondWithError(w, http.StatusForbidden, USER_MUST_BE_ADMIN_ERR.Error())
 			return
@@ -1854,7 +1854,7 @@ func (a *App) validateBlocklist(addr string, communityId int) error {
 	isTest := flag.Lookup("test.v") != nil
 
 	if isBlocked && !isTest {
-		return errors.New("user does not have permission")
+		return errors.New("User does not have permission.")
 	}
 	return nil
 }
@@ -1869,7 +1869,7 @@ func (a *App) validateTimestamp(timestamp string, expiry int) error {
 	uxTime := time.Unix(stamp/1000, (stamp%1000)*1000*1000)
 	diff := time.Now().UTC().Sub(uxTime).Seconds()
 	if diff > float64(expiry) {
-		err := errors.New("timestamp on request has expired")
+		err := errors.New("Timestamp on request has expired.")
 		log.Error().Err(err).Msgf("expiry error: %v", diff)
 		return err
 	}

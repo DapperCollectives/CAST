@@ -64,13 +64,13 @@ func NewFlowClient(flowEnv string) *FlowAdapter {
 	content, err := ioutil.ReadFile(path)
 
 	if err != nil {
-		log.Fatal().Msgf("Error when opening file: %+v", err)
+		log.Fatal().Msgf("Error when opening file: %+v.", err)
 	}
 
 	var config FlowConfig
 	err = json.Unmarshal(content, &config)
 	if err != nil {
-		log.Fatal().Msgf("Error parsing flow.json: %+v", err)
+		log.Fatal().Msgf("Error parsing flow.json: %+v.", err)
 	}
 
 	adapter.Config = config
@@ -85,7 +85,7 @@ func NewFlowClient(flowEnv string) *FlowAdapter {
 	// create flow client
 	FlowClient, err := client.New(adapter.URL, grpc.WithInsecure())
 	if err != nil {
-		log.Panic().Msgf("failed to connect to %s", adapter.URL)
+		log.Panic().Msgf("Failed to connect to %s.", adapter.URL)
 	}
 	adapter.Client = FlowClient
 	return &adapter
@@ -115,7 +115,7 @@ func (fa *FlowAdapter) UserSignatureValidate(
 		return nil
 	}
 
-	log.Debug().Msgf("UserSignature validate: %s [%s] %v", address, message, *sigs)
+	log.Debug().Msgf("UserSignature validate: %s [%s] %v.", address, message, *sigs)
 
 	flowAddress := flow.HexToAddress(address)
 	cadenceAddress := cadence.NewAddress(flowAddress)
@@ -131,7 +131,7 @@ func (fa *FlowAdapter) UserSignatureValidate(
 	// Load script
 	script, err := ioutil.ReadFile("./main/cadence/scripts/validate_signature_v2.cdc")
 	if err != nil {
-		log.Error().Err(err).Msgf("error reading cadence script file")
+		log.Error().Err(err).Msgf("Error reading cadence script file.")
 		return err
 	}
 
@@ -149,9 +149,9 @@ func (fa *FlowAdapter) UserSignatureValidate(
 
 	if err != nil && strings.Contains(err.Error(), "ledger returns unsuccessful") {
 		log.Error().Err(err).Msg("signature validation error")
-		return errors.New("flow access node error, please cast your vote again")
+		return errors.New("Flow access node error, please cast your vote again.")
 	} else if err != nil {
-		log.Error().Err(err).Msg("signature validation error")
+		log.Error().Err(err).Msg("Signature validation error.")
 		return err
 	}
 
@@ -160,7 +160,7 @@ func (fa *FlowAdapter) UserSignatureValidate(
 	}
 
 	if value != cadence.NewBool(true) {
-		return errors.New("invalid signature")
+		return errors.New("Invalid signature.")
 	}
 
 	return nil
@@ -251,7 +251,7 @@ func (fa *FlowAdapter) EnforceTokenThreshold(scriptPath, creatorAddr string, c *
 
 	script, err := ioutil.ReadFile(scriptPath)
 	if err != nil {
-		log.Error().Err(err).Msgf("error reading cadence script file")
+		log.Error().Err(err).Msgf("Error reading cadence script file.")
 		return false, err
 	}
 
@@ -269,7 +269,7 @@ func (fa *FlowAdapter) EnforceTokenThreshold(scriptPath, creatorAddr string, c *
 				cadenceAddress,
 			})
 		if err != nil {
-			log.Error().Err(err).Msg("error executing non-fungible-token script")
+			log.Error().Err(err).Msg("Error executing Non-Fungible-Token script.")
 			return false, err
 		}
 		value := CadenceValueToInterface(cadenceValue)
@@ -290,17 +290,16 @@ func (fa *FlowAdapter) EnforceTokenThreshold(scriptPath, creatorAddr string, c *
 				cadenceAddress,
 			})
 		if err != nil {
-			log.Error().Err(err).Msg("error executing funigble-token script")
+			log.Error().Err(err).Msg("Error executing Funigble-Token Script.")
 			return false, err
 		}
 
 		value := CadenceValueToInterface(cadenceValue)
 		balance, err = strconv.ParseFloat(value.(string), 64)
 		if err != nil {
-			log.Error().Err(err).Msg("error converting cadence value to float")
+			log.Error().Err(err).Msg("Error converting cadence value to float.")
 			return false, err
 		}
-
 	}
 
 	//check if balance is greater than threshold
@@ -317,7 +316,7 @@ func (fa *FlowAdapter) GetNFTIds(voterAddr string, c *Contract) ([]interface{}, 
 
 	script, err := ioutil.ReadFile("./main/cadence/scripts/get_nfts_ids.cdc")
 	if err != nil {
-		log.Error().Err(err).Msgf("Error reading cadence script file")
+		log.Error().Err(err).Msgf("Error reading cadence script file.")
 		return nil, err
 	}
 
@@ -331,7 +330,7 @@ func (fa *FlowAdapter) GetNFTIds(voterAddr string, c *Contract) ([]interface{}, 
 		},
 	)
 	if err != nil {
-		log.Error().Err(err).Msg("error executing script")
+		log.Error().Err(err).Msg("Error executing script.")
 		return nil, err
 	}
 
