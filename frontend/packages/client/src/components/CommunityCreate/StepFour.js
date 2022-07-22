@@ -33,7 +33,7 @@ export default function StepFour({
             label="CREATE COMMUNITY"
             enabled={isStepValid}
             onClick={isStepValid ? () => onSubmit() : () => {}}
-            classNames="mt-5"
+            classNames="mt-5 has-button-border-hover"
           />
         );
       }}

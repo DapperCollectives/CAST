@@ -50,7 +50,10 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
 
     // push now if date is today and not already in time interval
     if (cutOffDate) {
-      const nowDate = new Date();
+      const nowDate =
+        process.env.REACT_APP_APP_ENV?.toUpperCase() === 'PRODUCTION'
+          ? new Date(Date.now() + 60 * 60 * 1000) // delay by an hour in prod env
+          : new Date();
       nowDate.setSeconds(0);
       const doesntExist = timeIntervals.every((ti) => ti !== nowDate);
       if (doesntExist) {

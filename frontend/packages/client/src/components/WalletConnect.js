@@ -14,11 +14,13 @@ const SignInOutButton = ({ user: { loggedIn, addr }, injectedProvider }) => {
   return (
     <button
       onClick={signInOrOut}
-      className="wallet-connect button is-primary is-uppercase transition-all"
+      className="wallet-connect button is-primary is-uppercase transition-all small-text"
     >
       {loggedIn ? (
         <>
-          <span className="is-hidden-mobile">{addr} -&nbsp;</span>
+          <span className="is-hidden-mobile is-hidden-connect">
+            {addr} -&nbsp;
+          </span>
           <span>Disconnect</span>
         </>
       ) : (
