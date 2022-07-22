@@ -14,6 +14,8 @@ type StakedTokenWeightedDefault struct {
 	s.StrategyStruct
 	SC s.SnapshotClient
 	DB *s.Database
+
+	RequiresSnapshot bool
 }
 
 func (s *StakedTokenWeightedDefault) FetchBalance(

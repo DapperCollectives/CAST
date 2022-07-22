@@ -71,10 +71,10 @@ type Strategy interface {
 }
 
 var strategyMap = map[string]Strategy{
-	"token-weighted-default":        &strategies.TokenWeightedDefault{},
-	"staked-token-weighted-default": &strategies.StakedTokenWeightedDefault{},
-	"one-address-one-vote":          &strategies.OneAddressOneVote{},
-	"balance-of-nfts":               &strategies.BalanceOfNfts{},
+	"token-weighted-default":        &strategies.TokenWeightedDefault{RequiresSnapshot: true},
+	"staked-token-weighted-default": &strategies.StakedTokenWeightedDefault{RequiresSnapshot: true},
+	"one-address-one-vote":          &strategies.OneAddressOneVote{RequiresSnapshot: false},
+	"balance-of-nfts":               &strategies.BalanceOfNfts{RequiresSnapshot: false},
 }
 
 const (
@@ -123,6 +123,7 @@ func (a *App) Initialize(user, password, dbname, dbhost, dbport, ipfsKey, ipfsSe
 	}
 	a.FlowAdapter = shared.NewFlowClient(os.Getenv("FLOW_ENV"))
 	// Snapshot
+	log.Info().Msgf("SNAPSHOT_BASE_URL: %s", os.Getenv("SNAPSHOT_BASE_URL"))
 	a.SnapshotClient = shared.NewSnapshotClient(os.Getenv("SNAPSHOT_BASE_URL"))
 	// address to vote options mapping
 	a.TxOptionsAddresses = strings.Fields(os.Getenv("TX_OPTIONS_ADDRS"))
@@ -359,12 +360,6 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 		start = 0
 	}
 
-	votes, totalRecords, err := models.GetVotesForProposal(a.DB, start, count, order, proposalId)
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
 	//get the proposal
 	proposal := models.Proposal{ID: proposalId}
 	if err := proposal.GetProposalById(a.DB); err != nil {
@@ -384,6 +379,12 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	s.InitStrategy(a.FlowAdapter, a.DB, a.SnapshotClient)
+
+	votes, totalRecords, err := models.GetVotesForProposal(a.DB, start, count, order, proposalId, *proposal.Strategy)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
 
 	votesWithWeights, err := s.GetVotes(votes, &proposal)
 	if err != nil {
@@ -589,10 +590,10 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// validate user signature
-	if err := a.FlowAdapter.UserTransactionValidate(v.Addr, v.Message, v.Composite_signatures, v.TransactionId, a.TxOptionsAddresses, p.Choices); err != nil {
-		respondWithError(w, http.StatusBadRequest, err.Error())
-		return
-	}
+	// if err := a.FlowAdapter.UserTransactionValidate(v.Addr, v.Message, v.Composite_signatures, v.TransactionId, a.TxOptionsAddresses, p.Choices); err != nil {
+	// 	respondWithError(w, http.StatusBadRequest, err.Error())
+	// 	return
+	// }
 
 	v.Proposal_id = proposalId
 
@@ -604,8 +605,10 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 
 	emptyBalance := &models.Balance{
 		Addr:        v.Addr,
-		BlockHeight: *p.Block_height,
 		Proposal_id: p.ID,
+	}
+	if p.Block_height != nil {
+		emptyBalance.BlockHeight = *p.Block_height
 	}
 
 	s.InitStrategy(a.FlowAdapter, a.DB, a.SnapshotClient)
@@ -613,6 +616,8 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 	balance, err := s.FetchBalance(emptyBalance, &p)
 	if err != nil {
 		log.Error().Err(err).Msgf("error fetching balance for address %v", v.Addr)
+		respondWithError(w, http.StatusInternalServerError, "error fetching balance")
+		return
 	}
 
 	// create the voteWithBalance struct
@@ -789,18 +794,19 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	snapshotResponse, err := a.SnapshotClient.TakeSnapshot(strategy.Contract)
-	if err != nil {
-		log.Error().Err(err).Msg("error taking snapshot")
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
+	var snapshotResponse *shared.SnapshotResponse
+	if strategy.RequiresSnapshot {
+		snapshotResponse, err = a.SnapshotClient.TakeSnapshot(strategy.Contract)
+		if err != nil {
+			log.Error().Err(err).Msg("error taking snapshot")
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		p.Block_height = &snapshotResponse.Data.BlockHeight
+		p.Snapshot_status = &snapshotResponse.Data.Status
 	}
 
-	p.Block_height = &snapshotResponse.Data.BlockHeight
-	p.Snapshot_status = &snapshotResponse.Data.Status
-
-	//@TODO this whole if else block should be moved into to its own func
-	if *community.Only_authors_to_submit == true {
+	if *community.Only_authors_to_submit {
 		if err := models.EnsureRoleForCommunity(a.DB, p.Creator_addr, communityId, "author"); err != nil {
 			errMsg := fmt.Sprintf("account %s is not an author for community %d", p.Creator_addr, p.Community_id)
 			log.Error().Err(err).Msg(errMsg)
@@ -808,9 +814,9 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		hasBalance, err := a.FlowAdapter.EnforceTokenThreshold(p.Creator_addr, &strategy.Contract)
+		hasBalance, err := a.processTokenThreshold(p.Creator_addr, strategy)
 		if err != nil {
-			log.Error().Err(err).Msg("error enforcing token threshold")
+			log.Error().Err(err).Msg("error processing Token Threshold")
 			respondWithError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
@@ -1888,4 +1894,23 @@ func (a *App) processSnapshotStatus(s *models.Strategy, p *models.Proposal) erro
 	}
 	return nil
 
+}
+
+func (a *App) processTokenThreshold(address string, s models.Strategy) (bool, error) {
+	var scriptPath string
+	stratName := *s.Name
+
+	if stratName == "balance-of-nfts" {
+		scriptPath = "./main/cadence/scripts/get_nfts_ids.cdc"
+	} else {
+		scriptPath = "./main/cadence/scripts/get_balance.cdc"
+
+	}
+
+	hasBalance, err := a.FlowAdapter.EnforceTokenThreshold(scriptPath, address, &s.Contract)
+	if err != nil {
+		return false, err
+	}
+
+	return hasBalance, nil
 }
