@@ -78,8 +78,8 @@ export default function StepThree({
           </div>
           <div className="column is-12">
             <p className="small-text has-text-grey">
-              Proposal threshold is the minimum number of tokens required to
-              create a proposal.
+              Proposal threshold is the minimum number of tokens community
+              members must hold in order to create a proposal.
             </p>
           </div>
         </div>
@@ -105,8 +105,8 @@ export default function StepThree({
         />
         <input
           type="text"
-          placeholder="Storage Path"
-          name="storage_path"
+          placeholder="CollectionPublicPath"
+          name="collection_public_path"
           className="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
           value={storagePath}
           onChange={(event) =>
@@ -115,7 +115,7 @@ export default function StepThree({
         />
         <input
           type="text"
-          placeholder="Proposal Threshold"
+          placeholder="Number of Tokens"
           name="proposal_threshold"
           className="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
           value={proposalThreshold}
@@ -136,7 +136,7 @@ export default function StepThree({
             }}
           />
           <p className="has-text-grey small-text">
-            Allow only authors to submit a proposal
+            Allow only designated authors to submit proposals
           </p>
         </label>
       </WrapperResponsive>
