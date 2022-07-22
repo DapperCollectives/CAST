@@ -5,7 +5,7 @@ pub fun main(address: Address): [UInt64] {
     let account = getAccount(address)
 
     let collectionRef = account
-        .getCapability("TOKEN_NAME".CollectionPublicPath)
+        .getCapability(/public/"COLLECTION_PUBLIC_PATH")
         .borrow<&{NonFungibleToken.CollectionPublic}>()
         ?? panic("Could not borrow capability from public collection")
     
