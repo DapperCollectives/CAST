@@ -21,6 +21,14 @@ type PaginatedResponseWithUser struct {
 	Next         int                    `json:"next"`
 }
 
+type PaginatedResponseWithCommunity struct {
+	Data         []models.Community `json:"data"`
+	Start        int                    `json:"start"`
+	Count        int                    `json:"count"`
+	TotalRecords int                    `json:"totalRecords"`
+	Next         int                    `json:"next"`
+}
+
 type PaginatedResponseWithUserCommunity struct {
 	Data         []models.UserCommunity `json:"data"`
 	Start        int                    `json:"start"`
@@ -221,6 +229,12 @@ func (otu *OverflowTestUtils) UpdateCommunityAPI(id int, payload *models.Communi
 
 func (otu *OverflowTestUtils) GetCommunityAPI(id int) *httptest.ResponseRecorder {
 	req, _ := http.NewRequest("GET", "/communities/"+strconv.Itoa(id), nil)
+	response := otu.ExecuteRequest(req)
+	return response
+}
+
+func (otu *OverflowTestUtils) GetCommunitiesForHomepageAPI() *httptest.ResponseRecorder {
+	req, _ := http.NewRequest("GET", "/communities-for-homepage", nil)
 	response := otu.ExecuteRequest(req)
 	return response
 }
