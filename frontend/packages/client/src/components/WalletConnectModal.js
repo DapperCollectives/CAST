@@ -16,6 +16,8 @@ export default function WalletConnectModal({
       injectedProvider.authenticate(service);
       closeModal();
     },
+    icon: `https://fcl-discovery.onflow.org${service.provider.icon}`,
+    name: service.provider.name,
   }));
 
   return (
@@ -40,14 +42,19 @@ export default function WalletConnectModal({
           className="modal-card-body py-0 px-4"
           style={{ minHeight: '280px' }}
         >
-          {listOfServices.map((serivce) => {
+          {listOfServices.map((service) => {
             return (
               <div
                 className="border-light rounded-sm is-flex is-flex-direction-column is-justify-content-center mb-4 py-4 px-3 cursor-pointer strategy-selector transition-all"
                 style={{ minHeight: '48px' }}
-                onClick={serivce.connectToService}
+                onClick={service.connectToService}
               >
-                Blocto
+                <div className="columns">
+                  <div className="column">
+                    <img src={service.icon} alt={service.name} />
+                  </div>
+                  <div className="column">{service.name}</div>
+                </div>
               </div>
             );
           })}
