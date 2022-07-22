@@ -10,8 +10,8 @@ WORKDIR /app
 RUN yarn install
 
 #ENVS FOR STAGING FRONTEND
-ENV APP_ENV "production"
 ENV NODE_ENV "production"
+ENV REACT_APP_APP_ENV "production"
 ENV REACT_APP_FRONTEND_URL "fe.staging.cast.dapperlabs.com"
 ENV REACT_APP_BACK_END_SERVER_API "https://app.staging.cast.dapperlabs.com"
 ENV REACT_APP_IPFS_GATEWAY "https://gateway.pinata.cloud/ipfs/"
