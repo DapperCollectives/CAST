@@ -14,6 +14,8 @@ type OneAddressOneVote struct {
 	s.StrategyStruct
 	SC s.SnapshotClient
 	DB *s.Database
+
+	RequiresSnapshot bool
 }
 
 func (s *OneAddressOneVote) FetchBalance(
