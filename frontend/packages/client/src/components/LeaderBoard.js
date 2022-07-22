@@ -1,6 +1,7 @@
 import { Web3Consumer } from 'contexts/Web3';
 import React from 'react';
 import Blockies from 'react-blockies';
+import classnames from 'classnames';
 import { WrapperResponsive } from '../components';
 import { useLeaderBoard } from '../hooks';
 
@@ -28,6 +29,9 @@ const LeaderBoard = ({
   const { user } = web3;
   const { data, isLoading } = useLeaderBoard({ communityId, addr: user?.addr });
   const style = {};
+  const currentUserInTop10 = data?.users?.some(
+    (datum) => datum.addr === user?.addr
+  );
 
   return (
     <div className="is-flex is-flex-direction-column">
@@ -43,17 +47,19 @@ const LeaderBoard = ({
           {!isLoading &&
             data?.users.map((datum, index) => {
               const userIndex = index + 1;
-              const styleIndex =
-                index === 0
-                  ? 'rounded-sm-tl has-background-white-ter index-cell'
-                  : index === 4
-                  ? 'rounded-sm-bl has-background-white-ter index-cell'
-                  : 'has-background-white-ter index-cell';
+              const indexClasses = classnames({
+                'index-cell': index !== 0 && index !== 4,
+                'rounded-sm-tl': index === 0,
+                'rounded-sm-bl': index === 4,
+                'has-background-white-ter': !currentUserInTop10,
+                'has-background-black-bis': currentUserInTop10,
+                'has-text-white': currentUserInTop10,
+              });
 
               return (
                 <Row
                   key={`row-table-${index}`}
-                  classNameIndex={styleIndex}
+                  classNameIndex={indexClasses}
                   index={
                     <div className="smaller-text has-text-weight-bold">
                       {userIndex}
@@ -80,7 +86,7 @@ const LeaderBoard = ({
             })}
         </tbody>
       </table>
-      {!isLoading && data?.currentUser && (
+      {!isLoading && data?.currentUser && !currentUserInTop10 && (
         <table className="table is-fullwidth">
           <tbody className="is-scrollable-table" style={style}>
             <Row
