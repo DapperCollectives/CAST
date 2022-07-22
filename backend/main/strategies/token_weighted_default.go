@@ -40,7 +40,7 @@ func (s *TokenWeightedDefault) FetchBalance(
 	}
 
 	if err := b.GetBalanceByAddressAndBlockHeight(s.DB); err != nil && err.Error() != pgx.ErrNoRows.Error() {
-		log.Error().Err(err).Msg("error fetching balance from DB")
+		log.Error().Err(err).Msg("Error fetching balance from database.")
 		return nil, err
 	}
 
@@ -57,7 +57,7 @@ func (s *TokenWeightedDefault) FetchBalance(
 		ftBalance,
 		&strategy.Contract,
 	); err != nil {
-		log.Error().Err(err).Msg("error fetching balance")
+		log.Error().Err(err).Msg("Error fetching balance.")
 		return nil, err
 	}
 
@@ -66,7 +66,7 @@ func (s *TokenWeightedDefault) FetchBalance(
 	b.StakingBalance = 0
 
 	if err := b.CreateBalance(s.DB); err != nil {
-		log.Error().Err(err).Msg("error creating balance in the DB")
+		log.Error().Err(err).Msg("Error creating balance in the database.")
 		return nil, err
 	}
 
@@ -93,7 +93,7 @@ func (s *TokenWeightedDefault) GetVoteWeightForBalance(
 	proposal *models.Proposal,
 ) (float64, error) {
 	var weight float64
-	var ERROR error = fmt.Errorf("no weight found, address: %s, strategy: %s", vote.Addr, *proposal.Strategy)
+	var ERROR error = fmt.Errorf("No weight found, address: %s, strategy: %s.", vote.Addr, *proposal.Strategy)
 
 	if vote.PrimaryAccountBalance == nil {
 		return 0.00, nil

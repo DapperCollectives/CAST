@@ -1,15 +1,4 @@
 import React from 'react';
-import { kebabToString } from 'utils';
-
-const getStrategyDisplayName = (name) => {
-  if (name === 'one-address-one-vote-nft') {
-    return 'One Address, One Vote (NFT)';
-  } else if (name === 'one-address-one-vote-ft') {
-    return 'One Address, One Vote (Token)';
-  } else {
-    return kebabToString(name);
-  }
-};
 
 export default function StrategySelector({
   strategies = [],
@@ -31,9 +20,7 @@ export default function StrategySelector({
           >
             <div className="columns is-multiline">
               <div className="column is-12 pb-2">
-                <p style={{ textTransform: 'capitalize' }}>
-                  {getStrategyDisplayName(st.key)}
-                </p>
+                <p style={{ textTransform: 'capitalize' }}>{st.name}</p>
               </div>
               <div className="column is-12 pt-2">
                 <p className="small-text has-text-grey">{st.description}</p>

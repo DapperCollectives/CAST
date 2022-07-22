@@ -18,6 +18,16 @@ export default function StrategyInformationForm({
   return (
     <>
       <div className="columns is-flex-direction-column is-mobile m-0">
+        <div className="small-text" style={{ color: '#757575' }}>
+          Need help finding this information?{' '}
+          <a
+            href="https://docs.cast.fyi"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Check our Getting Started Guide.
+          </a>
+        </div>
         {formFields.map((field, index) => (
           <Input
             key={index}

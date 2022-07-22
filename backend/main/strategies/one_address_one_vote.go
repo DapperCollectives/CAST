@@ -61,7 +61,7 @@ func (s *OneAddressOneVote) GetVoteWeightForBalance(
 	proposal *models.Proposal,
 ) (float64, error) {
 	var weight float64
-	var ERROR error = fmt.Errorf("no address found")
+	var ERROR error = fmt.Errorf("No address found.")
 
 	if vote.Addr == "" {
 		return 0.00, ERROR

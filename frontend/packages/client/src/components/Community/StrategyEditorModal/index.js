@@ -106,6 +106,10 @@ export default function StrategyEditorModal({
       },
     }));
 
+  const strategyName =
+    strategyData?.name &&
+    strategies.find((s) => s.key === strategyData.name).name;
+
   return (
     <div
       className="modal-card has-background-white m-0 p-5 p-1-mobile"
@@ -116,7 +120,11 @@ export default function StrategyEditorModal({
         style={{ borderBottom: 'none' }}
       >
         <div className="column p-0 is-flex flex-1">
-          <h2 className="is-size-4">Select a Strategy</h2>
+          <h2 className="is-size-4" style={{ textTransform: 'capitalize' }}>
+            {step === ModalSteps[2] && strategyData?.name
+              ? strategyName
+              : 'Select a Strategy'}
+          </h2>
         </div>
         <div
           className={`column is-narrow px-0 has-text-right is-size-2 leading-tight cursor-pointer ${
