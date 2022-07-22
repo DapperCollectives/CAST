@@ -320,12 +320,6 @@ const VoteOptions = ({
         <h3 className={`is-size-5 `} style={{ lineHeight: '24px' }}>
           Cast your vote
         </h3>
-        <p
-          className="has-text-grey small-text pt-2"
-          style={{ lineHeight: '19.6px' }}
-        >
-          Secondary information about voting.
-        </p>
       </Wrapper>
       {!isImageChoice && (
         <TextBasedOptions

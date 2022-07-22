@@ -52,6 +52,7 @@ var (
 	placeholderFungibleTokenAddr    = regexp.MustCompile(`"[^"\s]*FUNGIBLE_TOKEN_ADDRESS"`)
 	placeholderNonFungibleTokenAddr = regexp.MustCompile(`"[^"\s]*NON_FUNGIBLE_TOKEN_ADDRESS"`)
 	placeholderMetadataViewsAddr    = regexp.MustCompile(`"[^"\s]*METADATA_VIEWS_ADDRESS"`)
+	placeholderCollectionPublicPath = regexp.MustCompile(`"[^"\s]*COLLECTION_PUBLIC_PATH"`)
 )
 
 func NewFlowClient(flowEnv string) *FlowAdapter {
@@ -354,6 +355,7 @@ func (fa *FlowAdapter) ReplaceContractPlaceholders(code string, c *Contract, isF
 	if isFungible {
 		code = placeholderFungibleTokenAddr.ReplaceAllString(code, fungibleTokenAddr)
 	} else {
+		code = placeholderCollectionPublicPath.ReplaceAllString(code, *c.Public_path)
 		code = placeholderNonFungibleTokenAddr.ReplaceAllString(code, nonFungibleTokenAddr)
 	}
 
