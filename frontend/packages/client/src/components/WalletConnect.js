@@ -5,8 +5,12 @@ const SignInOutButton = ({
   user: { loggedIn, addr },
   openWalletModal,
   injectedProvider,
+  closeModal,
 }) => {
   const signInOrOut = async (event) => {
+    if (closeModal) {
+      closeModal();
+    }
     event.preventDefault();
     if (loggedIn) {
       injectedProvider.unauthenticate();
@@ -36,7 +40,7 @@ const SignInOutButton = ({
   );
 };
 
-const CurrentUser = ({ web3 }) => {
+const CurrentUser = ({ web3, closeModal }) => {
   const { user, injectedProvider, openWalletModal } = web3;
   if (!user) {
     return null;
@@ -48,6 +52,7 @@ const CurrentUser = ({ web3 }) => {
         user={user}
         injectedProvider={injectedProvider}
         openWalletModal={openWalletModal}
+        closeModal={closeModal}
       />
     </div>
   );

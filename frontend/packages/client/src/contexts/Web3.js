@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import * as fcl from '@onflow/fcl';
-import networks from '../networks';
-import { useFclUser } from '../hooks';
+import networks from 'networks';
+import { useFclUser } from 'hooks';
+import { WalletConnectModal } from 'components';
 
 // create our app context
 export const Web3Context = React.createContext({});
@@ -16,6 +17,8 @@ export const useWebContext = () => {
 
 // provider Component that wraps the entire app and provides context variables
 export function Web3Provider({ children, network = 'testnet', ...props }) {
+  const [openModal, setOpenModal] = useState(false);
+  const [services, setServices] = useState([]);
   const [transactionInProgress, setTransactionInProgress] = useState(false);
   const [transactionStatus, setTransactionStatus] = useState(null);
   const [transactionError, setTransactionError] = useState('');
@@ -70,14 +73,17 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
       'discovery.authn.endpoint': walletDiscoveryApi, // public discovery api endpoint
       'discovery.authn.include': walletDiscoveryInclude, // opt-in wallets
     });
-
-    try {
-      const contracts = require('../contracts.json');
-      Object.keys(contracts).forEach((contract) => {
-        fcl.config().put(contract, contracts[contract]);
-      });
-    } catch (e) {}
   }, [network]);
+
+  // filter services for now only blocto
+  useEffect(() => {
+    fcl.discovery.authn.subscribe((res) => {
+      const filteredServices = res.results.filter((service) =>
+        service.uid.includes('blocto')
+      );
+      setServices(filteredServices);
+    });
+  }, []);
 
   const setWebContextConfig = useCallback((config) => {
     setExtraConfig(config);
@@ -99,6 +105,12 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
     return null;
   }
 
+  const openWalletModal = () => {
+    setOpenModal(true);
+  };
+  const closeModal = () => {
+    setOpenModal(false);
+  };
   // use props as a way to pass configuration values
   const providerProps = {
     executeTransaction,
@@ -115,12 +127,19 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
     isLedger,
     network,
     logOut,
+    openWalletModal,
     isValidFlowAddress,
     ...props,
   };
 
   return (
     <Web3Context.Provider value={providerProps}>
+      <WalletConnectModal
+        services={services}
+        openModal={openModal}
+        closeModal={closeModal}
+        injectedProvider={fcl}
+      />
       {children}
     </Web3Context.Provider>
   );
