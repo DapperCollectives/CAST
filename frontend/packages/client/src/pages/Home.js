@@ -1,21 +1,10 @@
 import React from 'react';
 import classnames from 'classnames';
-import { Message, Loader, FadeIn } from 'components';
+import { Loader, FadeIn, HomeFooter, HomeHeader } from 'components';
 import { useWebContext } from 'contexts/Web3';
 import CommunitiesPresenter from 'components/Community/CommunitiesPresenter';
 import useUserCommunities from 'hooks/useUserCommunities';
 import useFeaturedCommunities from 'hooks/useFeaturedCommunities';
-
-const LinkToIssueTemplate = () => (
-  <a
-    target="_blank"
-    rel="noreferrer noopener"
-    href="https://docs.cast.fyi"
-    className="pl-1 py-4"
-  >
-    <span className="mr-2">Learn more about decision-making on Flow here.</span>
-  </a>
-);
 
 export default function HomePage() {
   const {
@@ -52,15 +41,7 @@ export default function HomePage() {
 
   return (
     <section className="section">
-      <Message
-        messageText={
-          <p>
-            This is an open beta of CAST.
-            <LinkToIssueTemplate />
-          </p>
-        }
-        labelText="Beta"
-      />
+      <HomeHeader />
       {(loading || loadingFeaturedCommunities) && (
         <div style={{ height: '50vh' }}>
           <Loader fullHeight />
@@ -81,6 +62,7 @@ export default function HomePage() {
           />
         </FadeIn>
       )}
+      <HomeFooter />
     </section>
   );
 }
