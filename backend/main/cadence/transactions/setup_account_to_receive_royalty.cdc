@@ -12,12 +12,12 @@
 import FungibleToken from 0xee82856bf20e2aa6
 import MetadataViews from 0xf8d6e0586b0a20c7
 
-transaction(vaultPath: StoragePath) {
+transaction() {
 
     prepare(signer: AuthAccount) {
 
         // Return early if the account doesn't have a FungibleToken Vault
-        if signer.borrow<&FungibleToken.Vault>(from: vaultPath) == nil {
+        if signer.borrow<&FungibleToken.Vault>(from: /storage/flowTokenVault) == nil {
             panic("A vault for the specified fungible token path does not exist")
         }
 
@@ -25,7 +25,7 @@ transaction(vaultPath: StoragePath) {
         // the deposit function through the Receiver interface
         let capability = signer.link<&{FungibleToken.Receiver, FungibleToken.Balance}>(
             MetadataViews.getRoyaltyReceiverPublicPath(),
-            target: vaultPath
+            target: /storage/flowTokenVault 
         )!
 
         // Make sure the capability is valid
