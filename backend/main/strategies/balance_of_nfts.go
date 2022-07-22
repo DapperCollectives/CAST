@@ -1,8 +1,6 @@
 package strategies
 
 import (
-	"math"
-
 	"github.com/DapperCollectives/CAST/backend/main/models"
 	"github.com/DapperCollectives/CAST/backend/main/shared"
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
@@ -13,6 +11,8 @@ type BalanceOfNfts struct {
 	s.StrategyStruct
 	SC s.SnapshotClient
 	DB *s.Database
+
+	RequiresSnapshot bool
 }
 
 func (b *BalanceOfNfts) FetchBalance(
@@ -20,8 +20,10 @@ func (b *BalanceOfNfts) FetchBalance(
 	p *models.Proposal,
 ) (*models.Balance, error) {
 
+	v := models.Vote{Proposal_id: balance.Proposal_id, Addr: balance.Addr}
 	vb := &models.VoteWithBalance{
 		NFTs: []*models.NFT{},
+		Vote: v,
 	}
 
 	var c models.Community
@@ -69,7 +71,8 @@ func (b *BalanceOfNfts) TallyVotes(
 
 	for _, v := range votes {
 		nftCount := len(v.NFTs)
-		r.Results_float[v.Choice] += float64(nftCount) * math.Pow(10, -8)
+		r.Results_float[v.Choice] += float64(nftCount)
+		r.Results[v.Choice] += nftCount
 	}
 
 	return *r, nil

@@ -1,4 +1,4 @@
-FROM golang:latest as vt-init
+FROM golang:1.18.4 as vt-init
 # Install go modules
 WORKDIR /flow-voting-tool
 COPY ./go.mod ./

@@ -16,6 +16,8 @@ type TokenWeightedDefault struct {
 	s.StrategyStruct
 	SC s.SnapshotClient
 	DB *s.Database
+
+	RequiresSnapshot bool
 }
 
 type FTBalanceResponse struct {

@@ -31,7 +31,7 @@ type VoteWithBalance struct {
 	// Extend Vote
 	Vote
 	// Balance
-	BlockHeight             uint64   `json:"blockHeight"`
+	BlockHeight             uint64   `json:"blockHeight" pg:"block_height"`
 	Balance                 *uint64  `json:"balance"`
 	PrimaryAccountBalance   *uint64  `json:"primaryAccountBalance"`
 	SecondaryAccountBalance *uint64  `json:"secondaryAccountBalance"`
@@ -114,10 +114,10 @@ func GetAllVotesForProposal(db *s.Database, proposalId int, strategy string) ([]
 
 	//return all balances, strategy will do rest of the work
 	sql := `select v.*, 
-		p.block_height, 
 		b.primary_account_balance,
 		b.secondary_account_balance,
-		b.staking_balance
+		b.staking_balance,
+		COALESCE(p.block_height, 0) as block_height
     from votes v
     join proposals p on p.id = $1
   	left join balances b on b.addr = v.addr 

@@ -71,10 +71,10 @@ type Strategy interface {
 }
 
 var strategyMap = map[string]Strategy{
-	"token-weighted-default":        &strategies.TokenWeightedDefault{},
-	"staked-token-weighted-default": &strategies.StakedTokenWeightedDefault{},
-	"one-address-one-vote":          &strategies.OneAddressOneVote{},
-	"balance-of-nfts":               &strategies.BalanceOfNfts{},
+	"token-weighted-default":        &strategies.TokenWeightedDefault{RequiresSnapshot: true},
+	"staked-token-weighted-default": &strategies.StakedTokenWeightedDefault{RequiresSnapshot: true},
+	"one-address-one-vote":          &strategies.OneAddressOneVote{RequiresSnapshot: false},
+	"balance-of-nfts":               &strategies.BalanceOfNfts{RequiresSnapshot: false},
 }
 
 const (
@@ -604,8 +604,10 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 
 	emptyBalance := &models.Balance{
 		Addr:        v.Addr,
-		BlockHeight: *p.Block_height,
 		Proposal_id: p.ID,
+	}
+	if p.Block_height != nil {
+		emptyBalance.BlockHeight = *p.Block_height
 	}
 
 	s.InitStrategy(a.FlowAdapter, a.DB, a.SnapshotClient)
@@ -613,6 +615,8 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 	balance, err := s.FetchBalance(emptyBalance, &p)
 	if err != nil {
 		log.Error().Err(err).Msgf("error fetching balance for address %v", v.Addr)
+		respondWithError(w, http.StatusInternalServerError, "error fetching balance")
+		return
 	}
 
 	// create the voteWithBalance struct
@@ -789,17 +793,19 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	snapshotResponse, err := a.SnapshotClient.TakeSnapshot(strategy.Contract)
-	if err != nil {
-		log.Error().Err(err).Msg("error taking snapshot")
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
+	var snapshotResponse *shared.SnapshotResponse
+	if strategy.RequiresSnapshot {
+		snapshotResponse, err = a.SnapshotClient.TakeSnapshot(strategy.Contract)
+		if err != nil {
+			log.Error().Err(err).Msg("error taking snapshot")
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		p.Block_height = &snapshotResponse.Data.BlockHeight
+		p.Snapshot_status = &snapshotResponse.Data.Status
 	}
 
-	p.Block_height = &snapshotResponse.Data.BlockHeight
-	p.Snapshot_status = &snapshotResponse.Data.Status
-
-	if *community.Only_authors_to_submit == true {
+	if *community.Only_authors_to_submit {
 		if err := models.EnsureRoleForCommunity(a.DB, p.Creator_addr, communityId, "author"); err != nil {
 			errMsg := fmt.Sprintf("account %s is not an author for community %d", p.Creator_addr, p.Community_id)
 			log.Error().Err(err).Msg(errMsg)

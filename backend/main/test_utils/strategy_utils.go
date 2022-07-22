@@ -66,7 +66,7 @@ func (otu *OverflowTestUtils) TallyResultsForBalanceOfNfts(
 
 	for _, v := range *votes {
 		nfts := len(v.NFTs)
-		r.Results_float[v.Choice] += float64(nfts) * math.Pow(10, -8)
+		r.Results_float[v.Choice] += float64(nfts)
 	}
 	return r
 }
@@ -254,7 +254,7 @@ func (otu *OverflowTestUtils) SetupAccountForFlow(account string) {
 
 func (otu *OverflowTestUtils) MintNFT(p shared.MintParams) {
 	otu.O.TransactionFromFile("mint_nft").
-		SignProposeAndPayAs(p.Name).
+		SignProposeAndPayAsService().
 		Args(otu.O.Arguments().
 			Account(p.Recipient).
 			String(p.Name).
