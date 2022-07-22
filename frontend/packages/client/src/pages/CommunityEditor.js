@@ -59,7 +59,7 @@ const MenuTabs = ({ tabs, communityId, onClickButtonTab = () => {} } = {}) => {
           }`}
           onClick={onClickButtonTab('proposals-and-voting')}
         >
-          Proposals & Voting
+          Proposals &amp; Voting
         </button>
       </div>
     </div>
