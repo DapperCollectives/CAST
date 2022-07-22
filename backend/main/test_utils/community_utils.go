@@ -21,6 +21,14 @@ type PaginatedResponseWithUser struct {
 	Next         int                    `json:"next"`
 }
 
+type PaginatedResponseWithCommunity struct {
+	Data         []models.Community `json:"data"`
+	Start        int                    `json:"start"`
+	Count        int                    `json:"count"`
+	TotalRecords int                    `json:"totalRecords"`
+	Next         int                    `json:"next"`
+}
+
 type PaginatedResponseWithUserCommunity struct {
 	Data         []models.UserCommunity `json:"data"`
 	Start        int                    `json:"start"`
@@ -71,10 +79,11 @@ var (
 	flowPublicPath   = "flowTokenBalance"
 	threshold        = 0.0000069
 
-	exampleNFTName = "ExampleNFT"
-	exampleNFTAddr = "0xf8d6e0586b0a20c7"
-	tokenWeighted  = "token-weighted-default"
-	stakedWeighted = "staked-token-weighted-default"
+	exampleNFTName       = "ExampleNFT"
+	exampleNFTAddr       = "0xf8d6e0586b0a20c7"
+	exampleNFTPublicPath = "exampleNFTCollection"
+	tokenWeighted        = "token-weighted-default"
+	stakedWeighted       = "staked-token-weighted-default"
 
 	defaultStrategy = models.Strategy{
 		Name: &tokenWeighted,
@@ -134,6 +143,7 @@ var (
 		Slug:                   &slug,
 		Contract_name:          &exampleNFTName,
 		Contract_addr:          &exampleNFTAddr,
+		Public_path:            &exampleNFTPublicPath,
 		Only_authors_to_submit: &notOnlyAuthors,
 	}
 
@@ -219,6 +229,12 @@ func (otu *OverflowTestUtils) UpdateCommunityAPI(id int, payload *models.Communi
 
 func (otu *OverflowTestUtils) GetCommunityAPI(id int) *httptest.ResponseRecorder {
 	req, _ := http.NewRequest("GET", "/communities/"+strconv.Itoa(id), nil)
+	response := otu.ExecuteRequest(req)
+	return response
+}
+
+func (otu *OverflowTestUtils) GetCommunitiesForHomepageAPI() *httptest.ResponseRecorder {
+	req, _ := http.NewRequest("GET", "/communities-for-homepage", nil)
 	response := otu.ExecuteRequest(req)
 	return response
 }

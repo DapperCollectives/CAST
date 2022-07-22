@@ -175,6 +175,16 @@ func (otu *OverflowTestUtils) AddCommunitiesWithNFTContract(count int, signer st
 	return retIds, community
 }
 
+func (otu *OverflowTestUtils) MakeFeaturedCommunity(cId int) {
+	_, err := otu.A.DB.Conn.Exec(otu.A.DB.Context,
+		`
+		UPDATE communities SET is_featured = 'true' WHERE id = $1
+		`, cId)
+	if err != nil {
+		log.Error().Err(err).Msg("update communities is_featured DB err")
+	}
+}
+
 func (otu *OverflowTestUtils) AddProposals(cId int, count int) []int {
 	if count < 1 {
 		count = 1

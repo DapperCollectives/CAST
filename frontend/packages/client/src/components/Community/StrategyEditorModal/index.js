@@ -3,7 +3,7 @@ import networks from 'networks';
 import StrategySelector from './StrategySelector';
 import StrategyInformationForm from './StrategyInformationForm';
 import { ActionButton } from 'components';
-import { isValidAddress } from 'utils';
+import { isValidAddress, kebabToString } from 'utils';
 
 const networkConfig = networks[process.env.REACT_APP_FLOW_ENV];
 
@@ -112,7 +112,11 @@ export default function StrategyEditorModal({
         style={{ borderBottom: 'none' }}
       >
         <div className="column p-0 is-flex flex-1">
-          <h2 className="is-size-4">Select a Strategy</h2>
+          <h2 className="is-size-4" style={{ textTransform: 'capitalize' }}>
+            {step === ModalSteps[2] && strategyData?.name
+              ? kebabToString(strategyData.name)
+              : 'Select a Strategy'}
+          </h2>
         </div>
         <div
           className={`column is-narrow px-0 has-text-right is-size-2 leading-tight cursor-pointer ${
@@ -145,7 +149,7 @@ export default function StrategyEditorModal({
                 label="done"
                 enabled={formIsValid}
                 onClick={onConfirmDone}
-                classNames="mt-5"
+                classNames="mt-5 has-button-border-hover"
               />
             }
           />

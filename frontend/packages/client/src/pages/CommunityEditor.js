@@ -59,7 +59,7 @@ const MenuTabs = ({ tabs, communityId, onClickButtonTab = () => {} } = {}) => {
           }`}
           onClick={onClickButtonTab('proposals-and-voting')}
         >
-          Proposals & Voting
+          Proposals &amp; Voting
         </button>
       </div>
     </div>
@@ -190,6 +190,7 @@ export default function CommunityEditorPage() {
                   name={community?.name}
                   body={community?.body}
                   logo={community?.logo}
+                  banner={community?.bannerImgUrl}
                   updateCommunity={updateCommunity}
                   uploadFile={uploadFile}
                 />
