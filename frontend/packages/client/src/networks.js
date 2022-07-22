@@ -1,6 +1,6 @@
 const networksConfig = {
   emulator: {
-    accessApi: process.env.REACT_APP_EMULATOR_API || 'http://localhost:8080',
+    accessApi: process.env.REACT_APP_EMULATOR_API || 'http://localhost:8888',
     walletDiscovery:
       process.env.REACT_APP_EMULATOR_WALLET_DISCOVERY ||
       'http://localhost:8701/fcl/authn',
@@ -15,7 +15,7 @@ const networksConfig = {
     },
   },
   testnet: {
-    accessApi: 'https://access-testnet.onflow.org',
+    accessApi: 'https://rest-testnet.onflow.org',
     walletDiscovery: 'https://fcl-discovery.onflow.org/testnet/authn',
     walletDiscoveryApi: 'https://fcl-discovery.onflow.org/api/testnet/authn',
     walletDiscoveryInclude: [
@@ -31,7 +31,7 @@ const networksConfig = {
     },
   },
   mainnet: {
-    accessApi: 'https://mainnet.onflow.org',
+    accessApi: 'https://rest-mainnet.onflow.org',
     walletDiscovery: 'https://fcl-discovery.onflow.org/authn',
     walletDiscoveryApi: 'https://fcl-discovery.onflow.org/api/authn',
     walletDiscoveryInclude: [
