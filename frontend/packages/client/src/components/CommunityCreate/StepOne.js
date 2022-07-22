@@ -242,7 +242,7 @@ export default function StepOne({
         <textarea
           className="text-area rounded-sm border-light p-3 column is-full mt-4"
           type="text"
-          placeholder="About (short description)"
+          placeholder="Short Description"
           value={communityDescription || ''}
           name="community_details"
           rows="3"
