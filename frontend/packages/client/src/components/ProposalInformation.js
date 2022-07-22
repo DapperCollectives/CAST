@@ -17,7 +17,6 @@ const BlockieWithAddress = React.forwardRef(
     const { width } = useWindowDimensions();
 
     useEffect(() => {
-      console.log(ref?.current.clientWidth);
       if (ref?.current.clientWidth <= 223 && creatorAddr === addr) {
         setAdd(truncate(creatorAddr));
       } else if (ref?.current.clientWidth > 223 && creatorAddr !== addr) {
