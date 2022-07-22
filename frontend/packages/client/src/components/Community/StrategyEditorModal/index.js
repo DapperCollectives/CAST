@@ -3,7 +3,7 @@ import networks from 'networks';
 import StrategySelector from './StrategySelector';
 import StrategyInformationForm from './StrategyInformationForm';
 import { ActionButton } from 'components';
-import { isValidAddress, kebabToString } from 'utils';
+import { isValidAddress } from 'utils';
 
 const networkConfig = networks[process.env.REACT_APP_FLOW_ENV];
 
@@ -102,6 +102,10 @@ export default function StrategyEditorModal({
       },
     }));
 
+  const strategyName =
+    strategyData?.name &&
+    strategies.find((s) => s.key === strategyData.name).name;
+
   return (
     <div
       className="modal-card has-background-white m-0 p-5 p-1-mobile"
@@ -114,7 +118,7 @@ export default function StrategyEditorModal({
         <div className="column p-0 is-flex flex-1">
           <h2 className="is-size-4" style={{ textTransform: 'capitalize' }}>
             {step === ModalSteps[2] && strategyData?.name
-              ? kebabToString(strategyData.name)
+              ? strategyName
               : 'Select a Strategy'}
           </h2>
         </div>
