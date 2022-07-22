@@ -48,7 +48,7 @@ const LeaderBoard = ({
             data?.users.map((datum, index) => {
               const userIndex = index + 1;
               const indexClasses = classnames({
-                'index-cell': index !== 0 && index !== 4,
+                'index-cell': index === 0 || index === 4,
                 'rounded-sm-tl': index === 0,
                 'rounded-sm-bl': index === 4,
                 'has-background-white-ter': !currentUserInLeaderboard,
