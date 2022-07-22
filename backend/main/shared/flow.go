@@ -52,6 +52,7 @@ var (
 	placeholderFungibleTokenAddr    = regexp.MustCompile(`"[^"\s]*FUNGIBLE_TOKEN_ADDRESS"`)
 	placeholderNonFungibleTokenAddr = regexp.MustCompile(`"[^"\s]*NON_FUNGIBLE_TOKEN_ADDRESS"`)
 	placeholderMetadataViewsAddr    = regexp.MustCompile(`"[^"\s]*METADATA_VIEWS_ADDRESS"`)
+	placeholderCollectionPublicPath = regexp.MustCompile(`"[^"\s]*COLLECTION_PUBLIC_PATH"`)
 )
 
 func NewFlowClient(flowEnv string) *FlowAdapter {
@@ -347,28 +348,14 @@ func (fa *FlowAdapter) ReplaceContractPlaceholders(code string, c *Contract, isF
 		metadataViewsAddr    string
 	)
 
-	if os.Getenv("APP_ENV") == "DEV" || os.Getenv("APP_ENV") == "TEST" {
-		//emulator addresses
-		nonFungibleTokenAddr = "0xf8d6e0586b0a20c7"
-		fungibleTokenAddr = "0xee82856bf20e2aa6"
-		metadataViewsAddr = "0xf8d6e0586b0a20c7"
-
-	} else if os.Getenv("APP_ENV") == "STAGING" {
-		//testnet addresses
-		nonFungibleTokenAddr = "0x631e88ae7f1d7c20"
-		fungibleTokenAddr = "0x1654653399040a61"
-		metadataViewsAddr = "0x631e88ae7f1d7c20"
-
-	} else if os.Getenv("APP_ENV") == "PROD" {
-		//mainnet addresses
-		nonFungibleTokenAddr = "0x1d7e57aa55817448"
-		fungibleTokenAddr = "0x1654653399040a61"
-		metadataViewsAddr = "0x1d7e57aa55817448"
-	}
+	nonFungibleTokenAddr = fa.Config.Contracts["NonFungibleToken"].Aliases[os.Getenv("FLOW_ENV")]
+	fungibleTokenAddr = fa.Config.Contracts["FungibleToken"].Aliases[os.Getenv("FLOW_ENV")]
+	metadataViewsAddr = fa.Config.Contracts["MetadataViews"].Aliases[os.Getenv("FLOW_ENV")]
 
 	if isFungible {
 		code = placeholderFungibleTokenAddr.ReplaceAllString(code, fungibleTokenAddr)
 	} else {
+		code = placeholderCollectionPublicPath.ReplaceAllString(code, *c.Public_path)
 		code = placeholderNonFungibleTokenAddr.ReplaceAllString(code, nonFungibleTokenAddr)
 	}
 

@@ -1,8 +1,6 @@
 package strategies
 
 import (
-	"math"
-
 	"github.com/DapperCollectives/CAST/backend/main/models"
 	"github.com/DapperCollectives/CAST/backend/main/shared"
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
@@ -29,22 +27,15 @@ func (b *BalanceOfNfts) TallyVotes(
 
 	for _, v := range votes {
 		nftCount := len(v.NFTs)
-		r.Results_float[v.Choice] += float64(nftCount) * math.Pow(10, -8)
+		r.Results_float[v.Choice] += float64(nftCount)
+		r.Results[v.Choice] += nftCount
 	}
 
 	return *r, nil
 }
 
 func (b *BalanceOfNfts) GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error) {
-	var weight float64
-
-	var c models.Community
-	if err := c.GetCommunityByProposalId(b.DB, proposal.ID); err != nil {
-		return 0, err
-	}
-
-	weight = float64(len(vote.NFTs))
-	return weight, nil
+	return float64(len(vote.NFTs)), nil
 }
 
 func (s *BalanceOfNfts) GetVotes(
@@ -61,6 +52,10 @@ func (s *BalanceOfNfts) GetVotes(
 	}
 
 	return votes, nil
+}
+
+func (s *BalanceOfNfts) RequiresSnapshot() bool {
+	return false
 }
 
 func (s *BalanceOfNfts) InitStrategy(

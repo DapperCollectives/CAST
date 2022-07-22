@@ -1,15 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import classnames from 'classnames';
 import { useDropzone } from 'react-dropzone';
 import { Upload } from 'components/Svg';
 import { WrapperResponsive, Loader } from 'components';
 import { getReducedImg } from 'utils';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
-import { MAX_AVATAR_FILE_SIZE } from 'const';
+import { MAX_AVATAR_FILE_SIZE, MAX_FILE_SIZE } from 'const';
 
 function CommunityEditorProfile({
   name,
   body = '',
   logo,
+  banner,
   // fn to update community payload
   updateCommunity,
   // fn to upload image
@@ -18,15 +20,19 @@ function CommunityEditorProfile({
   const [communityName, setCommunityName] = useState(name);
   const [communityDescription, setCommunityDescription] = useState(body);
   const [isUpdating, setIsUpdating] = useState('');
+  const [isUpdatingImage, setIsUpdatingImage] = useState(false);
+  const [isUpdatingBanner, setIsUpdatingBanner] = useState(false);
   const [enableSave, setEnableSave] = useState(false);
   const [image, setImage] = useState({ imageUrl: logo });
+  const [bannerImage, setBannerImage] = useState({ imageUrl: banner });
   const { notifyError } = useErrorHandlerContext();
 
   useEffect(() => {
     if (
       (communityName !== name && communityName.length > 0) ||
       communityDescription !== body ||
-      image.file
+      image.file ||
+      bannerImage.file
     ) {
       setEnableSave(true);
     }
@@ -34,18 +40,25 @@ function CommunityEditorProfile({
       communityName.trim().length === 0 ||
       (communityName === name &&
         communityDescription === body &&
-        image.file === undefined)
+        image.file === undefined &&
+        bannerImage.file === undefined)
     ) {
       setEnableSave(false);
     }
-  }, [name, body, communityName, communityDescription, image]);
+  }, [name, body, communityName, communityDescription, image, bannerImage]);
 
   const saveData = async () => {
     setIsUpdating(true);
+    // upload images if any
     let newImageUrl;
-    // upload image if any
+    let newBannerImageUrl;
     if (image.file) {
+      setIsUpdatingImage(true);
       newImageUrl = await uploadFile(image.file);
+    }
+    if (bannerImage.file) {
+      setIsUpdatingBanner(true);
+      newBannerImageUrl = await uploadFile(bannerImage.file);
     }
     const updates = {
       ...(communityName !== name ? { name: communityName.trim() } : undefined),
@@ -53,15 +66,20 @@ function CommunityEditorProfile({
         ? { body: communityDescription.trim() }
         : undefined),
       ...(newImageUrl?.fileUrl ? { logo: newImageUrl.fileUrl } : undefined),
+      ...(newBannerImageUrl?.fileUrl
+        ? { bannerImgUrl: newBannerImageUrl.fileUrl }
+        : undefined),
     };
     // updated fields
     if (Object.keys(updates).length > 0) await updateCommunity(updates);
     setIsUpdating(false);
+    setIsUpdatingImage(false);
+    setIsUpdatingBanner(false);
     setEnableSave(false);
   };
 
   const onDrop = useCallback(
-    (acceptedFiles) => {
+    (filename, dataKey, maxFileSize, maxWidth) => (acceptedFiles) => {
       acceptedFiles.forEach((imageFile) => {
         // validate type
         if (
@@ -75,36 +93,61 @@ function CommunityEditorProfile({
         }
         // validate size
         if (imageFile.size > MAX_AVATAR_FILE_SIZE) {
+          const sizeLimit =
+            maxFileSize === MAX_AVATAR_FILE_SIZE ? '2MB' : '5MB';
           notifyError({
             status: 'Image file size not allowed',
-            statusText: 'The selected file exceeds the 2MB limit.',
+            statusText: `The selected file exceeds the ${sizeLimit} limit.`,
           });
           return;
         }
         const imageAsURL = URL.createObjectURL(imageFile);
-
+        const setters = {
+          logo: setImage,
+          banner: setBannerImage,
+        };
         const img = new Image();
         img.onload = function (e) {
-          // reduce image if necessary before upload
-          if (e.target.width > 150) {
-            getReducedImg(e.target, 150, 'community_image').then((result) => {
-              setImage({ imageUrl: imageAsURL, file: result.imageFile });
+          // reduce images if necessary before upload
+          if (e.target.width > maxWidth) {
+            getReducedImg(e.target, maxWidth, filename).then((result) => {
+              setters[dataKey]({
+                imageUrl: imageAsURL,
+                file: result.imageFile,
+              });
             });
           } else {
-            setImage({ imageUrl: imageAsURL, file: imageFile });
+            setters[dataKey]({ imageUrl: imageAsURL, file: imageFile });
           }
         };
         img.src = imageAsURL;
       });
     },
-    [setImage, notifyError]
+    [setImage, setBannerImage, notifyError]
   );
 
-  const { getRootProps, getInputProps } = useDropzone({
-    onDrop,
+  const { getRootProps: getLogoRootProps, getInputProps: getLogoInputProps } =
+    useDropzone({
+      onDrop: onDrop('community_image', 'logo', MAX_AVATAR_FILE_SIZE, 150),
+      maxFiles: 1,
+      accept: 'image/jpeg,image/png',
+    });
+
+  const {
+    getRootProps: getBannerRootProps,
+    getInputProps: getBannerInputProps,
+  } = useDropzone({
+    onDrop: onDrop('community_banner', 'banner', MAX_FILE_SIZE, 1200),
     maxFiles: 1,
     accept: 'image/jpeg,image/png',
   });
+
+  const imageDropClasses = classnames(
+    'is-flex is-flex-direction-column is-align-items-center is-justify-content-center cursor-pointer rounded-lg',
+    {
+      'border-dashed-dark': !bannerImage.file && !bannerImage.imageUrl,
+    }
+  );
 
   return (
     <WrapperResponsive
@@ -140,16 +183,16 @@ function CommunityEditorProfile({
               overflow: 'hidden',
               position: 'relative',
               ...(!image?.imageUrl
-                ? { border: '1px dashed #757575' }
+                ? { border: '2px dashed #757575' }
                 : undefined),
             }}
-            {...getRootProps()}
+            {...getLogoRootProps()}
           >
-            {!image && !isUpdating && (
+            {!isUpdatingImage && !image?.imageUrl && !image?.file && (
               <>
                 <Upload />
                 <span className="smaller-text">Avatar</span>
-                <input {...getInputProps()} />
+                <input {...getLogoInputProps()} />
               </>
             )}
             {image?.imageUrl && (
@@ -164,7 +207,7 @@ function CommunityEditorProfile({
                 }}
               />
             )}
-            {!(isUpdating && image.file) ? (
+            {!isUpdatingImage && (image?.imageUrl || image?.file) && (
               <div
                 className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center"
                 style={{
@@ -176,9 +219,69 @@ function CommunityEditorProfile({
                 }}
               >
                 <Upload className="has-text-white" />
-                <input {...getInputProps()} />
+                <input {...getLogoInputProps()} />
               </div>
-            ) : (
+            )}
+            {isUpdatingImage && (
+              <div
+                className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center"
+                style={{
+                  position: 'absolute',
+                }}
+              >
+                <p className="is-size-7">Uploading...</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      <div className="columns">
+        <div className="column is-12">
+          <div
+            className={imageDropClasses}
+            style={{ minHeight: 200 }}
+            {...getBannerRootProps()}
+          >
+            {!isUpdatingBanner && !bannerImage?.imageUrl && (
+              <>
+                <Upload />
+                <span className="smaller-text">Community Banner Image</span>
+                <span className="smaller-text">
+                  JPG or PNG 200px X 1200px recommended
+                </span>
+                <input {...getBannerInputProps()} />
+              </>
+            )}
+            {bannerImage?.imageUrl && (
+              <div
+                className="is-flex flex-1 is-flex-direction-column is-align-items-center is-justify-content-center rounded-lg"
+                style={{
+                  backgroundImage: `url(${bannerImage.imageUrl})`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  width: '100%',
+                  opacity: 0.5,
+                }}
+              />
+            )}
+            {!isUpdatingBanner && (bannerImage.imageUrl || bannerImage.file) && (
+              <div
+                className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center"
+                style={{
+                  borderRadius: '50%',
+                  position: 'absolute',
+                  zIndex: 10,
+                  height: 40,
+                  width: 40,
+                  backgroundColor: '#4a4a4a',
+                }}
+              >
+                <Upload className="has-text-white" />
+                <input {...getBannerInputProps()} />
+              </div>
+            )}
+            {isUpdatingBanner && (
               <div
                 className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center"
                 style={{
@@ -204,6 +307,7 @@ function CommunityEditorProfile({
         className="text-area rounded-sm border-light p-3 column is-full mt-5"
         type="text"
         value={communityDescription}
+        placeholder="Short Description"
         name="community_details"
         rows="3"
         cols="30"

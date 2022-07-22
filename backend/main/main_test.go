@@ -41,6 +41,7 @@ func TestMain(m *testing.M) {
 
 	os.Chdir(CWD)
 	os.Unsetenv("FVT_FEATURES")
+	os.Setenv("FLOW_ENV", "emulator")
 
 	A.Initialize(
 		os.Getenv("DB_USERNAME"),

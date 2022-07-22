@@ -68,6 +68,7 @@ type Strategy interface {
 	GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error)
 	InitStrategy(f *shared.FlowAdapter, db *shared.Database, sc *shared.SnapshotClient, name string)
 	FetchBalance(b *models.Balance, p *models.Proposal) (*models.Balance, error)
+	RequiresSnapshot() bool
 }
 
 var strategyMap = map[string]Strategy{
@@ -125,6 +126,7 @@ func (a *App) Initialize(user, password, dbname, dbhost, dbport, ipfsKey, ipfsSe
 	}
 	a.FlowAdapter = shared.NewFlowClient(os.Getenv("FLOW_ENV"))
 	// Snapshot
+	log.Info().Msgf("SNAPSHOT_BASE_URL: %s", os.Getenv("SNAPSHOT_BASE_URL"))
 	a.SnapshotClient = shared.NewSnapshotClient(os.Getenv("SNAPSHOT_BASE_URL"))
 	// address to vote options mapping
 	a.TxOptionsAddresses = strings.Fields(os.Getenv("TX_OPTIONS_ADDRS"))
@@ -361,12 +363,6 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 		start = 0
 	}
 
-	votes, totalRecords, err := models.GetVotesForProposal(a.DB, start, count, order, proposalId)
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
 	//get the proposal
 	proposal := models.Proposal{ID: proposalId}
 	if err := proposal.GetProposalById(a.DB); err != nil {
@@ -386,6 +382,12 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	s.InitStrategy(a.FlowAdapter, a.DB, a.SnapshotClient, *proposal.Strategy)
+
+	votes, totalRecords, err := models.GetVotesForProposal(a.DB, start, count, order, proposalId, *proposal.Strategy)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
 
 	votesWithWeights, err := s.GetVotes(votes, &proposal)
 	if err != nil {
@@ -606,8 +608,10 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 
 	emptyBalance := &models.Balance{
 		Addr:        v.Addr,
-		BlockHeight: *p.Block_height,
 		Proposal_id: p.ID,
+	}
+	if p.Block_height != nil {
+		emptyBalance.BlockHeight = *p.Block_height
 	}
 
 	s.InitStrategy(a.FlowAdapter, a.DB, a.SnapshotClient, *p.Strategy)
@@ -615,6 +619,8 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 	balance, err := s.FetchBalance(emptyBalance, &p)
 	if err != nil {
 		log.Error().Err(err).Msgf("error fetching balance for address %v", v.Addr)
+		respondWithError(w, http.StatusInternalServerError, "error fetching balance")
+		return
 	}
 
 	// create the voteWithBalance struct
@@ -790,18 +796,22 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		return
 
 	}
+	s := strategyMap[*p.Strategy]
+	s.InitStrategy(a.FlowAdapter, a.DB, a.SnapshotClient, *p.Strategy)
 
-	snapshotResponse, err := a.SnapshotClient.TakeSnapshot(strategy.Contract)
-	if err != nil {
-		log.Error().Err(err).Msg("error taking snapshot")
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
+	var snapshotResponse *shared.SnapshotResponse
+	if s.RequiresSnapshot() {
+		snapshotResponse, err = a.SnapshotClient.TakeSnapshot(strategy.Contract)
+		if err != nil {
+			log.Error().Err(err).Msg("error taking snapshot")
+			respondWithError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		p.Block_height = &snapshotResponse.Data.BlockHeight
+		p.Snapshot_status = &snapshotResponse.Data.Status
 	}
 
-	p.Block_height = &snapshotResponse.Data.BlockHeight
-	p.Snapshot_status = &snapshotResponse.Data.Status
-
-	if *community.Only_authors_to_submit == true {
+	if *community.Only_authors_to_submit {
 		if err := models.EnsureRoleForCommunity(a.DB, p.Creator_addr, communityId, "author"); err != nil {
 			errMsg := fmt.Sprintf("account %s is not an author for community %d", p.Creator_addr, p.Community_id)
 			log.Error().Err(err).Msg(errMsg)

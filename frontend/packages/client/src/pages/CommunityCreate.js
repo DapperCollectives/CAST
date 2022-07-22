@@ -99,8 +99,9 @@ export default function CommunityCreate() {
           // This is to bypass error on local
           // emulator when keys field is not present
           // on flow emulator response
-          if (
-            process.env.APP_ENV !== 'PRODUCTION' &&
+          if (process.env.REACT_APP_APP_ENV?.toUpperCase() === 'PRODUCTION') {
+            errorMessages.push(name);
+          } else if (
             !error?.message.includes(
               "Cannot read properties of undefined (reading 'map')"
             )
