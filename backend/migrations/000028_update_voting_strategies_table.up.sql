@@ -1,0 +1,4 @@
+UPDATE voting_strategies SET name = 'NFT-Weighted', description = 'A weight of 1 is added for each NFT at a user’s wallet address that matches the contract of the proposal.' WHERE key = 'balance-of-nfts';
+UPDATE voting_strategies SET name = 'Staked FLOW-Weighted', description = 'A weight of 1 is added for each FLOW token that a wallet address has staked or delegated to the Flow network.' WHERE key = 'staked-token-weighted-default';
+UPDATE voting_strategies SET name = 'Token-Weighted', description = 'A weight of 1 is added for each fungible token at a user’s wallet address that matches the contract of the proposal.' WHERE key = 'token-weighted-default';
+UPDATE voting_strategies SET name = 'One Address One Vote', description = 'A wallet address vote counts as one vote as long as it has at least one fungible token that matches the contract of the proposal.' WHERE key = 'one-address-one-vote';
