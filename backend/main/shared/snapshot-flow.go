@@ -157,7 +157,7 @@ func (c *SnapshotClient) GetSnapshotStatusAtBlockHeight(
 func (c *SnapshotClient) GetAddressBalanceAtBlockHeight(
 	address string,
 	blockheight uint64,
-	balancePointer interface{},
+	balanceResponse interface{},
 	contract *Contract,
 ) error {
 	if c.bypass() {
@@ -173,8 +173,8 @@ func (c *SnapshotClient) GetAddressBalanceAtBlockHeight(
 			c.BaseURL,
 			address,
 			blockheight,
-			contract.Addr,
-			contract.Name,
+			*contract.Addr,
+			*contract.Name,
 		)
 	}
 
@@ -184,10 +184,11 @@ func (c *SnapshotClient) GetAddressBalanceAtBlockHeight(
 		return err
 	}
 
-	if err := c.sendRequest(req, balancePointer); err != nil {
+	if err := c.sendRequest(req, balanceResponse); err != nil {
 		log.Debug().Err(err).Msgf("Snapshot GetAddressBalanceAtBlockHeight send request error.")
 		return err
 	}
+	log.Info().Msgf("got balance from snapshotter: %v", balanceResponse)
 
 	return nil
 }
@@ -277,6 +278,7 @@ func (c *SnapshotClient) sendRequest(req *http.Request, pointer interface{}) err
 		return fmt.Errorf("unknown snapshot error, status code: %d", res.StatusCode)
 	}
 
+	log.Info().Msgf("body: %v", res.Body)
 	if err = json.NewDecoder(res.Body).Decode(pointer); err != nil {
 		log.Debug().Err(err).Msgf("snapshot response decode error")
 		return err
