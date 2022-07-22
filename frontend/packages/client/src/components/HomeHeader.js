@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const startPositions = [{}];
 export default function HomeHeader() {
   return (
     <div className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center pb-7">
