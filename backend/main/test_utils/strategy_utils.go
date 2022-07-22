@@ -254,7 +254,7 @@ func (otu *OverflowTestUtils) SetupAccountForFlow(account string) {
 
 func (otu *OverflowTestUtils) MintNFT(p shared.MintParams) {
 	otu.O.TransactionFromFile("mint_nft").
-		SignProposeAndPayAsService().
+		SignProposeAndPayAs(p.Name).
 		Args(otu.O.Arguments().
 			Account(p.Recipient).
 			String(p.Name).
