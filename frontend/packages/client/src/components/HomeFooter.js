@@ -18,26 +18,26 @@ export default function HomeFooter() {
             </a>
           </p>
         </div>
-        <div className="column is-narrow px-4">
+        <div className="column is-narrow px-4-desktop">
           <p className="has-text-grey small-text">
             <a
               target="_blank"
               rel="noreferrer noopener"
               href="https://docs.cast.fyi"
-              className="pl-1 is-underlined has-text-grey"
+              className="is-underlined has-text-grey"
             >
               Docs
             </a>
           </p>
         </div>
-        <div className="column is-narrow px-4">
+        <div className="column is-narrow px-4-desktop">
           <p className="has-text-grey small-text">
             <Link>
               <div className="is-underlined has-text-grey">Privacy Policy</div>
             </Link>
           </p>
         </div>
-        <div className="column is-narrow px-4">
+        <div className="column is-narrow px-4-desktop">
           <p className="has-text-grey small-text">
             <Link>
               <div className="is-underlined has-text-grey">
