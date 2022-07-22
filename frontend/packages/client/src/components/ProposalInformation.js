@@ -6,20 +6,72 @@ import { useVotingResults, useWindowDimensions } from '../hooks';
 import useMediaQuery, { mediaMatchers } from '../hooks/useMediaQuery';
 import Tooltip from './Tooltip';
 
-const InfoBlock = ({ title, content }) => {
+function truncate(str) {
+  return str.substr(0, 3) + '...' + str.substr(10, str.length);
+}
+
+const BlockieWithAddress = React.forwardRef(
+  ({ creatorAddr, isCoreCreator }, ref) => {
+    const [addr, setAdd] = useState(creatorAddr);
+
+    const { width } = useWindowDimensions();
+
+    useEffect(() => {
+      if (ref?.current.clientWidth <= 260 && creatorAddr === addr) {
+        setAdd(truncate(creatorAddr));
+      } else if (ref?.current.clientWidth > 260 && creatorAddr !== addr) {
+        setAdd(creatorAddr);
+      }
+    }, [ref, width, creatorAddr, addr]);
+
+    return (
+      <div className="columns is-mobile m-0">
+        <div className="column is-narrow is-flex is-align-items-center p-0">
+          <Blockies
+            seed={creatorAddr}
+            size={6}
+            scale={4}
+            className="blockies"
+          />
+        </div>
+        <div className="column px-2 py-0 is-flex flex-1 is-align-items-center">
+          {addr}
+        </div>
+        {isCoreCreator && (
+          <div
+            className="column p-0 is-flex is-align-items-center is-justify-content-center-tablet subtitle is-size-7"
+            style={{ fontFamily: 'Roboto Mono' }}
+          >
+            Core
+          </div>
+        )}
+      </div>
+    );
+  }
+);
+
+const InfoBlock = ({ title, content, component }) => {
+  const containerRef = useRef();
+  // warn component consumer
+  if (content && component) {
+    console.warn('InfoBlock: please provide content or component');
+  }
   return (
-    <div className="columns is-mobile p-0 m-0 mb-5 small-text">
-      <div
-        className="column p-0 is-flex is-align-items-center flex-1 has-text-grey"
-        style={{ maxWidth: '40%' }}
-      >
+    <div
+      className="columns is-mobile p-0 m-0 mb-5 small-text"
+      ref={containerRef}
+    >
+      <div className="column p-0 is-flex is-align-items-center flex-1 has-text-grey is-5">
         {title}
       </div>
       <div
         className="column p-0 is-flex flex-1 is-align-items-center"
-        style={{ height: '1.5rem' }}
+        style={{
+          height: '1.5rem',
+        }}
       >
         {content}
+        {component && React.cloneElement(component, { ref: containerRef })}
       </div>
     </div>
   );
@@ -258,28 +310,11 @@ const ProposalInformation = ({
           />
           <InfoBlock
             title={'Author'}
-            content={
-              <div className="columns is-mobile m-0">
-                <div className="column is-narrow is-flex is-align-items-center p-0">
-                  <Blockies
-                    seed={creatorAddr}
-                    size={6}
-                    scale={4}
-                    className="blockies"
-                  />
-                </div>
-                <div className="column px-2 py-0 is-flex flex-1 is-align-items-center">
-                  {creatorAddr}
-                </div>
-                {isCoreCreator && (
-                  <div
-                    className="column p-0 is-flex is-align-items-center is-justify-content-center-tablet subtitle is-size-7"
-                    style={{ fontFamily: 'Roboto Mono' }}
-                  >
-                    Core
-                  </div>
-                )}
-              </div>
+            component={
+              <BlockieWithAddress
+                creatorAddr={creatorAddr}
+                isCoreCreator={isCoreCreator}
+              />
             }
           />
           {ipfs && (
