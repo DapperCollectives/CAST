@@ -31,7 +31,7 @@ func (b *BalanceOfNfts) FetchBalance(
 
 	strategy, err := models.MatchStrategyByProposal(*c.Strategies, *p.Strategy)
 	if err != nil {
-		log.Error().Err(err).Msg("Unable to find strategy for contract")
+		log.Error().Err(err).Msg("Unable to find strategy for contract.")
 		return nil, err
 	}
 

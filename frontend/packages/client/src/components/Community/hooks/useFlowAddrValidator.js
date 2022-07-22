@@ -64,10 +64,10 @@ export default function useFlowAddrValidator({
 export const validateAddrInList = (addrList, addr) => {
   // is valid Address
   if (!/0[x,X][a-zA-Z0-9]{16}$/gim.test(addr)) {
-    return { isValid: false, error: 'Invalid Address' };
+    return { isValid: false, error: 'Invalid Address.' };
   }
   if (addrList.filter((e) => e.addr === addr).length > 1) {
-    return { isValid: false, error: 'Duplicated Address' };
+    return { isValid: false, error: 'Duplicated Address.' };
   }
   return { isValid: true, error: '' };
 };
