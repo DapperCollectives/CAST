@@ -79,10 +79,11 @@ var (
 	flowPublicPath   = "flowTokenBalance"
 	threshold        = 0.0000069
 
-	exampleNFTName = "ExampleNFT"
-	exampleNFTAddr = "0xf8d6e0586b0a20c7"
-	tokenWeighted  = "token-weighted-default"
-	stakedWeighted = "staked-token-weighted-default"
+	exampleNFTName       = "ExampleNFT"
+	exampleNFTAddr       = "0xf8d6e0586b0a20c7"
+	exampleNFTPublicPath = "exampleNFTCollection"
+	tokenWeighted        = "token-weighted-default"
+	stakedWeighted       = "staked-token-weighted-default"
 
 	defaultStrategy = models.Strategy{
 		Name: &tokenWeighted,
@@ -142,6 +143,7 @@ var (
 		Slug:                   &slug,
 		Contract_name:          &exampleNFTName,
 		Contract_addr:          &exampleNFTAddr,
+		Public_path:            &exampleNFTPublicPath,
 		Only_authors_to_submit: &notOnlyAuthors,
 	}
 

@@ -36,3 +36,5 @@ export { default as FadeIn } from './FadeIn';
 export { default as UploadImageModal } from './UploadImageModal';
 export { default as Tablink } from './Tablink';
 export { default as Popover } from './Popover';
+export { default as HomeFooter } from './HomeFooter';
+export { default as HomeHeader } from './HomeHeader';
