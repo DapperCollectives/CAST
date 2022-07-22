@@ -108,8 +108,9 @@ func TestBalanceOfNFTsStrategy(t *testing.T) {
 	choices := proposals[0].Choices
 
 	var contract = &shared.Contract{
-		Name: community.Contract_name,
-		Addr: community.Contract_addr,
+		Name:        community.Contract_name,
+		Addr:        community.Contract_addr,
+		Public_path: community.Public_path,
 	}
 
 	votes, err := otu.GenerateListOfVotesWithNFTs(proposalId, 5, contract)
