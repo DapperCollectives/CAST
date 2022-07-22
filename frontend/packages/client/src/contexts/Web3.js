@@ -70,13 +70,6 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
       'discovery.authn.endpoint': walletDiscoveryApi, // public discovery api endpoint
       'discovery.authn.include': walletDiscoveryInclude, // opt-in wallets
     });
-
-    try {
-      const contracts = require('../contracts.json');
-      Object.keys(contracts).forEach((contract) => {
-        fcl.config().put(contract, contracts[contract]);
-      });
-    } catch (e) {}
   }, [network]);
 
   const setWebContextConfig = useCallback((config) => {
