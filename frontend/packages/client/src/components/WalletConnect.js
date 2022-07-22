@@ -1,14 +1,17 @@
 import React from 'react';
 import { Web3Consumer } from '../contexts/Web3';
 
-const SignInOutButton = ({ user: { loggedIn, addr }, injectedProvider }) => {
+const SignInOutButton = ({
+  user: { loggedIn, addr },
+  openWalletModal,
+  injectedProvider,
+}) => {
   const signInOrOut = async (event) => {
     event.preventDefault();
     if (loggedIn) {
       injectedProvider.unauthenticate();
     } else {
-      injectedProvider.authenticate();
-      injectedProvider.logIn();
+      openWalletModal();
     }
   };
   return (
@@ -34,14 +37,18 @@ const SignInOutButton = ({ user: { loggedIn, addr }, injectedProvider }) => {
 };
 
 const CurrentUser = ({ web3 }) => {
-  const { user, injectedProvider } = web3;
+  const { user, injectedProvider, openWalletModal } = web3;
   if (!user) {
     return null;
   }
 
   return (
     <div className="card">
-      <SignInOutButton user={user} injectedProvider={injectedProvider} />
+      <SignInOutButton
+        user={user}
+        injectedProvider={injectedProvider}
+        openWalletModal={openWalletModal}
+      />
     </div>
   );
 };
