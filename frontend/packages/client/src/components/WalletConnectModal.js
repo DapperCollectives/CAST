@@ -24,7 +24,10 @@ export default function WalletConnectModal({
   return (
     <div className={modalClasses}>
       <div className="modal-background"></div>
-      <div className="modal-card rounded-sm" style={{ maxWidth: '375px' }}>
+      <div
+        className="modal-card rounded-sm"
+        style={{ maxWidth: '375px', maxHeight: '370px' }}
+      >
         <header
           className="modal-card-head has-background-white columns is-mobile m-0 px-5 pt-4"
           style={{ borderBottom: 'none' }}
@@ -41,7 +44,7 @@ export default function WalletConnectModal({
         </header>
         <section
           className="modal-card-body pt-0 pb-3 px-5"
-          style={{ minHeight: '280px' }}
+          style={{ minHeight: '150px' }}
         >
           {listOfServices.map((service) => {
             return (
@@ -72,7 +75,7 @@ export default function WalletConnectModal({
         >
           <div className="columns is-multiline">
             <div className="column is-12 is-flex is-align-items-center">
-              <p className="is-size-5 pr-1">
+              <p className="is-size-6 pr-1">
                 Need a wallet?
                 <a
                   target="_blank"
