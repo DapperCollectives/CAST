@@ -38,3 +38,4 @@ export { default as Tablink } from './Tablink';
 export { default as Popover } from './Popover';
 export { default as HomeFooter } from './HomeFooter';
 export { default as HomeHeader } from './HomeHeader';
+export { default as WalletConnectModal } from './WalletConnectModal';
