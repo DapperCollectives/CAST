@@ -24,7 +24,7 @@ export default function WalletConnectModal({
   return (
     <div className={modalClasses}>
       <div className="modal-background"></div>
-      <div className="modal-card" style={{ maxWidth: '375px' }}>
+      <div className="modal-card rounded-sm" style={{ maxWidth: '375px' }}>
         <header
           className="modal-card-head has-background-white columns is-mobile m-0 px-5 pt-4"
           style={{ borderBottom: 'none' }}
