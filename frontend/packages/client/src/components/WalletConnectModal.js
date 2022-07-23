@@ -1,5 +1,6 @@
 import React from 'react';
 import classnames from 'classnames';
+import { ArrowRight } from './Svg';
 
 export default function WalletConnectModal({
   services = [],
@@ -39,22 +40,22 @@ export default function WalletConnectModal({
           </div>
         </header>
         <section
-          className="modal-card-body py-0 px-5"
+          className="modal-card-body pt-0 pb-3 px-5"
           style={{ minHeight: '280px' }}
         >
           {listOfServices.map((service) => {
             return (
               <div
                 className="border-light rounded-sm is-flex is-flex-direction-column is-justify-content-center mb-4 py-4 px-3 cursor-pointer strategy-selector transition-all"
-                style={{ height: '50px' }}
+                style={{ height: '60px' }}
                 onClick={service.connectToService}
               >
-                <div className="columns">
+                <div className="columns is-mobile">
                   <div className="column is-narrow is-flex is-align-items-center">
                     <img
                       src={service.icon}
                       alt={service.name}
-                      style={{ width: '25px', height: '25px' }}
+                      style={{ width: '30px', height: '30px' }}
                     />
                   </div>
                   <div className="column is-flex is-align-items-center">
@@ -66,17 +67,51 @@ export default function WalletConnectModal({
           })}
         </section>
         <footer
-          className="modal-card-foot has-background-grey-lighter pb-6"
-          style={{ height: '107px' }}
+          className="modal-card-foot is-justify-content-center px-0-mobile has-background-grey-lighter"
+          style={{ height: '120px' }}
         >
-          <div className="is-flex">
-            <div className="columns">
-              <div className="column is-flex is-align-items-center">
-                <p className="is-size-5">Need a wallet? Learn more</p>
-              </div>
+          <div className="columns is-multiline">
+            <div className="column is-12 is-flex is-align-items-center">
+              <p className="is-size-5 pr-1">
+                Need a wallet?
+                <a
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  href="https://dapper-collectives.gitbook.io/cast-docs/"
+                  className="px-1 has-text-black is-underlined"
+                  onClick={closeModal}
+                >
+                  Learn more
+                </a>
+              </p>
+              <ArrowRight />
+            </div>
+            <div className="column is-12">
+              <p
+                className="has-text-grey smaller-text is-flex"
+                style={{ whiteSpace: 'nowrap' }}
+              >
+                You agree to the the
+                <a
+                  href="#/terms-of-service"
+                  className="px-1 is-underlined has-text-grey"
+                  onClick={closeModal}
+                  style={{ whiteSpace: 'nowrap' }}
+                >
+                  Terms of Service
+                </a>
+                and
+                <a
+                  href="#/privacy-policy"
+                  className="px-1 is-underlined has-text-grey"
+                  onClick={closeModal}
+                  style={{ whiteSpace: 'nowrap' }}
+                >
+                  Privacy Policy
+                </a>
+              </p>
             </div>
           </div>
-          <div className="is-flex"></div>
         </footer>
       </div>
     </div>
