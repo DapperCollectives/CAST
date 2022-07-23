@@ -8,10 +8,10 @@ const SignInOutButton = ({
   closeModal,
 }) => {
   const signInOrOut = async (event) => {
+    event.preventDefault();
     if (closeModal) {
       closeModal();
     }
-    event.preventDefault();
     if (loggedIn) {
       injectedProvider.unauthenticate();
     } else {
