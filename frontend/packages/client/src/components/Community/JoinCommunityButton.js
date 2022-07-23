@@ -40,15 +40,18 @@ export default function JoinCommunityButton({
     event.stopPropagation();
     if (!user?.addr) {
       openModal(
-        React.createElement(Error, {
-          error: (
+        <Error
+          error={
             <div className="mt-5">
-              <WalletConnect />
+              <WalletConnect
+                closeModal={() => {
+                  closeModal();
+                }}
+              />
             </div>
-          ),
-
-          errorTitle: 'Please connect a wallet.',
-        }),
+          }
+          errorTitle="Please connect a wallet."
+        />,
         { classNameModalContent: 'rounded-sm' }
       );
       setIsModalErrorOpened(true);

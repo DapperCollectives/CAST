@@ -32,14 +32,14 @@ export default function HomeFooter() {
         </div>
         <div className="column is-narrow px-4-desktop">
           <p className="has-text-grey small-text">
-            <Link>
+            <Link to={'/privacy-policy'}>
               <div className="is-underlined has-text-grey">Privacy Policy</div>
             </Link>
           </p>
         </div>
         <div className="column is-narrow px-4-desktop">
           <p className="has-text-grey small-text">
-            <Link>
+            <Link to={'/terms-of-service'}>
               <div className="is-underlined has-text-grey">
                 Terms of Service
               </div>

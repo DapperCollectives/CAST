@@ -86,6 +86,30 @@ export const ArrowLeft = () => (
   </svg>
 );
 
+export const ArrowRight = () => (
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M3.33333 8H12.6667"
+      stroke="black"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <path
+      d="M8.66667 4L12.6667 8L8.66667 12"
+      stroke="black"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </svg>
+);
 export const ArrowLeftBold = () => (
   <svg
     width="24"
