@@ -14,7 +14,7 @@ export default function WalletConnectModal({
 
   const listOfServices = services.map((service) => ({
     connectToService: () => {
-      injectedProvider.authenticate(service);
+      injectedProvider.authenticate({ service });
       closeModal();
     },
     icon: `https://fcl-discovery.onflow.org${service.provider.icon}`,
