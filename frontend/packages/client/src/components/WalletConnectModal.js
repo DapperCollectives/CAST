@@ -1,6 +1,6 @@
 import React from 'react';
 import classnames from 'classnames';
-import { ArrowRight } from './Svg';
+import { ArrowRight, Close } from './Svg';
 
 export default function WalletConnectModal({
   services = [],
@@ -11,6 +11,10 @@ export default function WalletConnectModal({
   const modalClasses = classnames('modal', {
     'is-active': openModal,
   });
+
+  const handleClickOnBackground = () => {
+    closeModal();
+  };
 
   const listOfServices = services.map((service) => ({
     connectToService: () => {
@@ -23,7 +27,7 @@ export default function WalletConnectModal({
 
   return (
     <div className={modalClasses}>
-      <div className="modal-background"></div>
+      <div className="modal-background" onClick={handleClickOnBackground}></div>
       <div
         className="modal-card rounded-sm"
         style={{ maxWidth: '375px', maxHeight: '370px' }}
@@ -33,13 +37,13 @@ export default function WalletConnectModal({
           style={{ borderBottom: 'none' }}
         >
           <div className="column p-0 is-flex flex-1">
-            <h2 className="is-size-4">Connect a wallet</h2>
+            <h2 className="is-size-4 has-text-weight-bold">Connect a wallet</h2>
           </div>
           <div
             className={`column is-narrow px-0 has-text-right is-size-2 leading-tight cursor-pointer`}
             onClick={closeModal}
           >
-            &times;
+            <Close />
           </div>
         </header>
         <section
@@ -70,8 +74,8 @@ export default function WalletConnectModal({
           })}
         </section>
         <footer
-          className="modal-card-foot is-justify-content-center px-0-mobile has-background-grey-lighter"
-          style={{ height: '120px' }}
+          className="modal-card-foot is-justify-content-center px-0-mobile wallet-connect-footer"
+          style={{ height: '120px', borderTop: '0px' }}
         >
           <div className="columns is-multiline">
             <div className="column is-12 is-flex is-align-items-center">
