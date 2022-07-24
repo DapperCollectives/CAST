@@ -50,12 +50,13 @@ export default function WalletConnectModal({
           className="modal-card-body pt-0 pb-3 px-5"
           style={{ minHeight: '150px' }}
         >
-          {listOfServices.map((service) => {
+          {listOfServices.map((service, index) => {
             return (
               <div
                 className="border-light rounded-sm is-flex is-flex-direction-column is-justify-content-center mb-4 py-4 px-3 cursor-pointer strategy-selector transition-all"
                 style={{ height: '60px' }}
                 onClick={service.connectToService}
+                key={`service-${index}`}
               >
                 <div className="columns is-mobile">
                   <div className="column is-narrow is-flex is-align-items-center">
