@@ -126,7 +126,7 @@ const AboutPage = ({ location }) => {
                 }
               />
             </div>
-            <div className="column is-12 pt-5 small-text">
+            <div className="column is-12 pt-5 pb-3 small-text">
               <div className="is-flex flex-1 is-align-items-center is-justify-content-center">
                 <a
                   href="#/privacy-policy"
