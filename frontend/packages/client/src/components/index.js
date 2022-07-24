@@ -39,3 +39,5 @@ export { default as Popover } from './Popover';
 export { default as HomeFooter } from './HomeFooter';
 export { default as HomeHeader } from './HomeHeader';
 export { default as WalletConnectModal } from './WalletConnectModal';
+export { default as Label } from './Label';
+export { default as ModalAboutItem } from './ModalAboutItem';
