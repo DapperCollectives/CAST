@@ -88,7 +88,7 @@ $popover-max-width: 20rem
 				@if $spacing-vertical != null
 					.#{$shortcut}#{$spacing-vertical}-#{$name}#{$suffix}
 						#{$property}-top: $value !important
-						#{$property}-bottom: $value !important	
+						#{$property}-bottom: $value !important
 @include spacing-helpers('')
 
 +mobile
@@ -107,7 +107,7 @@ $popover-max-width: 20rem
 	@include spacing-helpers('desktop')
 
 +desktop-only
-	@include spacing-helpers('desktop-only')							
+	@include spacing-helpers('desktop-only')
 // custom css
 .App, #root
 	height: 100%
@@ -136,6 +136,12 @@ code
 	border-bottom-right-radius: 8px
 .rounded-lg
 	border-radius: 20px
+.rounded-lg-top
+	border-top-left-radius: 20px
+	border-top-right-radius: 20px
+.rounded-lg-bottom
+	border-bottom-left-radius: 20px
+	border-bottom-right-radius: 20px
 .rounded-full
 	border-radius: 50%
 .border-light
@@ -258,7 +264,7 @@ hr
 	pointer-events: none
 @media (min-width: 769px) and (max-width: 820px)
 	.is-hidden-connect
-		display: none	
+		display: none
 @media (min-width: 1024px)
 	.container > .navbar .navbar-brand
 		margin-left: 0 !important
@@ -309,6 +315,8 @@ hr
 		border-bottom-width: 2px
 		border-bottom-style: solid
 
+.medium-text
+	font-size: 1.13rem !important
 .small-text
 	font-size: 0.88rem !important
 .smaller-text
@@ -655,10 +663,13 @@ span[data-tooltip]
 			margin-top: 0.5em
 		&:not(:last-child)
 			margin-bottom: 0.5em
-.header-text	
+.header-text
 	font-size: 4.13rem
 @include mobile
 	.popover .popover-content
 		max-width: 10rem !important
-	.header-text	
+	.header-text
 		font-size: 2.5rem
+.beta-label
+	font-size: 10px
+	font-weight: 700
