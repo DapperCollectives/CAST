@@ -22,11 +22,11 @@ const AboutPage = ({ location }) => {
       <div
         className="modal-card rounded-sm px-4"
         style={{
-          'overflow-y': 'scroll',
+          overflowY: 'scroll',
         }}
       >
         <header
-          className="modal-card-head has-background-white rounded-lg-top pb-1 pt-3"
+          className="modal-card-head has-background-white rounded-lg-top pb-1"
           style={{ borderBottom: '0px' }}
         >
           <div className="columns px-5 px-3-mobile-only pt-4 flex-1 is-mobile">
@@ -41,7 +41,12 @@ const AboutPage = ({ location }) => {
             </div>
           </div>
         </header>
-        <section className="modal-card-body pt-0 rounded-lg-bottom">
+        <section
+          className="modal-card-body pt-0 rounded-lg-bottom"
+          style={{
+            minHeight: '600px',
+          }}
+        >
           <div className="columns px-5 px-3-mobile-only pt-4 is-multiline">
             <div className="column is-12 pt-0 pb-1">
               <h3 className="is-size-3 has-text-weight-bold">
