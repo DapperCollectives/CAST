@@ -277,7 +277,7 @@ export default function Community() {
             classNames="small-text pb-0-mobile px-0-mobile"
             extraStyles={notMobile ? { maxWidth: '132px' } : {}}
             buttonClassNames="py-5 py-4-mobile"
-            borderRadious="rounded-extra-lg"
+            borderRadious="rounded-xl"
             containerAlignment="is-align-items-flex-start"
           />
         }
