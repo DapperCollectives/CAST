@@ -13,7 +13,7 @@ export default function JoinCommunityButton({
   onJoinCommunity = async () => {},
   darkMode = true,
   classNames,
-  buttonClassNames,
+  buttonClassNames = '',
   extraStyles,
   borderRadious = 'rounded-lg',
   containerAlignment = 'is-align-self-center',
@@ -87,20 +87,16 @@ export default function JoinCommunityButton({
     }
   };
 
-  const classNamesContainer = classnames(
-    'column is-narrow-tablet is-full-mobile',
+  const classNamesContainer = `column is-narrow-tablet is-full-mobile ${classNames} ${containerAlignment}`;
+
+  const classNamesButton = classnames(
+    `button is-uppercase is-fullwidth ${buttonClassNames} ${borderRadious}`,
     {
-      [classNames]: !!classNames,
-      [containerAlignment]: !!containerAlignment,
+      'has-background-black has-text-white-bis': darkMode,
+      'rounded-sm has-text-black border-lighter-dark-grey small-text':
+        !darkMode,
     }
   );
-
-  const classNamesButton = classnames('button is-uppercase is-fullwidth', {
-    'has-background-black has-text-white-bis': darkMode,
-    'rounded-sm has-text-black border-lighter-dark-grey small-text': !darkMode,
-    [buttonClassNames]: !!buttonClassNames,
-    [borderRadious]: !!borderRadious,
-  });
 
   return (
     <div
