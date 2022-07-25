@@ -4,7 +4,7 @@ const networksConfig = {
     walletDiscovery:
       process.env.REACT_APP_EMULATOR_WALLET_DISCOVERY ||
       'http://localhost:8701/fcl/authn',
-    walletDiscoveryApi: 'https://fcl-discovery.onflow.org/api/testnet/authn',
+    walletDiscoveryApi: null,
     walletDiscoveryInclude: [],
     strategiesConfig: {
       'one-address-one-vote': {
