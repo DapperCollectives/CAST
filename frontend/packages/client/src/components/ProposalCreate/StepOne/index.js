@@ -185,7 +185,7 @@ const StepOne = ({
                 </button>
               </div>
             ),
-            errorTitle: 'Please select a strategy',
+            errorTitle: 'Please select a strategy.',
           }),
           { classNameModalContent: 'rounded-sm' }
         );
@@ -432,7 +432,7 @@ const StepOne = ({
             toolbar={{ options, inline, list, link }}
             editorState={localEditorState}
             toolbarClassName="toolbarClassName"
-            wrapperClassName="border-light rounded-sm word-break-all"
+            wrapperClassName="border-light rounded-sm"
             editorClassName="px-4 content"
             onEditorStateChange={onEditorChange}
             toolbarCustomButtons={[<AddImageOption addImage={addImage} />]}
@@ -443,7 +443,8 @@ const StepOne = ({
         <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6">
           <h4 className="title is-5 mb-2">Voting Strategy</h4>
           <p className="has-text-grey mb-5">
-            Select a strategy for how voting power is calculated.
+            Select a strategy for how voting power is calculated. Voting
+            strategies are set by community admins.
           </p>
           <Dropdown
             defaultValue={defaultValueStrategy}

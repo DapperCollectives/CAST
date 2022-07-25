@@ -13,6 +13,10 @@ export default function JoinCommunityButton({
   onJoinCommunity = async () => {},
   darkMode = true,
   classNames,
+  buttonClassNames = '',
+  extraStyles,
+  borderRadious = 'rounded-lg',
+  containerAlignment = 'is-align-self-center',
 }) {
   const [isModalErrorOpened, setIsModalErrorOpened] = useState(false);
   const { createCommunityUser, deleteUserFromCommunity } = useJoinCommunity();
@@ -40,15 +44,18 @@ export default function JoinCommunityButton({
     event.stopPropagation();
     if (!user?.addr) {
       openModal(
-        React.createElement(Error, {
-          error: (
+        <Error
+          error={
             <div className="mt-5">
-              <WalletConnect />
+              <WalletConnect
+                closeModal={() => {
+                  closeModal();
+                }}
+              />
             </div>
-          ),
-
-          errorTitle: 'Please connect a wallet.',
-        }),
+          }
+          errorTitle="Please connect a wallet."
+        />,
         { classNameModalContent: 'rounded-sm' }
       );
       setIsModalErrorOpened(true);
@@ -80,20 +87,22 @@ export default function JoinCommunityButton({
     }
   };
 
-  const classNamesContainer = classnames(
-    'column is-narrow-tablet is-full-mobile is-align-self-center',
+  const classNamesContainer = `column is-narrow-tablet is-full-mobile ${classNames} ${containerAlignment}`;
+
+  const classNamesButton = classnames(
+    `button is-uppercase is-fullwidth ${buttonClassNames} ${borderRadious}`,
     {
-      [classNames]: !!classNames,
+      'has-background-black has-text-white-bis': darkMode,
+      'rounded-sm has-text-black border-lighter-dark-grey small-text':
+        !darkMode,
     }
   );
 
-  const classNamesButton = classnames('button is-uppercase is-fullwidth', {
-    'rounded-lg has-background-black has-text-white-bis': darkMode,
-    'rounded-sm has-text-black border-lighter-dark-grey small-text': !darkMode,
-  });
-
   return (
-    <div className={classNamesContainer} style={{ minWidth: '117px' }}>
+    <div
+      className={classNamesContainer}
+      style={{ minWidth: '117px', ...extraStyles }}
+    >
       <button
         className={classNamesButton}
         onClick={isMember ? leaveCommunity : joinCommunity}
