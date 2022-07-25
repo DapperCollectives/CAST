@@ -274,7 +274,11 @@ export default function Community() {
             setTotalMembers={setTotalMembers}
             onLeaveCommunity={onUserLeaveCommunity}
             onJoinCommunity={onUserJoinCommunity}
-            classNames="mt-2-mobile small-text"
+            classNames="small-text pb-0-mobile px-0-mobile"
+            extraStyles={notMobile ? { maxWidth: '132px' } : {}}
+            buttonClassNames="py-5 py-4-mobile"
+            borderRadious="rounded-extra-lg"
+            containerAlignment="is-align-items-flex-start"
           />
         }
       />
