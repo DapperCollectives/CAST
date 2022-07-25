@@ -48,6 +48,7 @@ export default function CommunityHeader({
                   backgroundRepeat: 'no-repeat',
                   backgroundPosition: 'center',
                   backgroundSize: 'cover',
+                  border: '5px solid #F2F2F2',
                 }}
               ></div>
             ) : (
