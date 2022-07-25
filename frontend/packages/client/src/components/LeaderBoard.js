@@ -117,7 +117,10 @@ const LeaderBoard = ({
         </table>
       )}
       <div className="is-flex is-justify-content-start is-align-items-center">
-        <button className="button is-white p-0" onClick={onClickViewMore}>
+        <button
+          className="button is-white disable-hover p-0"
+          onClick={onClickViewMore}
+        >
           View All Members
         </button>
       </div>
