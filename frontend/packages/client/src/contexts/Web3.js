@@ -77,12 +77,29 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
 
   // filter services for now only blocto
   useEffect(() => {
-    fcl.discovery.authn.subscribe((res) => {
-      const filteredServices = res.results.filter((service) =>
-        service.uid.includes('blocto')
-      );
-      setServices(filteredServices);
-    });
+    if (process.env.REACT_APP_FLOW_ENV !== 'emulator') {
+      fcl.discovery.authn.subscribe((res) => {
+        const filteredServices = res.results.filter((service) =>
+          service.uid.includes('blocto')
+        );
+        setServices(filteredServices);
+      });
+    } else {
+      // hard code service for local dev
+      setServices([
+        {
+          f_type: 'Service',
+          f_vsn: '1.0.0',
+          type: 'authn',
+          method: 'IFRAME/RPC',
+          uid: 'blocto#authn',
+          provider: {
+            name: 'Blocto',
+            icon: '/images/blocto.png',
+          },
+        },
+      ]);
+    }
   }, []);
 
   const setWebContextConfig = useCallback((config) => {

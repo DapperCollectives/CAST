@@ -8,6 +8,8 @@ export default function WalletConnectModal({
   closeModal,
   injectedProvider,
 } = {}) {
+  const isLocalDev = process.env.REACT_APP_FLOW_ENV === 'emulator';
+
   const modalClasses = classnames('modal', {
     'is-active': openModal,
   });
@@ -18,7 +20,7 @@ export default function WalletConnectModal({
 
   const listOfServices = services.map((service) => ({
     connectToService: () => {
-      injectedProvider.authenticate({ service });
+      injectedProvider.authenticate(!isLocalDev ? { service } : undefined);
       closeModal();
     },
     icon: `https://fcl-discovery.onflow.org${service.provider.icon}`,
