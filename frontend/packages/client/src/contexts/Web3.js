@@ -85,7 +85,8 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
         setServices(filteredServices);
       });
     } else {
-      // hard code service for local dev
+      // hard code service for local dev wallet
+      // this setting will enable to show blocto to connect
       setServices([
         {
           f_type: 'Service',
