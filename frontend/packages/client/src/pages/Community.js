@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useHistory, useParams, Link } from 'react-router-dom';
-import classnames from 'classnames';
 import {
   Loader,
   CommunityPulse,
@@ -9,8 +8,8 @@ import {
   CommunityAbout,
   CommunityProposals,
   LeaderBoard,
-  JoinCommunityButton,
   Tablink,
+  CommunityHeader,
 } from 'components';
 import {
   useMediaQuery,
@@ -22,7 +21,6 @@ import {
   useWindowDimensions,
 } from '../hooks';
 import { useWebContext } from '../contexts/Web3';
-import Blockies from 'react-blockies';
 import { useQueryClient } from 'react-query';
 
 const CommunitySettingsButton = ({ communityId } = {}) => {
@@ -256,111 +254,23 @@ export default function Community() {
     logo,
     slug,
     id,
+    name,
   } = community ?? {};
-
-  const titleClassNames = classnames(
-    'is-size-5 has-text-weight-bold',
-    { 'mb-3': notMobile },
-    { 'mb-1': !notMobile }
-  );
-  const memberClassNames = classnames(
-    'has-text-grey',
-    { 'small-text mb-3': notMobile },
-    { 'is-size-6 mb-1': !notMobile }
-  );
-  const headerContainerClassNames = classnames(
-    'is-flex container community-header section',
-    { 'is-justify-content-space-between': notMobile }
-  );
-
-  const imageContainerClasses = classnames(
-    { '': notMobile },
-    {
-      'is-flex is-flex-direction-column is-justify-content-center m-0 community-logo-wrapper':
-        !notMobile,
-    }
-  );
-  const imageClasses = classnames(
-    {
-      'rounded-full community-logo-mobile': !notMobile,
-    },
-    {
-      'rounded-full': notMobile,
-    }
-  );
 
   return (
     <section className="full-height pt-0">
-      {community ? (
-        <div
-          className="is-flex community-header-wrapper"
-          style={{
-            backgroundImage: community?.bannerImgUrl
-              ? `url(${community.bannerImgUrl})`
-              : 'none',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
-        >
-          <div className={headerContainerClassNames}>
-            <div className="is-flex community-specific">
-              <div className={imageContainerClasses}>
-                {logo ? (
-                  <div
-                    role="img"
-                    aria-label="community banner"
-                    className={imageClasses}
-                    style={{
-                      width: 85,
-                      height: 85,
-                      backgroundImage: `url(${logo})`,
-                      backgroundRepeat: 'no-repeat',
-                      backgroundPosition: 'center',
-                      backgroundSize: 'cover',
-                    }}
-                  ></div>
-                ) : (
-                  <Blockies
-                    seed={slug ?? `seed-${id}`}
-                    size={10}
-                    scale={9.6}
-                    className="blockies"
-                  />
-                )}
-              </div>
-              <div className="column community-info is-justify-content-space-evenly">
-                <h2 className={titleClassNames}>{community.name}</h2>
-                <p className={memberClassNames}>{totalMembers} members</p>
-                <div className="is-flex">
-                  {members
-                    ? members.slice(0, 6).map(({ addr }, idx) => (
-                        <div
-                          key={`${idx}`}
-                          className="blockies-wrapper is-relative"
-                          style={{ right: `${idx * (notMobile ? 12 : 6)}px` }}
-                        >
-                          <Blockies
-                            seed={addr}
-                            size={notMobile ? 10 : 6}
-                            scale={4}
-                            className="blockies blockies-border"
-                          />
-                        </div>
-                      ))
-                    : null}
-                </div>
-              </div>
-            </div>
-            <JoinCommunityButton
-              communityId={communityId}
-              setTotalMembers={setTotalMembers}
-              onLeaveCommunity={onUserLeaveCommunity}
-              onJoinCommunity={onUserJoinCommunity}
-              classNames="mt-2-mobile"
-            />
-          </div>
-        </div>
-      ) : null}
+      <CommunityHeader
+        bannerImgUrl={community?.bannerImgUrl}
+        id={id}
+        logo={logo}
+        slug={slug}
+        communityName={name}
+        totalMembers={totalMembers}
+        members={members?.slice(0, 6)}
+        setTotalMembers={setTotalMembers}
+        onLeaveCommunity={onUserLeaveCommunity}
+        onJoinCommunity={onUserJoinCommunity}
+      />
       <div className="section pt-0">
         <div className="container full-height community-content">
           {loading ? (
