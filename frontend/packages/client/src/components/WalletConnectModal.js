@@ -9,6 +9,8 @@ export default function WalletConnectModal({
   closeModal,
   injectedProvider,
 } = {}) {
+  const isLocalDev = process.env.REACT_APP_FLOW_ENV === 'emulator';
+
   const modalClasses = classnames('modal', {
     'is-active': openModal,
   });
