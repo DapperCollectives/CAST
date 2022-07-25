@@ -1,21 +1,10 @@
 {
-  "name": "cast",
+  "name": "cast-backend",
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "client:build": "yarn workspace @ugly-baby/client build --max-old-space-size=12288",
-    "client:start": "yarn workspace @ugly-baby/client start",
-    "cadence:start": "yarn workspace @ugly-baby/cadence start",
-    "server:install": "yarn workspace @ugly-baby/server install",
-    "server:start": "yarn workspace @ugly-baby/server start",
-    "chain": "yarn workspace @ugly-baby/contracts chain",
-    "test": "yarn workspace @ugly-baby/contracts test",
-    "start": "yarn workspace @ugly-baby/client start"
-  },
-  "workspaces": {
-    "packages": [
-      "packages/*"
-    ]
+    "chain": "node chain.js",
+    "start": "go run ./main"
   },
   "dependencies": {},
   "devDependencies": {},

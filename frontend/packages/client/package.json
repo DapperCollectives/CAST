@@ -1,5 +1,5 @@
 {
-  "name": "@scaffold-flow/client",
+  "name": "@cast/client",
   "version": "1.0.1",
   "private": true,
   "dependencies": {
