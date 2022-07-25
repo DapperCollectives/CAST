@@ -1,4 +1,5 @@
 import React from 'react';
+import { JoinCommunityButton } from 'components';
 import { useMediaQuery } from 'hooks';
 import Blockies from 'react-blockies';
 
@@ -10,7 +11,9 @@ export default function CommunityHeader({
   communityName,
   members,
   totalMembers,
-  joinCommunityButton,
+  setTotalMembers = () => {},
+  onLeaveCommunity = () => {},
+  onJoinCommunity = () => {},
 } = {}) {
   const notMobile = useMediaQuery();
 
@@ -87,7 +90,17 @@ export default function CommunityHeader({
               </div>
             </div>
             <div className="column is-3 pb-0-mobile pt-2-mobile is-flex is-justify-content-end">
-              {joinCommunityButton}
+              <JoinCommunityButton
+                communityId={id}
+                setTotalMembers={setTotalMembers}
+                onLeaveCommunity={onLeaveCommunity}
+                onJoinCommunity={onJoinCommunity}
+                classNames="small-text pb-0-mobile px-0-mobile"
+                extraStyles={notMobile ? { maxWidth: '132px' } : {}}
+                buttonClassNames="py-5 py-4-mobile"
+                borderRadious="rounded-xl"
+                containerAlignment="is-align-items-flex-start"
+              />
             </div>
           </div>
         </div>

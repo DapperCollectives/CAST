@@ -8,7 +8,6 @@ import {
   CommunityAbout,
   CommunityProposals,
   LeaderBoard,
-  JoinCommunityButton,
   Tablink,
   CommunityHeader,
 } from 'components';
@@ -268,19 +267,9 @@ export default function Community() {
         communityName={name}
         totalMembers={totalMembers}
         members={members?.slice(0, 6)}
-        joinCommunityButton={
-          <JoinCommunityButton
-            communityId={id}
-            setTotalMembers={setTotalMembers}
-            onLeaveCommunity={onUserLeaveCommunity}
-            onJoinCommunity={onUserJoinCommunity}
-            classNames="small-text pb-0-mobile px-0-mobile"
-            extraStyles={notMobile ? { maxWidth: '132px' } : {}}
-            buttonClassNames="py-5 py-4-mobile"
-            borderRadious="rounded-xl"
-            containerAlignment="is-align-items-flex-start"
-          />
-        }
+        setTotalMembers={setTotalMembers}
+        onLeaveCommunity={onUserLeaveCommunity}
+        onJoinCommunity={onUserJoinCommunity}
       />
       <div className="section pt-0">
         <div className="container full-height community-content">
