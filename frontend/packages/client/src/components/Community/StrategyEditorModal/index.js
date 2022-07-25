@@ -112,7 +112,7 @@ export default function StrategyEditorModal({
 
   return (
     <div
-      className="modal-card has-background-white m-0 p-5 p-1-mobile"
+      className="modal-card has-background-white m-0 p-5 p-1-mobile full-height"
       style={{ minHeight: '467px' }}
     >
       <header
