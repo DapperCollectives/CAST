@@ -443,7 +443,8 @@ const StepOne = ({
         <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6">
           <h4 className="title is-5 mb-2">Voting Strategy</h4>
           <p className="has-text-grey mb-5">
-            Select a strategy for how voting power is calculated.
+            Select a strategy for how voting power is calculated. Voting
+            strategies are set by community admins.
           </p>
           <Dropdown
             defaultValue={defaultValueStrategy}
