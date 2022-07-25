@@ -318,7 +318,6 @@ function CommunityEditorProfile({
         value={communityName}
         onChange={(event) => setCommunityName(event.target.value)}
         disabled={isUpdating}
-        maxLength={50}
       />
       {showNameInputError && (
         <div className="pl-1 mt-2 transition-all">
