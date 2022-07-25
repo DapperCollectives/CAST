@@ -3,6 +3,7 @@ import * as fcl from '@onflow/fcl';
 import networks from 'networks';
 import { useFclUser } from 'hooks';
 import { WalletConnectModal } from 'components';
+import { IS_LOCAL_DEV } from 'const';
 
 // create our app context
 export const Web3Context = React.createContext({});
@@ -77,12 +78,30 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
 
   // filter services for now only blocto
   useEffect(() => {
-    fcl.discovery.authn.subscribe((res) => {
-      const filteredServices = res.results.filter((service) =>
-        service.uid.includes('blocto')
-      );
-      setServices(filteredServices);
-    });
+    if (!IS_LOCAL_DEV) {
+      fcl.discovery.authn.subscribe((res) => {
+        const filteredServices = res.results.filter((service) =>
+          service.uid.includes('blocto')
+        );
+        setServices(filteredServices);
+      });
+    } else {
+      // hard code service for local dev wallet
+      // this setting will enable to show blocto to connect
+      setServices([
+        {
+          f_type: 'Service',
+          f_vsn: '1.0.0',
+          type: 'authn',
+          method: 'IFRAME/RPC',
+          uid: 'blocto#authn',
+          provider: {
+            name: 'Blocto',
+            icon: '/images/blocto.png',
+          },
+        },
+      ]);
+    }
   }, []);
 
   const setWebContextConfig = useCallback((config) => {
