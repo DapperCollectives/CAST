@@ -3,9 +3,14 @@ import classnames from 'classnames';
 import { useDropzone } from 'react-dropzone';
 import { Upload } from 'components/Svg';
 import { WrapperResponsive, Loader } from 'components';
-import { getReducedImg } from 'utils';
+import { getReducedImg, validateLength } from 'utils';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
-import { MAX_AVATAR_FILE_SIZE, MAX_FILE_SIZE } from 'const';
+import {
+  MAX_AVATAR_FILE_SIZE,
+  MAX_FILE_SIZE,
+  COMMUNITY_DESCRIPTION_MAX_LENGTH,
+  COMMUNITY_NAME_MAX_LENGTH,
+} from 'const';
 
 function CommunityEditorProfile({
   name,
@@ -29,7 +34,9 @@ function CommunityEditorProfile({
 
   useEffect(() => {
     if (
-      (communityName !== name && communityName.length > 0) ||
+      (communityName !== name &&
+        communityName.length > 0 &&
+        validateLength(communityName, COMMUNITY_NAME_MAX_LENGTH)) ||
       communityDescription !== body ||
       image.file ||
       bannerImage.file
@@ -41,7 +48,9 @@ function CommunityEditorProfile({
       (communityName === name &&
         communityDescription === body &&
         image.file === undefined &&
-        bannerImage.file === undefined)
+        bannerImage.file === undefined) ||
+      !validateLength(communityName, COMMUNITY_NAME_MAX_LENGTH) ||
+      !validateLength(communityDescription, COMMUNITY_DESCRIPTION_MAX_LENGTH)
     ) {
       setEnableSave(false);
     }
@@ -149,6 +158,14 @@ function CommunityEditorProfile({
     }
   );
 
+  const showNameInputError = !validateLength(
+    communityName ?? '',
+    COMMUNITY_NAME_MAX_LENGTH
+  );
+  const showDescriptionInputError = !validateLength(
+    communityDescription ?? '',
+    COMMUNITY_DESCRIPTION_MAX_LENGTH
+  );
   return (
     <WrapperResponsive
       classNames="border-light rounded-lg columns is-flex-direction-column is-mobile m-0"
@@ -303,6 +320,13 @@ function CommunityEditorProfile({
         disabled={isUpdating}
         maxLength={50}
       />
+      {showNameInputError && (
+        <div className="pl-1 mt-2 transition-all">
+          <p className="smaller-text has-text-red">
+            The maximum length for Community Name is 50 characters
+          </p>
+        </div>
+      )}
       <textarea
         className="text-area rounded-sm border-light p-3 column is-full mt-5"
         type="text"
@@ -314,6 +338,13 @@ function CommunityEditorProfile({
         onChange={(event) => setCommunityDescription(event.target.value)}
         disabled={isUpdating}
       />
+      {showDescriptionInputError && (
+        <div className="pl-1 mt-2 transition-all">
+          <p className="smaller-text has-text-red">
+            The maximum length for Community Description is 1000 characters
+          </p>
+        </div>
+      )}
       <button
         style={{ height: 48, width: '100%' }}
         className={`button vote-button transition-all is-flex has-background-yellow rounded-sm mt-5 is-uppercase is-${
