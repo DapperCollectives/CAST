@@ -11,7 +11,7 @@ export default function HomeFooter() {
             <a
               target="_blank"
               rel="noreferrer noopener"
-              href="https://twitter.com/_collectives_"
+              href="https://dappercollectives.fyi"
               className="pl-1 is-underlined has-text-grey"
             >
               Dapper Collectives
