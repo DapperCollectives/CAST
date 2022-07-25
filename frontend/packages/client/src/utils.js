@@ -210,3 +210,6 @@ export const getPaginationInfo = (pages) => {
     lastPage?.next ?? -1,
   ];
 };
+
+export const validateLength = (string, MaxLength) =>
+  string?.length <= MaxLength;
