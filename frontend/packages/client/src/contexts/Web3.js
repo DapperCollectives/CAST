@@ -3,6 +3,7 @@ import * as fcl from '@onflow/fcl';
 import networks from 'networks';
 import { useFclUser } from 'hooks';
 import { WalletConnectModal } from 'components';
+import { IS_LOCAL_DEV } from 'const';
 
 // create our app context
 export const Web3Context = React.createContext({});
@@ -77,7 +78,7 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
 
   // filter services for now only blocto
   useEffect(() => {
-    if (process.env.REACT_APP_FLOW_ENV !== 'emulator') {
+    if (IS_LOCAL_DEV) {
       fcl.discovery.authn.subscribe((res) => {
         const filteredServices = res.results.filter((service) =>
           service.uid.includes('blocto')

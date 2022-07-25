@@ -1,6 +1,7 @@
 import React from 'react';
 import classnames from 'classnames';
 import { ArrowRight, Close } from './Svg';
+import { IS_LOCAL_DEV } from 'const';
 
 export default function WalletConnectModal({
   services = [],
@@ -8,8 +9,6 @@ export default function WalletConnectModal({
   closeModal,
   injectedProvider,
 } = {}) {
-  const isLocalDev = process.env.REACT_APP_FLOW_ENV === 'emulator';
-
   const modalClasses = classnames('modal', {
     'is-active': openModal,
   });
@@ -20,7 +19,7 @@ export default function WalletConnectModal({
 
   const listOfServices = services.map((service) => ({
     connectToService: () => {
-      injectedProvider.authenticate(!isLocalDev ? { service } : undefined);
+      injectedProvider.authenticate(!IS_LOCAL_DEV ? { service } : undefined);
       closeModal();
     },
     icon: `https://fcl-discovery.onflow.org${service.provider.icon}`,
