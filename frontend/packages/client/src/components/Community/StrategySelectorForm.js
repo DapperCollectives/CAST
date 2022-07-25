@@ -14,6 +14,7 @@ export default function StrategySelectorForm({
   callToAction = () => {},
   // callback to return strategies selected
   onStrategySelection,
+  enableDelUniqueItem,
 } = {}) {
   // holds array of objects with strategy information
   const [strategies, setStrategies] = useState(existingStrategies);
@@ -58,8 +59,8 @@ export default function StrategySelectorForm({
     setStrategies((state) => state.filter((_, idx) => idx !== index));
   };
 
-  // hide delete when there's only one strategy
-  const enableDelete = strategies.length > 1;
+  // hide delete when there's only one strategy unless passed by prop
+  const enableDelete = enableDelUniqueItem ?? strategies.length > 1;
 
   const callToActionComponent = callToAction(strategies);
 
