@@ -270,7 +270,7 @@ export default function Community() {
         members={members?.slice(0, 6)}
         joinCommunityButton={
           <JoinCommunityButton
-            communityId={communityId}
+            communityId={id}
             setTotalMembers={setTotalMembers}
             onLeaveCommunity={onUserLeaveCommunity}
             onJoinCommunity={onUserJoinCommunity}
