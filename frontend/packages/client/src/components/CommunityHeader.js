@@ -4,6 +4,7 @@ import { useMediaQuery } from 'hooks';
 import Blockies from 'react-blockies';
 
 export default function CommunityHeader({
+  isLoading = false,
   id,
   bannerImgUrl,
   logo,
@@ -36,6 +37,19 @@ export default function CommunityHeader({
               maxHeight: notMobile ? '149px' : '85px',
             }}
           >
+            {isLoading && (
+              <div
+                role="img"
+                aria-label="community banner"
+                className="rounded-full"
+                style={{
+                  width: notMobile ? 149 : 85,
+                  height: notMobile ? 149 : 85,
+                  backgroundColor: '#F2F2F2',
+                  border: '5px solid #F2F2F2',
+                }}
+              />
+            )}
             {logo ? (
               <div
                 role="img"
@@ -50,15 +64,15 @@ export default function CommunityHeader({
                   backgroundSize: 'cover',
                   border: '5px solid #F2F2F2',
                 }}
-              ></div>
-            ) : (
+              />
+            ) : slug || id ? (
               <Blockies
                 seed={slug ?? `seed-${id}`}
                 size={10}
                 scale={notMobile ? 14.9 : 8.5}
                 className="blockies blockies-border"
               />
-            )}
+            ) : null}
           </div>
           <div
             className="columns pt-5 pt-0-mobile"
