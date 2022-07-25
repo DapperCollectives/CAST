@@ -78,7 +78,7 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
 
   // filter services for now only blocto
   useEffect(() => {
-    if (IS_LOCAL_DEV) {
+    if (!IS_LOCAL_DEV) {
       fcl.discovery.authn.subscribe((res) => {
         const filteredServices = res.results.filter((service) =>
           service.uid.includes('blocto')

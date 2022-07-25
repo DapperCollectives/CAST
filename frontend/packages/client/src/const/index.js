@@ -5,7 +5,7 @@ export const MAX_AVATAR_FILE_SIZE = 2097152;
 
 export const MAX_PROPOSAL_IMAGE_FILE_SIZE = 2097152;
 
-export const IS_LOCAL_DEV = process.env.REACT_APP_FLOW_ENV !== 'emulator';
+export const IS_LOCAL_DEV = process.env.REACT_APP_FLOW_ENV === 'emulator';
 
 export const FilterValues = {
   all: 'All',
