@@ -27,6 +27,7 @@ export default function StepFour({
     <StrategySelectorForm
       existingStrategies={strategies}
       onStrategySelection={onStrategySelection}
+      enableDelUniqueItem={true}
       callToAction={() => {
         return (
           <ActionButton
