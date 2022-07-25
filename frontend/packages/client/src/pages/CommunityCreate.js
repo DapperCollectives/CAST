@@ -50,15 +50,18 @@ export default function CommunityCreate() {
     // opens modal and makes user to connect with wallet
     if (!creatorAddr) {
       modalContext.openModal(
-        React.createElement(Error, {
-          error: (
+        <Error
+          error={
             <div className="mt-5">
-              <WalletConnect />
+              <WalletConnect
+                closeModal={() => {
+                  modalContext.closeModal();
+                }}
+              />
             </div>
-          ),
-
-          errorTitle: 'Please connect a wallet to create a community.',
-        }),
+          }
+          errorTitle="Please connect a wallet to create a community."
+        />,
         { classNameModalContent: 'rounded-sm' }
       );
       setModalError(true);

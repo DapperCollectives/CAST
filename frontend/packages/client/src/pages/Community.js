@@ -260,6 +260,7 @@ export default function Community() {
   return (
     <section className="full-height pt-0">
       <CommunityHeader
+        isLoading={loading}
         bannerImgUrl={community?.bannerImgUrl}
         id={id}
         logo={logo}
