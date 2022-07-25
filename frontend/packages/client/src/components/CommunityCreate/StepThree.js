@@ -105,7 +105,7 @@ export default function StepThree({
         />
         <input
           type="text"
-          placeholder="CollectionPublicPath"
+          placeholder="Collection Public Path"
           name="collection_public_path"
           className="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
           value={storagePath}
