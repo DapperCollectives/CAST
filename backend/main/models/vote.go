@@ -13,6 +13,7 @@ import (
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
+	"github.com/rs/zerolog/log"
 )
 
 type Vote struct {
@@ -31,7 +32,7 @@ type VoteWithBalance struct {
 	// Extend Vote
 	Vote
 	// Balance
-	BlockHeight             uint64   `json:"blockHeight" pg:"block_height"`
+	BlockHeight             *uint64  `json:"blockHeight" pg:"block_height"`
 	Balance                 *uint64  `json:"balance"`
 	PrimaryAccountBalance   *uint64  `json:"primaryAccountBalance"`
 	SecondaryAccountBalance *uint64  `json:"secondaryAccountBalance"`
@@ -157,17 +158,18 @@ func GetVotesForProposal(db *s.Database, start, count int, order string, proposa
 		b.secondary_account_balance,
 		b.staking_balance
     from votes v
-    join proposals p on p.id = $3
+    join proposals p on p.id = v.proposal_id
   	left join balances b on b.addr = v.addr 
 		and p.block_height = b.block_height
-    where proposal_id = $3`
+    where v.proposal_id = $3`
 
-	sql = sql + orderBySql
+	sql = sql + " " + orderBySql
 	sql = sql + " LIMIT $1 OFFSET $2"
 
 	err := pgxscan.Select(db.Context, db.Conn, &votes, sql, count, start, proposalId)
 
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
+		log.Error().Err(err).Msg("Error querying votes for proposal")
 		return nil, 0, err
 	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
 		return []*VoteWithBalance{}, 0, nil
@@ -176,6 +178,7 @@ func GetVotesForProposal(db *s.Database, start, count int, order string, proposa
 	if strategy == "balance-of-nfts" {
 		votes, err = getUsersNFTs(db, votes)
 		if err != nil {
+			log.Error().Err(err).Msg("Error getting user NFTs")
 			return nil, 0, err
 		}
 	}
@@ -204,6 +207,7 @@ func (vb *VoteWithBalance) GetVote(db *s.Database) error {
 		left join balances b on b.addr = v.addr
 		WHERE proposal_id = $1 AND v.addr = $2`,
 		vb.Proposal_id, vb.Addr)
+
 	if err != nil {
 		return err
 	}
@@ -310,6 +314,7 @@ func GetUserNFTs(db *s.Database, vote *VoteWithBalance) ([]*NFT, error) {
 	sql := `select id from nfts
 	where proposal_id = $1 and owner_addr = $2
 	`
+
 	err := pgxscan.Select(db.Context, db.Conn, &nftIds, sql, vote.Proposal_id, vote.Addr)
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		return nil, err

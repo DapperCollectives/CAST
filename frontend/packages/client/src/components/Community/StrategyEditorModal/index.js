@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import networks from 'networks';
 import StrategySelector from './StrategySelector';
 import StrategyInformationForm from './StrategyInformationForm';
 import { ActionButton } from 'components';
 import { isValidAddress } from 'utils';
+
+const networkConfig = networks[process.env.REACT_APP_FLOW_ENV];
 
 const ModalSteps = {
   1: 'select-strategy',
@@ -56,6 +59,26 @@ export default function StrategyEditorModal({
   }, [strategyData]);
 
   const setStrategy = (strategyName) => {
+    //
+    // STRATEGY CONFIGURATION
+    //
+    // If strategy selected is 'one-address-one-vote'
+    // then no more information is required(FE uses strategy configuration)
+    // modal should be closed and strategy should be ready to be added
+    if (strategyName === 'one-address-one-vote') {
+      const strategyConfig =
+        networkConfig.strategiesConfig['one-address-one-vote'];
+      onDone({
+        name: strategyName,
+        contract: {
+          name: strategyConfig.name,
+          addr: strategyConfig.addr,
+          publicPath: strategyConfig.publicPath,
+          threshold: '0',
+        },
+      });
+      return;
+    }
     setStrategyData((state) => ({ ...state, name: strategyName }));
     setSep(ModalSteps[2]);
   };
