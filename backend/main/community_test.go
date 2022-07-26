@@ -40,7 +40,7 @@ func TestGetNonExistentCommunity(t *testing.T) {
 	var m map[string]string
 	json.Unmarshal(response.Body.Bytes(), &m)
 
-	assert.Equal(t, "Community not found", m["error"])
+	assert.Equal(t, "Community not found.", m["error"])
 }
 
 func TestCreateCommunity(t *testing.T) {

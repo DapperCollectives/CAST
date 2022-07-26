@@ -43,7 +43,7 @@ func TestGetVotes(t *testing.T) {
 
 		var m map[string]string
 		json.Unmarshal(response.Body.Bytes(), &m)
-		assert.Equal(t, "Vote not found", m["error"])
+		assert.Equal(t, "Vote not found.", m["error"])
 	})
 
 	t.Run("Should successfully return existing vote for address", func(t *testing.T) {
