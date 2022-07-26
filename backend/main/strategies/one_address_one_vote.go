@@ -12,8 +12,8 @@ import (
 
 type OneAddressOneVote struct {
 	s.StrategyStruct
-	SC s.SnapshotClient
-	DB *s.Database
+	SC   s.SnapshotClient
+	DB   *s.Database
 	name string
 }
 
@@ -32,14 +32,14 @@ func (s *OneAddressOneVote) FetchBalance(
 			log.Error().Err(err).Msg("error querying address b at blockheight")
 			return nil, err
 		}
-	
+
 		if b.ID == "" {
 			if err := b.CreateBalance(s.DB); err != nil {
 				log.Error().Err(err).Msg("error saving b to DB")
 				return nil, err
 			}
 		}
-	
+
 		return b, nil
 	}
 }
@@ -88,7 +88,12 @@ func (s *OneAddressOneVote) GetVotes(
 }
 
 func (s *OneAddressOneVote) RequiresSnapshot() bool {
-	return false
+	if s.name == "one-address-one-vote-nft" {
+		return false
+	} else {
+		return true
+	}
+
 }
 
 func (s *OneAddressOneVote) InitStrategy(

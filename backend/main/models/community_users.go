@@ -145,25 +145,12 @@ func GetCommunitiesForUser(db *s.Database, addr string, start, count int) ([]Use
 	err := pgxscan.Select(db.Context, db.Conn, &communities,
 		`
 		SELECT
-	  communities.*,
-	  a.roles
-		FROM communities
-		LEFT JOIN community_users ON community_users.community_id = communities.id
-		LEFT JOIN (
-				SELECT DISTINCT ON (community_users.community_id) community_users.*,
-						ARRAY(
-								SELECT community_users.user_type
-								FROM community_users
-								WHERE addr = $1
-								GROUP BY community_users.user_type
-						) as roles
-						FROM community_users
-						WHERE addr = $1
-		) a ON community_users.addr = a.addr
+		communities.*,
+		community_users.user_type as roles
+		  FROM communities
+		  JOIN community_users ON community_users.community_id = communities.id
 		WHERE community_users.addr = $1
-		GROUP BY communities.id, a.roles
-		LIMIT $2 OFFSET $3
-		`, addr, count, start)
+		`, addr)
 
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		return nil, 0, err
@@ -171,33 +158,9 @@ func GetCommunitiesForUser(db *s.Database, addr string, start, count int) ([]Use
 		return []UserCommunity{}, 0, nil
 	}
 
-	for i := range communities {
-		communities[i].Roles = strings.Trim(communities[i].Roles, "{}")
-	}
+	mergedCommunities, totalCommunities := mergeUserRolesForCommunities(communities, start, count)
 
-	var totalCommunities int
-	countSql := `
-	SELECT
-		COUNT(DISTINCT communities.id)
-	FROM communities
-	LEFT JOIN community_users ON community_users.community_id = communities.id
-	LEFT JOIN (
-		SELECT DISTINCT ON (community_users.community_id) community_users.*,
-				ARRAY(
-						SELECT community_users.user_type
-						FROM community_users
-						WHERE addr = $1
-						GROUP BY community_users.user_type
-				) as roles
-				FROM community_users
-				WHERE addr = $1
-	) a ON community_users.addr = a.addr
-	WHERE community_users.addr = $1
-	GROUP BY communities.id, a.roles
-	`
-	_ = db.Conn.QueryRow(db.Context, countSql, addr).Scan(&totalCommunities)
-
-	return communities, totalCommunities, nil
+	return mergedCommunities, totalCommunities, nil
 }
 
 func (u *CommunityUser) GetCommunityUser(db *s.Database) error {
@@ -417,4 +380,43 @@ func getLeaderboardUsers(userAchievements UserAchievements, currentUserAddr stri
 	}
 
 	return leaderboardUsers, currentUser
+}
+
+func mergeUserRolesForCommunities(communities []UserCommunity, start, count int) ([]UserCommunity, int) {
+	var mergedCommunities = []UserCommunity{}
+	communitiesMap := make(map[int]int)
+	for i := range communities {
+		if index, ok := communitiesMap[communities[i].ID]; ok{
+			mergedCommunities[index].Roles = strings.Join([]string{mergedCommunities[index].Roles, communities[i].Roles}, ",")
+		} else {
+			mergedCommunities = append(mergedCommunities, communities[i])
+			communitiesMap[communities[i].ID] = len(mergedCommunities) - 1
+		}
+	}
+
+	if start == 0 && len(mergedCommunities) >= count {
+		mergedCommunities = mergedCommunities[0:count]
+	} else {
+		startIndex := start * count
+		endIndex := start*count + count
+
+		// If index invalid, set to last page
+		if startIndex >= len(mergedCommunities) {
+			if len(mergedCommunities)-count >= 0 {
+				startIndex = len(mergedCommunities) - count
+			} else {
+				startIndex = 0
+			}
+		}
+
+		if endIndex <= len(mergedCommunities) {
+			mergedCommunities = mergedCommunities[startIndex:endIndex]
+		} else {
+			mergedCommunities = mergedCommunities[startIndex:]
+		}
+	}
+
+	totalCommunities := len(mergedCommunities)
+
+	return mergedCommunities, totalCommunities
 }

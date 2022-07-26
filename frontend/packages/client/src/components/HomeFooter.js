@@ -11,7 +11,7 @@ export default function HomeFooter() {
             <a
               target="_blank"
               rel="noreferrer noopener"
-              href="https://twitter.com/_collectives_"
+              href="https://dappercollectives.fyi"
               className="pl-1 is-underlined has-text-grey"
             >
               Dapper Collectives
@@ -33,16 +33,18 @@ export default function HomeFooter() {
         <div className="column is-narrow px-4-desktop">
           <p className="has-text-grey small-text">
             <Link to={'/privacy-policy'}>
-              <div className="is-underlined has-text-grey">Privacy Policy</div>
+              <span className="is-underlined has-text-grey">
+                Privacy Policy
+              </span>
             </Link>
           </p>
         </div>
         <div className="column is-narrow px-4-desktop">
           <p className="has-text-grey small-text">
             <Link to={'/terms-of-service'}>
-              <div className="is-underlined has-text-grey">
+              <span className="is-underlined has-text-grey">
                 Terms of Service
-              </div>
+              </span>
             </Link>
           </p>
         </div>

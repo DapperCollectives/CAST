@@ -7,9 +7,14 @@ import { CommunityLinksForm } from 'components/Community/CommunityEditorLinks';
 import useLinkValidator, {
   urlPatternValidation,
 } from '../Community/hooks/useLinkValidator';
-import { getReducedImg } from 'utils';
+import { getReducedImg, validateLength } from 'utils';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
-import { MAX_AVATAR_FILE_SIZE, MAX_FILE_SIZE } from 'const';
+import {
+  MAX_AVATAR_FILE_SIZE,
+  MAX_FILE_SIZE,
+  COMMUNITY_NAME_MAX_LENGTH,
+  COMMUNITY_DESCRIPTION_MAX_LENGTH,
+} from 'const';
 import pick from 'lodash/pick';
 import { useCommunityCategory } from 'hooks';
 
@@ -25,8 +30,6 @@ const initialValues = Object.assign(
   {},
   ...linksFields.map((key) => ({ [key]: '' }))
 );
-
-const checkValidNameLength = (name) => name?.length <= 50;
 
 export default function StepOne({
   stepData,
@@ -148,9 +151,12 @@ export default function StepOne({
   useEffect(() => {
     const requiredFields = {
       communityName: (name) =>
-        name?.trim().length > 0 && checkValidNameLength(name),
+        name?.trim().length > 0 &&
+        validateLength(name, COMMUNITY_NAME_MAX_LENGTH),
       communityDescription: (desc) =>
-        desc?.trim().length ? desc?.trim().length < 1000 : true,
+        desc?.trim().length
+          ? validateLength(desc, COMMUNITY_DESCRIPTION_MAX_LENGTH)
+          : true,
       logo: (logo) =>
         logo !== undefined ? logo?.file && logo?.imageUrl : true,
       communityTerms: (termsUrl) =>
@@ -170,7 +176,14 @@ export default function StepOne({
     }
   );
 
-  const showNameInputError = !checkValidNameLength(communityName ?? '');
+  const showNameInputError = !validateLength(
+    communityName ?? '',
+    COMMUNITY_NAME_MAX_LENGTH
+  );
+  const showDescriptionInputError = !validateLength(
+    communityDescription ?? '',
+    COMMUNITY_DESCRIPTION_MAX_LENGTH
+  );
 
   return (
     <>
@@ -323,6 +336,13 @@ export default function StepOne({
             })
           }
         />
+        {showDescriptionInputError && (
+          <div className="pl-1 mt-2 transition-all">
+            <p className="smaller-text has-text-red">
+              The maximum length for Community Description is 1000 characters
+            </p>
+          </div>
+        )}
         <Dropdown
           label="Category"
           margin="mt-4"
