@@ -16,7 +16,6 @@ type TokenWeightedDefault struct {
 	s.StrategyStruct
 	SC s.SnapshotClient
 	DB *s.Database
-	name string
 }
 
 type FTBalanceResponse struct {
@@ -50,20 +49,32 @@ func (s *TokenWeightedDefault) FetchBalance(
 		return nil, err
 	}
 
-	var ftBalance = &FTBalanceResponse{}
-	if err := s.SC.GetAddressBalanceAtBlockHeight(
-		b.Addr,
-		b.BlockHeight,
-		ftBalance,
-		&strategy.Contract,
-	); err != nil {
-		log.Error().Err(err).Msg("Error fetching balance.")
-		return nil, err
-	}
+	if *strategy.Contract.Name == "FlowToken" {
+		if err := s.SC.GetAddressBalanceAtBlockHeight(
+			b.Addr,
+			b.BlockHeight,
+			b,
+			&strategy.Contract,
+		); err != nil {
+			log.Error().Err(err).Msg("Error fetching balance.")
+			return nil, err
+		}
+	} else {
+		var ftBalance = &FTBalanceResponse{}
+		if err := s.SC.GetAddressBalanceAtBlockHeight(
+			b.Addr,
+			b.BlockHeight,
+			ftBalance,
+			&strategy.Contract,
+		); err != nil {
+			log.Error().Err(err).Msg("Error fetching balance.")
+			return nil, err
+		}
 
-	b.PrimaryAccountBalance = ftBalance.Balance
-	b.SecondaryAccountBalance = 0
-	b.StakingBalance = 0
+		b.PrimaryAccountBalance = ftBalance.Balance
+		b.SecondaryAccountBalance = 0
+		b.StakingBalance = 0
+	}
 
 	if err := b.CreateBalance(s.DB); err != nil {
 		log.Error().Err(err).Msg("Error creating balance in the database.")
@@ -139,10 +150,8 @@ func (s *TokenWeightedDefault) InitStrategy(
 	f *shared.FlowAdapter,
 	db *shared.Database,
 	sc *s.SnapshotClient,
-	name string,
 ) {
 	s.FlowAdapter = f
 	s.DB = db
 	s.SC = *sc
-	s.name = name
 }

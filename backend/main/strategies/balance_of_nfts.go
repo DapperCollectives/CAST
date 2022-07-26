@@ -4,20 +4,62 @@ import (
 	"github.com/DapperCollectives/CAST/backend/main/models"
 	"github.com/DapperCollectives/CAST/backend/main/shared"
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
+	"github.com/rs/zerolog/log"
 )
 
 type BalanceOfNfts struct {
 	s.StrategyStruct
 	SC s.SnapshotClient
 	DB *s.Database
-	name string
 }
 
 func (b *BalanceOfNfts) FetchBalance(
 	balance *models.Balance,
 	p *models.Proposal,
 ) (*models.Balance, error) {
-	return FetchNFTBalance(b.DB, b.FlowAdapter, balance, p)
+
+	v := models.Vote{Proposal_id: balance.Proposal_id, Addr: balance.Addr}
+	vb := &models.VoteWithBalance{
+		NFTs: []*models.NFT{},
+		Vote: v,
+	}
+
+	var c models.Community
+	if err := c.GetCommunityByProposalId(b.DB, balance.Proposal_id); err != nil {
+		return nil, err
+	}
+
+	strategy, err := models.MatchStrategyByProposal(*c.Strategies, *p.Strategy)
+	if err != nil {
+		log.Error().Err(err).Msg("Unable to find strategy for contract.")
+		return nil, err
+	}
+
+	nftIds, err := b.FlowAdapter.GetNFTIds(balance.Addr, &strategy.Contract)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, nftId := range nftIds {
+		nft := &models.NFT{
+			ID: nftId,
+		}
+		vb.NFTs = append(vb.NFTs, nft)
+	}
+
+	doesExist, err := models.DoesNFTExist(b.DB, vb)
+	if err != nil {
+		return nil, err
+	}
+
+	//only if the NFT ID is not already in the DB,
+	//do we add the balance
+	if !doesExist && err == nil {
+		err = models.CreateUserNFTRecord(b.DB, vb)
+		balance.NFTCount = len(vb.NFTs)
+	}
+
+	return balance, nil
 }
 
 func (b *BalanceOfNfts) TallyVotes(
@@ -35,7 +77,12 @@ func (b *BalanceOfNfts) TallyVotes(
 }
 
 func (b *BalanceOfNfts) GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error) {
-	return float64(len(vote.NFTs)), nil
+	nftIds, err := models.GetUserNFTs(b.DB, vote)
+	if err != nil {
+		log.Error().Err(err).Msg("error in GetVoteWeightForBalance for BalanceOfNFTs strategy")
+		return 0.00, err
+	}
+	return float64(len(nftIds)), nil
 }
 
 func (s *BalanceOfNfts) GetVotes(
@@ -62,10 +109,8 @@ func (s *BalanceOfNfts) InitStrategy(
 	f *shared.FlowAdapter,
 	db *shared.Database,
 	sc *s.SnapshotClient,
-	name string,
 ) {
 	s.FlowAdapter = f
 	s.DB = db
 	s.SC = *sc
-	s.name = name
 }
