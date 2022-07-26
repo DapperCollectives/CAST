@@ -66,7 +66,7 @@ type Strategy interface {
 	TallyVotes(votes []*models.VoteWithBalance, p *models.ProposalResults) (models.ProposalResults, error)
 	GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error)
 	GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error)
-	InitStrategy(f *shared.FlowAdapter, db *shared.Database, sc *shared.SnapshotClient, name string)
+	InitStrategy(f *shared.FlowAdapter, db *shared.Database, sc *shared.SnapshotClient)
 	FetchBalance(b *models.Balance, p *models.Proposal) (*models.Balance, error)
 	RequiresSnapshot() bool
 }
@@ -75,8 +75,6 @@ var strategyMap = map[string]Strategy{
 	"token-weighted-default":        &strategies.TokenWeightedDefault{},
 	"staked-token-weighted-default": &strategies.StakedTokenWeightedDefault{},
 	"one-address-one-vote":          &strategies.OneAddressOneVote{},
-	"one-address-one-vote-ft":       &strategies.OneAddressOneVote{},
-	"one-address-one-vote-nft":      &strategies.OneAddressOneVote{},
 	"balance-of-nfts":               &strategies.BalanceOfNfts{},
 }
 
@@ -322,7 +320,7 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	proposalWithChoices := models.NewProposalResults(proposalId, p.Choices)
-	s.InitStrategy(a.FlowAdapter, a.DB, a.SnapshotClient, *p.Strategy)
+	s.InitStrategy(a.FlowAdapter, a.DB, a.SnapshotClient)
 
 	proposalResults, err := s.TallyVotes(votes, proposalWithChoices)
 	if err != nil {
@@ -379,7 +377,7 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.InitStrategy(a.FlowAdapter, a.DB, a.SnapshotClient, *proposal.Strategy)
+	s.InitStrategy(a.FlowAdapter, a.DB, a.SnapshotClient)
 
 	votes, totalRecords, err := models.GetVotesForProposal(a.DB, start, count, order, proposalId, *proposal.Strategy)
 	if err != nil {
@@ -590,7 +588,7 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	// validate transaction signature
+	// validate user signature
 	// if err := a.FlowAdapter.UserTransactionValidate(v.Addr, v.Message, v.Composite_signatures, v.TransactionId, a.TxOptionsAddresses, p.Choices); err != nil {
 	// 	respondWithError(w, http.StatusBadRequest, err.Error())
 	// 	return
@@ -612,7 +610,7 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 		emptyBalance.BlockHeight = *p.Block_height
 	}
 
-	s.InitStrategy(a.FlowAdapter, a.DB, a.SnapshotClient, *p.Strategy)
+	s.InitStrategy(a.FlowAdapter, a.DB, a.SnapshotClient)
 
 	balance, err := s.FetchBalance(emptyBalance, &p)
 	if err != nil {
@@ -795,7 +793,7 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 
 	}
 	s := strategyMap[*p.Strategy]
-	s.InitStrategy(a.FlowAdapter, a.DB, a.SnapshotClient, *p.Strategy)
+	s.InitStrategy(a.FlowAdapter, a.DB, a.SnapshotClient)
 
 	p.Min_balance = strategy.Contract.Threshold
 	p.Max_weight = strategy.Contract.MaxWeight
