@@ -204,6 +204,7 @@ func (vb *VoteWithBalance) GetVote(db *s.Database) error {
 		left join balances b on b.addr = v.addr
 		WHERE proposal_id = $1 AND v.addr = $2`,
 		vb.Proposal_id, vb.Addr)
+
 	if err != nil {
 		return err
 	}
@@ -310,6 +311,7 @@ func GetUserNFTs(db *s.Database, vote *VoteWithBalance) ([]*NFT, error) {
 	sql := `select id from nfts
 	where proposal_id = $1 and owner_addr = $2
 	`
+
 	err := pgxscan.Select(db.Context, db.Conn, &nftIds, sql, vote.Proposal_id, vote.Addr)
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		return nil, err

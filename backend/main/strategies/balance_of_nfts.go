@@ -77,7 +77,12 @@ func (b *BalanceOfNfts) TallyVotes(
 }
 
 func (b *BalanceOfNfts) GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error) {
-	return float64(len(vote.NFTs)), nil
+	nftIds, err := models.GetUserNFTs(b.DB, vote)
+	if err != nil {
+		log.Error().Err(err).Msg("error in GetVoteWeightForBalance for BalanceOfNFTs strategy")
+		return 0.00, err
+	}
+	return float64(len(nftIds)), nil
 }
 
 func (s *BalanceOfNfts) GetVotes(

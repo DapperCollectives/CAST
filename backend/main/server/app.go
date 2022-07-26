@@ -612,6 +612,7 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 
 	s.InitStrategy(a.FlowAdapter, a.DB, a.SnapshotClient)
 
+	// TODO: should work w/ NFTs
 	balance, err := s.FetchBalance(emptyBalance, &p)
 	if err != nil {
 		log.Error().Err(err).Msgf("Error fetching balance for address %v.", v.Addr)
