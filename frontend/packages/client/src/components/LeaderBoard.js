@@ -47,13 +47,14 @@ const LeaderBoard = ({
           {!isLoading &&
             data?.users.map((datum, index) => {
               const userIndex = index + 1;
+              const isCurrentUser = datum.addr === user?.addr;
               const indexClasses = classnames({
                 'index-cell': index === 0 || index === 4,
                 'rounded-sm-tl': index === 0,
                 'rounded-sm-bl': index === 4,
-                'has-background-white-ter': !currentUserInLeaderboard,
-                'has-background-black-bis': currentUserInLeaderboard,
-                'has-text-white': currentUserInLeaderboard,
+                'has-background-white-ter': !isCurrentUser,
+                'has-background-black-bis': isCurrentUser,
+                'has-text-white': isCurrentUser,
               });
 
               return (
