@@ -1,9 +1,0 @@
-{
-  "name": "@scaffold-flow/cadence",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "start": "cd ../../.. && cd ./backend && node chain.js",
-    "deploy": "node deploy.js"
-  }
-}
