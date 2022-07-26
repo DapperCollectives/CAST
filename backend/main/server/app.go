@@ -797,6 +797,9 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 	s := strategyMap[*p.Strategy]
 	s.InitStrategy(a.FlowAdapter, a.DB, a.SnapshotClient, *p.Strategy)
 
+	p.Min_balance = strategy.Contract.Threshold
+	p.Max_weight = strategy.Contract.MaxWeight
+
 	var snapshotResponse *shared.SnapshotResponse
 	if s.RequiresSnapshot() {
 		snapshotResponse, err = a.SnapshotClient.TakeSnapshot(strategy.Contract)

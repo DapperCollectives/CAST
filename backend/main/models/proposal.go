@@ -21,7 +21,7 @@ type Proposal struct {
 	Choices              []s.Choice              `json:"choices" validate:"required"`
 	Strategy             *string                 `json:"strategy,omitempty"`
 	Max_weight           *float64                `json:"maxWeight,omitempty"`
-	Min_balance          *uint64                 `json:"minBalance,omitempty"`
+	Min_balance          *float64                `json:"minBalance,omitempty"`
 	Creator_addr         string                  `json:"creatorAddr" validate:"required"`
 	Start_time           time.Time               `json:"startTime" validate:"required"`
 	Result               *string                 `json:"result,omitempty"`
