@@ -197,7 +197,7 @@ func (p *Proposal) ValidateBalance(weight float64) error {
 		return nil
 	}
 
-	var Min_balance = float64(*p.Min_balance)
+	var Min_balance = *p.Min_balance
 	var ERROR error = fmt.Errorf("insufficient balance for strategy: %s", *p.Strategy)
 
 	// TODO: Feature flag
