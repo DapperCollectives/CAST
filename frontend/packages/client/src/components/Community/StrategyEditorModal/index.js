@@ -1,59 +1,26 @@
 import React, { useEffect, useState } from 'react';
+import networks from 'networks';
 import StrategySelector from './StrategySelector';
 import StrategyInformationForm from './StrategyInformationForm';
 import { ActionButton } from 'components';
 import { isValidAddress } from 'utils';
+
+const networkConfig = networks[process.env.REACT_APP_FLOW_ENV];
 
 const ModalSteps = {
   1: 'select-strategy',
   2: 'strategy-information',
 };
 
-const getFormFields = (strategyName) => {
-  let initialFormFields = {
-    addr: '',
-    name: '',
-    threshold: '',
-    maxWeight: '',
-    publicPath: '',
-  };
-
-  if (
-    strategyName === 'one-address-one-vote-nft' ||
-    strategyName === 'one-address-one-vote-ft'
-  ) {
-    initialFormFields = {
-      addr: '',
-      name: '',
-      publicPath: '',
-    };
-  }
-  return Object.keys(initialFormFields);
+const initialFormFields = {
+  addr: '',
+  name: '',
+  threshold: '',
+  maxWeight: '',
+  publicPath: '',
 };
 
-const getRequiredFields = (strategyName) => {
-  let requiredFields = {
-    addr: (addr) => addr?.trim().length > 0 && isValidAddress(addr),
-    name: (name) => name?.trim().length > 0 && name?.trim().length <= 150,
-    publicPath: (path) => path?.trim().length > 0 && path?.trim().length <= 150,
-    maxWeight: (maxWeight) =>
-      maxWeight?.trim().length > 0 && /^[0-9]+$/.test(maxWeight),
-    threshold: (threshold) =>
-      threshold?.trim().length > 0 && /^[0-9]+$/.test(threshold),
-  };
-  if (
-    strategyName === 'one-address-one-vote-nft' ||
-    strategyName === 'one-address-one-vote-ft'
-  ) {
-    requiredFields = {
-      addr: (addr) => addr?.trim().length > 0 && isValidAddress(addr),
-      name: (name) => name?.trim().length > 0 && name?.trim().length <= 150,
-      publicPath: (path) =>
-        path?.trim().length > 0 && path?.trim().length <= 150,
-    };
-  }
-  return requiredFields;
-};
+const formFields = Object.keys(initialFormFields);
 
 export default function StrategyEditorModal({
   strategies = [],
@@ -70,22 +37,49 @@ export default function StrategyEditorModal({
 
   const [strategyData, setStrategyData] = useState({
     name: '',
-    contract: {},
+    contract: { ...initialFormFields },
   });
 
   // this useEffect validates form on second step
   useEffect(() => {
-    const requiredFields = getRequiredFields(strategyData.name);
+    const requiredFields = {
+      addr: (addr) => addr?.trim().length > 0 && isValidAddress(addr),
+      name: (name) => name?.trim().length > 0 && name?.trim().length <= 150,
+      publicPath: (path) =>
+        path?.trim().length > 0 && path?.trim().length <= 150,
+      maxWeight: (maxWeight) =>
+        maxWeight?.trim().length > 0 && /^[0-9]+$/.test(maxWeight),
+      threshold: (threshold) =>
+        threshold?.trim().length > 0 && /^[0-9]+$/.test(threshold),
+    };
     const isValid = Object.keys(requiredFields).every((field) =>
       requiredFields[field](strategyData.contract[field])
     );
     setIsFormValid(isValid);
   }, [strategyData]);
 
-  // user selected strategy move to second step to enter information
   const setStrategy = (strategyName) => {
+    //
+    // STRATEGY CONFIGURATION
+    //
+    // If strategy selected is 'one-address-one-vote'
+    // then no more information is required(FE uses strategy configuration)
+    // modal should be closed and strategy should be ready to be added
+    if (strategyName === 'one-address-one-vote') {
+      const strategyConfig =
+        networkConfig.strategiesConfig['one-address-one-vote'];
+      onDone({
+        name: strategyName,
+        contract: {
+          name: strategyConfig.name,
+          addr: strategyConfig.addr,
+          publicPath: strategyConfig.publicPath,
+          threshold: '0',
+        },
+      });
+      return;
+    }
     setStrategyData((state) => ({ ...state, name: strategyName }));
-    // else go to second step
     setSep(ModalSteps[2]);
   };
 
@@ -151,7 +145,7 @@ export default function StrategyEditorModal({
           <StrategyInformationForm
             setField={setContractInfoField}
             formData={strategyData.contract}
-            formFields={getFormFields(strategyData.name)}
+            formFields={formFields}
             actionButton={
               <ActionButton
                 label="done"

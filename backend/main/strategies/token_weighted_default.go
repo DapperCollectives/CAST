@@ -16,7 +16,6 @@ type TokenWeightedDefault struct {
 	s.StrategyStruct
 	SC s.SnapshotClient
 	DB *s.Database
-	name string
 }
 
 type FTBalanceResponse struct {
@@ -139,10 +138,8 @@ func (s *TokenWeightedDefault) InitStrategy(
 	f *shared.FlowAdapter,
 	db *shared.Database,
 	sc *s.SnapshotClient,
-	name string,
 ) {
 	s.FlowAdapter = f
 	s.DB = db
 	s.SC = *sc
-	s.name = name
 }

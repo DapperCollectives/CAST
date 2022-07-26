@@ -113,7 +113,7 @@ const VotesList = ({ proposalId, castVote }) => {
                   <div
                     className={`column is-4 py-1 px-0 is-flex is-align-items-center is-justify-content-end small-text has-text-grey`}
                   >
-                    {millify(vote.balance / Math.pow(10, 8) || '0')} FLOW
+                    {millify(vote.weight || '0')}
                   </div>
                   {/* last one should not show if it has less than ten elements*/}
                   {(totalVotes !== i + 1 || hasMoreThanTen) && (
