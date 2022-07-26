@@ -13,6 +13,7 @@ import (
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
+	"github.com/rs/zerolog/log"
 )
 
 type Vote struct {
@@ -31,7 +32,7 @@ type VoteWithBalance struct {
 	// Extend Vote
 	Vote
 	// Balance
-	BlockHeight             uint64   `json:"blockHeight" pg:"block_height"`
+	BlockHeight             *uint64  `json:"blockHeight" pg:"block_height"`
 	Balance                 *uint64  `json:"balance"`
 	PrimaryAccountBalance   *uint64  `json:"primaryAccountBalance"`
 	SecondaryAccountBalance *uint64  `json:"secondaryAccountBalance"`
@@ -157,17 +158,18 @@ func GetVotesForProposal(db *s.Database, start, count int, order string, proposa
 		b.secondary_account_balance,
 		b.staking_balance
     from votes v
-    join proposals p on p.id = $3
+    join proposals p on p.id = v.proposal_id
   	left join balances b on b.addr = v.addr 
 		and p.block_height = b.block_height
-    where proposal_id = $3`
+    where v.proposal_id = $3`
 
-	sql = sql + orderBySql
+	sql = sql + " " + orderBySql
 	sql = sql + " LIMIT $1 OFFSET $2"
 
 	err := pgxscan.Select(db.Context, db.Conn, &votes, sql, count, start, proposalId)
 
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
+		log.Error().Err(err).Msg("Error querying votes for proposal")
 		return nil, 0, err
 	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
 		return []*VoteWithBalance{}, 0, nil
@@ -176,6 +178,7 @@ func GetVotesForProposal(db *s.Database, start, count int, order string, proposa
 	if strategy == "balance-of-nfts" {
 		votes, err = getUsersNFTs(db, votes)
 		if err != nil {
+			log.Error().Err(err).Msg("Error getting user NFTs")
 			return nil, 0, err
 		}
 	}
