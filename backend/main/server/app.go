@@ -150,8 +150,6 @@ func (a *App) ConnectDB(database_url string) {
 	var database shared.Database
 	var err error
 
-	log.Info().Msg("Connecting to PostgreSQL at " + database_url)
-
 	database.Context = context.Background()
 	database.Name = "flow_snapshot"
 
