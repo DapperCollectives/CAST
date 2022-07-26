@@ -179,7 +179,7 @@ export default function Community() {
 
   // these two fields should be coming from backend as configuration
   const showPulse = false;
-  const showLeaderBoard = true;
+  const showLeaderBoard = false;
 
   // check for allowing only three options
   if (!['proposals', 'about', 'members'].includes(activeTab)) {
