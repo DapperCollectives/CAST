@@ -3,6 +3,7 @@ package strategies
 import (
 	"fmt"
 	"math"
+	"time"
 
 	"github.com/DapperCollectives/CAST/backend/main/models"
 	"github.com/DapperCollectives/CAST/backend/main/shared"
@@ -15,6 +16,17 @@ type TokenWeightedDefault struct {
 	s.StrategyStruct
 	SC s.SnapshotClient
 	DB *s.Database
+	name string
+}
+
+type FTBalanceResponse struct {
+	ID              string    `json:"id"`
+	FungibleTokenID string    `json:"fungibleTokenId"`
+	Addr            string    `json:"addr"`
+	Balance         uint64    `json:"balance"`
+	BlockHeight     uint64    `json:"blockHeight"`
+	CreatedAt       time.Time `json:"createdAt"`
+	HasVault        bool      `json:"hasVault"`
 }
 
 func (s *TokenWeightedDefault) FetchBalance(
@@ -28,7 +40,7 @@ func (s *TokenWeightedDefault) FetchBalance(
 	}
 
 	if err := b.GetBalanceByAddressAndBlockHeight(s.DB); err != nil && err.Error() != pgx.ErrNoRows.Error() {
-		log.Error().Err(err).Msg("error fetching balance from DB")
+		log.Error().Err(err).Msg("Error fetching balance from database.")
 		return nil, err
 	}
 
@@ -38,18 +50,23 @@ func (s *TokenWeightedDefault) FetchBalance(
 		return nil, err
 	}
 
+	var ftBalance = &FTBalanceResponse{}
 	if err := s.SC.GetAddressBalanceAtBlockHeight(
 		b.Addr,
 		b.BlockHeight,
-		b,
+		ftBalance,
 		&strategy.Contract,
 	); err != nil {
-		log.Error().Err(err).Msg("error fetching balance")
+		log.Error().Err(err).Msg("Error fetching balance.")
 		return nil, err
 	}
 
+	b.PrimaryAccountBalance = ftBalance.Balance
+	b.SecondaryAccountBalance = 0
+	b.StakingBalance = 0
+
 	if err := b.CreateBalance(s.DB); err != nil {
-		log.Error().Err(err).Msg("error creating balance in the DB")
+		log.Error().Err(err).Msg("Error creating balance in the database.")
 		return nil, err
 	}
 
@@ -76,7 +93,7 @@ func (s *TokenWeightedDefault) GetVoteWeightForBalance(
 	proposal *models.Proposal,
 ) (float64, error) {
 	var weight float64
-	var ERROR error = fmt.Errorf("no weight found, address: %s, strategy: %s", vote.Addr, *proposal.Strategy)
+	var ERROR error = fmt.Errorf("No weight found, address: %s, strategy: %s.", vote.Addr, *proposal.Strategy)
 
 	if vote.PrimaryAccountBalance == nil {
 		return 0.00, nil
@@ -114,12 +131,18 @@ func (s *TokenWeightedDefault) GetVotes(
 	return votes, nil
 }
 
+func (s *TokenWeightedDefault) RequiresSnapshot() bool {
+	return true
+}
+
 func (s *TokenWeightedDefault) InitStrategy(
 	f *shared.FlowAdapter,
 	db *shared.Database,
 	sc *s.SnapshotClient,
+	name string,
 ) {
 	s.FlowAdapter = f
 	s.DB = db
 	s.SC = *sc
+	s.name = name
 }

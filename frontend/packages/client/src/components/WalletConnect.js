@@ -1,24 +1,33 @@
 import React from 'react';
 import { Web3Consumer } from '../contexts/Web3';
 
-const SignInOutButton = ({ user: { loggedIn, addr }, injectedProvider }) => {
+const SignInOutButton = ({
+  user: { loggedIn, addr },
+  openWalletModal,
+  injectedProvider,
+  closeModal,
+}) => {
   const signInOrOut = async (event) => {
     event.preventDefault();
+    if (closeModal) {
+      closeModal();
+    }
     if (loggedIn) {
       injectedProvider.unauthenticate();
     } else {
-      injectedProvider.authenticate();
-      injectedProvider.logIn();
+      openWalletModal();
     }
   };
   return (
     <button
       onClick={signInOrOut}
-      className="wallet-connect button is-primary is-uppercase transition-all"
+      className="wallet-connect button is-primary is-uppercase transition-all small-text"
     >
       {loggedIn ? (
         <>
-          <span className="is-hidden-mobile">{addr} -&nbsp;</span>
+          <span className="is-hidden-mobile is-hidden-connect">
+            {addr} -&nbsp;
+          </span>
           <span>Disconnect</span>
         </>
       ) : (
@@ -31,15 +40,20 @@ const SignInOutButton = ({ user: { loggedIn, addr }, injectedProvider }) => {
   );
 };
 
-const CurrentUser = ({ web3 }) => {
-  const { user, injectedProvider } = web3;
+const CurrentUser = ({ web3, closeModal }) => {
+  const { user, injectedProvider, openWalletModal } = web3;
   if (!user) {
     return null;
   }
 
   return (
     <div className="card">
-      <SignInOutButton user={user} injectedProvider={injectedProvider} />
+      <SignInOutButton
+        user={user}
+        injectedProvider={injectedProvider}
+        openWalletModal={openWalletModal}
+        closeModal={closeModal}
+      />
     </div>
   );
 };

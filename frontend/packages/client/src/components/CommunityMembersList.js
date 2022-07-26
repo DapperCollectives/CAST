@@ -51,9 +51,14 @@ export default function CommunityMembersList({ communityId } = {}) {
         extraStylesMobile={{ marginTop: '24px' }}
       >
         <p className="has-text-weight-bold is-uppercase small-text">
-          {pagination?.totalRecords ?? '...'} members
+          {pagination?.totalRecords ?? '...'}{' '}
+          {`member${pagination?.totalRecords > 1 ? 's' : ''}`}
         </p>
       </WrapperResponsive>
+      <p style={{ color: '#757575', marginBottom: '20px' }}>
+        Anyone can join a community to follow its progress. You must hold the
+        community’s token or NFT in your wallet to cast votes.
+      </p>
       <div className="is-flex flex-1">
         <TableMembers
           data={data}

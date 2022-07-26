@@ -1,4 +1,5 @@
 import React, { useEffect, useCallback } from 'react';
+import classnames from 'classnames';
 import { useDropzone } from 'react-dropzone';
 import { Upload } from 'components/Svg';
 import { WrapperResponsive, Dropdown } from 'components';
@@ -6,9 +7,14 @@ import { CommunityLinksForm } from 'components/Community/CommunityEditorLinks';
 import useLinkValidator, {
   urlPatternValidation,
 } from '../Community/hooks/useLinkValidator';
-import { getReducedImg } from 'utils';
+import { getReducedImg, validateLength } from 'utils';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
-import { MAX_AVATAR_FILE_SIZE } from 'const';
+import {
+  MAX_AVATAR_FILE_SIZE,
+  MAX_FILE_SIZE,
+  COMMUNITY_NAME_MAX_LENGTH,
+  COMMUNITY_DESCRIPTION_MAX_LENGTH,
+} from 'const';
 import pick from 'lodash/pick';
 import { useCommunityCategory } from 'hooks';
 
@@ -24,6 +30,7 @@ const initialValues = Object.assign(
   {},
   ...linksFields.map((key) => ({ [key]: '' }))
 );
+
 export default function StepOne({
   stepData,
   setStepValid,
@@ -43,7 +50,7 @@ export default function StepOne({
   );
 
   const onDrop = useCallback(
-    (acceptedFiles) => {
+    (filename, dataKey, maxFileSize, maxWidth) => (acceptedFiles) => {
       acceptedFiles.forEach((imageFile) => {
         // validate type
         if (
@@ -56,10 +63,12 @@ export default function StepOne({
           return;
         }
         // validate size
-        if (imageFile.size > MAX_AVATAR_FILE_SIZE) {
+        if (imageFile.size > maxFileSize) {
+          const sizeLimit =
+            maxFileSize === MAX_AVATAR_FILE_SIZE ? '2MB' : '5MB';
           notifyError({
             status: 'Image file size not allowed',
-            statusText: 'The selected file exceeds the 2MB limit.',
+            statusText: `The selected file exceeds the ${sizeLimit} limit.`,
           });
           return;
         }
@@ -67,15 +76,17 @@ export default function StepOne({
 
         const img = new Image();
         img.onload = function (e) {
-          // reduce image if necessary before upload
-          if (e.target.width > 150) {
-            getReducedImg(e.target, 150, 'community_image').then((result) => {
+          // reduce images if necessary before upload
+          if (e.target.width > maxWidth) {
+            getReducedImg(e.target, maxWidth, filename).then((result) => {
               onDataChange({
-                logo: { imageUrl: imageAsURL, file: result.imageFile },
+                [dataKey]: { imageUrl: imageAsURL, file: result.imageFile },
               });
             });
           } else {
-            onDataChange({ logo: { imageUrl: imageAsURL, file: imageFile } });
+            onDataChange({
+              [dataKey]: { imageUrl: imageAsURL, file: imageFile },
+            });
           }
         };
         img.src = imageAsURL;
@@ -84,8 +95,18 @@ export default function StepOne({
     [onDataChange, notifyError]
   );
 
-  const { getRootProps, getInputProps } = useDropzone({
-    onDrop,
+  const { getRootProps: getLogoRootProps, getInputProps: getLogoInputProps } =
+    useDropzone({
+      onDrop: onDrop('community_image', 'logo', MAX_AVATAR_FILE_SIZE, 150),
+      maxFiles: 1,
+      accept: 'image/jpeg,image/png',
+    });
+
+  const {
+    getRootProps: getBannerRootProps,
+    getInputProps: getBannerInputProps,
+  } = useDropzone({
+    onDrop: onDrop('community_banner', 'banner', MAX_FILE_SIZE, 1200),
     maxFiles: 1,
     accept: 'image/jpeg,image/png',
   });
@@ -94,6 +115,7 @@ export default function StepOne({
     communityName,
     communityDescription,
     logo,
+    banner,
     communityTerms,
     category,
   } = stepData || {};
@@ -128,9 +150,13 @@ export default function StepOne({
   // handles form validation
   useEffect(() => {
     const requiredFields = {
-      communityName: (name) => name?.trim().length > 0,
+      communityName: (name) =>
+        name?.trim().length > 0 &&
+        validateLength(name, COMMUNITY_NAME_MAX_LENGTH),
       communityDescription: (desc) =>
-        desc?.trim().length ? desc?.trim().length < 1000 : true,
+        desc?.trim().length
+          ? validateLength(desc, COMMUNITY_DESCRIPTION_MAX_LENGTH)
+          : true,
       logo: (logo) =>
         logo !== undefined ? logo?.file && logo?.imageUrl : true,
       communityTerms: (termsUrl) =>
@@ -142,6 +168,22 @@ export default function StepOne({
     );
     setStepValid(isValid && isCommunityLinksValid);
   }, [stepData, setStepValid, onDataChange, isCommunityLinksValid]);
+
+  const imageDropClasses = classnames(
+    'is-flex is-flex-direction-column is-align-items-center is-justify-content-center cursor-pointer rounded-lg',
+    {
+      'border-dashed-dark': !banner?.file,
+    }
+  );
+
+  const showNameInputError = !validateLength(
+    communityName ?? '',
+    COMMUNITY_NAME_MAX_LENGTH
+  );
+  const showDescriptionInputError = !validateLength(
+    communityDescription ?? '',
+    COMMUNITY_DESCRIPTION_MAX_LENGTH
+  );
 
   return (
     <>
@@ -177,18 +219,11 @@ export default function StepOne({
                 width: '90px',
                 overflow: 'hidden',
                 position: 'relative',
-                ...(!logo ? { border: '1px dashed #757575' } : undefined),
+                ...(!logo ? { border: '2px dashed #757575' } : undefined),
               }}
-              {...getRootProps()}
+              {...getLogoRootProps()}
             >
-              {!logo && (
-                <>
-                  <Upload />
-                  <span className="smaller-text">Avatar</span>
-                  <input {...getInputProps()} />
-                </>
-              )}
-              {logo && (
+              {logo ? (
                 <div
                   className="is-flex flex-1 is-flex-direction-column is-align-items-center is-justify-content-center"
                   style={{
@@ -199,6 +234,12 @@ export default function StepOne({
                     opacity: 0.5,
                   }}
                 />
+              ) : (
+                <>
+                  <Upload />
+                  <span className="smaller-text">Avatar</span>
+                  <input {...getLogoInputProps()} />
+                </>
               )}
               {logo?.file ? (
                 <div
@@ -212,7 +253,55 @@ export default function StepOne({
                   }}
                 >
                   <Upload className="has-text-white" />
-                  <input {...getInputProps()} />
+                  <input {...getLogoInputProps()} />
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </div>
+        <div className="columns">
+          <div className="column is-12">
+            <div
+              className={imageDropClasses}
+              style={{ minHeight: 200 }}
+              {...getBannerRootProps()}
+            >
+              {banner ? (
+                <div
+                  className="is-flex flex-1 is-flex-direction-column is-align-items-center is-justify-content-center rounded-lg"
+                  style={{
+                    backgroundImage: `url(${banner.imageUrl})`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    width: '100%',
+                    opacity: 0.5,
+                  }}
+                />
+              ) : (
+                <>
+                  <Upload />
+                  <span className="smaller-text">Community Banner Image</span>
+                  <span className="smaller-text">
+                    JPG or PNG 200px X 1200px recommended
+                  </span>
+                  <input {...getBannerInputProps()} />
+                </>
+              )}
+              {banner?.file ? (
+                <div
+                  className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center"
+                  style={{
+                    borderRadius: '50%',
+                    position: 'absolute',
+                    zIndex: 10,
+                    height: 40,
+                    width: 40,
+                    backgroundColor: '#4a4a4a',
+                  }}
+                >
+                  <Upload className="has-text-white" />
+                  <input {...getBannerInputProps()} />
                 </div>
               ) : null}
             </div>
@@ -224,13 +313,19 @@ export default function StepOne({
           name="community_name"
           className="rounded-sm border-light p-3 column is-full mt-2"
           value={communityName || ''}
-          maxLength={50}
           onChange={(event) => setData({ communityName: event.target.value })}
         />
+        {showNameInputError && (
+          <div className="pl-1 mt-2 transition-all">
+            <p className="smaller-text has-text-red">
+              The maximum length for Community Name is 50 characters
+            </p>
+          </div>
+        )}
         <textarea
           className="text-area rounded-sm border-light p-3 column is-full mt-4"
           type="text"
-          placeholder="About (short description)"
+          placeholder="Short Description"
           value={communityDescription || ''}
           name="community_details"
           rows="3"
@@ -241,6 +336,13 @@ export default function StepOne({
             })
           }
         />
+        {showDescriptionInputError && (
+          <div className="pl-1 mt-2 transition-all">
+            <p className="smaller-text has-text-red">
+              The maximum length for Community Description is 1000 characters
+            </p>
+          </div>
+        )}
         <Dropdown
           label="Category"
           margin="mt-4"
@@ -271,7 +373,7 @@ export default function StepOne({
         <div className="column is-12">
           <button
             style={{ height: 48, width: '100%' }}
-            className={`button vote-button transition-all is-flex has-background-yellow rounded-sm is-size-6 is-uppercase is-${
+            className={`button vote-button is-flex has-background-yellow rounded-sm is-size-6 is-uppercase is-${
               isStepValid ? 'enabled' : 'disabled'
             }`}
             onClick={isStepValid ? () => moveToNextStep() : () => {}}

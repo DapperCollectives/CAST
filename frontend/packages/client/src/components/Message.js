@@ -1,13 +1,6 @@
 import React from 'react';
 import WrapperResponsive from './WrapperResponsive';
-
-const Label = ({ labelText }) => {
-  return (
-    <span className="has-background-black has-text-white rounded-sm px-3 py-2 mr-2">
-      {labelText}
-    </span>
-  );
-};
+import Label from './Label';
 
 const Message = ({ messageText = '', labelText = null, icon = null } = {}) => {
   const labelComponent = labelText ? <Label labelText={labelText} /> : null;

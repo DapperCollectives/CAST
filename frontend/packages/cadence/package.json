@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "cd ../../.. && cd ./backend && flow emulator --dev-wallet",
-    "start:local": "node chain.js",
+    "start": "cd ../../.. && cd ./backend && node chain.js",
     "deploy": "node deploy.js"
   }
 }

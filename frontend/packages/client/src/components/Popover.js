@@ -1,7 +1,6 @@
 import React from 'react';
 import { useMediaQuery } from 'hooks';
 import classnames from 'classnames';
-import { map } from 'lodash';
 
 const defaultButtonStyle = {
   border: 'none',

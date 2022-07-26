@@ -14,6 +14,7 @@ type StakedTokenWeightedDefault struct {
 	s.StrategyStruct
 	SC s.SnapshotClient
 	DB *s.Database
+	name string
 }
 
 func (s *StakedTokenWeightedDefault) FetchBalance(
@@ -38,12 +39,12 @@ func (s *StakedTokenWeightedDefault) FetchBalance(
 		b,
 		&strategy.Contract,
 	); err != nil {
-		log.Error().Err(err).Msg("error fetching balance")
+		log.Error().Err(err).Msg("Error fetching balance.")
 		return nil, err
 	}
 
 	if err := b.CreateBalance(s.DB); err != nil {
-		log.Error().Err(err).Msg("error creating balance in the DB")
+		log.Error().Err(err).Msg("Error creating balance in the database.")
 		return nil, err
 	}
 
@@ -109,12 +110,18 @@ func (s *StakedTokenWeightedDefault) GetVotes(
 	return votes, nil
 }
 
+func (s *StakedTokenWeightedDefault) RequiresSnapshot() bool {
+	return true
+}
+
 func (s *StakedTokenWeightedDefault) InitStrategy(
 	f *shared.FlowAdapter,
 	db *shared.Database,
 	sc *s.SnapshotClient,
+	name string,
 ) {
 	s.FlowAdapter = f
 	s.DB = db
 	s.SC = *sc
+	s.name = name
 }

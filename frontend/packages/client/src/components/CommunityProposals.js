@@ -40,9 +40,6 @@ export default function CommunityProposals({ communityId = 1, admins } = {}) {
     });
 
   const classesContainer = notMobile ? 'mt-6' : 'mt-5';
-  const classesAboutContainer = `columns is-multiline m-0 ${
-    notMobile ? 'mt-5 pt-2' : 'mt-4'
-  }`;
 
   const initialLoading =
     filterValue !== 'all'
@@ -97,18 +94,6 @@ export default function CommunityProposals({ communityId = 1, admins } = {}) {
             </div>
           </div>
         )}
-        <div className={classesAboutContainer}>
-          <div className="column is-12 has-text-weight-bold is-uppercase small-text px-0">
-            ABOUT PROPOSALS
-          </div>
-          <div
-            className="column is-12 has-text-grey px-0"
-            style={{ marginBottom: '20px' }}
-          >
-            Proposals are created and submitted by community members. Members
-            can cast token-weighted votes on active proposals to make decisions.
-          </div>
-        </div>
       </div>
       <div
         className="column is-9-desktop is-7-tablet"

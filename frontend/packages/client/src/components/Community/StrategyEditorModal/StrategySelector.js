@@ -1,11 +1,10 @@
 import React from 'react';
-import { kebabToString } from 'utils';
 
 export default function StrategySelector({
   strategies = [],
   onSelectStrategy,
 } = {}) {
-  const selectStrategy = (stratgy) => () => onSelectStrategy(stratgy);
+  const selectStrategy = (strategy) => () => onSelectStrategy(strategy);
   return (
     <div
       className="is-flex is-flex-direction-column flex-1"
@@ -21,9 +20,7 @@ export default function StrategySelector({
           >
             <div className="columns is-multiline">
               <div className="column is-12 pb-2">
-                <p style={{ textTransform: 'capitalize' }}>
-                  {kebabToString(st.key)}
-                </p>
+                <p style={{ textTransform: 'capitalize' }}>{st.name}</p>
               </div>
               <div className="column is-12 pt-2">
                 <p className="small-text has-text-grey">{st.description}</p>

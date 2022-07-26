@@ -4,8 +4,7 @@
   "private": true,
   "dependencies": {
     "@creativebulma/bulma-tooltip": "^1.2.0",
-    "@onflow/config": "0.0.2",
-    "@onflow/fcl": "^0.0.77",
+    "@onflow/fcl": "^1.1.0",
     "@onflow/six-transfer-tokens": "0.0.8",
     "bulma": "0.9.3",
     "bulma-popover": "^1.1.1",

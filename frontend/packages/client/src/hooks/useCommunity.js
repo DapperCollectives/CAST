@@ -94,6 +94,7 @@ export default function useCommunity({
           twitterUrl,
           websiteUrl,
           logo,
+          banner,
           contractAdrress: contractAddr,
           contractName: contractN,
           storagePath: storageP,
@@ -102,14 +103,22 @@ export default function useCommunity({
           strategies,
         } = communityData;
 
+        // check for logo / banner uploads
+        // admins can edit later the images
         let communityLogo;
-        // check for logo upload
-        // admins can edit later the image
+        let communityBanner;
         if (logo?.file) {
           try {
             communityLogo = await uploadFile(logo.file);
           } catch (err) {
             communityLogo = undefined;
+          }
+        }
+        if (banner?.file) {
+          try {
+            communityBanner = await uploadFile(banner.file);
+          } catch (err) {
+            communityBanner = undefined;
           }
         }
 
@@ -124,8 +133,8 @@ export default function useCommunity({
             category: categorySelected?.value,
             termsAndConditionsUrl,
             creatorAddr,
-            additionalAuthors: listAddrAuthors?.map((ele) => ele.addr),
-            additionalAdmins: listAddrAdmins?.map((ele) => ele.addr),
+            additionalAuthors: listAddrAuthors,
+            additionalAdmins: listAddrAdmins,
             slug,
             githubUrl,
             instagramUrl,
@@ -133,6 +142,7 @@ export default function useCommunity({
             websiteUrl,
             discordUrl,
             logo: communityLogo?.fileUrl,
+            bannerImgUrl: communityBanner?.fileUrl,
             contractAddress: setDefaultValue(
               contractAddr,
               '0x0ae53cb6e3f42a79'

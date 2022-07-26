@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import { Calendar, CaretDown } from 'components/Svg';
+import { useMediaQuery } from 'hooks';
 
 const detectTimeZone = () =>
   new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -8,6 +9,8 @@ const detectTimeZone = () =>
 const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
   const [isStartTimeOpen, setStartTimeOpen] = useState(false);
   const [isEndTimeOpen, setEndTimeOpen] = useState(false);
+
+  const notMobile = useMediaQuery();
 
   useEffect(() => {
     const isDate = (d) => Object.prototype.toString.call(d) === '[object Date]';
@@ -47,7 +50,10 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
 
     // push now if date is today and not already in time interval
     if (cutOffDate) {
-      const nowDate = new Date();
+      const nowDate =
+        process.env.REACT_APP_APP_ENV?.toUpperCase() === 'PRODUCTION'
+          ? new Date(Date.now() + 60 * 60 * 1000) // delay by an hour in prod env
+          : new Date();
       nowDate.setSeconds(0);
       const doesntExist = timeIntervals.every((ti) => ti !== nowDate);
       if (doesntExist) {
@@ -113,6 +119,7 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
               placeholderText="Choose date"
               selected={stepData?.startDate}
               minDate={new Date()}
+              onFocus={(e) => !notMobile && e.target.blur()}
               onChange={(date) => {
                 onDataChange({
                   startDate: date,
@@ -200,6 +207,7 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
               disabled={
                 !Boolean(stepData?.startDate) || !Boolean(stepData?.startTime)
               }
+              onFocus={(e) => !notMobile && e.target.blur()}
               onChange={(date) => {
                 onDataChange({ endDate: date });
               }}

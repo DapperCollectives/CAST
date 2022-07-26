@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { ArrowLeft, CheckMark } from '../Svg';
 import Loader from '../Loader';
+import { useBeforeUnload } from '../../hooks';
 
 function StepByStep({
   finalLabel,
@@ -17,6 +18,8 @@ function StepByStep({
   const [isStepValid, setStepValid] = useState(false);
   const [stepsData, setStepsData] = useState({});
   const refs = React.useRef();
+
+  useBeforeUnload('Leave Page?');
 
   const onStepAdvance = (direction = 'next') => {
     if (direction === 'next') {

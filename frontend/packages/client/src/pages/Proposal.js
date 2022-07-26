@@ -528,7 +528,7 @@ export default function ProposalPage() {
                 <h1 className="title mt-5 is-3">{proposal.name}</h1>
                 {proposal.body && (
                   <div
-                    className="mt-6 mb-6 proposal-copy transition-all word-break-all content"
+                    className="mt-6 mb-6 proposal-copy transition-all content"
                     dangerouslySetInnerHTML={{
                       __html: htmlBody,
                     }}

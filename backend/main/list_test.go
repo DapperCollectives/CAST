@@ -80,7 +80,7 @@ func TestCreateList(t *testing.T) {
 
 		var m map[string]interface{}
 		json.Unmarshal(response.Body.Bytes(), &m)
-		assert.Equal(t, "invalid signature", m["error"])
+		assert.Equal(t, "Invalid signature.", m["error"])
 	})
 
 	t.Run("Should throw an error if timestamp is expired", func(t *testing.T) {
@@ -99,7 +99,7 @@ func TestCreateList(t *testing.T) {
 
 		var m map[string]interface{}
 		json.Unmarshal(response.Body.Bytes(), &m)
-		assert.Equal(t, "timestamp on request has expired", m["error"])
+		assert.Equal(t, "Timestamp on request has expired.", m["error"])
 	})
 }
 

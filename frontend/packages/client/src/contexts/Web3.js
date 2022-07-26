@@ -1,7 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import * as fcl from '@onflow/fcl';
-import networks from '../networks';
-import { useFclUser } from '../hooks';
+import networks from 'networks';
+import { useFclUser } from 'hooks';
+import { WalletConnectModal } from 'components';
+import { IS_LOCAL_DEV } from 'const';
 
 // create our app context
 export const Web3Context = React.createContext({});
@@ -16,6 +18,8 @@ export const useWebContext = () => {
 
 // provider Component that wraps the entire app and provides context variables
 export function Web3Provider({ children, network = 'testnet', ...props }) {
+  const [openModal, setOpenModal] = useState(false);
+  const [services, setServices] = useState([]);
   const [transactionInProgress, setTransactionInProgress] = useState(false);
   const [transactionStatus, setTransactionStatus] = useState(null);
   const [transactionError, setTransactionError] = useState('');
@@ -54,22 +58,51 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
   };
 
   useEffect(() => {
-    const { accessApi, walletDiscovery } = networks[network];
-    fcl
-      .config({
-        '0xFUNGIBLETOKENADDRESS':
-          network === 'testnet' ? '0x9a0766d93b6608b7' : '0xf233dcee88fe0abe',
-      })
-      .put('accessNode.api', accessApi) // connect to Flow
-      .put('discovery.wallet', walletDiscovery); // use Blocto wallet
+    const {
+      accessApi,
+      walletDiscovery,
+      walletDiscoveryApi,
+      walletDiscoveryInclude,
+    } = networks[network];
+    const iconUrl = window.location.origin + '/logo.png';
 
-    try {
-      const contracts = require('../contracts.json');
-      Object.keys(contracts).forEach((contract) => {
-        fcl.config().put(contract, contracts[contract]);
-      });
-    } catch (e) {}
+    fcl.config({
+      'app.detail.title': 'CAST',
+      'app.detail.icon': iconUrl,
+      'accessNode.api': accessApi, // connect to Flow
+      'discovery.wallet': walletDiscovery, // use wallets on public discovery
+      'discovery.authn.endpoint': walletDiscoveryApi, // public discovery api endpoint
+      'discovery.authn.include': walletDiscoveryInclude, // opt-in wallets
+    });
   }, [network]);
+
+  // filter services for now only blocto
+  useEffect(() => {
+    if (!IS_LOCAL_DEV) {
+      fcl.discovery.authn.subscribe((res) => {
+        const filteredServices = res.results.filter((service) =>
+          service.uid.includes('blocto')
+        );
+        setServices(filteredServices);
+      });
+    } else {
+      // hard code service for local dev wallet
+      // this setting will enable to show blocto to connect
+      setServices([
+        {
+          f_type: 'Service',
+          f_vsn: '1.0.0',
+          type: 'authn',
+          method: 'IFRAME/RPC',
+          uid: 'blocto#authn',
+          provider: {
+            name: 'Blocto',
+            icon: '/images/blocto.png',
+          },
+        },
+      ]);
+    }
+  }, []);
 
   const setWebContextConfig = useCallback((config) => {
     setExtraConfig(config);
@@ -91,6 +124,12 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
     return null;
   }
 
+  const openWalletModal = () => {
+    setOpenModal(true);
+  };
+  const closeModal = () => {
+    setOpenModal(false);
+  };
   // use props as a way to pass configuration values
   const providerProps = {
     executeTransaction,
@@ -107,12 +146,19 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
     isLedger,
     network,
     logOut,
+    openWalletModal,
     isValidFlowAddress,
     ...props,
   };
 
   return (
     <Web3Context.Provider value={providerProps}>
+      <WalletConnectModal
+        services={services}
+        openModal={openModal}
+        closeModal={closeModal}
+        injectedProvider={fcl}
+      />
       {children}
     </Web3Context.Provider>
   );

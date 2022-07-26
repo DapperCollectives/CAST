@@ -96,7 +96,9 @@ export default function StepTwo({
             </Popover>
           </>
         }
-        description="The admins will be able to edit the space settings and moderate proposals. You must add one address per line."
+        description="Admins can edit community settings and moderate proposals. 
+          We recommend at least two admin for each community, but it is not a requirement. 
+          Please add one address per line."
         addrList={listAddrAdmins}
         onAddressChange={onAdminAddressChange}
         onDeleteAddress={onAdminAddressDelete}
@@ -121,7 +123,8 @@ export default function StepTwo({
             </Popover>
           </>
         }
-        description="Authors can post proposals regardless of their voting power."
+        description="Authors can create and publish proposals, selecting from voting strategies set by an Admin.
+          Admins are automatically added as Authors."
         addrList={listAddrAuthors}
         onAddressChange={onAuthorAddressChange}
         onDeleteAddress={onAuthorAddressDelete}
@@ -136,7 +139,7 @@ export default function StepTwo({
         <div className="column is-12">
           <button
             style={{ height: 48, width: '100%' }}
-            className={`button vote-button transition-all is-flex has-background-yellow rounded-sm is-size-6 is-uppercase is-${
+            className={`button vote-button is-flex has-background-yellow rounded-sm is-size-6 is-uppercase is-${
               isStepValid ? 'enabled' : 'disabled'
             }`}
             onClick={isStepValid ? () => moveToNextStep() : () => {}}

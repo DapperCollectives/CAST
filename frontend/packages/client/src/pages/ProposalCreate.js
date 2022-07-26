@@ -44,15 +44,18 @@ export default function ProposalCreatePage() {
   const onSubmit = async (stepsData) => {
     if (!creatorAddr) {
       modalContext.openModal(
-        React.createElement(Error, {
-          error: (
+        <Error
+          error={
             <div className="mt-5">
-              <WalletConnect />
+              <WalletConnect
+                closeModal={() => {
+                  modalContext.closeModal();
+                }}
+              />
             </div>
-          ),
-
-          errorTitle: 'Please connect a wallet to create a proposal.',
-        }),
+          }
+          errorTitle="Please connect a wallet to create a proposal."
+        />,
         { classNameModalContent: 'rounded-sm' }
       );
       setModalError(true);

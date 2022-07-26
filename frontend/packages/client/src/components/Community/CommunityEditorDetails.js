@@ -328,15 +328,17 @@ export default function CommunityEditorDetails({ communityId } = {}) {
   return (
     <>
       <CommunityMembersEditor
-        description="The admins will be able to edit the space settings and moderate
-              proposals. You must add one address per line."
+        description="Admins can edit community settings and moderate proposals. 
+          We recommend at least two admin for each community, but it is not a requirement. 
+          Please add one address per line."
         type="admin"
         communityId={communityId}
       />
       <CommunityMembersEditor
         title="Authors"
         addrType="Author"
-        description="Authors can post proposals regardless of their voting power."
+        description="Authors can create and publish proposals, selecting from voting strategies set by an Admin.
+          Admins are automatically added as Authors."
         communityId={communityId}
       />
     </>

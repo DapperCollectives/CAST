@@ -1,6 +1,7 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { Gitbook, Github } from '../components/Svg';
+import { Close } from '../components/Svg';
+import { Label, ModalAboutItem } from 'components';
 
 const AboutPage = ({ location }) => {
   const { state = {} } = location;
@@ -14,111 +15,141 @@ const AboutPage = ({ location }) => {
     }
     history.goBack();
   };
+
   return (
     <div className={modal ? 'modal is-active' : undefined}>
       <div className="modal-background" onClick={closeModal} />
       <div
         className="modal-card rounded-sm px-4"
-        style={{ maxHeight: 'calc(100vh - 85px)' }}
+        style={{
+          overflowY: 'scroll',
+        }}
       >
         <header
-          className="modal-card-head is-flex-direction-column has-background-white columns is-mobile m-0 py-2"
-          style={{
-            borderBottom: 'none',
-          }}
+          className="modal-card-head has-background-white rounded-lg-top pb-1"
+          style={{ borderBottom: '0px' }}
         >
-          <div className="column is-full has-text-right is-size-2 p-0 leading-tight">
-            <span className="cursor-pointer" onClick={closeModal}>
-              &times;
-            </span>
-          </div>
-          <div className="column is-full has-text-left">
-            <p className="modal-card-title">About</p>
+          <div className="columns px-5 px-3-mobile-only pt-4 flex-1 is-mobile">
+            <div className="column px-2 pt-1">
+              <Label labelText="Beta" classNames="beta-label is-uppercase" />
+            </div>
+            <div
+              className={`column is-flex is-narrow has-text-right is-size-2 leading-tight cursor-pointer px-2 px-3-mobile-only pt-3`}
+              onClick={closeModal}
+            >
+              <Close />
+            </div>
           </div>
         </header>
-        <section className="modal-card-body py-2 px-0">
-          <div className="column px-4">
-            <p className="has-text-grey mb-4 small-text">
-              CAST is a voting tool for communities in the Flow network. It
-              allows groups of builders, creators, and fans to make choices
-              together — transparently and in public.{' '}
-            </p>
-            <p className="has-text-grey mb-4 small-text">
-              This governance tool is being made available first, in its alpha
-              stage, to those building on Flow. Soon, users will be able to
-              create communities right here on CAST.
-            </p>
-          </div>
-          <div className="columns is-mobile m-0 px-4">
-            <div className="column is-narrow is-flex is-align-items-center">
-              <a
-                target="_blank"
-                rel="noreferrer noopenner"
-                href="https://docs.cast.fyi"
-              >
-                <Gitbook />
-              </a>
+        <section
+          className="modal-card-body pt-0 rounded-lg-bottom"
+          style={{
+            minHeight: '600px',
+          }}
+        >
+          <div className="columns px-5 px-3-mobile-only pt-4 is-multiline">
+            <div className="column is-12 pt-0 pb-1">
+              <h3 className="is-size-3 has-text-weight-bold">
+                Welcome to CAST
+              </h3>
             </div>
-            <div className="column is-flex is-flex-direction-column">
-              <div className="small-text">Gitbook</div>
-              <div className="is-size-7 has-text-grey ">
-                Learn more about CAST
+            <div className="column is-12 pt-0 pb-1">
+              <p className="medium-text has-text-grey">
+                The future of communities is greater than the sum of likes and
+                shares.
+              </p>
+            </div>
+            <div className="column is-12 pt-0 pb-5">
+              <p className="medium-text has-text-grey">
+                CAST is your first step towards a new season of participation,
+                engagement, ownership and value.
+              </p>
+            </div>
+            <div className="column is-12 pt-0">
+              <ModalAboutItem
+                title="New to Web3 voting?"
+                subTittle={
+                  <>
+                    <a
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      href="https://dapper-collectives.gitbook.io/cast-docs/"
+                      className="pr-1 has-text-black is-underlined"
+                      onClick={closeModal}
+                    >
+                      Click here!
+                    </a>
+                    We'll help you.
+                  </>
+                }
+              />
+            </div>
+            <div className="column is-12 pt-0">
+              <ModalAboutItem
+                title="Want to see CAST’s code?"
+                subTittle={
+                  <>
+                    <a
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      href="https://dapper-collectives.gitbook.io/cast-docs/"
+                      className="pr-1 has-text-black is-underlined"
+                      onClick={closeModal}
+                    >
+                      Click here!
+                    </a>
+                    It’s fascinating.
+                  </>
+                }
+              />
+            </div>
+            <div className="column is-12 pt-0">
+              <ModalAboutItem
+                title="Found a bug?"
+                subTittle={
+                  <>
+                    <a
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      href="https://github.com/DapperCollectives/CAST/issues/new?assignees=markedconfidential&labels=bug&template=bug-report.md&title=%5BBUG%5D"
+                      className="pr-1 has-text-black is-underlined"
+                      onClick={closeModal}
+                    >
+                      Log here
+                    </a>
+                    or message us in #cast-beta
+                    <a
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      href="https://discord.gg/6SptFxy344"
+                      className="px-1 has-text-black is-underlined"
+                      onClick={closeModal}
+                    >
+                      here!
+                    </a>
+                  </>
+                }
+              />
+            </div>
+            <div className="column is-12 pt-5 pb-3 small-text">
+              <div className="is-flex flex-1 is-align-items-center is-justify-content-center">
+                <a
+                  href="#/privacy-policy"
+                  className="px-4 is-underlined has-text-grey"
+                  style={{ whiteSpace: 'nowrap' }}
+                >
+                  Privacy Policy
+                </a>
+
+                <a
+                  href="#/terms-of-service"
+                  className="px-4 is-underlined has-text-grey"
+                  style={{ whiteSpace: 'nowrap' }}
+                >
+                  Terms of Service
+                </a>
               </div>
             </div>
-          </div>
-          <div className="columns is-mobile m-0 px-4">
-            <div className="column is-narrow is-flex is-align-items-center">
-              <a
-                href="https://github.com/DapperCollectives/CAST"
-                target="_blank"
-                rel="noreferrer noopener"
-              >
-                <Github />
-              </a>
-            </div>
-            <div className="column is-flex is-flex-direction-column">
-              <div className="small-text">Github</div>
-              <div className="is-size-7 has-text-grey">Contribute to CAST</div>
-            </div>
-          </div>
-          <div className="divider mt-4" />
-          <div className="column is-flex is-flex-direction-column px-4">
-            <p className="has-text-grey mb-4 small-text">
-              The source code for this dapp is made available to you under the
-              terms of the [Apache 2.0
-              license](https://www.apache.org/licenses/LICENSE-2.0).
-            </p>
-            <p className="has-text-grey mb-4 small-text">
-              By using this dapp you agree to these terms and conditions. You
-              also agree that that all data entered, submitted or stored in this
-              instances of this dapp is publicly queryable or readable either on
-              IPFS or directly on the Flow blockchain. Everything will be public
-              and you should not input any information that you want to keep
-              private.
-            </p>
-            <p className="has-text-grey mb-4 small-text">
-              *Disclaimer of Warranty.* Unless required by applicable law or
-              agreed to in writing, this dapp is being provided to you on an “AS
-              IS” BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
-              express or implied, including, without limitation, any warranties
-              or conditions of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or
-              FITNESS FOR A PARTICULAR PURPOSE.
-            </p>
-            <p className="has-text-grey mb-4 small-text">
-              *Limitation of Liability*. In no event and under no legal theory,
-              whether in tort (including negligence), contract, or otherwise,
-              unless required by applicable law (such as deliberate and grossly
-              negligent acts) or agreed to in writing, shall any open source
-              contributor or any parties involved in the creation of this dapp
-              be liable to you for damages, including any direct, indirect,
-              special, incidental, or consequential damages of any character
-              arising as a result of any use of the dapp or out of the use or
-              inability to use the dapp (including but not limited to damages
-              for loss of goodwill, work stoppage, computer failure or
-              malfunction, or any and all other commercial damages or losses),
-              even if such person has been advised of the possibility of such
-              damages.
-            </p>
           </div>
         </section>
       </div>

@@ -27,13 +27,14 @@ export default function StepFour({
     <StrategySelectorForm
       existingStrategies={strategies}
       onStrategySelection={onStrategySelection}
+      enableDelUniqueItem
       callToAction={() => {
         return (
           <ActionButton
             label="CREATE COMMUNITY"
             enabled={isStepValid}
             onClick={isStepValid ? () => onSubmit() : () => {}}
-            classNames="mt-5"
+            classNames="mt-5 has-button-border-hover"
           />
         );
       }}
