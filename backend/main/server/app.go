@@ -150,8 +150,6 @@ func (a *App) ConnectDB(database_url string) {
 	var database shared.Database
 	var err error
 
-	log.Info().Msg("Connecting to PostgreSQL at " + database_url)
-
 	database.Context = context.Background()
 	database.Name = "flow_snapshot"
 
@@ -798,6 +796,9 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 	}
 	s := strategyMap[*p.Strategy]
 	s.InitStrategy(a.FlowAdapter, a.DB, a.SnapshotClient, *p.Strategy)
+
+	p.Min_balance = strategy.Contract.Threshold
+	p.Max_weight = strategy.Contract.MaxWeight
 
 	var snapshotResponse *shared.SnapshotResponse
 	if s.RequiresSnapshot() {
