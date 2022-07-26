@@ -672,8 +672,22 @@ span[data-tooltip]
 		max-width: 10rem !important
 	.header-text
 		font-size: 2.5rem
+		line-height: 3rem !important
 .beta-label
 	font-size: 10px
 	font-weight: 700
 .wallet-connect-footer
 	background-color: #F2F2F2
+
+.star
+	background-image: url(./assets/star-single.png)
+	animation: star 4s linear
+	background-size: contain
+	border-color: transparent
+	background-repeat: no-repeat
+	
+@keyframes star
+	from 
+		transform: scale(0) 
+	to
+		transform: scale(1)
