@@ -33,7 +33,7 @@ export default function StrategyInformationForm({
             key={index}
             placeholder={staticPlaceholders[field]}
             name={field}
-            value={formData[field]}
+            value={formData[field] ?? ''}
             onChange={setField(field)}
           />
         ))}
