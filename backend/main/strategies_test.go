@@ -277,263 +277,79 @@ func TestStakedTokenWeightedDefaultStrategy(t *testing.T) {
 }
 
 /* One Token One Vote */
-func TestOneTokenOneVoteStrategy(t *testing.T) {
-	clearTable("communities")
-	clearTable("community_users")
-	clearTable("proposals")
-	clearTable("votes")
-	clearTable("balances")
+// func TestOneTokenOneVoteStrategy(t *testing.T) {
+// 	clearTable("communities")
+// 	clearTable("community_users")
+// 	clearTable("proposals")
+// 	clearTable("votes")
+// 	clearTable("balances")
 
-	communityId := otu.AddCommunities(1)[0]
-	proposalIds, proposals := otu.AddProposalsForStrategy(communityId, "one-address-one-vote", 2)
-	proposalIdTwo := proposalIds[1]
-	proposalId := proposalIds[0]
-	choices := proposals[0].Choices
-	votes := otu.GenerateListOfVotes(proposalId, 10)
-	otu.AddDummyVotesAndBalances(votes)
+// 	communityId := otu.AddCommunities(1)[0]
+// 	proposalIds, proposals := otu.AddProposalsForStrategy(communityId, "one-address-one-vote", 2)
+// 	proposalIdTwo := proposalIds[1]
+// 	proposalId := proposalIds[0]
+// 	choices := proposals[0].Choices
+// 	votes := otu.GenerateListOfVotes(proposalId, 10)
+// 	otu.AddDummyVotesAndBalances(votes)
 
-	t.Run("Test Tallying Results", func(t *testing.T) {
-		//Tally Results
-		proposalWithChoices := models.NewProposalResults(proposalId, choices)
-		_results := otu.TallyResultsForOneAddressOneVote(votes, proposalWithChoices)
+// 	t.Run("Test Tallying Results", func(t *testing.T) {
+// 		//Tally Results
+// 		proposalWithChoices := models.NewProposalResults(proposalId, choices)
+// 		_results := otu.TallyResultsForOneAddressOneVote(votes, proposalWithChoices)
 
-		// Fetch Proposal Results
-		response := otu.GetProposalResultsAPI(proposalId)
-		CheckResponseCode(t, http.StatusOK, response.Code)
+// 		// Fetch Proposal Results
+// 		response := otu.GetProposalResultsAPI(proposalId)
+// 		CheckResponseCode(t, http.StatusOK, response.Code)
 
-		var results models.ProposalResults
-		json.Unmarshal(response.Body.Bytes(), &results)
+// 		var results models.ProposalResults
+// 		json.Unmarshal(response.Body.Bytes(), &results)
 
-		assert.Equal(t, _results.Proposal_id, results.Proposal_id)
-		assert.Equal(t, _results.Results["a"], results.Results["a"])
-		assert.Equal(t, _results.Results["b"], results.Results["b"])
-	})
+// 		assert.Equal(t, _results.Proposal_id, results.Proposal_id)
+// 		assert.Equal(t, _results.Results["a"], results.Results["a"])
+// 		assert.Equal(t, _results.Results["b"], results.Results["b"])
+// 	})
 
-	t.Run("Test Fetching Votes for Proposal", func(t *testing.T) {
-		response := otu.GetVotesForProposalAPI(proposalId)
+// 	t.Run("Test Fetching Votes for Proposal", func(t *testing.T) {
+// 		response := otu.GetVotesForProposalAPI(proposalId)
 
-		CheckResponseCode(t, http.StatusOK, response.Code)
+// 		CheckResponseCode(t, http.StatusOK, response.Code)
 
-		var body utils.PaginatedResponseWithVotes
-		json.Unmarshal(response.Body.Bytes(), &body)
+// 		var body utils.PaginatedResponseWithVotes
+// 		json.Unmarshal(response.Body.Bytes(), &body)
 
-		// Validate vote weights are returned correctly
-		for _, v := range body.Data {
-			expectedWeight := float64(1.00)
-			assert.Equal(t, expectedWeight, *v.Weight)
-		}
-	})
+// 		// Validate vote weights are returned correctly
+// 		for _, v := range body.Data {
+// 			expectedWeight := float64(1.00)
+// 			assert.Equal(t, expectedWeight, *v.Weight)
+// 		}
+// 	})
 
-	t.Run("Test Fetching Vote for Address", func(t *testing.T) {
-		_vote := (*votes)[0]
-		response := otu.GetVoteForProposalByAddressAPI(proposalId, _vote.Addr)
+// 	t.Run("Test Fetching Vote for Address", func(t *testing.T) {
+// 		_vote := (*votes)[0]
+// 		response := otu.GetVoteForProposalByAddressAPI(proposalId, _vote.Addr)
 
-		CheckResponseCode(t, http.StatusOK, response.Code)
+// 		CheckResponseCode(t, http.StatusOK, response.Code)
 
-		var vote models.VoteWithBalance
-		json.Unmarshal(response.Body.Bytes(), &vote)
+// 		var vote models.VoteWithBalance
+// 		json.Unmarshal(response.Body.Bytes(), &vote)
 
-		expectedWeight := float64(1.00)
-		assert.Equal(t, expectedWeight, *vote.Weight)
-	})
+// 		expectedWeight := float64(1.00)
+// 		assert.Equal(t, expectedWeight, *vote.Weight)
+// 	})
 
-	t.Run("Test Fetching Votes for Address", func(t *testing.T) {
-		_vote := (*votes)[0]
-		proposalIds := []int{proposalId, proposalIdTwo}
-		response := otu.GetVotesForAddressAPI(_vote.Addr, proposalIds)
+// 	t.Run("Test Fetching Votes for Address", func(t *testing.T) {
+// 		_vote := (*votes)[0]
+// 		proposalIds := []int{proposalId, proposalIdTwo}
+// 		response := otu.GetVotesForAddressAPI(_vote.Addr, proposalIds)
 
-		CheckResponseCode(t, http.StatusOK, response.Code)
+// 		CheckResponseCode(t, http.StatusOK, response.Code)
 
-		var votes []models.VoteWithBalance
-		json.Unmarshal(response.Body.Bytes(), &votes)
+// 		var votes []models.VoteWithBalance
+// 		json.Unmarshal(response.Body.Bytes(), &votes)
 
-		for _, v := range votes {
-			expectedWeight := float64(1.00)
-			assert.Equal(t, expectedWeight, *v.Weight)
-		}
-	})
-}
-
-/* One Address One Vote NFT */
-func TestOneTokenOneVoteNFTStrategy(t *testing.T) {
-	clearTable("communities")
-	clearTable("community_users")
-	clearTable("proposals")
-	clearTable("votes")
-	clearTable("balances")
-	clearTable("nfts")
-
-	communityId, community := otu.AddCommunitiesWithNFTContract(1, "user1")
-	proposalIds, proposals := otu.AddProposalsForStrategy(communityId[0], "one-address-one-vote-nft", 1)
-	proposalId := proposalIds[0]
-	choices := proposals[0].Choices
-
-	var contract = &shared.Contract{
-		Name:        community.Contract_name,
-		Addr:        community.Contract_addr,
-		Public_path: community.Public_path,
-	}
-
-	votes, err := otu.GenerateListOfVotesWithNFTs(proposalId, 5, contract)
-	if err != nil {
-		t.Error(err)
-	}
-
-	otu.AddDummyVotesAndNFTs(votes)
-	t.Run("Test Tallying Results For NFT Balance Strategy", func(t *testing.T) {
-
-		proposalWithChoices := models.NewProposalResults(proposalId, choices)
-		_results := otu.TallyResultsForBalanceOfNfts(votes, proposalWithChoices)
-
-		response := otu.GetProposalResultsAPI(proposalId)
-		CheckResponseCode(t, http.StatusOK, response.Code)
-
-		var results models.ProposalResults
-		json.Unmarshal(response.Body.Bytes(), &results)
-
-		assert.Equal(t, _results.Proposal_id, results.Proposal_id)
-		assert.Equal(t, _results.Results_float["a"], results.Results_float["a"])
-		assert.Equal(t, _results.Results_float["b"], results.Results_float["b"])
-	})
-
-	t.Run("Test Fetching Votes for Proposal", func(t *testing.T) {
-		response := otu.GetVotesForProposalAPI(proposalId)
-		CheckResponseCode(t, http.StatusOK, response.Code)
-
-		var body utils.PaginatedResponseWithVotes
-		json.Unmarshal(response.Body.Bytes(), &body)
-
-		// Validate vote weights are returned correctly
-		for _, v := range body.Data {
-			expectedWeight := float64(1.00)
-			assert.Equal(t, expectedWeight, *v.Weight)
-		}
-	})
-
-	t.Run("Test Fetching Vote for Address", func(t *testing.T) {
-		_vote := (*votes)[0]
-		response := otu.GetVoteForProposalByAddressAPI(proposalId, _vote.Addr)
-
-		CheckResponseCode(t, http.StatusOK, response.Code)
-
-		var vote models.VoteWithBalance
-		json.Unmarshal(response.Body.Bytes(), &vote)
-
-		expectedWeight := float64(1.00)
-		assert.Equal(t, expectedWeight, *vote.Weight)
-	})
-
-	// t.Run("Attempt to cheat the NFT strategy", func(t *testing.T) {
-	// 	proposalWithChoices := models.NewProposalResults(proposalId, choices)
-	// 	_ = otu.TallyResultsForBalanceOfNfts(votes, proposalWithChoices)
-
-	// 	response := otu.GetProposalResultsAPI(proposalId)
-	// 	CheckResponseCode(t, http.StatusOK, response.Code)
-
-	// 	var correctResults models.ProposalResults
-	// 	json.Unmarshal(response.Body.Bytes(), &correctResults)
-
-	// 	otu.SetupAccountForNFTs("user6")
-	// 	otu.TransferNFT("user2", "user3", 1)
-
-	// 	cheatVote, err := otu.GenerateSingleVoteWithNFT(proposalId, 3, contract)
-	// 	if err != nil {
-	// 		t.Error(err)
-	// 	}
-	// 	votesWithCheat := append(*votes, *cheatVote)
-	// 	cheatResults := otu.TallyResultsForBalanceOfNfts(&votesWithCheat, proposalWithChoices)
-
-	// 	response = otu.GetProposalResultsAPI(proposalId)
-	// 	CheckResponseCode(t, http.StatusOK, response.Code)
-
-	// 	json.Unmarshal(response.Body.Bytes(), &cheatResults)
-
-	// 	//weight should be the same as before the cheat vote was added
-	// 	//because the cheat vote should be ignored by the server
-	// 	//therefor the cheatResults should be the same as the correctResults
-
-	// 	assert.Equal(t, correctResults.Proposal_id, cheatResults.Proposal_id)
-	// 	assert.Equal(t, correctResults.Results_float["a"], cheatResults.Results_float["a"])
-	// 	assert.Equal(t, correctResults.Results_float["b"], cheatResults.Results_float["b"])
-	// })
-}
-
-/* One Token One Vote FT */
-func TestOneTokenOneVoteFTStrategy(t *testing.T) {
-	clearTable("communities")
-	clearTable("community_users")
-	clearTable("proposals")
-	clearTable("votes")
-	clearTable("balances")
-
-	communityId := otu.AddCommunities(1)[0]
-	proposalIds, proposals := otu.AddProposalsForStrategy(communityId, "one-address-one-vote-ft", 2)
-	votes := otu.GenerateListOfVotes(proposalIds[0], 10)
-	proposalId := proposalIds[0]
-	proposalIdTwo := proposalIds[1]
-	choices := proposals[0].Choices
-
-	otu.AddDummyVotesAndBalances(votes)
-
-	t.Run("Test Tallying Results", func(t *testing.T) {
-		// Tally results
-
-		proposalWithChoices := models.NewProposalResults(proposalId, choices)
-		_results := otu.TallyResultsForOneAddressOneVote(votes, proposalWithChoices)
-
-		// Fetch Proposal Results
-		response := otu.GetProposalResultsAPI(proposalIds[0])
-		CheckResponseCode(t, http.StatusOK, response.Code)
-
-		var results models.ProposalResults
-		json.Unmarshal(response.Body.Bytes(), &results)
-
-		assert.Equal(t, _results.Proposal_id, results.Proposal_id)
-		assert.Equal(t, _results.Results_float["a"], results.Results_float["a"])
-		assert.Equal(t, _results.Results_float["b"], results.Results_float["b"])
-	})
-
-	t.Run("Test Fetching Votes for Proposal", func(t *testing.T) {
-		response := otu.GetVotesForProposalAPI(proposalId)
-
-		CheckResponseCode(t, http.StatusOK, response.Code)
-
-		var body utils.PaginatedResponseWithVotes
-		json.Unmarshal(response.Body.Bytes(), &body)
-
-		// Validate vote weights are returned correctly
-		for _, v := range body.Data {
-			expectedWeight := 1.00
-			assert.Equal(t, &expectedWeight, v.Weight)
-		}
-	})
-
-	t.Run("Test Fetching Vote for Address", func(t *testing.T) {
-		_vote := (*votes)[0]
-		response := otu.GetVoteForProposalByAddressAPI(proposalId, _vote.Addr)
-
-		CheckResponseCode(t, http.StatusOK, response.Code)
-
-		var vote models.VoteWithBalance
-		json.Unmarshal(response.Body.Bytes(), &vote)
-
-		_expectedWeight := 1.00
-		assert.Equal(t, _expectedWeight, *vote.Weight)
-	})
-
-	t.Run("Test Fetching Votes For Address", func(t *testing.T) {
-		_vote := (*votes)[0]
-		proposalIds := []int{proposalId, proposalIdTwo}
-
-		response := otu.GetVotesForAddressAPI(_vote.Addr, proposalIds)
-		CheckResponseCode(t, http.StatusOK, response.Code)
-
-		var votes []models.VoteWithBalance
-		json.Unmarshal(response.Body.Bytes(), &votes)
-
-		for _, v := range votes {
-			_expectedWeight := 1.00
-			assert.Equal(t, _expectedWeight, *v.Weight)
-		}
-	})
-}
+// 		for _, v := range votes {
+// 			expectedWeight := float64(1.00)
+// 			assert.Equal(t, expectedWeight, *v.Weight)
+// 		}
+// 	})
+// }
