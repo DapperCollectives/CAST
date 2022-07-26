@@ -198,7 +198,7 @@ func (p *Proposal) ValidateBalance(weight float64) error {
 	}
 
 	var Min_balance = *p.Min_balance
-	var ERROR error = fmt.Errorf("insufficient balance for strategy: %s", *p.Strategy)
+	var ERROR error = fmt.Errorf("insufficient balance for strategy: %s\nmin threshold: %f, vote weight: %f", *p.Strategy, *p.Min_balance, weight)
 
 	// TODO: Feature flag
 	// Dont validate in DEV or TEST envs!
