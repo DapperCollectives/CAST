@@ -58,7 +58,6 @@ export default function StrategyEditorModal({
     setIsFormValid(isValid);
   }, [strategyData]);
 
-  // user selected strategy move to second step to enter information
   const setStrategy = (strategyName) => {
     //
     // STRATEGY CONFIGURATION
@@ -81,7 +80,6 @@ export default function StrategyEditorModal({
       return;
     }
     setStrategyData((state) => ({ ...state, name: strategyName }));
-    // else go to second step
     setSep(ModalSteps[2]);
   };
 
