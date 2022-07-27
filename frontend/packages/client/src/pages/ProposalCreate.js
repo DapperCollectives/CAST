@@ -29,10 +29,10 @@ export default function ProposalCreatePage() {
   const { communityId } = useQueryParams({ communityId: 'communityId' });
 
   useEffect(() => {
-    if (data?.id) {
-      history.push(`/proposal/${data.id}`);
+    if (data?.id && communityId) {
+      history.push(`/community/${communityId}/proposal/${data.id}`);
     }
-  }, [data, history]);
+  }, [data, history, communityId]);
 
   useEffect(() => {
     if (modalContext.isOpen && creatorAddr && modalError) {
