@@ -32,6 +32,9 @@ export default function AppPages() {
             <Route exact path="/community/create">
               <CommunityCreate />
             </Route>
+            <Route path="/community/:communityId/proposal/:proposalId">
+              <Proposal />
+            </Route>
             <Route path="/community/:communityId/edit" exact={true}>
               <CommunityEditor />
             </Route>
@@ -40,9 +43,6 @@ export default function AppPages() {
             </Route>
             <Route exact path="/proposal/create">
               <ProposalCreate />
-            </Route>
-            <Route path="/proposal/:proposalId">
-              <Proposal />
             </Route>
             <Route exact path="/debug-contract">
               <Debug />
