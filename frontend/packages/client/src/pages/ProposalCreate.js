@@ -32,7 +32,7 @@ export default function ProposalCreatePage() {
     if (data?.id) {
       history.push(`/community/${data.communityId}/proposal/${data.id}`);
     }
-  }, [data, history, communityId]);
+  }, [data, history]);
 
   useEffect(() => {
     if (modalContext.isOpen && creatorAddr && modalError) {
