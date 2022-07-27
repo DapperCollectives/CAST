@@ -111,8 +111,8 @@ func (otu *OverflowTestUtils) TallyResultsForBalanceOfNfts(
 	return p
 }
 
-func (otu *OverflowTestUtils) GenerateListOfVotes(proposalId int, count int) *[]models.VoteWithBalance {
-	votes := make([]models.VoteWithBalance, count)
+func (otu *OverflowTestUtils) GenerateListOfVotes(proposalId int, count int) []*models.VoteWithBalance {
+	votes := make([]*models.VoteWithBalance, count)
 	choices := []string{"a", "b"}
 	for i := 0; i < count; i++ {
 		addr := "0x" + strconv.Itoa(i)
@@ -128,7 +128,7 @@ func (otu *OverflowTestUtils) GenerateListOfVotes(proposalId int, count int) *[]
 		staking := uint64(balance * 5) // Make this different so staked/reg strats dont have same results
 		blockHeight := uint64(0)
 
-		vote := models.VoteWithBalance{
+		vote := &models.VoteWithBalance{
 			Vote:                  v,
 			PrimaryAccountBalance: &primary,
 			StakingBalance:        &staking,
@@ -138,7 +138,7 @@ func (otu *OverflowTestUtils) GenerateListOfVotes(proposalId int, count int) *[]
 		votes[i] = vote
 	}
 
-	return &votes
+	return votes
 }
 
 func (otu *OverflowTestUtils) GenerateCheatVote(proposalId int, count int) *[]models.VoteWithBalance {
@@ -174,7 +174,7 @@ func (otu *OverflowTestUtils) GenerateListOfVotesWithNFTs(
 	proposalId int,
 	count int,
 	contract *shared.Contract,
-) (*[]models.VoteWithBalance, error) {
+) ([]*models.VoteWithBalance, error) {
 
 	mintParams := shared.MintParams{
 		Recipient:            "user1",
@@ -184,7 +184,7 @@ func (otu *OverflowTestUtils) GenerateListOfVotesWithNFTs(
 		RoyaltyBeneficiaries: []string{"0xf8d6e0586b0a20c7"},
 	}
 
-	var votes []models.VoteWithBalance
+	var votes []*models.VoteWithBalance
 	choices := []string{"a", "b"}
 
 	otu.SetupAccountForFlow("account")
@@ -224,10 +224,10 @@ func (otu *OverflowTestUtils) GenerateListOfVotesWithNFTs(
 		vote.StakingBalance = &staking
 		vote.BlockHeight = &blockHeight
 
-		votes = append(votes, vote)
+		votes = append(votes, &vote)
 	}
 
-	return &votes, nil
+	return votes, nil
 }
 
 func (otu *OverflowTestUtils) GenerateSingleVoteWithNFT(

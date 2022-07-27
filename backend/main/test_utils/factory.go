@@ -21,8 +21,8 @@ var InvalidServiceAccountKey = "5687d75f957bf64591b55eb19227706e3c8712c1387225b8
 // VOTES
 //////////
 
-func (otu *OverflowTestUtils) AddDummyVotesAndBalances(votes *[]models.VoteWithBalance) {
-	for _, vote := range *votes {
+func (otu *OverflowTestUtils) AddDummyVotesAndBalances(votes []*models.VoteWithBalance) {
+	for _, vote := range votes {
 		// Insert Vote
 		_, err := otu.A.DB.Conn.Exec(otu.A.DB.Context, `
 			INSERT INTO votes(proposal_id, addr, choice, composite_signatures, message)
@@ -43,8 +43,8 @@ func (otu *OverflowTestUtils) AddDummyVotesAndBalances(votes *[]models.VoteWithB
 	}
 }
 
-func (otu *OverflowTestUtils) AddDummyVotesAndNFTs(votes *[]models.VoteWithBalance) {
-	for _, vote := range *votes {
+func (otu *OverflowTestUtils) AddDummyVotesAndNFTs(votes []*models.VoteWithBalance) {
+	for _, vote := range votes {
 
 		// Insert Vote
 		_, err := otu.A.DB.Conn.Exec(otu.A.DB.Context, `
