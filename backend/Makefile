@@ -30,7 +30,7 @@ float:
 	flow accounts add-contract FLOATVerifiers ./main/cadence/float/FLOATVerifiers.cdc
 
 macdev:
-	APP_ENV=DEV make macrun
+	APP_ENV=PRODUCTION make macrun
 
 dev:
 	APP_ENV=DEV make build_and_run
