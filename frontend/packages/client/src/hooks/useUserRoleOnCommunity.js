@@ -45,10 +45,10 @@ export default function useUserRoleOnCommunity({
 
   const rolesInCommunity =
     communityUser
-      ?.filter((datum) => {
+      ?.find((datum) => {
         return datum.id.toString() === communityId.toString();
       })
-      .map((community) => community?.membershipType) ?? [];
+      ?.roles?.split(',') ?? [];
 
   return roles.every((role) => rolesInCommunity.includes(role));
 }

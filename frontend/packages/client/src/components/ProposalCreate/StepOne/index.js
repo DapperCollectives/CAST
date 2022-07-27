@@ -23,6 +23,8 @@ import ImageChoices from './ImageChoices';
 import { Image } from 'components/Svg';
 import { kebabToString } from 'utils';
 
+const checkValidTitleLength = (text) => text?.length <= 128;
+
 // using a React component to render custom blocks
 const ImageCaptionCustomBlock = (props) => {
   return <div className="image-caption-draft-js">{props.children}</div>;
@@ -94,7 +96,7 @@ const StepOne = ({
 
   useEffect(() => {
     const requiredFields = {
-      title: (text) => text?.trim().length > 0,
+      title: (text) => text?.trim().length > 0 && checkValidTitleLength(text),
       description: (body) => body?.getCurrentContent().hasText(),
       choices: (opts) => {
         const getLabel = (o) => o?.value?.trim();
@@ -183,7 +185,7 @@ const StepOne = ({
                 </button>
               </div>
             ),
-            errorTitle: 'Please select a strategy',
+            errorTitle: 'Please select a strategy.',
           }),
           { classNameModalContent: 'rounded-sm' }
         );
@@ -379,6 +381,8 @@ const StepOne = ({
 
   const defaultValueStrategy = stepData?.strategy;
 
+  const showTitleInputError = !checkValidTitleLength(stepData?.title ?? '');
+
   return (
     <>
       {showUploadImagesModal && (
@@ -400,13 +404,19 @@ const StepOne = ({
             type="text"
             className="rounded-sm border-light p-3 column is-full"
             value={stepData?.title || ''}
-            maxLength={128}
             onChange={(event) =>
               onDataChange({
                 title: event.target.value,
               })
             }
           />
+          {showTitleInputError && (
+            <div className="pl-1 mt-2 transition-all">
+              <p className="smaller-text has-text-red">
+                The maximum length for Title is 128 characters
+              </p>
+            </div>
+          )}
         </div>
         <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6">
           <h4 className="title is-5 mb-2">
@@ -422,7 +432,7 @@ const StepOne = ({
             toolbar={{ options, inline, list, link }}
             editorState={localEditorState}
             toolbarClassName="toolbarClassName"
-            wrapperClassName="border-light rounded-sm word-break-all"
+            wrapperClassName="border-light rounded-sm"
             editorClassName="px-4 content"
             onEditorStateChange={onEditorChange}
             toolbarCustomButtons={[<AddImageOption addImage={addImage} />]}
@@ -433,7 +443,8 @@ const StepOne = ({
         <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6">
           <h4 className="title is-5 mb-2">Voting Strategy</h4>
           <p className="has-text-grey mb-5">
-            Select a strategy for how voting power is calculated.
+            Select a strategy for how voting power is calculated. Voting
+            strategies are set by community admins.
           </p>
           <Dropdown
             defaultValue={defaultValueStrategy}

@@ -1,38 +1,32 @@
 const networksConfig = {
   emulator: {
-    accessApi: process.env.REACT_APP_EMULATOR_API || 'http://localhost:8080',
+    accessApi: process.env.REACT_APP_EMULATOR_API || 'http://localhost:8888',
     walletDiscovery:
       process.env.REACT_APP_EMULATOR_WALLET_DISCOVERY ||
       'http://localhost:8701/fcl/authn',
-    strategiesConfig: {
-      'one-address-one-vote': {
-        name: 'FlowToken',
-        addr: '0x0ae53cb6e3f42a79',
-        publicPath: 'flowTokenBalance',
-      },
-    },
+    walletDiscoveryApi: null,
+    walletDiscoveryInclude: [],
+    strategiesConfig: {},
   },
   testnet: {
-    accessApi: 'https://access-testnet.onflow.org',
+    accessApi: 'https://rest-testnet.onflow.org',
     walletDiscovery: 'https://fcl-discovery.onflow.org/testnet/authn',
-    strategiesConfig: {
-      'one-address-one-vote': {
-        name: 'FlowToken',
-        addr: '0x7e60df042a9c0868',
-        publicPath: 'flowTokenBalance',
-      },
-    },
+    walletDiscoveryApi: 'https://fcl-discovery.onflow.org/api/testnet/authn',
+    walletDiscoveryInclude: [
+      // '0x9d2e44203cb13051', // Ledger
+      // '0x82ec283f88a62e65' // Dapper Wallet
+    ],
+    strategiesConfig: {},
   },
   mainnet: {
-    accessApi: 'https://mainnet.onflow.org',
+    accessApi: 'https://rest-mainnet.onflow.org',
     walletDiscovery: 'https://fcl-discovery.onflow.org/authn',
-    strategiesConfig: {
-      'one-address-one-vote': {
-        name: 'FlowToken',
-        addr: '0x1654653399040a61',
-        publicPath: 'flowTokenBalance',
-      },
-    },
+    walletDiscoveryApi: 'https://fcl-discovery.onflow.org/api/authn',
+    walletDiscoveryInclude: [
+      // '0xe5cd26afebe62781', // Ledger
+      // '0xead892083b3e2c6c' // Dapper Wallet
+    ],
+    strategiesConfig: {},
   },
 };
 

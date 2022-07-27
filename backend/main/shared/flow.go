@@ -2,11 +2,11 @@ package shared
 
 import (
 	"context"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"flag"
 	"io/ioutil"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -15,7 +15,6 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/onflow/cadence"
-	jsoncdc "github.com/onflow/cadence/encoding/json"
 	"github.com/onflow/flow-go-sdk"
 	"github.com/onflow/flow-go-sdk/client"
 	"google.golang.org/grpc"
@@ -53,6 +52,7 @@ var (
 	placeholderFungibleTokenAddr    = regexp.MustCompile(`"[^"\s]*FUNGIBLE_TOKEN_ADDRESS"`)
 	placeholderNonFungibleTokenAddr = regexp.MustCompile(`"[^"\s]*NON_FUNGIBLE_TOKEN_ADDRESS"`)
 	placeholderMetadataViewsAddr    = regexp.MustCompile(`"[^"\s]*METADATA_VIEWS_ADDRESS"`)
+	placeholderCollectionPublicPath = regexp.MustCompile(`"[^"\s]*COLLECTION_PUBLIC_PATH"`)
 )
 
 func NewFlowClient(flowEnv string) *FlowAdapter {
@@ -64,13 +64,13 @@ func NewFlowClient(flowEnv string) *FlowAdapter {
 	content, err := ioutil.ReadFile(path)
 
 	if err != nil {
-		log.Fatal().Msgf("Error when opening file: %+v", err)
+		log.Fatal().Msgf("Error when opening file: %+v.", err)
 	}
 
 	var config FlowConfig
 	err = json.Unmarshal(content, &config)
 	if err != nil {
-		log.Fatal().Msgf("Error parsing flow.json: %+v", err)
+		log.Fatal().Msgf("Error parsing flow.json: %+v.", err)
 	}
 
 	adapter.Config = config
@@ -80,11 +80,12 @@ func NewFlowClient(flowEnv string) *FlowAdapter {
 	if flag.Lookup("test.v") != nil {
 		adapter.URL = "127.0.0.1:3569"
 	}
+	log.Info().Msgf("FLOW URL: %s", adapter.URL)
 
 	// create flow client
 	FlowClient, err := client.New(adapter.URL, grpc.WithInsecure())
 	if err != nil {
-		log.Panic().Msgf("failed to connect to %s", adapter.URL)
+		log.Panic().Msgf("Failed to connect to %s.", adapter.URL)
 	}
 	adapter.Client = FlowClient
 	return &adapter
@@ -114,7 +115,7 @@ func (fa *FlowAdapter) UserSignatureValidate(
 		return nil
 	}
 
-	log.Debug().Msgf("UserSignature validate: %s [%s] %v", address, message, *sigs)
+	log.Debug().Msgf("UserSignature validate: %s [%s] %v.", address, message, *sigs)
 
 	flowAddress := flow.HexToAddress(address)
 	cadenceAddress := cadence.NewAddress(flowAddress)
@@ -130,7 +131,7 @@ func (fa *FlowAdapter) UserSignatureValidate(
 	// Load script
 	script, err := ioutil.ReadFile("./main/cadence/scripts/validate_signature_v2.cdc")
 	if err != nil {
-		log.Error().Err(err).Msgf("error reading cadence script file")
+		log.Error().Err(err).Msgf("Error reading cadence script file.")
 		return err
 	}
 
@@ -148,9 +149,9 @@ func (fa *FlowAdapter) UserSignatureValidate(
 
 	if err != nil && strings.Contains(err.Error(), "ledger returns unsuccessful") {
 		log.Error().Err(err).Msg("signature validation error")
-		return errors.New("flow access node error, please cast your vote again")
+		return errors.New("Flow access node error, please cast your vote again.")
 	} else if err != nil {
-		log.Error().Err(err).Msg("signature validation error")
+		log.Error().Err(err).Msg("Signature validation error.")
 		return err
 	}
 
@@ -159,123 +160,149 @@ func (fa *FlowAdapter) UserSignatureValidate(
 	}
 
 	if value != cadence.NewBool(true) {
-		return errors.New("invalid signature")
+		return errors.New("Invalid signature.")
 	}
 
 	return nil
 }
 
-func (fa *FlowAdapter) UserTransactionValidate(
-	address string,
-	message string,
-	sigs *[]CompositeSignature,
-	transactionId string,
-	txOptaddrs []string,
-	choices []Choice,
-) error {
-	if transactionId == "" {
-		// need user signature validation
-		return nil
-	}
-	log.Info().Msgf("Process Vote TXID %s", transactionId)
+// func (fa *FlowAdapter) UserTransactionValidate(
+// 	address string,
+// 	message string,
+// 	sigs *[]CompositeSignature,
+// 	transactionId string,
+// 	txOptaddrs []string,
+// 	choices []Choice,
+// ) error {
+// 	if transactionId == "" {
+// 		// need user signature validation
+// 		return nil
+// 	}
+// 	log.Info().Msgf("Process Vote TXID %s", transactionId)
 
-	// wait on transaction details and verify
-	txId := flow.HexToID(transactionId)
-	txr, tx, err := WaitForSeal(fa.Context, fa.Client, txId)
-	if err != nil || txr.Error != nil {
-		log.Error().Err(err).Msgf("Tranaction vote has error %s", txr.Error.Error())
-		return errors.New("transaction vote invalid")
-	}
+// 	// wait on transaction details and verify
+// 	txId := flow.HexToID(transactionId)
+// 	txr, tx, err := WaitForSeal(fa.Context, fa.Client, txId)
+// 	if err != nil || txr.Error != nil {
+// 		log.Error().Err(err).Msgf("Tranaction vote has error %s", txr.Error.Error())
+// 		return errors.New("transaction vote invalid")
+// 	}
 
-	isSealed := txr.Status.String() == "SEALED"
-	isVoter := "0x"+tx.ProposalKey.Address.String() == address
-	if !isSealed {
-		return errors.New("transaction vote not processed")
-	} else if !isVoter {
-		return errors.New("invalid voter address")
-	}
+// 	isSealed := txr.Status.String() == "SEALED"
+// 	isVoter := "0x"+tx.ProposalKey.Address.String() == address
+// 	if !isSealed {
+// 		return errors.New("transaction vote not processed")
+// 	} else if !isVoter {
+// 		return errors.New("invalid voter address")
+// 	}
 
-	txBlockByID, errBlockHeader := fa.Client.GetBlockHeaderByID(fa.Context, tx.ReferenceBlockID)
-	if errBlockHeader != nil {
-		log.Error().Err(err).Msgf("Get block header has error %s", errBlockHeader.Error())
-		return errors.New("can not verify tx is recent")
-	}
+// 	txBlockByID, errBlockHeader := fa.Client.GetBlockHeaderByID(fa.Context, tx.ReferenceBlockID)
+// 	if errBlockHeader != nil {
+// 		log.Error().Err(err).Msgf("Get block header has error %s", errBlockHeader.Error())
+// 		return errors.New("can not verify tx is recent")
+// 	}
 
-	if txBlockByID.Timestamp.Before(time.Now().Add(-15 * time.Minute)) {
-		log.Error().
-			Err(err).
-			Msgf("Tx timestamp too old, now: %s block: %s, blockId %s", time.Now(), txBlockByID.Timestamp, txBlockByID.ID)
-		return errors.New("voting transaction is invalid")
-	}
+// 	if txBlockByID.Timestamp.Before(time.Now().Add(-15 * time.Minute)) {
+// 		log.Error().
+// 			Err(err).
+// 			Msgf("Tx timestamp too old, now: %s block: %s, blockId %s", time.Now(), txBlockByID.Timestamp, txBlockByID.ID)
+// 		return errors.New("voting transaction is invalid")
+// 	}
 
-	// validate transaction arguments
-	toAddressDecoded, errAddress := jsoncdc.Decode(tx.Arguments[1])
-	if errAddress != nil {
-		log.Error().Err(err).Msgf("toAddress in tx invalid %s", errAddress.Error())
-		return errors.New("transaction vote is invalid, option not found")
-	}
+// 	// validate transaction arguments
+// 	toAddressDecoded, errAddress := jsoncdc.Decode(tx.Arguments[1])
+// 	if errAddress != nil {
+// 		log.Error().Err(err).Msgf("toAddress in tx invalid %s", errAddress.Error())
+// 		return errors.New("transaction vote is invalid, option not found")
+// 	}
 
-	toAddress := toAddressDecoded.(cadence.Address)
-	vars := strings.Split(message, ":")
-	encodedChoice := vars[1]
-	choiceBytes, errChoice := hex.DecodeString(encodedChoice)
+// 	toAddress := toAddressDecoded.(cadence.Address)
+// 	vars := strings.Split(message, ":")
+// 	encodedChoice := vars[1]
+// 	choiceBytes, errChoice := hex.DecodeString(encodedChoice)
 
-	if errChoice != nil {
-		return errors.New("couldnt decode choice in message from hex string")
-	}
+// 	if errChoice != nil {
+// 		return errors.New("couldnt decode choice in message from hex string")
+// 	}
 
-	isToAddressValid := false
-	for index, element := range txOptaddrs {
-		addr := toAddress.String()
-		if element == addr {
-			isToAddressValid = true
-			if choices[index].Choice_text != string(choiceBytes) {
-				return errors.New("vote choice does not match tx to address")
-			}
-		}
-	}
+// 	isToAddressValid := false
+// 	for index, element := range txOptaddrs {
+// 		addr := toAddress.String()
+// 		if element == addr {
+// 			isToAddressValid = true
+// 			if choices[index].Choice_text != string(choiceBytes) {
+// 				return errors.New("vote choice does not match tx to address")
+// 			}
+// 		}
+// 	}
 
-	if !isToAddressValid {
-		return errors.New("transaction to address not recognized")
-	}
-	return nil
-}
+// 	if !isToAddressValid {
+// 		return errors.New("transaction to address not recognized")
+// 	}
+// 	return nil
+// }
 
-func (fa *FlowAdapter) EnforceTokenThreshold(creatorAddr string, c *Contract) (bool, error) {
+func (fa *FlowAdapter) EnforceTokenThreshold(scriptPath, creatorAddr string, c *Contract) (bool, error) {
 
+	var balance float64
 	flowAddress := flow.HexToAddress(creatorAddr)
 	cadenceAddress := cadence.NewAddress(flowAddress)
 	cadencePath := cadence.Path{Domain: "public", Identifier: *c.Public_path}
 
-	script, err := ioutil.ReadFile("./main/cadence/scripts/get_balance.cdc")
+	script, err := ioutil.ReadFile(scriptPath)
 	if err != nil {
-		log.Error().Err(err).Msgf("error reading cadence script file")
+		log.Error().Err(err).Msgf("Error reading cadence script file.")
 		return false, err
 	}
 
-	script = fa.ReplaceContractPlaceholders(string(script[:]), c, true)
+	var cadenceValue cadence.Value
 
-	//call the script to verify balance
-	cadenceValue, err := fa.Client.ExecuteScriptAtLatestBlock(
-		fa.Context,
-		script,
-		[]cadence.Value{
-			cadencePath,
-			cadenceAddress,
-		},
-	)
-	if err != nil {
-		log.Error().Err(err).Msg("error executing script")
-		return false, err
+	if scriptPath == "./main/cadence/scripts/get_nfts_ids.cdc" {
+		isFungible := false
+		script = fa.ReplaceContractPlaceholders(string(script[:]), c, isFungible)
+
+		//call the non-fungible token script to verify balance
+		cadenceValue, err = fa.Client.ExecuteScriptAtLatestBlock(
+			fa.Context,
+			script,
+			[]cadence.Value{
+				cadenceAddress,
+			})
+		if err != nil {
+			log.Error().Err(err).Msg("Error executing Non-Fungible-Token script.")
+			return false, err
+		}
+		value := CadenceValueToInterface(cadenceValue)
+
+		nftIds := value.([]interface{})
+		balance = float64(len(nftIds))
+
+	} else {
+		isFungible := true
+		script = fa.ReplaceContractPlaceholders(string(script[:]), c, isFungible)
+
+		//call the fungible-token script to verify balance
+		cadenceValue, err = fa.Client.ExecuteScriptAtLatestBlock(
+			fa.Context,
+			script,
+			[]cadence.Value{
+				cadencePath,
+				cadenceAddress,
+			})
+		if err != nil {
+			log.Error().Err(err).Msg("Error executing Funigble-Token Script.")
+			return false, err
+		}
+
+		value := CadenceValueToInterface(cadenceValue)
+		balance, err = strconv.ParseFloat(value.(string), 64)
+		if err != nil {
+			log.Error().Err(err).Msg("Error converting cadence value to float.")
+			return false, err
+		}
 	}
 
-	value := CadenceValueToInterface(cadenceValue)
-	balance, err := strconv.ParseFloat(value.(string), 64)
-	if err != nil {
-		log.Error().Err(err).Msg("error converting cadence value to float")
-		return false, err
-	}
-
+	//check if balance is greater than threshold
 	if balance < *c.Threshold {
 		return false, nil
 	}
@@ -289,7 +316,7 @@ func (fa *FlowAdapter) GetNFTIds(voterAddr string, c *Contract) ([]interface{}, 
 
 	script, err := ioutil.ReadFile("./main/cadence/scripts/get_nfts_ids.cdc")
 	if err != nil {
-		log.Error().Err(err).Msgf("Error reading cadence script file")
+		log.Error().Err(err).Msgf("Error reading cadence script file.")
 		return nil, err
 	}
 
@@ -303,27 +330,31 @@ func (fa *FlowAdapter) GetNFTIds(voterAddr string, c *Contract) ([]interface{}, 
 		},
 	)
 	if err != nil {
-		log.Error().Err(err).Msg("error executing script")
+		log.Error().Err(err).Msg("Error executing script.")
 		return nil, err
 	}
 
 	value := CadenceValueToInterface(cadenceValue)
 
-	// we can cast cadence type [Uint64] as Go type []interface{}
-	// In the case where ids are of string type we need an if statement somewhere to handle
 	nftIds := value.([]interface{})
-
 	return nftIds, nil
 }
 
 func (fa *FlowAdapter) ReplaceContractPlaceholders(code string, c *Contract, isFungible bool) []byte {
-	fungibleTokenAddr := fa.Config.Contracts["FungibleToken"].Aliases[fa.Env]
-	nonFungibleTokenAddr := fa.Config.Contracts["NonFungibleToken"].Aliases[fa.Env]
-	metadataViewsAddr := fa.Config.Contracts["MetadataViews"].Aliases[fa.Env]
+	var (
+		fungibleTokenAddr    string
+		nonFungibleTokenAddr string
+		metadataViewsAddr    string
+	)
+
+	nonFungibleTokenAddr = fa.Config.Contracts["NonFungibleToken"].Aliases[os.Getenv("FLOW_ENV")]
+	fungibleTokenAddr = fa.Config.Contracts["FungibleToken"].Aliases[os.Getenv("FLOW_ENV")]
+	metadataViewsAddr = fa.Config.Contracts["MetadataViews"].Aliases[os.Getenv("FLOW_ENV")]
 
 	if isFungible {
 		code = placeholderFungibleTokenAddr.ReplaceAllString(code, fungibleTokenAddr)
 	} else {
+		code = placeholderCollectionPublicPath.ReplaceAllString(code, *c.Public_path)
 		code = placeholderNonFungibleTokenAddr.ReplaceAllString(code, nonFungibleTokenAddr)
 	}
 

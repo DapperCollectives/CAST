@@ -22,13 +22,13 @@ func (s *OneAddressOneVote) FetchBalance(
 ) (*models.Balance, error) {
 
 	if err := b.GetBalanceByAddressAndBlockHeight(s.DB); err != nil && err.Error() != pgx.ErrNoRows.Error() {
-		log.Error().Err(err).Msg("error querying address b at blockheight")
+		log.Error().Err(err).Msg("Error querying address b at blockheight.")
 		return nil, err
 	}
 
 	if b.ID == "" {
 		if err := b.CreateBalance(s.DB); err != nil {
-			log.Error().Err(err).Msg("error saving b to DB")
+			log.Error().Err(err).Msg("Error saving b to database.")
 			return nil, err
 		}
 	}
@@ -53,7 +53,7 @@ func (s *OneAddressOneVote) GetVoteWeightForBalance(
 	proposal *models.Proposal,
 ) (float64, error) {
 	var weight float64
-	var ERROR error = fmt.Errorf("no address found")
+	var ERROR error = fmt.Errorf("No address found.")
 
 	if vote.Addr == "" {
 		return 0.00, ERROR
@@ -77,6 +77,10 @@ func (s *OneAddressOneVote) GetVotes(
 	}
 
 	return votes, nil
+}
+
+func (s *OneAddressOneVote) RequiresSnapshot() bool {
+	return false
 }
 
 func (s *OneAddressOneVote) InitStrategy(

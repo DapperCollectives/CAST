@@ -58,7 +58,6 @@ export default function StrategyEditorModal({
     setIsFormValid(isValid);
   }, [strategyData]);
 
-  // user selected strategy move to second step to enter information
   const setStrategy = (strategyName) => {
     //
     // STRATEGY CONFIGURATION
@@ -81,7 +80,6 @@ export default function StrategyEditorModal({
       return;
     }
     setStrategyData((state) => ({ ...state, name: strategyName }));
-    // else go to second step
     setSep(ModalSteps[2]);
   };
 
@@ -102,9 +100,13 @@ export default function StrategyEditorModal({
       },
     }));
 
+  const strategyName =
+    strategyData?.name &&
+    strategies.find((s) => s.key === strategyData.name).name;
+
   return (
     <div
-      className="modal-card has-background-white m-0 p-5 p-1-mobile"
+      className="modal-card has-background-white m-0 p-5 p-1-mobile full-height"
       style={{ minHeight: '467px' }}
     >
       <header
@@ -112,7 +114,11 @@ export default function StrategyEditorModal({
         style={{ borderBottom: 'none' }}
       >
         <div className="column p-0 is-flex flex-1">
-          <h2 className="is-size-4">Select a Strategy</h2>
+          <h2 className="is-size-4" style={{ textTransform: 'capitalize' }}>
+            {step === ModalSteps[2] && strategyData?.name
+              ? strategyName
+              : 'Select a Strategy'}
+          </h2>
         </div>
         <div
           className={`column is-narrow px-0 has-text-right is-size-2 leading-tight cursor-pointer ${
@@ -145,7 +151,7 @@ export default function StrategyEditorModal({
                 label="done"
                 enabled={formIsValid}
                 onClick={onConfirmDone}
-                classNames="mt-5"
+                classNames="mt-5 has-button-border-hover"
               />
             }
           />

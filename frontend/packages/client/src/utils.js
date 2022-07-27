@@ -106,7 +106,7 @@ export function getReducedImg(image, newImageWidth = 150, fileName) {
           const blobAsFile = blobImageNoType;
           return resolve({ imageFile: blobAsFile });
         }
-        reject({ error: 'Error while using blob' });
+        reject({ error: 'Error while using blob.' });
       },
       'image/jpeg',
       1
@@ -210,3 +210,6 @@ export const getPaginationInfo = (pages) => {
     lastPage?.next ?? -1,
   ];
 };
+
+export const validateLength = (string, MaxLength) =>
+  string?.length <= MaxLength;

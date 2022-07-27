@@ -40,7 +40,7 @@ func TestGetNonExistentCommunity(t *testing.T) {
 	var m map[string]string
 	json.Unmarshal(response.Body.Bytes(), &m)
 
-	assert.Equal(t, "Community not found", m["error"])
+	assert.Equal(t, "Community not found.", m["error"])
 }
 
 func TestCreateCommunity(t *testing.T) {
@@ -135,6 +135,23 @@ func TestGetCommunityAPI(t *testing.T) {
 	response := otu.GetCommunityAPI(1)
 
 	checkResponseCode(t, http.StatusOK, response.Code)
+}
+
+func TestGetCommunitiesForHomepageAPI(t *testing.T) {
+	clearTable("communities")
+	clearTable("community_users")
+	communityIds := otu.AddCommunities(2)
+	otu.MakeFeaturedCommunity(communityIds[0])
+
+	response := otu.GetCommunitiesForHomepageAPI()
+
+	checkResponseCode(t, http.StatusOK, response.Code)
+
+	//Parse the response
+	var p test_utils.PaginatedResponseWithCommunity
+	json.Unmarshal(response.Body.Bytes(), &p)
+	
+	assert.Equal(t, 1, len(p.Data))
 }
 
 func TestUpdateCommunity(t *testing.T) {

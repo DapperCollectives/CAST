@@ -1,7 +1,6 @@
 import React from 'react';
 import { useMediaQuery } from 'hooks';
 import classnames from 'classnames';
-import { map } from 'lodash';
 
 const defaultButtonStyle = {
   border: 'none',
@@ -31,12 +30,13 @@ export default function Popover({
       <div className="popover-content">
         <div className={popoverClassName}>
           <div className="column is-12 p-0">
-            {paragraphs.map((p) => (
+            {paragraphs.map((p, index) => (
               <p
                 className="small-text has-text-weight-normal has-text-grey small-text"
                 style={{
                   lineHeight: '20px',
                 }}
+                key={`popover-${index}`}
               >
                 {p}
               </p>

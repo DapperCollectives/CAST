@@ -33,6 +33,7 @@ type Community struct {
 	Proposal_validation      *string     `json:"proposalValidation,omitempty"`
 	Proposal_threshold       *string     `json:"proposalThreshold,omitempty"`
 	Slug                     *string     `json:"slug,omitempty"                  validate:"required"`
+	Is_featured      		 *bool		 `json:"isFeatured,omitempty"`
 
 	//TODO we can remove this from the struct as contract data is inside Strategies now
 	Contract_name *string  `json:"contractName,omitempty"`
@@ -142,7 +143,7 @@ func GetCommunitiesForHomePage(db *s.Database, start, count int) ([]*Community, 
 		`
 		SELECT
   	*
-		FROM communities WHERE discord_url IS NOT NULL
+		FROM communities WHERE (discord_url IS NOT NULL
 		AND twitter_url IS NOT NULL
   	AND id IN (
     	SELECT community_id
@@ -156,8 +157,8 @@ func GetCommunitiesForHomePage(db *s.Database, start, count int) ([]*Community, 
     	WHERE status = 'published' AND end_time < (NOW() AT TIME ZONE 'UTC')
     	GROUP BY community_id
     	HAVING COUNT(*) >= 2
-  	)
-	OR id = 1
+  	))
+	OR is_featured = 'true'
 		LIMIT $1 OFFSET $2
 		`, count, start)
 

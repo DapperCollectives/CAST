@@ -59,7 +59,7 @@ const MenuTabs = ({ tabs, communityId, onClickButtonTab = () => {} } = {}) => {
           }`}
           onClick={onClickButtonTab('proposals-and-voting')}
         >
-          Proposals & Voting
+          Proposals &amp; Voting
         </button>
       </div>
     </div>
@@ -154,8 +154,8 @@ export default function CommunityEditorPage() {
   // initial loading
   if (loading && !community) {
     return (
-      <section className="section">
-        <div className="container is-flex full-height">
+      <section className="section full-height">
+        <div className="container is-flex full-height is-justify-content-center">
           <Loader fullHeight />
         </div>
       </section>
@@ -190,6 +190,7 @@ export default function CommunityEditorPage() {
                   name={community?.name}
                   body={community?.body}
                   logo={community?.logo}
+                  banner={community?.bannerImgUrl}
                   updateCommunity={updateCommunity}
                   uploadFile={uploadFile}
                 />

@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"sort"
+	"strings"
 
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/georgysavva/scany/pgxscan"
@@ -30,7 +31,7 @@ var USER_TYPES = UserTypes{"member", "author", "admin"}
 
 type UserCommunity struct {
 	Community
-	Membership_type string `json:"membershipType,omitempty"`
+	Roles string `json:"roles" validate:"required"`
 }
 
 type CommunityUserPayload struct {
@@ -140,16 +141,16 @@ func GetCommunityLeaderboard(db *s.Database, communityId int, addr string, start
 
 func GetCommunitiesForUser(db *s.Database, addr string, start, count int) ([]UserCommunity, int, error) {
 	var communities = []UserCommunity{}
+
 	err := pgxscan.Select(db.Context, db.Conn, &communities,
 		`
 		SELECT
-			communities.*,
-			community_users.user_type as membership_type
-		FROM communities
-		LEFT JOIN community_users ON community_users.community_id = communities.id
+		communities.*,
+		community_users.user_type as roles
+		  FROM communities
+		  JOIN community_users ON community_users.community_id = communities.id
 		WHERE community_users.addr = $1
-		LIMIT $2 OFFSET $3
-		`, addr, count, start)
+		`, addr)
 
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		return nil, 0, err
@@ -157,17 +158,9 @@ func GetCommunitiesForUser(db *s.Database, addr string, start, count int) ([]Use
 		return []UserCommunity{}, 0, nil
 	}
 
-	var totalCommunities int
-	countSql := `
-	SELECT
-		COUNT(communities.id)
-	FROM communities
-	LEFT JOIN community_users ON community_users.community_id = communities.id
-	WHERE community_users.addr = $1
-	`
-	_ = db.Conn.QueryRow(db.Context, countSql, addr).Scan(&totalCommunities)
+	mergedCommunities, totalCommunities := mergeUserRolesForCommunities(communities, start, count)
 
-	return communities, totalCommunities, nil
+	return mergedCommunities, totalCommunities, nil
 }
 
 func (u *CommunityUser) GetCommunityUser(db *s.Database) error {
@@ -209,7 +202,7 @@ func GrantAdminRolesToAddress(db *s.Database, communityId int, addr string) erro
 		userRole := CommunityUser{Addr: addr, Community_id: communityId, User_type: role}
 		if err := userRole.GetCommunityUser(db); err != nil {
 			if err := userRole.CreateCommunityUser(db); err != nil {
-				log.Error().Err(err).Msgf("db error creating role %s for addr %s for communityId %d", role, addr, communityId)
+				log.Error().Err(err).Msgf("Database error creating role %s for Address: %s and Communuity Id: %d.", role, addr, communityId)
 				return err
 			}
 		}
@@ -223,7 +216,7 @@ func GrantAuthorRolesToAddress(db *s.Database, communityId int, addr string) err
 		userRole := CommunityUser{Addr: addr, Community_id: communityId, User_type: role}
 		if err := userRole.GetCommunityUser(db); err != nil {
 			if err := userRole.CreateCommunityUser(db); err != nil {
-				log.Error().Err(err).Msgf("db error creating role %s for addr %s for communityId %d", role, addr, communityId)
+				log.Error().Err(err).Msgf("Database error creating role %s for Address: %s and Community Id: %d.", role, addr, communityId)
 				return err
 			}
 		}
@@ -280,7 +273,7 @@ func getUserAchievements(db *s.Database, communityId int) (UserAchievements, err
 	// their votes and achievements (e.g. early votes, streaks and winning choices)
 	// Note 1: crosstab is a postgres extension that creates a pivot table.
 	// Achievements are joined as columns for each user.
-	// Note 2: Subselects community_id not replaced properly by $1, so has been
+	// Note 2: crosstab Subselects in community_id not replaced properly by $1, so has been
 	// substituted in string first.
 	sql := fmt.Sprintf(
 		`
@@ -387,4 +380,43 @@ func getLeaderboardUsers(userAchievements UserAchievements, currentUserAddr stri
 	}
 
 	return leaderboardUsers, currentUser
+}
+
+func mergeUserRolesForCommunities(communities []UserCommunity, start, count int) ([]UserCommunity, int) {
+	var mergedCommunities = []UserCommunity{}
+	communitiesMap := make(map[int]int)
+	for i := range communities {
+		if index, ok := communitiesMap[communities[i].ID]; ok{
+			mergedCommunities[index].Roles = strings.Join([]string{mergedCommunities[index].Roles, communities[i].Roles}, ",")
+		} else {
+			mergedCommunities = append(mergedCommunities, communities[i])
+			communitiesMap[communities[i].ID] = len(mergedCommunities) - 1
+		}
+	}
+
+	if start == 0 && len(mergedCommunities) >= count {
+		mergedCommunities = mergedCommunities[0:count]
+	} else {
+		startIndex := start * count
+		endIndex := start*count + count
+
+		// If index invalid, set to last page
+		if startIndex >= len(mergedCommunities) {
+			if len(mergedCommunities)-count >= 0 {
+				startIndex = len(mergedCommunities) - count
+			} else {
+				startIndex = 0
+			}
+		}
+
+		if endIndex <= len(mergedCommunities) {
+			mergedCommunities = mergedCommunities[startIndex:endIndex]
+		} else {
+			mergedCommunities = mergedCommunities[startIndex:]
+		}
+	}
+
+	totalCommunities := len(mergedCommunities)
+
+	return mergedCommunities, totalCommunities
 }
