@@ -29,8 +29,8 @@ export default function ProposalCreatePage() {
   const { communityId } = useQueryParams({ communityId: 'communityId' });
 
   useEffect(() => {
-    if (data?.id && communityId) {
-      history.push(`/community/${communityId}/proposal/${data.id}`);
+    if (data?.id) {
+      history.push(`/community/${data.communityId}/proposal/${data.id}`);
     }
   }, [data, history, communityId]);
 
