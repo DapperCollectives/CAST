@@ -64,16 +64,32 @@ func (b *BalanceOfNfts) FetchBalance(
 
 func (b *BalanceOfNfts) TallyVotes(
 	votes []*models.VoteWithBalance,
-	r *models.ProposalResults,
+	p *models.ProposalResults,
+	maxWeight float64,
 ) (models.ProposalResults, error) {
 
-	for _, v := range votes {
-		nftCount := len(v.NFTs)
-		r.Results_float[v.Choice] += float64(nftCount)
-		r.Results[v.Choice] += nftCount
+	for _, vote := range votes {
+		var weight float64
+
+		if len(vote.NFTs) != 0 {
+			nftCount := len(vote.NFTs)
+			exceedsMaxWeight := models.CheckForMaxWeight(
+				maxWeight,
+				uint64(nftCount),
+			)
+
+			if exceedsMaxWeight {
+				weight = maxWeight
+			} else {
+				weight = float64(nftCount)
+			}
+
+			p.Results[vote.Choice] += int(weight)
+			p.Results_float[vote.Choice] += weight
+		}
 	}
 
-	return *r, nil
+	return *p, nil
 }
 
 func (b *BalanceOfNfts) GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error) {

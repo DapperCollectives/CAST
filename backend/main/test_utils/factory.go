@@ -21,7 +21,7 @@ var InvalidServiceAccountKey = "5687d75f957bf64591b55eb19227706e3c8712c1387225b8
 // VOTES
 //////////
 
-func (otu *OverflowTestUtils) AddDummyVotesAndBalances(votes *[]VoteWithBalance) {
+func (otu *OverflowTestUtils) AddDummyVotesAndBalances(votes *[]models.VoteWithBalance) {
 	for _, vote := range *votes {
 		// Insert Vote
 		_, err := otu.A.DB.Conn.Exec(otu.A.DB.Context, `
@@ -36,14 +36,14 @@ func (otu *OverflowTestUtils) AddDummyVotesAndBalances(votes *[]VoteWithBalance)
 		_, err = otu.A.DB.Conn.Exec(otu.A.DB.Context, `
 			INSERT INTO balances(id, addr, primary_account_balance, secondary_address, secondary_account_balance, staking_balance, script_result, stakes, block_height)
 			VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)
-		`, uuid.New(), vote.Addr, vote.Primary_account_balance, "0x0", 0, vote.Staking_balance, "SUCCESS", []string{}, 1)
+		`, uuid.New(), vote.Addr, vote.PrimaryAccountBalance, "0x0", 0, vote.StakingBalance, "SUCCESS", []string{}, 1)
 		if err != nil {
 			log.Error().Err(err).Msg("AddDummyVotesAndBalances database error - balances.")
 		}
 	}
 }
 
-func (otu *OverflowTestUtils) AddDummyVotesAndNFTs(votes *[]VoteWithBalance) {
+func (otu *OverflowTestUtils) AddDummyVotesAndNFTs(votes *[]models.VoteWithBalance) {
 	for _, vote := range *votes {
 
 		// Insert Vote

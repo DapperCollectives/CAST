@@ -52,17 +52,31 @@ func (s *StakedTokenWeightedDefault) FetchBalance(
 
 func (s *StakedTokenWeightedDefault) TallyVotes(
 	votes []*models.VoteWithBalance,
-	r *models.ProposalResults,
+	p *models.ProposalResults,
+	maxWeight float64,
 ) (models.ProposalResults, error) {
 
 	for _, vote := range votes {
+		var weight float64
+
 		if vote.StakingBalance != nil {
-			r.Results[vote.Choice] += int(float64(*vote.StakingBalance) * math.Pow(10, -8))
-			r.Results_float[vote.Choice] += float64(*vote.StakingBalance) * math.Pow(10, -8)
+			exceedsMaxWeight := models.CheckForMaxWeight(
+				maxWeight,
+				*vote.StakingBalance,
+			)
+
+			if exceedsMaxWeight {
+				weight = maxWeight
+			} else {
+				weight = float64(*vote.StakingBalance)
+			}
+
+			p.Results[vote.Choice] += int(weight * math.Pow(10, -8))
+			p.Results_float[vote.Choice] += weight * math.Pow(10, -8)
 		}
 	}
 
-	return *r, nil
+	return *p, nil
 }
 
 func (s *StakedTokenWeightedDefault) GetVoteWeightForBalance(

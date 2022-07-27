@@ -108,7 +108,14 @@ func (p *Proposal) GetProposalById(db *s.Database) error {
 	WHERE p.id = $1
 	GROUP BY p.id`
 	sql = fmt.Sprintf(sql, computedStatusSQL)
-	return pgxscan.Get(db.Context, db.Conn, p, sql, p.ID)
+	err := pgxscan.Get(db.Context, db.Conn, p, sql, p.ID)
+
+	if p.Max_weight == nil {
+		maxWeightDefault := float64(0)
+		p.Max_weight = &maxWeightDefault
+	}
+
+	return err
 }
 
 func (p *Proposal) CreateProposal(db *s.Database) error {
