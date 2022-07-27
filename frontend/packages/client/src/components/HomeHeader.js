@@ -19,8 +19,8 @@ export default function HomeHeader() {
   return (
     <div className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center pb-7">
       <div
-        className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center px-4 is-clipped"
-        style={{ position: 'relative' }}
+        className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center px-4"
+        style={{ position: 'relative', overflow: 'hidden' }}
         ref={parentRef}
       >
         <div className="is-flex">
