@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"math"
 	"net/http"
 	"testing"
@@ -15,7 +14,7 @@ import (
 )
 
 type Strategy interface {
-	TallyVotes(votes []*models.VoteWithBalance, p *models.ProposalResults, maxWeight float64) (models.ProposalResults, error)
+	TallyVotes(votes []*models.VoteWithBalance, p *models.ProposalResults, proposal *models.Proposal) (models.ProposalResults, error)
 	GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error)
 	GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error)
 	InitStrategy(f *shared.FlowAdapter, db *shared.Database, sc *shared.SnapshotClient)
@@ -45,21 +44,21 @@ func TestTokenWeightedDefaultStrategy(t *testing.T) {
 	proposalIdTwo := proposalIds[1]
 	choices := proposals[0].Choices
 
-	otu.AddDummyVotesAndBalances(votes)
+	err := otu.AddDummyVotesAndBalances(votes)
+	if err != nil {
+		t.Errorf("Error adding votes and balances: %s", err)
+	}
 
 	t.Run("Test Tallying Results", func(t *testing.T) {
 		// Tally results
-		maxWeightDefault := float64(0)
 		strategyName := "token-weighted-default"
 
 		s := strategyMap[strategyName]
 		proposalWithChoices := models.NewProposalResults(proposalId, choices)
-		_results, err := s.TallyVotes(votes, proposalWithChoices, maxWeightDefault)
+		_results, err := s.TallyVotes(votes, proposalWithChoices, proposals[0])
 		if err != nil {
 			t.Errorf("Error tallying votes: %v", err)
 		}
-
-		fmt.Printf("Results: %v\n", _results)
 
 		// Fetch Proposal Results
 		response := otu.GetProposalResultsAPI(proposalId)
@@ -67,10 +66,6 @@ func TestTokenWeightedDefaultStrategy(t *testing.T) {
 
 		var results models.ProposalResults
 		json.Unmarshal(response.Body.Bytes(), &results)
-
-		fmt.Printf("API Results: %v\n", results)
-		fmt.Printf("_results.Results_float[a]: %v\n", _results.Results_float["a"])
-		fmt.Printf("_results.Results_float[b]: %v\n", _results.Results_float["b"])
 
 		assert.Equal(t, _results.Proposal_id, results.Proposal_id)
 		assert.Equal(t, _results.Results_float["a"], results.Results_float["a"])
@@ -150,23 +145,20 @@ func TestBalanceOfNFTsStrategy(t *testing.T) {
 
 	otu.AddDummyVotesAndNFTs(votes)
 	t.Run("Test Tallying Results For NFT Balance Strategy", func(t *testing.T) {
-		maxWeightDefault := float64(0.0)
 		strategyName := "balance-of-nfts"
 
 		s := strategyMap[strategyName]
 		proposalWithChoices := models.NewProposalResults(proposalId, choices)
-		_results, err := s.TallyVotes(votes, proposalWithChoices, maxWeightDefault)
+		_results, err := s.TallyVotes(votes, proposalWithChoices, proposals[0])
 		if err != nil {
 			t.Errorf("Error tallying votes: %v", err)
 		}
 
-		fmt.Printf("_results %v\n", _results)
 		response := otu.GetProposalResultsAPI(proposalId)
 		CheckResponseCode(t, http.StatusOK, response.Code)
 
 		var results models.ProposalResults
 		json.Unmarshal(response.Body.Bytes(), &results)
-		fmt.Printf("results %v\n", results)
 
 		assert.Equal(t, _results.Results_float["a"], results.Results_float["a"])
 	})
@@ -251,12 +243,11 @@ func TestStakedTokenWeightedDefaultStrategy(t *testing.T) {
 
 	t.Run("Test Tallying Results", func(t *testing.T) {
 		// Tally results
-		maxWeightDefault := float64(0.0)
 		strategyName := "staked-token-weighted-default"
 
 		s := strategyMap[strategyName]
 		proposalWithChoices := models.NewProposalResults(proposalId, choices)
-		_results, err := s.TallyVotes(votes, proposalWithChoices, maxWeightDefault)
+		_results, err := s.TallyVotes(votes, proposalWithChoices, proposals[0])
 		if err != nil {
 			t.Errorf("Error tallying votes: %v", err)
 		}
@@ -273,7 +264,6 @@ func TestStakedTokenWeightedDefaultStrategy(t *testing.T) {
 
 	t.Run("Test Fetching Votes for Proposal", func(t *testing.T) {
 		response := otu.GetVotesForProposalAPI(proposalId)
-
 		CheckResponseCode(t, http.StatusOK, response.Code)
 
 		var body utils.PaginatedResponseWithVotes

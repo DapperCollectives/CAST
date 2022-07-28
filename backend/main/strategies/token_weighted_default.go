@@ -86,31 +86,27 @@ func (s *TokenWeightedDefault) FetchBalance(
 
 func (s *TokenWeightedDefault) TallyVotes(
 	votes []*models.VoteWithBalance,
-	p *models.ProposalResults,
-	maxWeight float64,
+	r *models.ProposalResults,
+	proposal *models.Proposal,
 ) (models.ProposalResults, error) {
 
 	for _, vote := range votes {
-		var weight float64
 
 		if vote.PrimaryAccountBalance != nil {
-			exceedsMaxWeight := models.CheckForMaxWeight(
-				maxWeight,
-				*vote.PrimaryAccountBalance,
-			)
+			var allowedBalance float64
 
-			if exceedsMaxWeight {
-				weight = maxWeight
+			if proposal.Max_weight != nil {
+				allowedBalance = proposal.EnforceMaxWeight(float64(*vote.PrimaryAccountBalance))
 			} else {
-				weight = float64(*vote.PrimaryAccountBalance)
+				allowedBalance = float64(*vote.PrimaryAccountBalance)
 			}
 
-			p.Results[vote.Choice] += int(weight * math.Pow(10, -8))
-			p.Results_float[vote.Choice] += weight * math.Pow(10, -8)
+			r.Results[vote.Choice] += int(allowedBalance * math.Pow(10, -8))
+			r.Results_float[vote.Choice] += allowedBalance * math.Pow(10, -8)
 		}
 	}
 
-	return *p, nil
+	return *r, nil
 }
 
 func (s *TokenWeightedDefault) GetVoteWeightForBalance(

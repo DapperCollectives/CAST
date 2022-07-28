@@ -297,16 +297,6 @@ func (v *Vote) ValidateChoice(proposal Proposal) error {
 	return nil
 }
 
-func CheckForMaxWeight(maxWeight float64, balance uint64) bool {
-	floatBalance := float64(balance)
-
-	if maxWeight != 0 && floatBalance >= maxWeight {
-		fmt.Printf("Max weight exceeded: %f > %f\n", floatBalance, maxWeight)
-		return true
-	}
-	return false
-}
-
 func getUsersNFTs(db *s.Database, votes []*VoteWithBalance) ([]*VoteWithBalance, error) {
 	for _, vote := range votes {
 		nftIds, err := GetUserNFTs(db, vote)
