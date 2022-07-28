@@ -356,7 +356,7 @@ const ProposalInformation = ({
           />
         </WrapperSpacingTop>
         <hr />
-        {/* <WrapperSpacingBottom
+        <WrapperSpacingBottom
           isMobileOnly={!isNotMobile}
           isDesktopOnly={isNotMobile && !isTabletOnly}
           isTabletOnly={isTabletOnly}
@@ -365,7 +365,7 @@ const ProposalInformation = ({
           {!loadingVotingResults && (
             <Results voteResults={votingResults?.results || []} />
           )}
-        </WrapperSpacingBottom> */}
+        </WrapperSpacingBottom>
       </div>
     </div>
   );

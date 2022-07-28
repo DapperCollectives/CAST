@@ -215,3 +215,20 @@ func (p *Proposal) ValidateBalance(weight float64) error {
 	}
 	return nil
 }
+
+func (p *Proposal) EnforceMaxWeight(balance float64) float64 {
+	var allowedBalance float64
+	var maxWeight = *p.Max_weight
+
+	if p.Max_weight == nil {
+		return balance
+	}
+
+	if balance >= maxWeight {
+		allowedBalance = maxWeight
+	} else {
+		allowedBalance = balance
+	}
+
+	return allowedBalance
+}

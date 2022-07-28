@@ -11,7 +11,6 @@ const CommunityCard = ({ logo, name, body, id, slug }) => {
   const descriptionStyle = {
     lineHeight: '1.5em',
     maxHeight: '3rem',
-    overflow: 'hidden',
   };
 
   const isNotMobile = useMediaQuery();
@@ -67,7 +66,10 @@ const CommunityCard = ({ logo, name, body, id, slug }) => {
               <div className="is-size-5 is-size-6-mobile mb-2 is-4 is-6-mobile pt-0-mobile line-clamp-2">
                 {name}
               </div>
-              <p className="has-text-grey small-text" style={descriptionStyle}>
+              <p
+                className="has-text-grey small-text line-clamp-2"
+                style={descriptionStyle}
+              >
                 {body}
               </p>
             </div>
