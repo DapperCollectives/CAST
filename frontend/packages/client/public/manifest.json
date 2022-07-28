@@ -12,13 +12,5 @@
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#000000",
-  "background_color": "#ffffff",
-  "permissions": ["storage", "activeTab", "alarms"],
-  "web_accessible_resources": [
-    {
-      "resources": ["*.html"],
-      "matches": ["<all_urls>"],
-      "extension_ids": ["hpclkefagolihohboafpheddmmgdffjm"]
-    }
-  ]
+  "background_color": "#ffffff"
 }
