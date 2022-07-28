@@ -80,15 +80,23 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
   useEffect(() => {
     if (!IS_LOCAL_DEV) {
       fcl.discovery.authn.subscribe((res) => {
-        const filteredServices = res.results.filter((service) =>
-          service.uid.includes('blocto')
-        );
-        setServices(filteredServices);
+        setServices(res.results);
       });
     } else {
       // hard code service for local dev wallet
       // this setting will enable to show blocto to connect
       setServices([
+        {
+          f_type: 'Service',
+          f_vsn: '1.0.0',
+          method: 'EXT/RPC',
+          provider: {
+            icon: 'https://raw.githubusercontent.com/Outblock/Lilico-Web/main/asset/logo-dis.png',
+            name: 'Lilico',
+          },
+          type: 'authn',
+          uid: 'Lilico',
+        },
         {
           f_type: 'Service',
           f_vsn: '1.0.0',
