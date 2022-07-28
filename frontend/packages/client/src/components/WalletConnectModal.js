@@ -22,7 +22,9 @@ export default function WalletConnectModal({
       injectedProvider.authenticate(!IS_LOCAL_DEV ? { service } : undefined);
       closeModal();
     },
-    icon: `https://fcl-discovery.onflow.org${service.provider.icon}`,
+    icon: service.provider.name.includes('Blocto')
+      ? `https://fcl-discovery.onflow.org${service.provider.icon}`
+      : `${service.provider.icon}`,
     name: service.provider.name,
   }));
 
@@ -34,27 +36,27 @@ export default function WalletConnectModal({
         style={{ maxWidth: '375px', maxHeight: '370px' }}
       >
         <header
-          className="modal-card-head has-background-white columns is-mobile m-0 px-5 pt-4"
+          className="modal-card-head has-background-white columns is-mobile m-0 px-5 pt-5"
           style={{ borderBottom: 'none' }}
         >
           <div className="column p-0 is-flex flex-1">
             <h2 className="is-size-4 has-text-weight-bold">Connect a wallet</h2>
           </div>
           <div
-            className={`column is-narrow px-0 has-text-right is-size-2 leading-tight cursor-pointer`}
+            className={`column is-narrow p-0 has-text-right is-size-2 leading-tight cursor-pointer`}
             onClick={closeModal}
           >
             <Close />
           </div>
         </header>
         <section
-          className="modal-card-body pt-0 pb-3 px-5"
+          className="modal-card-body pt-1 pb-3 px-5"
           style={{ minHeight: '150px' }}
         >
           {listOfServices.map((service, index) => {
             return (
               <div
-                className="border-light rounded-sm is-flex is-flex-direction-column is-justify-content-center mb-4 py-4 px-3 cursor-pointer strategy-selector transition-all"
+                className="border-light rounded-sm is-flex is-flex-direction-column is-justify-content-center mb-2 py-4 px-3 cursor-pointer strategy-selector transition-all"
                 style={{ height: '60px' }}
                 onClick={service.connectToService}
                 key={`service-${index}`}
@@ -77,7 +79,7 @@ export default function WalletConnectModal({
         </section>
         <footer
           className="modal-card-foot is-justify-content-center px-0-mobile wallet-connect-footer"
-          style={{ height: '120px', borderTop: '0px' }}
+          style={{ height: '107px', borderTop: '0px' }}
         >
           <div className="columns is-multiline">
             <div className="column is-12 is-flex is-align-items-center">
