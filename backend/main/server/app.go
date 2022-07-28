@@ -920,7 +920,7 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// validate signature
-	if err := a.validateSignature(p.Creator_addr, payload.Timestamp, payload.Composite_signatures); err != nil {
+	if err := a.validateSignature(payload.Signing_addr, payload.Timestamp, payload.Composite_signatures); err != nil {
 		log.Error().Err(err)
 		respondWithError(w, http.StatusForbidden, err.Error())
 		return
