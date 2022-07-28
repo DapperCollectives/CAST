@@ -1,8 +1,14 @@
 import React from 'react';
 import classnames from 'classnames';
+import sortBy from 'lodash/sortBy';
 import { ArrowRight, Close } from './Svg';
 import { IS_LOCAL_DEV } from 'const';
 
+const walletIcon = {
+  Blocto: 'https://fcl-discovery.onflow.org/images/blocto.png',
+  Lilico:
+    'https://raw.githubusercontent.com/Outblock/Lilico-Web/main/asset/logo-dis.png',
+};
 export default function WalletConnectModal({
   services = [],
   openModal,
@@ -17,16 +23,18 @@ export default function WalletConnectModal({
     closeModal();
   };
 
-  const listOfServices = services.map((service) => ({
-    connectToService: () => {
-      injectedProvider.authenticate(!IS_LOCAL_DEV ? { service } : undefined);
-      closeModal();
-    },
-    icon: service.provider.name.includes('Blocto')
-      ? `https://fcl-discovery.onflow.org${service.provider.icon}`
-      : `${service.provider.icon}`,
-    name: service.provider.name,
-  }));
+  // sorting alphabetically services
+  const listOfServices = sortBy(
+    services.map((service) => ({
+      connectToService: () => {
+        injectedProvider.authenticate(!IS_LOCAL_DEV ? { service } : undefined);
+        closeModal();
+      },
+      icon: walletIcon[service.provider.name] ?? '',
+      name: service.provider.name,
+    })),
+    (service) => service.name
+  );
 
   return (
     <div className={modalClasses}>
