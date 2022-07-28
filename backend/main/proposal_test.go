@@ -196,7 +196,6 @@ func TestUpdateProposal(t *testing.T) {
 		userPayload := otu.GenerateCommunityUserPayload("user1", userStruct)
 
 		response = otu.CreateCommunityUserAPI(communityId, userPayload)
-		fmt.Println(response.Body)
 		checkResponseCode(t, http.StatusCreated, response.Code)
 
 		// Get proposal after create
