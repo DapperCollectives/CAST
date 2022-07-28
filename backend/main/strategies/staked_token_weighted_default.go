@@ -53,12 +53,22 @@ func (s *StakedTokenWeightedDefault) FetchBalance(
 func (s *StakedTokenWeightedDefault) TallyVotes(
 	votes []*models.VoteWithBalance,
 	r *models.ProposalResults,
+	proposal *models.Proposal,
 ) (models.ProposalResults, error) {
 
 	for _, vote := range votes {
+
 		if vote.StakingBalance != nil {
-			r.Results[vote.Choice] += int(float64(*vote.StakingBalance) * math.Pow(10, -8))
-			r.Results_float[vote.Choice] += float64(*vote.StakingBalance) * math.Pow(10, -8)
+			var allowedBalance float64
+
+			if proposal.Max_weight != nil {
+				allowedBalance = proposal.EnforceMaxWeight(float64(*vote.PrimaryAccountBalance))
+			} else {
+				allowedBalance = float64(*vote.PrimaryAccountBalance)
+			}
+
+			r.Results[vote.Choice] += int(allowedBalance * math.Pow(10, -8))
+			r.Results_float[vote.Choice] += allowedBalance * math.Pow(10, -8)
 		}
 	}
 
