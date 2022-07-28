@@ -30,7 +30,7 @@ export default function WalletConnectModal({
     <div className={modalClasses}>
       <div className="modal-background" onClick={handleClickOnBackground}></div>
       <div
-        className="modal-card rounded-sm"
+        className="modal-card rounded-sm has-background-white"
         style={{ maxWidth: '375px', maxHeight: '370px' }}
       >
         <header

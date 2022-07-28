@@ -19,12 +19,7 @@ const AboutPage = ({ location }) => {
   return (
     <div className={modal ? 'modal is-active' : undefined}>
       <div className="modal-background" onClick={closeModal} />
-      <div
-        className="modal-card rounded-sm px-4"
-        style={{
-          overflowY: 'scroll',
-        }}
-      >
+      <div className="modal-card rounded-sm px-4 has-background-white">
         <header
           className="modal-card-head has-background-white rounded-lg-top pb-1"
           style={{ borderBottom: '0px' }}
