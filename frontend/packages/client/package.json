@@ -93,6 +93,12 @@
             "react"
           ]
         }
+      ],
+      "react/no-multi-comp": [
+        2,
+        {
+          "ignoreStateless": true
+        }
       ]
     }
   },
