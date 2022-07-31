@@ -63,6 +63,36 @@
         {
           "usePrettierrc": true
         }
+      ],
+      "import/order": [
+        2,
+        {
+          "newlines-between": "never",
+          "groups": [
+            "builtin",
+            "external",
+            "internal",
+            "parent",
+            "sibling",
+            "index",
+            "unknown",
+            "object"
+          ],
+          "alphabetize": {
+            "order": "asc",
+            "caseInsensitive": true
+          },
+          "pathGroups": [
+            {
+              "pattern": "react*",
+              "group": "external",
+              "position": "before"
+            }
+          ],
+          "pathGroupsExcludedImportTypes": [
+            "react"
+          ]
+        }
       ]
     }
   },
