@@ -1,8 +1,8 @@
 import React from 'react';
 import classnames from 'classnames';
+import { IS_LOCAL_DEV } from 'const';
 import sortBy from 'lodash/sortBy';
 import { ArrowRight, Close } from './Svg';
-import { IS_LOCAL_DEV } from 'const';
 
 const walletIcon = {
   Blocto: 'https://fcl-discovery.onflow.org/images/blocto.png',

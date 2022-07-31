@@ -1,7 +1,7 @@
 import { useInfiniteQuery } from 'react-query';
+import { useErrorHandlerContext } from 'contexts/ErrorHandler';
+import { checkResponse, getPaginationInfo } from 'utils';
 import { PAGINATION_INITIAL_STATE } from '../reducers';
-import { checkResponse, getPaginationInfo } from '../utils';
-import { useErrorHandlerContext } from '../contexts/ErrorHandler';
 
 export default function useCommunityMembers({
   communityId,

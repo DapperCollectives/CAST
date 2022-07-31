@@ -11,21 +11,21 @@ import {
   WrapperResponsive,
   Tablink,
 } from 'components';
+import {
+  CancelProposalModalConfirmation,
+  ProposalStatus,
+  VoteOptions,
+} from 'components/Proposal';
 import { CheckMark, ArrowLeft, Bin } from 'components/Svg';
+import { FilterValues } from 'const';
+import { useModalContext } from 'contexts/NotificationModal';
+import { useWebContext } from 'contexts/Web3';
 import {
   useProposal,
   useVotingStrategies,
   useMediaQuery,
   useUserRoleOnCommunity,
 } from 'hooks';
-import { useModalContext } from 'contexts/NotificationModal';
-import { useWebContext } from 'contexts/Web3';
-import { FilterValues } from 'const';
-import {
-  CancelProposalModalConfirmation,
-  ProposalStatus,
-  VoteOptions,
-} from 'components/Proposal';
 import { getProposalType } from 'utils';
 
 function useQueryParams() {

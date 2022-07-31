@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import networks from 'networks';
-import StrategySelector from './StrategySelector';
-import StrategyInformationForm from './StrategyInformationForm';
 import { ActionButton } from 'components';
+import networks from 'networks';
 import { isValidAddress } from 'utils';
+import StrategyInformationForm from './StrategyInformationForm';
+import StrategySelector from './StrategySelector';
 
 const networkConfig = networks[process.env.REACT_APP_FLOW_ENV];
 

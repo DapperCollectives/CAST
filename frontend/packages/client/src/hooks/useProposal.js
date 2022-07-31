@@ -1,9 +1,9 @@
 import { useReducer, useCallback } from 'react';
-import { defaultReducer, INITIAL_STATE } from '../reducers';
-import { checkResponse, getCompositeSigs } from '../utils';
-import { useErrorHandlerContext } from '../contexts/ErrorHandler';
 import { CODE as transferTokensCode } from '@onflow/six-transfer-tokens';
 import * as t from '@onflow/types';
+import { useErrorHandlerContext } from 'contexts/ErrorHandler';
+import { checkResponse, getCompositeSigs } from 'utils';
+import { defaultReducer, INITIAL_STATE } from '../reducers';
 
 export default function useProposal() {
   const [state, dispatch] = useReducer(defaultReducer, {

@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import classnames from 'classnames';
 import { useDropzone } from 'react-dropzone';
-import { Upload } from 'components/Svg';
+import classnames from 'classnames';
 import { WrapperResponsive, Loader } from 'components';
-import { getReducedImg, validateLength } from 'utils';
-import { useErrorHandlerContext } from 'contexts/ErrorHandler';
+import { Upload } from 'components/Svg';
 import {
   MAX_AVATAR_FILE_SIZE,
   MAX_FILE_SIZE,
   COMMUNITY_DESCRIPTION_MAX_LENGTH,
   COMMUNITY_NAME_MAX_LENGTH,
 } from 'const';
+import { useErrorHandlerContext } from 'contexts/ErrorHandler';
+import { getReducedImg, validateLength } from 'utils';
 
 function CommunityEditorProfile({
   name,

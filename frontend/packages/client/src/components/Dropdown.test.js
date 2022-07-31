@@ -1,10 +1,9 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
-
-import '@testing-library/jest-dom';
 import renderer from 'react-test-renderer';
-import Dropdown from './Dropdown';
+import { render, screen, waitFor } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
+import Dropdown from './Dropdown';
 
 describe('Dropdown UI Component', () => {
   it(`renders correctly`, () => {

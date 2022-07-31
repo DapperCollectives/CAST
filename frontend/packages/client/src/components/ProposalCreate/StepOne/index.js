@@ -6,6 +6,9 @@ import React, {
   useRef,
 } from 'react';
 import { Editor } from 'react-draft-wysiwyg';
+import { Dropdown, Error, UploadImageModal } from 'components';
+import { Image } from 'components/Svg';
+import { useModalContext } from 'contexts/NotificationModal';
 import {
   EditorState,
   AtomicBlockUtils,
@@ -14,14 +17,11 @@ import {
   DefaultDraftBlockRenderMap,
   SelectionState,
 } from 'draft-js';
-import { Map } from 'immutable';
 import { useQueryParams, useCommunityDetails } from 'hooks';
-import { useModalContext } from 'contexts/NotificationModal';
-import { Dropdown, Error, UploadImageModal } from 'components';
-import TextBasedChoices from './TextBasedChoices';
-import ImageChoices from './ImageChoices';
-import { Image } from 'components/Svg';
+import { Map } from 'immutable';
 import { kebabToString } from 'utils';
+import ImageChoices from './ImageChoices';
+import TextBasedChoices from './TextBasedChoices';
 
 const checkValidTitleLength = (text) => text?.length <= 128;
 

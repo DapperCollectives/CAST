@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import isEqual from 'lodash/isEqual';
-import pickBy from 'lodash/pickBy';
 import pick from 'lodash/pick';
+import pickBy from 'lodash/pickBy';
 
 export const urlPatternValidation = (url) => {
   const regex = new RegExp(

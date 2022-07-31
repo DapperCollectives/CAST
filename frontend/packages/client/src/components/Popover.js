@@ -1,6 +1,6 @@
 import React from 'react';
-import { useMediaQuery } from 'hooks';
 import classnames from 'classnames';
+import { useMediaQuery } from 'hooks';
 
 const defaultButtonStyle = {
   border: 'none',

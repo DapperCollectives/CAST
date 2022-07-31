@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { StepByStep, WalletConnect, Error } from 'components';
-import { useWebContext } from 'contexts/Web3';
-import { useModalContext } from 'contexts/NotificationModal';
 import {
   StartSteps,
   StepOne,
@@ -10,6 +8,8 @@ import {
   StepThree,
   StepFour,
 } from 'components/CommunityCreate';
+import { useModalContext } from 'contexts/NotificationModal';
+import { useWebContext } from 'contexts/Web3';
 import useCommunity from 'hooks/useCommunity';
 import { generateSlug } from 'utils';
 

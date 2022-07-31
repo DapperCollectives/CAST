@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Link, useParams, useHistory } from 'react-router-dom';
-import { useWebContext } from 'contexts/Web3';
 import {
   CommunityEditorProfile,
   CommunityEditorLinks,
@@ -10,13 +9,14 @@ import {
   Loader,
 } from 'components';
 import { ArrowLeft, ArrowLeftBold } from 'components/Svg';
+import { CommunityEditPageTabs } from 'const';
+import { useWebContext } from 'contexts/Web3';
 import {
   useCommunityDetails,
   useMediaQuery,
   useFileUploader,
   useUserRoleOnCommunity,
 } from 'hooks';
-import { CommunityEditPageTabs } from 'const';
 
 const MenuTabs = ({ tabs, communityId, onClickButtonTab = () => {} } = {}) => {
   return (

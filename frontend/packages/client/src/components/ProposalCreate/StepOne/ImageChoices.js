@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
+import { getProposalType } from 'utils';
 import ImageChoiceUploader from './ImageChoiceUploader';
-import { getProposalType } from '../../../utils';
 
 const ImageChoices = ({ choices = [], onChoiceChange, initChoices } = {}) => {
   useEffect(() => {

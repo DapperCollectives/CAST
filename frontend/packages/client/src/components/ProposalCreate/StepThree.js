@@ -1,7 +1,7 @@
 import React, { useEffect, useCallback } from 'react';
-import { ProposalStatus, VoteOptions } from '../Proposal';
 import { parseDateToServer } from 'utils';
 import { customDraftToHTML } from 'utils';
+import { ProposalStatus, VoteOptions } from '../Proposal';
 
 const StepThree = ({ stepsData, setStepValid }) => {
   const setPreviewValid = useCallback(() => {

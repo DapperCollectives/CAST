@@ -1,6 +1,6 @@
 import React from 'react';
-import { Logo, LinkOut } from './Svg';
 import { NavLink } from 'react-router-dom';
+import { Logo, LinkOut } from './Svg';
 
 const Sidenavbar = ({ showSidenav, closeSidenav }) => {
   return (

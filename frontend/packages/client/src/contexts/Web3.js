@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import * as fcl from '@onflow/fcl';
-import networks from 'networks';
-import { useFclUser } from 'hooks';
 import { WalletConnectModal } from 'components';
 import { IS_LOCAL_DEV } from 'const';
+import { useFclUser } from 'hooks';
+import networks from 'networks';
 
 // create our app context
 export const Web3Context = React.createContext({});

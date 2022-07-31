@@ -2,16 +2,16 @@
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { StepByStep, WalletConnect, Error } from 'components';
-import { useWebContext } from 'contexts/Web3';
-import { useModalContext } from 'contexts/NotificationModal';
-import { useErrorHandlerContext } from 'contexts/ErrorHandler';
-import { useProposal, useQueryParams } from 'hooks';
-import { parseDateToServer, customDraftToHTML } from 'utils';
 import {
   PropCreateStepOne,
   PropCreateStepTwo,
   PropCreateStepThree,
 } from 'components/ProposalCreate';
+import { useErrorHandlerContext } from 'contexts/ErrorHandler';
+import { useModalContext } from 'contexts/NotificationModal';
+import { useWebContext } from 'contexts/Web3';
+import { useProposal, useQueryParams } from 'hooks';
+import { parseDateToServer, customDraftToHTML } from 'utils';
 
 export default function ProposalCreatePage() {
   const { createProposal, data, loading, error } = useProposal();

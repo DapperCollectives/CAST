@@ -1,4 +1,4 @@
-import { checkResponse } from '../utils';
+import { checkResponse } from 'utils';
 import { COMMUNITIES_URL } from './constants';
 
 const DEFAULT_PAGE_SIZE = 10;

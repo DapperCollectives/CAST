@@ -1,8 +1,8 @@
 import { useReducer, useEffect, useCallback } from 'react';
-import { defaultReducer, INITIAL_STATE } from '../reducers';
-import { checkResponse, getCompositeSigs } from '../utils';
-import { useErrorHandlerContext } from '../contexts/ErrorHandler';
-import { useWebContext } from '../contexts/Web3';
+import { useErrorHandlerContext } from 'contexts/ErrorHandler';
+import { useWebContext } from 'contexts/Web3';
+import { defaultReducer, INITIAL_STATE } from 'reducers';
+import { checkResponse, getCompositeSigs } from 'utils';
 
 export default function useCommunityDetails(id) {
   const {

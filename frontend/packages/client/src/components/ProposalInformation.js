@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Blockies from 'react-blockies';
+import { useVotingResults, useWindowDimensions } from 'hooks';
+import useMediaQuery, { mediaMatchers } from 'hooks/useMediaQuery';
+import { parseDateFromServer } from 'utils';
 import { LinkOut } from './Svg';
-import { parseDateFromServer } from '../utils';
-import { useVotingResults, useWindowDimensions } from '../hooks';
-import useMediaQuery, { mediaMatchers } from '../hooks/useMediaQuery';
 import Tooltip from './Tooltip';
 
 function truncate(str) {

@@ -1,6 +1,6 @@
 import { useReducer, useCallback } from 'react';
+import { checkResponse } from 'utils';
 import { defaultReducer, INITIAL_STATE } from '../reducers';
-import { checkResponse } from '../utils';
 
 export default function useVotesForAddress() {
   const [state, dispatch] = useReducer(defaultReducer, {

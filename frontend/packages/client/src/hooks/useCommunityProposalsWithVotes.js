@@ -1,9 +1,9 @@
+import { useEffect, useMemo } from 'react';
+import { useWebContext } from 'contexts/Web3';
+import { debounce } from 'utils';
+import { PAGINATION_INITIAL_STATE } from '../reducers';
 import useCommunityProposals from './useCommunityProposals';
 import useVotesForAddress from './useVotesForAddress';
-import { PAGINATION_INITIAL_STATE } from '../reducers';
-import { useWebContext } from '../contexts/Web3';
-import { useEffect, useMemo } from 'react';
-import { debounce } from '../utils';
 
 export default function useCommunityProposalsWithVotes({
   communityId,

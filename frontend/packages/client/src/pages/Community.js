@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { useQueryClient } from 'react-query';
 import { useHistory, useParams, Link } from 'react-router-dom';
 import {
   Loader,
@@ -11,6 +12,7 @@ import {
   Tablink,
   CommunityHeader,
 } from 'components';
+import { useWebContext } from 'contexts/Web3';
 import {
   useMediaQuery,
   useCommunityDetails,
@@ -19,9 +21,7 @@ import {
   useUserRoleOnCommunity,
   useCommunityMembers,
   useWindowDimensions,
-} from '../hooks';
-import { useWebContext } from '../contexts/Web3';
-import { useQueryClient } from 'react-query';
+} from 'hooks';
 
 const CommunitySettingsButton = ({ communityId } = {}) => {
   return (

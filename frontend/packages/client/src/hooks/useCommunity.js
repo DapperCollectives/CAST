@@ -1,12 +1,12 @@
 import { useReducer, useCallback } from 'react';
+import { useFileUploader } from 'hooks';
+import { checkResponse, getCompositeSigs } from 'utils';
+import { useErrorHandlerContext } from '../contexts/ErrorHandler';
 import {
   paginationReducer,
   PAGINATION_INITIAL_STATE,
   INITIAL_STATE,
 } from '../reducers';
-import { checkResponse, getCompositeSigs } from 'utils';
-import { useErrorHandlerContext } from '../contexts/ErrorHandler';
-import { useFileUploader } from 'hooks';
 
 const setDefaultValue = (field, fallbackValue) => {
   if (field === undefined || field === '') {

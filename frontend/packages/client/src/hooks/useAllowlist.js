@@ -1,7 +1,7 @@
 import { useReducer, useEffect, useCallback } from 'react';
+import { useErrorHandlerContext } from 'contexts/ErrorHandler';
+import { checkResponse } from 'utils';
 import { defaultReducer, INITIAL_STATE } from '../reducers';
-import { checkResponse } from '../utils';
-import { useErrorHandlerContext } from '../contexts/ErrorHandler';
 
 export default function useAllowlist() {
   const [state, dispatch] = useReducer(defaultReducer, INITIAL_STATE);

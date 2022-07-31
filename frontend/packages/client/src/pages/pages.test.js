@@ -1,10 +1,8 @@
-import { render, cleanup, waitFor } from '@testing-library/react';
-import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Router } from 'react-router-dom';
-
+import { render, cleanup, waitFor } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
 import '@testing-library/jest-dom';
-
 import AppPages from '.';
 
 jest.mock('../components/Transactions', () => () => {
@@ -33,7 +31,7 @@ jest.mock('./ProposalCreate', () => () => {
 });
 
 afterAll(() => {
-  jest.unmock('../components/Transactions');
+  jest.unmock('components/Transactions');
   jest.unmock('./Home');
   jest.unmock('./About');
   jest.unmock('./Community');

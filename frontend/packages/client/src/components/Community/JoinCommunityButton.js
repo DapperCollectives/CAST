@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { useWebContext } from 'contexts/Web3';
-import { useModalContext } from 'contexts/NotificationModal';
-import { useJoinCommunity, useUserRoleOnCommunity } from 'hooks';
-import { WalletConnect, Error } from 'components';
 import classnames from 'classnames';
+import { WalletConnect, Error } from 'components';
+import { useModalContext } from 'contexts/NotificationModal';
+import { useWebContext } from 'contexts/Web3';
+import { useJoinCommunity, useUserRoleOnCommunity } from 'hooks';
 
 export default function JoinCommunityButton({
   communityId,

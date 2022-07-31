@@ -1,7 +1,7 @@
 import { useReducer, useCallback } from 'react';
+import { useErrorHandlerContext } from 'contexts/ErrorHandler';
+import { checkResponse } from 'utils';
 import { defaultReducer, INITIAL_STATE } from '../reducers';
-import { checkResponse } from '../utils';
-import { useErrorHandlerContext } from '../contexts/ErrorHandler';
 
 export default function useFileUploader({ useModalNotifications = true } = {}) {
   const [state, dispatch] = useReducer(defaultReducer, {

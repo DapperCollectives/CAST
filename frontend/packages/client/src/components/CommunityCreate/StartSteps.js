@@ -1,6 +1,6 @@
 import React from 'react';
-import { useMediaQuery } from 'hooks';
 import classnames from 'classnames';
+import { useMediaQuery } from 'hooks';
 
 export default function StartSteps({ dismissPreStep }) {
   const { notMobile } = useMediaQuery();
