@@ -1,17 +1,17 @@
 /* global plausible */
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { StepByStep, WalletConnect, Error } from 'components';
-import {
-  PropCreateStepOne,
-  PropCreateStepTwo,
-  PropCreateStepThree,
-} from 'components/ProposalCreate';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useModalContext } from 'contexts/NotificationModal';
 import { useWebContext } from 'contexts/Web3';
+import { Error, StepByStep, WalletConnect } from 'components';
+import {
+  PropCreateStepOne,
+  PropCreateStepThree,
+  PropCreateStepTwo,
+} from 'components/ProposalCreate';
 import { useProposal, useQueryParams } from 'hooks';
-import { parseDateToServer, customDraftToHTML } from 'utils';
+import { customDraftToHTML, parseDateToServer } from 'utils';
 
 export default function ProposalCreatePage() {
   const { createProposal, data, loading, error } = useProposal();

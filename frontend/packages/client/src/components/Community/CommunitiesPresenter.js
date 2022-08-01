@@ -1,6 +1,7 @@
 import React from 'react';
 import classnames from 'classnames';
 import CommunityCard from './CommunityCard';
+
 /**
  * CommunitiesPresenter will group communities on a row bases,
  * will use elementsPerRow to determine how many communities to render per row

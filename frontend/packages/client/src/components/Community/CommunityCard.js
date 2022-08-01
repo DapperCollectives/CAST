@@ -3,6 +3,7 @@ import Blockies from 'react-blockies';
 import { Link } from 'react-router-dom';
 import { useMediaQuery } from 'hooks';
 import JoinCommunityButton from './JoinCommunityButton';
+
 /**
  * CommunityCard will group communities on a row bases,
  * will use elementsPerRow to determine how many communities to render per row

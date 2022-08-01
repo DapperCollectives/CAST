@@ -1,10 +1,10 @@
 import React from 'react';
-import classnames from 'classnames';
-import { Loader, FadeIn, HomeFooter, HomeHeader } from 'components';
-import CommunitiesPresenter from 'components/Community/CommunitiesPresenter';
 import { useWebContext } from 'contexts/Web3';
+import { FadeIn, HomeFooter, HomeHeader, Loader } from 'components';
+import CommunitiesPresenter from 'components/Community/CommunitiesPresenter';
 import useFeaturedCommunities from 'hooks/useFeaturedCommunities';
 import useUserCommunities from 'hooks/useUserCommunities';
+import classnames from 'classnames';
 
 export default function HomePage() {
   const {

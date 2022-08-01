@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ActionButton } from 'components';
-import networks from 'networks';
 import { isValidAddress } from 'utils';
+import networks from 'networks';
 import StrategyInformationForm from './StrategyInformationForm';
 import StrategySelector from './StrategySelector';
 

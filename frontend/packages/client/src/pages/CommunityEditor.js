@@ -1,22 +1,22 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { Link, useParams, useHistory } from 'react-router-dom';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Link, useHistory, useParams } from 'react-router-dom';
+import { useWebContext } from 'contexts/Web3';
 import {
-  CommunityEditorProfile,
-  CommunityEditorLinks,
   CommunityEditorDetails,
+  CommunityEditorLinks,
+  CommunityEditorProfile,
   CommunityPropsAndVoting,
   Dropdown,
   Loader,
 } from 'components';
 import { ArrowLeft, ArrowLeftBold } from 'components/Svg';
-import { CommunityEditPageTabs } from 'const';
-import { useWebContext } from 'contexts/Web3';
 import {
   useCommunityDetails,
-  useMediaQuery,
   useFileUploader,
+  useMediaQuery,
   useUserRoleOnCommunity,
 } from 'hooks';
+import { CommunityEditPageTabs } from 'const';
 
 const MenuTabs = ({ tabs, communityId, onClickButtonTab = () => {} } = {}) => {
   return (

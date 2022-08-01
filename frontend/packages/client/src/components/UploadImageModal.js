@@ -1,9 +1,9 @@
-import React, { useCallback, useState, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Loader } from 'components';
-import { Upload, Bin } from 'components/Svg';
-import { MAX_PROPOSAL_IMAGE_FILE_SIZE } from 'const';
+import { Bin, Upload } from 'components/Svg';
 import { useFileUploader, useMediaQuery } from 'hooks';
+import { MAX_PROPOSAL_IMAGE_FILE_SIZE } from 'const';
 
 const MAX_IMAGE_FILES = 1;
 

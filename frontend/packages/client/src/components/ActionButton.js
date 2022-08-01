@@ -1,6 +1,6 @@
 import React from 'react';
-import classnames from 'classnames';
 import Loader from 'components/Loader';
+import classnames from 'classnames';
 
 export default function ActionButton({
   enabled = true,

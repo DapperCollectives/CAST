@@ -1,5 +1,5 @@
-import { checkResponse } from 'utils';
 import { COMMUNITIES_URL } from './constants';
+import { checkResponse } from 'utils';
 
 const DEFAULT_PAGE_SIZE = 10;
 const getLeaderBoardUrl = (communityId, addr, pageSize) =>

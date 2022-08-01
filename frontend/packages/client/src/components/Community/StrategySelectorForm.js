@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { useModalContext } from 'contexts/NotificationModal';
 import { AddButton } from 'components';
 import StrategySelectorInput from 'components/Community/StrategySelectorInput';
-import { useModalContext } from 'contexts/NotificationModal';
 import { useVotingStrategies } from 'hooks';
-import isEqual from 'lodash/isEqual';
 import { kebabToString } from 'utils';
+import isEqual from 'lodash/isEqual';
 import StrategyEditorModal from './StrategyEditorModal';
 
 export default function StrategySelectorForm({

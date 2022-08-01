@@ -1,6 +1,6 @@
 import { useQuery } from 'react-query';
-import fetchLeaderBoard from 'api/leaderboard';
 import { useErrorHandlerContext } from '../contexts/ErrorHandler';
+import fetchLeaderBoard from 'api/leaderboard';
 
 export default function useLeaderBoard({ communityId = 0, addr = '' } = {}) {
   const { notifyError } = useErrorHandlerContext();

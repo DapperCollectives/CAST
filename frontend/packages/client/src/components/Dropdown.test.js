@@ -1,6 +1,6 @@
+import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import renderer from 'react-test-renderer';
-import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
 import Dropdown from './Dropdown';

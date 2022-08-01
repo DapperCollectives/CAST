@@ -1,31 +1,31 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useParams, useLocation } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
+import { useModalContext } from 'contexts/NotificationModal';
+import { useWebContext } from 'contexts/Web3';
 import {
-  Message,
-  VotesList,
-  StrategyModal,
-  ProposalInformation,
-  WalletConnect,
   Error,
   Loader,
-  WrapperResponsive,
+  Message,
+  ProposalInformation,
+  StrategyModal,
   Tablink,
+  VotesList,
+  WalletConnect,
+  WrapperResponsive,
 } from 'components';
 import {
   CancelProposalModalConfirmation,
   ProposalStatus,
   VoteOptions,
 } from 'components/Proposal';
-import { CheckMark, ArrowLeft, Bin } from 'components/Svg';
-import { FilterValues } from 'const';
-import { useModalContext } from 'contexts/NotificationModal';
-import { useWebContext } from 'contexts/Web3';
+import { ArrowLeft, Bin, CheckMark } from 'components/Svg';
 import {
-  useProposal,
-  useVotingStrategies,
   useMediaQuery,
+  useProposal,
   useUserRoleOnCommunity,
+  useVotingStrategies,
 } from 'hooks';
+import { FilterValues } from 'const';
 import { getProposalType } from 'utils';
 
 function useQueryParams() {

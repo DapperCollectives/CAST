@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { parseDateToServer } from 'utils';
 import { customDraftToHTML } from 'utils';
 import { ProposalStatus, VoteOptions } from '../Proposal';

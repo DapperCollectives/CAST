@@ -1,14 +1,14 @@
+import React from 'react';
 import 'react-datepicker/dist/react-datepicker.css';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
-import './App.sass';
-import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { ReactQueryDevtools } from 'react-query/devtools';
 import { HashRouter as Router } from 'react-router-dom';
-import { ErrorHandler } from 'components';
 import NotificationModalProvider from 'contexts/NotificationModal';
 import { Web3Provider } from 'contexts/Web3';
-import { ReactQueryDevtools } from 'react-query/devtools';
+import { ErrorHandler } from 'components';
+import './App.sass';
 import AppPages from './pages';
 import Error from './pages/Error';
 

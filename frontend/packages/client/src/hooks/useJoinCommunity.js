@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from 'react-query';
-import { getCompositeSigs } from 'utils';
 import { useErrorHandlerContext } from '../contexts/ErrorHandler';
+import { getCompositeSigs } from 'utils';
 
 export default function useJoinCommunity() {
   const queryClient = useQueryClient();

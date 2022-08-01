@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
 import { StatusLabel, WrapperResponsive } from 'components';
 import { Active, CheckCircle } from 'components/Svg';
-import { FilterValues } from 'const';
 import { useVotingResults } from 'hooks';
-import millify from 'millify';
+import { FilterValues } from 'const';
 import { parseDateFromServer } from 'utils';
+import millify from 'millify';
 
 const IconAndText = ({ endTime, voted, status }) => {
   const { data: votingResults } = useVotingResults();

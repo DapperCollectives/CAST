@@ -1,9 +1,9 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Loader } from 'components';
-import { Upload, Bin } from 'components/Svg';
-import { MAX_FILE_SIZE } from 'const';
+import { Bin, Upload } from 'components/Svg';
 import { useFileUploader } from 'hooks';
+import { MAX_FILE_SIZE } from 'const';
 
 const IMAGE_STATUS = {
   notStarted: 'not-started',

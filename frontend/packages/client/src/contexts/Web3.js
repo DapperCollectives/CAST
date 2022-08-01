@@ -1,8 +1,8 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import * as fcl from '@onflow/fcl';
+import React, { useCallback, useEffect, useState } from 'react';
 import { WalletConnectModal } from 'components';
-import { IS_LOCAL_DEV } from 'const';
 import { useFclUser } from 'hooks';
+import { IS_LOCAL_DEV } from 'const';
+import * as fcl from '@onflow/fcl';
 import networks from 'networks';
 
 // create our app context

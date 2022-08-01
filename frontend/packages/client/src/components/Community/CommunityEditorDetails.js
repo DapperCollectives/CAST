@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { WrapperResponsive, Loader, AddButton, FadeIn } from 'components';
-import { Bin, ValidCheckMark, InvalidCheckMark } from 'components/Svg';
+import React, { useEffect, useRef, useState } from 'react';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useWebContext } from 'contexts/Web3';
-import { useCommunityUsers } from 'hooks';
-import { getCompositeSigs } from 'utils';
+import { AddButton, FadeIn, Loader, WrapperResponsive } from 'components';
+import { Bin, InvalidCheckMark, ValidCheckMark } from 'components/Svg';
 import useFlowAddrValidator, {
   validateAddrInList,
 } from './hooks/useFlowAddrValidator';
+import { useCommunityUsers } from 'hooks';
+import { getCompositeSigs } from 'utils';
 
 export const CommunityUsersForm = ({
   title,

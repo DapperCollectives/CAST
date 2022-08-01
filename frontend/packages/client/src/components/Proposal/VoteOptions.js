@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { FilterValues } from 'const';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useVotesForAddress } from 'hooks';
-import { parseDateFromServer, getProposalType } from 'utils';
+import { FilterValues } from 'const';
+import { getProposalType, parseDateFromServer } from 'utils';
 import { WrapperResponsive as Wrapper } from '..';
 import { getStatus } from './getStatus';
 

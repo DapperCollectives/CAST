@@ -1,7 +1,7 @@
-import { useReducer, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useReducer } from 'react';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { checkResponse } from 'utils';
-import { defaultReducer, INITIAL_STATE } from '../reducers';
+import { INITIAL_STATE, defaultReducer } from '../reducers';
 
 export default function useVotingStrategies() {
   const [state, dispatch] = useReducer(defaultReducer, INITIAL_STATE);

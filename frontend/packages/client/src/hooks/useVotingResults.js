@@ -1,7 +1,7 @@
-import { useReducer, useEffect, useCallback } from 'react';
-import { checkResponse } from 'utils';
+import { useCallback, useEffect, useReducer } from 'react';
 import { useErrorHandlerContext } from '../contexts/ErrorHandler';
-import { defaultReducer, INITIAL_STATE } from '../reducers';
+import { checkResponse } from 'utils';
+import { INITIAL_STATE, defaultReducer } from '../reducers';
 
 export default function useVotingResults(proposalId) {
   const [state, dispatch] = useReducer(defaultReducer, INITIAL_STATE);

@@ -1,25 +1,25 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useQueryClient } from 'react-query';
-import { useHistory, useParams, Link } from 'react-router-dom';
-import {
-  Loader,
-  CommunityPulse,
-  CommunityLinks,
-  CommunityMemberList,
-  CommunityAbout,
-  CommunityProposals,
-  LeaderBoard,
-  Tablink,
-  CommunityHeader,
-} from 'components';
+import { Link, useHistory, useParams } from 'react-router-dom';
 import { useWebContext } from 'contexts/Web3';
 import {
-  useMediaQuery,
+  CommunityAbout,
+  CommunityHeader,
+  CommunityLinks,
+  CommunityMemberList,
+  CommunityProposals,
+  CommunityPulse,
+  LeaderBoard,
+  Loader,
+  Tablink,
+} from 'components';
+import {
   useCommunityDetails,
-  useQueryParams,
-  useCommunityUsers,
-  useUserRoleOnCommunity,
   useCommunityMembers,
+  useCommunityUsers,
+  useMediaQuery,
+  useQueryParams,
+  useUserRoleOnCommunity,
   useWindowDimensions,
 } from 'hooks';
 

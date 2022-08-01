@@ -1,6 +1,6 @@
 import React from 'react';
-import classnames from 'classnames';
 import { IS_LOCAL_DEV } from 'const';
+import classnames from 'classnames';
 import sortBy from 'lodash/sortBy';
 import { ArrowRight, Close } from './Svg';
 

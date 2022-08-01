@@ -1,25 +1,25 @@
 import React, {
-  useState,
-  useEffect,
   useCallback,
+  useEffect,
   useMemo,
   useRef,
+  useState,
 } from 'react';
 import { Editor } from 'react-draft-wysiwyg';
+import { useModalContext } from 'contexts/NotificationModal';
 import { Dropdown, Error, UploadImageModal } from 'components';
 import { Image } from 'components/Svg';
-import { useModalContext } from 'contexts/NotificationModal';
+import { useCommunityDetails, useQueryParams } from 'hooks';
+import { kebabToString } from 'utils';
 import {
-  EditorState,
   AtomicBlockUtils,
-  Modifier,
   ContentState,
   DefaultDraftBlockRenderMap,
+  EditorState,
+  Modifier,
   SelectionState,
 } from 'draft-js';
-import { useQueryParams, useCommunityDetails } from 'hooks';
 import { Map } from 'immutable';
-import { kebabToString } from 'utils';
 import ImageChoices from './ImageChoices';
 import TextBasedChoices from './TextBasedChoices';
 

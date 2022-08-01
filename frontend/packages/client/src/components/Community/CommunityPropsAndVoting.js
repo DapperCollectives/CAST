@@ -1,11 +1,11 @@
 import React from 'react';
+import { useModalContext } from 'contexts/NotificationModal';
+import { useWebContext } from 'contexts/Web3';
 import { Error } from 'components';
 import ActionButton from 'components/ActionButton';
 import StrategySelectorForm from 'components/Community/StrategySelectorForm';
-import { useModalContext } from 'contexts/NotificationModal';
-import { useWebContext } from 'contexts/Web3';
-import isEqual from 'lodash/isEqual';
 import { kebabToString } from 'utils';
+import isEqual from 'lodash/isEqual';
 
 export default function CommunityProposalsAndVoting({
   communityVotingStrategies = [],
