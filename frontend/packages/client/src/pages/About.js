@@ -1,7 +1,7 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { Close } from '../components/Svg';
 import { Label, ModalAboutItem } from 'components';
+import { Close } from 'components/Svg';
 
 const AboutPage = ({ location }) => {
   const { state = {} } = location;

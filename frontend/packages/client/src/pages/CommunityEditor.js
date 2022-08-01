@@ -1,10 +1,10 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { Link, useParams, useHistory } from 'react-router-dom';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Link, useHistory, useParams } from 'react-router-dom';
 import { useWebContext } from 'contexts/Web3';
 import {
-  CommunityEditorProfile,
-  CommunityEditorLinks,
   CommunityEditorDetails,
+  CommunityEditorLinks,
+  CommunityEditorProfile,
   CommunityPropsAndVoting,
   Dropdown,
   Loader,
@@ -12,8 +12,8 @@ import {
 import { ArrowLeft, ArrowLeftBold } from 'components/Svg';
 import {
   useCommunityDetails,
-  useMediaQuery,
   useFileUploader,
+  useMediaQuery,
   useUserRoleOnCommunity,
 } from 'hooks';
 import { CommunityEditPageTabs } from 'const';

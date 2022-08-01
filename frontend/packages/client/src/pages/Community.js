@@ -1,27 +1,27 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { useHistory, useParams, Link } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { useQueryClient } from 'react-query';
+import { Link, useHistory, useParams } from 'react-router-dom';
+import { useWebContext } from 'contexts/Web3';
 import {
-  Loader,
-  CommunityPulse,
+  CommunityAbout,
+  CommunityHeader,
   CommunityLinks,
   CommunityMemberList,
-  CommunityAbout,
   CommunityProposals,
+  CommunityPulse,
   LeaderBoard,
+  Loader,
   Tablink,
-  CommunityHeader,
 } from 'components';
 import {
-  useMediaQuery,
   useCommunityDetails,
-  useQueryParams,
-  useCommunityUsers,
-  useUserRoleOnCommunity,
   useCommunityMembers,
+  useCommunityUsers,
+  useMediaQuery,
+  useQueryParams,
+  useUserRoleOnCommunity,
   useWindowDimensions,
-} from '../hooks';
-import { useWebContext } from '../contexts/Web3';
-import { useQueryClient } from 'react-query';
+} from 'hooks';
 
 const CommunitySettingsButton = ({ communityId } = {}) => {
   return (

@@ -1,8 +1,9 @@
 import React from 'react';
-import Loader from './Loader';
 import Blockies from 'react-blockies';
-import FadeIn from '../components/FadeIn';
+import FadeIn from 'components/FadeIn';
 import classnames from 'classnames';
+import Loader from './Loader';
+
 // import WrapperResponsive from "./WrapperResponsive";
 
 const Row = ({

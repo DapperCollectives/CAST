@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Web3Consumer } from '../contexts/Web3';
 
 function Transaction({ web3 }) {
