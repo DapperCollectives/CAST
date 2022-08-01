@@ -97,12 +97,13 @@ func (s *TokenWeightedDefault) TallyVotes(
 
 			if proposal.Max_weight != nil {
 				allowedBalance = proposal.EnforceMaxWeight(float64(*vote.PrimaryAccountBalance))
+				r.Results[vote.Choice] += int(allowedBalance)
+				r.Results_float[vote.Choice] += allowedBalance
 			} else {
 				allowedBalance = float64(*vote.PrimaryAccountBalance)
+				r.Results[vote.Choice] += int(allowedBalance * math.Pow(10, -8))
+				r.Results_float[vote.Choice] += allowedBalance * math.Pow(10, -8)
 			}
-
-			r.Results[vote.Choice] += int(allowedBalance * math.Pow(10, -8))
-			r.Results_float[vote.Choice] += allowedBalance * math.Pow(10, -8)
 		}
 	}
 
