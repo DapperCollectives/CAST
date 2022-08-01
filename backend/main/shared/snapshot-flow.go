@@ -52,36 +52,19 @@ type SnapshotData struct {
 	BlockHeight uint64 `json:"blockHeight"`
 }
 
-// copied this quick and dirty from models to get around circular dependency
-// move to shared?
-type Balance struct {
-	ID                      string    `json:"id"`
-	Addr                    string    `json:"addr"`
-	PrimaryAccountBalance   uint64    `json:"primaryAccountBalance"`
-	SecondaryAddress        string    `json:"secondaryAddress"`
-	SecondaryAccountBalance uint64    `json:"secondaryAccountBalance"`
-	StakingBalance          uint64    `json:"stakingBalance"`
-	ScriptResult            string    `json:"scriptResult"`
-	Stakes                  []string  `json:"stakes"`
-	BlockHeight             uint64    `json:"blockHeight"`
-	Proposal_id             int       `json:"proposal_id"`
-	NFTCount                int       `json:"nftCount"`
-	CreatedAt               time.Time `json:"createdAt"`
-}
-
 var (
 	DummySnapshot = Snapshot{
 		ID:           "1",
-		Block_height: 1000000,
+		Block_height: 0,
 		Started:      time.Now(),
 		Finished:     time.Now(),
 	}
 
-	DummyBalance = Balance{
+	DummyBalance = FTBalanceResponse{
 		PrimaryAccountBalance:   100,
 		SecondaryAccountBalance: 100,
 		StakingBalance:          100,
-		BlockHeight:             1000000,
+		BlockHeight:             0,
 	}
 )
 
@@ -157,12 +140,14 @@ func (c *SnapshotClient) GetSnapshotStatusAtBlockHeight(
 func (c *SnapshotClient) GetAddressBalanceAtBlockHeight(
 	address string,
 	blockheight uint64,
-	balanceResponse interface{},
+	balanceResponse *FTBalanceResponse,
 	contract *Contract,
 ) error {
 	if c.bypass() {
+		log.Info().Msgf("overriding snapshotter service for dev")
 		return nil
 	}
+
 	var url string
 
 	if *contract.Name == "FlowToken" {

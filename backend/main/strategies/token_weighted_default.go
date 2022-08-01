@@ -3,11 +3,10 @@ package strategies
 import (
 	"fmt"
 	"math"
-	"time"
 
 	"github.com/DapperCollectives/CAST/backend/main/models"
-	"github.com/DapperCollectives/CAST/backend/main/shared"
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
+	shared "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/jackc/pgx/v4"
 	"github.com/rs/zerolog/log"
 )
@@ -16,16 +15,6 @@ type TokenWeightedDefault struct {
 	s.StrategyStruct
 	SC s.SnapshotClient
 	DB *s.Database
-}
-
-type FTBalanceResponse struct {
-	ID              string    `json:"id"`
-	FungibleTokenID string    `json:"fungibleTokenId"`
-	Addr            string    `json:"addr"`
-	Balance         uint64    `json:"balance"`
-	BlockHeight     uint64    `json:"blockHeight"`
-	CreatedAt       time.Time `json:"createdAt"`
-	HasVault        bool      `json:"hasVault"`
 }
 
 func (s *TokenWeightedDefault) FetchBalance(
@@ -49,18 +38,24 @@ func (s *TokenWeightedDefault) FetchBalance(
 		return nil, err
 	}
 
+	var ftBalance = &shared.FTBalanceResponse{}
+	ftBalance.NewFTBalance()
+
 	if *strategy.Contract.Name == "FlowToken" {
 		if err := s.SC.GetAddressBalanceAtBlockHeight(
 			b.Addr,
 			b.BlockHeight,
-			b,
+			ftBalance,
 			&strategy.Contract,
 		); err != nil {
-			log.Error().Err(err).Msg("Error fetching balance.")
+			log.Error().Err(err).Msg("Error fetching balance from snapshot client")
 			return nil, err
 		}
+		b.PrimaryAccountBalance = ftBalance.PrimaryAccountBalance
+		b.SecondaryAccountBalance = ftBalance.SecondaryAccountBalance
+		b.StakingBalance = ftBalance.StakingBalance
+
 	} else {
-		var ftBalance = &FTBalanceResponse{}
 		if err := s.SC.GetAddressBalanceAtBlockHeight(
 			b.Addr,
 			b.BlockHeight,
@@ -70,7 +65,6 @@ func (s *TokenWeightedDefault) FetchBalance(
 			log.Error().Err(err).Msg("Error fetching balance.")
 			return nil, err
 		}
-
 		b.PrimaryAccountBalance = ftBalance.Balance
 		b.SecondaryAccountBalance = 0
 		b.StakingBalance = 0

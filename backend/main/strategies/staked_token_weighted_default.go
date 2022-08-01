@@ -31,16 +31,17 @@ func (s *StakedTokenWeightedDefault) FetchBalance(
 		log.Error().Err(err).Msg("Unable to find strategy for contract")
 		return nil, err
 	}
+	fmt.Printf("strategy: %+v\n", strategy)
 
-	if err := s.SC.GetAddressBalanceAtBlockHeight(
-		b.Addr,
-		b.BlockHeight,
-		b,
-		&strategy.Contract,
-	); err != nil {
-		log.Error().Err(err).Msg("Error fetching balance.")
-		return nil, err
-	}
+	// if err := s.SC.GetAddressBalanceAtBlockHeight(
+	// 	b.Addr,
+	// 	b.BlockHeight,
+	// 	b,
+	// 	&strategy.Contract,
+	// ); err != nil {
+	// 	log.Error().Err(err).Msg("Error fetching balance.")
+	// 	return nil, err
+	// }
 
 	if err := b.CreateBalance(s.DB); err != nil {
 		log.Error().Err(err).Msg("Error creating balance in the database.")
