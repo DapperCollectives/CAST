@@ -1,9 +1,9 @@
 import React, { Suspense, lazy } from 'react';
-import { Switch, Route } from 'react-router-dom';
-import Loader from '../components/Loader';
+import { Route, Switch } from 'react-router-dom';
+import Loader from 'components/Loader';
 
-const Header = lazy(() => import('../components/Header'));
-const Transactions = lazy(() => import('../components/Transactions'));
+const Header = lazy(() => import('components/Header'));
+const Transactions = lazy(() => import('components/Transactions'));
 const Home = lazy(() => import('./Home'));
 const Proposal = lazy(() => import('./Proposal'));
 const About = lazy(() => import('./About'));

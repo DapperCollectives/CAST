@@ -1,27 +1,27 @@
 import React, {
-  useState,
-  useEffect,
   useCallback,
+  useEffect,
   useMemo,
   useRef,
+  useState,
 } from 'react';
 import { Editor } from 'react-draft-wysiwyg';
+import { useModalContext } from 'contexts/NotificationModal';
+import { Dropdown, Error, UploadImageModal } from 'components';
+import { Image } from 'components/Svg';
+import { useCommunityDetails, useQueryParams } from 'hooks';
+import { kebabToString } from 'utils';
 import {
-  EditorState,
   AtomicBlockUtils,
-  Modifier,
   ContentState,
   DefaultDraftBlockRenderMap,
+  EditorState,
+  Modifier,
   SelectionState,
 } from 'draft-js';
 import { Map } from 'immutable';
-import { useQueryParams, useCommunityDetails } from 'hooks';
-import { useModalContext } from 'contexts/NotificationModal';
-import { Dropdown, Error, UploadImageModal } from 'components';
-import TextBasedChoices from './TextBasedChoices';
 import ImageChoices from './ImageChoices';
-import { Image } from 'components/Svg';
-import { kebabToString } from 'utils';
+import TextBasedChoices from './TextBasedChoices';
 
 const checkValidTitleLength = (text) => text?.length <= 128;
 

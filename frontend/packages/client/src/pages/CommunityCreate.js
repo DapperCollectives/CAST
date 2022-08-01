@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { StepByStep, WalletConnect, Error } from 'components';
-import { useWebContext } from 'contexts/Web3';
 import { useModalContext } from 'contexts/NotificationModal';
+import { useWebContext } from 'contexts/Web3';
+import { Error, StepByStep, WalletConnect } from 'components';
 import {
   StartSteps,
-  StepOne,
-  StepTwo,
-  StepThree,
   StepFour,
+  StepOne,
+  StepThree,
+  StepTwo,
 } from 'components/CommunityCreate';
 import useCommunity from 'hooks/useCommunity';
 import { generateSlug } from 'utils';

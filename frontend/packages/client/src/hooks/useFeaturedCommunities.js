@@ -1,7 +1,7 @@
 import { useInfiniteQuery } from 'react-query';
-import { PAGINATION_INITIAL_STATE } from '../reducers';
-import { checkResponse } from 'utils';
 import { useErrorHandlerContext } from '../contexts/ErrorHandler';
+import { checkResponse } from 'utils';
+import { PAGINATION_INITIAL_STATE } from '../reducers';
 
 export default function useFeaturedCommunities({
   count = PAGINATION_INITIAL_STATE.count,

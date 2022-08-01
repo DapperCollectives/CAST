@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import { useWebContext } from 'contexts/Web3';
 import { useCommunityMembers } from 'hooks';
-import TableMembers from './TableMembers';
 import { debounce } from 'utils';
+import TableMembers from './TableMembers';
 import WrapperResponsive from './WrapperResponsive';
 
 export default function CommunityMembersList({ communityId } = {}) {

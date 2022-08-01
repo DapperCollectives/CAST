@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { useMediaQuery } from '../hooks';
+import { useMediaQuery } from 'hooks';
 
 export default function WrapperResponsive({
   as: Tag = 'div',

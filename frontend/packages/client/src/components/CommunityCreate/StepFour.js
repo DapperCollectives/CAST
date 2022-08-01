@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
-import StrategySelectorForm from 'components/Community/StrategySelectorForm';
 import ActionButton from 'components/ActionButton';
+import StrategySelectorForm from 'components/Community/StrategySelectorForm';
 
 export default function StepFour({
   stepData,
