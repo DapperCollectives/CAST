@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Website, Instagram, Twitter, Discord, Github } from 'components/Svg';
-import { WrapperResponsive, Loader } from 'components';
+import { WrapperResponsive, ActionButton } from 'components';
 import useLinkValidator from './hooks/useLinkValidator';
 import { useForm } from 'react-hook-form';
+import { wait } from 'utils';
 
 const FormFieldsConfig = [
   {
@@ -103,15 +104,15 @@ export const CommunityLinksForm = ({
     </WrapperResponsive>
   );
 };
-const CommunityLinksForm2 = ({
+const CommunityLinksInternal = ({
   formFields = FormFieldsConfig,
   submitComponent,
-  onChangeHandler,
-  fields,
-  isUpdating = false,
   wrapperMargin = 'mb-6',
   wrapperMarginMobile = 'mb-4',
   handleSubmit,
+  register,
+  errors,
+  isSubmitting,
 }) => {
   return (
     <WrapperResponsive
@@ -140,49 +141,43 @@ const CommunityLinksForm2 = ({
         </div>
       </div>
       <form onSubmit={handleSubmit}>
-        <>
-          {formFields.map((formField, index) => (
+        {formFields.map((formField, index) => (
+          <div
+            style={{ position: 'relative' }}
+            className="is-flex is-align-items-center mt-4"
+            key={`form-field-${index}`}
+          >
+            <input
+              type="text"
+              placeholder={formField?.placeholder}
+              {...register(formField.fieldName, { disabled: isSubmitting })}
+              className="rounded-sm border-light py-3 pr-3 column is-full"
+              style={{
+                paddingLeft: '34px',
+              }}
+            />
             <div
-              style={{ position: 'relative' }}
-              className="is-flex is-align-items-center mt-4"
-              key={`form-field-${index}`}
+              className="pl-3"
+              style={{
+                position: 'absolute',
+                height: 18,
+                opacity: 0.3,
+              }}
             >
-              <input
-                type="text"
-                name={formField.fieldName}
-                className="rounded-sm border-light py-3 pr-3 column is-full"
-                placeholder={formField?.placeholder}
-                value={fields[formField.fieldName]}
-                maxLength={200}
-                onChange={(event) =>
-                  onChangeHandler(formField.fieldName)(event.target.value)
-                }
-                style={{
-                  paddingLeft: '34px',
-                }}
-                disabled={isUpdating}
-              />
-              <div
-                className="pl-3"
-                style={{
-                  position: 'absolute',
-                  height: 18,
-                  opacity: 0.3,
-                }}
-              >
-                {formField.iconComponent}
-              </div>
+              {formField.iconComponent}
             </div>
-          ))}
-          {submitComponent}
-        </>
+            {errors[formField.fieldName] && (
+              <p>{errors[formField.fieldName]?.message}</p>
+            )}
+          </div>
+        ))}
+        {submitComponent}
       </form>
     </WrapperResponsive>
   );
 };
 
 export default function CommunityEditorLinks(props = {}) {
-  const onSubmit = (data) => console.log(data);
   const { updateCommunity, ...fields } = props;
   const {
     websiteUrl = '',
@@ -192,7 +187,7 @@ export default function CommunityEditorLinks(props = {}) {
     githubUrl = '',
   } = fields;
 
-  const { register, handleSubmit } = useForm({
+  const { register, handleSubmit, watch, formState } = useForm({
     defaultValues: {
       websiteUrl,
       twitterUrl,
@@ -201,59 +196,25 @@ export default function CommunityEditorLinks(props = {}) {
       githubUrl,
     },
   });
-  const [isUpdating, setIsUpdating] = useState(false);
-  // const [links, setLinks] = useState({
-  //   websiteUrl,
-  //   twitterUrl,
-  //   instagramUrl,
-  //   discordUrl,
-  //   githubUrl,
-  // });
+  const { errors, isSubmitting, isDirty, isValid } = formState;
 
-  // const saveData = async () => {
-  //   setIsUpdating(true);
-  //   const updatedKeys = Object.keys(links).filter(
-  //     (key) => links[key] !== (fields[key] ?? '')
-  //   );
-
-  //   const updatedFields = Object.assign(
-  //     {},
-  //     ...updatedKeys.map((key) => ({ [key]: links[key] }))
-  //   );
-  //   await updateCommunity(updatedFields);
-  //   setIsUpdating(false);
-  // };
-
-  // const { isValid, hasChangedFromOriginal } = useLinkValidator({
-  //   links,
-  //   initialValues: fields,
-  // });
-
-  // const enableSave = isValid && hasChangedFromOriginal;
-
-  // const changeHandler = (field) => (value) =>
-  //   setLinks((state) => ({
-  //     ...state,
-  //     [field]: value,
-  //   }));
-
+  const onSubmit = async (data) => {
+    await updateCommunity(data);
+  };
   return (
-    <CommunityLinksForm2
-        // submitComponent={
-        //   <button
-        //     style={{ height: 48, width: '100%' }}
-        //     className={`button vote-button transition-all is-flex has-background-yellow rounded-sm mt-5 is-uppercase is-${
-        //       enableSave && !isUpdating ? 'enabled' : 'disabled'
-        //     }`}
-        //     onClick={!enableSave ? () => {} : saveData}
-        //   >
-        //     {!isUpdating && <>Save</>}
-        //     {isUpdating && <Loader size={18} spacing="mx-button-loader" />}
-        //   </button>
-        // }
-        // onChangeHandler={changeHandler}
-        // fields={links}
-        // isUpdating={isUpdating}
+    <CommunityLinksInternal
+      submitComponent={
+        <ActionButton
+          label="save"
+          enabled={isValid && isDirty && !isSubmitting}
+          loading={isSubmitting}
+          classNames="vote-button transition-all  has-background-yellow mt-5"
+        />
+      }
+      errors={errors}
+      register={register}
+      isSubmitting={isSubmitting}
+      handleSubmit={handleSubmit(onSubmit)}
     />
   );
 }
