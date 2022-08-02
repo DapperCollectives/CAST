@@ -369,7 +369,10 @@ func (fa *FlowAdapter) CheckIfUserHasEvent(voterAddr string, c *Contract) (bool,
 
 	value := CadenceValueToInterface(cadenceValue)
 
-	hasEventNFT := value.(bool)
+	hasEventNFT := false
+	if value == "true" {
+		hasEventNFT = true
+	}
 	return hasEventNFT, nil
 }
 
