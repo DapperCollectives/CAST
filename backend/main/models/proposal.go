@@ -223,6 +223,8 @@ func (p *Proposal) EnforceMaxWeight(balance float64) float64 {
 	if p.Max_weight == nil {
 		return balance
 	}
+	fmt.Printf("maxWeight: %f\n", maxWeight)
+	fmt.Printf("balance: %f\n", balance)
 
 	if balance >= maxWeight {
 		allowedBalance = maxWeight

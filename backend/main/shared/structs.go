@@ -86,9 +86,9 @@ type FTBalanceResponse struct {
 
 func (b *FTBalanceResponse) NewFTBalance() {
 	if os.Getenv("APP_ENV") == "TEST" || os.Getenv("APP_ENV") == "DEV" {
-		b.PrimaryAccountBalance = 100
-		b.SecondaryAccountBalance = 100
-		b.StakingBalance = 100
+		b.PrimaryAccountBalance = 11100000
+		b.SecondaryAccountBalance = 12300000
+		b.StakingBalance = 13500000
 	}
 }
 
