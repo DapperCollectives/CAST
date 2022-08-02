@@ -1,7 +1,7 @@
 import React from 'react';
+import Blockies from 'react-blockies';
 import { JoinCommunityButton } from 'components';
 import { useMediaQuery } from 'hooks';
-import Blockies from 'react-blockies';
 
 export default function CommunityHeader({
   isLoading = false,

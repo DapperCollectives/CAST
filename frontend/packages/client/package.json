@@ -7,6 +7,7 @@
     "@hookform/resolvers": "^2.9.7",
     "@onflow/fcl": "^1.2.0",
     "@onflow/six-transfer-tokens": "0.0.8",
+    "@trivago/prettier-plugin-sort-imports": "^3.3.0",
     "bulma": "0.9.3",
     "bulma-popover": "^1.1.1",
     "classnames": "^2.2.6",
@@ -64,6 +65,15 @@
         },
         {
           "usePrettierrc": true
+        }
+      ],
+      "import/order": [
+        0
+      ],
+      "react/no-multi-comp": [
+        2,
+        {
+          "ignoreStateless": true
         }
       ]
     }

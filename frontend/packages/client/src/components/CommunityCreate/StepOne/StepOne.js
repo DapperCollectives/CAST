@@ -1,23 +1,22 @@
-import React, { useEffect, useCallback } from 'react';
-import classnames from 'classnames';
+import React, { useCallback, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload } from 'components/Svg';
 import { WrapperResponsive, Dropdown } from 'components';
 import isEqual from 'lodash/isEqual';
-import { CommunityLinksForm } from 'components/Community/CommunityEditorLinks';
+import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import useLinkValidator, {
   urlPatternValidation,
 } from '../Community/hooks/useLinkValidator';
-import { getReducedImg, validateLength } from 'utils';
-import { useErrorHandlerContext } from 'contexts/ErrorHandler';
+import { useCommunityCategory } from 'hooks';
 import {
+  COMMUNITY_DESCRIPTION_MAX_LENGTH,
+  COMMUNITY_NAME_MAX_LENGTH,
   MAX_AVATAR_FILE_SIZE,
   MAX_FILE_SIZE,
-  COMMUNITY_NAME_MAX_LENGTH,
-  COMMUNITY_DESCRIPTION_MAX_LENGTH,
 } from 'const';
+import { getReducedImg, validateLength } from 'utils';
+import classnames from 'classnames';
 import pick from 'lodash/pick';
-import { useCommunityCategory } from 'hooks';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import {
