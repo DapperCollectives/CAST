@@ -5,6 +5,7 @@
   "dependencies": {
     "@creativebulma/bulma-tooltip": "^1.2.0",
     "@onflow/fcl": "^1.2.0",
+    "@onflow/sdk": "file:../../../../fcl-js/packages/sdk",
     "@onflow/six-transfer-tokens": "0.0.8",
     "bulma": "0.9.3",
     "bulma-popover": "^1.1.1",

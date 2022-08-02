@@ -23,7 +23,7 @@ const ServiceAddress = "0xf8d6e0586b0a20c7"
 func TestMain(m *testing.M) {
 	var err error
 
-	emulator := overflow.NewOverflowEmulator()
+	emulator := overflow.NewTestingEmulator()
 	emulator.Config("../flow.json")
 	emulator.BasePath("./main/cadence")
 	O = emulator.Start()
