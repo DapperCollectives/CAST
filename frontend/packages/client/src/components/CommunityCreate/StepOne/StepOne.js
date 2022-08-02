@@ -1,13 +1,14 @@
 import React, { useCallback, useEffect } from 'react';
+import { WrapperResponsive, Dropdown } from 'components';
 import { useDropzone } from 'react-dropzone';
 import { Upload } from 'components/Svg';
-import { WrapperResponsive, Dropdown } from 'components';
 import isEqual from 'lodash/isEqual';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import useLinkValidator, {
   urlPatternValidation,
-} from '../Community/hooks/useLinkValidator';
+} from 'components/Community/hooks/useLinkValidator';
 import { useCommunityCategory } from 'hooks';
+import { CommunityLinksForm2 } from 'components/Community/CommunityEditorLinks';
 import {
   COMMUNITY_DESCRIPTION_MAX_LENGTH,
   COMMUNITY_NAME_MAX_LENGTH,
@@ -23,7 +24,6 @@ import {
   Schema,
   linksFieldsArray,
 } from 'components/Community/CommunityEditorLinks/FormConfig';
-import { CommunityLinksForm2 } from 'components/Community/CommunityEditorLinks';
 
 const linksFields = [
   'websiteUrl',
@@ -135,7 +135,7 @@ export default function StepOne({
     pick(stepData || {}, linksFields)
   );
 
-  const changeHandler = (field) => (value) => onDataChange({ [field]: value });
+  // const changeHandler = (field) => (value) => onDataChange({ [field]: value });
 
   const { isValid: isCommunityLinksValid } = useLinkValidator({
     links: linksFieldsObj,
