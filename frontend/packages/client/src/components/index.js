@@ -42,3 +42,4 @@ export { default as WalletConnectModal } from './WalletConnectModal';
 export { default as Label } from './Label';
 export { default as ModalAboutItem } from './ModalAboutItem';
 export { default as CommunityHeader } from './CommunityHeader';
+export { default as Form } from './Form';

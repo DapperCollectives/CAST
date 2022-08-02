@@ -3,6 +3,7 @@ import classnames from 'classnames';
 import { useDropzone } from 'react-dropzone';
 import { Upload } from 'components/Svg';
 import { WrapperResponsive, Dropdown } from 'components';
+import isEqual from 'lodash/isEqual';
 import { CommunityLinksForm } from 'components/Community/CommunityEditorLinks';
 import useLinkValidator, {
   urlPatternValidation,
@@ -17,6 +18,13 @@ import {
 } from 'const';
 import pick from 'lodash/pick';
 import { useCommunityCategory } from 'hooks';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import {
+  Schema,
+  linksFieldsArray,
+} from 'components/Community/CommunityEditorLinks/FormConfig';
+import { CommunityLinksForm2 } from 'components/Community/CommunityEditorLinks';
 
 const linksFields = [
   'websiteUrl',
@@ -38,6 +46,7 @@ export default function StepOne({
   moveToNextStep,
   isStepValid,
 }) {
+  console.log('stepData =====> ', stepData);
   const { notifyError } = useErrorHandlerContext();
 
   const { data: communityCategory } = useCommunityCategory();
@@ -185,8 +194,45 @@ export default function StepOne({
     COMMUNITY_DESCRIPTION_MAX_LENGTH
   );
 
+  const { register, handleSubmit, formState, watch } = useForm({
+    defaultValues: linksFieldsObj,
+    resolver: yupResolver(Schema),
+  });
+
+  const { errors, isSubmitting, isValid } = formState;
+
+  const watchedFields = watch(linksFieldsArray);
+
+  useEffect(() => {
+    const toUpdate = Object.assign(
+      {},
+      ...linksFieldsArray.map((key, index) => ({ [key]: watchedFields[index] }))
+    );
+    if (
+      !isEqual(pick(stepData, linksFields), toUpdate) &&
+      isValid &&
+      !isSubmitting
+    ) {
+      onDataChange({ ...toUpdate });
+    }
+  }, [
+    onDataChange,
+    linksFieldsObj,
+    stepData,
+    watchedFields,
+    isValid,
+    isSubmitting,
+  ]);
+
+  const onSubmit = (data) => {
+    console.log(data);
+    if (isStepValid) {
+      moveToNextStep();
+    }
+  };
+
   return (
-    <>
+    <form onSubmit={handleSubmit(onSubmit)}>
       <WrapperResponsive
         classNames="border-light rounded-lg columns is-flex-direction-column is-mobile m-0"
         extraClasses="p-6 mb-5"
@@ -362,26 +408,26 @@ export default function StepOne({
           onChange={(event) => setData({ communityTerms: event.target.value })}
         />
       </WrapperResponsive>
-      <CommunityLinksForm
-        onChangeHandler={changeHandler}
-        fields={linksFieldsObj}
-        wrapperMargin="mb-4"
-        wrapperMarginMobile="mb-3"
+      <CommunityLinksForm2
+        removeInnerForm
+        register={register}
+        errors={errors}
+        isSubmitting={isSubmitting}
       />
-
       <div className="columns mb-5">
         <div className="column is-12">
           <button
+            type="submit"
             style={{ height: 48, width: '100%' }}
             className={`button vote-button is-flex has-background-yellow rounded-sm is-size-6 is-uppercase is-${
               isStepValid ? 'enabled' : 'disabled'
             }`}
-            onClick={isStepValid ? () => moveToNextStep() : () => {}}
+            // onClick={isStepValid ? () => moveToNextStep() : () => {}}
           >
             Next: COMMUNITY DETAILS
           </button>
         </div>
       </div>
-    </>
+    </form>
   );
 }

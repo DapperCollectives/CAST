@@ -1,18 +1,27 @@
 import React from 'react';
-import { WrapperResponsive } from 'components';
-import Form from './Form';
-import { FormFieldsConfig } from './FormFields';
+import { WrapperResponsive, Form } from 'components';
+import FormFields from './FormFields';
+import { FormFieldsConfig } from './FormConfig';
 
 export default function EditorForm({
   formFields = FormFieldsConfig,
   submitComponent,
   wrapperMargin = 'mb-6',
   wrapperMarginMobile = 'mb-4',
-  handleSubmit,
   register,
   errors,
   isSubmitting,
+  removeInnerForm,
+  handleSubmit = () => {},
 } = {}) {
+  const formFieldsComponent = (
+    <FormFields
+      formFields={formFields}
+      register={register}
+      isSubmitting={isSubmitting}
+      errors={errors}
+    />
+  );
   return (
     <WrapperResponsive
       classNames="border-light rounded-lg columns is-flex-direction-column is-mobile m-0"
@@ -39,14 +48,14 @@ export default function EditorForm({
           </div>
         </div>
       </div>
-      <Form
-        handleSubmit={handleSubmit}
-        formFields={formFields}
-        register={register}
-        isSubmitting={isSubmitting}
-        errors={errors}
-        submitComponent={submitComponent}
-      />
+      {removeInnerForm ? (
+        <>{formFieldsComponent}</>
+      ) : (
+        <Form methods={{ register }} handleSubmit={handleSubmit}>
+          {formFieldsComponent}
+          {submitComponent}
+        </Form>
+      )}
     </WrapperResponsive>
   );
 }

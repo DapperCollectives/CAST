@@ -3,7 +3,7 @@ import React from 'react';
 import { WrapperResponsive, ActionButton } from 'components';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { FormFieldsConfig, Schema } from './FormFields';
+import { FormFieldsConfig, Schema } from './FormConfig';
 import EditorForm from './EditorForm';
 
 export const CommunityLinksForm = ({
@@ -14,7 +14,7 @@ export const CommunityLinksForm = ({
   isUpdating = false,
   wrapperMargin = 'mb-6',
   wrapperMarginMobile = 'mb-4',
-}) => {
+} = {}) => {
   return (
     <WrapperResponsive
       classNames="border-light rounded-lg columns is-flex-direction-column is-mobile m-0"
