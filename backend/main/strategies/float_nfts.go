@@ -37,10 +37,22 @@ func (s *FloatNFTs) FetchBalance(
 		return nil, err
 	}
 
-	nftIds, err := s.FlowAdapter.GetNFTIds(balance.Addr, &strategy.Contract)
+	if strategy.Contract.Float_event_id == nil {
+		log.Error().Msg("No float event id field was found for contract.")
+	}
+
+	hasEventNFT, err := s.FlowAdapter.CheckIfUserHasEvent(balance.Addr, &strategy.Contract)
 	if err != nil {
 		return nil, err
 	}
+
+	if !hasEventNFT {
+		log.Error().Err(err).Msg("the user does not have this Float event in their wallet")
+		return nil, err
+	}
+
+	//if the user has the event, we can fetch their Float IDs
+	nftIds, err := s.FlowAdapter.GetNFTIds(balance.Addr, &strategy.Contract)
 
 	for _, nftId := range nftIds {
 		nft := &models.NFT{

@@ -39,11 +39,12 @@ type FlowConfig struct {
 }
 
 type Contract struct {
-	Name        *string  `json:"name,omitempty"`
-	Addr        *string  `json:"addr,omitempty"`
-	Public_path *string  `json:"publicPath,omitempty"`
-	Threshold   *float64 `json:"threshold,omitempty,string"`
-	MaxWeight   *float64 `json:"maxWeight,omitempty,string"`
+	Name           *string  `json:"name,omitempty"`
+	Addr           *string  `json:"addr,omitempty"`
+	Public_path    *string  `json:"publicPath,omitempty"`
+	Threshold      *float64 `json:"threshold,omitempty,string"`
+	MaxWeight      *float64 `json:"maxWeight,omitempty,string"`
+	Float_event_id *uint64  `json:"floatEventId,omitempty"`
 }
 
 var (
@@ -338,6 +339,72 @@ func (fa *FlowAdapter) GetNFTIds(voterAddr string, c *Contract) ([]interface{}, 
 
 	nftIds := value.([]interface{})
 	return nftIds, nil
+}
+
+func (fa *FlowAdapter) CheckIfUserHasEvent(voterAddr string, c *Contract) (bool, error) {
+	flowAddress := flow.HexToAddress(voterAddr)
+	cadenceAddress := cadence.NewAddress(flowAddress)
+	cadenceUInt64 := cadence.NewUInt64(*c.Float_event_id)
+
+	script, err := ioutil.ReadFile("./main/cadence/float/scripts/owns_specific_float.cdc")
+	if err != nil {
+		log.Error().Err(err).Msgf("Error reading cadence script file.")
+		return false, err
+	}
+
+	script = fa.ReplaceContractPlaceholders(string(script[:]), c, false)
+
+	cadenceValue, err := fa.Client.ExecuteScriptAtLatestBlock(
+		fa.Context,
+		script,
+		[]cadence.Value{
+			cadenceAddress,
+			cadenceUInt64,
+		},
+	)
+	if err != nil {
+		log.Error().Err(err).Msg("Error executing script.")
+		return false, err
+	}
+
+	value := CadenceValueToInterface(cadenceValue)
+
+	hasEventNFT := value.(bool)
+	return hasEventNFT, nil
+}
+
+func (fa *FlowAdapter) GetEventNFT(voterAddr string, c *Contract) (interface{}, error) {
+
+	//first we get all the floats a user owns
+
+	flowAddress := flow.HexToAddress(voterAddr)
+	cadenceAddress := cadence.NewAddress(flowAddress)
+	cadenceUInt64 := cadence.NewUInt64(*c.Float_event_id)
+
+	script, err := ioutil.ReadFile("./main/cadence/float/scripts/get_specific_float.cdc")
+	if err != nil {
+		log.Error().Err(err).Msgf("Error reading cadence script file.")
+		return nil, err
+	}
+
+	script = fa.ReplaceContractPlaceholders(string(script[:]), c, false)
+
+	cadenceValue, err := fa.Client.ExecuteScriptAtLatestBlock(
+		fa.Context,
+		script,
+		[]cadence.Value{
+			cadenceAddress,
+			cadenceUInt64,
+		},
+	)
+	if err != nil {
+		log.Error().Err(err).Msg("Error executing script.")
+		return nil, err
+	}
+
+	value := CadenceValueToInterface(cadenceValue)
+
+	return value, nil
 }
 
 func (fa *FlowAdapter) ReplaceContractPlaceholders(code string, c *Contract, isFungible bool) []byte {
