@@ -12,15 +12,38 @@ const ModalSteps = {
   2: 'strategy-information',
 };
 
-const initialFormFields = {
-  addr: '',
-  name: '',
-  threshold: '',
-  maxWeight: '',
-  publicPath: '',
+const getFormFields = (strategy) => {
+  const formFields = {
+    addr: '',
+    name: '',
+    threshold: '',
+    maxWeight: '',
+    publicPath: '',
+  };
+  if (strategy === 'float-nfts') {
+    formFields.floatEventId = '';
+  }
+  return formFields;
 };
 
-const formFields = Object.keys(initialFormFields);
+const getRequiredFields = (strategy) => {
+  const requiredFields = {
+    addr: (addr) => addr?.trim().length > 0 && isValidAddress(addr),
+    name: (name) => name?.trim().length > 0 && name?.trim().length <= 150,
+    publicPath: (path) => path?.trim().length > 0 && path?.trim().length <= 150,
+    maxWeight: (maxWeight) =>
+      maxWeight?.trim().length > 0 && /^[0-9]+$/.test(maxWeight),
+    threshold: (threshold) =>
+      threshold?.trim().length > 0 && /^[0-9]+$/.test(threshold),
+  };
+
+  if (strategy === 'float-nfts') {
+    requiredFields.floatEventId = (floatEventId) =>
+      floatEventId?.trim().length > 0 && /^[0-9]+$/.test(floatEventId);
+  }
+
+  return requiredFields;
+};
 
 export default function StrategyEditorModal({
   strategies = [],
@@ -37,21 +60,13 @@ export default function StrategyEditorModal({
 
   const [strategyData, setStrategyData] = useState({
     name: '',
-    contract: { ...initialFormFields },
+    contract: {},
   });
 
   // this useEffect validates form on second step
   useEffect(() => {
-    const requiredFields = {
-      addr: (addr) => addr?.trim().length > 0 && isValidAddress(addr),
-      name: (name) => name?.trim().length > 0 && name?.trim().length <= 150,
-      publicPath: (path) =>
-        path?.trim().length > 0 && path?.trim().length <= 150,
-      maxWeight: (maxWeight) =>
-        maxWeight?.trim().length > 0 && /^[0-9]+$/.test(maxWeight),
-      threshold: (threshold) =>
-        threshold?.trim().length > 0 && /^[0-9]+$/.test(threshold),
-    };
+    const requiredFields = getRequiredFields(strategyData.name);
+
     const isValid = Object.keys(requiredFields).every((field) =>
       requiredFields[field](strategyData.contract[field])
     );
@@ -79,7 +94,10 @@ export default function StrategyEditorModal({
       });
       return;
     }
-    setStrategyData((state) => ({ ...state, name: strategyName }));
+    setStrategyData({
+      name: strategyName,
+      contract: getFormFields(strategyName),
+    });
     setSep(ModalSteps[2]);
   };
 
@@ -145,7 +163,7 @@ export default function StrategyEditorModal({
           <StrategyInformationForm
             setField={setContractInfoField}
             formData={strategyData.contract}
-            formFields={formFields}
+            formFields={Object.keys(getFormFields(strategyData.name))}
             actionButton={
               <ActionButton
                 label="done"
