@@ -70,7 +70,7 @@ func (s *FloatNFTs) FetchBalance(
 	//do we add the balance
 	if !doesExist && err == nil {
 		err = models.CreateUserNFTRecord(s.DB, vb)
-		balance.NFTCount = len(vb.NFTs)
+		balance.NFTCount = 1 // force set to one if user has an event.
 	}
 
 	return balance, nil
