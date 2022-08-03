@@ -225,6 +225,9 @@ func (p *Proposal) EnforceMaxWeight(balance float64) float64 {
 
 	var allowedBalance float64
 	var maxWeight = *p.Max_weight
+
+	//inversions is used to correctly shift Max_weight x amount of
+	//decimal places, depending on how many decimal places it original is
 	var inversions = map[int]int{
 		1: 8,
 		2: 7,
