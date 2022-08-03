@@ -613,7 +613,6 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 
 	s.InitStrategy(a.FlowAdapter, a.DB, a.SnapshotClient)
 
-	// TODO: should work w/ NFTs
 	balance, err := s.FetchBalance(emptyBalance, &p)
 	if err != nil {
 		log.Error().Err(err).Msgf("Error fetching balance for address %v.", v.Addr)
@@ -1482,7 +1481,7 @@ func (a *App) getAccountAtBlockHeight(w http.ResponseWriter, r *http.Request) {
 		Name: &flowToken,
 	}
 
-	b := Balance{}
+	b := shared.FTBalanceResponse{}
 	if err = a.SnapshotClient.GetAddressBalanceAtBlockHeight(addr, blockHeight, &b, &defaultFlowContract); err != nil {
 		log.Error().Err(err).Msgf("Error getting account %s at blockheight %d.", addr, blockHeight)
 		respondWithError(w, http.StatusInternalServerError, err.Error())
