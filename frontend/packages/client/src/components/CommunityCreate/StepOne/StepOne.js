@@ -2,6 +2,7 @@ import React, { useCallback, useEffect } from 'react';
 import { WrapperResponsive, Dropdown } from 'components';
 import { useDropzone } from 'react-dropzone';
 import { Upload } from 'components/Svg';
+import Input from 'components/common/Input';
 import isEqual from 'lodash/isEqual';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import useLinkValidator, {
@@ -21,22 +22,11 @@ import pick from 'lodash/pick';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import {
-  Schema,
-  linksFieldsArray,
-} from 'components/Community/CommunityEditorLinks/FormConfig';
-
-const linksFields = [
-  'websiteUrl',
-  'twitterUrl',
-  'instagramUrl',
-  'discordUrl',
-  'githubUrl',
-];
-
-const initialValues = Object.assign(
-  {},
-  ...linksFields.map((key) => ({ [key]: '' }))
-);
+  StepOneSchema,
+  StepOneFieldsArray,
+  initialValues,
+} from '../FormConfig';
+import TextArea from 'components/common/TextArea';
 
 export default function StepOne({
   stepData,
@@ -119,27 +109,14 @@ export default function StepOne({
     accept: 'image/jpeg,image/png',
   });
 
-  const {
-    communityName,
-    communityDescription,
-    logo,
-    banner,
-    communityTerms,
-    category,
-  } = stepData || {};
+  const { logo, banner, category } = stepData || {};
 
   // handle links form
-  const linksFieldsObj = Object.assign(
+  const fieldsObj = Object.assign(
     {},
     initialValues,
-    pick(stepData || {}, linksFields)
+    pick(stepData || {}, StepOneFieldsArray)
   );
-
-  // const changeHandler = (field) => (value) => onDataChange({ [field]: value });
-
-  const { isValid: isCommunityLinksValid } = useLinkValidator({
-    links: linksFieldsObj,
-  });
 
   const setCategoryValue = useCallback(
     (value) => {
@@ -158,13 +135,6 @@ export default function StepOne({
   // handles form validation
   useEffect(() => {
     const requiredFields = {
-      communityName: (name) =>
-        name?.trim().length > 0 &&
-        validateLength(name, COMMUNITY_NAME_MAX_LENGTH),
-      communityDescription: (desc) =>
-        desc?.trim().length
-          ? validateLength(desc, COMMUNITY_DESCRIPTION_MAX_LENGTH)
-          : true,
       logo: (logo) =>
         logo !== undefined ? logo?.file && logo?.imageUrl : true,
       communityTerms: (termsUrl) =>
@@ -174,8 +144,8 @@ export default function StepOne({
     const isValid = Object.keys(requiredFields).every(
       (field) => stepData && requiredFields[field](stepData[field])
     );
-    setStepValid(isValid && isCommunityLinksValid);
-  }, [stepData, setStepValid, onDataChange, isCommunityLinksValid]);
+    setStepValid(true);
+  }, [stepData, setStepValid, onDataChange]);
 
   const imageDropClasses = classnames(
     'is-flex is-flex-direction-column is-align-items-center is-justify-content-center cursor-pointer rounded-lg',
@@ -184,44 +154,28 @@ export default function StepOne({
     }
   );
 
-  const showNameInputError = !validateLength(
-    communityName ?? '',
-    COMMUNITY_NAME_MAX_LENGTH
-  );
-  const showDescriptionInputError = !validateLength(
-    communityDescription ?? '',
-    COMMUNITY_DESCRIPTION_MAX_LENGTH
-  );
-
   const { register, handleSubmit, formState, watch } = useForm({
-    defaultValues: linksFieldsObj,
-    resolver: yupResolver(Schema),
+    defaultValues: fieldsObj,
+    resolver: yupResolver(StepOneSchema),
   });
 
   const { errors, isSubmitting, isValid } = formState;
 
-  const watchedFields = watch(linksFieldsArray);
+  const watchedFields = watch(StepOneFieldsArray);
 
+  console.log(watchedFields);
+  console.log('errors', errors);
   useEffect(() => {
     const toUpdate = Object.assign(
       {},
-      ...linksFieldsArray.map((key, index) => ({ [key]: watchedFields[index] }))
+      ...StepOneFieldsArray.map((key, index) => ({
+        [key]: watchedFields[index],
+      }))
     );
-    if (
-      !isEqual(pick(stepData, linksFields), toUpdate) &&
-      isValid &&
-      !isSubmitting
-    ) {
+    if (!isEqual(stepData, toUpdate) && isValid && !isSubmitting) {
       onDataChange({ ...toUpdate });
     }
-  }, [
-    onDataChange,
-    linksFieldsObj,
-    stepData,
-    watchedFields,
-    isValid,
-    isSubmitting,
-  ]);
+  }, [onDataChange, stepData, watchedFields, isValid, isSubmitting]);
 
   const onSubmit = (data) => {
     console.log(data);
@@ -352,42 +306,22 @@ export default function StepOne({
             </div>
           </div>
         </div>
-        <input
-          type="text"
+        <Input
           placeholder="Community Name"
-          name="community_name"
-          className="rounded-sm border-light p-3 column is-full mt-2"
-          value={communityName || ''}
-          onChange={(event) => setData({ communityName: event.target.value })}
+          register={register}
+          name="communityName"
+          disabled={isSubmitting}
+          error={errors['communityName']}
+          classNames="rounded-sm border-light p-3 column is-full mt-2"
         />
-        {showNameInputError && (
-          <div className="pl-1 mt-2 transition-all">
-            <p className="smaller-text has-text-red">
-              The maximum length for Community Name is 50 characters
-            </p>
-          </div>
-        )}
-        <textarea
-          className="text-area rounded-sm border-light p-3 column is-full mt-4"
-          type="text"
+        <TextArea
           placeholder="Short Description"
-          value={communityDescription || ''}
-          name="community_details"
-          rows="3"
-          cols="30"
-          onChange={(event) =>
-            setData({
-              communityDescription: event.target.value,
-            })
-          }
+          register={register}
+          name="communityDescription"
+          disabled={isSubmitting}
+          error={errors['communityDescription']}
+          classNames="text-area rounded-sm border-light p-3 column is-full mt-4"
         />
-        {showDescriptionInputError && (
-          <div className="pl-1 mt-2 transition-all">
-            <p className="smaller-text has-text-red">
-              The maximum length for Community Description is 1000 characters
-            </p>
-          </div>
-        )}
         <Dropdown
           label="Category"
           margin="mt-4"
@@ -398,13 +332,13 @@ export default function StepOne({
           }))}
           onSelectValue={setCategoryValue}
         />
-        <input
-          type="text"
+        <Input
           placeholder="Terms  (e.g. https://example.com/terms)"
-          name="terms"
-          className="rounded-sm border-light p-3 column is-full mt-4"
-          value={communityTerms || ''}
-          onChange={(event) => setData({ communityTerms: event.target.value })}
+          register={register}
+          name="communityTerms"
+          disabled={isSubmitting}
+          error={errors['communityTerms']}
+          classNames="rounded-sm border-light p-3 column is-full mt-4"
         />
       </WrapperResponsive>
       <CommunityLinksForm2

@@ -1,7 +1,7 @@
 import React from 'react';
 import { WrapperResponsive, Form } from 'components';
 import FormFields from './FormFields';
-import { FormFieldsConfig } from './FormConfig';
+import { FormFieldsConfig } from 'components/CommunityCreate/FormConfig';
 
 export default function EditorForm({
   formFields = FormFieldsConfig,

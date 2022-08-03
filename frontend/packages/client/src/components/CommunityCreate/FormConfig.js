@@ -1,7 +1,11 @@
 import * as yup from 'yup';
 import { Website, Instagram, Twitter, Discord, Github } from 'components/Svg';
+import {
+  COMMUNITY_DESCRIPTION_MAX_LENGTH,
+  COMMUNITY_NAME_MAX_LENGTH,
+} from 'const';
 
-const Schema = yup
+const LinksSchema = yup
   .object()
   .shape({
     websiteUrl: yup.string().matches(
@@ -14,12 +18,12 @@ const Schema = yup
           '(\\#[-a-z\\d_]*)?$',
         'i'
       ),
-      { message: 'Invalid Website url', excludeEmptyString: true }
+      { message: 'Invalid Website URL', excludeEmptyString: true }
     ),
     twitterUrl: yup
       .string()
       .matches(new RegExp('(https://)(www\\.)?twitter\\.com/(\\w+)', 'i'), {
-        message: 'Invalid Twitter url',
+        message: 'Invalid Twitter URL',
         excludeEmptyString: true,
       }),
     instagramUrl: yup
@@ -27,7 +31,7 @@ const Schema = yup
       .matches(
         /(https:\/\/)(www\.)?(?:instagram.com|instagr.am|instagr.com)\/(\w+)/gim,
         {
-          message: 'Invalid Instragram url',
+          message: 'Invalid Instragram URL',
           excludeEmptyString: true,
         }
       ),
@@ -36,18 +40,32 @@ const Schema = yup
       .matches(
         /(https:\/\/)(www\.)?(discord\.(gg|io|me|li|com)|discordapp\.com\/invite)\/.+[a-zA-Z0-9]/gim,
         {
-          message: 'Invalid Discord url',
+          message: 'Invalid Discord URL',
           excludeEmptyString: true,
         }
       ),
     githubUrl: yup
       .string()
       .matches(/(https:\/\/)(www\.)?(github\.com)\/(?:[^/\s]+)/gim, {
-        message: 'Invalid Github url',
+        message: 'Invalid Github URL',
         excludeEmptyString: true,
       }),
   })
   .required();
+
+const StepOneSchema = LinksSchema.shape({
+  communityName: yup.string().required('Please provide a Communiy Name').max(
+    COMMUNITY_NAME_MAX_LENGTH,
+    // eslint-disable-next-line no-template-curly-in-string
+    'The maximum length for Community Name is ${max} characters'
+  ),
+  communityDescription: yup.string().max(
+    COMMUNITY_DESCRIPTION_MAX_LENGTH,
+    // eslint-disable-next-line no-template-curly-in-string
+    'The maximum length for Community Description is ${max} characters'
+  ),
+  communityTerms: yup.string().url('Community Terms must be a valid URL'),
+}).required();
 
 const FormFieldsConfig = [
   {
@@ -79,4 +97,23 @@ const FormFieldsConfig = [
 
 const linksFieldsArray = FormFieldsConfig.map((field) => field.fieldName);
 
-export { Schema, FormFieldsConfig, linksFieldsArray };
+const StepOneFieldsArray = [
+  ...linksFieldsArray,
+  'communityName',
+  'communityDescription',
+  'communityTerms',
+];
+
+const initialValues = Object.assign(
+  {},
+  ...StepOneFieldsArray.map((key) => ({ [key]: '' }))
+);
+
+export {
+  StepOneSchema,
+  LinksSchema,
+  FormFieldsConfig,
+  StepOneFieldsArray,
+  linksFieldsArray,
+  initialValues,
+};

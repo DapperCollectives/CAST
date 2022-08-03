@@ -2,7 +2,10 @@ import React from 'react';
 import { WrapperResponsive, ActionButton } from 'components';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { FormFieldsConfig, Schema } from './FormConfig';
+import {
+  FormFieldsConfig,
+  LinksSchema,
+} from 'components/CommunityCreate/FormConfig';
 import EditorForm from './EditorForm';
 
 export const CommunityLinksForm = ({
@@ -96,7 +99,7 @@ export default function CommunityEditorLinks(props = {}) {
       discordUrl,
       githubUrl,
     },
-    resolver: yupResolver(Schema),
+    resolver: yupResolver(LinksSchema),
   });
 
   const { errors, isSubmitting, isDirty, isValid } = formState;

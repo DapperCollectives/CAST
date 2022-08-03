@@ -25,7 +25,6 @@ export { default as CommunityEditorDetails } from './Community/CommunityEditorDe
 export { default as CommunityPropsAndVoting } from './Community/CommunityPropsAndVoting';
 export { default as AddButton } from './AddButton';
 export { default as ActionButton } from './ActionButton';
-export { default as Input } from './Input';
 export { default as Title } from './Title';
 export {
   PropCreateStepOne,
@@ -42,4 +41,5 @@ export { default as WalletConnectModal } from './WalletConnectModal';
 export { default as Label } from './Label';
 export { default as ModalAboutItem } from './ModalAboutItem';
 export { default as CommunityHeader } from './CommunityHeader';
-export { default as Form } from './Form';
+export { default as Form } from './common/Form';
+export { default as Input } from './common/Input';
