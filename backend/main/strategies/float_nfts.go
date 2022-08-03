@@ -41,19 +41,29 @@ func (s *FloatNFTs) FetchBalance(
 		log.Error().Msg("No float event id field was found for contract.")
 	}
 
-	hasEventNFT, err := s.FlowAdapter.CheckIfUserHasEvent(balance.Addr, &strategy.Contract)
-	if err != nil {
+	if err := s.queryNFTs(*vb, strategy, balance); err != nil {
 		return nil, err
+	}
+
+	return balance, nil
+}
+
+func (s *FloatNFTs) queryNFTs(
+	vb models.VoteWithBalance,
+	strategy models.Strategy,
+	balance *models.Balance,
+) error {
+	hasEventNFT, err := s.FlowAdapter.CheckIfUserHasEvent(vb.Vote.Addr, &strategy.Contract)
+	if err != nil {
+		return err
 	}
 
 	if !hasEventNFT {
 		log.Error().Err(err).Msg("the user does not have this Float event in their wallet")
-		return nil, err
+		return err
 	}
 
-	//if the user has the event, we can fetch their Float IDs
-	nftIds, err := s.FlowAdapter.GetNFTIds(balance.Addr, &strategy.Contract)
-
+	nftIds, err := s.FlowAdapter.GetFloatNFTIds(vb.Vote.Addr, &strategy.Contract)
 	for _, nftId := range nftIds {
 		nft := &models.NFT{
 			ID: nftId,
@@ -61,19 +71,19 @@ func (s *FloatNFTs) FetchBalance(
 		vb.NFTs = append(vb.NFTs, nft)
 	}
 
-	doesExist, err := models.DoesNFTExist(s.DB, vb)
+	doesExist, err := models.DoesNFTExist(s.DB, &vb)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	//only if the NFT ID is not already in the DB,
-	//do we add the balance
+	//in this strategy we don't consider multple NFTs for the same event
+	//so we just use 1 for NFTCount
 	if !doesExist && err == nil {
-		err = models.CreateUserNFTRecord(s.DB, vb)
+		err = models.CreateUserNFTRecord(s.DB, &vb)
 		balance.NFTCount = 1 // force set to one if user has an event.
 	}
 
-	return balance, nil
+	return err
 }
 
 func (s *FloatNFTs) TallyVotes(

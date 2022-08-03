@@ -37,9 +37,21 @@ func (b *BalanceOfNfts) FetchBalance(
 		return nil, err
 	}
 
+	if err := b.queryNFTs(*vb, strategy, balance); err != nil {
+		return nil, err
+	}
+
+	return balance, nil
+}
+
+func (b *BalanceOfNfts) queryNFTs(
+	vb models.VoteWithBalance,
+	strategy models.Strategy,
+	balance *models.Balance,
+) error {
 	nftIds, err := b.FlowAdapter.GetNFTIds(balance.Addr, &strategy.Contract)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	for _, nftId := range nftIds {
@@ -49,19 +61,19 @@ func (b *BalanceOfNfts) FetchBalance(
 		vb.NFTs = append(vb.NFTs, nft)
 	}
 
-	doesExist, err := models.DoesNFTExist(b.DB, vb)
+	doesExist, err := models.DoesNFTExist(b.DB, &vb)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	//only if the NFT ID is not already in the DB,
 	//do we add the balance
 	if !doesExist && err == nil {
-		err = models.CreateUserNFTRecord(b.DB, vb)
+		err = models.CreateUserNFTRecord(b.DB, &vb)
 		balance.NFTCount = len(vb.NFTs)
 	}
 
-	return balance, nil
+	return err
 }
 
 func (b *BalanceOfNfts) TallyVotes(

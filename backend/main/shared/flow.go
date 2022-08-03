@@ -341,6 +341,37 @@ func (fa *FlowAdapter) GetNFTIds(voterAddr string, c *Contract) ([]interface{}, 
 	return nftIds, nil
 }
 
+func (fa *FlowAdapter) GetFloatNFTIds(voterAddr string, c *Contract) ([]interface{}, error) {
+	flowAddress := flow.HexToAddress(voterAddr)
+	cadenceAddress := cadence.NewAddress(flowAddress)
+	cadenceUInt64 := cadence.NewUInt64(*c.Float_event_id)
+
+	script, err := ioutil.ReadFile("./main/cadence/scripts/get_float_nfts_ids.cdc")
+	if err != nil {
+		log.Error().Err(err).Msgf("Error reading cadence script file.")
+		return nil, err
+	}
+
+	script = fa.ReplaceContractPlaceholders(string(script[:]), c, false)
+
+	cadenceValue, err := fa.Client.ExecuteScriptAtLatestBlock(
+		fa.Context,
+		script,
+		[]cadence.Value{
+			cadenceAddress,
+			cadenceUInt64,
+		})
+	if err != nil {
+		log.Error().Err(err).Msg("Error executing script.")
+		return nil, err
+	}
+
+	value := CadenceValueToInterface(cadenceValue)
+
+	nftIds := value.([]interface{})
+	return nftIds, nil
+}
+
 func (fa *FlowAdapter) CheckIfUserHasEvent(voterAddr string, c *Contract) (bool, error) {
 	flowAddress := flow.HexToAddress(voterAddr)
 	cadenceAddress := cadence.NewAddress(flowAddress)
@@ -360,8 +391,7 @@ func (fa *FlowAdapter) CheckIfUserHasEvent(voterAddr string, c *Contract) (bool,
 		[]cadence.Value{
 			cadenceAddress,
 			cadenceUInt64,
-		},
-	)
+		})
 	if err != nil {
 		log.Error().Err(err).Msg("Error executing script.")
 		return false, err
@@ -395,8 +425,7 @@ func (fa *FlowAdapter) GetEventNFT(voterAddr string, c *Contract) (interface{}, 
 		[]cadence.Value{
 			cadenceAddress,
 			cadenceUInt64,
-		},
-	)
+		})
 	if err != nil {
 		log.Error().Err(err).Msg("Error executing script.")
 		return nil, err
