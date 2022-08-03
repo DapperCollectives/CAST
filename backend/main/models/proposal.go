@@ -245,11 +245,7 @@ func (p *Proposal) EnforceMaxWeight(balance float64) float64 {
 	powerToShift := minuend - maxLimitLength
 	shiftedMaxWeight := maxWeight * math.Pow(10, float64(powerToShift))
 
-	fmt.Printf("balance: %f\n", balance)
-	fmt.Printf("shiftedMaxWeight: %f\n", shiftedMaxWeight)
-
 	if balance >= shiftedMaxWeight {
-		fmt.Printf("balance >= shiftedMaxWeight\n")
 		allowedBalance = shiftedMaxWeight
 	} else {
 		allowedBalance = balance
