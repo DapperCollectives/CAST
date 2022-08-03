@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"time"
 
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
@@ -34,8 +33,6 @@ func (b *Balance) GetBalanceByAddressAndBlockHeight(db *s.Database) error {
 }
 
 func (b *Balance) CreateBalance(db *s.Database) error {
-
-	fmt.Printf("Balance %+v\n", b)
 	sql := `
 	INSERT INTO balances (addr, primary_account_balance, secondary_address,
 	    secondary_account_balance, staking_balance, script_result, stakes, block_height, id)
