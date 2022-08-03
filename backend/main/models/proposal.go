@@ -6,7 +6,9 @@ package models
 
 import (
 	"fmt"
+	"math"
 	"os"
+	"strings"
 	"time"
 
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
@@ -217,17 +219,38 @@ func (p *Proposal) ValidateBalance(weight float64) error {
 }
 
 func (p *Proposal) EnforceMaxWeight(balance float64) float64 {
-	var allowedBalance float64
-	var maxWeight = *p.Max_weight
-
 	if p.Max_weight == nil {
 		return balance
 	}
-	fmt.Printf("maxWeight: %f\n", maxWeight)
-	fmt.Printf("balance: %f\n", balance)
 
-	if balance >= maxWeight {
-		allowedBalance = maxWeight
+	var allowedBalance float64
+	var maxWeight = *p.Max_weight
+	var inversions = map[int]int{
+		1: 8,
+		2: 7,
+		3: 6,
+		4: 5,
+		5: 4,
+		6: 3,
+		7: 2,
+		8: 1,
+	}
+
+	//we shift the maxWeight up by x decimal places so that the
+	//comparison block works as expected
+	//first, get the number of decimal places left side of . for maxWeight
+	maxLimitLength := len(strings.Split(fmt.Sprintf("%v", maxWeight), ".")[0])
+
+	minuend := inversions[maxLimitLength]
+	powerToShift := minuend - maxLimitLength
+	shiftedMaxWeight := maxWeight * math.Pow(10, float64(powerToShift))
+
+	fmt.Printf("balance: %f\n", balance)
+	fmt.Printf("shiftedMaxWeight: %f\n", shiftedMaxWeight)
+
+	if balance >= shiftedMaxWeight {
+		fmt.Printf("balance >= shiftedMaxWeight\n")
+		allowedBalance = shiftedMaxWeight
 	} else {
 		allowedBalance = balance
 	}

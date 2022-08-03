@@ -84,6 +84,8 @@ func (s *TokenWeightedDefault) TallyVotes(
 	proposal *models.Proposal,
 ) (models.ProposalResults, error) {
 
+	fmt.Printf("Proposal %v\n", proposal)
+
 	for _, vote := range votes {
 
 		if vote.PrimaryAccountBalance != nil {
