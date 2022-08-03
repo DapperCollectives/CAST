@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink, withRouter } from 'react-router-dom';
 import Sidenavbar from './SideNavbar';
-import { Logo, LinkOut } from './Svg';
+import { LinkOut, Logo } from './Svg';
 import WalletConnect from './WalletConnect';
 
 function Header(props) {

@@ -1,6 +1,6 @@
 import React from 'react';
-import { Star } from 'components/Svg';
 import Blockies from 'react-blockies';
+import { Star } from 'components/Svg';
 
 const ProposalCardHeader = ({ creatorAddr, isAdminProposal }) => {
   return (

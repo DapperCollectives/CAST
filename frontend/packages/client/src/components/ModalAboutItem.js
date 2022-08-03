@@ -1,5 +1,5 @@
 import React from 'react';
-import { Star } from '../components/Svg';
+import { Star } from 'components/Svg';
 
 export default function ModalAboutItem({
   closeModal = () => {},

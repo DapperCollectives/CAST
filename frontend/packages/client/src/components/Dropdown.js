@@ -1,6 +1,6 @@
-import React, { useState, forwardRef } from 'react';
-import { CaretDown } from './Svg';
+import React, { forwardRef, useState } from 'react';
 import classnames from 'classnames';
+import { CaretDown } from './Svg';
 
 const DropDown = forwardRef(
   (
