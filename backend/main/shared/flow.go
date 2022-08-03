@@ -44,7 +44,7 @@ type Contract struct {
 	Public_path    *string  `json:"publicPath,omitempty"`
 	Threshold      *float64 `json:"threshold,omitempty,string"`
 	MaxWeight      *float64 `json:"maxWeight,omitempty,string"`
-	Float_event_id *uint64  `json:"floatEventId,omitempty"`
+	Float_event_id *uint64  `json:"floatEventId,omitempty,string"`
 }
 
 var (
@@ -399,7 +399,10 @@ func (fa *FlowAdapter) CheckIfUserHasEvent(voterAddr string, c *Contract) (bool,
 
 	value := CadenceValueToInterface(cadenceValue)
 
-	hasEventNFT := value.(bool)
+	hasEventNFT := false
+	if value == "true" {
+		hasEventNFT = true
+	}
 	return hasEventNFT, nil
 }
 
