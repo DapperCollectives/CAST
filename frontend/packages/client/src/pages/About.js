@@ -87,7 +87,7 @@ const AboutPage = ({ location }) => {
                     <a
                       target="_blank"
                       rel="noreferrer noopener"
-                      href="https://dapper-collectives.gitbook.io/cast-docs/"
+                      href="https://github.com/DapperCollectives/CAST"
                       className="pr-1 has-text-black is-underlined"
                       onClick={closeModal}
                     >
