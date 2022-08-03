@@ -193,6 +193,7 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/proposals", a.createProposal).Methods("POST", "OPTIONS")
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/proposals/{id:[0-9]+}", a.updateProposal).
 		Methods("PUT", "OPTIONS")
+	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/strategies", a.getActiveStrategiesForCommunity).Methods("GET")
 	// Lists
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/lists", a.getListsForCommunity).Methods("GET")
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/lists", a.createListForCommunity).Methods("POST", "OPTIONS")
@@ -943,6 +944,24 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondWithJSON(w, http.StatusOK, p)
+}
+
+func (a *App) getActiveStrategiesForCommunity(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	communityId, err := strconv.Atoi(vars["communityId"])
+
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid Community ID.")
+		return
+	}
+
+	strategies, err := models.GetActiveStrategiesForCommunity(a.DB, communityId)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, strategies)
 }
 
 // Communities
