@@ -18,7 +18,7 @@ const ProfileSchema = yup.object().shape({
     // eslint-disable-next-line no-template-curly-in-string
     'The maximum length for Community Description is ${max} characters'
   ),
-  // communityTerms: yup.string().url('Community Terms must be a valid URL'),
+  communityTerms: yup.string().url('Community Terms must be a valid URL'),
   communityCategory: yup
     .string()
     .required('Please provide a Communiy Category'),
