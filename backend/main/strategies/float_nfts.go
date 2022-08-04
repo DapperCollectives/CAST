@@ -78,7 +78,7 @@ func (s *FloatNFTs) queryNFTs(
 
 	//in this strategy we don't consider multple NFTs for the same event
 	//so we just use 1 for NFTCount
-	if !doesExist && err == nil {
+	if !doesExist {
 		err = models.CreateUserNFTRecord(s.DB, &vb)
 		balance.NFTCount = 1 // force set to one if user has an event.
 	}
