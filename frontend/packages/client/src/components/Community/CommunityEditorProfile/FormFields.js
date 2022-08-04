@@ -9,7 +9,6 @@ export default function FormFields({
   isSubmitting,
   errors,
   control,
-  communityCategory,
 } = {}) {
   const { data: communityCategories } = useCommunityCategory();
 

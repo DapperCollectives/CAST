@@ -1,63 +1,39 @@
-import React, { useCallback, useEffect } from 'react';
-import { useDropzone } from 'react-dropzone';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useErrorHandlerContext } from 'contexts/ErrorHandler';
-import { useCommunityCategory } from 'hooks';
-import { WrapperResponsive } from 'components';
-import { Upload } from 'components/Svg';
 import { CommunityLinksForm } from 'components/Community/CommunityEditorLinks';
 import { CommunityProfileForm } from 'components/Community/CommunityEditorProfile';
-import { MAX_AVATAR_FILE_SIZE, MAX_FILE_SIZE } from 'const';
-import { getReducedImg } from 'utils';
-import classnames from 'classnames';
 import pick from 'lodash/pick';
 import {
   StepOneSchema,
   StepOneFieldsArray,
   initialValues,
 } from '../FormConfig';
-import TextArea from 'components/common/TextArea';
-import Dropdown from 'components/common/Dropdown';
-import Input from 'components/common/Input';
 import { ActionButton } from 'components';
-export default function StepOne({
-  stepData,
-  setStepValid,
-  onDataChange,
-  moveToNextStep,
-  isStepValid,
-}) {
-  console.log(stepData);
-  // handle links form
+
+export default function StepOne({ stepData, onDataChange, moveToNextStep }) {
   const fieldsObj = Object.assign(
     {},
     initialValues,
     pick(stepData || {}, StepOneFieldsArray)
   );
 
-  const { register, handleSubmit, formState, watch, control, setValue } =
+  const { register, handleSubmit, formState, control, setValue, watch } =
     useForm({
       defaultValues: fieldsObj,
       resolver: yupResolver(StepOneSchema),
       reValidateMode: 'onChange',
     });
 
-  console.log(register('logo'));
   const { errors, isSubmitting, isValid, isDirty } = formState;
 
-  const watchedFields = watch(StepOneFieldsArray);
-
-  console.log(watchedFields);
-  console.log('errors', errors);
-  console.log('isValid', isValid);
   const onSubmit = (data) => {
-    console.log('data', data);
     onDataChange(data);
     moveToNextStep();
   };
 
-  const { logo, banner } = stepData || {};
+  const logoField = watch('logo');
+  const bannerField = watch('banner');
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -68,8 +44,8 @@ export default function StepOne({
         removeInnerForm
         setValue={setValue}
         control={control}
-        logoImage={logo}
-        bannerImage={banner}
+        logoImage={logoField}
+        bannerImage={bannerField}
       />
       <CommunityLinksForm
         removeInnerForm
