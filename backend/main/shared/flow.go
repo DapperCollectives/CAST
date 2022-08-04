@@ -346,7 +346,7 @@ func (fa *FlowAdapter) GetFloatNFTIds(voterAddr string, c *Contract) ([]interfac
 	cadenceAddress := cadence.NewAddress(flowAddress)
 	cadenceUInt64 := cadence.NewUInt64(*c.Float_event_id)
 
-	script, err := ioutil.ReadFile("./main/cadence/scripts/get_float_nfts_ids.cdc")
+	script, err := ioutil.ReadFile("./main/cadence/float/scripts/get_float_ids.cdc")
 	if err != nil {
 		log.Error().Err(err).Msgf("Error reading cadence script file.")
 		return nil, err
