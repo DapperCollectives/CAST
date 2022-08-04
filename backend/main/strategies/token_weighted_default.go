@@ -3,11 +3,10 @@ package strategies
 import (
 	"fmt"
 	"math"
-	"time"
 
 	"github.com/DapperCollectives/CAST/backend/main/models"
-	"github.com/DapperCollectives/CAST/backend/main/shared"
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
+	shared "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/jackc/pgx/v4"
 	"github.com/rs/zerolog/log"
 )
@@ -16,16 +15,6 @@ type TokenWeightedDefault struct {
 	s.StrategyStruct
 	SC s.SnapshotClient
 	DB *s.Database
-}
-
-type FTBalanceResponse struct {
-	ID              string    `json:"id"`
-	FungibleTokenID string    `json:"fungibleTokenId"`
-	Addr            string    `json:"addr"`
-	Balance         uint64    `json:"balance"`
-	BlockHeight     uint64    `json:"blockHeight"`
-	CreatedAt       time.Time `json:"createdAt"`
-	HasVault        bool      `json:"hasVault"`
 }
 
 func (s *TokenWeightedDefault) FetchBalance(
@@ -49,31 +38,9 @@ func (s *TokenWeightedDefault) FetchBalance(
 		return nil, err
 	}
 
-	if *strategy.Contract.Name == "FlowToken" {
-		if err := s.SC.GetAddressBalanceAtBlockHeight(
-			b.Addr,
-			b.BlockHeight,
-			b,
-			&strategy.Contract,
-		); err != nil {
-			log.Error().Err(err).Msg("Error fetching balance.")
-			return nil, err
-		}
-	} else {
-		var ftBalance = &FTBalanceResponse{}
-		if err := s.SC.GetAddressBalanceAtBlockHeight(
-			b.Addr,
-			b.BlockHeight,
-			ftBalance,
-			&strategy.Contract,
-		); err != nil {
-			log.Error().Err(err).Msg("Error fetching balance.")
-			return nil, err
-		}
-
-		b.PrimaryAccountBalance = ftBalance.Balance
-		b.SecondaryAccountBalance = 0
-		b.StakingBalance = 0
+	if err := s.FetchBalanceFromSnapshot(&strategy, b); err != nil {
+		log.Error().Err(err).Msg("Error calling snapshot client")
+		return nil, err
 	}
 
 	if err := b.CreateBalance(s.DB); err != nil {
@@ -84,24 +51,63 @@ func (s *TokenWeightedDefault) FetchBalance(
 	return b, nil
 }
 
+func (s *TokenWeightedDefault) FetchBalanceFromSnapshot(
+	strategy *models.Strategy,
+	b *models.Balance,
+) error {
+
+	var ftBalance = &shared.FTBalanceResponse{}
+	ftBalance.NewFTBalance()
+
+	if *strategy.Contract.Name == "FlowToken" {
+		if err := s.SC.GetAddressBalanceAtBlockHeight(
+			b.Addr,
+			b.BlockHeight,
+			ftBalance,
+			&strategy.Contract,
+		); err != nil {
+			log.Error().Err(err).Msg("Error fetching balance from snapshot client")
+			return err
+		}
+		b.PrimaryAccountBalance = ftBalance.PrimaryAccountBalance
+		b.SecondaryAccountBalance = ftBalance.SecondaryAccountBalance
+		b.StakingBalance = ftBalance.StakingBalance
+
+	} else {
+		if err := s.SC.GetAddressBalanceAtBlockHeight(
+			b.Addr,
+			b.BlockHeight,
+			ftBalance,
+			&strategy.Contract,
+		); err != nil {
+			log.Error().Err(err).Msg("Error fetching balance.")
+			return err
+		}
+		b.PrimaryAccountBalance = ftBalance.Balance
+		b.SecondaryAccountBalance = 0
+		b.StakingBalance = 0
+	}
+
+	return nil
+}
+
 func (s *TokenWeightedDefault) TallyVotes(
 	votes []*models.VoteWithBalance,
 	r *models.ProposalResults,
-	proposal *models.Proposal,
+	p *models.Proposal,
 ) (models.ProposalResults, error) {
 
 	for _, vote := range votes {
-
 		if vote.PrimaryAccountBalance != nil {
 			var allowedBalance float64
 
-			if proposal.Max_weight != nil {
-				allowedBalance = proposal.EnforceMaxWeight(float64(*vote.PrimaryAccountBalance))
+			if p.Max_weight != nil {
+				allowedBalance = p.EnforceMaxWeight(float64(*vote.PrimaryAccountBalance))
 			} else {
 				allowedBalance = float64(*vote.PrimaryAccountBalance)
 			}
 
-			r.Results[vote.Choice] += int(allowedBalance * math.Pow(10, -8))
+			r.Results[vote.Choice] += int(allowedBalance)
 			r.Results_float[vote.Choice] += allowedBalance * math.Pow(10, -8)
 		}
 	}

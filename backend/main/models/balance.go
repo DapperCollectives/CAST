@@ -33,17 +33,12 @@ func (b *Balance) GetBalanceByAddressAndBlockHeight(db *s.Database) error {
 }
 
 func (b *Balance) CreateBalance(db *s.Database) error {
-	// Skip for test/dev.
-	if *db.Env == "TEST" || *db.Env == "DEV" {
-		return nil
-	}
-
-	// Build SQL query to insert balances to DB
 	sql := `
 	INSERT INTO balances (addr, primary_account_balance, secondary_address,
 	    secondary_account_balance, staking_balance, script_result, stakes, block_height, id)
 	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 	`
+
 	_, err := db.Conn.Exec(db.Context, sql,
 		b.Addr, b.PrimaryAccountBalance, b.SecondaryAddress, b.SecondaryAccountBalance,
 		b.StakingBalance, b.ScriptResult, b.Stakes, b.BlockHeight, uuid.New(),
