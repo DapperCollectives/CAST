@@ -1,6 +1,6 @@
 import { formatDistance } from 'date-fns';
-import { customAlphabet } from 'nanoid';
 import { stateToHTML } from 'draft-js-export-html';
+import { customAlphabet } from 'nanoid';
 
 const nanoid = customAlphabet('1234567890abcdef', 10);
 

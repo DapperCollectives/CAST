@@ -1,6 +1,6 @@
 import React from 'react';
-import classnames from 'classnames';
 import { Plus } from 'components/Svg';
+import classnames from 'classnames';
 
 export default function AddButton({
   onAdd = () => {},
