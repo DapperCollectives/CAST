@@ -24,14 +24,14 @@ const ProfileSchema = yup.object().shape({
     .required('Please provide a Communiy Category'),
   logo: yup
     .object({
-      file: yup.string().optional(),
+      file: yup.mixed().optional(),
       imageUrl: yup.string().optional(),
     })
     .nullable(),
   banner: yup
     .object()
     .shape({
-      file: yup.string().optional(),
+      file: yup.mixed().optional(),
       imageUrl: yup.string().optional(),
     })
     .nullable(),

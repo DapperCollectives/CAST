@@ -27,8 +27,8 @@ export default function CommunityEditorProfile({
         communityName: name,
         communutyDescription: body,
         communityCategory: category,
-        logo: { imageUrl: logo },
-        banner: { imageUrl: banner },
+        logo: logo ? { imageUrl: logo } : undefined,
+        banner: banner ? { imageUrl: banner } : undefined,
         communityTerms: terms,
       },
       resolver: yupResolver(ProfileSchema),
@@ -37,13 +37,21 @@ export default function CommunityEditorProfile({
   const logoField = watch('logo');
   const bannerField = watch('banner');
 
-  const { errors, isSubmitting, isSubmitSuccessful, isDirty } = formState;
+  const { errors, isSubmitting, isSubmitSuccessful, isDirty, isValid } =
+    formState;
+
+  console.log('logoField', logoField);
+  console.log('bannerField', bannerField);
+  console.log('isDirty', isDirty);
+  console.log('isValid', isValid);
+  console.log('errors', errors);
 
   useEffect(() => {
-    reset({}, { keepValues: true });
+    reset({}, { keepDirty: false });
   }, [isSubmitSuccessful, reset]);
 
   const onSubmit = async (data) => {
+    console.log(data);
     const {
       communityName,
       communityDescription,
@@ -53,13 +61,13 @@ export default function CommunityEditorProfile({
 
     let newImageUrl;
     let newBannerImageUrl;
-    if (data?.logoImage?.file) {
+    if (data?.logo?.file) {
       setIsUpdatingImage(true);
-      newImageUrl = await uploadFile(data?.logoImage?.fil);
+      newImageUrl = await uploadFile(data?.logo?.file);
     }
-    if (data?.bannerImage?.file) {
+    if (data?.banner?.file) {
       setIsUpdatingBanner(true);
-      newBannerImageUrl = await uploadFile(data?.bannerImage?.fil);
+      newBannerImageUrl = await uploadFile(data?.banner?.file);
     }
     const updates = {
       ...(communityName !== name ? { name: communityName.trim() } : undefined),

@@ -56,15 +56,18 @@ export default function ProfileForm({
             getReducedImg(e.target, maxWidth, filename).then((result) => {
               setValue(
                 dataKey,
-                { imageUrl: imageAsURL, file: imageFile },
-                { shouldValidate: true }
+                {
+                  imageUrl: imageAsURL,
+                  file: result.imageFile,
+                },
+                { shouldValidate: true, shouldDirty: true }
               );
             });
           } else {
             setValue(
               dataKey,
               { imageUrl: imageAsURL, file: imageFile },
-              { shouldValidate: true }
+              { shouldValidate: true, shouldDirty: true }
             );
           }
         };
