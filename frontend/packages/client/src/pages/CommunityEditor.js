@@ -4,7 +4,6 @@ import { useWebContext } from 'contexts/Web3';
 import {
   CommunityEditorDetails,
   CommunityEditorLinks,
-  // CommunityEditorProfile,
   CommunityPropsAndVoting,
   Dropdown,
   Loader,
