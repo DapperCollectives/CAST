@@ -597,7 +597,7 @@ func (a *App) validateVoucher(w http.ResponseWriter, r *http.Request) {
 			Signature: payloadSigs[0].Sig,
 		},
 	}
-	err := a.FlowAdapter.UserSignatureValidate(authorizer, transactionPayload, &compositeSigs, "")
+	err := a.FlowAdapter.UserSignatureValidate(authorizer, rlpEncode(toEncode), &compositeSigs, "")
 	log.Info().Msgf("user validate err?: %s", err)
 	if err != nil {
 		log.Error().Err(err).Msg("error validating signature")
