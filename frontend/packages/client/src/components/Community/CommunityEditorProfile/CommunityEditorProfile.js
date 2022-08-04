@@ -5,6 +5,16 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { ProfileSchema, initialValues } from './FormConfig';
 import ProfileForm from './ProfileForm';
 
+// map to match server fields for updating
+const ServerFieldsMap = {
+  communityName: 'name',
+  communityDescription: 'body',
+  communityCategory: 'category',
+  communityTerms: 'termsAndConditionsUrl',
+  banner: 'bannerImgUrl',
+  logo: 'logo',
+};
+
 export default function CommunityEditorProfile({
   name,
   body = '',
@@ -25,7 +35,7 @@ export default function CommunityEditorProfile({
       defaultValues: {
         ...initialValues,
         communityName: name,
-        communutyDescription: body,
+        communityDescription: body,
         communityCategory: category,
         logo: logo ? { imageUrl: logo } : undefined,
         banner: banner ? { imageUrl: banner } : undefined,
@@ -37,60 +47,55 @@ export default function CommunityEditorProfile({
   const logoField = watch('logo');
   const bannerField = watch('banner');
 
-  const { errors, isSubmitting, isSubmitSuccessful, isDirty, isValid } =
+  const { errors, isSubmitting, isSubmitSuccessful, isDirty, dirtyFields } =
     formState;
 
-  console.log('logoField', logoField);
-  console.log('bannerField', bannerField);
-  console.log('isDirty', isDirty);
-  console.log('isValid', isValid);
-  console.log('errors', errors);
-
+  // reset form after update with new props passed updated
   useEffect(() => {
-    reset({}, { keepDirty: false });
-  }, [isSubmitSuccessful, reset]);
+    if (isSubmitSuccessful) {
+      reset({
+        ...initialValues,
+        communityName: name,
+        communityDescription: body,
+        communityCategory: category,
+        logo: logo ? { imageUrl: logo } : undefined,
+        banner: banner ? { imageUrl: banner } : undefined,
+        communityTerms: terms,
+      });
+    }
+  }, [isSubmitSuccessful, name, body, category, logo, banner, terms, reset]);
 
   const onSubmit = async (data) => {
-    console.log(data);
-    const {
-      communityName,
-      communityDescription,
-      communityCategory,
-      communityTerms,
-    } = data;
+    const fieldsToUpdate = Object.keys(dirtyFields);
 
-    let newImageUrl;
-    let newBannerImageUrl;
-    if (data?.logo?.file) {
+    // get all fields that were updated
+    const updates = Object.assign(
+      {},
+      ...fieldsToUpdate.map((field) => ({
+        [ServerFieldsMap[field]]: data[field],
+      }))
+    );
+
+    // logo and banner images need to be uploaded and
+    // url needs to be sent to backend to update
+    if (updates?.logo?.file) {
       setIsUpdatingImage(true);
-      newImageUrl = await uploadFile(data?.logo?.file);
+      const uploadImg = await uploadFile(data?.logo?.file);
+      updates.logo = uploadImg?.fileUrl ?? undefined;
     }
-    if (data?.banner?.file) {
+    if (updates?.bannerImgUrl?.file) {
       setIsUpdatingBanner(true);
-      newBannerImageUrl = await uploadFile(data?.banner?.file);
+      const uploadBanner = await uploadFile(data?.banner?.file);
+      updates.bannerImgUrl = uploadBanner?.fileUrl ?? undefined;
     }
-    const updates = {
-      ...(communityName !== name ? { name: communityName.trim() } : undefined),
-      ...(communityDescription !== body
-        ? { body: communityDescription.trim() }
-        : undefined),
-      ...(newImageUrl?.fileUrl ? { logo: newImageUrl.fileUrl } : undefined),
-      ...(newBannerImageUrl?.fileUrl
-        ? { bannerImgUrl: newBannerImageUrl.fileUrl }
-        : undefined),
-      ...(communityCategory !== category
-        ? { category: communityCategory }
-        : undefined),
-      ...(communityTerms !== terms
-        ? { termsAndConditionsUrl: communityTerms }
-        : undefined),
-    };
+
     // updated fields
     if (Object.keys(updates).length > 0) {
       await updateCommunity(updates);
     }
-    setIsUpdatingImage(false);
-    setIsUpdatingBanner(false);
+    // call if value as true
+    !isUpdatingImage && setIsUpdatingImage(false);
+    !isUpdatingBanner && setIsUpdatingBanner(false);
   };
 
   return (
