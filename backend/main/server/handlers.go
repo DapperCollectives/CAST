@@ -86,36 +86,20 @@ func (a *App) getVoteForAddress(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	voteWithBalance := &models.VoteWithBalance{
-		Vote: models.Vote{
-			Addr:        addr,
-			Proposal_id: proposal.ID,
-		}}
-
-	if err := voteWithBalance.GetVote(a.DB); err != nil {
-		switch err.Error() {
-		case pgx.ErrNoRows.Error():
-			respondWithError(w, http.StatusNotFound, "Vote not found.")
-		default:
-			respondWithError(w, http.StatusInternalServerError, err.Error())
-		}
+	vote, err := a.fetchVote(addr, proposal.ID)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid Vote ID.")
 		return
 	}
 
-	s := strategyMap[*proposal.Strategy]
-	if s == nil {
-		respondWithError(w, http.StatusInternalServerError, "Proposal strategy not found.")
-		return
-	}
-
-	weight, err := s.GetVoteWeightForBalance(voteWithBalance, &proposal)
+	weight, err := a.useStrategyGetVoteWeight(proposal, vote)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	voteWithBalance.Weight = &weight
-	respondWithJSON(w, http.StatusOK, voteWithBalance)
+	vote.Weight = &weight
+	respondWithJSON(w, http.StatusOK, vote)
 }
 
 func (a *App) getVotesForAddress(w http.ResponseWriter, r *http.Request) {
@@ -1604,6 +1588,22 @@ func (a *App) useStrategyGetVotes(
 	return votesWithWeights, nil
 }
 
+func (a *App) useStrategyGetVoteWeight(
+	p models.Proposal,
+	v *models.VoteWithBalance,
+) (float64, error) {
+	s := strategyMap[*p.Strategy]
+	if s == nil {
+		return 0, errors.New("Strategy not found.")
+	}
+
+	weight, err := s.GetVoteWeightForBalance(v, &p)
+	if err != nil {
+		return 0, err
+	}
+	return weight, nil
+}
+
 func (a *App) getPaginatedVotes(
 	r *http.Request,
 	p models.Proposal,
@@ -1640,4 +1640,23 @@ func (a *App) getPaginatedVotes(
 	}
 
 	return votes, ordered, nil
+}
+
+func (a *App) fetchVote(addr string, id int) (*models.VoteWithBalance, error) {
+	voteWithBalance := &models.VoteWithBalance{
+		Vote: models.Vote{
+			Addr:        addr,
+			Proposal_id: id,
+		}}
+
+	if err := voteWithBalance.GetVote(a.DB); err != nil {
+		switch err.Error() {
+		case pgx.ErrNoRows.Error():
+			msg := fmt.Sprintf("Vote with ID %d not found.", id)
+			return nil, errors.New(msg)
+		default:
+			return nil, err
+		}
+	}
+	return voteWithBalance, nil
 }
