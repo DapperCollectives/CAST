@@ -44,7 +44,7 @@ func (a *App) upload(w http.ResponseWriter, r *http.Request) {
 // Votes
 func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	proposal, err := a.fetchProposal(vars)
+	proposal, err := a.fetchProposal(vars, "proposalId")
 
 	votes, err := models.GetAllVotesForProposal(a.DB, proposal.ID, *proposal.Strategy)
 	if err != nil {
@@ -63,7 +63,7 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	proposal, err := a.fetchProposal(vars)
+	proposal, err := a.fetchProposal(vars, "proposalId")
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID.")
 		return
@@ -80,7 +80,7 @@ func (a *App) getVoteForAddress(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	addr := vars["addr"]
 
-	proposal, err := a.fetchProposal(vars)
+	proposal, err := a.fetchProposal(vars, "proposalId")
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID.")
 		return
@@ -108,57 +108,26 @@ func (a *App) getVotesForAddress(w http.ResponseWriter, r *http.Request) {
 	}
 
 	start, count := getPageParams(r.FormValue("start"), r.FormValue("count"), 25)
-
-	votes, totalRecords, err := models.GetVotesForAddress(a.DB, start, count, addr, &proposalIds)
-	if err != nil {
-		log.Error().Err(err).Msg("Error getting votes for address.")
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-	}
-
-	var votesWithBalances []*models.VoteWithBalance
-
-	for _, vote := range votes {
-
-		proposal := models.Proposal{ID: vote.Proposal_id}
-		if err := proposal.GetProposalById(a.DB); err != nil {
-			switch err.Error() {
-			case pgx.ErrNoRows.Error():
-				respondWithError(w, http.StatusNotFound, "Proposal not found.")
-			default:
-				respondWithError(w, http.StatusInternalServerError, err.Error())
-			}
-			return
-		}
-
-		s := strategyMap[*proposal.Strategy]
-		if s == nil {
-			respondWithError(w, http.StatusInternalServerError, "Strategy not found.")
-			return
-		}
-
-		weight, err := s.GetVoteWeightForBalance(vote, &proposal)
-		if err != nil {
-			respondWithError(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-
-		vote.Weight = &weight
-		votesWithBalances = append(votesWithBalances, vote)
-	}
-
 	orderParams := shared.OrderedPageParams{
-		Start:        start,
-		Count:        count,
-		TotalRecords: totalRecords,
+		Start: start,
+		Count: count,
+		Order: "desc",
 	}
 
-	response := shared.GetPaginatedResponseWithPayload(votesWithBalances, orderParams)
+	votes, orderParams, err := a.processVotes(addr, proposalIds, orderParams)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response := shared.GetPaginatedResponseWithPayload(votes, orderParams)
 	respondWithJSON(w, http.StatusOK, response)
 }
 
 func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	proposalId, err := strconv.Atoi(vars["proposalId"])
+
+	proposal, err := a.fetchProposal(vars, "proposalId")
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID.")
 		return
@@ -171,7 +140,7 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	v.Proposal_id = proposalId
+	v.Proposal_id = proposal.ID
 
 	// validate user hasn't already voted
 	existingVote := models.Vote{Proposal_id: v.Proposal_id, Addr: v.Addr}
@@ -182,9 +151,9 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get the proposal for extra validations
-	p := models.Proposal{ID: proposalId}
+	p := models.Proposal{ID: proposal.ID}
 	if err := p.GetProposalById(a.DB); err != nil {
-		log.Error().Err(err).Msgf("Error fetching proposal by id: %v.", proposalId)
+		log.Error().Err(err).Msgf("Error fetching proposal by id: %v.", proposal.ID)
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -230,7 +199,7 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 	// 	return
 	// }
 
-	v.Proposal_id = proposalId
+	v.Proposal_id = proposal.ID
 
 	s := a.initStrategy(*p.Strategy)
 	if s == nil {
@@ -323,7 +292,6 @@ func (a *App) getProposalsForCommunity(w http.ResponseWriter, r *http.Request) {
 func (a *App) getProposal(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
-
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID.")
 		return
@@ -1525,8 +1493,8 @@ func (a *App) uploadFile(r *http.Request) (interface{}, error) {
 	return resp, nil
 }
 
-func (a *App) fetchProposal(vars map[string]string) (models.Proposal, error) {
-	proposalId, err := strconv.Atoi(vars["proposalId"])
+func (a *App) fetchProposal(vars map[string]string, query string) (models.Proposal, error) {
+	proposalId, err := strconv.Atoi(vars[query])
 	if err != nil {
 		msg := fmt.Sprintf("Invalid proposalId: %s", vars["proposalId"])
 		log.Error().Err(err).Msg(msg)
@@ -1671,4 +1639,59 @@ func (a *App) fetchVote(addr string, id int) (*models.VoteWithBalance, error) {
 		}
 	}
 	return voteWithBalance, nil
+}
+
+func (a *App) processVotes(
+	addr string,
+	ids []int,
+	order shared.OrderedPageParams,
+) (
+	[]*models.VoteWithBalance,
+	shared.OrderedPageParams,
+	error,
+) {
+	votes, totalRecords, err := models.GetVotesForAddress(
+		a.DB,
+		order.Start,
+		order.Count,
+		addr,
+		&ids,
+	)
+	if err != nil {
+		log.Error().Err(err).Msg("Error getting votes for address.")
+		return nil, order, err
+	}
+
+	var votesWithBalances []*models.VoteWithBalance
+
+	for _, vote := range votes {
+
+		proposal := models.Proposal{ID: vote.Proposal_id}
+		if err := proposal.GetProposalById(a.DB); err != nil {
+			switch err.Error() {
+			case pgx.ErrNoRows.Error():
+				msg := fmt.Sprintf("Proposal with ID %d not found.", vote.Proposal_id)
+				return nil, order, errors.New(msg)
+			default:
+				return nil, order, err
+			}
+		}
+
+		s := strategyMap[*proposal.Strategy]
+		if s == nil {
+			return nil, order, errors.New("Strategy not found.")
+		}
+
+		weight, err := s.GetVoteWeightForBalance(vote, &proposal)
+		if err != nil {
+			return nil, order, err
+		}
+
+		vote.Weight = &weight
+		votesWithBalances = append(votesWithBalances, vote)
+	}
+
+	order.TotalRecords = totalRecords
+
+	return votesWithBalances, order, nil
 }
