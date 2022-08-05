@@ -38,14 +38,14 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/voting-strategies", a.getVotingStrategies).Methods("GET")
 	a.Router.HandleFunc("/community-categories", a.getCommunityCategories).Methods("GET")
 	// Users
-	a.Router.HandleFunc("/users/{addr:0x[a-zA-Z0-9]{16}}/communities", a.handleGetUserCommunities).Methods("GET")
-	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users", a.handleCreateCommunityUser).Methods("POST", "OPTIONS")
-	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users", a.handleGetCommunityUsers).Methods("GET")
-	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users/type/{userType:[a-zA-Z]+}", a.handleGetCommunityUsersByType).
+	a.Router.HandleFunc("/users/{addr:0x[a-zA-Z0-9]{16}}/communities", a.getUserCommunities).Methods("GET")
+	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users", a.createCommunityUser).Methods("POST", "OPTIONS")
+	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users", a.getCommunityUsers).Methods("GET")
+	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users/type/{userType:[a-zA-Z]+}", a.getCommunityUsersByType).
 		Methods("GET")
-	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users/{addr:0x[a-zA-Z0-9]{16}}/{userType:[a-zA-Z]+}", a.handleRemoveUserRole).
+	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users/{addr:0x[a-zA-Z0-9]{16}}/{userType:[a-zA-Z]+}", a.removeUserRole).
 		Methods("DELETE", "OPTIONS")
-	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/leaderboard", a.handleGetCommunityLeaderboard).Methods("GET")
+	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/leaderboard", a.getCommunityLeaderboard).Methods("GET")
 	// Utilities
 	a.Router.HandleFunc("/accounts/admin", a.getAdminList).Methods("GET")
 	a.Router.HandleFunc("/accounts/blocklist", a.getCommunityBlocklist).Methods("GET")

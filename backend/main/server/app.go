@@ -74,6 +74,8 @@ const (
 	maxFileSize = 5 * 1024 * 1024 // 5MB
 )
 
+var helpers Helpers
+
 //////////////////////
 // INSTANCE METHODS //
 //////////////////////
@@ -140,6 +142,8 @@ func (a *App) Initialize() {
 	a.Router.Use(mux.CORSMethodMiddleware(a.Router))
 	a.Router.Use(middleware.Logger)
 	a.Router.Use(middleware.UseCors(a.Config))
+
+	helpers.Initialize(a)
 }
 
 func (a *App) Run() {
