@@ -84,7 +84,7 @@ var helpers Helpers
 
 func (a *App) Initialize() {
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
-	log.Logger = log.Logger.Level(zerolog.DebugLevel)
+	log.Logger = log.Logger.Level(zerolog.InfoLevel)
 
 	// Env
 	env := os.Getenv("APP_ENV")

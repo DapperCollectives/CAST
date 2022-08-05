@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/DapperCollectives/CAST/backend/main/shared"
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/google/uuid"
@@ -26,6 +27,11 @@ type Vote struct {
 	Cid                  *string                 `json:"cid"`
 	Message              string                  `json:"message"`
 	TransactionId        string                  `json:"transactionId"`
+}
+
+type CreateVotePayload struct {
+	Vote    Vote           `json:"vote"`
+	Voucher shared.Voucher `json:"voucher"`
 }
 
 type VoteWithBalance struct {
