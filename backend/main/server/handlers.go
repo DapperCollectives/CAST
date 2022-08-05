@@ -133,129 +133,8 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var v models.Vote
-	if err := validatePayload(r.Body, &v); err != nil {
-		log.Error().Err(err).Msg("Invalid request payload.")
-		respondWithError(w, http.StatusBadRequest, "Invalid request payload.")
-		return
-	}
-
-	v.Proposal_id = proposal.ID
-
-	// validate user hasn't already voted
-	existingVote := models.Vote{Proposal_id: v.Proposal_id, Addr: v.Addr}
-	if err := existingVote.GetVote(a.DB); err == nil {
-		log.Error().Msgf("Address %s has already voted for proposal %d.", v.Addr, v.Proposal_id)
-		respondWithError(w, http.StatusInternalServerError, errors.New("address has already voted").Error())
-		return
-	}
-
-	// get the proposal for extra validations
-	p := models.Proposal{ID: proposal.ID}
-	if err := p.GetProposalById(a.DB); err != nil {
-		log.Error().Err(err).Msgf("Error fetching proposal by id: %v.", proposal.ID)
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	// check that proposal is live
-	if os.Getenv("APP_ENV") != "DEV" {
-		if !p.IsLive() {
-			err = errors.New("User cannot vote on inactive proposal.")
-			log.Error().Err(err)
-			respondWithError(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-	}
-
-	// validate the user is not on community's blocklist
-	if err = a.validateBlocklist(v.Addr, p.Community_id); err != nil {
-		log.Error().Err(err).Msgf(fmt.Sprintf("Address %v is on blocklist for community id %v.\n", v.Addr, p.Community_id))
-		respondWithError(w, http.StatusForbidden, err.Error())
-		return
-	}
-
-	// validate proper message format
-	//<proposalId>:<choice>:<timestamp>
-	if err := v.ValidateMessage(p); err != nil && v.TransactionId == "" {
-		log.Error().Err(err)
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-	// validate choice exists on proposal
-	if err := v.ValidateChoice(p); err != nil {
-		log.Error().Err(err)
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-	// validate user signature
-	if err := a.FlowAdapter.UserSignatureValidate(v.Addr, v.Message, v.Composite_signatures, v.TransactionId); err != nil {
-		respondWithError(w, http.StatusBadRequest, err.Error())
-		return
-	}
-	// validate user signature
-	// if err := a.FlowAdapter.UserTransactionValidate(v.Addr, v.Message, v.Composite_signatures, v.TransactionId, a.TxOptionsAddresses, p.Choices); err != nil {
-	// 	respondWithError(w, http.StatusBadRequest, err.Error())
-	// 	return
-	// }
-
-	v.Proposal_id = proposal.ID
-
-	s := a.initStrategy(*p.Strategy)
-	if s == nil {
-		respondWithError(w, http.StatusInternalServerError, "Proposal strategy not found.")
-		return
-	}
-
-	emptyBalance := &models.Balance{
-		Addr:        v.Addr,
-		Proposal_id: p.ID,
-	}
-	if p.Block_height != nil {
-		emptyBalance.BlockHeight = *p.Block_height
-	}
-
-	balance, err := s.FetchBalance(emptyBalance, &p)
-	if err != nil {
-		log.Error().Err(err).Msgf("Error fetching balance for address %v.", v.Addr)
-		respondWithError(w, http.StatusInternalServerError, "Error fetching balance.")
-		return
-	}
-
-	vb := models.VoteWithBalance{
-		Vote:                    v,
-		PrimaryAccountBalance:   &balance.PrimaryAccountBalance,
-		SecondaryAccountBalance: &balance.SecondaryAccountBalance,
-		StakingBalance:          &balance.StakingBalance,
-	}
-
-	weight, err := s.GetVoteWeightForBalance(&vb, &p)
-	if err != nil {
-		log.Error().Err(err).Msg("Error getting vote weight.")
-		respondWithError(w, http.StatusInternalServerError, "Error getting vote weight.")
-		return
-	}
-
-	if err = p.ValidateBalance(weight); err != nil {
-		log.Error().Err(err).Msg("Account may not vote on proposal: insufficient balance.")
-		respondWithError(w, http.StatusForbidden, err.Error())
-		return
-	}
-
-	v.Cid, err = a.pinJSONToIpfs(p)
-	if err != nil {
-		log.Error().Err(err).Msg("Error pinning JSON to IPFS.")
-		respondWithError(w, http.StatusInternalServerError, "IPFS error: "+err.Error())
-		return
-	}
-
-	if err := v.CreateVote(a.DB); err != nil {
-		log.Error().Err(err).Msg("Couldnt create vote.")
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	respondWithJSON(w, http.StatusCreated, v)
+	vote, err := a.createVote(r, proposal)
+	respondWithJSON(w, http.StatusCreated, vote)
 }
 
 // Proposals
@@ -1694,4 +1573,120 @@ func (a *App) processVotes(
 	order.TotalRecords = totalRecords
 
 	return votesWithBalances, order, nil
+}
+
+func (a *App) createVote(r *http.Request, p models.Proposal) (*models.VoteWithBalance, error) {
+	var v models.Vote
+	if err := validatePayload(r.Body, &v); err != nil {
+		log.Error().Err(err).Msg("Invalid request payload.")
+		return nil, err
+	}
+
+	v.Proposal_id = p.ID
+
+	// validate user hasn't already voted
+	existingVote := models.Vote{Proposal_id: v.Proposal_id, Addr: v.Addr}
+	if err := existingVote.GetVote(a.DB); err == nil {
+		log.Error().Msgf("Address %s has already voted for proposal %d.", v.Addr, v.Proposal_id)
+		return nil, errors.New("Address has already voted for this proposal.")
+	}
+
+	// check that proposal is live
+	if os.Getenv("APP_ENV") != "DEV" {
+		if !p.IsLive() {
+			err := errors.New("User cannot vote on inactive proposal.")
+			return nil, err
+		}
+	}
+
+	if err := a.validateVote(p, v); err != nil {
+		return nil, err
+	}
+
+	v.Proposal_id = p.ID
+
+	s := a.initStrategy(*p.Strategy)
+	if s == nil {
+		return nil, errors.New("Proposal strategy not found.")
+	}
+
+	emptyBalance := &models.Balance{
+		Addr:        v.Addr,
+		Proposal_id: p.ID,
+	}
+	if p.Block_height != nil {
+		emptyBalance.BlockHeight = *p.Block_height
+	}
+
+	balance, err := s.FetchBalance(emptyBalance, &p)
+	if err != nil {
+		log.Error().Err(err).Msgf("Error fetching balance for address %v.", v.Addr)
+		return nil, errors.New("Error fetching balance for address.")
+	}
+
+	vb := models.VoteWithBalance{
+		Vote:                    v,
+		PrimaryAccountBalance:   &balance.PrimaryAccountBalance,
+		SecondaryAccountBalance: &balance.SecondaryAccountBalance,
+		StakingBalance:          &balance.StakingBalance,
+	}
+
+	weight, err := s.GetVoteWeightForBalance(&vb, &p)
+	if err != nil {
+		msg := fmt.Sprintf("Error getting vote weight for address %s.", v.Addr)
+		log.Error().Err(err).Msg(msg)
+		return nil, errors.New(msg)
+	}
+
+	if err = p.ValidateBalance(weight); err != nil {
+		msg := fmt.Sprintf("Account balance is too low to vote on this proposal.")
+		log.Error().Err(err).Msg(msg)
+		return nil, errors.New(msg)
+	}
+
+	v.Cid, err = a.pinJSONToIpfs(p)
+	if err != nil {
+		msg := fmt.Sprintf("Error pinning proposal to IPFS.")
+		log.Error().Err(err).Msg(msg)
+		return nil, errors.New(msg)
+	}
+
+	if err := v.CreateVote(a.DB); err != nil {
+		msg := fmt.Sprintf("Error creating vote for address %s.", v.Addr)
+		log.Error().Err(err).Msg(msg)
+		return nil, errors.New(msg)
+	}
+
+	return &vb, nil
+}
+
+func (a *App) validateVote(p models.Proposal, v models.Vote) error {
+	// validate the user is not on community's blocklist
+	if err := a.validateBlocklist(v.Addr, p.Community_id); err != nil {
+		log.Error().Err(err).Msgf(fmt.Sprintf("Address %v is on blocklist for community id %v.\n", v.Addr, p.Community_id))
+		msg := fmt.Sprintf("Address %v is on blocklist for community id %v.", v.Addr, p.Community_id)
+		return errors.New(msg)
+	}
+
+	// validate proper message format
+	//<proposalId>:<choice>:<timestamp>
+	if err := v.ValidateMessage(p); err != nil && v.TransactionId == "" {
+		log.Error().Err(err)
+		return err
+	}
+	// validate choice exists on proposal
+	if err := v.ValidateChoice(p); err != nil {
+		log.Error().Err(err)
+		return err
+	}
+	// validate user signature
+	if err := a.FlowAdapter.UserSignatureValidate(v.Addr, v.Message, v.Composite_signatures, v.TransactionId); err != nil {
+		return err
+	}
+	// validate user signature
+	// if err := a.FlowAdapter.UserTransactionValidate(v.Addr, v.Message, v.Composite_signatures, v.TransactionId, a.TxOptionsAddresses, p.Choices); err != nil {
+	// 	respondWithError(w, http.StatusBadRequest, err.Error())
+	// 	return
+	// }
+	return nil
 }
