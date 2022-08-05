@@ -86,19 +86,12 @@ func (a *App) getVoteForAddress(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	vote, err := a.fetchVote(addr, proposal.ID)
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Vote ID.")
-		return
-	}
-
-	weight, err := a.useStrategyGetVoteWeight(proposal, vote)
+	vote, err := a.processVote(addr, proposal)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	vote.Weight = &weight
 	respondWithJSON(w, http.StatusOK, vote)
 }
 
@@ -1497,6 +1490,10 @@ func (a *App) validateUserWithRole(addr, timestamp string, compositeSignatures *
 	return nil
 }
 
+///////////////////////
+// CONTROLLER HELPERS //
+//////////////////////
+
 func (a *App) uploadFile(r *http.Request) (interface{}, error) {
 	file, handler, err := r.FormFile("file")
 	if err != nil {
@@ -1642,6 +1639,21 @@ func (a *App) getPaginatedVotes(
 	return votes, ordered, nil
 }
 
+func (a *App) processVote(addr string, p models.Proposal) (*models.VoteWithBalance, error) {
+	vote, err := a.fetchVote(addr, p.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	weight, err := a.useStrategyGetVoteWeight(p, vote)
+	if err != nil {
+		return nil, err
+	}
+
+	vote.Weight = &weight
+	return vote, err
+}
+
 func (a *App) fetchVote(addr string, id int) (*models.VoteWithBalance, error) {
 	voteWithBalance := &models.VoteWithBalance{
 		Vote: models.Vote{
@@ -1652,7 +1664,7 @@ func (a *App) fetchVote(addr string, id int) (*models.VoteWithBalance, error) {
 	if err := voteWithBalance.GetVote(a.DB); err != nil {
 		switch err.Error() {
 		case pgx.ErrNoRows.Error():
-			msg := fmt.Sprintf("Vote with ID %d not found.", id)
+			msg := fmt.Sprintf("Vote not found.")
 			return nil, errors.New(msg)
 		default:
 			return nil, err
