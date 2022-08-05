@@ -105,10 +105,6 @@ func (fa *FlowAdapter) GetCurrentBlockHeight() (int, error) {
 	return int(block.Height), nil
 }
 
-func (fa *FlowAdapter) ValidateVoucherSignature(voucher interface{}, signature string) {
-
-}
-
 func (fa *FlowAdapter) UserSignatureValidate(
 	address string,
 	message string,
