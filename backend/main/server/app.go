@@ -89,7 +89,7 @@ const (
 
 func (a *App) Initialize(user, password, dbname, dbhost, dbport, ipfsKey, ipfsSecret string) {
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
-	log.Logger = log.Logger.Level(zerolog.DebugLevel)
+	log.Logger = log.Logger.Level(zerolog.InfoLevel)
 
 	// Env
 	env := os.Getenv("APP_ENV")
@@ -571,16 +571,18 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var payload models.CreateVotePayload
 	var v models.Vote
 	decoder := json.NewDecoder(r.Body)
 
-	if err := decoder.Decode(&v); err != nil {
+	if err := decoder.Decode(&payload); err != nil {
 		log.Error().Err(err).Msg("Invalid request payload.")
 		respondWithError(w, http.StatusBadRequest, "Invalid request payload.")
 		return
 	}
-
 	defer r.Body.Close()
+
+	v = payload.Vote
 
 	v.Proposal_id = proposalId
 
@@ -603,7 +605,7 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 	// check that proposal is live
 	if os.Getenv("APP_ENV") != "DEV" {
 		if !p.IsLive() {
-			err = errors.New("User cannot vote on inactive proposal.")
+			err = errors.New("user cannot vote on inactive proposal")
 			log.Error().Err(err)
 			respondWithError(w, http.StatusInternalServerError, err.Error())
 			return
@@ -617,29 +619,42 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// validate proper message format
-	//<proposalId>:<choice>:<timestamp>
-	if err := v.ValidateMessage(p); err != nil && v.TransactionId == "" {
-		log.Error().Err(err)
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
 	// validate choice exists on proposal
 	if err := v.ValidateChoice(p); err != nil {
 		log.Error().Err(err)
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	// validate user signature
-	if err := a.FlowAdapter.UserSignatureValidate(v.Addr, v.Message, v.Composite_signatures, v.TransactionId); err != nil {
+
+	// validate tx signature
+	voucher := payload.Voucher
+	authorizer := voucher.Authorizers[0]
+	envelopeSigs := voucher.EnvelopeSigs
+
+	if authorizer != v.Addr || authorizer != envelopeSigs[0].Address {
+		err := errors.New("authorizer address must match voter address and envelope signer")
+		log.Error().Err(err)
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+	}
+
+	//
+	// TODO: validate voucher fields correspond with vote choice, timestamp, etc
+	//
+
+	// Validate Signature
+	compositeSigs := []shared.CompositeSignature{
+		{
+			Addr:      envelopeSigs[0].Address,
+			Key_id:    envelopeSigs[0].KeyId,
+			Signature: envelopeSigs[0].Sig,
+		},
+	}
+	// recreate encoded tx envelope to validate signature
+	transactionEnvelope := shared.EncodeTransactionEnvelope(payload.Voucher)
+	if err := a.FlowAdapter.UserSignatureValidate(v.Addr, transactionEnvelope, &compositeSigs, v.TransactionId); err != nil {
 		respondWithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	// validate user signature
-	// if err := a.FlowAdapter.UserTransactionValidate(v.Addr, v.Message, v.Composite_signatures, v.TransactionId, a.TxOptionsAddresses, p.Choices); err != nil {
-	// 	respondWithError(w, http.StatusBadRequest, err.Error())
-	// 	return
-	// }
 
 	v.Proposal_id = proposalId
 

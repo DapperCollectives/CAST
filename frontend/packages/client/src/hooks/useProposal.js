@@ -8,7 +8,6 @@ import * as fcl from '@onflow/fcl';
 import {
   encodeTransactionPayload,
   encodeTransactionEnvelope,
-  // rlpEncodeIndividualPayloadFields,
 } from '@onflow/sdk';
 
 export default function useProposal() {
@@ -76,8 +75,8 @@ export default function useProposal() {
     isLedger
   ) => {
     return isLedger
-      ? voteOnProposalLedger(injectedProvider, proposal, voteData)
-      : voteOnProposalBlocto(injectedProvider, proposal, voteData);
+      ? voteOnProposalTxSig(injectedProvider, proposal, voteData)
+      : voteOnProposalTxSig(injectedProvider, proposal, voteData);
   };
 
   const voteOnProposalLedger = useCallback(
@@ -171,61 +170,21 @@ export default function useProposal() {
     },
     []
   );
-
   const voteOnProposalBlocto = useCallback(
     async (injectedProvider, proposal, voteData) => {
       try {
         const timestamp = Date.now();
         const hexChoice = Buffer.from(voteData.choice).toString('hex');
         const message = `${proposal.id}:${hexChoice}:${timestamp}`;
+        const hexMessage = Buffer.from(message).toString('hex');
+        const _compositeSignatures = await injectedProvider
+          .currentUser()
+          .signUserMessage(hexMessage);
 
-        const voucher = await fcl.serialize([
-          fcl.transaction`
-            transaction() {
-              prepare(acct: AuthAccount) {
-                log(acct)
-              }
-            }
-          `,
-          fcl.limit(999),
-          fcl.proposer(fcl.authz),
-          fcl.authorizations([fcl.authz]),
-          fcl.payer(fcl.authz),
-        ]);
-        const voucherJSON = JSON.parse(voucher);
-        console.log(voucherJSON);
-
-        // const rlpEncodedFields = rlpEncodeIndividualPayloadFields(voucherJSON);
-        let rlpEncodedFields = {};
-        console.log(rlpEncodedFields);
-        const transactionPayload = encodeTransactionPayload(voucherJSON);
-        let transactionEnvelope = encodeTransactionEnvelope(voucherJSON);
-        console.log(transactionPayload);
-        console.log(transactionEnvelope);
-
-        // remove domain tag
-        // console.log('tx env w/o domain: ', transactionEnvelope);
-
-        console.log('-------- RLP ENCODED FIELDS -----------');
-        console.log(rlpEncodedFields);
-        console.log('---------------------------------------');
-
-        console.log(voucherJSON.envelopeSigs);
-        const sig = voucherJSON.envelopeSigs[0];
-        const verified = await fcl.AppUtils.verifyUserSignatures(
-          transactionEnvelope.slice(64),
-          [
-            {
-              keyId: sig.keyId,
-              addr: sig.address,
-              signature: sig.sig,
-              f_type: 'CompositeSignature',
-            },
-          ],
-          { fclCryptoContract: '0xf8d6e0586b0a20c7' }
-          // { fclCryptoContract: 'testnet' }
-        );
-        console.log('verified?', verified);
+        const compositeSignatures = getCompositeSigs(_compositeSignatures);
+        if (!compositeSignatures) {
+          return { error: 'No valid user signature found.' };
+        }
 
         const fetchOptions = {
           method: 'POST',
@@ -233,14 +192,15 @@ export default function useProposal() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            rlpEncodedFields,
-            voucher: voucherJSON,
-            transactionPayload,
-            transactionEnvelope,
+            ...voteData,
+            compositeSignatures,
+            message,
+            timestamp,
           }),
         };
+        const { id } = proposal;
         const response = await fetch(
-          `${process.env.REACT_APP_BACK_END_SERVER_API}/validate-voucher-test`,
+          `${process.env.REACT_APP_BACK_END_SERVER_API}/proposals/${id}/votes`,
           fetchOptions
         );
 
@@ -278,29 +238,6 @@ export default function useProposal() {
           fcl.payer(fcl.authz),
         ]);
         const voucherJSON = JSON.parse(voucher);
-        console.log(voucherJSON);
-
-        const transactionPayload = encodeTransactionPayload(voucherJSON);
-        let transactionEnvelope = encodeTransactionEnvelope(voucherJSON);
-        console.log(transactionPayload);
-        console.log(transactionEnvelope);
-
-        console.log(voucherJSON.envelopeSigs);
-        const sig = voucherJSON.envelopeSigs[0];
-        const verified = await fcl.AppUtils.verifyUserSignatures(
-          transactionEnvelope.slice(64),
-          [
-            {
-              keyId: sig.keyId,
-              addr: sig.address,
-              signature: sig.sig,
-              f_type: 'CompositeSignature',
-            },
-          ],
-          { fclCryptoContract: '0xf8d6e0586b0a20c7' }
-          // { fclCryptoContract: 'testnet' }
-        );
-        console.log('verified?', verified);
 
         const fetchOptions = {
           method: 'POST',
@@ -308,14 +245,17 @@ export default function useProposal() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            // rlpEncodedFields,
+            vote: {
+              ...voteData,
+              message,
+              timestamp,
+            },
             voucher: voucherJSON,
-            transactionPayload,
-            transactionEnvelope,
           }),
         };
+        const { id } = proposal;
         const response = await fetch(
-          `${process.env.REACT_APP_BACK_END_SERVER_API}/validate-voucher-test`,
+          `${process.env.REACT_APP_BACK_END_SERVER_API}/proposals/${id}/votes`,
           fetchOptions
         );
 
@@ -331,6 +271,7 @@ export default function useProposal() {
     },
     []
   );
+
   const getProposal = useCallback(
     async (proposalId) => {
       dispatch({ type: 'PROCESSING' });
