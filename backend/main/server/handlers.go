@@ -32,136 +32,55 @@ func (a *App) upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	file, handler, err := r.FormFile("file")
+	resp, err := a.uploadFile(r)
 	if err != nil {
-		log.Error().Err(err).Msg("FormFile Retrieval Error.")
-		respondWithError(w, http.StatusBadRequest, err.Error())
-		return
-	}
-	defer file.Close()
-
-	// ensure mime type is allowed
-	mime := handler.Header.Get("Content-Type")
-	if !funk.Contains(allowedFileTypes, mime) {
-		msg := fmt.Sprintf("Uploaded file type of '%s' is not allowed.", mime)
-		log.Error().Msg(msg)
-		respondWithError(w, http.StatusBadRequest, msg)
-		return
-	}
-
-	pin, err := a.IpfsClient.PinFile(file, handler.Filename)
-	if err != nil {
-		log.Error().Err(err).Msg("Error pinning file to IPFS.")
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
-	}
-
-	resp := struct {
-		Cid string `json:"cid"`
-	}{
-		Cid: pin.IpfsHash,
 	}
 
 	respondWithJSON(w, http.StatusOK, resp)
 }
 
 // Votes
-
 func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	proposalId, err := strconv.Atoi(vars["proposalId"])
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID.")
-		return
-	}
+	proposal, err := a.fetchProposal(vars)
 
-	p := models.Proposal{ID: proposalId}
-
-	if err := p.GetProposalById(a.DB); err != nil {
-		switch err.Error() {
-		case pgx.ErrNoRows.Error():
-			respondWithError(w, http.StatusNotFound, "Proposal not found.")
-		default:
-			respondWithError(w, http.StatusInternalServerError, err.Error())
-		}
-		return
-	}
-
-	votes, err := models.GetAllVotesForProposal(a.DB, proposalId, *p.Strategy)
+	votes, err := models.GetAllVotesForProposal(a.DB, proposal.ID, *proposal.Strategy)
 	if err != nil {
 		log.Error().Err(err).Msg("Error getting votes for proposal.")
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	s := a.initStrategy(*p.Strategy)
-	if s == nil {
-		respondWithError(w, http.StatusInternalServerError, "Proposal strategy not found.")
-		return
+	results, err := a.useStrategyTally(proposal, votes)
+	if *proposal.Computed_status == "closed" {
+		models.AddWinningVoteAchievement(a.DB, votes, results, proposal.Community_id)
 	}
 
-	proposalWithChoices := models.NewProposalResults(proposalId, p.Choices)
-	proposalResults, err := s.TallyVotes(votes, proposalWithChoices, &p)
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	if *p.Computed_status == "closed" {
-		models.AddWinningVoteAchievement(a.DB, votes, proposalResults, p.Community_id)
-	}
-
-	respondWithJSON(w, http.StatusOK, proposalResults)
+	respondWithJSON(w, http.StatusOK, results)
 }
 
 func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	proposalId, err := strconv.Atoi(vars["proposalId"])
-
+	proposal, err := a.fetchProposal(vars)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID.")
 		return
 	}
 
-	start, count, order := getOrderedPageParams(r.FormValue("start"), r.FormValue("count"), r.FormValue("order"), 25)
+	votes, orders, err := a.getPaginatedVotes(r, proposal)
+	votesWithWeights, err := a.useStrategyGetVotes(proposal, votes)
 
-	proposal := models.Proposal{ID: proposalId}
-	if err := proposal.GetProposalById(a.DB); err != nil {
-		switch err.Error() {
-		case pgx.ErrNoRows.Error():
-			respondWithError(w, http.StatusNotFound, "Proposal not found.")
-		default:
-			respondWithError(w, http.StatusInternalServerError, err.Error())
-		}
-		return
-	}
-
-	s := a.initStrategy(*proposal.Strategy)
-	if s == nil {
-		respondWithError(w, http.StatusInternalServerError, "Invalid Strategy.")
-		return
-	}
-
-	votes, totalRecords, err := models.GetVotesForProposal(a.DB, start, count, order, proposalId, *proposal.Strategy)
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	votesWithWeights, err := s.GetVotes(votes, &proposal)
-	if err != nil {
-		respondWithError(w, http.StatusNotFound, err.Error())
-		return
-	}
-	response := shared.GetPaginatedResponseWithPayload(votesWithWeights, start, count, totalRecords)
+	response := shared.GetPaginatedResponseWithPayload(votesWithWeights, orders)
 	respondWithJSON(w, http.StatusOK, response)
 }
 
 func (a *App) getVoteForAddress(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	proposalId, err := strconv.Atoi(vars["proposalId"])
 	addr := vars["addr"]
 
+	proposal, err := a.fetchProposal(vars)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID.")
 		return
@@ -170,24 +89,13 @@ func (a *App) getVoteForAddress(w http.ResponseWriter, r *http.Request) {
 	voteWithBalance := &models.VoteWithBalance{
 		Vote: models.Vote{
 			Addr:        addr,
-			Proposal_id: proposalId,
+			Proposal_id: proposal.ID,
 		}}
 
 	if err := voteWithBalance.GetVote(a.DB); err != nil {
 		switch err.Error() {
 		case pgx.ErrNoRows.Error():
 			respondWithError(w, http.StatusNotFound, "Vote not found.")
-		default:
-			respondWithError(w, http.StatusInternalServerError, err.Error())
-		}
-		return
-	}
-
-	proposal := models.Proposal{ID: proposalId}
-	if err := proposal.GetProposalById(a.DB); err != nil {
-		switch err.Error() {
-		case pgx.ErrNoRows.Error():
-			respondWithError(w, http.StatusNotFound, "Proposal not found.")
 		default:
 			respondWithError(w, http.StatusInternalServerError, err.Error())
 		}
@@ -222,7 +130,7 @@ func (a *App) getVotesForAddress(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	start, count := getPageParams(r.FormValue("start"),r.FormValue("count"), 25)
+	start, count := getPageParams(r.FormValue("start"), r.FormValue("count"), 25)
 
 	votes, totalRecords, err := models.GetVotesForAddress(a.DB, start, count, addr, &proposalIds)
 	if err != nil {
@@ -261,7 +169,13 @@ func (a *App) getVotesForAddress(w http.ResponseWriter, r *http.Request) {
 		votesWithBalances = append(votesWithBalances, vote)
 	}
 
-	response := shared.GetPaginatedResponseWithPayload(votesWithBalances, start, count, totalRecords)
+	orderParams := shared.OrderedPageParams{
+		Start:        start,
+		Count:        count,
+		TotalRecords: totalRecords,
+	}
+
+	response := shared.GetPaginatedResponseWithPayload(votesWithBalances, orderParams)
 	respondWithJSON(w, http.StatusOK, response)
 }
 
@@ -408,8 +322,14 @@ func (a *App) getProposalsForCommunity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	start, count, order := getOrderedPageParams(r.FormValue("start"),r.FormValue("count"),r.FormValue("order"), 25)
+	start, count, order := getOrderedPageParams(r.FormValue("start"), r.FormValue("count"), r.FormValue("order"), 25)
 	status := r.FormValue("status")
+
+	orderParams := shared.OrderedPageParams{
+		Start: start,
+		Count: count,
+		Order: order,
+	}
 
 	proposals, totalRecords, err := models.GetProposalsForCommunity(a.DB, start, count, communityId, status, order)
 	if err != nil {
@@ -417,7 +337,9 @@ func (a *App) getProposalsForCommunity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := shared.GetPaginatedResponseWithPayload(proposals, start, count, totalRecords)
+	orderParams.TotalRecords = totalRecords
+
+	response := shared.GetPaginatedResponseWithPayload(proposals, orderParams)
 	respondWithJSON(w, http.StatusOK, response)
 }
 
@@ -639,7 +561,13 @@ func (a *App) getCommunities(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	response := shared.GetPaginatedResponseWithPayload(communities, start, count, totalRecords)
+
+	orderParams := shared.OrderedPageParams{
+		Start:        start,
+		Count:        count,
+		TotalRecords: totalRecords,
+	}
+	response := shared.GetPaginatedResponseWithPayload(communities, orderParams)
 
 	respondWithJSON(w, http.StatusOK, response)
 }
@@ -677,7 +605,13 @@ func (a *App) getCommunitiesForHomePage(w http.ResponseWriter, r *http.Request) 
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	response := shared.GetPaginatedResponseWithPayload(communities, start, count, totalRecords)
+	orderParams := shared.OrderedPageParams{
+		Start:        start,
+		Count:        count,
+		TotalRecords: totalRecords,
+	}
+
+	response := shared.GetPaginatedResponseWithPayload(communities, orderParams)
 
 	respondWithJSON(w, http.StatusOK, response)
 }
@@ -1199,7 +1133,13 @@ func (a *App) handleGetCommunityUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := shared.GetPaginatedResponseWithPayload(users, start, count, totalRecords)
+	orderParams := shared.OrderedPageParams{
+		Start:        start,
+		Count:        count,
+		TotalRecords: totalRecords,
+	}
+
+	response := shared.GetPaginatedResponseWithPayload(users, orderParams)
 	respondWithJSON(w, http.StatusOK, response)
 
 }
@@ -1234,8 +1174,12 @@ func (a *App) handleGetCommunityUsersByType(w http.ResponseWriter, r *http.Reque
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-
-	response := shared.GetPaginatedResponseWithPayload(users, start, count, totalRecords)
+	orderParams := shared.OrderedPageParams{
+		Start:        start,
+		Count:        count,
+		TotalRecords: totalRecords,
+	}
+	response := shared.GetPaginatedResponseWithPayload(users, orderParams)
 	respondWithJSON(w, http.StatusOK, response)
 }
 
@@ -1257,7 +1201,13 @@ func (a *App) handleGetCommunityLeaderboard(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	response := shared.GetPaginatedResponseWithPayload(leaderboard.Users, start, count, totalRecords)
+	orderParams := shared.OrderedPageParams{
+		Start:        start,
+		Count:        count,
+		TotalRecords: totalRecords,
+	}
+
+	response := shared.GetPaginatedResponseWithPayload(leaderboard.Users, orderParams)
 	response.Data = leaderboard
 	respondWithJSON(w, http.StatusOK, response)
 }
@@ -1274,7 +1224,13 @@ func (a *App) handleGetUserCommunities(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := shared.GetPaginatedResponseWithPayload(communities, start, count, totalRecords)
+	orderParams := shared.OrderedPageParams{
+		Start:        start,
+		Count:        count,
+		TotalRecords: totalRecords,
+	}
+
+	response := shared.GetPaginatedResponseWithPayload(communities, orderParams)
 	respondWithJSON(w, http.StatusOK, response)
 
 }
@@ -1354,7 +1310,7 @@ func (a *App) handleRemoveUserRole(w http.ResponseWriter, r *http.Request) {
 			respondWithError(w, http.StatusInternalServerError, err.Error())
 			return
 		}
-	// Otherwise, just remove the specified user role
+		// Otherwise, just remove the specified user role
 	} else if err := u.Remove(a.DB); err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -1555,4 +1511,133 @@ func (a *App) validateUserWithRole(addr, timestamp string, compositeSignatures *
 	}
 
 	return nil
+}
+
+func (a *App) uploadFile(r *http.Request) (interface{}, error) {
+	file, handler, err := r.FormFile("file")
+	if err != nil {
+		log.Error().Err(err).Msg("FormFile Retrieval Error.")
+		return nil, err
+	}
+	defer file.Close()
+
+	// ensure mime type is allowed
+	mime := handler.Header.Get("Content-Type")
+	if !funk.Contains(allowedFileTypes, mime) {
+		msg := fmt.Sprintf("Uploaded file type of '%s' is not allowed.", mime)
+		log.Error().Msg(msg)
+		return nil, errors.New(msg)
+	}
+
+	pin, err := a.IpfsClient.PinFile(file, handler.Filename)
+	if err != nil {
+		log.Error().Err(err).Msg("Error pinning file to IPFS.")
+		return nil, err
+	}
+
+	resp := struct {
+		Cid string `json:"cid"`
+	}{
+		Cid: pin.IpfsHash,
+	}
+
+	return resp, nil
+}
+
+func (a *App) fetchProposal(vars map[string]string) (models.Proposal, error) {
+	proposalId, err := strconv.Atoi(vars["proposalId"])
+	if err != nil {
+		msg := fmt.Sprintf("Invalid proposalId: %s", vars["proposalId"])
+		log.Error().Err(err).Msg(msg)
+		return models.Proposal{}, errors.New(msg)
+	}
+
+	p := models.Proposal{ID: proposalId}
+
+	if err := p.GetProposalById(a.DB); err != nil {
+		switch err.Error() {
+		case pgx.ErrNoRows.Error():
+			msg := fmt.Sprintf("Proposal with ID %d not found.", proposalId)
+			return models.Proposal{}, errors.New(msg)
+		default:
+			return models.Proposal{}, err
+		}
+	}
+
+	return p, nil
+}
+
+func (a *App) useStrategyTally(
+	p models.Proposal,
+	v []*models.VoteWithBalance,
+) (models.ProposalResults, error) {
+
+	s := a.initStrategy(*p.Strategy)
+	if s == nil {
+		return models.ProposalResults{}, errors.New("Strategy not found.")
+	}
+
+	proposalInitialized := models.NewProposalResults(p.ID, p.Choices)
+	results, err := s.TallyVotes(v, proposalInitialized, &p)
+	if err != nil {
+		return models.ProposalResults{}, err
+	}
+
+	return results, nil
+}
+
+func (a *App) useStrategyGetVotes(
+	p models.Proposal,
+	v []*models.VoteWithBalance,
+) ([]*models.VoteWithBalance, error) {
+
+	s := a.initStrategy(*p.Strategy)
+	if s == nil {
+		return nil, errors.New("Strategy not found.")
+	}
+
+	votesWithWeights, err := s.GetVotes(v, &p)
+	if err != nil {
+		return nil, err
+	}
+
+	return votesWithWeights, nil
+}
+
+func (a *App) getPaginatedVotes(
+	r *http.Request,
+	p models.Proposal,
+) (
+	[]*models.VoteWithBalance,
+	shared.OrderedPageParams,
+	error,
+) {
+
+	start, count, order := getOrderedPageParams(
+		r.FormValue("start"),
+		r.FormValue("count"),
+		r.FormValue("order"),
+		25,
+	)
+
+	votes, totalRecords, err := models.GetVotesForProposal(
+		a.DB,
+		start,
+		count,
+		order,
+		p.ID,
+		*p.Strategy,
+	)
+	if err != nil {
+		return nil, shared.OrderedPageParams{}, err
+	}
+
+	ordered := shared.OrderedPageParams{
+		Start:        start,
+		Count:        count,
+		Order:        order,
+		TotalRecords: totalRecords,
+	}
+
+	return votes, ordered, nil
 }
