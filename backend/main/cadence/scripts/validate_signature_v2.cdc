@@ -10,7 +10,7 @@ pub fun main(
   
   let account = getAccount(address)
   let keys = account.keys
-  let messageBytes = message.utf8
+  let messageBytes = message.decodeHex()
   var i = 0
   var totalWeight = 0.0
   while i < keyIds.length {

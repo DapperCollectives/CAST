@@ -134,7 +134,7 @@ func (fa *FlowAdapter) UserSignatureValidate(
 
 	// Load script
 	// script, err := ioutil.ReadFile("./main/cadence/scripts/validate_signature_v2.cdc")
-	script, err := ioutil.ReadFile("./main/cadence/scripts/validate_signature_v3.cdc")
+	script, err := ioutil.ReadFile("./main/cadence/scripts/validate_signature_v2.cdc")
 	if err != nil {
 		log.Error().Err(err).Msgf("Error reading cadence script file.")
 		return err

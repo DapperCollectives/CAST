@@ -7,7 +7,8 @@ import * as t from '@onflow/types';
 import * as fcl from '@onflow/fcl';
 import {
   encodeTransactionPayload,
-  rlpEncodeIndividualPayloadFields,
+  encodeTransactionEnvelope,
+  // rlpEncodeIndividualPayloadFields,
 } from '@onflow/sdk';
 
 export default function useProposal() {
@@ -194,14 +195,37 @@ export default function useProposal() {
         const voucherJSON = JSON.parse(voucher);
         console.log(voucherJSON);
 
-        const rlpEncodedFields = rlpEncodeIndividualPayloadFields(voucherJSON);
+        // const rlpEncodedFields = rlpEncodeIndividualPayloadFields(voucherJSON);
+        let rlpEncodedFields = {};
         console.log(rlpEncodedFields);
         const transactionPayload = encodeTransactionPayload(voucherJSON);
+        let transactionEnvelope = encodeTransactionEnvelope(voucherJSON);
         console.log(transactionPayload);
+        console.log(transactionEnvelope);
+
+        // remove domain tag
+        // console.log('tx env w/o domain: ', transactionEnvelope);
 
         console.log('-------- RLP ENCODED FIELDS -----------');
         console.log(rlpEncodedFields);
         console.log('---------------------------------------');
+
+        console.log(voucherJSON.envelopeSigs);
+        const sig = voucherJSON.envelopeSigs[0];
+        const verified = await fcl.AppUtils.verifyUserSignatures(
+          transactionEnvelope.slice(64),
+          [
+            {
+              keyId: sig.keyId,
+              addr: sig.address,
+              signature: sig.sig,
+              f_type: 'CompositeSignature',
+            },
+          ],
+          { fclCryptoContract: '0xf8d6e0586b0a20c7' }
+          // { fclCryptoContract: 'testnet' }
+        );
+        console.log('verified?', verified);
 
         const fetchOptions = {
           method: 'POST',
@@ -212,6 +236,7 @@ export default function useProposal() {
             rlpEncodedFields,
             voucher: voucherJSON,
             transactionPayload,
+            transactionEnvelope,
           }),
         };
         const response = await fetch(
@@ -232,6 +257,80 @@ export default function useProposal() {
     []
   );
 
+  const voteOnProposalTxSig = useCallback(
+    async (injectedProvider, proposal, voteData) => {
+      try {
+        const timestamp = Date.now();
+        const hexChoice = Buffer.from(voteData.choice).toString('hex');
+        const message = `${proposal.id}:${hexChoice}:${timestamp}`;
+
+        const voucher = await fcl.serialize([
+          fcl.transaction`
+            transaction() {
+              prepare(acct: AuthAccount) {
+                log(acct)
+              }
+            }
+          `,
+          fcl.limit(999),
+          fcl.proposer(fcl.authz),
+          fcl.authorizations([fcl.authz]),
+          fcl.payer(fcl.authz),
+        ]);
+        const voucherJSON = JSON.parse(voucher);
+        console.log(voucherJSON);
+
+        const transactionPayload = encodeTransactionPayload(voucherJSON);
+        let transactionEnvelope = encodeTransactionEnvelope(voucherJSON);
+        console.log(transactionPayload);
+        console.log(transactionEnvelope);
+
+        console.log(voucherJSON.envelopeSigs);
+        const sig = voucherJSON.envelopeSigs[0];
+        const verified = await fcl.AppUtils.verifyUserSignatures(
+          transactionEnvelope.slice(64),
+          [
+            {
+              keyId: sig.keyId,
+              addr: sig.address,
+              signature: sig.sig,
+              f_type: 'CompositeSignature',
+            },
+          ],
+          { fclCryptoContract: '0xf8d6e0586b0a20c7' }
+          // { fclCryptoContract: 'testnet' }
+        );
+        console.log('verified?', verified);
+
+        const fetchOptions = {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            // rlpEncodedFields,
+            voucher: voucherJSON,
+            transactionPayload,
+            transactionEnvelope,
+          }),
+        };
+        const response = await fetch(
+          `${process.env.REACT_APP_BACK_END_SERVER_API}/validate-voucher-test`,
+          fetchOptions
+        );
+
+        if (response.json) {
+          const json = await response.json();
+          return json;
+        }
+
+        return { error: response };
+      } catch (err) {
+        return { error: String(err) };
+      }
+    },
+    []
+  );
   const getProposal = useCallback(
     async (proposalId) => {
       dispatch({ type: 'PROCESSING' });

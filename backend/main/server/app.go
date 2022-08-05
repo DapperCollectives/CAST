@@ -2,9 +2,8 @@ package server
 
 import (
 	// "errors"
-	"bytes"
+
 	"context"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"flag"
@@ -20,7 +19,6 @@ import (
 	"github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/DapperCollectives/CAST/backend/main/strategies"
 	"github.com/axiomzen/envconfig"
-	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v4"
@@ -398,73 +396,13 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, response)
 }
 
-func rightPaddedBuffer(s string, numBytes uint) string {
-	format := "%-" + fmt.Sprintf("%d", numBytes*2) + "s"
-	_rightPaddedStr := fmt.Sprintf(format, s)
-	rightPaddedStr := strings.Replace(_rightPaddedStr, " ", "0", int(numBytes*2))
-	return rightPaddedStr
-}
-func leftPaddedBuffer(s string, numBytes uint) []byte {
-	format := "%0" + fmt.Sprintf("%d", numBytes*2) + "s"
-	leftPaddedStr := fmt.Sprintf(format, s)
-	data, _ := hex.DecodeString(leftPaddedStr)
-	return data
-}
-func blockBuffer(s string) []byte {
-	return leftPaddedBuffer(s, 32)
-}
-func addressBuffer(s string) []byte {
-	return leftPaddedBuffer(s, 8)
-}
-func sansPrefix(addr string) string {
-	return strings.TrimPrefix(addr, "0x")
-}
-func rlpEncode(p interface{}) string {
-	b := new(bytes.Buffer)
-	_ = rlp.Encode(b, p)
-	return hex.EncodeToString(b.Bytes())
+type VoucherReqPayload struct {
+	Voucher             shared.Voucher `json:"voucher"`
+	TransactionPayload  string         `json:"transactionPayload"`
+	TransactionEnvelope string         `json:"transactionEnvelope"`
 }
 
 func (a *App) validateVoucher(w http.ResponseWriter, r *http.Request) {
-	// Voucher Structs
-	type ProposalKey struct {
-		Address     string `json:"address"`
-		KeyId       uint   `json:"keyId"`
-		SequenceNum uint   `json:"sequenceNum"`
-	}
-	type PayloadSig struct {
-		Address string `json:"address"`
-		KeyId   uint   `json:"keyId"`
-		Sig     string `json:"sig"`
-	}
-	type Voucher struct {
-		Cadence      string              `json:"cadence"`
-		RefBlock     string              `json:"refBlock"`
-		ComputeLimit uint                `json:"computeLimit"`
-		Arguments    []map[string]string `json:"arguments"`
-		Payer        string              `json:"payer"`
-		Authorizers  []string            `json:"authorizers"`
-		ProposalKey  ProposalKey         `json:"proposalKey"`
-		PayloadSigs  []PayloadSig        `json:"payloadSigs"`
-		// EnvelopeSigs
-	}
-	type RlpEncodedFields struct {
-		DomainTag         string `json:"domainTag"`
-		Cadence           string `json:"cadence"`
-		RefBlock          string `json:"refBlock"`
-		ComputeLimit      string `json:"computeLimit"`
-		Arguments         string `json:"arguments"`
-		Payer             string `json:"payer"`
-		Authorizers       string `json:"authorizers"`
-		ProposalKeyAddr   string `json:"proposalKeyAddr"`
-		ProposalKeyId     string `json:"proposalKeyId"`
-		ProposalKeySeqNum string `json:"proposalKeySeqNum"`
-	}
-	type VoucherReqPayload struct {
-		Voucher            Voucher          `json:"voucher"`
-		RlpEncodedFields   RlpEncodedFields `json:"rlpEncodedFields"`
-		TransactionPayload string           `json:"transactionPayload"`
-	}
 
 	// Decode Request Body
 	var payload VoucherReqPayload
@@ -476,118 +414,16 @@ func (a *App) validateVoucher(w http.ResponseWriter, r *http.Request) {
 	}
 
 	v := payload.Voucher
-	encodedFields := payload.RlpEncodedFields
-
-	//////////////////////////
-	// Build Payload Message
-	//////////////////////////
-	log.Info().Msgf("\nEncoding Voucher into Transaction Payload\n")
-
-	var toEncode []interface{}
-	var serverEncodedFields RlpEncodedFields
-
-	// CADENCE
-	toEncode = append(toEncode, v.Cadence)
-
-	// individually rlp encode
-	serverEncodedFields.Cadence = rlpEncode(v.Cadence)
-	log.Info().Msgf("FCL Encoded Cadence: %s", encodedFields.Cadence)
-	log.Info().Msgf("Ser Encoded Cadence: %s\n", serverEncodedFields.Cadence)
-
-	// ARGUMENTS
-	// Stringify tx args
-	args := make([]string, len(v.Arguments))
-	for i, arg := range v.Arguments {
-		jsonStrArg, _ := json.Marshal(arg)
-		args[i] = string(jsonStrArg)
-	}
-
-	toEncode = append(toEncode, args)
-	serverEncodedFields.Arguments = rlpEncode(args)
-
-	log.Info().Msgf("FCL Encoded Args: %s", encodedFields.Arguments)
-	log.Info().Msgf("Ser Encoded Args: %s\n", serverEncodedFields.Arguments)
-
-	// REF BLOCK
-	toEncode = append(toEncode, leftPaddedBuffer(v.RefBlock, 32))
-	serverEncodedFields.RefBlock = rlpEncode(leftPaddedBuffer(v.RefBlock, 32))
-
-	log.Info().Msgf("FCL Encoded RefBlock: %s", encodedFields.RefBlock)
-	log.Info().Msgf("Ser Encoded RefBlock: %s\n", serverEncodedFields.RefBlock)
-
-	// COMPUTE LIMIT
-	toEncode = append(toEncode, v.ComputeLimit)
-	serverEncodedFields.ComputeLimit = rlpEncode(v.ComputeLimit)
-
-	log.Info().Msgf("FCL Encoded ComputeLimit: %s", encodedFields.ComputeLimit)
-	log.Info().Msgf("Ser Encoded ComputeLimit: %s\n", serverEncodedFields.ComputeLimit)
-
-	// PROPOSAL KEY ADDRESS
-	proposalAddrData := addressBuffer(sansPrefix(v.ProposalKey.Address))
-	toEncode = append(toEncode, proposalAddrData)
-	serverEncodedFields.ProposalKeyAddr = rlpEncode(proposalAddrData)
-
-	log.Info().Msgf("FCL Encoded Proposal Addr: %s", encodedFields.ProposalKeyAddr)
-	log.Info().Msgf("Ser Encoded Proposal Addr: %s\n", serverEncodedFields.ProposalKeyAddr)
-
-	// PROPOSAL KEY ID
-	toEncode = append(toEncode, v.ProposalKey.KeyId)
-	serverEncodedFields.ProposalKeyId = rlpEncode(v.ProposalKey.KeyId)
-
-	log.Info().Msgf("FCL Encoded Proposal KeyId: %s", encodedFields.ProposalKeyId)
-	log.Info().Msgf("Ser Encoded Proposal KeyId: %s\n", serverEncodedFields.ProposalKeyId)
-
-	// PROPOSAL KEY SEQ NUM
-	toEncode = append(toEncode, v.ProposalKey.SequenceNum)
-	serverEncodedFields.ProposalKeySeqNum = rlpEncode(v.ProposalKey.SequenceNum)
-
-	log.Info().Msgf("FCL Encoded Proposal SeqNum: %s", encodedFields.ProposalKeySeqNum)
-	log.Info().Msgf("Ser Encoded Proposal SeqNum: %s\n", serverEncodedFields.ProposalKeySeqNum)
-
-	// PAYER
-	payerData := leftPaddedBuffer(sansPrefix(v.Payer), 8)
-	toEncode = append(toEncode, payerData) // 8 bytes left padded w/ 0s
-	serverEncodedFields.Payer = rlpEncode(payerData)
-
-	log.Info().Msgf("FCL Encoded Payer: %s", encodedFields.Payer)
-	log.Info().Msgf("Ser Encoded Payer: %s\n", serverEncodedFields.Payer)
-
-	// Stringify/pad authorizers
-	authorizers := make([][]byte, len(v.Authorizers))
-	for i, addr := range v.Authorizers {
-		authorizers[i] = addressBuffer(sansPrefix(addr))
-	}
-	toEncode = append(toEncode, authorizers)
-	serverEncodedFields.Authorizers = rlpEncode(authorizers)
-
-	log.Info().Msgf("FCL Encoded Authorizers: %s", encodedFields.Authorizers)
-	log.Info().Msgf("Ser Encoded Authorizers: %s\n", serverEncodedFields.Authorizers)
-
-	// DOMAIN TAG
-	domainTag := "FLOW-V0.0-transaction"
-	TX_DOMAIN_TAG := rightPaddedBuffer(hex.EncodeToString([]byte(domainTag)), 32)
-	serverEncodedFields.DomainTag = TX_DOMAIN_TAG
-
-	log.Info().Msgf("FCL Encoded Domain Tag: %s", encodedFields.DomainTag)
-	log.Info().Msgf("Ser Encoded Domain Tag: %s\n", serverEncodedFields.DomainTag)
-
-	// Encode
-	transactionPayload := fmt.Sprintf("%s%s", TX_DOMAIN_TAG, rlpEncode(toEncode))
-
-	log.Info().Msgf("FCL Tx Payload:\n%s", payload.TransactionPayload)
-	log.Info().Msgf("Ser Tx Payload:\n%s\n", transactionPayload)
-
-	log.Info().Msgf("Transaction Payloads match?????? %v", payload.TransactionPayload == transactionPayload)
+	envelopePayload := shared.EncodeTransactionEnvelope(v)
 
 	///////////////////////
 	// Validate Signature
 	///////////////////////
 
 	log.Info().Msgf("Validating transaction payload signatures ...\n")
-	log.Info().Msgf("Payload Sigs: %v", payload.Voucher.PayloadSigs)
 
-	authorizer := payload.Voucher.Authorizers[0]
-	payloadSigs := payload.Voucher.PayloadSigs
+	authorizer := v.Authorizers[0]
+	payloadSigs := v.EnvelopeSigs
 
 	// Validate Signature
 	compositeSigs := []shared.CompositeSignature{
@@ -597,10 +433,11 @@ func (a *App) validateVoucher(w http.ResponseWriter, r *http.Request) {
 			Signature: payloadSigs[0].Sig,
 		},
 	}
-	err := a.FlowAdapter.UserSignatureValidate(authorizer, rlpEncode(toEncode), &compositeSigs, "")
-	log.Info().Msgf("user validate err?: %s", err)
+	err := a.FlowAdapter.UserSignatureValidate(authorizer, envelopePayload, &compositeSigs, "")
 	if err != nil {
 		log.Error().Err(err).Msg("error validating signature")
+	} else {
+		log.Info().Msg("VALID SIGNATURE")
 	}
 }
 
