@@ -54,6 +54,12 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	results, err := a.useStrategyTally(proposal, votes)
+	if err != nil {
+		log.Error().Err(err).Msg("Error tallying votes.")
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
 	if *proposal.Computed_status == "closed" {
 		models.AddWinningVoteAchievement(a.DB, votes, results, proposal.Community_id)
 	}
@@ -69,10 +75,10 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	votes, orders, err := a.getPaginatedVotes(r, proposal)
+	votes, order, err := a.getPaginatedVotes(r, proposal)
 	votesWithWeights, err := a.useStrategyGetVotes(proposal, votes)
 
-	response := shared.GetPaginatedResponseWithPayload(votesWithWeights, orders)
+	response := shared.GetPaginatedResponseWithPayload(votesWithWeights, order)
 	respondWithJSON(w, http.StatusOK, response)
 }
 
