@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import Popover from 'components/Popover';
 import useFlowAddrValidator from '../Community/hooks/useFlowAddrValidator';
-import { CommunityUsersForm } from '../Community/CommunityEditorDetails';
+import { CommunityUsersForm } from '../Community/CommunityEditorDetails2';
 
 const isInitialList = (listAddr) => {
   return listAddr?.length === 1 && listAddr[0].addr === '';

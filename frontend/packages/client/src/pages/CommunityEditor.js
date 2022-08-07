@@ -2,12 +2,12 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import { useWebContext } from 'contexts/Web3';
 import {
-  CommunityEditorDetails,
   CommunityEditorLinks,
   CommunityPropsAndVoting,
   Dropdown,
   Loader,
 } from 'components';
+import { CommunityEditorDetails } from 'components/Community/CommunityEditorDetails';
 import { CommunityEditorProfile } from 'components/Community/CommunityEditorProfile';
 import { ArrowLeft, ArrowLeftBold } from 'components/Svg';
 import {
