@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { useForm, useWatch } from 'react-hook-form';
 import { ActionButton } from 'components';
-import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { ProfileSchema, initialValues } from './FormConfig';
 import ProfileForm from './ProfileForm';
@@ -30,7 +30,7 @@ export default function CommunityEditorProfile({
   const [isUpdatingImage, setIsUpdatingImage] = useState(false);
   const [isUpdatingBanner, setIsUpdatingBanner] = useState(false);
 
-  const { register, handleSubmit, formState, watch, control, setValue, reset } =
+  const { register, handleSubmit, formState, control, setValue, reset } =
     useForm({
       defaultValues: {
         ...initialValues,
@@ -44,8 +44,8 @@ export default function CommunityEditorProfile({
       resolver: yupResolver(ProfileSchema),
     });
 
-  const logoField = watch('logo');
-  const bannerField = watch('banner');
+  const logoField = useWatch({ control, name: 'logo' });
+  const bannerField = useWatch({ control, name: 'banner' });
 
   const { errors, isSubmitting, isSubmitSuccessful, isDirty, dirtyFields } =
     formState;
