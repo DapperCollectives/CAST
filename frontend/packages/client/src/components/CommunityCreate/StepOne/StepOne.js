@@ -18,12 +18,11 @@ export default function StepOne({ stepData, onDataChange, moveToNextStep }) {
     pick(stepData || {}, StepOneFieldsArray)
   );
 
-  const { register, handleSubmit, formState, control, setValue, watch } =
-    useForm({
-      defaultValues: fieldsObj,
-      resolver: yupResolver(StepOneSchema),
-      reValidateMode: 'onChange',
-    });
+  const { register, handleSubmit, formState, control, setValue } = useForm({
+    defaultValues: fieldsObj,
+    resolver: yupResolver(StepOneSchema),
+    reValidateMode: 'onChange',
+  });
 
   const { errors, isSubmitting, isValid, isDirty } = formState;
 
