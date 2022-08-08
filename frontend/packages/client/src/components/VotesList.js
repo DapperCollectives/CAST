@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
-import millify from 'millify';
-import { AngleDown, AngleUp } from './Svg';
 import Blockies from 'react-blockies';
 import { useProposalVotes } from 'hooks';
+import millify from 'millify';
+import { AngleDown, AngleUp } from './Svg';
 
 const Core = () => (
   <div className="subtitle small-text p-2 rounded-sm has-background-white-ter has-text-black is-family-monospace">

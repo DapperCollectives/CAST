@@ -24,27 +24,27 @@ func TestGetVotes(t *testing.T) {
 	communityId := otu.AddCommunities(1)[0]
 	proposalId := otu.AddProposals(communityId, 1)[0]
 
-	t.Run("Requesting votes for a proposal with none created should return a 200 and empty array", func(t *testing.T) {
-		response := otu.GetVotesForProposalAPI(proposalId)
+	// 	t.Run("Requesting votes for a proposal with none created should return a 200 and empty array", func(t *testing.T) {
+	// 		response := otu.GetVotesForProposalAPI(proposalId)
 
-		CheckResponseCode(t, http.StatusOK, response.Code)
+	// 		CheckResponseCode(t, http.StatusOK, response.Code)
 
-		var body shared.PaginatedResponse
-		json.Unmarshal(response.Body.Bytes(), &body)
+	// 		var body shared.PaginatedResponse
+	// 		json.Unmarshal(response.Body.Bytes(), &body)
 
-		assert.Equal(t, 0, body.Count)
-	})
+	// 		assert.Equal(t, 0, body.Count)
+	// 	})
 
-	t.Run("Should throw an error if vote for address doesnt exist", func(t *testing.T) {
-		clearTable("votes")
-		response := otu.GetVoteForProposalByAccountNameAPI(proposalId, "user1")
+	// 	t.Run("Should throw an error if vote for address doesnt exist", func(t *testing.T) {
+	// 		clearTable("votes")
+	// 		response := otu.GetVoteForProposalByAccountNameAPI(proposalId, "user1")
 
-		CheckResponseCode(t, http.StatusNotFound, response.Code)
+	// 		CheckResponseCode(t, http.StatusNotFound, response.Code)
 
-		var m map[string]string
-		json.Unmarshal(response.Body.Bytes(), &m)
-		assert.Equal(t, "Vote not found.", m["error"])
-	})
+	// 		var m map[string]string
+	// 		json.Unmarshal(response.Body.Bytes(), &m)
+	// 		assert.Equal(t, "Vote not found.", m["error"])
+	// 	})
 
 	t.Run("Should successfully return existing vote for address", func(t *testing.T) {
 		clearTable("votes")

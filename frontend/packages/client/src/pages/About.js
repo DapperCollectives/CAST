@@ -1,7 +1,7 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { Close } from '../components/Svg';
 import { Label, ModalAboutItem } from 'components';
+import { Close } from 'components/Svg';
 
 const AboutPage = ({ location }) => {
   const { state = {} } = location;
@@ -87,7 +87,7 @@ const AboutPage = ({ location }) => {
                     <a
                       target="_blank"
                       rel="noreferrer noopener"
-                      href="https://dapper-collectives.gitbook.io/cast-docs/"
+                      href="https://github.com/DapperCollectives/CAST"
                       className="pr-1 has-text-black is-underlined"
                       onClick={closeModal}
                     >

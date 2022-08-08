@@ -32,16 +32,10 @@ func (s *StakedTokenWeightedDefault) FetchBalance(
 		return nil, err
 	}
 
-	if err := s.SC.GetAddressBalanceAtBlockHeight(
-		b.Addr,
-		b.BlockHeight,
-		b,
-		&strategy.Contract,
-	); err != nil {
-		log.Error().Err(err).Msg("Error fetching balance.")
+	if err := s.FetchBalanceFromSnapshot(&strategy, b); err != nil {
+		log.Error().Err(err).Msg("Error calling snapshot client")
 		return nil, err
 	}
-
 	if err := b.CreateBalance(s.DB); err != nil {
 		log.Error().Err(err).Msg("Error creating balance in the database.")
 		return nil, err
@@ -50,24 +44,63 @@ func (s *StakedTokenWeightedDefault) FetchBalance(
 	return b, nil
 }
 
+func (s *StakedTokenWeightedDefault) FetchBalanceFromSnapshot(
+	strategy *models.Strategy,
+	b *models.Balance,
+) error {
+
+	var ftBalance = &shared.FTBalanceResponse{}
+	ftBalance.NewFTBalance()
+
+	if *strategy.Contract.Name == "FlowToken" {
+		if err := s.SC.GetAddressBalanceAtBlockHeight(
+			b.Addr,
+			b.BlockHeight,
+			ftBalance,
+			&strategy.Contract,
+		); err != nil {
+			log.Error().Err(err).Msg("Error fetching balance from snapshot client")
+			return err
+		}
+		b.PrimaryAccountBalance = ftBalance.PrimaryAccountBalance
+		b.SecondaryAccountBalance = ftBalance.SecondaryAccountBalance
+		b.StakingBalance = ftBalance.StakingBalance
+
+	} else {
+		if err := s.SC.GetAddressBalanceAtBlockHeight(
+			b.Addr,
+			b.BlockHeight,
+			ftBalance,
+			&strategy.Contract,
+		); err != nil {
+			log.Error().Err(err).Msg("Error fetching balance.")
+			return err
+		}
+		b.PrimaryAccountBalance = ftBalance.Balance
+		b.SecondaryAccountBalance = 0
+		b.StakingBalance = 0
+	}
+
+	return nil
+}
 func (s *StakedTokenWeightedDefault) TallyVotes(
 	votes []*models.VoteWithBalance,
 	r *models.ProposalResults,
-	proposal *models.Proposal,
+	p *models.Proposal,
 ) (models.ProposalResults, error) {
+	var zero uint64 = 0
 
 	for _, vote := range votes {
-
-		if vote.StakingBalance != nil {
+		if *vote.StakingBalance != zero {
 			var allowedBalance float64
 
-			if proposal.Max_weight != nil {
-				allowedBalance = proposal.EnforceMaxWeight(float64(*vote.PrimaryAccountBalance))
+			if p.Max_weight != nil {
+				allowedBalance = p.EnforceMaxWeight(float64(*vote.StakingBalance))
 			} else {
-				allowedBalance = float64(*vote.PrimaryAccountBalance)
+				allowedBalance = float64(*vote.StakingBalance)
 			}
 
-			r.Results[vote.Choice] += int(allowedBalance * math.Pow(10, -8))
+			r.Results[vote.Choice] += int(allowedBalance)
 			r.Results_float[vote.Choice] += allowedBalance * math.Pow(10, -8)
 		}
 	}
