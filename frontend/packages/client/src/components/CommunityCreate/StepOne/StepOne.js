@@ -1,15 +1,15 @@
 import React from 'react';
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
+import { useForm, useWatch } from 'react-hook-form';
+import { ActionButton } from 'components';
 import { CommunityLinksForm } from 'components/Community/CommunityEditorLinks';
 import { CommunityProfileForm } from 'components/Community/CommunityEditorProfile';
+import { yupResolver } from '@hookform/resolvers/yup';
 import pick from 'lodash/pick';
 import {
-  StepOneSchema,
   StepOneFieldsArray,
+  StepOneSchema,
   initialValues,
 } from '../FormConfig';
-import { ActionButton } from 'components';
 
 export default function StepOne({ stepData, onDataChange, moveToNextStep }) {
   const fieldsObj = Object.assign(
@@ -32,8 +32,8 @@ export default function StepOne({ stepData, onDataChange, moveToNextStep }) {
     moveToNextStep();
   };
 
-  const logoField = watch('logo');
-  const bannerField = watch('banner');
+  const logoField = useWatch({ control, name: 'logo' });
+  const bannerField = useWatch({ control, name: 'banner' });
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
