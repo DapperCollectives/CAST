@@ -1,8 +1,8 @@
-import * as yup from 'yup';
 import {
   COMMUNITY_DESCRIPTION_MAX_LENGTH,
   COMMUNITY_NAME_MAX_LENGTH,
 } from 'const';
+import * as yup from 'yup';
 
 const ProfileSchema = yup.object().shape({
   communityName: yup

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Controller } from 'react-hook-form';
-import classnames from 'classnames';
-import { CaretDown } from 'components/Svg';
 import FadeIn from 'components/FadeIn';
+import { CaretDown } from 'components/Svg';
+import classnames from 'classnames';
 
 const Dropdown = ({
   defaultValue,

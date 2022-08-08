@@ -1,7 +1,7 @@
 import React from 'react';
-import TextArea from 'components/common/TextArea';
 import Dropdown from 'components/common/Dropdown';
 import Input from 'components/common/Input';
+import TextArea from 'components/common/TextArea';
 import { useCommunityCategory } from 'hooks';
 
 export default function FormFields({

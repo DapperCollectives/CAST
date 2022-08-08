@@ -1,12 +1,12 @@
 import {
   LinksSchema,
-  linksInitialValues,
   linksFieldsArray,
+  linksInitialValues,
 } from 'components/Community/CommunityEditorLinks';
 import {
   ProfileSchema,
-  profileInitialValues,
   profileFieldsArray,
+  profileInitialValues,
 } from 'components/Community/CommunityEditorProfile';
 
 const StepOneSchema = LinksSchema.concat(ProfileSchema);

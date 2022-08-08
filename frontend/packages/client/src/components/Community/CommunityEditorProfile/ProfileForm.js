@@ -1,12 +1,12 @@
 import React, { useCallback } from 'react';
-import { WrapperResponsive, Form } from 'components';
-import FormFields from './FormFields';
 import { useDropzone } from 'react-dropzone';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
+import { Form, WrapperResponsive } from 'components';
 import { Upload } from 'components/Svg';
 import { MAX_AVATAR_FILE_SIZE, MAX_FILE_SIZE } from 'const';
 import { getReducedImg } from 'utils';
 import classnames from 'classnames';
+import FormFields from './FormFields';
 
 export default function ProfileForm({
   submitComponent,
