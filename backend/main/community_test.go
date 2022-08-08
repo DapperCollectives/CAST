@@ -150,7 +150,7 @@ func TestGetCommunitiesForHomepageAPI(t *testing.T) {
 	//Parse the response
 	var p test_utils.PaginatedResponseWithCommunity
 	json.Unmarshal(response.Body.Bytes(), &p)
-	
+
 	assert.Equal(t, 1, len(p.Data))
 }
 

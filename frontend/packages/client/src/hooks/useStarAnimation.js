@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-
 import { useWindowDimensions } from 'hooks';
 
 export default function useStarAnimation({ stars }) {

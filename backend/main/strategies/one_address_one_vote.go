@@ -38,14 +38,15 @@ func (s *OneAddressOneVote) FetchBalance(
 
 func (s *OneAddressOneVote) TallyVotes(
 	votes []*models.VoteWithBalance,
-	p *models.ProposalResults,
+	r *models.ProposalResults,
+	proposal *models.Proposal,
 ) (models.ProposalResults, error) {
 
 	for _, vote := range votes {
-		p.Results[vote.Choice]++
+		r.Results[vote.Choice]++
 	}
 
-	return *p, nil
+	return *r, nil
 }
 
 func (s *OneAddressOneVote) GetVoteWeightForBalance(

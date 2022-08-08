@@ -1,7 +1,7 @@
 import React from 'react';
-import WrapperResponsive from './WrapperResponsive';
 import Miquela from '../assets/miquela.png';
 import PeopleToast from '../assets/people-toast.png';
+import WrapperResponsive from './WrapperResponsive';
 
 export default function CommunityPulse() {
   return (

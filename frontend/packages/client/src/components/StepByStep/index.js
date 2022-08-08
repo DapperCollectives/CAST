@@ -1,7 +1,7 @@
-import React, { useState, useCallback } from 'react';
-import { ArrowLeft, CheckMark } from '../Svg';
+import React, { useCallback, useState } from 'react';
+import { useBeforeUnload } from 'hooks';
 import Loader from '../Loader';
-import { useBeforeUnload } from '../../hooks';
+import { ArrowLeft, CheckMark } from '../Svg';
 
 function StepByStep({
   finalLabel,
@@ -83,7 +83,7 @@ function StepByStep({
       return (
         <div className={`is-flex ${stepClasses.join(' ')}`} key={stepIdx}>
           <div
-            className="rounded-full has-text-black has-background-orange is-flex 
+            className="rounded-full has-text-black has-background-orange is-flex
               is-align-items-center is-justify-content-center"
             style={{
               width: 30,

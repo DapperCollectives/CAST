@@ -1,6 +1,6 @@
 import React from 'react';
-import { Twitter, Discord, Website, Instagram, Github } from './Svg';
 import { Title } from '.';
+import { Discord, Github, Instagram, Twitter, Website } from './Svg';
 
 export default function CommunityLinks({
   instagramUrl,
