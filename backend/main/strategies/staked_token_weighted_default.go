@@ -86,21 +86,21 @@ func (s *StakedTokenWeightedDefault) FetchBalanceFromSnapshot(
 func (s *StakedTokenWeightedDefault) TallyVotes(
 	votes []*models.VoteWithBalance,
 	r *models.ProposalResults,
-	proposal *models.Proposal,
+	p *models.Proposal,
 ) (models.ProposalResults, error) {
+	var zero uint64 = 0
 
 	for _, vote := range votes {
-
-		if vote.StakingBalance != nil {
+		if *vote.StakingBalance != zero {
 			var allowedBalance float64
 
-			if proposal.Max_weight != nil {
-				allowedBalance = proposal.EnforceMaxWeight(float64(*vote.PrimaryAccountBalance))
+			if p.Max_weight != nil {
+				allowedBalance = p.EnforceMaxWeight(float64(*vote.StakingBalance))
 			} else {
-				allowedBalance = float64(*vote.PrimaryAccountBalance)
+				allowedBalance = float64(*vote.StakingBalance)
 			}
 
-			r.Results[vote.Choice] += int(allowedBalance * math.Pow(10, -8))
+			r.Results[vote.Choice] += int(allowedBalance)
 			r.Results_float[vote.Choice] += allowedBalance * math.Pow(10, -8)
 		}
 	}
