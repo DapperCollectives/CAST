@@ -43,15 +43,7 @@ func TestMain(m *testing.M) {
 	os.Unsetenv("FVT_FEATURES")
 	os.Setenv("FLOW_ENV", "emulator")
 
-	A.Initialize(
-		os.Getenv("DB_USERNAME"),
-		os.Getenv("DB_PASSWORD"),
-		os.Getenv("TEST_DB_NAME"),
-		os.Getenv("DB_HOST"),
-		os.Getenv("DB_PORT"),
-		os.Getenv("IPFS_KEY"),
-		os.Getenv("IPFS_SECRET"),
-	)
+	A.Initialize()
 
 	adapter := shared.NewFlowClient(os.Getenv("FLOW_ENV"))
 
