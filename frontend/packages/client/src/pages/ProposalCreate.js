@@ -1,6 +1,6 @@
 /* global plausible */
 import React, { useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useModalContext } from 'contexts/NotificationModal';
 import { useWebContext } from 'contexts/Web3';
@@ -10,7 +10,7 @@ import {
   PropCreateStepThree,
   PropCreateStepTwo,
 } from 'components/ProposalCreate';
-import { useProposal, useQueryParams } from 'hooks';
+import { useProposal } from 'hooks';
 import { customDraftToHTML, parseDateToServer } from 'utils';
 
 export default function ProposalCreatePage() {
@@ -26,7 +26,7 @@ export default function ProposalCreatePage() {
 
   const { notifyError } = useErrorHandlerContext();
 
-  const { communityId } = useQueryParams({ communityId: 'communityId' });
+  const { communityId } = useParams();
 
   useEffect(() => {
     if (data?.id) {
