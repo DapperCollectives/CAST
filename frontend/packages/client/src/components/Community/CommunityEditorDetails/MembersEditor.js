@@ -1,13 +1,13 @@
 import React, { useEffect } from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useFieldArray, useForm } from 'react-hook-form';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useWebContext } from 'contexts/Web3';
 import { ActionButton } from 'components';
 import { useCommunityUsers } from 'hooks';
+import { getCompositeSigs } from 'utils';
+import { yupResolver } from '@hookform/resolvers/yup';
 import AddressForm from './AddressForm';
 import { AddressSchema } from './FormConfig';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { getCompositeSigs } from 'utils';
 
 export default function MembersEditor({
   title = 'Admins',

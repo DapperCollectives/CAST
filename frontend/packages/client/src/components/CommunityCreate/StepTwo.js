@@ -1,13 +1,13 @@
 import React, { useEffect } from 'react';
-import Popover from 'components/Popover';
+import { useFieldArray, useForm } from 'react-hook-form';
 import { useWebContext } from 'contexts/Web3';
-import { useForm, useFieldArray } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
+import { ActionButton } from 'components';
 import {
   AddressForm,
   AddressSchema,
 } from 'components/Community/CommunityEditorDetails';
-import { ActionButton } from 'components';
+import Popover from 'components/Popover';
+import { yupResolver } from '@hookform/resolvers/yup';
 
 const popoverParagraph =
   'In addition, community creator address will be set as admin and member by default.';
