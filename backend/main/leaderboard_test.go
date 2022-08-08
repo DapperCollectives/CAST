@@ -1,3 +1,5 @@
+package main
+
 // TODO: These tests appear to have broken, will fix/investigate in Leaderboard Bug Fix tickets (JB)
 
 // func TestGetLeaderboardCurrentUser(t *testing.T) {
