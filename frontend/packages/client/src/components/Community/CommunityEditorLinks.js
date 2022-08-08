@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Website, Instagram, Twitter, Discord, Github } from 'components/Svg';
-import { WrapperResponsive, Loader } from 'components';
+import { Loader, WrapperResponsive } from 'components';
+import { Discord, Github, Instagram, Twitter, Website } from 'components/Svg';
 import useLinkValidator from './hooks/useLinkValidator';
 
 const FormFieldsConfig = [

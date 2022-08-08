@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-
 import { useWindowDimensions } from 'hooks';
 
 export default function useStarAnimation({ stars }) {
@@ -17,6 +16,7 @@ export default function useStarAnimation({ stars }) {
   const { current: parent } = parentRef;
 
   useEffect(() => {
+    const isMobile = width < 768;
     if (parent) {
       const maxWidth = parent.clientWidth;
       const maxHeight = parent.clientHeight;
@@ -25,8 +25,9 @@ export default function useStarAnimation({ stars }) {
         stars.map((position) => ({
           width: position.width,
           height: position.height,
-          top: maxHeight * position.topPer,
-          left: maxWidth * position.leftPer,
+          // if mobile use a smaller area so they fit
+          top: parseInt(maxHeight * position.topPer * (isMobile ? 0.9 : 1)),
+          left: parseInt(maxWidth * position.leftPer * (isMobile ? 0.9 : 1)),
         }))
       );
     }

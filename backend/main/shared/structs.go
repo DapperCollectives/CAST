@@ -2,7 +2,9 @@ package shared
 
 import (
 	"context"
+	"os"
 	"reflect"
+	"time"
 
 	"github.com/jackc/pgx/v4/pgxpool"
 )
@@ -63,6 +65,31 @@ type MintParams struct {
 	Cuts                 []float64
 	RoyaltyDescriptions  []string
 	RoyaltyBeneficiaries []string
+}
+
+type FTBalanceResponse struct {
+	ID                      string    `json:"id,omitempty"`
+	FungibleTokenID         string    `json:"fungibleTokenId"`
+	Addr                    string    `json:"addr"`
+	PrimaryAccountBalance   uint64    `json:"primaryAccountBalance"`
+	SecondaryAddress        string    `json:"secondaryAddress"`
+	SecondaryAccountBalance uint64    `json:"secondaryAccountBalance"`
+	Balance                 uint64    `json:"balance"`
+	StakingBalance          uint64    `json:"stakingBalance"`
+	ScriptResult            string    `json:"scriptResult"`
+	Stakes                  []string  `json:"stakes"`
+	BlockHeight             uint64    `json:"blockHeight"`
+	Proposal_id             int       `json:"proposal_id"`
+	NFTCount                int       `json:"nftCount"`
+	CreatedAt               time.Time `json:"createdAt"`
+}
+
+func (b *FTBalanceResponse) NewFTBalance() {
+	if os.Getenv("APP_ENV") == "TEST" || os.Getenv("APP_ENV") == "DEV" {
+		b.PrimaryAccountBalance = 11100000
+		b.SecondaryAccountBalance = 12300000
+		b.StakingBalance = 13500000
+	}
 }
 
 // Underlying value of payload needs to be a slice

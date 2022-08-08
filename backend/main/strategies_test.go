@@ -8,9 +8,26 @@ import (
 
 	"github.com/DapperCollectives/CAST/backend/main/models"
 	"github.com/DapperCollectives/CAST/backend/main/shared"
+	"github.com/DapperCollectives/CAST/backend/main/strategies"
 	utils "github.com/DapperCollectives/CAST/backend/main/test_utils"
 	"github.com/stretchr/testify/assert"
 )
+
+type Strategy interface {
+	TallyVotes(votes []*models.VoteWithBalance, p *models.ProposalResults, proposal *models.Proposal) (models.ProposalResults, error)
+	GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error)
+	GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error)
+	InitStrategy(f *shared.FlowAdapter, db *shared.Database, sc *shared.SnapshotClient)
+	FetchBalance(b *models.Balance, p *models.Proposal) (*models.Balance, error)
+	RequiresSnapshot() bool
+}
+
+var strategyMap = map[string]Strategy{
+	"token-weighted-default":        &strategies.TokenWeightedDefault{},
+	"staked-token-weighted-default": &strategies.StakedTokenWeightedDefault{},
+	"one-address-one-vote":          &strategies.OneAddressOneVote{},
+	"balance-of-nfts":               &strategies.BalanceOfNfts{},
+}
 
 /* Token Weighted Default */
 func TestTokenWeightedDefaultStrategy(t *testing.T) {
@@ -27,16 +44,24 @@ func TestTokenWeightedDefaultStrategy(t *testing.T) {
 	proposalIdTwo := proposalIds[1]
 	choices := proposals[0].Choices
 
-	otu.AddDummyVotesAndBalances(votes)
+	err := otu.AddDummyVotesAndBalances(votes)
+	if err != nil {
+		t.Errorf("Error adding votes and balances: %s", err)
+	}
 
 	t.Run("Test Tallying Results", func(t *testing.T) {
 		// Tally results
+		strategyName := "token-weighted-default"
 
+		s := strategyMap[strategyName]
 		proposalWithChoices := models.NewProposalResults(proposalId, choices)
-		_results := otu.TallyResultsForTokenWeightedDefault(*votes, proposalWithChoices)
+		_results, err := s.TallyVotes(votes, proposalWithChoices, proposals[0])
+		if err != nil {
+			t.Errorf("Error tallying votes: %v", err)
+		}
 
 		// Fetch Proposal Results
-		response := otu.GetProposalResultsAPI(proposalIds[0])
+		response := otu.GetProposalResultsAPI(proposalId)
 		CheckResponseCode(t, http.StatusOK, response.Code)
 
 		var results models.ProposalResults
@@ -57,14 +82,14 @@ func TestTokenWeightedDefaultStrategy(t *testing.T) {
 
 		// Validate vote weights are returned correctly
 		for i, v := range body.Data {
-			_vote := (*votes)[i]
-			expectedWeight := float64(_vote.Primary_account_balance) * math.Pow(10, -8)
-			assert.Equal(t, &expectedWeight, v.Weight)
+			_vote := (votes)[i]
+			expectedWeight := float64(*_vote.PrimaryAccountBalance) * math.Pow(10, -8)
+			assert.Equal(t, expectedWeight, *v.Weight)
 		}
 	})
 
 	t.Run("Test Fetching Vote for Address", func(t *testing.T) {
-		_vote := (*votes)[0]
+		_vote := (votes)[0]
 		response := otu.GetVoteForProposalByAddressAPI(proposalId, _vote.Addr)
 
 		CheckResponseCode(t, http.StatusOK, response.Code)
@@ -72,12 +97,12 @@ func TestTokenWeightedDefaultStrategy(t *testing.T) {
 		var vote models.VoteWithBalance
 		json.Unmarshal(response.Body.Bytes(), &vote)
 
-		_expectedWeight := float64(_vote.Primary_account_balance) * math.Pow(10, -8)
+		_expectedWeight := float64(*_vote.PrimaryAccountBalance) * math.Pow(10, -8)
 		assert.Equal(t, _expectedWeight, *vote.Weight)
 	})
 
 	t.Run("Test Fetching Votes For Address", func(t *testing.T) {
-		_vote := (*votes)[0]
+		_vote := (votes)[0]
 		proposalIds := []int{proposalId, proposalIdTwo}
 
 		response := otu.GetVotesForAddressAPI(_vote.Addr, proposalIds)
@@ -87,7 +112,7 @@ func TestTokenWeightedDefaultStrategy(t *testing.T) {
 		json.Unmarshal(response.Body.Bytes(), &votes)
 
 		for _, v := range votes {
-			_expectedWeight := float64(_vote.Primary_account_balance) * math.Pow(10, -8)
+			_expectedWeight := float64(*_vote.PrimaryAccountBalance) * math.Pow(10, -8)
 			assert.Equal(t, _expectedWeight, *v.Weight)
 		}
 	})
@@ -120,9 +145,14 @@ func TestBalanceOfNFTsStrategy(t *testing.T) {
 
 	otu.AddDummyVotesAndNFTs(votes)
 	t.Run("Test Tallying Results For NFT Balance Strategy", func(t *testing.T) {
+		strategyName := "balance-of-nfts"
 
+		s := strategyMap[strategyName]
 		proposalWithChoices := models.NewProposalResults(proposalId, choices)
-		_results := otu.TallyResultsForBalanceOfNfts(votes, proposalWithChoices)
+		_results, err := s.TallyVotes(votes, proposalWithChoices, proposals[0])
+		if err != nil {
+			t.Errorf("Error tallying votes: %v", err)
+		}
 
 		response := otu.GetProposalResultsAPI(proposalId)
 		CheckResponseCode(t, http.StatusOK, response.Code)
@@ -130,9 +160,7 @@ func TestBalanceOfNFTsStrategy(t *testing.T) {
 		var results models.ProposalResults
 		json.Unmarshal(response.Body.Bytes(), &results)
 
-		assert.Equal(t, _results.Proposal_id, results.Proposal_id)
 		assert.Equal(t, _results.Results_float["a"], results.Results_float["a"])
-		assert.Equal(t, _results.Results_float["b"], results.Results_float["b"])
 	})
 
 	t.Run("Test Fetching Votes for Proposal", func(t *testing.T) {
@@ -150,7 +178,7 @@ func TestBalanceOfNFTsStrategy(t *testing.T) {
 	})
 
 	t.Run("Test Fetching Vote for Address", func(t *testing.T) {
-		_vote := (*votes)[0]
+		_vote := (votes)[0]
 		response := otu.GetVoteForProposalByAddressAPI(proposalId, _vote.Addr)
 
 		CheckResponseCode(t, http.StatusOK, response.Code)
@@ -215,8 +243,14 @@ func TestStakedTokenWeightedDefaultStrategy(t *testing.T) {
 
 	t.Run("Test Tallying Results", func(t *testing.T) {
 		// Tally results
+		strategyName := "staked-token-weighted-default"
+
+		s := strategyMap[strategyName]
 		proposalWithChoices := models.NewProposalResults(proposalId, choices)
-		_results := otu.TallyResultsForStakedTokenWeightedDefault(votes, proposalWithChoices)
+		_results, err := s.TallyVotes(votes, proposalWithChoices, proposals[0])
+		if err != nil {
+			t.Errorf("Error tallying votes: %v", err)
+		}
 
 		// Fetch Proposal Results
 		response := otu.GetProposalResultsAPI(proposalId)
@@ -225,14 +259,11 @@ func TestStakedTokenWeightedDefaultStrategy(t *testing.T) {
 		var results models.ProposalResults
 		json.Unmarshal(response.Body.Bytes(), &results)
 
-		assert.Equal(t, _results.Proposal_id, results.Proposal_id)
-		assert.Equal(t, _results.Results_float["a"], results.Results_float["a"])
-		assert.Equal(t, _results.Results_float["b"], results.Results_float["b"])
+		assert.Equal(t, _results, results)
 	})
 
 	t.Run("Test Fetching Votes for Proposal", func(t *testing.T) {
 		response := otu.GetVotesForProposalAPI(proposalId)
-
 		CheckResponseCode(t, http.StatusOK, response.Code)
 
 		var body utils.PaginatedResponseWithVotes
@@ -240,14 +271,14 @@ func TestStakedTokenWeightedDefaultStrategy(t *testing.T) {
 
 		// Validate vote weights are returned correctly
 		for i, v := range body.Data {
-			_vote := (*votes)[i]
-			expectedWeight := float64(_vote.Staking_balance) * math.Pow(10, -8)
+			_vote := (votes)[i]
+			expectedWeight := float64(*_vote.StakingBalance) * math.Pow(10, -8)
 			assert.Equal(t, expectedWeight, *v.Weight)
 		}
 	})
 
 	t.Run("Test Fetching Vote for Address", func(t *testing.T) {
-		_vote := (*votes)[0]
+		_vote := (votes)[0]
 		response := otu.GetVoteForProposalByAddressAPI(proposalId, _vote.Addr)
 
 		CheckResponseCode(t, http.StatusOK, response.Code)
@@ -255,12 +286,12 @@ func TestStakedTokenWeightedDefaultStrategy(t *testing.T) {
 		var vote models.VoteWithBalance
 		json.Unmarshal(response.Body.Bytes(), &vote)
 
-		_expectedWeight := float64(_vote.Staking_balance) * math.Pow(10, -8)
+		_expectedWeight := float64(*_vote.StakingBalance) * math.Pow(10, -8)
 		assert.Equal(t, _expectedWeight, *vote.Weight)
 	})
 
 	t.Run("Test Fetching Votes For Address", func(t *testing.T) {
-		_vote := (*votes)[0]
+		_vote := (votes)[0]
 		proposalIds := []int{proposalId, proposalIdTwo}
 
 		response := otu.GetVotesForAddressAPI(_vote.Addr, proposalIds)
@@ -270,7 +301,7 @@ func TestStakedTokenWeightedDefaultStrategy(t *testing.T) {
 		json.Unmarshal(response.Body.Bytes(), &votes)
 
 		for _, v := range votes {
-			_expectedWeight := float64(_vote.Staking_balance) * math.Pow(10, -8)
+			_expectedWeight := float64(*_vote.StakingBalance) * math.Pow(10, -8)
 			assert.Equal(t, _expectedWeight, *v.Weight)
 		}
 	})

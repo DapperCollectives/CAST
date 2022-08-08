@@ -63,7 +63,7 @@ type App struct {
 var allowedFileTypes = []string{"image/jpg", "image/jpeg", "image/png", "image/gif"}
 
 type Strategy interface {
-	TallyVotes(votes []*models.VoteWithBalance, p *models.ProposalResults) (models.ProposalResults, error)
+	TallyVotes(votes []*models.VoteWithBalance, p *models.ProposalResults, proposal *models.Proposal) (models.ProposalResults, error)
 	GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error)
 	GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error)
 	InitStrategy(f *shared.FlowAdapter, db *shared.Database, sc *shared.SnapshotClient)
@@ -322,7 +322,7 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 	proposalWithChoices := models.NewProposalResults(proposalId, p.Choices)
 	s.InitStrategy(a.FlowAdapter, a.DB, a.SnapshotClient)
 
-	proposalResults, err := s.TallyVotes(votes, proposalWithChoices)
+	proposalResults, err := s.TallyVotes(votes, proposalWithChoices, &p)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -612,7 +612,6 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 
 	s.InitStrategy(a.FlowAdapter, a.DB, a.SnapshotClient)
 
-	// TODO: should work w/ NFTs
 	balance, err := s.FetchBalance(emptyBalance, &p)
 	if err != nil {
 		log.Error().Err(err).Msgf("Error fetching balance for address %v.", v.Addr)
@@ -1463,7 +1462,7 @@ func (a *App) getAccountAtBlockHeight(w http.ResponseWriter, r *http.Request) {
 		Name: &flowToken,
 	}
 
-	b := Balance{}
+	b := shared.FTBalanceResponse{}
 	if err = a.SnapshotClient.GetAddressBalanceAtBlockHeight(addr, blockHeight, &b, &defaultFlowContract); err != nil {
 		log.Error().Err(err).Msgf("Error getting account %s at blockheight %d.", addr, blockHeight)
 		respondWithError(w, http.StatusInternalServerError, err.Error())
