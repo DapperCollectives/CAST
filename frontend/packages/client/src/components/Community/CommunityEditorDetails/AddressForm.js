@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { AddButton, Loader, WrapperResponsive } from 'components';
 import FormFields from './FormFields';
 
@@ -7,6 +7,7 @@ export default function AddressForm({
   description,
   loadingUsers = false,
   addrList,
+  listName,
   errors,
   onDeleteAddress,
   onAddAddress,
@@ -18,29 +19,30 @@ export default function AddressForm({
   removeInnerForm,
   isSubmitting = false,
   handleSubmit,
-  autoFocusOnLoad = false,
+  showValidIcon,
 } = {}) {
-  // const canDeleteAddress = addrList.length > 1;
-
-  // const refOnFirstInput = useRef();
-
-  // useEffect(() => {
-  //   if (refOnFirstInput.current) {
-  //     refOnFirstInput.current.focus();
-  //   }
-  // }, [refOnFirstInput]);
+  const onClearField = useCallback(
+    (index) => {
+      update(index, { addr: '' });
+    },
+    [update]
+  );
 
   const formFieldsComponent = useMemo(
     () => (
       <FormFields
+        label="Flow wallet address"
         addrType={addrType}
         addrList={addrList}
+        listName={listName}
         onDeleteAddress={onDeleteAddress}
         register={register}
         isValid={isValid}
         update={update}
         isSubmitting={isSubmitting}
         errors={errors}
+        showValidIcon={showValidIcon}
+        onClearField={onClearField}
       />
     ),
     [
@@ -52,6 +54,9 @@ export default function AddressForm({
       update,
       isValid,
       addrType,
+      listName,
+      showValidIcon,
+      onClearField,
     ]
   );
   const addButtonComponent = useMemo(
@@ -59,7 +64,7 @@ export default function AddressForm({
       <AddButton
         disabled={loadingUsers}
         addText={addrType}
-        onAdd={onAddAddress}
+        onAdd={() => onAddAddress({ addr: '' })}
         className="mt-2"
       />
     ),
