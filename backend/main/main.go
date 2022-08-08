@@ -1,9 +1,7 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
-	"net/http"
 	"os"
 
 	app "github.com/DapperCollectives/CAST/backend/main/server"
@@ -31,23 +29,6 @@ func main() {
 	}
 
 	a := app.App{}
-	a.Initialize(
-		os.Getenv("DB_USERNAME"),
-		os.Getenv("DB_PASSWORD"),
-		os.Getenv("DB_NAME"),
-		os.Getenv("DB_HOST"),
-		os.Getenv("DB_PORT"),
-		os.Getenv("IPFS_KEY"),
-		os.Getenv("IPFS_SECRET"),
-	)
-
-	a.Run(":5001")
-
-}
-
-////////////
-// Routes //
-////////////
-func Health_get(w http.ResponseWriter, r *http.Request) {
-	json.NewEncoder(w).Encode("OK")
+	a.Initialize()
+	a.Run()
 }
