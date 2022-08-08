@@ -1,9 +1,9 @@
-import { Web3Consumer } from 'contexts/Web3';
 import React from 'react';
 import Blockies from 'react-blockies';
+import { Web3Consumer } from 'contexts/Web3';
+import { WrapperResponsive } from 'components';
+import { useLeaderBoard } from 'hooks';
 import classnames from 'classnames';
-import { WrapperResponsive } from '../components';
-import { useLeaderBoard } from '../hooks';
 
 const Row = ({ index, addr, score, classNameIndex }) => {
   const smallRowStyle = { width: '30%' };

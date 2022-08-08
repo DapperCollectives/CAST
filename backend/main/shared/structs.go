@@ -2,7 +2,9 @@ package shared
 
 import (
 	"context"
+	"os"
 	"reflect"
+	"time"
 
 	"github.com/jackc/pgx/v4/pgxpool"
 )
@@ -35,6 +37,13 @@ type PaginatedResponse struct {
 	Next         int         `json:"next"`
 }
 
+type OrderedPageParams struct {
+	Start        int
+	Count        int
+	Order        string
+	TotalRecords int
+}
+
 type CompositeSignature struct {
 	Addr      string  `json:"addr"`
 	Key_id    uint    `json:"keyId"`
@@ -65,22 +74,48 @@ type MintParams struct {
 	RoyaltyBeneficiaries []string
 }
 
+type FTBalanceResponse struct {
+	ID                      string    `json:"id,omitempty"`
+	FungibleTokenID         string    `json:"fungibleTokenId"`
+	Addr                    string    `json:"addr"`
+	PrimaryAccountBalance   uint64    `json:"primaryAccountBalance"`
+	SecondaryAddress        string    `json:"secondaryAddress"`
+	SecondaryAccountBalance uint64    `json:"secondaryAccountBalance"`
+	Balance                 uint64    `json:"balance"`
+	StakingBalance          uint64    `json:"stakingBalance"`
+	ScriptResult            string    `json:"scriptResult"`
+	Stakes                  []string  `json:"stakes"`
+	BlockHeight             uint64    `json:"blockHeight"`
+	Proposal_id             int       `json:"proposal_id"`
+	NFTCount                int       `json:"nftCount"`
+	CreatedAt               time.Time `json:"createdAt"`
+}
+
+func (b *FTBalanceResponse) NewFTBalance() {
+	if os.Getenv("APP_ENV") == "TEST" || os.Getenv("APP_ENV") == "DEV" {
+		b.PrimaryAccountBalance = 11100000
+		b.SecondaryAccountBalance = 12300000
+		b.StakingBalance = 13500000
+	}
+}
+
 // Underlying value of payload needs to be a slice
-func GetPaginatedResponseWithPayload(payload interface{}, start, count, totalRecords int) *PaginatedResponse {
+func GetPaginatedResponseWithPayload(payload interface{}, o OrderedPageParams) *PaginatedResponse {
 	// Tricky way of getting the length of a slice
 	// that is typed as interface{}
+
 	_count := reflect.ValueOf(payload).Len()
 	var next int
-	if start+_count >= totalRecords {
+	if o.Start+_count >= o.TotalRecords {
 		next = -1
 	} else {
-		next = start + _count
+		next = o.Start + _count
 	}
 	response := PaginatedResponse{
 		Data:         payload,
-		Start:        start,
+		Start:        o.Start,
 		Count:        _count,
-		TotalRecords: totalRecords,
+		TotalRecords: o.TotalRecords,
 		Next:         next,
 	}
 

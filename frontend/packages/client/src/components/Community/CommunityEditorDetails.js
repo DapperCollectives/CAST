@@ -1,14 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Bin, ValidCheckMark, InvalidCheckMark } from 'components/Svg';
-import { WrapperResponsive, Loader, AddButton } from 'components';
-import { useCommunityUsers } from 'hooks';
+import React, { useEffect, useRef, useState } from 'react';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useWebContext } from 'contexts/Web3';
-import { getCompositeSigs } from 'utils';
+import { AddButton, FadeIn, Loader, WrapperResponsive } from 'components';
+import { Bin, InvalidCheckMark, ValidCheckMark } from 'components/Svg';
 import useFlowAddrValidator, {
   validateAddrInList,
 } from './hooks/useFlowAddrValidator';
-import FadeIn from 'components/FadeIn';
+import { useCommunityUsers } from 'hooks';
+import { getCompositeSigs } from 'utils';
 
 export const CommunityUsersForm = ({
   title,
@@ -328,8 +327,8 @@ export default function CommunityEditorDetails({ communityId } = {}) {
   return (
     <>
       <CommunityMembersEditor
-        description="Admins can edit community settings and moderate proposals. 
-          We recommend at least two admin for each community, but it is not a requirement. 
+        description="Admins can edit community settings and moderate proposals.
+          We recommend at least two admin for each community, but it is not a requirement.
           Please add one address per line."
         type="admin"
         communityId={communityId}

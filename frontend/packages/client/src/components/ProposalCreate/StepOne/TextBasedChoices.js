@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
+import AddButton from 'components/AddButton';
 import { Bin } from 'components/Svg';
 import { getProposalType } from 'utils';
-import AddButton from 'components/AddButton';
 
 const TextBasedChoices = ({
   choices = [],

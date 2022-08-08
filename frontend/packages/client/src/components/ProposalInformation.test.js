@@ -1,7 +1,7 @@
-import React from 'react';
 import { cleanup, render } from '@testing-library/react';
-import '@testing-library/jest-dom';
+import React from 'react';
 import renderer from 'react-test-renderer';
+import '@testing-library/jest-dom';
 import ProposalInformation from './ProposalInformation';
 
 let documentMock;

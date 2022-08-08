@@ -1,6 +1,6 @@
 import React from 'react';
-import WrapperResponsive from './WrapperResponsive';
 import Label from './Label';
+import WrapperResponsive from './WrapperResponsive';
 
 const Message = ({ messageText = '', labelText = null, icon = null } = {}) => {
   const labelComponent = labelText ? <Label labelText={labelText} /> : null;

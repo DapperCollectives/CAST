@@ -1,12 +1,12 @@
-import { useReducer, useCallback } from 'react';
-import {
-  paginationReducer,
-  PAGINATION_INITIAL_STATE,
-  INITIAL_STATE,
-} from '../reducers';
-import { checkResponse, getCompositeSigs } from 'utils';
+import { useCallback, useReducer } from 'react';
 import { useErrorHandlerContext } from '../contexts/ErrorHandler';
 import { useFileUploader } from 'hooks';
+import { checkResponse, getCompositeSigs } from 'utils';
+import {
+  INITIAL_STATE,
+  PAGINATION_INITIAL_STATE,
+  paginationReducer,
+} from '../reducers';
 
 const setDefaultValue = (field, fallbackValue) => {
   if (field === undefined || field === '') {
