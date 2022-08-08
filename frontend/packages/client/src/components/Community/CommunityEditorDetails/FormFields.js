@@ -11,13 +11,19 @@ export default function Form({
   label,
   addrType,
   isValid,
+  listName = 'addrList',
+  onClearField,
 } = {}) {
+  const enableDeletion = addrList.length > 1;
   return (
     <>
       <div className="columns is-multiline p-0 m-0">
         {addrList.map((addrField, index) => {
-          const errorInField = errors?.['addrList']?.[index]?.addr;
+          const errorInField = Array.isArray(errors?.[listName])
+            ? errors?.[listName]?.[index]?.addr
+            : errors?.[listName];
 
+          const checkIcon = addrField.addr !== '';
           const inputStyle = `form-error-input-icon ${
             errorInField ? 'form-error-input-border' : ''
           }`;
@@ -32,7 +38,7 @@ export default function Form({
                 key={addrField.id} // important to include key with field's id
                 placeholder={label || `Enter ${addrType}`}
                 className={`border-light rounded-sm p-3 column is-full ${inputStyle}`}
-                {...register(`addrList.${index}.addr`, {
+                {...register(`${listName}.${index}.addr`, {
                   disabled: isSubmitting,
                 })}
               />
@@ -47,22 +53,27 @@ export default function Form({
                 }}
               >
                 {!errorInField ? (
-                  isValid ? (
+                  isValid && checkIcon ? (
                     <div className="is-flex is-align-items-center mr-2">
                       <ValidCheckMark />
                     </div>
                   ) : null
                 ) : (
-                  <div className="cursor-pointer is-flex is-align-items-center mr-2">
+                  <div
+                    className="cursor-pointer is-flex is-align-items-center mr-2"
+                    onClick={() => onClearField(index)}
+                  >
                     <InvalidCheckMark />
                   </div>
                 )}
-                <div
-                  className="cursor-pointer is-flex is-align-items-center"
-                  onClick={() => onDeleteAddress(index)}
-                >
-                  <Bin />
-                </div>
+                {enableDeletion && (
+                  <div
+                    className="cursor-pointer is-flex is-align-items-center"
+                    onClick={() => onDeleteAddress(index)}
+                  >
+                    <Bin />
+                  </div>
+                )}
               </div>
               {errorInField && (
                 <FadeIn>

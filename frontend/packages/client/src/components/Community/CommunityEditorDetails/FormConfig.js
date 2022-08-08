@@ -24,9 +24,26 @@ yup.addMethod(yup.array, 'unique', function (field, message) {
 
 yup.addMethod(yup.array, 'allowOneEmptyElement', function (field, message) {
   return this.test('allowOneEmptyElement', message, function (array = []) {
-    return array.length === 1 && array[0][field] === '';
+    if (array.length > 1 && array.some((e) => e[field] === '')) {
+      const index = array.map((e) => e[field]).indexOf('');
+      return this.createError({
+        path: `${this.path}.${index}.${field}`,
+        message,
+      });
+    }
+    return true;
   });
 });
+
+const addEmptyElementValidation = (schema, isEditMode) => {
+  // return schema;
+
+  if (!isEditMode) {
+    // on create community flow this will enable one empty element
+    return schema.allowOneEmptyElement('addr', 'Invalid empty Address');
+  }
+  return schema;
+};
 
 const AddressSchema = ({ isValidFlowAddress, isEditMode = false } = {}) => {
   const addresValidation = (yupSchema) =>
@@ -65,8 +82,8 @@ const AddressSchema = ({ isValidFlowAddress, isEditMode = false } = {}) => {
         }
       );
 
-  const basicValidation = yup.object().shape({
-    addrList: yup
+  const elementValidation = addEmptyElementValidation(
+    yup
       .array(
         yup.object({
           addr: isEditMode
@@ -78,11 +95,15 @@ const AddressSchema = ({ isValidFlowAddress, isEditMode = false } = {}) => {
       )
       .min(1)
       .unique('addr', 'Invalid duplicated address'),
+    isEditMode
+  );
+  return yup.object().shape({
+    ...(isEditMode
+      ? { addrList: elementValidation }
+      : {
+          listAddrAdmins: elementValidation,
+          listAddrAuthors: elementValidation,
+        }),
   });
-
-  if (isEditMode) {
-    return basicValidation;
-  }
-  return basicValidation.allowOneEmptyElement('addr', 'Invalid empty Address');
 };
 export { AddressSchema };
