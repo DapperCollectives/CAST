@@ -744,7 +744,6 @@ func (a *App) removeUserRole(w http.ResponseWriter, r *http.Request) {
 /////////////////
 // TEST ROUTES //
 /////////////////
-
 func rightPaddedBuffer(s string, numBytes uint) string {
 	format := "%-" + fmt.Sprintf("%d", numBytes*2) + "s"
 	_rightPaddedStr := fmt.Sprintf(format, s)

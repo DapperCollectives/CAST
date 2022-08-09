@@ -180,14 +180,10 @@ export default function useProposal() {
 
         const voucher = await fcl.serialize([
           fcl.transaction`
-            transaction(a: Int, b: Int, c: Address) {
+            transaction() {
               prepare(acct: AuthAccount) {
                 log(acct)
-                log(a)
-                log(b)
-                log(c)
               }
-              execute {}
             }
           `,
           fcl.limit(999),

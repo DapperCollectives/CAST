@@ -13,8 +13,8 @@ const networksConfig = {
     walletDiscovery: 'https://fcl-discovery.onflow.org/testnet/authn',
     walletDiscoveryApi: 'https://fcl-discovery.onflow.org/api/testnet/authn',
     walletDiscoveryInclude: [
-      // '0x9d2e44203cb13051', // Ledger
-      // '0x82ec283f88a62e65' // Dapper Wallet
+      '0x9d2e44203cb13051', // Ledger
+      '0x82ec283f88a62e65', // Dapper Wallet
     ],
     strategiesConfig: {},
   },
@@ -23,8 +23,8 @@ const networksConfig = {
     walletDiscovery: 'https://fcl-discovery.onflow.org/authn',
     walletDiscoveryApi: 'https://fcl-discovery.onflow.org/api/authn',
     walletDiscoveryInclude: [
-      // '0xe5cd26afebe62781', // Ledger
-      // '0xead892083b3e2c6c' // Dapper Wallet
+      '0xe5cd26afebe62781', // Ledger
+      '0xead892083b3e2c6c', // Dapper Wallet
     ],
     strategiesConfig: {},
   },
