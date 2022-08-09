@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/DapperCollectives/CAST/backend/main/shared"
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/jackc/pgx/v4"
@@ -60,7 +61,7 @@ type LeaderboardPayload struct {
 	CurrentUser LeaderboardUser   `json:"currentUser"`
 }
 
-func GetUsersForCommunity(db *s.Database, communityId, start, count int) ([]CommunityUserType, int, error) {
+func GetUsersForCommunity(db *s.Database, communityId int, params shared.OrderedPageParams) ([]CommunityUserType, int, error) {
 	var users = []CommunityUserType{}
 	err := pgxscan.Select(db.Context, db.Conn, &users,
 		`
@@ -80,7 +81,7 @@ func GetUsersForCommunity(db *s.Database, communityId, start, count int) ([]Comm
 				(SELECT addr FROM community_users WHERE community_id = $1 group BY community_users.addr) 
 		AS temp_user_addrs 
 		LIMIT $2 OFFSET $3
-		`, communityId, count, start)
+		`, communityId, params.Count, params.Start)
 
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		return nil, 0, err
@@ -116,7 +117,12 @@ func GetUsersForCommunityByType(db *s.Database, communityId, start, count int, u
 	return users, totalUsers, nil
 }
 
-func GetCommunityLeaderboard(db *s.Database, communityId int, addr string, start, count int) (LeaderboardPayload, int, error) {
+func GetCommunityLeaderboard(
+	db *s.Database,
+	communityId int,
+	addr string,
+	params shared.OrderedPageParams,
+) (LeaderboardPayload, int, error) {
 	var payload = LeaderboardPayload{}
 
 	userAchievements, err := getUserAchievements(db, communityId)
@@ -129,7 +135,7 @@ func GetCommunityLeaderboard(db *s.Database, communityId int, addr string, start
 		return payload, 0, nil
 	}
 
-	leaderboardUsers, currentUser := getLeaderboardUsers(userAchievements, addr, start, count)
+	leaderboardUsers, currentUser := getLeaderboardUsers(userAchievements, addr, params.Start, params.Count)
 
 	totalUsers := getTotalUsersForCommunity(db, communityId)
 
@@ -139,7 +145,7 @@ func GetCommunityLeaderboard(db *s.Database, communityId int, addr string, start
 	return payload, totalUsers, nil
 }
 
-func GetCommunitiesForUser(db *s.Database, addr string, start, count int) ([]UserCommunity, int, error) {
+func GetCommunitiesForUser(db *s.Database, addr string, params shared.OrderedPageParams) ([]UserCommunity, int, error) {
 	var communities = []UserCommunity{}
 
 	err := pgxscan.Select(db.Context, db.Conn, &communities,
@@ -158,7 +164,7 @@ func GetCommunitiesForUser(db *s.Database, addr string, start, count int) ([]Use
 		return []UserCommunity{}, 0, nil
 	}
 
-	mergedCommunities, totalCommunities := mergeUserRolesForCommunities(communities, start, count)
+	mergedCommunities, totalCommunities := mergeUserRolesForCommunities(communities, params.Start, params.Count)
 
 	return mergedCommunities, totalCommunities, nil
 }
@@ -386,7 +392,7 @@ func mergeUserRolesForCommunities(communities []UserCommunity, start, count int)
 	var mergedCommunities = []UserCommunity{}
 	communitiesMap := make(map[int]int)
 	for i := range communities {
-		if index, ok := communitiesMap[communities[i].ID]; ok{
+		if index, ok := communitiesMap[communities[i].ID]; ok {
 			mergedCommunities[index].Roles = strings.Join([]string{mergedCommunities[index].Roles, communities[i].Roles}, ",")
 		} else {
 			mergedCommunities = append(mergedCommunities, communities[i])

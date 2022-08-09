@@ -106,12 +106,8 @@ func (a *App) getVotesForAddress(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	start, count := getPageParams(r.FormValue("start"), r.FormValue("count"), 25)
-	orderParams := shared.OrderedPageParams{
-		Start: start,
-		Count: count,
-		Order: "desc",
-	}
+	orderParams := getPageParams(r.FormValue("start"), r.FormValue("count"), 25)
+	orderParams.Order = "desc"
 
 	votes, orderParams, err := helpers.processVotes(addr, proposalIds, orderParams)
 	if err != nil {
@@ -259,19 +255,15 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 // Communities
 
 func (a *App) getCommunities(w http.ResponseWriter, r *http.Request) {
-	start, count := getPageParams(r.FormValue("start"), r.FormValue("count"), 25)
+	orderParams := getPageParams(r.FormValue("start"), r.FormValue("count"), 25)
 
-	communities, totalRecords, err := models.GetCommunities(a.DB, start, count)
+	communities, totalRecords, err := models.GetCommunities(a.DB, orderParams)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	orderParams := shared.OrderedPageParams{
-		Start:        start,
-		Count:        count,
-		TotalRecords: totalRecords,
-	}
+	orderParams.TotalRecords = totalRecords
 	response := shared.GetPaginatedResponseWithPayload(communities, orderParams)
 
 	respondWithJSON(w, http.StatusOK, response)
@@ -296,21 +288,17 @@ func (a *App) getCommunity(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) getCommunitiesForHomePage(w http.ResponseWriter, r *http.Request) {
-	start, count := getPageParams(r.FormValue("start"), r.FormValue("count"), 25)
+	orderParams := getPageParams(r.FormValue("start"), r.FormValue("count"), 25)
 
-	communities, totalRecords, err := models.GetCommunitiesForHomePage(a.DB, start, count)
+	communities, totalRecords, err := models.GetCommunitiesForHomePage(a.DB, orderParams)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	orderParams := shared.OrderedPageParams{
-		Start:        start,
-		Count:        count,
-		TotalRecords: totalRecords,
-	}
+
+	orderParams.TotalRecords = totalRecords
 
 	response := shared.GetPaginatedResponseWithPayload(communities, orderParams)
-
 	respondWithJSON(w, http.StatusOK, response)
 }
 
@@ -572,19 +560,15 @@ func (a *App) getCommunityUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	start, count := getPageParams(r.FormValue("start"), r.FormValue("count"), 100)
+	orderParams := getPageParams(r.FormValue("start"), r.FormValue("count"), 100)
 
-	users, totalRecords, err := models.GetUsersForCommunity(a.DB, communityId, start, count)
+	users, totalRecords, err := models.GetUsersForCommunity(a.DB, communityId, orderParams)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	orderParams := shared.OrderedPageParams{
-		Start:        start,
-		Count:        count,
-		TotalRecords: totalRecords,
-	}
+	orderParams.TotalRecords = totalRecords
 
 	response := shared.GetPaginatedResponseWithPayload(users, orderParams)
 	respondWithJSON(w, http.StatusOK, response)
@@ -640,19 +624,14 @@ func (a *App) getCommunityLeaderboard(w http.ResponseWriter, r *http.Request) {
 	}
 
 	addr := r.FormValue("addr")
-	start, count := getPageParams(r.FormValue("start"), r.FormValue("count"), 100)
+	orderParams := getPageParams(r.FormValue("start"), r.FormValue("count"), 100)
 
-	leaderboard, totalRecords, err := models.GetCommunityLeaderboard(a.DB, communityId, addr, start, count)
+	leaderboard, totalRecords, err := models.GetCommunityLeaderboard(a.DB, communityId, addr, orderParams)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-
-	orderParams := shared.OrderedPageParams{
-		Start:        start,
-		Count:        count,
-		TotalRecords: totalRecords,
-	}
+	orderParams.TotalRecords = totalRecords
 
 	response := shared.GetPaginatedResponseWithPayload(leaderboard.Users, orderParams)
 	response.Data = leaderboard
@@ -663,19 +642,15 @@ func (a *App) getUserCommunities(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	addr := vars["addr"]
 
-	start, count := getPageParams(r.FormValue("start"), r.FormValue("count"), 100)
+	orderParams := getPageParams(r.FormValue("start"), r.FormValue("count"), 100)
 
-	communities, totalRecords, err := models.GetCommunitiesForUser(a.DB, addr, start, count)
+	communities, totalRecords, err := models.GetCommunitiesForUser(a.DB, addr, orderParams)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	orderParams := shared.OrderedPageParams{
-		Start:        start,
-		Count:        count,
-		TotalRecords: totalRecords,
-	}
+	orderParams.TotalRecords = totalRecords
 
 	response := shared.GetPaginatedResponseWithPayload(communities, orderParams)
 	respondWithJSON(w, http.StatusOK, response)
@@ -759,7 +734,7 @@ func getOrderedPageParams(start, count, order string, defaultCount int) shared.O
 	}
 }
 
-func getPageParams(start, count string, defaultCount int) (int, int) {
+func getPageParams(start, count string, defaultCount int) shared.OrderedPageParams {
 	s, _ := strconv.Atoi(start)
 	c, _ := strconv.Atoi(count)
 
@@ -769,5 +744,9 @@ func getPageParams(start, count string, defaultCount int) (int, int) {
 	if s < 0 {
 		s = 0
 	}
-	return s, c
+
+	return shared.OrderedPageParams{
+		Start: s,
+		Count: c,
+	}
 }
