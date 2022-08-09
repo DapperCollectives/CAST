@@ -16,6 +16,7 @@ import {
   useMediaQuery,
   useUserRoleOnCommunity,
 } from 'hooks';
+import useCommunityActiveVotingStrategies from 'hooks/useCommunityActiveStrategies';
 import { CommunityEditPageTabs } from 'const';
 
 const MenuTabs = ({ tabs, communityId, onClickButtonTab = () => {} } = {}) => {
@@ -116,6 +117,8 @@ export default function CommunityEditorPage() {
     loading,
     updateCommunityDetails,
   } = useCommunityDetails(communityId);
+  const { data: activeStrategies } =
+    useCommunityActiveVotingStrategies(communityId);
 
   const { uploadFile } = useFileUploader();
   const notMobile = useMediaQuery();
@@ -213,6 +216,7 @@ export default function CommunityEditorPage() {
                 updateCommunity={updateCommunity}
                 updatingCommunity={loading}
                 communityVotingStrategies={community.strategies}
+                activeStrategies={activeStrategies}
               />
             )}
           </div>
