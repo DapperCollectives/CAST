@@ -133,6 +133,11 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	vote, err := helpers.createVote(r, proposal)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
 	respondWithJSON(w, http.StatusCreated, vote)
 }
 
@@ -174,7 +179,7 @@ func (a *App) getProposal(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID.")
 		return
 	}
-	
+
 	c, httpStatus, err := helpers.fetchCommunity(p.Community_id)
 	if err != nil {
 		respondWithError(w, httpStatus, err.Error())
@@ -332,7 +337,7 @@ func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 
 	c, httpStatus, err := helpers.createCommunity(payload)
 	if err != nil {
-		respondWithError(w, httpStatus, err.Error())	
+		respondWithError(w, httpStatus, err.Error())
 		return
 	}
 
@@ -356,7 +361,7 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 	c, httpStatus, err := helpers.updateCommunity(id, payload)
 	if err != nil {
 		respondWithError(w, httpStatus, err.Error())
-		return	
+		return
 	}
 
 	respondWithJSON(w, http.StatusOK, c)
@@ -382,23 +387,22 @@ func (a *App) getCommunityCategories(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) getActiveStrategiesForCommunity(w http.ResponseWriter, r *http.Request) {
-    vars := mux.Vars(r)
-    communityId, err := strconv.Atoi(vars["communityId"])
+	vars := mux.Vars(r)
+	communityId, err := strconv.Atoi(vars["communityId"])
 
-    if err != nil {
-        respondWithError(w, http.StatusBadRequest, "Invalid Community ID.")
-        return
-    }
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid Community ID.")
+		return
+	}
 
-    strategies, err := models.GetActiveStrategiesForCommunity(a.DB, communityId)
-    if err != nil {
-        respondWithError(w, http.StatusInternalServerError, err.Error())
-        return
-    }
+	strategies, err := models.GetActiveStrategiesForCommunity(a.DB, communityId)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
 
-    respondWithJSON(w, http.StatusOK, strategies)
+	respondWithJSON(w, http.StatusOK, strategies)
 }
-
 
 ////////////
 // Lists //
