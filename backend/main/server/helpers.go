@@ -132,6 +132,36 @@ func (h *Helpers) useStrategyGetVoteWeight(
 	return weight, nil
 }
 
+func (h *Helpers) useStrategyFetchBalance(
+	v models.Vote,
+	p models.Proposal,
+	s Strategy,
+) (models.VoteWithBalance, error) {
+
+	emptyBalance := &models.Balance{
+		Addr:        v.Addr,
+		Proposal_id: p.ID,
+	}
+	if p.Block_height != nil {
+		emptyBalance.BlockHeight = *p.Block_height
+	}
+
+	balance, err := s.FetchBalance(emptyBalance, &p)
+	if err != nil {
+		log.Error().Err(err).Msgf("Error fetching balance for address %v.", v.Addr)
+		return models.VoteWithBalance{}, errors.New("Error fetching balance for address.")
+	}
+
+	vb := models.VoteWithBalance{
+		Vote:                    v,
+		PrimaryAccountBalance:   &balance.PrimaryAccountBalance,
+		SecondaryAccountBalance: &balance.SecondaryAccountBalance,
+		StakingBalance:          &balance.StakingBalance,
+	}
+
+	return vb, nil
+}
+
 func (h *Helpers) getPaginatedVotes(
 	r *http.Request,
 	p models.Proposal,
@@ -201,6 +231,7 @@ func (h *Helpers) fetchVote(addr string, id int) (*models.VoteWithBalance, error
 			return nil, err
 		}
 	}
+
 	return voteWithBalance, nil
 }
 
@@ -294,54 +325,46 @@ func (h *Helpers) createVote(r *http.Request, p models.Proposal) (*models.VoteWi
 		return nil, errors.New("Proposal strategy not found.")
 	}
 
-	emptyBalance := &models.Balance{
-		Addr:        v.Addr,
-		Proposal_id: p.ID,
-	}
-	if p.Block_height != nil {
-		emptyBalance.BlockHeight = *p.Block_height
-	}
-
-	balance, err := s.FetchBalance(emptyBalance, &p)
+	vb, err := h.useStrategyFetchBalance(v, p, s)
 	if err != nil {
-		log.Error().Err(err).Msgf("Error fetching balance for address %v.", v.Addr)
-		return nil, errors.New("Error fetching balance for address.")
+		return nil, err
 	}
 
-	vb := models.VoteWithBalance{
-		Vote:                    v,
-		PrimaryAccountBalance:   &balance.PrimaryAccountBalance,
-		SecondaryAccountBalance: &balance.SecondaryAccountBalance,
-		StakingBalance:          &balance.StakingBalance,
+	if err := h.insertVote(vb, p); err != nil {
+		return nil, err
 	}
 
-	weight, err := s.GetVoteWeightForBalance(&vb, &p)
+	return &vb, nil
+}
+
+func (h *Helpers) insertVote(v models.VoteWithBalance, p models.Proposal) error {
+	weight, err := h.useStrategyGetVoteWeight(p, &v)
 	if err != nil {
 		msg := fmt.Sprintf("Error getting vote weight for address %s.", v.Addr)
 		log.Error().Err(err).Msg(msg)
-		return nil, errors.New(msg)
+		return errors.New(msg)
 	}
 
 	if err = p.ValidateBalance(weight); err != nil {
 		msg := fmt.Sprintf("Account balance is too low to vote on this proposal.")
 		log.Error().Err(err).Msg(msg)
-		return nil, errors.New(msg)
+		return errors.New(msg)
 	}
 
 	v.Cid, err = h.pinJSONToIpfs(p)
 	if err != nil {
 		msg := fmt.Sprintf("Error pinning proposal to IPFS.")
 		log.Error().Err(err).Msg(msg)
-		return nil, errors.New(msg)
+		return errors.New(msg)
 	}
 
 	if err := v.CreateVote(h.A.DB); err != nil {
 		msg := fmt.Sprintf("Error creating vote for address %s.", v.Addr)
 		log.Error().Err(err).Msg(msg)
-		return nil, errors.New(msg)
+		return errors.New(msg)
 	}
 
-	return &vb, nil
+	return nil
 }
 
 func (h *Helpers) validateVote(p models.Proposal, v models.Vote) error {
@@ -381,13 +404,13 @@ func (h *Helpers) fetchCommunity(id int) (models.Community, int, error) {
 	if err := community.GetCommunity(h.A.DB); err != nil {
 		log.Error().Err(err)
 		switch err.Error() {
-			case pgx.ErrNoRows.Error():
-				return models.Community{}, http.StatusNotFound, errors.New("Community not found.")
-			default:
-				return models.Community{}, http.StatusInternalServerError, err
+		case pgx.ErrNoRows.Error():
+			return models.Community{}, http.StatusNotFound, errors.New("Community not found.")
+		default:
+			return models.Community{}, http.StatusInternalServerError, err
 		}
 	}
-	
+
 	return community, http.StatusOK, nil
 }
 
@@ -454,7 +477,7 @@ func (h *Helpers) createProposal(communityId int, p models.Proposal) (models.Pro
 
 	p.Cid, err = h.pinJSONToIpfs(p)
 	if err != nil {
-		log.Error().Err(err).Msg("IPFS error: "+err.Error())
+		log.Error().Err(err).Msg("IPFS error: " + err.Error())
 		errMsg := "Error pinning JSON to IPFS."
 		return models.Proposal{}, http.StatusInternalServerError, errors.New(errMsg)
 	}
@@ -725,7 +748,7 @@ func (h *Helpers) updateAddressesInList(id int, payload models.ListUpdatePayload
 
 	cid, err := h.pinJSONToIpfs(l)
 	if err != nil {
-		log.Error().Err(err).Msg("IPFS error: "+err.Error())
+		log.Error().Err(err).Msg("IPFS error: " + err.Error())
 		return http.StatusInternalServerError, errors.New("Error pinning JSON to IPFS.")
 	}
 	l.Cid = cid
@@ -762,7 +785,7 @@ func (h *Helpers) createListForCommunity(payload models.ListPayload) (models.Lis
 
 	cid, err := h.pinJSONToIpfs(l)
 	if err != nil {
-		log.Error().Err(err).Msg("IPFS error: "+err.Error())
+		log.Error().Err(err).Msg("IPFS error: " + err.Error())
 		return models.List{}, http.StatusInternalServerError, errors.New("Error pinning JSON to IPFS.")
 	}
 	l.Cid = cid
