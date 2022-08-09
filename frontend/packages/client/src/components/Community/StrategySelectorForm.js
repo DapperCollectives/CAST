@@ -6,9 +6,11 @@ import { useVotingStrategies } from 'hooks';
 import { kebabToString } from 'utils';
 import isEqual from 'lodash/isEqual';
 import StrategyEditorModal from './StrategyEditorModal';
+import { Error } from 'components';
 
 export default function StrategySelectorForm({
   existingStrategies = [],
+  activeStrategies = [],
   disableAddButton = false,
   // this fc returns a component(Button) to render
   callToAction = () => {},
@@ -56,6 +58,33 @@ export default function StrategySelectorForm({
   };
 
   const onDeleteStrategy = (index) => {
+    const strategy = strategies[index];
+    if (activeStrategies.includes(strategy.name)) {
+      openModal(
+        React.createElement(Error, {
+          error: (
+            <div className="mt-4">
+              <p className="is-size-6">
+                Selected strategy is currently used by a pending or active
+                proposal.
+              </p>
+              <div className="is-flex is-align-items-center is-justify-content-center">
+                <ul>
+                  <li>
+                    <p className="smaller-text mt-2 has-text-red">
+                      - {kebabToString(strategy.name)}
+                    </p>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          ),
+          errorTitle: 'Strategy In Use Error',
+        }),
+        { classNameModalContent: 'rounded-sm' }
+      );
+      return;
+    }
     setStrategies((state) => state.filter((_, idx) => idx !== index));
   };
 

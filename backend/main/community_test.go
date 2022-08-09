@@ -154,6 +154,32 @@ func TestGetCommunitiesForHomepageAPI(t *testing.T) {
 	assert.Equal(t, 1, len(p.Data))
 }
 
+func TestGetCommunityActiveStrategies(t *testing.T) {
+	clearTable("communities")
+	clearTable("community_users")
+	clearTable("proposals")
+	
+	communityId := otu.AddCommunitiesWithUsers(1, "user1")[0]
+
+	proposalStruct := otu.GenerateProposalStruct("user1", communityId)
+	payload1 := otu.GenerateProposalPayload("user1", proposalStruct)
+	otu.CreateProposalAPI(payload1)
+
+	payload2 := otu.GenerateProposalPayload("user1", proposalStruct)
+	otu.CreateProposalAPI(payload2)
+
+	cancelPayload := otu.GenerateCancelProposalStruct("user1", payload1.ID)
+	otu.UpdateProposalAPI(payload1.ID, cancelPayload)
+
+	response := otu.GetCommunityActiveStrategies(communityId)
+	CheckResponseCode(t, http.StatusOK, response.Code)
+
+	var results []string
+	json.Unmarshal(response.Body.Bytes(), &results)
+
+	assert.Equal(t, 1, len(results))
+}
+
 func TestUpdateCommunity(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")
