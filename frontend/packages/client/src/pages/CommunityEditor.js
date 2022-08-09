@@ -16,8 +16,8 @@ import {
   useMediaQuery,
   useUserRoleOnCommunity,
 } from 'hooks';
-import { CommunityEditPageTabs } from 'const';
 import useCommunityActiveVotingStrategies from 'hooks/useCommunityActiveStrategies';
+import { CommunityEditPageTabs } from 'const';
 
 const MenuTabs = ({ tabs, communityId, onClickButtonTab = () => {} } = {}) => {
   return (
