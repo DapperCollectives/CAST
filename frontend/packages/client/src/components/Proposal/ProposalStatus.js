@@ -1,8 +1,8 @@
 import React from 'react';
+import { StatusLabel } from 'components';
+import { FilterValues } from 'const';
 import { parseDateFromServer } from 'utils';
 import { getStatus } from './getStatus';
-import { FilterValues } from 'const';
-import { StatusLabel } from 'components';
 
 const ProposalStatus = ({ proposal, className = '' }) => {
   const { diffFromNow: endDiff, diffDays } = parseDateFromServer(

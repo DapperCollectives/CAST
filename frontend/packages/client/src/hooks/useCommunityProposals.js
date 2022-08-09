@@ -1,11 +1,11 @@
-import { useReducer, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useReducer } from 'react';
+import { useErrorHandlerContext } from 'contexts/ErrorHandler';
+import { checkResponse } from 'utils';
 import {
-  paginationReducer,
-  PAGINATION_INITIAL_STATE,
   INITIAL_STATE,
+  PAGINATION_INITIAL_STATE,
+  paginationReducer,
 } from '../reducers';
-import { checkResponse } from '../utils';
-import { useErrorHandlerContext } from '../contexts/ErrorHandler';
 
 /**
  * Hook to return proposals created on a community. Results are paginated

@@ -38,11 +38,11 @@ func TestGetProposal(t *testing.T) {
 
 		response := otu.GetProposalByIdAPI(communityId, 420)
 
-		CheckResponseCode(t, http.StatusNotFound, response.Code)
+		CheckResponseCode(t, http.StatusBadRequest, response.Code)
 
 		var m map[string]string
 		json.Unmarshal(response.Body.Bytes(), &m)
-		assert.Equal(t, "Proposal not found.", m["error"])
+		assert.Equal(t, "Invalid Proposal ID.", m["error"])
 	})
 
 	t.Run("Should fetch existing proposal by ID", func(t *testing.T) {

@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { WrapperResponsive as Wrapper } from '..';
-import { parseDateFromServer, getProposalType } from 'utils';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useVotesForAddress } from 'hooks';
-import { getStatus } from './getStatus';
 import { FilterValues } from 'const';
+import { getProposalType, parseDateFromServer } from 'utils';
+import { WrapperResponsive as Wrapper } from '..';
+import { getStatus } from './getStatus';
 
 const TextBasedOptions = ({
   choices,

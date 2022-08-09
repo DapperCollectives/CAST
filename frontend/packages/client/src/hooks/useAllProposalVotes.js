@@ -1,11 +1,11 @@
-import { useReducer, useCallback } from 'react';
+import { useCallback, useReducer } from 'react';
+import { useErrorHandlerContext } from 'contexts/ErrorHandler';
+import { checkResponse } from 'utils';
 import {
-  paginationReducer,
-  PAGINATION_INITIAL_STATE,
   INITIAL_STATE,
+  PAGINATION_INITIAL_STATE,
+  paginationReducer,
 } from '../reducers';
-import { checkResponse } from '../utils';
-import { useErrorHandlerContext } from '../contexts/ErrorHandler';
 
 /**
  * Hook to return proposal votes for a proposal. Results are paginated

@@ -2,7 +2,6 @@ package test_utils
 
 import (
 	"fmt"
-	"math"
 	"math/rand"
 	"strconv"
 
@@ -10,72 +9,17 @@ import (
 	"github.com/DapperCollectives/CAST/backend/main/shared"
 )
 
-type VoteWithBalance struct {
-	models.Vote
-
-	Primary_account_balance uint64 `json:"primaryAccountBalance"`
-	Staking_balance         uint64 `json:"stakingBalance"`
-	Block_height            uint64 `json:"blockHeight"`
-
-	NFTs []models.NFT
+type dummyBalance struct {
+	Primary     uint64
+	Staking     uint64
+	BlockHeight uint64
 }
 
-func (otu *OverflowTestUtils) TallyResultsForTokenWeightedDefault(
-	votes []VoteWithBalance,
-	p *models.ProposalResults,
-) *models.ProposalResults {
-
-	for _, vote := range votes {
-		if vote.Primary_account_balance != 0 {
-			p.Results[vote.Choice] += int(float64(vote.Primary_account_balance) * math.Pow(10, -8))
-			p.Results_float[vote.Choice] += float64(vote.Primary_account_balance) * math.Pow(10, -8)
-		}
-	}
-
-	return p
-}
-
-func (otu *OverflowTestUtils) TallyResultsForStakedTokenWeightedDefault(
-	votes *[]VoteWithBalance,
-	r *models.ProposalResults,
-) *models.ProposalResults {
-
-	for _, v := range *votes {
-		r.Results_float[v.Choice] += float64(v.Staking_balance) * math.Pow(10, -8)
-	}
-
-	return r
-}
-
-func (otu *OverflowTestUtils) TallyResultsForOneAddressOneVote(
-	votes *[]VoteWithBalance,
-	r *models.ProposalResults,
-) *models.ProposalResults {
-
-	for _, v := range *votes {
-		r.Results[v.Choice]++
-	}
-
-	return r
-}
-
-func (otu *OverflowTestUtils) TallyResultsForBalanceOfNfts(
-	votes *[]VoteWithBalance,
-	r *models.ProposalResults,
-) *models.ProposalResults {
-
-	for _, v := range *votes {
-		nfts := len(v.NFTs)
-		r.Results_float[v.Choice] += float64(nfts)
-	}
-	return r
-}
-
-func (otu *OverflowTestUtils) GenerateListOfVotes(proposalId int, count int) *[]VoteWithBalance {
-	votes := make([]VoteWithBalance, count)
+func (otu *OverflowTestUtils) GenerateListOfVotes(proposalId int, count int) []*models.VoteWithBalance {
+	votes := make([]*models.VoteWithBalance, count)
 	choices := []string{"a", "b"}
 	for i := 0; i < count; i++ {
-		addr := "0x" + strconv.Itoa(i)
+		addr := "0x" + strconv.Itoa(i+1)
 		randomNumber := rand.Intn(2)
 		choice := choices[randomNumber]
 		v := models.Vote{
@@ -84,22 +28,22 @@ func (otu *OverflowTestUtils) GenerateListOfVotes(proposalId int, count int) *[]
 
 		// Balance is 1 FLOW * index
 		balance := 100000000 * (i + 1)
+		dummyBal := createDummyBalance(balance)
 
-		vote := VoteWithBalance{
-			Vote:                    v,
-			Primary_account_balance: uint64(balance),
-			Staking_balance:         uint64(balance * 5), // Make this different so staked/reg strats dont have same results
-			Block_height:            uint64(0),
+		vote := &models.VoteWithBalance{
+			Vote:                  v,
+			PrimaryAccountBalance: &dummyBal.Primary,
+			StakingBalance:        &dummyBal.Staking,
+			BlockHeight:           &dummyBal.BlockHeight,
 		}
-
 		votes[i] = vote
 	}
 
-	return &votes
+	return votes
 }
 
-func (otu *OverflowTestUtils) GenerateCheatVote(proposalId int, count int) *[]VoteWithBalance {
-	votes := make([]VoteWithBalance, count)
+func (otu *OverflowTestUtils) GenerateCheatVote(proposalId int, count int) *[]models.VoteWithBalance {
+	votes := make([]models.VoteWithBalance, count)
 	choices := []string{"a", "b"}
 	for i := 0; i < count; i++ {
 		addr := "0x" + strconv.Itoa(i)
@@ -108,15 +52,15 @@ func (otu *OverflowTestUtils) GenerateCheatVote(proposalId int, count int) *[]Vo
 		v := models.Vote{
 			Proposal_id: proposalId, Addr: addr, Choice: choice,
 		}
-
 		// Balance is 1 FLOW * index
 		balance := 100000000 * (i + 1)
+		dummyBal := createDummyBalance(balance)
 
-		vote := VoteWithBalance{
-			Vote:                    v,
-			Primary_account_balance: uint64(balance),
-			Staking_balance:         uint64(balance * 5), // Make this different so staked/reg strats dont have same results
-			Block_height:            uint64(0),
+		vote := models.VoteWithBalance{
+			Vote:                  v,
+			PrimaryAccountBalance: &dummyBal.Primary,
+			StakingBalance:        &dummyBal.Staking,
+			BlockHeight:           &dummyBal.BlockHeight,
 		}
 
 		votes[i] = vote
@@ -129,7 +73,7 @@ func (otu *OverflowTestUtils) GenerateListOfVotesWithNFTs(
 	proposalId int,
 	count int,
 	contract *shared.Contract,
-) (*[]VoteWithBalance, error) {
+) ([]*models.VoteWithBalance, error) {
 
 	mintParams := shared.MintParams{
 		Recipient:            "user1",
@@ -139,7 +83,7 @@ func (otu *OverflowTestUtils) GenerateListOfVotesWithNFTs(
 		RoyaltyBeneficiaries: []string{"0xf8d6e0586b0a20c7"},
 	}
 
-	var votes []VoteWithBalance
+	var votes []*models.VoteWithBalance
 	choices := []string{"a", "b"}
 
 	otu.SetupAccountForFlow("account")
@@ -171,21 +115,35 @@ func (otu *OverflowTestUtils) GenerateListOfVotesWithNFTs(
 		vote := otu.CreateNFTVote(v, nftIds, contract)
 
 		balance := 100000000 * (i + 1)
-		vote.Primary_account_balance = uint64(balance)
-		vote.Staking_balance = uint64(balance * 5)
-		vote.Block_height = uint64(0)
+		dummyBal := createDummyBalance(balance)
 
-		votes = append(votes, vote)
+		vote.PrimaryAccountBalance = &dummyBal.Primary
+		vote.StakingBalance = &dummyBal.Staking
+		vote.BlockHeight = &dummyBal.BlockHeight
+
+		votes = append(votes, &vote)
 	}
 
-	return &votes, nil
+	return votes, nil
+}
+
+func createDummyBalance(balance int) dummyBalance {
+	primary := uint64(balance)
+	staking := uint64(balance * 5)
+	blockHeight := uint64(0)
+
+	return dummyBalance{
+		Primary:     primary,
+		Staking:     staking,
+		BlockHeight: blockHeight,
+	}
 }
 
 func (otu *OverflowTestUtils) GenerateSingleVoteWithNFT(
 	proposalId int,
 	accountNumber int,
 	contract *shared.Contract,
-) (*VoteWithBalance, error) {
+) (*models.VoteWithBalance, error) {
 	addr := otu.ResolveUser(1)
 	randomNumber := rand.Intn(2)
 	choices := []string{"a", "b"}
@@ -201,31 +159,35 @@ func (otu *OverflowTestUtils) GenerateSingleVoteWithNFT(
 
 	vote := otu.CreateNFTVote(v, nftIds, contract)
 	balance := 100000000 * (accountNumber)
-	vote.Primary_account_balance = uint64(balance)
-	vote.Staking_balance = uint64(balance * 5)
-	vote.Block_height = uint64(0)
+	primary := uint64(balance)
+	staking := uint64(balance * 5)
+	blockHeight := uint64(0)
+
+	vote.PrimaryAccountBalance = &primary
+	vote.StakingBalance = &staking
+	vote.BlockHeight = &blockHeight
 
 	return &vote, nil
 }
 
-func (otu *OverflowTestUtils) CreateNFTVote(v models.Vote, ids []interface{}, contract *shared.Contract) VoteWithBalance {
-	nfts := []models.NFT{}
+func (otu *OverflowTestUtils) CreateNFTVote(v models.Vote, ids []interface{}, contract *shared.Contract) models.VoteWithBalance {
+	nfts := []*models.NFT{}
 
 	for _, id := range ids {
 		idUint, err := strconv.ParseUint(id.(string), 10, 64)
 		if err != nil {
 			fmt.Println(err)
-			return VoteWithBalance{}
+			return models.VoteWithBalance{}
 		}
 
 		NFT := models.NFT{
 			ID:            idUint,
 			Contract_addr: *contract.Addr,
 		}
-		nfts = append(nfts, NFT)
+		nfts = append(nfts, &NFT)
 	}
 
-	vote := VoteWithBalance{
+	vote := models.VoteWithBalance{
 		Vote: v,
 		NFTs: nfts,
 	}
