@@ -438,25 +438,8 @@ func (h *Helpers) createProposal(communityId int, p models.Proposal) (models.Pro
 		return models.Proposal{}, http.StatusInternalServerError, err
 	}
 
-	if *community.Only_authors_to_submit {
-		if err := models.EnsureRoleForCommunity(h.A.DB, p.Creator_addr, communityId, "author"); err != nil {
-			errMsg := fmt.Sprintf("Account %s is not an author for community %d.", p.Creator_addr, p.Community_id)
-			log.Error().Err(err).Msg(errMsg)
-			return models.Proposal{}, http.StatusForbidden, errors.New(errMsg)
-		}
-	} else {
-		hasBalance, err := h.processTokenThreshold(p.Creator_addr, strategy)
-		if err != nil {
-			errMsg := "Error processing Token Threshold."
-			log.Error().Err(err).Msg(errMsg)
-			return models.Proposal{}, http.StatusForbidden, errors.New(errMsg)
-		}
-
-		if !hasBalance {
-			errMsg := "Insufficient token balance to create proposal."
-			log.Error().Err(err).Msg(errMsg)
-			return models.Proposal{}, http.StatusForbidden, errors.New(errMsg)
-		}
+	if err := h.enforceCommunityResitrictions(community, p, strategy); err != nil {
+		return models.Proposal{}, http.StatusForbidden, err
 	}
 
 	if err := h.processSnapshotStatus(&strategy, &p); err != nil {
@@ -472,7 +455,6 @@ func (h *Helpers) createProposal(communityId int, p models.Proposal) (models.Pro
 		return models.Proposal{}, http.StatusInternalServerError, errors.New(errMsg)
 	}
 
-	// validate proposal fields
 	validate := validator.New()
 	vErr := validate.Struct(p)
 	if vErr != nil {
@@ -491,6 +473,36 @@ func (h *Helpers) createProposal(communityId int, p models.Proposal) (models.Pro
 	}
 
 	return p, http.StatusCreated, nil
+}
+
+func (h *Helpers) enforceCommunityResitrictions(
+	c models.Community,
+	p models.Proposal,
+	s models.Strategy,
+) error {
+
+	if *c.Only_authors_to_submit {
+		if err := models.EnsureRoleForCommunity(h.A.DB, p.Creator_addr, c.ID, "author"); err != nil {
+			errMsg := fmt.Sprintf("Account %s is not an author for community %d.", p.Creator_addr, p.Community_id)
+			log.Error().Err(err).Msg(errMsg)
+			return errors.New(errMsg)
+		}
+	} else {
+		hasBalance, err := h.processTokenThreshold(p.Creator_addr, s)
+		if err != nil {
+			errMsg := "Error processing Token Threshold."
+			log.Error().Err(err).Msg(errMsg)
+			return errors.New(errMsg)
+		}
+
+		if !hasBalance {
+			errMsg := "Insufficient token balance to create proposal."
+			log.Error().Err(err).Msg(errMsg)
+			return errors.New(errMsg)
+		}
+	}
+
+	return nil
 }
 
 func (h *Helpers) snapshot(strategy *models.Strategy, p *models.Proposal) error {
