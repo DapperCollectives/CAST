@@ -2,6 +2,7 @@ package server
 
 import (
 	// "errors"
+
 	"context"
 	"flag"
 	"fmt"
@@ -83,7 +84,7 @@ var helpers Helpers
 
 func (a *App) Initialize() {
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
-	log.Logger = log.Logger.Level(zerolog.InfoLevel)
+	log.Logger = log.Logger.Level(zerolog.DebugLevel)
 
 	// Env
 	env := os.Getenv("APP_ENV")
@@ -114,22 +115,22 @@ func (a *App) Initialize() {
 	}
 
 	a.ConnectDB(
-		os.Getenv("DB_USERNAME"), 
-		os.Getenv("DB_PASSWORD"), 
-		os.Getenv("DB_HOST"), 
-		os.Getenv("DB_PORT"), 
+		os.Getenv("DB_USERNAME"),
+		os.Getenv("DB_PASSWORD"),
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_PORT"),
 		dbname,
 	)
 
 	// IPFS
 	a.IpfsClient = shared.NewIpfsClient(os.Getenv("IPFS_KEY"), os.Getenv("IPFS_SECRET"))
-	
+
 	// Flow
 	if os.Getenv("FLOW_ENV") == "" {
 		os.Setenv("FLOW_ENV", "emulator")
 	}
 	a.FlowAdapter = shared.NewFlowClient(os.Getenv("FLOW_ENV"))
-	
+
 	// Snapshot
 	log.Info().Msgf("SNAPSHOT_BASE_URL: %s", os.Getenv("SNAPSHOT_BASE_URL"))
 	a.SnapshotClient = shared.NewSnapshotClient(os.Getenv("SNAPSHOT_BASE_URL"))

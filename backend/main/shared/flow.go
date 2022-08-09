@@ -105,6 +105,10 @@ func (fa *FlowAdapter) GetCurrentBlockHeight() (int, error) {
 	return int(block.Height), nil
 }
 
+func (fa *FlowAdapter) ValidateVoucherSignature(voucher interface{}, signature string) {
+
+}
+
 func (fa *FlowAdapter) UserSignatureValidate(
 	address string,
 	message string,
@@ -116,7 +120,7 @@ func (fa *FlowAdapter) UserSignatureValidate(
 		return nil
 	}
 
-	log.Debug().Msgf("UserSignature validate: %s [%s] %v.", address, message, *sigs)
+	log.Debug().Msgf("UserSignature validate:\nAddress%s\nMessage: %s\nSigs: %v.", address, message, *sigs)
 
 	flowAddress := flow.HexToAddress(address)
 	cadenceAddress := cadence.NewAddress(flowAddress)
@@ -130,7 +134,8 @@ func (fa *FlowAdapter) UserSignatureValidate(
 	}
 
 	// Load script
-	script, err := ioutil.ReadFile("./main/cadence/scripts/validate_signature_v2.cdc")
+	// script, err := ioutil.ReadFile("./main/cadence/scripts/validate_signature_v2.cdc")
+	script, err := ioutil.ReadFile("./main/cadence/scripts/validate_signature_v3.cdc")
 	if err != nil {
 		log.Error().Err(err).Msgf("Error reading cadence script file.")
 		return err

@@ -5,6 +5,7 @@
   "dependencies": {
     "@creativebulma/bulma-tooltip": "^1.2.0",
     "@onflow/fcl": "^1.2.0",
+    "@onflow/sdk": "^1.1.1",
     "@onflow/six-transfer-tokens": "0.0.8",
     "@trivago/prettier-plugin-sort-imports": "^3.3.0",
     "bulma": "0.9.3",

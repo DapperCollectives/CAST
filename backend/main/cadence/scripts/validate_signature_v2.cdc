@@ -29,7 +29,7 @@ pub fun main(
       if pk.verify(
         signature: signatureBytes,
         signedData: messageBytes,
-        domainSeparationTag: "FLOW-V0.0-user",
+        domainSeparationTag: "FLOW-V0.0-transaction",
         hashAlgorithm: key.hashAlgorithm
       ) {
         // this key is good, add weight to total weight

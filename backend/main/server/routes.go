@@ -32,6 +32,7 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/proposals/{proposalId:[0-9]+}/votes/{addr:0x[a-zA-Z0-9]+}", a.getVoteForAddress).Methods("GET")
 	a.Router.HandleFunc("/proposals/{proposalId:[0-9]+}/votes", a.createVoteForProposal).Methods("POST", "OPTIONS")
 	a.Router.HandleFunc("/votes/{addr:0x[a-zA-Z0-9]+}", a.getVotesForAddress).Methods("GET")
+	a.Router.HandleFunc("/validate-voucher-test", a.validateVoucher).Methods("POST", "OPTIONS")
 	//Strategies
 	// a.Router.HandleFunc("/proposals/{proposalId:[0-9]+}/votes/{addr:0x[a-zA-Z0-9]{16}}", a.updateVoteForProposal).Methods("PUT", "OPTIONS")
 	a.Router.HandleFunc("/proposals/{proposalId:[0-9]+}/results", a.getResultsForProposal)

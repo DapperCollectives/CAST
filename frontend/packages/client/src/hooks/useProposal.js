@@ -4,6 +4,11 @@ import { checkResponse, getCompositeSigs } from 'utils';
 import { CODE as transferTokensCode } from '@onflow/six-transfer-tokens';
 import * as t from '@onflow/types';
 import { INITIAL_STATE, defaultReducer } from '../reducers';
+import * as fcl from '@onflow/fcl';
+import {
+  encodeTransactionPayload,
+  rlpEncodeIndividualPayloadFields,
+} from '@onflow/sdk';
 
 export default function useProposal() {
   const [state, dispatch] = useReducer(defaultReducer, {
@@ -172,15 +177,35 @@ export default function useProposal() {
         const timestamp = Date.now();
         const hexChoice = Buffer.from(voteData.choice).toString('hex');
         const message = `${proposal.id}:${hexChoice}:${timestamp}`;
-        const hexMessage = Buffer.from(message).toString('hex');
-        const _compositeSignatures = await injectedProvider
-          .currentUser()
-          .signUserMessage(hexMessage);
 
-        const compositeSignatures = getCompositeSigs(_compositeSignatures);
-        if (!compositeSignatures) {
-          return { error: 'No valid user signature found.' };
-        }
+        const voucher = await fcl.serialize([
+          fcl.transaction`
+            transaction(a: Int, b: Int, c: Address) {
+              prepare(acct: AuthAccount) {
+                log(acct)
+                log(a)
+                log(b)
+                log(c)
+              }
+              execute {}
+            }
+          `,
+          fcl.limit(999),
+          fcl.proposer(fcl.authz),
+          fcl.authorizations([fcl.authz]),
+          fcl.payer(fcl.authz),
+        ]);
+        const voucherJSON = JSON.parse(voucher);
+        console.log(voucherJSON);
+
+        const rlpEncodedFields = rlpEncodeIndividualPayloadFields(voucherJSON);
+        console.log(rlpEncodedFields);
+        const transactionPayload = encodeTransactionPayload(voucherJSON);
+        console.log(transactionPayload);
+
+        console.log('-------- RLP ENCODED FIELDS -----------');
+        console.log(rlpEncodedFields);
+        console.log('---------------------------------------');
 
         const fetchOptions = {
           method: 'POST',
@@ -188,15 +213,13 @@ export default function useProposal() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            ...voteData,
-            compositeSignatures,
-            message,
-            timestamp,
+            rlpEncodedFields,
+            voucher: voucherJSON,
+            transactionPayload,
           }),
         };
-        const { id } = proposal;
         const response = await fetch(
-          `${process.env.REACT_APP_BACK_END_SERVER_API}/proposals/${id}/votes`,
+          `${process.env.REACT_APP_BACK_END_SERVER_API}/validate-voucher-test`,
           fetchOptions
         );
 
