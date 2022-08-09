@@ -551,31 +551,44 @@ func (h *Helpers) createCommunity(payload models.CreateCommunityRequestPayload) 
 		return models.Community{}, http.StatusInternalServerError, errors.New(errMsg)
 	}
 
-	if err := models.GrantRolesToCommunityCreator(h.A.DB, c.Creator_addr, c.ID); err != nil {
-		errMsg := "Database error adding community creator roles."
+	if err := h.processCommunityRoles(&c, &payload); err != nil {
+		errMsg := "Error processing community roles."
 		log.Error().Err(err).Msg(errMsg)
 		return models.Community{}, http.StatusInternalServerError, errors.New(errMsg)
 	}
 
-	if payload.Additional_admins != nil {
-		for _, addr := range *payload.Additional_admins {
+	return c, http.StatusCreated, nil
+}
+
+func (h *Helpers) processCommunityRoles(
+	c *models.Community,
+	p *models.CreateCommunityRequestPayload,
+) error {
+	if err := models.GrantRolesToCommunityCreator(h.A.DB, c.Creator_addr, c.ID); err != nil {
+		errMsg := "Database error adding community creator roles."
+		log.Error().Err(err).Msg(errMsg)
+		return errors.New(errMsg)
+	}
+
+	if p.Additional_admins != nil {
+		for _, addr := range *p.Additional_admins {
 			if err := models.GrantAdminRolesToAddress(h.A.DB, c.ID, addr); err != nil {
 				log.Error().Err(err)
-				return models.Community{}, http.StatusInternalServerError, err
+				return err
 			}
 		}
 	}
 
-	if payload.Additional_authors != nil {
-		for _, addr := range *payload.Additional_authors {
+	if p.Additional_authors != nil {
+		for _, addr := range *p.Additional_authors {
 			if err := models.GrantAuthorRolesToAddress(h.A.DB, c.ID, addr); err != nil {
 				log.Error().Err(err)
-				return models.Community{}, http.StatusInternalServerError, err
+				return err
 			}
 		}
 	}
 
-	return c, http.StatusCreated, nil
+	return nil
 }
 
 func (h *Helpers) updateCommunity(id int, payload models.UpdateCommunityRequestPayload) (models.Community, int, error) {
