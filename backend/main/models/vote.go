@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/DapperCollectives/CAST/backend/main/shared"
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/google/uuid"
@@ -69,12 +70,13 @@ const (
 
 func GetVotesForAddress(
 	db *s.Database,
-	start, count int,
+	order shared.OrderedPageParams,
 	address string,
 	proposalIds *[]int,
 ) ([]*VoteWithBalance, int, error) {
 	var votes []*VoteWithBalance
 	var err error
+
 	sql := `select v.*, 
 		b.primary_account_balance,
 		b.secondary_account_balance,
@@ -82,17 +84,17 @@ func GetVotesForAddress(
 		from votes v
 		left join balances b on b.addr = v.addr
 		WHERE v.addr = $3`
+
 	// Conditionally add proposal_id condition
 	if len(*proposalIds) > 0 {
 		sql = sql + " AND proposal_id = ANY($4)"
 		sql = sql + "LIMIT $1 OFFSET $2 "
 		err = pgxscan.Select(db.Context, db.Conn, &votes,
-			sql, count, start, address, *proposalIds)
+			sql, order.Count, order.Start, address, *proposalIds)
 	} else {
 		sql = sql + "LIMIT $1 OFFSET $2 "
 		err = pgxscan.Select(db.Context, db.Conn, &votes,
-
-			sql, count, start, address)
+			sql, order.Count, order.Start, address)
 	}
 
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {

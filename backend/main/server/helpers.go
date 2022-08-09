@@ -129,6 +129,7 @@ func (h *Helpers) useStrategyGetVoteWeight(
 	if err != nil {
 		return 0, err
 	}
+
 	return weight, nil
 }
 
@@ -246,8 +247,7 @@ func (h *Helpers) processVotes(
 ) {
 	votes, totalRecords, err := models.GetVotesForAddress(
 		h.A.DB,
-		order.Start,
-		order.Count,
+		order,
 		addr,
 		&ids,
 	)
