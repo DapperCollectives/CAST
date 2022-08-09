@@ -431,21 +431,11 @@ func (h *Helpers) createProposal(communityId int, p models.Proposal) (models.Pro
 		return models.Proposal{}, http.StatusInternalServerError, errors.New(errMsg)
 
 	}
-	s := h.initStrategy(*strategy.Name)
-
 	p.Min_balance = strategy.Contract.Threshold
 	p.Max_weight = strategy.Contract.MaxWeight
 
-	var snapshotResponse *shared.SnapshotResponse
-	if s.RequiresSnapshot() {
-		snapshotResponse, err = h.A.SnapshotClient.TakeSnapshot(strategy.Contract)
-		if err != nil {
-			errMsg := "Error taking snapshot."
-			log.Error().Err(err).Msg(errMsg)
-			return models.Proposal{}, http.StatusInternalServerError, errors.New(errMsg)
-		}
-		p.Block_height = &snapshotResponse.Data.BlockHeight
-		p.Snapshot_status = &snapshotResponse.Data.Status
+	if err := h.snapshot(&strategy, &p); err != nil {
+		return models.Proposal{}, http.StatusInternalServerError, err
 	}
 
 	if *community.Only_authors_to_submit {
@@ -501,6 +491,23 @@ func (h *Helpers) createProposal(communityId int, p models.Proposal) (models.Pro
 	}
 
 	return p, http.StatusCreated, nil
+}
+
+func (h *Helpers) snapshot(strategy *models.Strategy, p *models.Proposal) error {
+	s := h.initStrategy(*strategy.Name)
+
+	//var snapshotResponse *shared.SnapshotResponse
+	if s.RequiresSnapshot() {
+		snapshotResponse, err := h.A.SnapshotClient.TakeSnapshot(strategy.Contract)
+		if err != nil {
+			errMsg := "Error taking snapshot."
+			return errors.New(errMsg)
+		}
+		p.Block_height = &snapshotResponse.Data.BlockHeight
+		p.Snapshot_status = &snapshotResponse.Data.Status
+	}
+
+	return nil
 }
 
 func (h *Helpers) createCommunity(payload models.CreateCommunityRequestPayload) (models.Community, int, error) {
