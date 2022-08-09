@@ -1,50 +1,5 @@
 package main
 
-import (
-	"encoding/json"
-	"net/http"
-	"testing"
-
-	"github.com/DapperCollectives/CAST/backend/main/test_utils"
-	"github.com/stretchr/testify/assert"
-)
-
-func TestGetLeaderboard(t *testing.T) {
-
-	clearTable("communities")
-	clearTable("community_users")
-	clearTable("user_achievements")
-	clearTable("proposals")
-	clearTable("votes")
-
-	communityId := otu.AddCommunities(1)[0]
-
-	expectedUsers := 2
-	expectedProposals := 2
-
-	// users get single vote for each proposal they voted on
-	expectedScore := expectedProposals
-
-	otu.GenerateVotes(communityId, expectedProposals, expectedUsers)
-
-	// Remove all achievements to test base case for scoring
-
-	response := otu.GetCommunityLeaderboardAPI(communityId)
-	checkResponseCode(t, http.StatusOK, response.Code)
-
-	var p test_utils.PaginatedResponseWithLeaderboardUser
-	json.Unmarshal(response.Body.Bytes(), &p)
-
-	users := p.Data.Users
-
-	receivedUser1Score := users[0].Score
-	receivedUser2Score := users[1].Score
-
-	assert.Equal(t, expectedUsers, len(users))
-	assert.Equal(t, expectedScore, receivedUser1Score)
-	assert.Equal(t, expectedScore, receivedUser2Score)
-}
-
 // TODO: These tests appear to have broken, will fix/investigate in Leaderboard Bug Fix tickets (JB)
 
 // func TestGetLeaderboardCurrentUser(t *testing.T) {
