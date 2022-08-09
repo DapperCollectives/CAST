@@ -146,24 +146,18 @@ func (a *App) getProposalsForCommunity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	start, count, order := getOrderedPageParams(r.FormValue("start"), r.FormValue("count"), r.FormValue("order"), 25)
+	order := getOrderedPageParams(r.FormValue("start"), r.FormValue("count"), r.FormValue("order"), 25)
 	status := r.FormValue("status")
 
-	orderParams := shared.OrderedPageParams{
-		Start: start,
-		Count: count,
-		Order: order,
-	}
-
-	proposals, totalRecords, err := models.GetProposalsForCommunity(a.DB, start, count, communityId, status, order)
+	proposals, totalRecords, err := models.GetProposalsForCommunity(a.DB, order, communityId, status)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	orderParams.TotalRecords = totalRecords
+	order.TotalRecords = totalRecords
 
-	response := shared.GetPaginatedResponseWithPayload(proposals, orderParams)
+	response := shared.GetPaginatedResponseWithPayload(proposals, order)
 	respondWithJSON(w, http.StatusOK, response)
 }
 
@@ -174,7 +168,7 @@ func (a *App) getProposal(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID.")
 		return
 	}
-	
+
 	c, httpStatus, err := helpers.fetchCommunity(p.Community_id)
 	if err != nil {
 		respondWithError(w, httpStatus, err.Error())
@@ -332,7 +326,7 @@ func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 
 	c, httpStatus, err := helpers.createCommunity(payload)
 	if err != nil {
-		respondWithError(w, httpStatus, err.Error())	
+		respondWithError(w, httpStatus, err.Error())
 		return
 	}
 
@@ -356,7 +350,7 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 	c, httpStatus, err := helpers.updateCommunity(id, payload)
 	if err != nil {
 		respondWithError(w, httpStatus, err.Error())
-		return	
+		return
 	}
 
 	respondWithJSON(w, http.StatusOK, c)
@@ -745,7 +739,7 @@ func validatePayload(body io.ReadCloser, data interface{}) error {
 	return nil
 }
 
-func getOrderedPageParams(start, count, order string, defaultCount int) (int, int, string) {
+func getOrderedPageParams(start, count, order string, defaultCount int) shared.OrderedPageParams {
 	s, _ := strconv.Atoi(start)
 	c, _ := strconv.Atoi(count)
 	if order == "" {
@@ -757,7 +751,12 @@ func getOrderedPageParams(start, count, order string, defaultCount int) (int, in
 	if s < 0 {
 		s = 0
 	}
-	return s, c, order
+
+	return shared.OrderedPageParams{
+		Start: s,
+		Count: c,
+		Order: order,
+	}
 }
 
 func getPageParams(start, count string, defaultCount int) (int, int) {

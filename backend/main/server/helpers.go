@@ -172,7 +172,7 @@ func (h *Helpers) getPaginatedVotes(
 	error,
 ) {
 
-	start, count, order := getOrderedPageParams(
+	order := getOrderedPageParams(
 		r.FormValue("start"),
 		r.FormValue("count"),
 		r.FormValue("order"),
@@ -181,8 +181,6 @@ func (h *Helpers) getPaginatedVotes(
 
 	votes, totalRecords, err := models.GetVotesForProposal(
 		h.A.DB,
-		start,
-		count,
 		order,
 		p.ID,
 		*p.Strategy,
@@ -191,14 +189,9 @@ func (h *Helpers) getPaginatedVotes(
 		return nil, shared.OrderedPageParams{}, err
 	}
 
-	ordered := shared.OrderedPageParams{
-		Start:        start,
-		Count:        count,
-		Order:        order,
-		TotalRecords: totalRecords,
-	}
+	order.TotalRecords = totalRecords
 
-	return votes, ordered, nil
+	return votes, order, nil
 }
 
 func (h *Helpers) processVote(addr string, p models.Proposal) (*models.VoteWithBalance, error) {

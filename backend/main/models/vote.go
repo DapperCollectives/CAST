@@ -145,10 +145,16 @@ func GetAllVotesForProposal(db *s.Database, proposalId int, strategy string) ([]
 	return votes, nil
 }
 
-func GetVotesForProposal(db *s.Database, start, count int, order string, proposalId int, strategy string) ([]*VoteWithBalance, int, error) {
+func GetVotesForProposal(
+	db *s.Database,
+	params shared.OrderedPageParams,
+	proposalId int,
+	strategy string,
+) ([]*VoteWithBalance, int, error) {
 	var votes []*VoteWithBalance
 	var orderBySql string
-	if order == "desc" {
+
+	if params.Order == "desc" {
 		orderBySql = "ORDER BY b.created_at DESC"
 	} else {
 		orderBySql = "ORDER BY b.created_at ASC"
@@ -168,7 +174,7 @@ func GetVotesForProposal(db *s.Database, start, count int, order string, proposa
 	sql = sql + " " + orderBySql
 	sql = sql + " LIMIT $1 OFFSET $2"
 
-	err := pgxscan.Select(db.Context, db.Conn, &votes, sql, count, start, proposalId)
+	err := pgxscan.Select(db.Context, db.Conn, &votes, sql, params.Count, params.Start, proposalId)
 
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		log.Error().Err(err).Msg("Error querying votes for proposal")
