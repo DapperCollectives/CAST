@@ -303,7 +303,7 @@ func handleCancelledProposal(db *s.Database, proposalId int) error {
 
 	// Delete All votes for cancelled proposal
 	_, err := db.Conn.Exec(db.Context, `
-		DELETE FROM votes WHERE proposal_id = $1
+		UPDATE votes SET is_cancelled = 'true' WHERE proposal_id = $1
 	`, proposalId)
 
 	if err != nil {
@@ -319,14 +319,22 @@ func handleCancelledProposal(db *s.Database, proposalId int) error {
 		return err
 	}
 
+	 err = updateStreak(db, proposalId)
+	 if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func updateStreak(db *s.Database, proposalId int) error {
 	var achievements = []struct {
 		Id int64 `json:"id"`
 		Proposals []int64 `json:"proposals"`
 		Details string `json:"details"`
 	}{}
 
-	// handle streaks
-	err = pgxscan.Select(db.Context, db.Conn, &achievements, `
+	err := pgxscan.Select(db.Context, db.Conn, &achievements, `
 		SELECT id, proposals, details FROM user_achievements WHERE $1 = ANY (proposals) AND achievement_type = 'streak'
 	`, proposalId)
 
@@ -346,18 +354,18 @@ func handleCancelledProposal(db *s.Database, proposalId int) error {
 			}
 		}
 
-		// Remove proposalId from array
+		// Remove cancelled proposalId from array
 		copy(a.Proposals[index:], a.Proposals[index+1:])
 		a.Proposals = a.Proposals[:len(a.Proposals)-1]
 
 		// NOTE: If cancelled proposal is in the middle of a streak greater than 3, the user will maintain
 		// their streak, but it will be one less in length. Streaks are not split into smaller streaks wrt
 		// cancelled proposals.
-		if(len(a.Proposals) >= 3) {
+		if(len(a.Proposals) >= defaultStreakLength) {
 			// update details with updated proposals array
-			strProps := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(a.Proposals)), ","), "[]")
+			updatedStreak := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(a.Proposals)), ","), "[]")
 			s := strings.Split(a.Details, ":")
-			s[3] = strProps
+			s[3] = updatedStreak
 			a.Details = strings.Join(s, ":")
 			
 			_, err := db.Conn.Exec(db.Context, `
@@ -375,7 +383,6 @@ func handleCancelledProposal(db *s.Database, proposalId int) error {
 				return err
 			}
 		}
-
 	}
 
 	return nil
