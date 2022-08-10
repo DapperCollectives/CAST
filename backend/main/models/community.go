@@ -33,7 +33,7 @@ type Community struct {
 	Proposal_validation      *string     `json:"proposalValidation,omitempty"`
 	Proposal_threshold       *string     `json:"proposalThreshold,omitempty"`
 	Slug                     *string     `json:"slug,omitempty"                  validate:"required"`
-	Is_featured      		 *bool		 `json:"isFeatured,omitempty"`
+	Is_featured              *bool       `json:"isFeatured,omitempty"`
 
 	//TODO we can remove this from the struct as contract data is inside Strategies now
 	Contract_name *string  `json:"contractName,omitempty"`
@@ -106,13 +106,13 @@ func (c *Community) GetCommunity(db *s.Database) error {
 		c.ID)
 }
 
-func GetCommunities(db *s.Database, start, count int) ([]*Community, int, error) {
+func GetCommunities(db *s.Database, pageParams shared.PageParams) ([]*Community, int, error) {
 	var communities []*Community
 	err := pgxscan.Select(db.Context, db.Conn, &communities,
 		`
 		SELECT * FROM communities
 		LIMIT $1 OFFSET $2
-		`, count, start)
+		`, pageParams.Count, pageParams.Start)
 
 	// If we get pgx.ErrNoRows, just return an empty array
 	// and obfuscate error
@@ -136,7 +136,7 @@ func (c *Community) GetCommunityByProposalId(db *s.Database, proposalId int) err
 		proposalId)
 }
 
-func GetCommunitiesForHomePage(db *s.Database, start, count int) ([]*Community, int, error) {
+func GetCommunitiesForHomePage(db *s.Database, params shared.PageParams) ([]*Community, int, error) {
 	var communities []*Community
 
 	err := pgxscan.Select(db.Context, db.Conn, &communities,
@@ -160,7 +160,7 @@ func GetCommunitiesForHomePage(db *s.Database, start, count int) ([]*Community, 
   	))
 	OR is_featured = 'true'
 		LIMIT $1 OFFSET $2
-		`, count, start)
+		`, params.Count, params.Start)
 
 	// If we get pgx.ErrNoRows, just return an empty array
 	// and obfuscate error
