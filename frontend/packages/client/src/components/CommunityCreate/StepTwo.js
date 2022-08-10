@@ -125,7 +125,6 @@ export default function StepTwo({ stepData, onDataChange, moveToNextStep }) {
         update={updateOnAdmin}
         addrType={'admin'}
         errors={errors}
-        showValidIcon={false}
       />
       <AddressForm
         removeInnerForm
@@ -154,7 +153,6 @@ export default function StepTwo({ stepData, onDataChange, moveToNextStep }) {
         update={updateOnAuthor}
         addrType={'author'}
         errors={errors}
-        showValidIcon={false}
       />
       <div className="columns mb-5">
         <div className="column is-12">

@@ -19,7 +19,6 @@ export default function AddressForm({
   removeInnerForm,
   isSubmitting = false,
   handleSubmit,
-  showValidIcon,
 } = {}) {
   const onClearField = useCallback(
     (index) => {
@@ -41,7 +40,6 @@ export default function AddressForm({
         update={update}
         isSubmitting={isSubmitting}
         errors={errors}
-        showValidIcon={showValidIcon}
         onClearField={onClearField}
       />
     ),
@@ -55,7 +53,6 @@ export default function AddressForm({
       isValid,
       addrType,
       listName,
-      showValidIcon,
       onClearField,
     ]
   );
