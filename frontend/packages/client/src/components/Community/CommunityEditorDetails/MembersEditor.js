@@ -126,6 +126,8 @@ export default function MembersEditor({
       );
       return;
     }
+    // if all updates when well: reset values on form with updated values
+    reset({ addrList: addrList }, { keepDirty: false });
   };
 
   return (
