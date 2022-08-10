@@ -29,7 +29,7 @@ export default function StepTwo({
   });
 
   const { isDirty, isSubmitting, errors, isValid } = formState;
-
+  // list for admins
   const {
     fields: addrAdminList,
     append: appendToAdmin,
@@ -40,6 +40,7 @@ export default function StepTwo({
     name: 'listAddrAdmins',
     focusAppend: true,
   });
+  // list for authors
   const {
     fields: addrAuthorList,
     append: appendToAuthor,
@@ -67,7 +68,6 @@ export default function StepTwo({
       addrAdminList.length === 0 &&
       addrAuthorList.length === 0
     ) {
-      console.log('RESETING');
       reset(
         {
           listAddrAdmins,
