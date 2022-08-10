@@ -146,9 +146,9 @@ func (a *App) getProposalsForCommunity(w http.ResponseWriter, r *http.Request) {
 
 	proposals, totalRecords, err := models.GetProposalsForCommunity(
 		a.DB,
-		pageParams,
 		communityId,
 		status,
+		pageParams,
 	)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
@@ -594,26 +594,19 @@ func (a *App) getCommunityUsersByType(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	count, _ := strconv.Atoi(r.FormValue("count"))
-	start, _ := strconv.Atoi(r.FormValue("start"))
-	if count > 100 || count < 1 {
-		count = 100
-	}
-	if start < 0 {
-		start = 0
-	}
-
-	users, totalRecords, err := models.GetUsersForCommunityByType(a.DB, communityId, start, count, userType)
-
+	pageParams := getPageParams(*r, 100)
+	users, totalRecords, err := models.GetUsersForCommunityByType(
+		a.DB,
+		communityId,
+		userType,
+		pageParams,
+	)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	pageParams := shared.OrderedPageParams{
-		Start:        start,
-		Count:        count,
-		TotalRecords: totalRecords,
-	}
+	pageParams.TotalRecords = totalRecords
+
 	response := shared.GetPaginatedResponseWithPayload(users, pageParams)
 	respondWithJSON(w, http.StatusOK, response)
 }
@@ -718,7 +711,7 @@ func validatePayload(body io.ReadCloser, data interface{}) error {
 	return nil
 }
 
-func getPageParams(r http.Request, defaultCount int) shared.OrderedPageParams {
+func getPageParams(r http.Request, defaultCount int) shared.PageParams {
 	s, _ := strconv.Atoi(r.FormValue("start"))
 	c, _ := strconv.Atoi(r.FormValue("count"))
 	o := r.FormValue("order")
@@ -734,7 +727,7 @@ func getPageParams(r http.Request, defaultCount int) shared.OrderedPageParams {
 		s = 0
 	}
 
-	return shared.OrderedPageParams{
+	return shared.PageParams{
 		Start: s,
 		Count: c,
 		Order: o,

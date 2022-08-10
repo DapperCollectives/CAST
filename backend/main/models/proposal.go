@@ -59,9 +59,9 @@ var computedStatusSQL = `
 
 func GetProposalsForCommunity(
 	db *s.Database,
-	params shared.OrderedPageParams,
 	communityId int,
 	status string,
+	params shared.PageParams,
 ) ([]*Proposal, int, error) {
 	var proposals []*Proposal
 	var err error

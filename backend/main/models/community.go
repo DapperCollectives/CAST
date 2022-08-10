@@ -106,7 +106,7 @@ func (c *Community) GetCommunity(db *s.Database) error {
 		c.ID)
 }
 
-func GetCommunities(db *s.Database, pageParams shared.OrderedPageParams) ([]*Community, int, error) {
+func GetCommunities(db *s.Database, pageParams shared.PageParams) ([]*Community, int, error) {
 	var communities []*Community
 	err := pgxscan.Select(db.Context, db.Conn, &communities,
 		`
@@ -136,7 +136,7 @@ func (c *Community) GetCommunityByProposalId(db *s.Database, proposalId int) err
 		proposalId)
 }
 
-func GetCommunitiesForHomePage(db *s.Database, params shared.OrderedPageParams) ([]*Community, int, error) {
+func GetCommunitiesForHomePage(db *s.Database, params shared.PageParams) ([]*Community, int, error) {
 	var communities []*Community
 
 	err := pgxscan.Select(db.Context, db.Conn, &communities,

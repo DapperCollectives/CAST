@@ -72,7 +72,7 @@ func GetVotesForAddress(
 	db *s.Database,
 	address string,
 	proposalIds *[]int,
-	pageParams shared.OrderedPageParams,
+	pageParams shared.PageParams,
 ) ([]*VoteWithBalance, int, error) {
 	var votes []*VoteWithBalance
 	var err error
@@ -149,7 +149,7 @@ func GetVotesForProposal(
 	db *s.Database,
 	proposalId int,
 	strategy string,
-	pageParams shared.OrderedPageParams,
+	pageParams shared.PageParams,
 ) ([]*VoteWithBalance, int, error) {
 	var votes []*VoteWithBalance
 	var orderBySql string

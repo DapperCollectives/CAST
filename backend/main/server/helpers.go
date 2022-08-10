@@ -168,7 +168,7 @@ func (h *Helpers) getPaginatedVotes(
 	p models.Proposal,
 ) (
 	[]*models.VoteWithBalance,
-	shared.OrderedPageParams,
+	shared.PageParams,
 	error,
 ) {
 
@@ -181,7 +181,7 @@ func (h *Helpers) getPaginatedVotes(
 		pageParams,
 	)
 	if err != nil {
-		return nil, shared.OrderedPageParams{}, err
+		return nil, shared.PageParams{}, err
 	}
 
 	pageParams.TotalRecords = totalRecords
@@ -227,17 +227,17 @@ func (h *Helpers) fetchVote(addr string, id int) (*models.VoteWithBalance, error
 func (h *Helpers) processVotes(
 	addr string,
 	ids []int,
-	pageParams shared.OrderedPageParams,
+	pageParams shared.PageParams,
 ) (
 	[]*models.VoteWithBalance,
-	shared.OrderedPageParams,
+	shared.PageParams,
 	error,
 ) {
 	votes, totalRecords, err := models.GetVotesForAddress(
 		h.A.DB,
-		pageParams,
 		addr,
 		&ids,
+		pageParams,
 	)
 	if err != nil {
 		log.Error().Err(err).Msg("Error getting votes for address.")

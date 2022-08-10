@@ -61,7 +61,7 @@ type LeaderboardPayload struct {
 	CurrentUser LeaderboardUser   `json:"currentUser"`
 }
 
-func GetUsersForCommunity(db *s.Database, communityId int, pageParams shared.OrderedPageParams) ([]CommunityUserType, int, error) {
+func GetUsersForCommunity(db *s.Database, communityId int, pageParams shared.PageParams) ([]CommunityUserType, int, error) {
 	var users = []CommunityUserType{}
 	err := pgxscan.Select(db.Context, db.Conn, &users,
 		`
@@ -96,13 +96,18 @@ func GetUsersForCommunity(db *s.Database, communityId int, pageParams shared.Ord
 	return users, totalUsers, nil
 }
 
-func GetUsersForCommunityByType(db *s.Database, communityId, start, count int, user_type string) ([]CommunityUser, int, error) {
+func GetUsersForCommunityByType(
+	db *s.Database,
+	communityId int,
+	user_type string,
+	pageParams shared.PageParams,
+) ([]CommunityUser, int, error) {
 	var users = []CommunityUser{}
 	err := pgxscan.Select(db.Context, db.Conn, &users,
 		`
 		SELECT * FROM community_users WHERE community_id = $1 AND user_type = $2
 		LIMIT $3 OFFSET $4
-		`, communityId, user_type, count, start)
+		`, communityId, user_type, pageParams.Count, pageParams.Start)
 
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		return nil, 0, err
@@ -121,7 +126,7 @@ func GetCommunityLeaderboard(
 	db *s.Database,
 	communityId int,
 	addr string,
-	pageParams shared.OrderedPageParams,
+	pageParams shared.PageParams,
 ) (LeaderboardPayload, int, error) {
 	var payload = LeaderboardPayload{}
 
@@ -150,7 +155,7 @@ func GetCommunityLeaderboard(
 	return payload, totalUsers, nil
 }
 
-func GetCommunitiesForUser(db *s.Database, addr string, pageParams shared.OrderedPageParams) ([]UserCommunity, int, error) {
+func GetCommunitiesForUser(db *s.Database, addr string, pageParams shared.PageParams) ([]UserCommunity, int, error) {
 	var communities = []UserCommunity{}
 
 	err := pgxscan.Select(db.Context, db.Conn, &communities,
