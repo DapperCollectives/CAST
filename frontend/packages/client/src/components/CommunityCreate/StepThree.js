@@ -1,28 +1,13 @@
-import React, { useEffect } from 'react';
-import { WrapperResponsive } from 'components';
-import { isValidAddress } from 'utils';
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { useWebContext } from 'contexts/Web3';
+import { ActionButton, WrapperResponsive } from 'components';
+import Input from 'components/common/Input';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { stepThree } from './FormConfig';
 
-const allEmptyFields = (data) => {
-  // all fields are undefined: form untouched or empty strings
-  const fields = [
-    'contractAddress',
-    'contractName',
-    'storagePath',
-    'proposalThreshold',
-  ];
-  return fields.every(
-    (field) => data[field] === undefined || data[field] === ''
-  );
-};
-const allFieldsFilled = (data) => {
-  // all fields have data and are not empty strings: form touched
-  return [
-    'contractAddress',
-    'contractName',
-    'storagePath',
-    'proposalThreshold',
-  ].every((field) => data[field] !== undefined && data[field] !== '');
-};
+const { Schema } = stepThree;
+
 export default function StepThree({
   stepData = {},
   setStepValid,
@@ -38,33 +23,31 @@ export default function StepThree({
     onlyAuthorsToSubmitProposals = false,
   } = stepData;
 
-  useEffect(() => {
-    const requiredFields = {
-      contractAddress: (addr) =>
-        addr?.trim().length > 0 ? isValidAddress(addr) : true,
-      contractName: (name) =>
-        name?.trim().length > 0 ? name?.trim().length <= 150 : true,
-      storagePath: (path) =>
-        path?.trim().length > 0 ? path?.trim().length <= 150 : true,
-      proposalThreshold: (threshold) =>
-        threshold?.trim().length > 0 ? /^[0-9]+$/.test(threshold) : true,
-    };
+  const { isValidFlowAddress } = useWebContext();
 
-    const isValid =
-      Object.keys(requiredFields).every(
-        (field) => stepData && requiredFields[field](stepData[field])
-      ) &&
-      // only autors can submit, Ignore all other fields they must be empty
-      ((allEmptyFields(stepData) && onlyAuthorsToSubmitProposals) ||
-        // all fields are complete with valid data
-        // (onlyAuthorsToSubmitProposals could be checked or not)
-        allFieldsFilled(stepData));
+  const { register, control, handleSubmit, reset, formState, watch } = useForm({
+    resolver: yupResolver(Schema(isValidFlowAddress)),
+    defaultValues: {
+      proposalThreshold,
+      contractAddress,
+      contractName,
+      storagePath,
+      onlyAuthorsToSubmitProposals,
+    },
+  });
+  const onSubmit = (data) => {
+    console.log(data);
 
-    setStepValid(isValid);
-  }, [stepData, setStepValid, onlyAuthorsToSubmitProposals]);
-
+    // onDataChange({ listAddrAdmins: admins, listAddrAuthors: authors });
+    // moveToNextStep();
+  };
+  const { isDirty, isSubmitting, errors, isValid } = formState;
+  console.log('Errors ', errors);
+  console.log('isDirty ', isDirty);
+  console.log('isValid ', isValid);
+  console.log('watch ', watch('onlyAuthorsToSubmitProposals'));
   return (
-    <>
+    <form onSubmit={handleSubmit(onSubmit)}>
       <WrapperResponsive
         classNames="border-light rounded-lg columns is-flex-direction-column is-mobile m-0"
         extraClasses="p-6 mb-5"
@@ -83,57 +66,46 @@ export default function StepThree({
             </p>
           </div>
         </div>
-        <input
-          type="text"
+        <Input
           placeholder="Contract Address"
-          name="contract_address"
-          className="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
-          value={contractAddress}
-          onChange={(event) =>
-            onDataChange({ contractAddress: event.target.value })
-          }
+          register={register}
+          name="contractAddress"
+          disabled={isSubmitting}
+          error={errors['contractAddress']}
+          classNames="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
         />
-        <input
-          type="text"
+        <Input
           placeholder="Contract Name"
-          name="contract_name"
-          className="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
-          value={contractName}
-          onChange={(event) =>
-            onDataChange({ contractName: event.target.value })
-          }
+          register={register}
+          name="contractName"
+          disabled={isSubmitting}
+          error={errors['contractName']}
+          classNames="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
         />
-        <input
-          type="text"
+        <Input
           placeholder="Collection Public Path"
-          name="collection_public_path"
-          className="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
-          value={storagePath}
-          onChange={(event) =>
-            onDataChange({ storagePath: event.target.value })
-          }
+          name="storagePath"
+          register={register}
+          disabled={isSubmitting}
+          error={errors['storagePath']}
+          classNames="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
         />
-        <input
-          type="text"
+        <Input
           placeholder="Number of Tokens"
-          name="proposal_threshold"
-          className="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
-          value={proposalThreshold}
-          onChange={(event) =>
-            onDataChange({ proposalThreshold: event.target.value })
-          }
+          name="proposalThreshold"
+          register={register}
+          disabled={isSubmitting}
+          error={errors['proposalThreshold']}
+          classNames="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
         />
-
         <label className="checkbox column is-flex is-align-items-center is-full is-full-mobile px-0 mt-4 mb-4">
-          <input
+          <Input
             type="checkbox"
-            className="mr-2 form-checkbox"
-            checked={onlyAuthorsToSubmitProposals}
-            onChange={(e) => {
-              onDataChange({
-                onlyAuthorsToSubmitProposals: !onlyAuthorsToSubmitProposals,
-              });
-            }}
+            name="onlyAuthorsToSubmitProposals"
+            register={register}
+            disabled={isSubmitting}
+            error={errors['onlyAuthorsToSubmitProposals']}
+            classNames="mr-2 form-checkbox"
           />
           <p className="has-text-grey small-text">
             Allow only designated authors to submit proposals
@@ -142,17 +114,14 @@ export default function StepThree({
       </WrapperResponsive>
       <div className="columns mb-5">
         <div className="column is-12">
-          <button
-            style={{ height: 48, width: '100%' }}
-            className={`button vote-button is-flex has-background-yellow rounded-sm is-size-6 is-uppercase is-${
-              isStepValid ? 'enabled' : 'disabled'
-            }`}
-            onClick={isStepValid ? () => moveToNextStep() : () => {}}
-          >
-            Next: VOTING STRATEGIES
-          </button>
+          <ActionButton
+            type="submit"
+            label="Next: VOTING STRATEGIES"
+            enabled={(isValid || isDirty) && !isSubmitting}
+            classNames="vote-button transition-all has-background-yellow mt-5"
+          />
         </div>
       </div>
-    </>
+    </form>
   );
 }
