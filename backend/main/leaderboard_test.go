@@ -1,112 +1,114 @@
 package main
 
-// TODO: These tests appear to have broken, will fix/investigate in Leaderboard Bug Fix tickets (JB)
+import (
+	"encoding/json"
+	"net/http"
+	"sort"
+	"testing"
+	"time"
 
-// func TestGetLeaderboardCurrentUser(t *testing.T) {
-// 	clearTable("communities")
-// 	clearTable("community_users")
-// 	clearTable("user_achievements")
-// 	clearTable("proposals")
-// 	clearTable("votes")
+	"github.com/DapperCollectives/CAST/backend/main/models"
+	"github.com/DapperCollectives/CAST/backend/main/test_utils"
+	"github.com/stretchr/testify/assert"
+)
 
-// 	communityId := otu.AddCommunities(1)[0]
-// 	proposalId := otu.AddActiveProposals(communityId, 1)[0]
-// 	vote := otu.GenerateValidVotePayload("user1", proposalId, "a")
-// 	otu.CreateVoteAPI(proposalId, vote)
+func resetTables() {
+	clearTable("communities")
+	clearTable("balances")
+	clearTable("community_users")
+	clearTable("user_achievements")
+	clearTable("proposals")
+	clearTable("votes")
+}
 
-// 	response := otu.GetCommunityLeaderboardAPI(communityId)
-// 	checkResponseCode(t, http.StatusOK, response.Code)
+func TestGetLeaderboardCurrentUser(t *testing.T) {
+	resetTables()
 
-// 	var p test_utils.PaginatedResponseWithLeaderboardUser
-// 	json.Unmarshal(response.Body.Bytes(), &p)
+	communityId := otu.AddCommunities(1)[0]
+	proposalId := otu.AddActiveProposals(communityId, 1)[0]
+	vote := otu.GenerateValidVotePayload("user1", proposalId, "a")
+	otu.CreateVoteAPI(proposalId, vote)
 
-// 	assert.Equal(t, models.LeaderboardUser{}, p.Data.CurrentUser)
+	response := otu.GetCommunityLeaderboardAPI(communityId)
+	checkResponseCode(t, http.StatusOK, response.Code)
 
-// 	response = otu.GetCommunityLeaderboardAPIWithCurrentUser(communityId, vote.Addr)
-// 	checkResponseCode(t, http.StatusOK, response.Code)
+	var p test_utils.PaginatedResponseWithLeaderboardUser
+	json.Unmarshal(response.Body.Bytes(), &p)
 
-// 	var p2 test_utils.PaginatedResponseWithLeaderboardUser
-// 	json.Unmarshal(response.Body.Bytes(), &p2)
+	assert.Equal(t, models.LeaderboardUser{}, p.Data.CurrentUser)
 
-// 	fmt.Println(vote.Addr, p2.Data.CurrentUser.Addr)
+	response = otu.GetCommunityLeaderboardAPIWithCurrentUser(communityId, vote.Addr)
+	checkResponseCode(t, http.StatusOK, response.Code)
 
-// 	assert.Equal(t, vote.Addr, p2.Data.CurrentUser.Addr)
-// }
+	var p2 test_utils.PaginatedResponseWithLeaderboardUser
+	json.Unmarshal(response.Body.Bytes(), &p2)
 
-// func TestGetLeaderboardWithEarlyVotes(t *testing.T) {
-// 	clearTable("communities")
-// 	clearTable("community_users")
-// 	clearTable("user_achievements")
-// 	clearTable("proposals")
-// 	clearTable("votes")
+	assert.Equal(t, vote.Addr, p2.Data.CurrentUser.Addr)
+}
 
-// 	communityId := otu.AddCommunities(1)[0]
-// 	earlyVoteBonus := 1
-// 	expectedUsers := 1
-// 	expectedProposals := 2
+func TestGetLeaderboardWithEarlyVotes(t *testing.T) {
+	resetTables()
 
-// 	// user gets single vote for each proposal they voted on
-// 	expectedScore := expectedProposals + (expectedProposals * earlyVoteBonus)
+	communityId := otu.AddCommunities(1)[0]
+	earlyVoteBonus := 1
+	expectedUsers := 1
+	expectedProposals := 2
 
-// 	otu.GenerateEarlyVoteAchievements(communityId, expectedProposals, expectedUsers)
+	// user gets single vote for each proposal they voted on
+	expectedScore := expectedProposals + (expectedProposals * earlyVoteBonus)
 
-// 	response := otu.GetCommunityLeaderboardAPI(communityId)
-// 	checkResponseCode(t, http.StatusOK, response.Code)
+	otu.GenerateEarlyVoteAchievements(communityId, expectedProposals, expectedUsers)
 
-// 	var p test_utils.PaginatedResponseWithLeaderboardUser
-// 	json.Unmarshal(response.Body.Bytes(), &p)
+	response := otu.GetCommunityLeaderboardAPI(communityId)
+	checkResponseCode(t, http.StatusOK, response.Code)
 
-// 	users := p.Data.Users
+	var p test_utils.PaginatedResponseWithLeaderboardUser
+	json.Unmarshal(response.Body.Bytes(), &p)
 
-// 	receivedScore := users[0].Score
+	users := p.Data.Users
 
-// 	assert.Equal(t, expectedUsers, len(users))
-// 	assert.Equal(t, expectedScore, receivedScore)
-// }
+	receivedScore := users[0].Score
 
-// func TestGetLeaderboardWithSingleStreak(t *testing.T) {
-// 	clearTable("communities")
-// 	clearTable("community_users")
-// 	clearTable("user_achievements")
-// 	clearTable("proposals")
-// 	clearTable("votes")
+	assert.Equal(t, expectedUsers, len(users))
+	assert.Equal(t, expectedScore, receivedScore)
+}
 
-// 	communityId := otu.AddCommunities(1)[0]
-// 	streaks := []int{3, 4}
-// 	streakBonus := 1
-// 	expectedUsers := 2
-// 	expectedScoreA := streaks[0] + (1 * streakBonus)
-// 	expectedScoreB := streaks[1] + (1 * streakBonus)
+func TestGetLeaderboardWithSingleStreak(t *testing.T) {
+	resetTables()
 
-// 	otu.GenerateSingleStreakAchievements(communityId, streaks)
+	communityId := otu.AddCommunities(1)[0]
+	streaks := []int{3, 4}
+	streakBonus := 1
+	expectedUsers := len(streaks)
+	expectedScoreA := streaks[0] + (1 * streakBonus)
+	expectedScoreB := streaks[1] + (1 * streakBonus)
 
-// 	response := otu.GetCommunityLeaderboardAPI(communityId)
-// 	checkResponseCode(t, http.StatusOK, response.Code)
+	otu.GenerateSingleStreakAchievements(communityId, streaks)
 
-// 	var p test_utils.PaginatedResponseWithLeaderboardUser
-// 	json.Unmarshal(response.Body.Bytes(), &p)
+	response := otu.GetCommunityLeaderboardAPI(communityId)
+	checkResponseCode(t, http.StatusOK, response.Code)
 
-// 	users := p.Data.Users
+	var p test_utils.PaginatedResponseWithLeaderboardUser
+	json.Unmarshal(response.Body.Bytes(), &p)
 
-// 	// ensure scores ordered for assert
-// 	sort.Slice(users, func(i, j int) bool {
-// 		return users[i].Score < users[j].Score
-// 	})
+	users := p.Data.Users
 
-// 	receivedScoreA := users[0].Score
-// 	receivedScoreB := users[1].Score
+	// ensure scores ordered for assert
+	sort.Slice(users, func(i, j int) bool {
+		return users[i].Score < users[j].Score
+	})
 
-// 	assert.Equal(t, expectedUsers, len(users))
-// 	assert.Equal(t, expectedScoreA, receivedScoreA)
-// 	assert.Equal(t, expectedScoreB, receivedScoreB)
-// }
+	receivedScoreA := users[0].Score
+	receivedScoreB := users[1].Score
+
+	assert.Equal(t, expectedUsers, len(users))
+	assert.Equal(t, expectedScoreA, receivedScoreA)
+	assert.Equal(t, expectedScoreB, receivedScoreB)
+}
 
 // func TestGetLeaderboardWithMultiStreaks(t *testing.T) {
-// 	clearTable("communities")
-// 	clearTable("community_users")
-// 	clearTable("user_achievements")
-// 	clearTable("proposals")
-// 	clearTable("votes")
+// 	resetTables()
+
 // 	communityId := otu.AddCommunities(1)[0]
 // 	streaks := []int{3, 4}
 // 	streakBonus := 1
@@ -131,123 +133,111 @@ package main
 // 	assert.Equal(t, expectedUser1Score, receivedUser1Score)
 // }
 
-// func TestGetLeaderboardWithWinningVote(t *testing.T) {
-// 	clearTable("communities")
-// 	clearTable("community_users")
-// 	clearTable("user_achievements")
-// 	clearTable("proposals")
-// 	clearTable("proposal_results")
-// 	clearTable("votes")
-// 	communityId := otu.AddCommunities(1)[0]
-// 	winningVoteBonus := 1
+func TestGetLeaderboardWithWinningVote(t *testing.T) {
+	resetTables()
 
-// 	proposalId := otu.GenerateWinningVoteAchievement(communityId, "one-address-one-vote")
-// 	otu.UpdateProposalEndTime(proposalId, time.Now().UTC())
-// 	otu.GetProposalResultsAPI(proposalId)
+	communityId := otu.AddCommunities(1)[0]
+	winningVoteBonus := 1
 
-// 	response := otu.GetCommunityLeaderboardAPI(communityId)
-// 	checkResponseCode(t, http.StatusOK, response.Code)
+	proposalId := otu.GenerateWinningVoteAchievement(communityId, "one-address-one-vote")
+	otu.UpdateProposalEndTime(proposalId, time.Now().UTC())
+	otu.GetProposalResultsAPI(proposalId)
 
-// 	var p test_utils.PaginatedResponseWithLeaderboardUser
-// 	json.Unmarshal(response.Body.Bytes(), &p)
+	response := otu.GetCommunityLeaderboardAPI(communityId)
+	checkResponseCode(t, http.StatusOK, response.Code)
 
-// 	users := p.Data.Users
+	var p test_utils.PaginatedResponseWithLeaderboardUser
+	json.Unmarshal(response.Body.Bytes(), &p)
 
-// 	winningUserScore := 1 + 1*winningVoteBonus
-// 	losingUserScore := 1
+	users := p.Data.Users
 
-// 	receivedWinners := 0
-// 	receivedLosers := 0
+	winningUserScore := 1 + 1*winningVoteBonus
+	losingUserScore := 1
 
-// 	for _, user := range users {
-// 		if user.Score == winningUserScore {
-// 			receivedWinners += 1
-// 		} else if user.Score == losingUserScore {
-// 			receivedLosers += 1
-// 		}
-// 	}
+	receivedWinners := 0
+	receivedLosers := 0
 
-// 	expectedWinners := 3
-// 	expectedLosers := 1
+	for _, user := range users {
+		if user.Score == winningUserScore {
+			receivedWinners += 1
+		} else if user.Score == losingUserScore {
+			receivedLosers += 1
+		}
+	}
 
-// 	assert.Equal(t, expectedWinners, receivedWinners)
-// 	assert.Equal(t, expectedLosers, receivedLosers)
-// }
+	expectedWinners := 3
+	expectedLosers := 1
 
-// func TestGetLeaderboardDefaultPaging(t *testing.T) {
-// 	clearTable("communities")
-// 	clearTable("community_users")
-// 	clearTable("user_achievements")
-// 	clearTable("proposals")
-// 	clearTable("votes")
+	assert.Equal(t, expectedWinners, receivedWinners)
+	assert.Equal(t, expectedLosers, receivedLosers)
+}
 
-// 	communityId := otu.AddCommunities(1)[0]
+func TestGetLeaderboardDefaultPaging(t *testing.T) {
+	resetTables()
 
-// 	numUsers := 6
-// 	numProposals := 1
+	communityId := otu.AddCommunities(1)[0]
 
-// 	otu.GenerateVotes(communityId, numProposals, numUsers)
+	numUsers := 6
+	numProposals := 1
 
-// 	response := otu.GetCommunityLeaderboardAPI(communityId)
-// 	checkResponseCode(t, http.StatusOK, response.Code)
+	otu.GenerateVotes(communityId, numProposals, numUsers)
 
-// 	var p test_utils.PaginatedResponseWithLeaderboardUser
-// 	json.Unmarshal(response.Body.Bytes(), &p)
+	response := otu.GetCommunityLeaderboardAPI(communityId)
+	checkResponseCode(t, http.StatusOK, response.Code)
 
-// 	expectedLength := 6
-// 	assert.Equal(t, expectedLength, len(p.Data.Users))
-// }
+	var p test_utils.PaginatedResponseWithLeaderboardUser
+	json.Unmarshal(response.Body.Bytes(), &p)
 
-// func TestGetLeaderboardPaging(t *testing.T) {
-// 	clearTable("communities")
-// 	clearTable("community_users")
-// 	clearTable("user_achievements")
-// 	clearTable("proposals")
-// 	clearTable("votes")
+	expectedLength := 6
+	assert.Equal(t, expectedLength, len(p.Data.Users))
+}
 
-// 	communityId := otu.AddCommunities(1)[0]
+func TestGetLeaderboardPaging(t *testing.T) {
+	resetTables()
 
-// 	otu.AddActiveProposals(communityId, 1)
+	communityId := otu.AddCommunities(1)[0]
 
-// 	count := 3
+	otu.AddActiveProposals(communityId, 1)
 
-// 	// Leaderboard with no users because no votes yet
-// 	response1 := otu.GetCommunityLeaderboardAPIWithPaging(communityId, 0, count)
-// 	checkResponseCode(t, http.StatusOK, response1.Code)
+	count := 3
 
-// 	var p1 test_utils.PaginatedResponseWithLeaderboardUser
-// 	json.Unmarshal(response1.Body.Bytes(), &p1)
+	// Leaderboard with no users because no votes yet
+	response1 := otu.GetCommunityLeaderboardAPIWithPaging(communityId, 0, count)
+	checkResponseCode(t, http.StatusOK, response1.Code)
 
-// 	numUsers := 6
-// 	numProposals := 1
+	var p1 test_utils.PaginatedResponseWithLeaderboardUser
+	json.Unmarshal(response1.Body.Bytes(), &p1)
 
-// 	otu.GenerateVotes(communityId, numProposals, numUsers)
+	numUsers := 6
+	numProposals := 1
 
-// 	// First Page
-// 	response2 := otu.GetCommunityLeaderboardAPIWithPaging(communityId, 0, count)
-// 	checkResponseCode(t, http.StatusOK, response2.Code)
+	otu.GenerateVotes(communityId, numProposals, numUsers)
 
-// 	var p2 test_utils.PaginatedResponseWithLeaderboardUser
-// 	json.Unmarshal(response2.Body.Bytes(), &p2)
+	// First Page
+	response2 := otu.GetCommunityLeaderboardAPIWithPaging(communityId, 0, count)
+	checkResponseCode(t, http.StatusOK, response2.Code)
 
-// 	// Second Page
-// 	response3 := otu.GetCommunityLeaderboardAPIWithPaging(communityId, 1, count)
-// 	checkResponseCode(t, http.StatusOK, response3.Code)
+	var p2 test_utils.PaginatedResponseWithLeaderboardUser
+	json.Unmarshal(response2.Body.Bytes(), &p2)
 
-// 	var p3 test_utils.PaginatedResponseWithLeaderboardUser
-// 	json.Unmarshal(response3.Body.Bytes(), &p3)
+	// Second Page
+	response3 := otu.GetCommunityLeaderboardAPIWithPaging(communityId, 1, count)
+	checkResponseCode(t, http.StatusOK, response3.Code)
 
-// 	// Invalid Page
-// 	response4 := otu.GetCommunityLeaderboardAPIWithPaging(communityId, 3, count)
-// 	checkResponseCode(t, http.StatusOK, response4.Code)
+	var p3 test_utils.PaginatedResponseWithLeaderboardUser
+	json.Unmarshal(response3.Body.Bytes(), &p3)
 
-// 	var p4 test_utils.PaginatedResponseWithLeaderboardUser
-// 	json.Unmarshal(response4.Body.Bytes(), &p4)
+	// Invalid Page
+	response4 := otu.GetCommunityLeaderboardAPIWithPaging(communityId, 3, count)
+	checkResponseCode(t, http.StatusOK, response4.Code)
 
-// 	expectedNoUsersLength := 0
-// 	expectedLength := 3
-// 	assert.Equal(t, expectedNoUsersLength, len(p1.Data.Users))
-// 	assert.Equal(t, expectedLength, len(p2.Data.Users))
-// 	assert.Equal(t, expectedLength, len(p3.Data.Users))
-// 	assert.Equal(t, expectedLength, len(p4.Data.Users))
-// }
+	var p4 test_utils.PaginatedResponseWithLeaderboardUser
+	json.Unmarshal(response4.Body.Bytes(), &p4)
+
+	expectedNoUsersLength := 0
+	expectedLength := 3
+	assert.Equal(t, expectedNoUsersLength, len(p1.Data.Users))
+	assert.Equal(t, expectedLength, len(p2.Data.Users))
+	assert.Equal(t, expectedLength, len(p3.Data.Users))
+	assert.Equal(t, expectedLength, len(p4.Data.Users))
+}
