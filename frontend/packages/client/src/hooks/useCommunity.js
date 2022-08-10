@@ -82,7 +82,7 @@ export default function useCommunity({
         const {
           communityName: name,
           communityDescription: body,
-          category: categorySelected,
+          communityCategory: category,
           communityTerms: termsAndConditionsUrl,
           listAddrAdmins,
           listAddrAuthors,
@@ -130,7 +130,7 @@ export default function useCommunity({
           body: JSON.stringify({
             name,
             body,
-            category: categorySelected?.value,
+            category,
             termsAndConditionsUrl,
             creatorAddr,
             additionalAuthors: listAddrAuthors,
