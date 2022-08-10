@@ -9,10 +9,12 @@ export default function Input({
   register,
   disabled,
   error,
+  type = 'text',
 } = {}) {
   return (
     <div className="is-flex is-flex-direction-column flex-1">
       <input
+        type={type}
         style={{ width: '100%', ...style }}
         placeholder={placeholder}
         className={classNames}
