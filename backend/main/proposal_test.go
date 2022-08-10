@@ -38,11 +38,11 @@ func TestGetProposal(t *testing.T) {
 
 		response := otu.GetProposalByIdAPI(communityId, 420)
 
-		CheckResponseCode(t, http.StatusNotFound, response.Code)
+		CheckResponseCode(t, http.StatusBadRequest, response.Code)
 
 		var m map[string]string
 		json.Unmarshal(response.Body.Bytes(), &m)
-		assert.Equal(t, "Proposal not found.", m["error"])
+		assert.Equal(t, "Invalid Proposal ID.", m["error"])
 	})
 
 	t.Run("Should fetch existing proposal by ID", func(t *testing.T) {
@@ -169,6 +169,43 @@ func TestUpdateProposal(t *testing.T) {
 		assert.Equal(t, "active", *created.Computed_status)
 
 		cancelPayload := otu.GenerateCancelProposalStruct(authorName, communityId)
+		response = otu.UpdateProposalAPI(p.ID, cancelPayload)
+		checkResponseCode(t, http.StatusOK, response.Code)
+
+		// Get proposal after update
+		response = otu.GetProposalByIdAPI(communityId, p.ID)
+		var cancelled models.Proposal
+		json.Unmarshal(response.Body.Bytes(), &cancelled)
+		assert.Equal(t, "cancelled", *cancelled.Computed_status)
+	})
+
+	t.Run("A community author should be able to cancel an active proposal created by another author", func(t *testing.T) {
+		proposalStruct := otu.GenerateProposalStruct(authorName, communityId)
+		// Make proposal active
+		proposalStruct.Start_time = time.Now().AddDate(0, -1, 0)
+
+		payload := otu.GenerateProposalPayload(authorName, proposalStruct)
+		response := otu.CreateProposalAPI(payload)
+
+		CheckResponseCode(t, http.StatusCreated, response.Code)
+		var p models.Proposal
+		json.Unmarshal(response.Body.Bytes(), &p)
+
+		//Generate second author
+		userStruct := otu.GenerateCommunityUserStruct("user2", "author")
+		userPayload := otu.GenerateCommunityUserPayload("user1", userStruct)
+
+		response = otu.CreateCommunityUserAPI(communityId, userPayload)
+		checkResponseCode(t, http.StatusCreated, response.Code)
+
+		// Get proposal after create
+		response = otu.GetProposalByIdAPI(communityId, p.ID)
+		var created models.Proposal
+		json.Unmarshal(response.Body.Bytes(), &created)
+
+		assert.Equal(t, "active", *created.Computed_status)
+
+		cancelPayload := otu.GenerateCancelProposalStruct("user2", communityId)
 		response = otu.UpdateProposalAPI(p.ID, cancelPayload)
 		checkResponseCode(t, http.StatusOK, response.Code)
 

@@ -1,6 +1,6 @@
 import React from 'react';
-import { ActionButton } from 'components';
 import { useForm } from 'react-hook-form';
+import { ActionButton } from 'components';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { LinksSchema } from './FormConfig';
 import EditorForm from './LinksForm';

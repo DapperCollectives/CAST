@@ -9,7 +9,7 @@ export const DesktopCard = ({ pr, style, isDesktopOnly }) => {
   const { src, alt } = imgProps;
 
   return (
-    <Link to={`/proposal/${pr.id}`}>
+    <Link to={`/community/${pr.communityId}/proposal/${pr.id}`}>
       <div
         className="border-light rounded-sm mb-5 proposal-card transition-all is-flex columns p-5"
         style={style}

@@ -1,5 +1,5 @@
+import { Discord, Github, Instagram, Twitter, Website } from 'components/Svg';
 import * as yup from 'yup';
-import { Website, Instagram, Twitter, Discord, Github } from 'components/Svg';
 
 const LinksSchema = yup.object().shape({
   websiteUrl: yup.string().matches(
