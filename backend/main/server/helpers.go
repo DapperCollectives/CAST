@@ -405,9 +405,6 @@ func (h *Helpers) validateVote(p models.Proposal, payload models.CreateVotePaylo
 		}
 	} else {
 		// validate proper message format
-		//<proposalId>:<choice>:<timestamp>
-		log.Info().Msgf("vote: %v", v)
-		log.Info().Msgf("about to vlaidate vote message: %s", v.Message)
 		// hex decode before validating
 		decodedMessage, _ := hex.DecodeString(v.Message)
 		if err := models.ValidateVoteMessage(string(decodedMessage), p); err != nil {
