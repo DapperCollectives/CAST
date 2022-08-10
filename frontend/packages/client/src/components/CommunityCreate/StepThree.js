@@ -2,6 +2,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useWebContext } from 'contexts/Web3';
 import { ActionButton, WrapperResponsive } from 'components';
+import Checkbox from 'components/common/Checkbox';
 import Input from 'components/common/Input';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { stepThree } from './FormConfig';
@@ -10,9 +11,7 @@ const { Schema } = stepThree;
 
 export default function StepThree({
   stepData = {},
-  setStepValid,
   onDataChange,
-  isStepValid,
   moveToNextStep,
 }) {
   const {
@@ -25,7 +24,7 @@ export default function StepThree({
 
   const { isValidFlowAddress } = useWebContext();
 
-  const { register, control, handleSubmit, reset, formState, watch } = useForm({
+  const { register, handleSubmit, formState } = useForm({
     resolver: yupResolver(Schema(isValidFlowAddress)),
     defaultValues: {
       proposalThreshold,
@@ -36,16 +35,12 @@ export default function StepThree({
     },
   });
   const onSubmit = (data) => {
-    console.log(data);
-
-    // onDataChange({ listAddrAdmins: admins, listAddrAuthors: authors });
-    // moveToNextStep();
+    onDataChange(data);
+    moveToNextStep();
   };
+
   const { isDirty, isSubmitting, errors, isValid } = formState;
-  console.log('Errors ', errors);
-  console.log('isDirty ', isDirty);
-  console.log('isValid ', isValid);
-  console.log('watch ', watch('onlyAuthorsToSubmitProposals'));
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <WrapperResponsive
@@ -98,19 +93,15 @@ export default function StepThree({
           error={errors['proposalThreshold']}
           classNames="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
         />
-        <label className="checkbox column is-flex is-align-items-center is-full is-full-mobile px-0 mt-4 mb-4">
-          <Input
-            type="checkbox"
-            name="onlyAuthorsToSubmitProposals"
-            register={register}
-            disabled={isSubmitting}
-            error={errors['onlyAuthorsToSubmitProposals']}
-            classNames="mr-2 form-checkbox"
-          />
-          <p className="has-text-grey small-text">
-            Allow only designated authors to submit proposals
-          </p>
-        </label>
+        <Checkbox
+          type="checkbox"
+          name="onlyAuthorsToSubmitProposals"
+          register={register}
+          disabled={isSubmitting}
+          error={errors['onlyAuthorsToSubmitProposals']}
+          label="Allow only designated authors to submit proposals"
+          labelClassNames="has-text-grey small-text"
+        />
       </WrapperResponsive>
       <div className="columns mb-5">
         <div className="column is-12">
