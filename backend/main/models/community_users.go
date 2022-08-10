@@ -61,7 +61,7 @@ type LeaderboardPayload struct {
 	CurrentUser LeaderboardUser   `json:"currentUser"`
 }
 
-func GetUsersForCommunity(db *s.Database, communityId int, params shared.OrderedPageParams) ([]CommunityUserType, int, error) {
+func GetUsersForCommunity(db *s.Database, communityId int, pageParams shared.OrderedPageParams) ([]CommunityUserType, int, error) {
 	var users = []CommunityUserType{}
 	err := pgxscan.Select(db.Context, db.Conn, &users,
 		`
@@ -81,7 +81,7 @@ func GetUsersForCommunity(db *s.Database, communityId int, params shared.Ordered
 				(SELECT addr FROM community_users WHERE community_id = $1 group BY community_users.addr) 
 		AS temp_user_addrs 
 		LIMIT $2 OFFSET $3
-		`, communityId, params.Count, params.Start)
+		`, communityId, pageParams.Count, pageParams.Start)
 
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		return nil, 0, err
@@ -121,7 +121,7 @@ func GetCommunityLeaderboard(
 	db *s.Database,
 	communityId int,
 	addr string,
-	params shared.OrderedPageParams,
+	pageParams shared.OrderedPageParams,
 ) (LeaderboardPayload, int, error) {
 	var payload = LeaderboardPayload{}
 
@@ -135,7 +135,12 @@ func GetCommunityLeaderboard(
 		return payload, 0, nil
 	}
 
-	leaderboardUsers, currentUser := getLeaderboardUsers(userAchievements, addr, params.Start, params.Count)
+	leaderboardUsers, currentUser := getLeaderboardUsers(
+		userAchievements,
+		addr,
+		pageParams.Start,
+		pageParams.Count,
+	)
 
 	totalUsers := getTotalUsersForCommunity(db, communityId)
 
@@ -145,7 +150,7 @@ func GetCommunityLeaderboard(
 	return payload, totalUsers, nil
 }
 
-func GetCommunitiesForUser(db *s.Database, addr string, params shared.OrderedPageParams) ([]UserCommunity, int, error) {
+func GetCommunitiesForUser(db *s.Database, addr string, pageParams shared.OrderedPageParams) ([]UserCommunity, int, error) {
 	var communities = []UserCommunity{}
 
 	err := pgxscan.Select(db.Context, db.Conn, &communities,
@@ -164,7 +169,7 @@ func GetCommunitiesForUser(db *s.Database, addr string, params shared.OrderedPag
 		return []UserCommunity{}, 0, nil
 	}
 
-	mergedCommunities, totalCommunities := mergeUserRolesForCommunities(communities, params.Start, params.Count)
+	mergedCommunities, totalCommunities := mergeUserRolesForCommunities(communities, pageParams.Start, pageParams.Count)
 
 	return mergedCommunities, totalCommunities, nil
 }

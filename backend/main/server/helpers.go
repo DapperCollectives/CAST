@@ -172,26 +172,21 @@ func (h *Helpers) getPaginatedVotes(
 	error,
 ) {
 
-	order := getOrderedPageParams(
-		r.FormValue("start"),
-		r.FormValue("count"),
-		r.FormValue("order"),
-		25,
-	)
+	pageParams := getPageParams(*r, 25)
 
 	votes, totalRecords, err := models.GetVotesForProposal(
 		h.A.DB,
-		order,
 		p.ID,
 		*p.Strategy,
+		pageParams,
 	)
 	if err != nil {
 		return nil, shared.OrderedPageParams{}, err
 	}
 
-	order.TotalRecords = totalRecords
+	pageParams.TotalRecords = totalRecords
 
-	return votes, order, nil
+	return votes, pageParams, nil
 }
 
 func (h *Helpers) processVote(addr string, p models.Proposal) (*models.VoteWithBalance, error) {
@@ -232,7 +227,7 @@ func (h *Helpers) fetchVote(addr string, id int) (*models.VoteWithBalance, error
 func (h *Helpers) processVotes(
 	addr string,
 	ids []int,
-	order shared.OrderedPageParams,
+	pageParams shared.OrderedPageParams,
 ) (
 	[]*models.VoteWithBalance,
 	shared.OrderedPageParams,
@@ -240,13 +235,13 @@ func (h *Helpers) processVotes(
 ) {
 	votes, totalRecords, err := models.GetVotesForAddress(
 		h.A.DB,
-		order,
+		pageParams,
 		addr,
 		&ids,
 	)
 	if err != nil {
 		log.Error().Err(err).Msg("Error getting votes for address.")
-		return nil, order, err
+		return nil, pageParams, err
 	}
 
 	var votesWithBalances []*models.VoteWithBalance
@@ -258,29 +253,29 @@ func (h *Helpers) processVotes(
 			switch err.Error() {
 			case pgx.ErrNoRows.Error():
 				msg := fmt.Sprintf("Proposal with ID %d not found.", vote.Proposal_id)
-				return nil, order, errors.New(msg)
+				return nil, pageParams, errors.New(msg)
 			default:
-				return nil, order, err
+				return nil, pageParams, err
 			}
 		}
 
 		s := strategyMap[*proposal.Strategy]
 		if s == nil {
-			return nil, order, errors.New("Strategy not found.")
+			return nil, pageParams, errors.New("Strategy not found.")
 		}
 
 		weight, err := s.GetVoteWeightForBalance(vote, &proposal)
 		if err != nil {
-			return nil, order, err
+			return nil, pageParams, err
 		}
 
 		vote.Weight = &weight
 		votesWithBalances = append(votesWithBalances, vote)
 	}
 
-	order.TotalRecords = totalRecords
+	pageParams.TotalRecords = totalRecords
 
-	return votesWithBalances, order, nil
+	return votesWithBalances, pageParams, nil
 }
 
 func (h *Helpers) createVote(r *http.Request, p models.Proposal) (*models.VoteWithBalance, error) {

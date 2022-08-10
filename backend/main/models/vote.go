@@ -70,9 +70,9 @@ const (
 
 func GetVotesForAddress(
 	db *s.Database,
-	order shared.OrderedPageParams,
 	address string,
 	proposalIds *[]int,
+	pageParams shared.OrderedPageParams,
 ) ([]*VoteWithBalance, int, error) {
 	var votes []*VoteWithBalance
 	var err error
@@ -90,11 +90,11 @@ func GetVotesForAddress(
 		sql = sql + " AND proposal_id = ANY($4)"
 		sql = sql + "LIMIT $1 OFFSET $2 "
 		err = pgxscan.Select(db.Context, db.Conn, &votes,
-			sql, order.Count, order.Start, address, *proposalIds)
+			sql, pageParams.Count, pageParams.Start, address, *proposalIds)
 	} else {
 		sql = sql + "LIMIT $1 OFFSET $2 "
 		err = pgxscan.Select(db.Context, db.Conn, &votes,
-			sql, order.Count, order.Start, address)
+			sql, pageParams.Count, pageParams.Start, address)
 	}
 
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
@@ -147,14 +147,14 @@ func GetAllVotesForProposal(db *s.Database, proposalId int, strategy string) ([]
 
 func GetVotesForProposal(
 	db *s.Database,
-	params shared.OrderedPageParams,
 	proposalId int,
 	strategy string,
+	pageParams shared.OrderedPageParams,
 ) ([]*VoteWithBalance, int, error) {
 	var votes []*VoteWithBalance
 	var orderBySql string
 
-	if params.Order == "desc" {
+	if pageParams.Order == "desc" {
 		orderBySql = "ORDER BY b.created_at DESC"
 	} else {
 		orderBySql = "ORDER BY b.created_at ASC"
@@ -174,7 +174,15 @@ func GetVotesForProposal(
 	sql = sql + " " + orderBySql
 	sql = sql + " LIMIT $1 OFFSET $2"
 
-	err := pgxscan.Select(db.Context, db.Conn, &votes, sql, params.Count, params.Start, proposalId)
+	err := pgxscan.Select(
+		db.Context,
+		db.Conn,
+		&votes,
+		sql,
+		pageParams.Count,
+		pageParams.Start,
+		proposalId,
+	)
 
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		log.Error().Err(err).Msg("Error querying votes for proposal")

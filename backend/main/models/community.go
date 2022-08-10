@@ -106,13 +106,13 @@ func (c *Community) GetCommunity(db *s.Database) error {
 		c.ID)
 }
 
-func GetCommunities(db *s.Database, params shared.OrderedPageParams) ([]*Community, int, error) {
+func GetCommunities(db *s.Database, pageParams shared.OrderedPageParams) ([]*Community, int, error) {
 	var communities []*Community
 	err := pgxscan.Select(db.Context, db.Conn, &communities,
 		`
 		SELECT * FROM communities
 		LIMIT $1 OFFSET $2
-		`, params.Count, params.Start)
+		`, pageParams.Count, pageParams.Start)
 
 	// If we get pgx.ErrNoRows, just return an empty array
 	// and obfuscate error
