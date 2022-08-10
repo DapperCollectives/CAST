@@ -12,20 +12,18 @@ import { yupResolver } from '@hookform/resolvers/yup';
 const popoverParagraph =
   'In addition, community creator address will be set as admin and member by default.';
 
-export default function StepTwo({
-  stepData,
-  setStepValid,
-  onDataChange,
-  moveToNextStep,
-  isStepValid,
-}) {
+export default function StepTwo({ stepData, onDataChange, moveToNextStep }) {
   const { listAddrAdmins = [], listAddrAuthors = [] } = stepData || {};
 
   const { isValidFlowAddress } = useWebContext();
 
   const { register, control, handleSubmit, reset, formState } = useForm({
-    mode: 'onChange',
-    resolver: yupResolver(AddressSchema({ isValidFlowAddress })),
+    resolver: yupResolver(
+      AddressSchema({
+        fieldNames: ['listAddrAdmins', 'listAddrAuthors'],
+        isValidFlowAddress,
+      })
+    ),
   });
 
   const { isDirty, isSubmitting, errors, isValid } = formState;
