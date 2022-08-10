@@ -128,6 +128,11 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	vote, err := helpers.createVote(r, proposal)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
 	respondWithJSON(w, http.StatusCreated, vote)
 }
 
@@ -368,23 +373,22 @@ func (a *App) getCommunityCategories(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) getActiveStrategiesForCommunity(w http.ResponseWriter, r *http.Request) {
-    vars := mux.Vars(r)
-    communityId, err := strconv.Atoi(vars["communityId"])
+	vars := mux.Vars(r)
+	communityId, err := strconv.Atoi(vars["communityId"])
 
-    if err != nil {
-        respondWithError(w, http.StatusBadRequest, "Invalid Community ID.")
-        return
-    }
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid Community ID.")
+		return
+	}
 
-    strategies, err := models.GetActiveStrategiesForCommunity(a.DB, communityId)
-    if err != nil {
-        respondWithError(w, http.StatusInternalServerError, err.Error())
-        return
-    }
+	strategies, err := models.GetActiveStrategiesForCommunity(a.DB, communityId)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
 
-    respondWithJSON(w, http.StatusOK, strategies)
+	respondWithJSON(w, http.StatusOK, strategies)
 }
-
 
 ////////////
 // Lists //
