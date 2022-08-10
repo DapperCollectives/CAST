@@ -9,13 +9,13 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type BalanceOfNfts struct {
+type FloatNFTs struct {
 	s.StrategyStruct
 	SC s.SnapshotClient
 	DB *s.Database
 }
 
-func (b *BalanceOfNfts) FetchBalance(
+func (s *FloatNFTs) FetchBalance(
 	balance *models.Balance,
 	p *models.Proposal,
 ) (*models.Balance, error) {
@@ -27,7 +27,7 @@ func (b *BalanceOfNfts) FetchBalance(
 	}
 
 	var c models.Community
-	if err := c.GetCommunityByProposalId(b.DB, balance.Proposal_id); err != nil {
+	if err := c.GetCommunityByProposalId(s.DB, balance.Proposal_id); err != nil {
 		return nil, err
 	}
 
@@ -37,23 +37,33 @@ func (b *BalanceOfNfts) FetchBalance(
 		return nil, err
 	}
 
-	if err := b.queryNFTs(*vb, strategy, balance); err != nil {
+	if strategy.Contract.Float_event_id == nil {
+		log.Error().Msg("No float event id field was found for contract.")
+	}
+
+	if err := s.queryNFTs(*vb, strategy, balance); err != nil {
 		return nil, err
 	}
 
 	return balance, nil
 }
 
-func (b *BalanceOfNfts) queryNFTs(
+func (s *FloatNFTs) queryNFTs(
 	vb models.VoteWithBalance,
 	strategy models.Strategy,
 	balance *models.Balance,
 ) error {
-	nftIds, err := b.FlowAdapter.GetNFTIds(balance.Addr, &strategy.Contract)
+	hasEventNFT, err := s.FlowAdapter.CheckIfUserHasEvent(vb.Vote.Addr, &strategy.Contract)
 	if err != nil {
 		return err
 	}
 
+	if !hasEventNFT {
+		log.Error().Err(err).Msg("the user does not have this Float event in their wallet")
+		return err
+	}
+
+	nftIds, err := s.FlowAdapter.GetFloatNFTIds(vb.Vote.Addr, &strategy.Contract)
 	for _, nftId := range nftIds {
 		nft := &models.NFT{
 			ID: nftId,
@@ -61,22 +71,22 @@ func (b *BalanceOfNfts) queryNFTs(
 		vb.NFTs = append(vb.NFTs, nft)
 	}
 
-	doesExist, err := models.DoesNFTExist(b.DB, &vb)
+	doesExist, err := models.DoesNFTExist(s.DB, &vb)
 	if err != nil {
 		return err
 	}
 
-	//only if the NFT ID is not already in the DB,
-	//do we add the balance
-	if !doesExist && err == nil {
-		err = models.CreateUserNFTRecord(b.DB, &vb)
-		balance.NFTCount = len(vb.NFTs)
+	//in this strategy we don't consider multple NFTs for the same event
+	//so we just use 1 for NFTCount
+	if !doesExist {
+		err = models.CreateUserNFTRecord(s.DB, &vb)
+		balance.NFTCount = 1 // force set to one if user has an event.
 	}
 
 	return err
 }
 
-func (b *BalanceOfNfts) TallyVotes(
+func (s *FloatNFTs) TallyVotes(
 	votes []*models.VoteWithBalance,
 	r *models.ProposalResults,
 	proposal *models.Proposal,
@@ -101,8 +111,8 @@ func (b *BalanceOfNfts) TallyVotes(
 	return *r, nil
 }
 
-func (b *BalanceOfNfts) GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error) {
-	nftIds, err := models.GetUserNFTs(b.DB, vote)
+func (s *FloatNFTs) GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error) {
+	nftIds, err := models.GetUserNFTs(s.DB, vote)
 	if err != nil {
 		log.Error().Err(err).Msg("error in GetVoteWeightForBalance for BalanceOfNFTs strategy")
 		return 0.00, err
@@ -110,7 +120,7 @@ func (b *BalanceOfNfts) GetVoteWeightForBalance(vote *models.VoteWithBalance, pr
 	return float64(len(nftIds)), nil
 }
 
-func (s *BalanceOfNfts) GetVotes(
+func (s *FloatNFTs) GetVotes(
 	votes []*models.VoteWithBalance,
 	proposal *models.Proposal,
 ) ([]*models.VoteWithBalance, error) {
@@ -126,11 +136,11 @@ func (s *BalanceOfNfts) GetVotes(
 	return votes, nil
 }
 
-func (s *BalanceOfNfts) RequiresSnapshot() bool {
+func (s *FloatNFTs) RequiresSnapshot() bool {
 	return false
 }
 
-func (s *BalanceOfNfts) InitStrategy(
+func (s *FloatNFTs) InitStrategy(
 	f *shared.FlowAdapter,
 	db *shared.Database,
 	sc *s.SnapshotClient,

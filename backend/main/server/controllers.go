@@ -367,6 +367,25 @@ func (a *App) getCommunityCategories(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, vs)
 }
 
+func (a *App) getActiveStrategiesForCommunity(w http.ResponseWriter, r *http.Request) {
+    vars := mux.Vars(r)
+    communityId, err := strconv.Atoi(vars["communityId"])
+
+    if err != nil {
+        respondWithError(w, http.StatusBadRequest, "Invalid Community ID.")
+        return
+    }
+
+    strategies, err := models.GetActiveStrategiesForCommunity(a.DB, communityId)
+    if err != nil {
+        respondWithError(w, http.StatusInternalServerError, err.Error())
+        return
+    }
+
+    respondWithJSON(w, http.StatusOK, strategies)
+}
+
+
 ////////////
 // Lists //
 ///////////

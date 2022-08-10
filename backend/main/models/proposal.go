@@ -262,3 +262,32 @@ func (p *Proposal) EnforceMaxWeight(balance float64) float64 {
 
 	return allowedBalance
 }
+
+func GetActiveStrategiesForCommunity(db *s.Database, communityId int) ([]string, error) {
+	var strategies []string
+	var err error
+
+	// Get Strategies from active proposals
+	sql := `
+		SELECT strategy FROM proposals 
+		WHERE community_id = $1
+		AND (
+			(status = 'published' AND start_time > (now() at time zone 'utc')) OR 
+			(status = 'published' AND start_time < (now() at time zone 'utc') AND end_time > (now() at time zone 'utc')) OR 
+			(status = 'published' AND end_time > (now() at time zone 'utc'))
+		)
+		GROUP BY strategy
+		`
+
+	err = pgxscan.Select(db.Context, db.Conn, &strategies, sql, communityId)
+
+	// If we get pgx.ErrNoRows, just return an empty array
+	// and obfuscate error
+	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
+		return nil, err
+	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
+		return nil, nil
+	}
+
+	return strategies, nil
+}

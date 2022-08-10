@@ -268,3 +268,11 @@ func (otu *OverflowTestUtils) GetCommunityUsersAPIByType(id int, userType string
 	response := otu.ExecuteRequest(req)
 	return response
 }
+
+func (otu *OverflowTestUtils) GetCommunityActiveStrategies(id int) *httptest.ResponseRecorder {
+	req, _ := http.NewRequest("GET", "/communities/"+strconv.Itoa(id)+"/strategies", nil)
+	response := otu.ExecuteRequest(req)
+	return response
+}
+
+

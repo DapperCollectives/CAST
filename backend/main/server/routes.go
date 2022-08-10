@@ -12,6 +12,7 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/communities/{id:[0-9]+}", a.getCommunity).Methods("GET")
 	a.Router.HandleFunc("/communities/{id:[0-9]+}", a.updateCommunity).Methods("PATCH", "OPTIONS")
 	a.Router.HandleFunc("/communities", a.createCommunity).Methods("POST", "OPTIONS")
+	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/strategies", a.getActiveStrategiesForCommunity).Methods("GET")
 	// Proposals
 	a.Router.HandleFunc("/proposals/{id:[0-9]+}", a.getProposal).Methods("GET")
 	a.Router.HandleFunc("/proposals/{id:[0-9]+}", a.updateProposal).Methods("PUT", "OPTIONS")

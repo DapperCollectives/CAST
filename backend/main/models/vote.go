@@ -44,9 +44,10 @@ type VoteWithBalance struct {
 }
 
 type NFT struct {
-	ID            interface{} `json:"id"`
-	Contract_addr string      `json:"contract_addr"`
-	Created_at    time.Time   `json:"created_at"`
+	ID             interface{} `json:"id"`
+	Contract_addr  string      `json:"contract_addr"`
+	Created_at     time.Time   `json:"created_at"`
+	FLoat_event_id uint64      `json:"event_id,omitempty"`
 }
 
 type VotingStreak struct {
