@@ -21,7 +21,7 @@ export { default as CommunityAbout } from './CommunityAbout';
 export { default as JoinCommunityButton } from './Community/JoinCommunityButton';
 export { CommunityEditorProfile } from './Community/CommunityEditorProfile';
 export { CommunityEditorLinks } from './Community/CommunityEditorLinks';
-export { default as CommunityEditorDetails } from './Community/CommunityEditorDetails';
+export { CommunityEditorDetails } from './Community/CommunityEditorDetails';
 export { default as CommunityPropsAndVoting } from './Community/CommunityPropsAndVoting';
 export { default as AddButton } from './AddButton';
 export { default as ActionButton } from './ActionButton';
