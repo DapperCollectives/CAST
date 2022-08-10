@@ -1,6 +1,6 @@
+import { useQuery } from 'react-query';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { fetchActiveStrategies } from 'api/community';
-import { useQuery } from 'react-query';
 
 export default function useCommunityActiveVotingStrategies(communityId) {
   const { notifyError } = useErrorHandlerContext();

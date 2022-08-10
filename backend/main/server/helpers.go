@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/hex"
 	"errors"
 	"flag"
 	"fmt"
@@ -260,11 +261,13 @@ func (h *Helpers) processVotes(
 }
 
 func (h *Helpers) createVote(r *http.Request, p models.Proposal) (*models.VoteWithBalance, error) {
-	var v models.Vote
-	if err := validatePayload(r.Body, &v); err != nil {
+	var payload models.CreateVotePayload
+	if err := validatePayload(r.Body, &payload); err != nil {
 		log.Error().Err(err).Msg("Invalid request payload.")
 		return nil, err
 	}
+
+	var v = payload.Vote
 
 	v.Proposal_id = p.ID
 
@@ -283,7 +286,7 @@ func (h *Helpers) createVote(r *http.Request, p models.Proposal) (*models.VoteWi
 		}
 	}
 
-	if err := h.validateVote(p, v); err != nil {
+	if err := h.validateVote(p, payload); err != nil {
 		return nil, err
 	}
 
@@ -328,7 +331,12 @@ func (h *Helpers) createVote(r *http.Request, p models.Proposal) (*models.VoteWi
 		return nil, errors.New(msg)
 	}
 
-	v.Cid, err = h.pinJSONToIpfs(p)
+	// Include voucher in vote data when pinning
+	ipfsVote := map[string]interface{}{
+		"vote":    v,
+		"voucher": payload.Voucher,
+	}
+	v.Cid, err = h.pinJSONToIpfs(ipfsVote)
 	if err != nil {
 		msg := fmt.Sprintf("Error pinning proposal to IPFS.")
 		log.Error().Err(err).Msg(msg)
@@ -344,7 +352,8 @@ func (h *Helpers) createVote(r *http.Request, p models.Proposal) (*models.VoteWi
 	return &vb, nil
 }
 
-func (h *Helpers) validateVote(p models.Proposal, v models.Vote) error {
+func (h *Helpers) validateVote(p models.Proposal, payload models.CreateVotePayload) error {
+	var v = payload.Vote
 	// validate the user is not on community's blocklist
 	if err := h.validateBlocklist(v.Addr, p.Community_id); err != nil {
 		log.Error().Err(err).Msgf(fmt.Sprintf("Address %v is on blocklist for community id %v.\n", v.Addr, p.Community_id))
@@ -352,26 +361,64 @@ func (h *Helpers) validateVote(p models.Proposal, v models.Vote) error {
 		return errors.New(msg)
 	}
 
-	// validate proper message format
-	//<proposalId>:<choice>:<timestamp>
-	if err := v.ValidateMessage(p); err != nil && v.TransactionId == "" {
-		log.Error().Err(err)
-		return err
-	}
 	// validate choice exists on proposal
 	if err := v.ValidateChoice(p); err != nil {
 		log.Error().Err(err)
 		return err
 	}
-	// validate user signature
-	if err := h.A.FlowAdapter.UserSignatureValidate(v.Addr, v.Message, v.Composite_signatures, v.TransactionId); err != nil {
-		return err
+
+	// If voucher is present
+	if payload.Voucher != nil {
+		// Transaction Signature validation
+		voucher := payload.Voucher
+		authorizer := voucher.Authorizers[0]
+
+		v.Composite_signatures = shared.GetUserCompositeSignatureFromVoucher(voucher)
+
+		// Validate authorizer
+		if authorizer != v.Addr || authorizer != (*v.Composite_signatures)[0].Addr {
+			err := errors.New("authorizer address must match voter address and envelope signer")
+			log.Error().Err(err)
+			return err
+		}
+
+		voteMessageToValidate := fmt.Sprintf("%s:%s:%s",
+			voucher.Arguments[0]["value"],
+			voucher.Arguments[1]["value"],
+			voucher.Arguments[2]["value"],
+		)
+		// validate proper message format
+		//<proposalId>:<choice>:<timestamp>
+		if err := models.ValidateVoteMessage(voteMessageToValidate, p); err != nil {
+			log.Error().Err(err)
+			return err
+		}
+
+		// re-build message & composite signatures for validation
+		// set v.Message as the encoded message, rather than the colon(:) delimited message above.
+		// we can do this because we can always recover the tx arguments that make up the
+		// colon delimited message by decoding this rlp encoded message
+		v.Message = shared.EncodeMessageFromVoucher(voucher)
+
+		if err := h.validateTxSignature(v.Addr, v.Message, v.Composite_signatures); err != nil {
+			return err
+		}
+	} else {
+		// validate proper message format
+		//<proposalId>:<choice>:<timestamp>
+		log.Info().Msgf("vote: %v", v)
+		log.Info().Msgf("about to vlaidate vote message: %s", v.Message)
+		// hex decode before validating
+		decodedMessage, _ := hex.DecodeString(v.Message)
+		if err := models.ValidateVoteMessage(string(decodedMessage), p); err != nil {
+			log.Error().Err(err)
+			return err
+		}
+		if err := h.validateUserSignature(v.Addr, v.Message, v.Composite_signatures); err != nil {
+			return err
+		}
 	}
-	// validate user signature
-	// if err := h.A.FlowAdapter.UserTransactionValidate(v.Addr, v.Message, v.Composite_signatures, v.TransactionId, h.A.TxOptionsAddresses, p.Choices); err != nil {
-	// 	respondWithError(w, http.StatusBadRequest, err.Error())
-	// 	return
-	// }
+
 	return nil
 }
 
@@ -381,13 +428,13 @@ func (h *Helpers) fetchCommunity(id int) (models.Community, int, error) {
 	if err := community.GetCommunity(h.A.DB); err != nil {
 		log.Error().Err(err)
 		switch err.Error() {
-			case pgx.ErrNoRows.Error():
-				return models.Community{}, http.StatusNotFound, errors.New("Community not found.")
-			default:
-				return models.Community{}, http.StatusInternalServerError, err
+		case pgx.ErrNoRows.Error():
+			return models.Community{}, http.StatusNotFound, errors.New("Community not found.")
+		default:
+			return models.Community{}, http.StatusInternalServerError, err
 		}
 	}
-	
+
 	return community, http.StatusOK, nil
 }
 
@@ -454,7 +501,7 @@ func (h *Helpers) createProposal(communityId int, p models.Proposal) (models.Pro
 
 	p.Cid, err = h.pinJSONToIpfs(p)
 	if err != nil {
-		log.Error().Err(err).Msg("IPFS error: "+err.Error())
+		log.Error().Err(err).Msg("IPFS error: " + err.Error())
 		errMsg := "Error pinning JSON to IPFS."
 		return models.Proposal{}, http.StatusInternalServerError, errors.New(errMsg)
 	}
@@ -725,7 +772,7 @@ func (h *Helpers) updateAddressesInList(id int, payload models.ListUpdatePayload
 
 	cid, err := h.pinJSONToIpfs(l)
 	if err != nil {
-		log.Error().Err(err).Msg("IPFS error: "+err.Error())
+		log.Error().Err(err).Msg("IPFS error: " + err.Error())
 		return http.StatusInternalServerError, errors.New("Error pinning JSON to IPFS.")
 	}
 	l.Cid = cid
@@ -762,7 +809,7 @@ func (h *Helpers) createListForCommunity(payload models.ListPayload) (models.Lis
 
 	cid, err := h.pinJSONToIpfs(l)
 	if err != nil {
-		log.Error().Err(err).Msg("IPFS error: "+err.Error())
+		log.Error().Err(err).Msg("IPFS error: " + err.Error())
 		return models.List{}, http.StatusInternalServerError, errors.New("Error pinning JSON to IPFS.")
 	}
 	l.Cid = cid
@@ -775,14 +822,27 @@ func (h *Helpers) createListForCommunity(payload models.ListPayload) (models.Lis
 	return l, http.StatusCreated, nil
 }
 
-func (h *Helpers) validateSignature(addr string, message string, sigs *[]shared.CompositeSignature) error {
+func (h *Helpers) validateUserSignature(addr string, message string, sigs *[]shared.CompositeSignature) error {
 	shouldValidateSignature := h.A.Config.Features["validateSigs"]
 
 	if !shouldValidateSignature {
 		return nil
 	}
 
-	if err := h.A.FlowAdapter.UserSignatureValidate(addr, message, sigs, ""); err != nil {
+	if err := h.A.FlowAdapter.ValidateSignature(addr, message, sigs, "USER"); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (h *Helpers) validateTxSignature(addr string, message string, sigs *[]shared.CompositeSignature) error {
+	shouldValidateSignature := h.A.Config.Features["validateSigs"]
+
+	if !shouldValidateSignature {
+		return nil
+	}
+
+	if err := h.A.FlowAdapter.ValidateSignature(addr, message, sigs, "TRANSACTION"); err != nil {
 		return err
 	}
 	return nil
@@ -825,7 +885,7 @@ func (h *Helpers) validateUser(addr, timestamp string, compositeSignatures *[]sh
 	if err := h.validateTimestamp(timestamp, 60); err != nil {
 		return err
 	}
-	if err := h.validateSignature(addr, timestamp, compositeSignatures); err != nil {
+	if err := h.validateUserSignature(addr, timestamp, compositeSignatures); err != nil {
 		return err
 	}
 
@@ -836,7 +896,7 @@ func (h *Helpers) validateUserWithRole(addr, timestamp string, compositeSignatur
 	if err := h.validateTimestamp(timestamp, 60); err != nil {
 		return err
 	}
-	if err := h.validateSignature(addr, timestamp, compositeSignatures); err != nil {
+	if err := h.validateUserSignature(addr, timestamp, compositeSignatures); err != nil {
 		return err
 	}
 	if err := models.EnsureRoleForCommunity(h.A.DB, addr, communityId, role); err != nil {

@@ -1,14 +1,14 @@
 import { useCallback, useReducer } from 'react';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { checkResponse, getCompositeSigs } from 'utils';
+import * as fcl from '@onflow/fcl';
+import {
+  encodeTransactionEnvelope,
+  encodeTransactionPayload,
+} from '@onflow/sdk';
 import { CODE as transferTokensCode } from '@onflow/six-transfer-tokens';
 import * as t from '@onflow/types';
 import { INITIAL_STATE, defaultReducer } from '../reducers';
-import * as fcl from '@onflow/fcl';
-import {
-  encodeTransactionPayload,
-  encodeTransactionEnvelope,
-} from '@onflow/sdk';
 
 export default function useProposal() {
   const [state, dispatch] = useReducer(defaultReducer, {
@@ -72,105 +72,25 @@ export default function useProposal() {
     injectedProvider,
     proposal,
     voteData,
-    isLedger
+    walletProvider
   ) => {
-    return isLedger
-      ? voteOnProposalTxSig(injectedProvider, proposal, voteData)
-      : voteOnProposalTxSig(injectedProvider, proposal, voteData);
+    console.log('walletProvider', walletProvider);
+    switch (walletProvider) {
+      case 'dapper#authn':
+        return voteOnProposalWithTxSig(injectedProvider, proposal, voteData);
+      case 'fcl-ledger-authz':
+        return voteOnProposalWithTxSig(injectedProvider, proposal, voteData);
+      default:
+        // return voteOnProposalWithTxSig(injectedProvider, proposal, voteData);
+        return voteOnProposalWithMessageSig(
+          injectedProvider,
+          proposal,
+          voteData
+        );
+    }
   };
 
-  const voteOnProposalLedger = useCallback(
-    async (injectedProvider, proposal, voteData) => {
-      try {
-        const timestamp = Date.now();
-        const hexChoice = Buffer.from(voteData.choice).toString('hex');
-        // use static transaction to address for voting option
-        const txOptionsAddresses = (
-          process.env.REACT_APP_TX_OPTIONS_ADDRS || ''
-        ).split(',');
-        const optionId = proposal.choices
-          .map((c) => c.value)
-          .indexOf(voteData.choice);
-        const toAddress = txOptionsAddresses[optionId];
-        let _compositeSignatures = '';
-
-        if (!toAddress) {
-          return { error: 'Missing voting transaction to address' };
-        }
-        const buildAuthz = (address) => {
-          return async function authz(account) {
-            return {
-              ...account,
-              addr: injectedProvider.sansPrefix(address),
-              keyId: 0,
-              signingFunction: async (signable) => {
-                const result = await injectedProvider.authz();
-                const signedResult = await result.signingFunction(signable);
-                _compositeSignatures = signedResult;
-                return {
-                  addr: injectedProvider.withPrefix(address),
-                  keyId: 0,
-                  signature: signedResult.signature,
-                };
-              },
-            };
-          };
-        };
-
-        // only serialize the tx not send
-        const { transactionId } = await injectedProvider.send([
-          injectedProvider.transaction(transferTokensCode),
-          injectedProvider.args([
-            injectedProvider.arg('0.0', t.UFix64),
-            injectedProvider.arg(toAddress, t.Address),
-          ]),
-          injectedProvider.proposer(buildAuthz(voteData.addr)),
-          injectedProvider.authorizations([injectedProvider.authz]),
-          injectedProvider.payer(injectedProvider.authz),
-          injectedProvider.limit(100),
-        ]);
-
-        const message = `${proposal.id}:${hexChoice}:${timestamp}:ledger-${transactionId}`;
-        const compositeSignatures = getCompositeSigs([_compositeSignatures]);
-        if (!compositeSignatures) {
-          return { error: 'No valid user signature found.' };
-        }
-
-        // wait on the client till transaction is sealed
-        await injectedProvider.tx(transactionId).onceSealed();
-
-        const fetchOptions = {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            ...voteData,
-            compositeSignatures,
-            message,
-            timestamp,
-            transactionId,
-          }),
-        };
-        const { id } = proposal;
-        const response = await fetch(
-          `${process.env.REACT_APP_BACK_END_SERVER_API}/proposals/${id}/votes`,
-          fetchOptions
-        );
-
-        if (response.json) {
-          const json = await response.json();
-          return json;
-        }
-
-        return { error: response };
-      } catch (err) {
-        return { error: String(err) };
-      }
-    },
-    []
-  );
-  const voteOnProposalBlocto = useCallback(
+  const voteOnProposalWithMessageSig = useCallback(
     async (injectedProvider, proposal, voteData) => {
       try {
         const timestamp = Date.now();
@@ -192,10 +112,13 @@ export default function useProposal() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            ...voteData,
-            compositeSignatures,
-            message,
-            timestamp,
+            vote: {
+              ...voteData,
+              compositeSignatures,
+              message: hexMessage,
+              timestamp,
+            },
+            voucher: null,
           }),
         };
         const { id } = proposal;
@@ -217,7 +140,7 @@ export default function useProposal() {
     []
   );
 
-  const voteOnProposalTxSig = useCallback(
+  const voteOnProposalWithTxSig = useCallback(
     async (injectedProvider, proposal, voteData) => {
       try {
         const timestamp = Date.now();
@@ -226,12 +149,20 @@ export default function useProposal() {
 
         const voucher = await fcl.serialize([
           fcl.transaction`
-            transaction() {
+            transaction(proposalId: String, choice: String, timestamp: String) {
               prepare(acct: AuthAccount) {
-                log(acct)
+                // this transaction does nothing and will not be run
+                // it is only used to collect a signature
+                // for your vote on this proposal.
+                // you will not be charged a gas fee.
               }
             }
           `,
+          fcl.args([
+            fcl.arg(`${proposal.id}`, t.String),
+            fcl.arg(hexChoice, t.String),
+            fcl.arg(`${timestamp}`, t.String),
+          ]),
           fcl.limit(999),
           fcl.proposer(fcl.authz),
           fcl.authorizations([fcl.authz]),
