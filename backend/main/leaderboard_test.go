@@ -79,7 +79,7 @@ func TestGetLeaderboardWithSingleStreak(t *testing.T) {
 	communityId := otu.AddCommunities(1)[0]
 	streaks := []int{3, 4}
 	streakBonus := 1
-	expectedUsers := len(streaks)
+	expectedUsersNum := len(streaks)
 	expectedScoreA := streaks[0] + (1 * streakBonus)
 	expectedScoreB := streaks[1] + (1 * streakBonus)
 
@@ -101,7 +101,7 @@ func TestGetLeaderboardWithSingleStreak(t *testing.T) {
 	receivedScoreA := users[0].Score
 	receivedScoreB := users[1].Score
 
-	assert.Equal(t, expectedUsers, len(users))
+	assert.Equal(t, expectedUsersNum, len(users))
 	assert.Equal(t, expectedScoreA, receivedScoreA)
 	assert.Equal(t, expectedScoreB, receivedScoreB)
 }
