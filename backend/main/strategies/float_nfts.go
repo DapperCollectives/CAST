@@ -93,12 +93,11 @@ func (s *FloatNFTs) TallyVotes(
 ) (models.ProposalResults, error) {
 
 	for _, vote := range votes {
-
 		if len(vote.NFTs) != 0 {
 			var allowedBalance float64
 
 			if proposal.Max_weight != nil {
-				allowedBalance = proposal.EnforceMaxWeight(float64(*vote.PrimaryAccountBalance))
+				allowedBalance = proposal.EnforceMaxWeight(float64(len(vote.NFTs)))
 			} else {
 				allowedBalance = float64(len(vote.NFTs))
 			}
