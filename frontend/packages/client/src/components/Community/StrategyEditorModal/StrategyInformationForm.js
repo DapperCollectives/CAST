@@ -7,6 +7,7 @@ const staticPlaceholders = {
   publicPath: 'Collection Public Path',
   maxWeight: 'Max Weight',
   threshold: 'Minimum Balance',
+  floatEventId: 'Event ID',
 };
 
 export default function StrategyInformationForm({

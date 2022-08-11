@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/DapperCollectives/CAST/backend/main/shared"
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/google/uuid"
@@ -43,9 +44,10 @@ type VoteWithBalance struct {
 }
 
 type NFT struct {
-	ID            interface{} `json:"id"`
-	Contract_addr string      `json:"contract_addr"`
-	Created_at    time.Time   `json:"created_at"`
+	ID             interface{} `json:"id"`
+	Contract_addr  string      `json:"contract_addr"`
+	Created_at     time.Time   `json:"created_at"`
+	FLoat_event_id uint64      `json:"event_id,omitempty"`
 }
 
 type VotingStreak struct {
@@ -69,12 +71,13 @@ const (
 
 func GetVotesForAddress(
 	db *s.Database,
-	start, count int,
 	address string,
 	proposalIds *[]int,
+	pageParams shared.PageParams,
 ) ([]*VoteWithBalance, int, error) {
 	var votes []*VoteWithBalance
 	var err error
+
 	sql := `select v.*, 
 		b.primary_account_balance,
 		b.secondary_account_balance,
@@ -82,17 +85,17 @@ func GetVotesForAddress(
 		from votes v
 		left join balances b on b.addr = v.addr
 		WHERE v.addr = $3`
+
 	// Conditionally add proposal_id condition
 	if len(*proposalIds) > 0 {
 		sql = sql + " AND proposal_id = ANY($4)"
 		sql = sql + "LIMIT $1 OFFSET $2 "
 		err = pgxscan.Select(db.Context, db.Conn, &votes,
-			sql, count, start, address, *proposalIds)
+			sql, pageParams.Count, pageParams.Start, address, *proposalIds)
 	} else {
 		sql = sql + "LIMIT $1 OFFSET $2 "
 		err = pgxscan.Select(db.Context, db.Conn, &votes,
-
-			sql, count, start, address)
+			sql, pageParams.Count, pageParams.Start, address)
 	}
 
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
@@ -143,10 +146,16 @@ func GetAllVotesForProposal(db *s.Database, proposalId int, strategy string) ([]
 	return votes, nil
 }
 
-func GetVotesForProposal(db *s.Database, start, count int, order string, proposalId int, strategy string) ([]*VoteWithBalance, int, error) {
+func GetVotesForProposal(
+	db *s.Database,
+	proposalId int,
+	strategy string,
+	pageParams shared.PageParams,
+) ([]*VoteWithBalance, int, error) {
 	var votes []*VoteWithBalance
 	var orderBySql string
-	if order == "desc" {
+
+	if pageParams.Order == "desc" {
 		orderBySql = "ORDER BY b.created_at DESC"
 	} else {
 		orderBySql = "ORDER BY b.created_at ASC"
@@ -166,7 +175,15 @@ func GetVotesForProposal(db *s.Database, start, count int, order string, proposa
 	sql = sql + " " + orderBySql
 	sql = sql + " LIMIT $1 OFFSET $2"
 
-	err := pgxscan.Select(db.Context, db.Conn, &votes, sql, count, start, proposalId)
+	err := pgxscan.Select(
+		db.Context,
+		db.Conn,
+		&votes,
+		sql,
+		pageParams.Count,
+		pageParams.Start,
+		proposalId,
+	)
 
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		log.Error().Err(err).Msg("Error querying votes for proposal")

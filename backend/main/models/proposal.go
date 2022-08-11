@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/DapperCollectives/CAST/backend/main/shared"
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/jackc/pgx/v4"
@@ -56,7 +57,12 @@ var computedStatusSQL = `
 	END as computed_status
 	`
 
-func GetProposalsForCommunity(db *s.Database, start, count int, communityId int, status string, order string) ([]*Proposal, int, error) {
+func GetProposalsForCommunity(
+	db *s.Database,
+	communityId int,
+	status string,
+	params shared.PageParams,
+) ([]*Proposal, int, error) {
 	var proposals []*Proposal
 	var err error
 
@@ -81,11 +87,11 @@ func GetProposalsForCommunity(db *s.Database, start, count int, communityId int,
 		statusFilter = ` AND status = 'published' AND end_time > (now() at time zone 'utc')`
 	}
 
-	orderBySql := fmt.Sprintf(` ORDER BY created_at %s`, order)
+	orderBySql := fmt.Sprintf(` ORDER BY created_at %s`, params.Order)
 	limitOffsetSql := ` LIMIT $1 OFFSET $2`
 	sql = sql + statusFilter + orderBySql + limitOffsetSql
 
-	err = pgxscan.Select(db.Context, db.Conn, &proposals, sql, count, start, communityId)
+	err = pgxscan.Select(db.Context, db.Conn, &proposals, sql, params.Count, params.Start, communityId)
 
 	// If we get pgx.ErrNoRows, just return an empty array
 	// and obfuscate error
@@ -255,4 +261,33 @@ func (p *Proposal) EnforceMaxWeight(balance float64) float64 {
 	}
 
 	return allowedBalance
+}
+
+func GetActiveStrategiesForCommunity(db *s.Database, communityId int) ([]string, error) {
+	var strategies []string
+	var err error
+
+	// Get Strategies from active proposals
+	sql := `
+		SELECT strategy FROM proposals 
+		WHERE community_id = $1
+		AND (
+			(status = 'published' AND start_time > (now() at time zone 'utc')) OR 
+			(status = 'published' AND start_time < (now() at time zone 'utc') AND end_time > (now() at time zone 'utc')) OR 
+			(status = 'published' AND end_time > (now() at time zone 'utc'))
+		)
+		GROUP BY strategy
+		`
+
+	err = pgxscan.Select(db.Context, db.Conn, &strategies, sql, communityId)
+
+	// If we get pgx.ErrNoRows, just return an empty array
+	// and obfuscate error
+	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
+		return nil, err
+	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
+		return nil, nil
+	}
+
+	return strategies, nil
 }
