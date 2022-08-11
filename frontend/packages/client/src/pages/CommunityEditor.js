@@ -8,6 +8,7 @@ import {
   CommunityPropsAndVoting,
   Dropdown,
   Loader,
+  ProposalThresholdEditor,
 } from 'components';
 import { ArrowLeft, ArrowLeftBold } from 'components/Svg';
 import {
@@ -63,6 +64,16 @@ const MenuTabs = ({ tabs, communityId, onClickButtonTab = () => {} } = {}) => {
           Proposals &amp; Voting
         </button>
       </div>
+      <div className="is-flex flex-1" style={{ marginTop: '18px' }}>
+        <button
+          className={`button is-white px-2 small-text ${
+            tabs.votingStrategies ? 'has-text-weight-bold' : ''
+          }`}
+          onClick={onClickButtonTab('voting-strategies')}
+        >
+          Voting Strategies
+        </button>
+      </div>
     </div>
   );
 };
@@ -97,6 +108,10 @@ const DropdownMenu = ({ communityId, onClickButtonTab = () => {} } = {}) => {
           {
             label: 'Proposals & Voting',
             value: CommunityEditPageTabs.proposalAndVoting,
+          },
+          {
+            label: 'Voting Strategies',
+            value: CommunityEditPageTabs.votingStrategies,
           },
         ]}
         onSelectValue={(value) => {
@@ -211,6 +226,18 @@ export default function CommunityEditorPage() {
               <CommunityEditorDetails communityId={community?.id} />
             )}
             {tabs.proposalsAndVoting && (
+              <ProposalThresholdEditor
+                communityId={community?.id}
+                updateCommunity={updateCommunity}
+                updatingCommunity={loading}
+                contractAddress={community?.contractAddr}
+                contractName={community?.contractName}
+                storagePath={community?.publicPath}
+                proposalThreshold={community?.proposalThreshold}
+                onlyAuthorsToSubmitProposals={community?.onlyAuthorsToSubmit}
+              />
+            )}
+            {tabs.votingStrategies && (
               <CommunityPropsAndVoting
                 communityId={community?.id}
                 updateCommunity={updateCommunity}
