@@ -1,14 +1,17 @@
 import React, { useEffect } from 'react';
+import { useFieldArray, useForm } from 'react-hook-form';
+import { useWebContext } from 'contexts/Web3';
+import { ActionButton } from 'components';
+import {
+  AddressForm,
+  AddressSchema,
+} from 'components/Community/CommunityEditorDetails';
 import Popover from 'components/Popover';
-import useFlowAddrValidator from '../Community/hooks/useFlowAddrValidator';
-import { CommunityUsersForm } from '../Community/CommunityEditorDetails';
-
-const isInitialList = (listAddr) => {
-  return listAddr?.length === 1 && listAddr[0].addr === '';
-};
+import { yupResolver } from '@hookform/resolvers/yup';
 
 const popoverParagraph =
   'In addition, community creator address will be set as admin and member by default.';
+
 export default function StepTwo({
   stepData,
   setStepValid,
@@ -16,73 +19,88 @@ export default function StepTwo({
   moveToNextStep,
   isStepValid,
 }) {
-  const { listAddrAdmins = [{ addr: '' }], listAddrAuthors = [{ addr: '' }] } =
-    stepData || {};
+  const { listAddrAdmins = [], listAddrAuthors = [] } = stepData || {};
 
-  const { isValid: isValidAdmins } = useFlowAddrValidator({
-    addrList: listAddrAdmins,
+  const { isValidFlowAddress } = useWebContext();
+
+  const { register, control, handleSubmit, reset, formState } = useForm({
+    mode: 'onChange',
+    resolver: yupResolver(AddressSchema({ isValidFlowAddress })),
   });
-  const { isValid: isValidAuthors } = useFlowAddrValidator({
-    addrList: listAddrAuthors,
+
+  const { isDirty, isSubmitting, errors, isValid } = formState;
+  // list for admins
+  const {
+    fields: addrAdminList,
+    append: appendToAdmin,
+    remove: removeFromAdmin,
+    update: updateOnAdmin,
+  } = useFieldArray({
+    control,
+    name: 'listAddrAdmins',
+    focusAppend: true,
+  });
+  // list for authors
+  const {
+    fields: addrAuthorList,
+    append: appendToAuthor,
+    remove: removeFromAuthor,
+    update: updateOnAuthor,
+  } = useFieldArray({
+    control,
+    name: 'listAddrAuthors',
+    focusAppend: true,
   });
 
   useEffect(() => {
+    // first initial load
     if (
-      (isInitialList(listAddrAdmins) && isInitialList(listAddrAuthors)) ||
-      (isInitialList(listAddrAdmins) && isValidAuthors) ||
-      (isInitialList(listAddrAuthors) && isValidAdmins)
+      Object.keys(stepData ?? {}).length === 0 &&
+      addrAdminList.length === 0 &&
+      addrAuthorList.length === 0
     ) {
-      setStepValid(true);
-      return;
+      appendToAuthor({ addr: '' });
+      appendToAdmin({ addr: '' });
     }
-    setStepValid(isValidAuthors && isValidAdmins);
+    // returns form next step back to this step
+    else if (
+      Object.keys(stepData ?? {}).length > 0 &&
+      addrAdminList.length === 0 &&
+      addrAuthorList.length === 0
+    ) {
+      reset(
+        {
+          listAddrAdmins,
+          listAddrAuthors,
+        },
+        { keepIsValid: true }
+      );
+    }
   }, [
-    isValidAuthors,
-    isValidAdmins,
-    setStepValid,
+    stepData,
     listAddrAdmins,
     listAddrAuthors,
+    addrAdminList,
+    addrAuthorList,
+    reset,
+    appendToAuthor,
+    appendToAdmin,
   ]);
 
-  const onAdminAddressChange = (index, value) => {
-    const addrListUpdated = listAddrAdmins.map((addr, idx) => {
-      return idx === index ? { addr: value.trim() } : addr;
-    });
+  const onSubmit = (data) => {
+    const { listAddrAdmins = [], listAddrAuthors = [] } = data;
 
-    onDataChange({ listAddrAdmins: addrListUpdated });
-  };
+    const admins = listAddrAdmins.map((e) => ({ addr: e.addr }));
+    const authors = listAddrAuthors.map((e) => ({ addr: e.addr }));
 
-  const onAdminAddressDelete = (index) => {
-    const newAddrs = listAddrAdmins.slice(0);
-    newAddrs.splice(index, 1);
-    onDataChange({ listAddrAdmins: newAddrs });
-  };
-
-  const onAdminAddressAdd = () => {
-    onDataChange({ listAddrAdmins: [...listAddrAdmins, { addr: '' }] });
-  };
-
-  const onAuthorAddressChange = (index, value) => {
-    const addrListUpdated = listAddrAuthors.map((addr, idx) => {
-      return idx === index ? { addr: value.trim() } : addr;
-    });
-
-    onDataChange({ listAddrAuthors: addrListUpdated });
-  };
-
-  const onAuthorAddressDelete = (index) => {
-    const newAddrs = listAddrAuthors.slice(0);
-    newAddrs.splice(index, 1);
-    onDataChange({ listAddrAuthors: newAddrs });
-  };
-
-  const onAuthorAddressAdd = () => {
-    onDataChange({ listAddrAuthors: [...listAddrAuthors, { addr: '' }] });
+    onDataChange({ listAddrAdmins: admins, listAddrAuthors: authors });
+    moveToNextStep();
   };
 
   return (
-    <>
-      <CommunityUsersForm
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <AddressForm
+        removeInnerForm
         title={
           <>
             Admins
@@ -96,20 +114,22 @@ export default function StepTwo({
             </Popover>
           </>
         }
-        description="Admins can edit community settings and moderate proposals. 
-          We recommend at least two admin for each community, but it is not a requirement. 
-          Please add one address per line."
-        addrList={listAddrAdmins}
-        onAddressChange={onAdminAddressChange}
-        onDeleteAddress={onAdminAddressDelete}
-        onAddAddress={onAdminAddressAdd}
-        addrType="Admins"
-        label="Flow wallet address"
-        validateEachAddress
-        onClearField={(index) => onAdminAddressChange(index, '')}
-        autoFocusOnLoad={true}
+        description="Admins can edit community settings and moderate proposals.
+                We recommend at least two admin for each community, but it is not a requirement.
+                Please add one address per line."
+        addrList={addrAdminList}
+        listName="listAddrAdmins"
+        onDeleteAddress={removeFromAdmin}
+        onAddAddress={appendToAdmin}
+        register={register}
+        control={control}
+        isValid={isValid}
+        update={updateOnAdmin}
+        addrType={'admin'}
+        errors={errors}
       />
-      <CommunityUsersForm
+      <AddressForm
+        removeInnerForm
         title={
           <>
             Authors
@@ -125,29 +145,27 @@ export default function StepTwo({
         }
         description="Authors can create and publish proposals, selecting from voting strategies set by an Admin.
           Admins are automatically added as Authors."
-        addrList={listAddrAuthors}
-        onAddressChange={onAuthorAddressChange}
-        onDeleteAddress={onAuthorAddressDelete}
-        onAddAddress={onAuthorAddressAdd}
-        addrType="Authors"
-        label="Flow wallet address"
-        validateEachAddress
-        onClearField={(index) => onAuthorAddressChange(index, '')}
-        autoFocusOnLoad={false}
+        addrList={addrAuthorList}
+        listName="listAddrAuthors"
+        onDeleteAddress={removeFromAuthor}
+        onAddAddress={appendToAuthor}
+        register={register}
+        control={control}
+        isValid={isValid}
+        update={updateOnAuthor}
+        addrType={'author'}
+        errors={errors}
       />
       <div className="columns mb-5">
         <div className="column is-12">
-          <button
-            style={{ height: 48, width: '100%' }}
-            className={`button vote-button is-flex has-background-yellow rounded-sm is-size-6 is-uppercase is-${
-              isStepValid ? 'enabled' : 'disabled'
-            }`}
-            onClick={isStepValid ? () => moveToNextStep() : () => {}}
-          >
-            Next: PROPOSAL & VOTING
-          </button>
+          <ActionButton
+            type="submit"
+            label="Next: PROPOSAL & VOTING"
+            enabled={(isValid || isDirty) && !isSubmitting}
+            classNames="vote-button transition-all has-background-yellow mt-5"
+          />
         </div>
       </div>
-    </>
+    </form>
   );
 }
