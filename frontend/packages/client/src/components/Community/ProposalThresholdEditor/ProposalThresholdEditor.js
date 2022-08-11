@@ -142,7 +142,7 @@ export default function ProposalThresholdEditor({
           <ActionButton
             type="submit"
             label="Next: VOTING STRATEGIES"
-            enabled={(isValid || isDirty) && !isSubmitting}
+            enabled={isDirty && !isSubmitting}
             classNames="vote-button transition-all has-background-yellow mt-5"
           />
         </div>
