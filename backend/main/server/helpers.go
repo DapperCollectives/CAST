@@ -25,60 +25,6 @@ func (h *Helpers) Initialize(app *App) {
 	h.A = app
 }
 
-func (h *Helpers) uploadFile(r *http.Request) (interface{}, error) {
-	file, handler, err := r.FormFile("file")
-	if err != nil {
-		log.Error().Err(err).Msg("FormFile Retrieval Error.")
-		return nil, err
-	}
-	defer file.Close()
-
-	// ensure mime type is allowed
-	mime := handler.Header.Get("Content-Type")
-	if !funk.Contains(allowedFileTypes, mime) {
-		msg := fmt.Sprintf("Uploaded file type of '%s' is not allowed.", mime)
-		log.Error().Msg(msg)
-		return nil, errors.New(msg)
-	}
-
-	pin, err := h.A.IpfsClient.PinFile(file, handler.Filename)
-	if err != nil {
-		log.Error().Err(err).Msg("Error pinning file to IPFS.")
-		return nil, err
-	}
-
-	resp := struct {
-		Cid string `json:"cid"`
-	}{
-		Cid: pin.IpfsHash,
-	}
-
-	return resp, nil
-}
-
-func (h *Helpers) fetchProposal(vars map[string]string, query string) (models.Proposal, error) {
-	proposalId, err := strconv.Atoi(vars[query])
-	if err != nil {
-		msg := fmt.Sprintf("Invalid proposalId: %s", vars["proposalId"])
-		log.Error().Err(err).Msg(msg)
-		return models.Proposal{}, errors.New(msg)
-	}
-
-	p := models.Proposal{ID: proposalId}
-
-	if err := p.GetProposalById(h.A.DB); err != nil {
-		switch err.Error() {
-		case pgx.ErrNoRows.Error():
-			msg := fmt.Sprintf("Proposal with ID %d not found.", proposalId)
-			return models.Proposal{}, errors.New(msg)
-		default:
-			return models.Proposal{}, err
-		}
-	}
-
-	return p, nil
-}
-
 func (h *Helpers) useStrategyTally(
 	p models.Proposal,
 	v []*models.VoteWithBalance,
@@ -161,6 +107,60 @@ func (h *Helpers) useStrategyFetchBalance(
 	}
 
 	return vb, nil
+}
+
+func (h *Helpers) fetchProposal(vars map[string]string, query string) (models.Proposal, error) {
+	proposalId, err := strconv.Atoi(vars[query])
+	if err != nil {
+		msg := fmt.Sprintf("Invalid proposalId: %s", vars["proposalId"])
+		log.Error().Err(err).Msg(msg)
+		return models.Proposal{}, errors.New(msg)
+	}
+
+	p := models.Proposal{ID: proposalId}
+
+	if err := p.GetProposalById(h.A.DB); err != nil {
+		switch err.Error() {
+		case pgx.ErrNoRows.Error():
+			msg := fmt.Sprintf("Proposal with ID %d not found.", proposalId)
+			return models.Proposal{}, errors.New(msg)
+		default:
+			return models.Proposal{}, err
+		}
+	}
+
+	return p, nil
+}
+
+func (h *Helpers) uploadFile(r *http.Request) (interface{}, error) {
+	file, handler, err := r.FormFile("file")
+	if err != nil {
+		log.Error().Err(err).Msg("FormFile Retrieval Error.")
+		return nil, err
+	}
+	defer file.Close()
+
+	// ensure mime type is allowed
+	mime := handler.Header.Get("Content-Type")
+	if !funk.Contains(allowedFileTypes, mime) {
+		msg := fmt.Sprintf("Uploaded file type of '%s' is not allowed.", mime)
+		log.Error().Msg(msg)
+		return nil, errors.New(msg)
+	}
+
+	pin, err := h.A.IpfsClient.PinFile(file, handler.Filename)
+	if err != nil {
+		log.Error().Err(err).Msg("Error pinning file to IPFS.")
+		return nil, err
+	}
+
+	resp := struct {
+		Cid string `json:"cid"`
+	}{
+		Cid: pin.IpfsHash,
+	}
+
+	return resp, nil
 }
 
 func (h *Helpers) getPaginatedVotes(
