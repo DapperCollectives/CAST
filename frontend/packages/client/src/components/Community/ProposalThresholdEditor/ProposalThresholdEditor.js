@@ -42,12 +42,12 @@ const checkIfNeedsDefaultValues = ({
   contractAddress: contractAddr,
   contractName,
   storagePath: publicPath,
-  proposalThreshold,
+  proposalThreshold: threshold,
   onlyAuthorsToSubmitProposals: onlyAuthorsToSubmit,
 }) => {
   if (
     onlyAuthorsToSubmit &&
-    [contractAddr, contractName, publicPath, proposalThreshold].every(
+    [contractAddr, contractName, publicPath, threshold].every(
       (field) => field === ''
     )
   ) {
@@ -55,7 +55,7 @@ const checkIfNeedsDefaultValues = ({
       contractAddr: defaultVaules.contractAddress,
       contractName: defaultVaules.contractName,
       publicPath: defaultVaules.storagePath,
-      proposalThreshold: defaultVaules.proposalThreshold,
+      threshold: defaultVaules.proposalThreshold,
       onlyAuthorsToSubmit,
     };
   }
@@ -63,7 +63,7 @@ const checkIfNeedsDefaultValues = ({
     contractAddr,
     contractName,
     publicPath,
-    proposalThreshold,
+    threshold,
     onlyAuthorsToSubmit,
   };
 };
