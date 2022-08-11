@@ -78,6 +78,10 @@ export default function ProposalThresholdEditor({
 }) {
   const { isValidFlowAddress } = useWebContext();
 
+  // if flow contract information was used and
+  // onlyAuthorsToSubmitProposals === true then do not show contract information
+  // if was left in black when community was created and frontend completed
+  // the request with Flow contract information
   const useEmptyFields = checkFieldValues({
     contractAddress,
     contractName,
@@ -102,8 +106,10 @@ export default function ProposalThresholdEditor({
   });
 
   const onSubmit = async (data) => {
-    // check field values and pupulate them
+    // check fields value and pupulate them
     // with flow contract info if needed
+    // if user leaves all fields empty and onlyAuthorsToSubmitProposals === true
+    // the it adds Flow contract information
     const payload = checkIfNeedsDefaultValues(data);
     await updateCommunity(payload);
 
