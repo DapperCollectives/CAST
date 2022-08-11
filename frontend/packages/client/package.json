@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@creativebulma/bulma-tooltip": "^1.2.0",
+    "@hookform/resolvers": "^2.9.7",
     "@onflow/fcl": "^1.2.0",
     "@onflow/six-transfer-tokens": "0.0.8",
     "@trivago/prettier-plugin-sort-imports": "^3.3.0",
