@@ -79,7 +79,7 @@ func TestGetLeaderboardWithSingleStreak(t *testing.T) {
 	communityId := otu.AddCommunities(1)[0]
 	streaks := []int{3, 4}
 	streakBonus := 1
-	expectedUsersNum := len(streaks)
+	expectedUsers := len(streaks)
 	expectedScoreA := streaks[0] + (1 * streakBonus)
 	expectedScoreB := streaks[1] + (1 * streakBonus)
 
@@ -101,37 +101,37 @@ func TestGetLeaderboardWithSingleStreak(t *testing.T) {
 	receivedScoreA := users[0].Score
 	receivedScoreB := users[1].Score
 
-	assert.Equal(t, expectedUsersNum, len(users))
+	assert.Equal(t, expectedUsers, len(users))
 	assert.Equal(t, expectedScoreA, receivedScoreA)
 	assert.Equal(t, expectedScoreB, receivedScoreB)
 }
 
-// func TestGetLeaderboardWithMultiStreaks(t *testing.T) {
-// 	resetTables()
+func TestGetLeaderboardWithMultiStreaks(t *testing.T) {
+	resetTables()
 
-// 	communityId := otu.AddCommunities(1)[0]
-// 	streaks := []int{3, 4}
-// 	streakBonus := 1
-// 	expectedUsers := 1
+	communityId := otu.AddCommunities(1)[0]
+	streaks := []int{3, 4}
+	streakBonus := 1
+	expectedUsers := 1
 
-// 	// user with 7 votes and 2 streaks
-// 	expectedUser1Score := 7 + (2 * streakBonus)
+	// user with 7 votes and 2 streaks
+	expectedUser1Score := 7 + (2 * streakBonus)
 
-// 	otu.GenerateMultiStreakAchievements(communityId, streaks)
+	otu.GenerateMultiStreakAchievements(communityId, streaks)
 
-// 	response := otu.GetCommunityLeaderboardAPI(communityId)
-// 	checkResponseCode(t, http.StatusOK, response.Code)
+	response := otu.GetCommunityLeaderboardAPI(communityId)
+	checkResponseCode(t, http.StatusOK, response.Code)
 
-// 	var p test_utils.PaginatedResponseWithLeaderboardUser
-// 	json.Unmarshal(response.Body.Bytes(), &p)
+	var p test_utils.PaginatedResponseWithLeaderboardUser
+	json.Unmarshal(response.Body.Bytes(), &p)
 
-// 	users := p.Data.Users
+	users := p.Data.Users
 
-// 	receivedUser1Score := users[0].Score
+	receivedUser1Score := users[0].Score
 
-// 	assert.Equal(t, expectedUsers, len(users))
-// 	assert.Equal(t, expectedUser1Score, receivedUser1Score)
-// }
+	assert.Equal(t, expectedUsers, len(users))
+	assert.Equal(t, expectedUser1Score, receivedUser1Score)
+}
 
 func TestGetLeaderboardWithWinningVote(t *testing.T) {
 	resetTables()
