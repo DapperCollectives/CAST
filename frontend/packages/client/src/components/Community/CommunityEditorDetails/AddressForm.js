@@ -1,25 +1,38 @@
 import React, { useCallback, useMemo } from 'react';
 import { AddButton, Loader, WrapperResponsive } from 'components';
+import pick from 'lodash/pick';
 import FormFields from './FormFields';
 
 export default function AddressForm({
-  title,
-  description,
   loadingUsers = false,
-  addrList,
-  listName,
-  errors,
-  onDeleteAddress,
-  onAddAddress,
   addrType = 'Admins',
-  register,
-  update,
-  isValid,
   submitComponent,
   removeInnerForm,
   isSubmitting = false,
   handleSubmit,
+  ...props
 } = {}) {
+  const { title, description } = pick(props, ['title', 'description']);
+  const {
+    addrList,
+    listName,
+    errors,
+    onDeleteAddress,
+    onAddAddress,
+    register,
+    update,
+    isValid,
+  } = pick(props, [
+    'addrList',
+    'listName',
+    'errors',
+    'onDeleteAddress',
+    'onAddAddress',
+    'register',
+    'update',
+    'isValid',
+  ]);
+
   const onClearField = useCallback(
     (index) => {
       update(index, { addr: '' });
