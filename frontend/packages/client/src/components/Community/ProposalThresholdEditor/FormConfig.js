@@ -19,7 +19,7 @@ yup.addMethod(yup.string, 'makeOtherFieldsRequired', function (message) {
   });
 });
 
-const StepThreeSchema = (isValidFlowAddress) =>
+const Schema = (isValidFlowAddress) =>
   yup.object().shape({
     onlyAuthorsToSubmitProposals: yup.boolean(),
     contractAddress: yup
@@ -64,8 +64,4 @@ const StepThreeSchema = (isValidFlowAddress) =>
       }),
   });
 
-const stepThree = {
-  Schema: StepThreeSchema,
-};
-
-export { stepThree };
+export { Schema };
