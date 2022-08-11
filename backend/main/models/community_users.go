@@ -147,7 +147,10 @@ func GetCommunityLeaderboard(
 		pageParams.Count,
 	)
 
-	totalUsers := getTotalUsersForCommunity(db, communityId)
+	totalUsers := len(leaderboardUsers)
+	if(totalUsers > pageParams.Count) {
+		totalUsers = pageParams.Count
+	}
 
 	payload.Users = leaderboardUsers
 	payload.CurrentUser = currentUser
@@ -274,13 +277,6 @@ func EnsureValidRole(userType string) bool {
 		}
 	}
 	return false
-}
-
-func getTotalUsersForCommunity(db *s.Database, communityId int) int {
-	var totalUsers int
-	countSql := `SELECT COUNT(*) FROM community_users WHERE community_id = $1`
-	_ = db.Conn.QueryRow(db.Context, countSql, communityId).Scan(&totalUsers)
-	return totalUsers
 }
 
 func getUserAchievements(db *s.Database, communityId int) (UserAchievements, error) {
