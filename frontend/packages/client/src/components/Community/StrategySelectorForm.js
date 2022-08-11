@@ -28,8 +28,11 @@ export default function StrategySelectorForm({
     }
   }, [strategies, onStrategySelection, existingStrategies]);
 
-  const { data: allVotingStrategies, loading: loadingAllStrategies } =
-    useVotingStrategies();
+  const {
+    data: allVotingStrategies,
+    loading: loadingAllStrategies,
+    addFungibleToken,
+  } = useVotingStrategies();
 
   const { openModal, closeModal } = useModalContext();
 
@@ -39,6 +42,13 @@ export default function StrategySelectorForm({
   );
 
   const addNewStrategy = (newStrategyInfo) => {
+    const { contract } = newStrategyInfo;
+    if (
+      newStrategyInfo.name === 'staked-token-weighted-default' ||
+      newStrategyInfo.name === 'token-weighted-default'
+    ) {
+      addFungibleToken(contract.addr, contract.name);
+    }
     setStrategies((state) => [...state, newStrategyInfo]);
     closeModal();
   };

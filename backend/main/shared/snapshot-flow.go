@@ -207,6 +207,32 @@ func (c *SnapshotClient) GetLatestSnapshot(contract Contract) (*Snapshot, error)
 	return &snapshot, nil
 }
 
+func (c *SnapshotClient) AddFungibleToken(addr, name string) (error) {
+	var snapshot Snapshot
+	var url string
+
+	fmt.Println(addr, name)
+
+	if c.bypass() {
+		return nil
+	}
+
+	url = fmt.Sprintf(`%s/add-fungible-token/%s, %s`, c.BaseURL, addr, name)
+
+	req, err := c.setRequestMethod("POST", url)
+	if err != nil {
+		log.Debug().Err(err).Msg("SnapshotClient AddFungibleToken request error")
+		return err
+	}
+
+	if err := c.sendRequest(req, snapshot); err != nil {
+		log.Debug().Err(err).Msgf("Snapshot AddFungibleToken send request error.")
+		return err
+	}
+
+	return nil
+}
+
 func (c *SnapshotClient) GetLatestFlowSnapshot() (*Snapshot, error) {
 	var snapshot Snapshot
 
