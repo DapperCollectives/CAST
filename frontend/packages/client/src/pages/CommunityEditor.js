@@ -145,6 +145,7 @@ export default function CommunityEditorPage() {
       profile: value === CommunityEditPageTabs.profile,
       details: value === CommunityEditPageTabs.details,
       proposalsAndVoting: value === CommunityEditPageTabs.proposalAndVoting,
+      votingStrategies: value === CommunityEditPageTabs.votingStrategies,
     });
   };
 
