@@ -106,6 +106,17 @@ func TestGetLeaderboardWithSingleStreak(t *testing.T) {
 	assert.Equal(t, expectedScoreB, receivedScoreB)
 }
 
+// func TestGetLeaderboardWithMultiStreaks(t *testing.T) {
+// 	clearTable("communities")
+// 	clearTable("community_users")
+// 	clearTable("user_achievements")
+// 	clearTable("proposals")
+// 	clearTable("votes")
+// 	communityId := otu.AddCommunities(1)[0]
+// 	streaks := []int{3, 4}
+// 	streakBonus := 1
+// 	expectedUsers := 1
+
 func TestGetLeaderboardWithMultiStreaks(t *testing.T) {
 	resetTables()
 
