@@ -11,10 +11,12 @@ import { Schema } from './FormConfig';
 
 const networkConfig = networks[process.env.REACT_APP_FLOW_ENV];
 
+const { flowAddress } = networkConfig;
+
 const defaultVaules = {
-  contractAddress: networkConfig.flowAddress.contractAddr,
-  contractName: networkConfig.flowAddress.contractName,
-  storagePath: networkConfig.flowAddress.storagePath,
+  contractAddress: flowAddress.contractAddr,
+  contractName: flowAddress.contractName,
+  storagePath: flowAddress.storagePath,
   proposalThreshold: '0',
 };
 
@@ -35,6 +37,37 @@ const checkFieldValues = ({
     })
   );
 };
+
+const checkIfNeedsDefaultValues = ({
+  contractAddress: contractAddr,
+  contractName,
+  storagePath: publicPath,
+  proposalThreshold,
+  onlyAuthorsToSubmitProposals: onlyAuthorsToSubmit,
+}) => {
+  if (
+    onlyAuthorsToSubmit &&
+    [contractAddr, contractName, publicPath, proposalThreshold].every(
+      (field) => field === ''
+    )
+  ) {
+    return {
+      contractAddr: defaultVaules.contractAddress,
+      contractName: defaultVaules.contractName,
+      publicPath: defaultVaules.storagePath,
+      proposalThreshold: defaultVaules.proposalThreshold,
+      onlyAuthorsToSubmit,
+    };
+  }
+  return {
+    contractAddr,
+    contractName,
+    publicPath,
+    proposalThreshold,
+    onlyAuthorsToSubmit,
+  };
+};
+
 export default function ProposalThresholdEditor({
   updateCommunity = () => {},
   contractAddress,
@@ -69,11 +102,15 @@ export default function ProposalThresholdEditor({
   });
 
   const onSubmit = async (data) => {
-    await updateCommunity(data);
+    // check field values and pupulate them
+    // with flow contract info if needed
+    const payload = checkIfNeedsDefaultValues(data);
+    await updateCommunity(payload);
+
     reset(data, { keepDirty: false });
   };
 
-  const { isDirty, isSubmitting, errors, isValid } = formState;
+  const { isDirty, isSubmitting, errors } = formState;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
