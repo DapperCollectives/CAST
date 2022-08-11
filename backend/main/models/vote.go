@@ -27,6 +27,7 @@ type Vote struct {
 	Cid                  *string                 `json:"cid"`
 	Message              string                  `json:"message"`
 	TransactionId        string                  `json:"transactionId"`
+	IsCancelled		 	 bool					 `json:"isCancelled"`
 }
 
 type VoteWithBalance struct {
@@ -57,6 +58,7 @@ type VotingStreak struct {
 
 const (
 	timestampExpiry = 60
+	defaultStreakLength = 3
 )
 
 const (
@@ -527,7 +529,7 @@ func addDefaultStreak(db *s.Database, addr string, communityId int, proposals []
 }
 
 func addOrUpdateStreak(db *s.Database, addr string, communityId int, proposals []uint64, details string) error {
-	v := new(Vote)
+	var id int
 	// If previous streak exists, then update with new streak details, or insert new streak
 	// e.g. If previous streak = 1,2,3 and current streak = 1,2,3,4 then update row with current streak details
 	previousStreakDetails := fmt.Sprintf("%s:%s:%d:%s", Streak, addr, communityId, strings.Trim(strings.Join(strings.Fields(fmt.Sprint(proposals[:len(proposals)-1])), ","), "[]"))
@@ -538,7 +540,7 @@ func addOrUpdateStreak(db *s.Database, addr string, communityId int, proposals [
 						DO UPDATE SET proposals = $4, details = $6
 						RETURNING id
 					`
-	return db.Conn.QueryRow(db.Context, sql, addr, Streak, communityId, proposals, previousStreakDetails, details).Scan(&v.ID)
+	return db.Conn.QueryRow(db.Context, sql, addr, Streak, communityId, proposals, previousStreakDetails, details).Scan(&id)
 }
 
 func checkErrorIgnoreNoRows(err error) bool {
