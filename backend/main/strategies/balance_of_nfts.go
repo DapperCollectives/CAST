@@ -1,8 +1,6 @@
 package strategies
 
 import (
-	"math"
-
 	"github.com/DapperCollectives/CAST/backend/main/models"
 	"github.com/DapperCollectives/CAST/backend/main/shared"
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
@@ -92,8 +90,8 @@ func (b *BalanceOfNfts) TallyVotes(
 				allowedBalance = float64(len(vote.NFTs))
 			}
 
-			r.Results[vote.Choice] += int(allowedBalance * math.Pow(10, -8))
-			r.Results_float[vote.Choice] += allowedBalance * math.Pow(10, -8)
+			r.Results[vote.Choice] += int(allowedBalance)
+			r.Results_float[vote.Choice] += allowedBalance
 		}
 	}
 
