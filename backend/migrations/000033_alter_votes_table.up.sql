@@ -1,0 +1,1 @@
+ALTER TABLE votes ADD COLUMN is_cancelled BOOLEAN DEFAULT 'false';

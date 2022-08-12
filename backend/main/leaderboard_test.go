@@ -79,7 +79,7 @@ func TestGetLeaderboardWithSingleStreak(t *testing.T) {
 	communityId := otu.AddCommunities(1)[0]
 	streaks := []int{3, 4}
 	streakBonus := 1
-	expectedUsersNum := len(streaks)
+	expectedUsers := len(streaks)
 	expectedScoreA := streaks[0] + (1 * streakBonus)
 	expectedScoreB := streaks[1] + (1 * streakBonus)
 
@@ -101,7 +101,7 @@ func TestGetLeaderboardWithSingleStreak(t *testing.T) {
 	receivedScoreA := users[0].Score
 	receivedScoreB := users[1].Score
 
-	assert.Equal(t, expectedUsersNum, len(users))
+	assert.Equal(t, expectedUsers, len(users))
 	assert.Equal(t, expectedScoreA, receivedScoreA)
 	assert.Equal(t, expectedScoreB, receivedScoreB)
 }
@@ -114,24 +114,32 @@ func TestGetLeaderboardWithSingleStreak(t *testing.T) {
 // 	streakBonus := 1
 // 	expectedUsers := 1
 
-// 	// user with 7 votes and 2 streaks
-// 	expectedUser1Score := 7 + (2 * streakBonus)
+func TestGetLeaderboardWithMultiStreaks(t *testing.T) {
+	resetTables()
 
-// 	otu.GenerateMultiStreakAchievements(communityId, streaks)
+	communityId := otu.AddCommunities(1)[0]
+	streaks := []int{3, 4}
+	streakBonus := 1
+	expectedUsers := 1
 
-// 	response := otu.GetCommunityLeaderboardAPI(communityId)
-// 	checkResponseCode(t, http.StatusOK, response.Code)
+	// user with 7 votes and 2 streaks
+	expectedUser1Score := 7 + (2 * streakBonus)
 
-// 	var p test_utils.PaginatedResponseWithLeaderboardUser
-// 	json.Unmarshal(response.Body.Bytes(), &p)
+	otu.GenerateMultiStreakAchievements(communityId, streaks)
 
-// 	users := p.Data.Users
+	response := otu.GetCommunityLeaderboardAPI(communityId)
+	checkResponseCode(t, http.StatusOK, response.Code)
 
-// 	receivedUser1Score := users[0].Score
+	var p test_utils.PaginatedResponseWithLeaderboardUser
+	json.Unmarshal(response.Body.Bytes(), &p)
 
-// 	assert.Equal(t, expectedUsers, len(users))
-// 	assert.Equal(t, expectedUser1Score, receivedUser1Score)
-// }
+	users := p.Data.Users
+
+	receivedUser1Score := users[0].Score
+
+	assert.Equal(t, expectedUsers, len(users))
+	assert.Equal(t, expectedUser1Score, receivedUser1Score)
+}
 
 func TestGetLeaderboardWithWinningVote(t *testing.T) {
 	resetTables()
