@@ -1,15 +1,15 @@
 import { addresValidation } from 'components/Community/CommunityEditorDetails';
+import omit from 'lodash/omit';
+import values from 'lodash/values';
 import * as yup from 'yup';
 
 yup.addMethod(yup.string, 'makeOtherFieldsRequired', function (message) {
   return this.test('checkOtherFields', message, function (value, context) {
     const { path, parent } = context;
-    const otherProps = Object.keys(parent).filter(
-      (key) => key !== path && key !== 'onlyAuthorsToSubmitProposals'
-    );
+    const otherFieldsObj = omit(parent, [path, 'onlyAuthorsToSubmitProposals']);
     // if currrent field does not have data but other do throw error
     // to let the user know that it needs to be completed or field must be empty
-    if (value === '' && otherProps.some((key) => parent[key] !== '')) {
+    if (value === '' && values(otherFieldsObj).some((val) => val !== '')) {
       return this.createError({
         path: `${this.path}`,
         message,
