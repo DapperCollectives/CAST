@@ -2096,6 +2096,37 @@
     "@svgr/plugin-svgo" "^5.5.0"
     loader-utils "^2.0.0"
 
+"@tanstack/match-sorter-utils@^8.1.1":
+  version "8.1.1"
+  resolved "https://registry.yarnpkg.com/@tanstack/match-sorter-utils/-/match-sorter-utils-8.1.1.tgz#895f407813254a46082a6bbafad9b39b943dc834"
+  integrity sha512-IdmEekEYxQsoLOR0XQyw3jD1GujBpRRYaGJYQUw1eOT1eUugWxdc7jomh1VQ1EKHcdwDLpLaCz/8y4KraU4T9A==
+  dependencies:
+    remove-accents "0.4.2"
+
+"@tanstack/query-core@^4.0.0-beta.1":
+  version "4.1.2"
+  resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-4.1.2.tgz#b13744d6ded73c5ae9760a61a6c39501c3cb1bda"
+  integrity sha512-s9a4tkJOGrKyyX2iVjkyMxQJ+4mVro6YJBQV8NzgorUtjnwJRiFkTYbLJPLbHGLIoICTzsbMfplnI5KuFDfyzw==
+
+"@tanstack/react-query-devtools@4.0.11-beta.0":
+  version "4.0.11-beta.0"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query-devtools/-/react-query-devtools-4.0.11-beta.0.tgz#62eabce5f8956ec9f17df3e178824d78c2820bcd"
+  integrity sha512-JQoCgoidFOlP37ZEnBxWhtjbXv7KVvBpooQafD6HFFuqM9hK85t95Ct7W5tb8D82L95XzdcIj/ZjAjt5jOM5fQ==
+  dependencies:
+    "@tanstack/match-sorter-utils" "^8.1.1"
+    "@tanstack/react-query" "^4.0.10"
+    "@types/use-sync-external-store" "^0.0.3"
+    use-sync-external-store "^1.2.0"
+
+"@tanstack/react-query@^4.0.10", "@tanstack/react-query@^4.1.0":
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-4.1.0.tgz#eafda4578e7268cb3e36b2840107e680a57f626c"
+  integrity sha512-ZwPCqVoCqvUvTfmvpPlC6apyrvV4JmK1XsesreFs9TxZmASyRvj9Dk1Z++ct6m5lniccDssnLOo+36E1EAi/nA==
+  dependencies:
+    "@tanstack/query-core" "^4.0.0-beta.1"
+    "@types/use-sync-external-store" "^0.0.3"
+    use-sync-external-store "^1.2.0"
+
 "@testing-library/dom@^8.0.0":
   version "8.11.3"
   resolved "https://registry.npmjs.org/@testing-library/dom/-/dom-8.11.3.tgz"
