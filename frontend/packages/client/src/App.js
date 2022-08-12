@@ -12,7 +12,6 @@ import './App.sass';
 import AppPages from './pages';
 import Error from './pages/Error';
 
-const isLocalDevMode = process.env.NODE_ENV === 'development';
 // create react-query client
 const queryClient = new QueryClient();
 
@@ -34,7 +33,7 @@ function App() {
             </Router>
           </NotificationModalProvider>
         </Web3Provider>
-        {isLocalDevMode && <ReactQueryDevtools />}
+        <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
     </ErrorBoundary>
   );

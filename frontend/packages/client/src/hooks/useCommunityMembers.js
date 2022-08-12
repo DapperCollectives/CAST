@@ -1,6 +1,6 @@
-import { useInfiniteQuery } from 'react-query';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { checkResponse, getPaginationInfo } from 'utils';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { PAGINATION_INITIAL_STATE } from '../reducers';
 
 export default function useCommunityMembers({
