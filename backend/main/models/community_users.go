@@ -319,7 +319,7 @@ func getUserAchievements(db *s.Database, communityId int) (UserAchievements, err
 				ORDER BY 1,2$$
 			) AS ct(address varchar(18), winning_vote bigint)
 		) c ON v.addr = c.address
-			WHERE p.community_id = $1
+			WHERE p.community_id = $1 AND v.is_cancelled != 'true'
 			GROUP BY v.addr, a.early_vote, b.streak, c.winning_vote
 		`, communityId, communityId, communityId)
 
