@@ -12,7 +12,7 @@ const networkConfig = networks[process.env.REACT_APP_FLOW_ENV];
 
 const { flowAddress } = networkConfig;
 
-const defaultVaules = {
+const defaultValues = {
   contractAddress: flowAddress.contractAddr,
   contractName: flowAddress.contractName,
   storagePath: flowAddress.storagePath,
@@ -28,7 +28,7 @@ const checkFieldValues = ({
 }) => {
   return (
     onlyAuthorsToSubmitProposals === true &&
-    isEqual(defaultVaules, {
+    isEqual(defaultValues, {
       contractAddress,
       contractName,
       storagePath,
@@ -51,10 +51,10 @@ const checkIfNeedsDefaultValues = ({
     )
   ) {
     return {
-      contractAddr: defaultVaules.contractAddress,
-      contractName: defaultVaules.contractName,
-      publicPath: defaultVaules.storagePath,
-      proposalThreshold: defaultVaules.proposalThreshold,
+      contractAddr: defaultValues.contractAddress,
+      contractName: defaultValues.contractName,
+      publicPath: defaultValues.storagePath,
+      proposalThreshold: defaultValues.proposalThreshold,
       onlyAuthorsToSubmit,
     };
   }
