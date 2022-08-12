@@ -10,7 +10,7 @@ const networksConfig = {
     flowAddress: {
       contractName: 'FlowToken',
       contractAddr: '0x0ae53cb6e3f42a79',
-      storagePath: 'flowTokenVault',
+      storagePath: 'flowTokenBalance',
     },
   },
   testnet: {
