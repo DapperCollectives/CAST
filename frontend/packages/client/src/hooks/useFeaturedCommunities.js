@@ -9,7 +9,7 @@ export default function useFeaturedCommunities({
   const { notifyError } = useErrorHandlerContext();
 
   const { isLoading, isError, data, error, fetchNextPage } = useInfiniteQuery(
-    'communities-for-homepage',
+    ['communities-for-homepage'],
     async ({ pageParam = 0 }) => {
       const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities-for-homepage?count=${count}&start=${pageParam}`;
       try {
