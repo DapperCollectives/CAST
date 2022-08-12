@@ -1,7 +1,6 @@
 export { default as useFclUser } from './useFclUser';
 export { default as useProposal } from './useProposal';
 export { default as useProposalVotes } from './useProposalVotes';
-export { default as useAllProposalVotes } from './useAllProposalVotes';
 export { default as useVotesForAddress } from './useVotesForAddress';
 export { default as useVotingResults } from './useVotingResults';
 export { default as useCommunityProposalsWithVotes } from './useCommunityProposalsWithVotes';
