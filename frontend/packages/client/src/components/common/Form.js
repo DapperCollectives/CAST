@@ -1,9 +1,9 @@
 import React from 'react';
 
-export default function Form({ removeInnerForm, children, handleSubmit }) {
+export default function Form({ removeInnerForm, children, onSubmit }) {
   return removeInnerForm ? (
     { children }
   ) : (
-    <form onSubmit={handleSubmit}>{children}</form>
+    <form onSubmit={onSubmit}>{children}</form>
   );
 }
