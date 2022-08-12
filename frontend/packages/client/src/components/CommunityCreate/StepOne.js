@@ -344,7 +344,7 @@ export default function StepOne({
           </div>
         )}
         <Dropdown
-          label="Category"
+          label="Community Type"
           margin="mt-4"
           defaultValue={category}
           values={(communityCategory ?? []).map((cat) => ({
