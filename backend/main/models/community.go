@@ -35,7 +35,6 @@ type Community struct {
 	Slug                     *string     `json:"slug,omitempty"                  validate:"required"`
 	Is_featured              *bool       `json:"isFeatured,omitempty"`
 
-	//TODO we can remove this from the struct as contract data is inside Strategies now
 	Contract_name *string  `json:"contractName,omitempty"`
 	Contract_addr *string  `json:"contractAddr,omitempty"`
 	Public_path   *string  `json:"publicPath,omitempty"`
@@ -72,6 +71,12 @@ type UpdateCommunityRequestPayload struct {
 	Terms_and_conditions_url *string     `json:"termsAndConditionsUrl,omitempty"`
 	Proposal_validation      *string     `json:"proposalValidation,omitempty"`
 	Proposal_threshold       *string     `json:"proposalThreshold,omitempty"`
+
+	//TODO dup fields in Community struct, make sub struct for both to use
+	Contract_name *string  `json:"contractName,omitempty"`
+	Contract_addr *string  `json:"contractAddr,omitempty"`
+	Public_path   *string  `json:"publicPath,omitempty"`
+	Threshold     *float64 `json:"threshold,omitempty"`
 
 	s.TimestampSignaturePayload
 }
@@ -208,8 +213,12 @@ func (c *Community) UpdateCommunity(db *s.Database, p *UpdateCommunityRequestPay
 	proposal_validation = COALESCE($12, proposal_validation),
 	proposal_threshold = COALESCE($13, proposal_threshold),
 	category = COALESCE($14, category),
-	terms_and_conditions_url = COALESCE($15, terms_and_conditions_url)
-	WHERE id = $16
+	terms_and_conditions_url = COALESCE($15, terms_and_conditions_url),
+	contract_name = COALESCE($16, contract_name),
+	contract_addr = COALESCE($17, contract_addr),
+	public_path = COALESCE($18, public_path),
+	threshold = COALESCE($19, threshold)
+	WHERE id = $20
 	`,
 		p.Name,
 		p.Body,
@@ -226,8 +235,13 @@ func (c *Community) UpdateCommunity(db *s.Database, p *UpdateCommunityRequestPay
 		p.Proposal_threshold,
 		p.Category,
 		p.Terms_and_conditions_url,
+		p.Contract_name,
+		p.Contract_addr,
+		p.Public_path,
+		p.Threshold,
 		c.ID,
 	)
+
 	return err
 }
 
