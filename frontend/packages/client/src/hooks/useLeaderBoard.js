@@ -1,5 +1,5 @@
-import { useQuery } from 'react-query';
 import { useErrorHandlerContext } from '../contexts/ErrorHandler';
+import { useQuery } from '@tanstack/react-query';
 import { fetchLeaderBoard } from 'api/community';
 
 export default function useLeaderBoard({ communityId = 0, addr = '' } = {}) {

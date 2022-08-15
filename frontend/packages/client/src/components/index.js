@@ -23,6 +23,7 @@ export { CommunityEditorProfile } from './Community/CommunityEditorProfile';
 export { CommunityEditorLinks } from './Community/CommunityEditorLinks';
 export { CommunityEditorDetails } from './Community/CommunityEditorDetails';
 export { default as CommunityPropsAndVoting } from './Community/CommunityPropsAndVoting';
+export { ProposalThresholdEditor } from './Community/ProposalThresholdEditor';
 export { default as AddButton } from './AddButton';
 export { default as ActionButton } from './ActionButton';
 export { default as Title } from './Title';

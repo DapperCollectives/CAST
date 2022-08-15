@@ -147,7 +147,10 @@ func GetCommunityLeaderboard(
 		pageParams.Count,
 	)
 
-	totalUsers := getTotalUsersForCommunity(db, communityId)
+	totalUsers := len(leaderboardUsers)
+	if(totalUsers > pageParams.Count) {
+		totalUsers = pageParams.Count
+	}
 
 	payload.Users = leaderboardUsers
 	payload.CurrentUser = currentUser
@@ -276,13 +279,6 @@ func EnsureValidRole(userType string) bool {
 	return false
 }
 
-func getTotalUsersForCommunity(db *s.Database, communityId int) int {
-	var totalUsers int
-	countSql := `SELECT COUNT(*) FROM community_users WHERE community_id = $1`
-	_ = db.Conn.QueryRow(db.Context, countSql, communityId).Scan(&totalUsers)
-	return totalUsers
-}
-
 func getUserAchievements(db *s.Database, communityId int) (UserAchievements, error) {
 	var userAchievements UserAchievements
 	// Retrieve each user in the community with totals for
@@ -323,7 +319,7 @@ func getUserAchievements(db *s.Database, communityId int) (UserAchievements, err
 				ORDER BY 1,2$$
 			) AS ct(address varchar(18), winning_vote bigint)
 		) c ON v.addr = c.address
-			WHERE p.community_id = $1
+			WHERE p.community_id = $1 AND v.is_cancelled != 'true'
 			GROUP BY v.addr, a.early_vote, b.streak, c.winning_vote
 		`, communityId, communityId, communityId)
 

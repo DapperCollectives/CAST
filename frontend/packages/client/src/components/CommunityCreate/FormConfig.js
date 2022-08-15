@@ -8,6 +8,7 @@ import {
   profileFieldsArray,
   profileInitialValues,
 } from 'components/Community/CommunityEditorProfile';
+import { Schema as StepThreeSchema } from 'components/Community/ProposalThresholdEditor';
 
 const StepOneSchema = LinksSchema.concat(ProfileSchema);
 
@@ -15,4 +16,11 @@ const StepOneFieldsArray = [...linksFieldsArray, ...profileFieldsArray];
 
 const initialValues = { ...linksInitialValues, ...profileInitialValues };
 
-export { StepOneSchema, StepOneFieldsArray, initialValues };
+const stepOne = {
+  Schema: StepOneSchema,
+};
+const stepThree = {
+  Schema: StepThreeSchema,
+};
+
+export { stepOne, stepThree, StepOneSchema, StepOneFieldsArray, initialValues };
