@@ -1,5 +1,5 @@
-import { useQuery } from 'react-query';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
+import { useQuery } from '@tanstack/react-query';
 import { fetchCommunityCategories } from 'api/communityCategory';
 
 export default function useCommunityCategory() {
