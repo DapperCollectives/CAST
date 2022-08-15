@@ -1,11 +1,6 @@
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { useWebContext } from 'contexts/Web3';
-import { ActionButton, WrapperResponsive } from 'components';
-import Checkbox from 'components/common/Checkbox';
-import Input from 'components/common/Input';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { stepThree } from './FormConfig';
+import React, { useEffect } from 'react';
+import { WrapperResponsive } from 'components';
+import { isValidAddress } from 'utils';
 
 const { Schema } = stepThree;
 
@@ -42,7 +37,7 @@ export default function StepThree({
   const { isDirty, isSubmitting, errors, isValid } = formState;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <>
       <WrapperResponsive
         classNames="border-light rounded-lg columns is-flex-direction-column is-mobile m-0"
         extraClasses="p-6 mb-5"
@@ -61,58 +56,76 @@ export default function StepThree({
             </p>
           </div>
         </div>
-        <Input
+        <input
+          type="text"
           placeholder="Contract Address"
-          register={register}
-          name="contractAddress"
-          disabled={isSubmitting}
-          error={errors['contractAddress']}
-          classNames="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
+          name="contract_address"
+          className="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
+          value={contractAddress}
+          onChange={(event) =>
+            onDataChange({ contractAddress: event.target.value })
+          }
         />
-        <Input
+        <input
+          type="text"
           placeholder="Contract Name"
-          register={register}
-          name="contractName"
-          disabled={isSubmitting}
-          error={errors['contractName']}
-          classNames="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
+          name="contract_name"
+          className="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
+          value={contractName}
+          onChange={(event) =>
+            onDataChange({ contractName: event.target.value })
+          }
         />
-        <Input
+        <input
+          type="text"
           placeholder="Collection Public Path"
-          name="storagePath"
-          register={register}
-          disabled={isSubmitting}
-          error={errors['storagePath']}
-          classNames="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
+          name="collection_public_path"
+          className="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
+          value={storagePath}
+          onChange={(event) =>
+            onDataChange({ storagePath: event.target.value })
+          }
         />
-        <Input
+        <input
+          type="text"
           placeholder="Number of Tokens"
-          name="proposalThreshold"
-          register={register}
-          disabled={isSubmitting}
-          error={errors['proposalThreshold']}
-          classNames="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
+          name="proposal_threshold"
+          className="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
+          value={proposalThreshold}
+          onChange={(event) =>
+            onDataChange({ proposalThreshold: event.target.value })
+          }
         />
-        <Checkbox
-          type="checkbox"
-          name="onlyAuthorsToSubmitProposals"
-          register={register}
-          disabled={isSubmitting}
-          error={errors['onlyAuthorsToSubmitProposals']}
-          label="Allow only designated authors to submit proposals"
-          labelClassNames="has-text-grey small-text"
-        />
+
+        <label className="checkbox column is-flex is-align-items-center is-full is-full-mobile px-0 mt-4 mb-4">
+          <input
+            type="checkbox"
+            className="mr-2 form-checkbox"
+            checked={onlyAuthorsToSubmitProposals}
+            onChange={(e) => {
+              onDataChange({
+                onlyAuthorsToSubmitProposals: !onlyAuthorsToSubmitProposals,
+              });
+            }}
+          />
+          <p className="has-text-grey small-text">
+            Allow only designated authors to submit proposals
+          </p>
+        </label>
       </WrapperResponsive>
       <div className="columns mb-5">
         <div className="column is-12">
-          <ActionButton
-            type="submit"
-            label="Next: VOTING STRATEGIES"
-            enabled={(isValid || isDirty) && !isSubmitting}
-            classNames="vote-button transition-all has-background-yellow mt-5"
-          />
+          <button
+            style={{ height: 48, width: '100%' }}
+            className={`button vote-button is-flex has-background-yellow rounded-sm is-size-6 is-uppercase is-${
+              isStepValid ? 'enabled' : 'disabled'
+            }`}
+            onClick={isStepValid ? () => moveToNextStep() : () => {}}
+          >
+            Next: VOTING STRATEGIES
+          </button>
         </div>
       </div>
-    </form>
+    </>
   );
 }
