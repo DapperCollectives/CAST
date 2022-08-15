@@ -6,7 +6,6 @@ export { default as useVotingResults } from './useVotingResults';
 export { default as useCommunityProposalsWithVotes } from './useCommunityProposalsWithVotes';
 export { default as useVotingStrategies } from './useVotingStrategies';
 export { default as useWindowDimensions } from './useWindowDimension';
-export { default as useAllowlist } from './useAllowlist';
 export { default as useCommunityMembers } from './useCommunityMembers';
 export { default as useMediaQuery } from './useMediaQuery';
 export { default as useLeaderBoard } from './useLeaderBoard';
