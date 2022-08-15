@@ -1,5 +1,9 @@
 import { COMMUNITIES_URL } from './constants';
 import { checkResponse, setDefaultValue } from 'utils';
+import networks from 'networks';
+
+const networkConfig = networks[process.env.REACT_APP_FLOW_ENV];
+const { flowAddress } = networkConfig;
 
 const DEFAULT_PAGE_SIZE = 10;
 const getLeaderBoardUrl = (communityId, addr, pageSize) =>
@@ -59,13 +63,17 @@ export const createCommunityApiReq = async ({
       discordUrl,
       logo,
       bannerImgUrl,
-      contractAddress: setDefaultValue(
+      contractAddr: setDefaultValue(
         payload?.contractAddr,
-        '0x0ae53cb6e3f42a79'
+        flowAddress.contractAddr
       ),
-      contractName: setDefaultValue(payload?.contractN, 'FlowToken'),
-      storagePath: setDefaultValue(payload?.storageP, 'flowTokenBalance'),
-      proposalThreshold: setDefaultValue(payload?.proposalThreshold, '0'),
+      contractName: setDefaultValue(
+        payload?.contractN,
+        flowAddress.contractName
+      ),
+      publicPath: setDefaultValue(payload?.storageP, flowAddress.storagePath),
+      proosalThreshold: setDefaultValue(payload?.proposalThreshold, '0'),
+
       strategies,
       onlyAuthorsToSubmit: Boolean(payload?.onlyAuthorsToSubmitProposals),
       timestamp,
