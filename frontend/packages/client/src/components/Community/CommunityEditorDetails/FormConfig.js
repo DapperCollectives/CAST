@@ -90,13 +90,13 @@ const AddressSchema = ({
     yup
       .array(
         yup.object({
-          addr: isEditMode
-            ? addresValidation(
-                yup.string().required('Please enter a Flow Address'),
-                isValidFlowAddress,
-                false
-              )
-            : addresValidation(yup.string(), isValidFlowAddress, true),
+          addr: addresValidation(
+            isEditMode
+              ? yup.string().required('Please enter a Flow Address')
+              : yup.string(),
+            isValidFlowAddress,
+            !isEditMode
+          ),
         })
       )
       .min(1)
