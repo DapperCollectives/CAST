@@ -36,8 +36,6 @@ yup.addMethod(yup.array, 'allowOneEmptyElement', function (field, message) {
 });
 
 const addEmptyElementValidation = (schema, isEditMode) => {
-  // return schema;
-
   if (!isEditMode) {
     // on create community flow this will enable one empty element
     return schema.allowOneEmptyElement('addr', 'Invalid empty Address');
@@ -88,11 +86,13 @@ const AddressSchema = ({ isValidFlowAddress, isEditMode = false } = {}) => {
     yup
       .array(
         yup.object({
-          addr: isEditMode
-            ? addresValidation(
-                yup.string().required('Please enter a Flow Address')
-              )
-            : addresValidation(yup.string()),
+          addr: addresValidation(
+            isEditMode
+              ? yup.string().required('Please enter a Flow Address')
+              : yup.string(),
+            isValidFlowAddress,
+            !isEditMode
+          ),
         })
       )
       .min(1)
