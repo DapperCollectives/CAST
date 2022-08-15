@@ -164,6 +164,6 @@ export default function StepTwo({ stepData, onDataChange, moveToNextStep }) {
           />
         </div>
       </div>
-    </formform>
+    </form>
   );
 }
