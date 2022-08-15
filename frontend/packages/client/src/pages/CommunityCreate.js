@@ -24,7 +24,7 @@ export default function CommunityCreate() {
   const {
     createCommunity,
     data,
-    loading: creatingCommunity,
+    isLoading: creatingCommunity,
     error,
   } = useCommunityCreator({ initialLoading: false });
 
