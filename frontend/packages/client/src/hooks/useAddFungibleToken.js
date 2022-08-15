@@ -8,7 +8,7 @@ export default function useAddFungibleToken() {
   const { notifyError } = useErrorHandlerContext();
 
   const addFungibleToken = useCallback(
-    async (addr, name) => {
+    async (addr, name, path) => {
       const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/add-fungible-token`;
       try {
         const fetchOptions = {
@@ -19,6 +19,7 @@ export default function useAddFungibleToken() {
           body: JSON.stringify({
             addr,
             name,
+            path,
           }),
         };
         dispatch({ type: 'PROCESSING' });

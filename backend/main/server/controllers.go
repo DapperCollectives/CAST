@@ -553,6 +553,7 @@ func (a *App) addFungibleToken(w http.ResponseWriter, r *http.Request) {
 	payload := struct{
 		Addr string `json:"addr" validate:"required"`
 		Name string `json:"name" validate:"required"`
+		Path string `json:"path" validate:"required"`
 	}{}
 
 	if err := validatePayload(r.Body, &payload); err != nil {
@@ -560,7 +561,7 @@ func (a *App) addFungibleToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := a.SnapshotClient.AddFungibleToken(payload.Addr, payload.Name)
+	err := a.SnapshotClient.AddFungibleToken(payload.Addr, payload.Name, payload.Path)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return

@@ -3,7 +3,7 @@ import { useModalContext } from 'contexts/NotificationModal';
 import { AddButton } from 'components';
 import { Error } from 'components';
 import StrategySelectorInput from 'components/Community/StrategySelectorInput';
-import { useVotingStrategies, useAddFungibleToken } from 'hooks';
+import { useAddFungibleToken, useVotingStrategies } from 'hooks';
 import { kebabToString } from 'utils';
 import isEqual from 'lodash/isEqual';
 import StrategyEditorModal from './StrategyEditorModal';
@@ -45,7 +45,7 @@ export default function StrategySelectorForm({
       newStrategyInfo.name === 'staked-token-weighted-default' ||
       newStrategyInfo.name === 'token-weighted-default'
     ) {
-      addFungibleToken(contract.addr, contract.name);
+      addFungibleToken(contract.addr, contract.name, contract.publicPath);
     }
     setStrategies((state) => [...state, newStrategyInfo]);
     closeModal();

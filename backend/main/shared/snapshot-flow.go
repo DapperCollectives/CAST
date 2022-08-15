@@ -1,6 +1,7 @@
 package shared
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -50,6 +51,12 @@ type SnapshotData struct {
 	Message     string `json:"message"`
 	Status      string `json:"status"`
 	BlockHeight uint64 `json:"blockHeight"`
+}
+
+type FungibleTokenContract struct {
+	ContractAddress       string `json:"contractAddress"`
+	ContractName          string `json:"contractName"`
+	PublicCapabilityPath string `json:"publicCapabilityPath"`
 }
 
 var (
@@ -207,23 +214,25 @@ func (c *SnapshotClient) GetLatestSnapshot(contract Contract) (*Snapshot, error)
 	return &snapshot, nil
 }
 
-func (c *SnapshotClient) AddFungibleToken(addr, name string) (error) {
-	var snapshot Snapshot
-	var url string
-
+func (c *SnapshotClient) AddFungibleToken(addr, name, path string) (error) {
 	if c.bypass() {
 		return nil
 	}
 
-	url = fmt.Sprintf(`%s/add-fungible-token/%s, %s`, c.BaseURL, addr, name)
+	url := fmt.Sprintf(`%s/add-fungible-token`, c.BaseURL)
 
-	req, err := c.setRequestMethod("POST", url)
+	payload := FungibleTokenContract{
+		ContractAddress: addr,
+		ContractName: name,
+		PublicCapabilityPath: path,
+	}
+	req, err := c.setPostRequest(url, payload)
 	if err != nil {
 		log.Debug().Err(err).Msg("SnapshotClient AddFungibleToken request error")
 		return err
 	}
 
-	if err := c.sendRequest(req, snapshot); err != nil {
+	if err := c.sendRequest(req, payload); err != nil {
 		log.Debug().Err(err).Msgf("Snapshot AddFungibleToken send request error.")
 		return err
 	}
@@ -260,6 +269,23 @@ func (c *SnapshotClient) setSnapshotUrl(contract Contract, route string) string 
 	}
 
 	return url
+}
+
+func (c *SnapshotClient) setPostRequest(url string, payload interface{}) (*http.Request, error) {
+	body, err := json.Marshal(payload)
+	if err != nil {
+		log.Debug().Err(err).Msg("SnapshotClient POST request payload error")
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
+	if err != nil {
+		log.Debug().Err(err).Msg("SnapshotClient POST request error")
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+
+	return req, nil
 }
 
 func (c *SnapshotClient) setRequestMethod(method, url string) (*http.Request, error) {
