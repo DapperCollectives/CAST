@@ -20,7 +20,6 @@ export default function StrategyInformationForm({
   formData = {},
   onSubmit = () => {},
 } = {}) {
-  console.log('default values', formData);
   const { isValidFlowAddress } = useWebContext();
   const { register, handleSubmit, formState } = useForm({
     resolver: yupResolver(getSchema(formFields, isValidFlowAddress)),
