@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useQueryClient } from 'react-query';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import { useWebContext } from 'contexts/Web3';
 import {
@@ -22,6 +21,7 @@ import {
   useUserRoleOnCommunity,
   useWindowDimensions,
 } from 'hooks';
+import { useQueryClient } from '@tanstack/react-query';
 
 const CommunitySettingsButton = ({ communityId } = {}) => {
   return (

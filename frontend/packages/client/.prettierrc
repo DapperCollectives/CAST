@@ -7,13 +7,14 @@
   "semi": true,
   "bracketSpacing": true,
   "importOrder": [
-    "react",
+    "^react*",
     "contexts",
     "components",
     "hooks",
     "const",
     "utils",
     "<THIRD_PARTY_MODULES>",
+    "^@*$",
     "^[./]"
   ],
   "importOrderSeparation": false,
