@@ -2,13 +2,12 @@ import React, { useEffect } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { useWebContext } from 'contexts/Web3';
 import { ActionButton } from 'components';
-import {
-  AddressForm,
-  AddressSchema,
-} from 'components/Community/CommunityEditorDetails';
+import { AddressForm } from 'components/Community/CommunityEditorDetails';
 import Popover from 'components/Popover';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { stepTwo } from './FormConfig';
 
+const { Schema } = stepTwo;
 const popoverParagraph =
   'In addition, community creator address will be set as admin and member by default.';
 
@@ -19,7 +18,7 @@ export default function StepTwo({ stepData, onDataChange, moveToNextStep }) {
 
   const { register, control, handleSubmit, reset, formState } = useForm({
     resolver: yupResolver(
-      AddressSchema({
+      Schema({
         fieldNames: ['listAddrAdmins', 'listAddrAuthors'],
         isValidFlowAddress,
       })
