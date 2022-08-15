@@ -21,7 +21,7 @@ export default function useFeaturedCommunities({
       }
     },
     {
-      getNextPageParam: (lastPage, pages) => {
+      getNextPageParam: (lastPage) => {
         const { next, start, count } = lastPage;
         return next > 0 ? start + count : undefined;
       },
