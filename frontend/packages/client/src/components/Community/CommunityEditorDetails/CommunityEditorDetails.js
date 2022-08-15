@@ -5,7 +5,7 @@ import { AddButton, FadeIn, Loader, WrapperResponsive } from 'components';
 import { Bin, InvalidCheckMark, ValidCheckMark } from 'components/Svg';
 import useFlowAddrValidator, {
   validateAddrInList,
-} from './hooks/useFlowAddrValidator';
+} from '../hooks/useFlowAddrValidator';
 import { useCommunityUsers } from 'hooks';
 import { getCompositeSigs } from 'utils';
 

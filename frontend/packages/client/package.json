@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@creativebulma/bulma-tooltip": "^1.2.0",
+    "@hookform/resolvers": "^2.9.7",
     "@onflow/fcl": "^1.2.0",
     "@onflow/six-transfer-tokens": "0.0.8",
     "@trivago/prettier-plugin-sort-imports": "^3.3.0",
@@ -34,7 +35,8 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.3",
     "sass": "^1.49.8",
-    "string-strip-html": "8.3.0"
+    "string-strip-html": "8.3.0",
+    "yup": "^0.32.11"
   },
   "scripts": {
     "start": "react-scripts start",
