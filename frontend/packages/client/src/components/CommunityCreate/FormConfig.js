@@ -1,4 +1,4 @@
-import { addresValidation } from 'components/Community/CommunityEditorDetails';
+import { AddressSchema } from 'components/Community/CommunityEditorDetails';
 import {
   LinksSchema,
   linksFieldsArray,
@@ -23,7 +23,10 @@ const stepOne = {
   initialValues,
 };
 
+const stepTwo = {
+  Schema: AddressSchema,
+};
 const stepThree = {
   Schema: StepThreeSchema,
 };
-export { stepOne, stepThree };
+export { stepOne, stepTwo, stepThree };
