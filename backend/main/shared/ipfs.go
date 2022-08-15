@@ -8,6 +8,7 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -101,6 +102,12 @@ func (c *IpfsClient) PinJson(data interface{}) (*Pin, error) {
 }
 
 func (c *IpfsClient) PinFile(file multipart.File, fileName string) (*Pin, error) {
+	if c.bypass() {
+		return &Pin{
+			IpfsHash:  "local-host",
+			Timestamp: time.Now(),
+		}, nil
+	}
 	url := c.BaseURL + "/pinning/pinFileToIPFS"
 
 	body := &bytes.Buffer{}
@@ -119,4 +126,11 @@ func (c *IpfsClient) PinFile(file multipart.File, fileName string) (*Pin, error)
 	}
 
 	return &res, nil
+}
+
+func (c *IpfsClient) bypass() bool {
+	if os.Getenv("APP_ENV") == "DEV" {
+		return true
+	}
+	return false
 }

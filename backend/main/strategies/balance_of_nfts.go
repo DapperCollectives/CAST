@@ -1,8 +1,6 @@
 package strategies
 
 import (
-	"math"
-
 	"github.com/DapperCollectives/CAST/backend/main/models"
 	"github.com/DapperCollectives/CAST/backend/main/shared"
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
@@ -83,18 +81,17 @@ func (b *BalanceOfNfts) TallyVotes(
 ) (models.ProposalResults, error) {
 
 	for _, vote := range votes {
-
 		if len(vote.NFTs) != 0 {
 			var allowedBalance float64
 
 			if proposal.Max_weight != nil {
-				allowedBalance = proposal.EnforceMaxWeight(float64(*vote.PrimaryAccountBalance))
+				allowedBalance = proposal.EnforceMaxWeight(float64(len(vote.NFTs)))
 			} else {
 				allowedBalance = float64(len(vote.NFTs))
 			}
 
-			r.Results[vote.Choice] += int(allowedBalance * math.Pow(10, -8))
-			r.Results_float[vote.Choice] += allowedBalance * math.Pow(10, -8)
+			r.Results[vote.Choice] += int(allowedBalance)
+			r.Results_float[vote.Choice] += allowedBalance
 		}
 	}
 

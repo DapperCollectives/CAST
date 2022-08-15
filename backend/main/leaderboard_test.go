@@ -107,11 +107,8 @@ func TestGetLeaderboardWithSingleStreak(t *testing.T) {
 }
 
 // func TestGetLeaderboardWithMultiStreaks(t *testing.T) {
-// 	clearTable("communities")
-// 	clearTable("community_users")
-// 	clearTable("user_achievements")
-// 	clearTable("proposals")
-// 	clearTable("votes")
+// 	resetTables()
+
 // 	communityId := otu.AddCommunities(1)[0]
 // 	streaks := []int{3, 4}
 // 	streakBonus := 1
