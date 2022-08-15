@@ -33,11 +33,8 @@ export default function CommunityCreate() {
   const modalContext = useModalContext();
 
   useEffect(() => {
-    // if (data && data[0]?.id && isBlocking) {
-    //   setIsBlocking(false);
-    // }
-    if (data && data[0]?.id) {
-      history.push(`/community/${data[0].id}`);
+    if (data && data?.id) {
+      history.push(`/community/${data.id}`);
     }
   }, [data, history]);
 
@@ -152,7 +149,7 @@ export default function CommunityCreate() {
       slug: generateSlug(),
     };
 
-    await createCommunity(injectedProvider, communityData);
+    await createCommunity({ injectedProvider, communityData });
   };
 
   const props = {
