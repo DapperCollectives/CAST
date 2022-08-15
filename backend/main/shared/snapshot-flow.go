@@ -211,8 +211,6 @@ func (c *SnapshotClient) AddFungibleToken(addr, name string) (error) {
 	var snapshot Snapshot
 	var url string
 
-	fmt.Println(addr, name)
-
 	if c.bypass() {
 		return nil
 	}

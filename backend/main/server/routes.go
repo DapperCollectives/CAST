@@ -54,5 +54,5 @@ func (a *App) initializeRoutes() {
 
 	// Snapshotter
 	a.Router.HandleFunc("/latest-snapshot", a.getLatestSnapshot).Methods("GET")
-	a.Router.HandleFunc("/add-fungible-token", a.addFungibleToken).Methods("GET")
+	a.Router.HandleFunc("/add-fungible-token", a.addFungibleToken).Methods("POST","OPTIONS")
 }

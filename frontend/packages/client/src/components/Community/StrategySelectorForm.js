@@ -3,7 +3,7 @@ import { useModalContext } from 'contexts/NotificationModal';
 import { AddButton } from 'components';
 import { Error } from 'components';
 import StrategySelectorInput from 'components/Community/StrategySelectorInput';
-import { useVotingStrategies } from 'hooks';
+import { useVotingStrategies, useAddFungibleToken } from 'hooks';
 import { kebabToString } from 'utils';
 import isEqual from 'lodash/isEqual';
 import StrategyEditorModal from './StrategyEditorModal';
@@ -28,11 +28,9 @@ export default function StrategySelectorForm({
     }
   }, [strategies, onStrategySelection, existingStrategies]);
 
-  const {
-    data: allVotingStrategies,
-    loading: loadingAllStrategies,
-    addFungibleToken,
-  } = useVotingStrategies();
+  const { data: allVotingStrategies, loading: loadingAllStrategies } =
+    useVotingStrategies();
+  const { addFungibleToken } = useAddFungibleToken();
 
   const { openModal, closeModal } = useModalContext();
 

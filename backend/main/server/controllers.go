@@ -3,7 +3,6 @@ package server
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -551,27 +550,17 @@ func (a *App) getLatestSnapshot(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) addFungibleToken(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	addr := vars["addr"]
-	name := vars["name"]
+	payload := struct{
+		Addr string `json:"addr" validate:"required"`
+		Name string `json:"name" validate:"required"`
+	}{}
 
-	fmt.Println("ADD FUNGIBLE TOKEN")
-
-	errMsg := ""
-	if addr == "" && name == "" {
-		errMsg = "Missing token address and name."
-	} else if addr == "" {
-		errMsg = "Missing token address."
-	} else if name == "" {
-		errMsg = "Missing token name."
-	}
-
-	if errMsg != "" {
-		respondWithError(w, http.StatusBadRequest, errMsg)
+	if err := validatePayload(r.Body, &payload); err != nil {
+		respondWithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	err := a.SnapshotClient.AddFungibleToken(addr, name)
+	err := a.SnapshotClient.AddFungibleToken(payload.Addr, payload.Name)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
