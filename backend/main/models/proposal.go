@@ -319,8 +319,8 @@ func handleCancelledProposal(db *s.Database, proposalId int) error {
 		return err
 	}
 
-	 err = updateStreak(db, proposalId)
-	 if err != nil {
+	err = updateStreak(db, proposalId)
+	if err != nil {
 		return err
 	}
 
@@ -329,9 +329,9 @@ func handleCancelledProposal(db *s.Database, proposalId int) error {
 
 func updateStreak(db *s.Database, proposalId int) error {
 	var achievements = []struct {
-		Id int64 `json:"id"`
+		Id        int64   `json:"id"`
 		Proposals []int64 `json:"proposals"`
-		Details string `json:"details"`
+		Details   string  `json:"details"`
 	}{}
 
 	err := pgxscan.Select(db.Context, db.Conn, &achievements, `
@@ -344,8 +344,8 @@ func updateStreak(db *s.Database, proposalId int) error {
 
 	for _, a := range achievements {
 		pId := int64(proposalId)
-	
-	  	// Find index of proposal id being cancelled
+
+		// Find index of proposal id being cancelled
 		index := -1
 		for i, id := range a.Proposals {
 			if id == pId {
@@ -361,19 +361,21 @@ func updateStreak(db *s.Database, proposalId int) error {
 		// NOTE: If cancelled proposal is in the middle of a streak greater than 3, the user will maintain
 		// their streak, but it will be one less in length. Streaks are not split into smaller streaks wrt
 		// cancelled proposals.
-		if(len(a.Proposals) >= defaultStreakLength) {
+
+		defaultStreakLength := 3
+		if len(a.Proposals) >= defaultStreakLength {
 			// update details with updated proposals array
 			updatedStreak := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(a.Proposals)), ","), "[]")
 			s := strings.Split(a.Details, ":")
 			s[3] = updatedStreak
 			a.Details = strings.Join(s, ":")
-			
+
 			_, err := db.Conn.Exec(db.Context, `
 				UPDATE user_achievements
 				SET proposals = $1, details = $2
 				WHERE id = $3
 			`, a.Proposals, a.Details, a.Id)
-		
+
 			if err != nil {
 				return err
 			}
