@@ -213,3 +213,10 @@ export const getPaginationInfo = (pages) => {
 
 export const validateLength = (string, MaxLength) =>
   string?.length <= MaxLength;
+
+export const setDefaultValue = (field, fallbackValue) => {
+  if (field === undefined || field === '') {
+    return fallbackValue;
+  }
+  return field;
+};
