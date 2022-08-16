@@ -22,7 +22,6 @@ import {
   useWindowDimensions,
 } from 'hooks';
 import { useQueryClient } from '@tanstack/react-query';
-import { clearConfigCache } from 'prettier';
 
 const CommunitySettingsButton = ({ communityId } = {}) => {
   return (
@@ -354,9 +353,7 @@ export default function Community() {
                     communityAbout={
                       <CommunityAbout
                         isMobile={!notMobile}
-                        textAbout={
-                          community?.about?.textAbout || community?.body
-                        }
+                        textAbout={community?.body}
                         adminMembers={(admins ?? []).map((admin) => ({
                           name: admin.addr,
                         }))}
