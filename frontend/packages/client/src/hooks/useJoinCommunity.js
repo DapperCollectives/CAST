@@ -1,12 +1,12 @@
 import { useErrorHandlerContext } from '../contexts/ErrorHandler';
-import { getCompositeSigs } from 'utils';
+import { checkResponse, getCompositeSigs } from 'utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 export default function useJoinCommunity() {
   const queryClient = useQueryClient();
   const { notifyError } = useErrorHandlerContext();
 
-  const { mutateAsync: createCommunityUserMutation } = useMutation(
+  const { mutate: createCommunityUserMutation } = useMutation(
     async ({ communityId, user, injectedProvider }) => {
       const { addr } = user;
       const { currentUser } = injectedProvider;
@@ -22,29 +22,23 @@ export default function useJoinCommunity() {
       if (!compositeSignatures) {
         return { error: 'No valid user signature found.' };
       }
+      const fetchOptions = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          communityId: parseInt(communityId),
+          addr,
+          userType: 'member',
+          signingAddr: addr,
+          timestamp,
+          compositeSignatures,
+        }),
+      };
 
-      try {
-        const fetchOptions = {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            communityId: parseInt(communityId),
-            addr,
-            userType: 'member',
-            signingAddr: addr,
-            timestamp,
-            compositeSignatures,
-          }),
-        };
-
-        const response = await fetch(url, fetchOptions);
-        const json = await response.json();
-        return { success: true, data: json };
-      } catch (err) {
-        notifyError(err, url);
-      }
+      const response = await fetch(url, fetchOptions);
+      return checkResponse(response);
     },
     {
       onSuccess: async (_, variables) => {
@@ -58,10 +52,13 @@ export default function useJoinCommunity() {
           addr,
         ]);
       },
+      onError: (error) => {
+        notifyError(error);
+      },
     }
   );
 
-  const { mutateAsync: deleteUserFromCommunityMutation } = useMutation(
+  const { mutate: deleteUserFromCommunityMutation } = useMutation(
     async ({ communityId, user, injectedProvider }) => {
       const { addr } = user;
       const { currentUser } = injectedProvider;
@@ -78,28 +75,23 @@ export default function useJoinCommunity() {
         return { error: 'No valid user signature found.' };
       }
 
-      try {
-        const fetchOptions = {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            communityId: parseInt(communityId),
-            addr,
-            userType: 'member',
-            signingAddr: addr,
-            timestamp,
-            compositeSignatures,
-          }),
-        };
+      const fetchOptions = {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          communityId: parseInt(communityId),
+          addr,
+          userType: 'member',
+          signingAddr: addr,
+          timestamp,
+          compositeSignatures,
+        }),
+      };
 
-        const response = await fetch(url, fetchOptions);
-        const json = await response.json();
-        return { success: true, data: json };
-      } catch (err) {
-        notifyError(err, url);
-      }
+      const response = await fetch(url, fetchOptions);
+      return checkResponse(response);
     },
     {
       onSuccess: async (_, variables) => {
@@ -113,19 +105,14 @@ export default function useJoinCommunity() {
           addr,
         ]);
       },
+      onError: (error) => {
+        notifyError(error);
+      },
     }
   );
 
-  const createCommunityUser = async (props) => {
-    return createCommunityUserMutation(props);
-  };
-
-  const deleteUserFromCommunity = async (props) => {
-    return deleteUserFromCommunityMutation(props);
-  };
-
   return {
-    createCommunityUser,
-    deleteUserFromCommunity,
+    createCommunityUser: createCommunityUserMutation,
+    deleteUserFromCommunity: deleteUserFromCommunityMutation,
   };
 }
