@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from 'react-query';
 import { useErrorHandlerContext } from '../contexts/ErrorHandler';
 import { useWebContext } from 'contexts/Web3';
-import { getCompositeSigs } from 'utils';
 import { UPDATE_MEMBERSHIP_TX } from 'const';
+import { getCompositeSigs } from 'utils';
 
 export default function useJoinCommunity() {
   const queryClient = useQueryClient();

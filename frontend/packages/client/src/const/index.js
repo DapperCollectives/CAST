@@ -40,7 +40,7 @@ transaction() {
         //
     }
 }
-`
+`;
 export const CREATE_PROPOSAL_TX = `
 transaction() {
     prepare(acct: AuthAccount) {
@@ -50,7 +50,7 @@ transaction() {
         // it is only used to collect a signature.
         //
     }
-}`
+}`;
 export const CAST_VOTE_TX = `
 transaction() {
     prepare(acct: AuthAccount) {
@@ -60,7 +60,7 @@ transaction() {
         // it is only used to collect a signature.
         //
     }
-}`
+}`;
 export const UPDATE_COMMUNITY_TX = `
 transaction() {
     prepare(acct: AuthAccount) {
@@ -70,7 +70,7 @@ transaction() {
         // it is only used to collect a signature.
         //
     }
-}`
+}`;
 export const UPDATE_PROPOSAL_TX = `
 transaction() {
     prepare(acct: AuthAccount) {
@@ -80,7 +80,7 @@ transaction() {
         // it is only used to collect a signature.
         //
     }
-}`
+}`;
 export const UPDATE_MEMBERSHIP_TX = `
 transaction() {
     prepare(acct: AuthAccount) {
@@ -90,5 +90,4 @@ transaction() {
         // it is only used to collect a signature.
         //
     }
-}`
-
+}`;

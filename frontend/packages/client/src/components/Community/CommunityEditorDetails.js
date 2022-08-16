@@ -7,8 +7,8 @@ import useFlowAddrValidator, {
   validateAddrInList,
 } from './hooks/useFlowAddrValidator';
 import { useCommunityUsers } from 'hooks';
-import { getCompositeSigs } from 'utils';
 import { UPDATE_COMMUNITY_TX } from 'const';
+import { getCompositeSigs } from 'utils';
 
 export const CommunityUsersForm = ({
   title,

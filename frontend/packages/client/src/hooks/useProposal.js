@@ -1,12 +1,12 @@
 import { useCallback, useReducer } from 'react';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useWebContext } from 'contexts/Web3';
+import { CAST_VOTE_TX, CREATE_PROPOSAL_TX, UPDATE_PROPOSAL_TX } from 'const';
 import { checkResponse, getCompositeSigs } from 'utils';
 import * as fcl from '@onflow/fcl';
 import { CODE as transferTokensCode } from '@onflow/six-transfer-tokens';
 import * as t from '@onflow/types';
 import { INITIAL_STATE, defaultReducer } from '../reducers';
-import { CAST_VOTE_TX, CREATE_PROPOSAL_TX, UPDATE_PROPOSAL_TX } from 'const';
 
 export default function useProposal() {
   const [state, dispatch] = useReducer(defaultReducer, {
@@ -14,8 +14,7 @@ export default function useProposal() {
     loading: false,
   });
   const { notifyError } = useErrorHandlerContext();
-  const { user, signMessageByWalletProvider } =
-    useWebContext();
+  const { user, signMessageByWalletProvider } = useWebContext();
 
   const createProposal = useCallback(
     async (injectedProvider, data) => {
@@ -26,7 +25,11 @@ export default function useProposal() {
         const timestamp = Date.now().toString();
         const hexTime = Buffer.from(timestamp).toString('hex');
         const [compositeSignatures, voucher] =
-          await signMessageByWalletProvider(user?.services[0]?.uid, CREATE_PROPOSAL_TX, hexTime);
+          await signMessageByWalletProvider(
+            user?.services[0]?.uid,
+            CREATE_PROPOSAL_TX,
+            hexTime
+          );
 
         if (!compositeSignatures && !voucher) {
           const statusText = 'No valid user signature found.';
@@ -230,7 +233,11 @@ export default function useProposal() {
         const hexTime = Buffer.from(timestamp).toString('hex');
 
         const [compositeSignatures, voucher] =
-          await signMessageByWalletProvider(user?.services[0]?.uid, UPDATE_PROPOSAL_TX, hexTime);
+          await signMessageByWalletProvider(
+            user?.services[0]?.uid,
+            UPDATE_PROPOSAL_TX,
+            hexTime
+          );
 
         if (!compositeSignatures && !voucher) {
           return { error: 'No valid user signature found.' };

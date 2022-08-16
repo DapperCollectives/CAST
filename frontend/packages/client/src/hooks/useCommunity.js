@@ -1,8 +1,8 @@
 import { useCallback, useReducer } from 'react';
 import { useErrorHandlerContext } from '../contexts/ErrorHandler';
-import { CREATE_COMMUNITY_TX } from 'const';
 import { useWebContext } from 'contexts/Web3';
 import { useFileUploader } from 'hooks';
+import { CREATE_COMMUNITY_TX } from 'const';
 import { checkResponse } from 'utils';
 import {
   INITIAL_STATE,
@@ -62,7 +62,11 @@ export default function useCommunity({
         const hexTime = Buffer.from(timestamp).toString('hex');
 
         const [compositeSignatures, voucher] =
-          await signMessageByWalletProvider(user?.services[0]?.uid, CREATE_COMMUNITY_TX, hexTime);
+          await signMessageByWalletProvider(
+            user?.services[0]?.uid,
+            CREATE_COMMUNITY_TX,
+            hexTime
+          );
 
         if (!compositeSignatures & !voucher) {
           const statusText = 'No valid user signature found.';
