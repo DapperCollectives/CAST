@@ -22,6 +22,7 @@ import {
   useWindowDimensions,
 } from 'hooks';
 import { useQueryClient } from '@tanstack/react-query';
+import { clearConfigCache } from 'prettier';
 
 const CommunitySettingsButton = ({ communityId } = {}) => {
   return (
@@ -172,11 +173,6 @@ export default function Community() {
     queryKey,
   } = useCommunityMembers({ communityId, count: 18 });
 
-  const [totalMembers, setTotalMembers] = useState();
-  useEffect(() => {
-    setTotalMembers(totalRecords);
-  }, [totalRecords]);
-
   // these two fields should be coming from backend as configuration
   const showPulse = false;
   const showLeaderBoard = true;
@@ -266,9 +262,8 @@ export default function Community() {
         logo={logo}
         slug={slug}
         communityName={name}
-        totalMembers={totalMembers}
+        totalMembers={totalRecords}
         members={members?.slice(0, 6)}
-        setTotalMembers={setTotalMembers}
         onLeaveCommunity={onUserLeaveCommunity}
         onJoinCommunity={onUserJoinCommunity}
       />
