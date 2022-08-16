@@ -918,11 +918,10 @@ func (h *Helpers) processTokenThreshold(address string, s models.Strategy) (bool
 	var scriptPath string
 	stratName := *s.Name
 
-	if stratName == "balance-of-nfts" {
+	if stratName == "balance-of-nfts" || stratName == "float-nfts" {
 		scriptPath = "./main/cadence/scripts/get_nfts_ids.cdc"
 	} else {
 		scriptPath = "./main/cadence/scripts/get_balance.cdc"
-
 	}
 
 	hasBalance, err := h.A.FlowAdapter.EnforceTokenThreshold(scriptPath, address, &s.Contract)
