@@ -8,7 +8,6 @@ import useFlowAddrValidator, {
 } from './hooks/useFlowAddrValidator';
 import { useCommunityUsers } from 'hooks';
 import { UPDATE_COMMUNITY_TX } from 'const';
-import { getCompositeSigs } from 'utils';
 
 export const CommunityUsersForm = ({
   title,
@@ -161,7 +160,6 @@ const CommunityMembersEditor = ({
   const {
     user: { addr },
     user,
-    injectedProvider,
     signMessageByWalletProvider,
   } = useWebContext();
   const { notifyError } = useErrorHandlerContext();

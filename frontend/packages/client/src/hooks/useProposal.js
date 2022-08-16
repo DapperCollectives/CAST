@@ -4,7 +4,6 @@ import { useWebContext } from 'contexts/Web3';
 import { CAST_VOTE_TX, CREATE_PROPOSAL_TX, UPDATE_PROPOSAL_TX } from 'const';
 import { checkResponse, getCompositeSigs } from 'utils';
 import * as fcl from '@onflow/fcl';
-import { CODE as transferTokensCode } from '@onflow/six-transfer-tokens';
 import * as t from '@onflow/types';
 import { INITIAL_STATE, defaultReducer } from '../reducers';
 

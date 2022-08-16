@@ -2,7 +2,7 @@ import { useCallback, useEffect, useReducer } from 'react';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useWebContext } from 'contexts/Web3';
 import { UPDATE_COMMUNITY_TX } from 'const';
-import { checkResponse, getCompositeSigs } from 'utils';
+import { checkResponse } from 'utils';
 import { INITIAL_STATE, defaultReducer } from 'reducers';
 
 export default function useCommunityDetails(id) {

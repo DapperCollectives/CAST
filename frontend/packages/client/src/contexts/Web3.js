@@ -142,6 +142,13 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
     setOpenModal(false);
   };
 
+  /**
+   *
+   * @param {String} cadence - transaction code to be authorized by user
+   * @param {String} data - transaction argument, or message data
+   *  we want to validate on the backend
+   * @returns {Object} - voucher as JSON
+   */
   const signMessageVoucher = async (cadence, data) => {
     const voucher = await fcl.serialize([
       fcl.transaction(cadence),
@@ -154,6 +161,14 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
     return JSON.parse(voucher);
   };
 
+  /**
+   *
+   * @param {String} walletProvider ID of the wallet service user is connected to
+   * @param {String} cadence transaction code to be authorized
+   * @param {String} data transaction argument, or message data to be validated on the backend
+   * @returns {[Array?, Object?]} first element is an array of composite signatures,
+   * second element is voucher JSON parsed into an Object.  If function is successful, one element will be null.  If it fails, both elements will be null.
+   */
   const signMessageByWalletProvider = async (walletProvider, cadence, data) => {
     try {
       let voucher;

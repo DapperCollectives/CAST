@@ -2,12 +2,11 @@ import { useMutation, useQueryClient } from 'react-query';
 import { useErrorHandlerContext } from '../contexts/ErrorHandler';
 import { useWebContext } from 'contexts/Web3';
 import { UPDATE_MEMBERSHIP_TX } from 'const';
-import { getCompositeSigs } from 'utils';
 
 export default function useJoinCommunity() {
   const queryClient = useQueryClient();
   const { notifyError } = useErrorHandlerContext();
-  const { user, signMessageByWalletProvider } = useWebContext();
+  const { signMessageByWalletProvider } = useWebContext();
 
   const { mutateAsync: createCommunityUserMutation } = useMutation(
     async ({ communityId, user, injectedProvider }) => {
@@ -67,8 +66,6 @@ export default function useJoinCommunity() {
   const { mutateAsync: deleteUserFromCommunityMutation } = useMutation(
     async ({ communityId, user, injectedProvider }) => {
       const { addr } = user;
-      const { currentUser } = injectedProvider;
-      const { signUserMessage } = currentUser();
       const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}/users/${addr}/member`;
       const timestamp = Date.now().toString();
       const hexTime = Buffer.from(timestamp).toString('hex');

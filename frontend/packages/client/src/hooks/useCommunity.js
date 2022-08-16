@@ -33,7 +33,7 @@ export default function useCommunity({
   const { notifyError } = useErrorHandlerContext();
   // for now not using modal notification if there was an error uploading image
   const { uploadFile } = useFileUploader({ useModalNotifications: false });
-  const { user, services, signMessageByWalletProvider } = useWebContext();
+  const { user, signMessageByWalletProvider } = useWebContext();
   console.log('walletProviderId', user?.services[0]?.uid);
 
   const getCommunities = useCallback(async () => {

@@ -17,7 +17,7 @@ export default function ProposalCreatePage() {
   const { createProposal, data, loading, error } = useProposal();
   const [modalError, setModalError] = useState(null);
   const {
-    user: { addr: creatorAddr, services },
+    user: { addr: creatorAddr },
     injectedProvider,
   } = useWebContext();
   const history = useHistory();
