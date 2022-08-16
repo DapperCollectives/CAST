@@ -261,13 +261,11 @@ func (h *Helpers) processVotes(
 }
 
 func (h *Helpers) createVote(r *http.Request, p models.Proposal) (*models.VoteWithBalance, error) {
-	var payload models.CreateVotePayload
-	if err := validatePayload(r.Body, &payload); err != nil {
+	var v models.Vote
+	if err := validatePayload(r.Body, &v); err != nil {
 		log.Error().Err(err).Msg("Invalid request payload.")
 		return nil, err
 	}
-
-	var v = payload.Vote
 
 	v.Proposal_id = p.ID
 
@@ -286,7 +284,7 @@ func (h *Helpers) createVote(r *http.Request, p models.Proposal) (*models.VoteWi
 		}
 	}
 
-	if err := h.validateVote(p, payload); err != nil {
+	if err := h.validateVote(p, v); err != nil {
 		return nil, err
 	}
 
@@ -333,8 +331,7 @@ func (h *Helpers) createVote(r *http.Request, p models.Proposal) (*models.VoteWi
 
 	// Include voucher in vote data when pinning
 	ipfsVote := map[string]interface{}{
-		"vote":    v,
-		"voucher": payload.Voucher,
+		"vote": v,
 	}
 	v.Cid, err = h.pinJSONToIpfs(ipfsVote)
 	if err != nil {
@@ -352,8 +349,7 @@ func (h *Helpers) createVote(r *http.Request, p models.Proposal) (*models.VoteWi
 	return &vb, nil
 }
 
-func (h *Helpers) validateVote(p models.Proposal, payload models.CreateVotePayload) error {
-	var v = payload.Vote
+func (h *Helpers) validateVote(p models.Proposal, v models.Vote) error {
 	// validate the user is not on community's blocklist
 	if err := h.validateBlocklist(v.Addr, p.Community_id); err != nil {
 		log.Error().Err(err).Msgf(fmt.Sprintf("Address %v is on blocklist for community id %v.\n", v.Addr, p.Community_id))
@@ -368,9 +364,9 @@ func (h *Helpers) validateVote(p models.Proposal, payload models.CreateVotePaylo
 	}
 
 	// If voucher is present
-	if payload.Voucher != nil {
+	if v.Voucher != nil {
 		// Transaction Signature validation
-		voucher := payload.Voucher
+		voucher := v.Voucher
 		authorizer := voucher.Authorizers[0]
 
 		v.Composite_signatures = shared.GetUserCompositeSignatureFromVoucher(voucher)
@@ -436,8 +432,14 @@ func (h *Helpers) fetchCommunity(id int) (models.Community, int, error) {
 }
 
 func (h *Helpers) createProposal(communityId int, p models.Proposal) (models.Proposal, int, error) {
-	if err := h.validateUser(p.Creator_addr, p.Timestamp, p.Composite_signatures); err != nil {
-		return models.Proposal{}, http.StatusForbidden, err
+	if p.Voucher != nil {
+		if err := h.validateUserViaVoucher(p.Creator_addr, p.Voucher); err != nil {
+			return models.Proposal{}, http.StatusForbidden, err
+		}
+	} else {
+		if err := h.validateUser(p.Creator_addr, p.Timestamp, p.Composite_signatures); err != nil {
+			return models.Proposal{}, http.StatusForbidden, err
+		}
 	}
 
 	community, httpStatus, err := h.fetchCommunity(communityId)
@@ -527,8 +529,15 @@ func (h *Helpers) createProposal(communityId int, p models.Proposal) (models.Pro
 func (h *Helpers) createCommunity(payload models.CreateCommunityRequestPayload) (models.Community, int, error) {
 	c := payload.Community
 
-	if err := h.validateUser(c.Creator_addr, c.Timestamp, c.Composite_signatures); err != nil {
-		return models.Community{}, http.StatusForbidden, err
+	if c.Voucher != nil {
+		log.Info().Msgf("validate user via voucher %v \n", c.Voucher)
+		if err := h.validateUserViaVoucher(c.Creator_addr, c.Voucher); err != nil {
+			return models.Community{}, http.StatusForbidden, err
+		}
+	} else {
+		if err := h.validateUser(c.Creator_addr, c.Timestamp, c.Composite_signatures); err != nil {
+			return models.Community{}, http.StatusForbidden, err
+		}
 	}
 
 	cid, err := h.pinJSONToIpfs(c)
@@ -593,9 +602,16 @@ func (h *Helpers) updateCommunity(id int, payload models.UpdateCommunityRequestP
 		return models.Community{}, http.StatusForbidden, err
 	}
 
-	if err := h.validateUser(payload.Signing_addr, payload.Timestamp, payload.Composite_signatures); err != nil {
-		log.Error().Err(err)
-		return models.Community{}, http.StatusForbidden, err
+	if payload.Voucher != nil {
+		if err := h.validateUserViaVoucher(payload.Signing_addr, payload.Voucher); err != nil {
+			log.Error().Err(err)
+			return models.Community{}, http.StatusForbidden, err
+		}
+	} else {
+		if err := h.validateUser(payload.Signing_addr, payload.Timestamp, payload.Composite_signatures); err != nil {
+			log.Error().Err(err)
+			return models.Community{}, http.StatusForbidden, err
+		}
 	}
 
 	if err := c.UpdateCommunity(h.A.DB, &payload); err != nil {
@@ -701,9 +717,16 @@ func (h *Helpers) createCommunityUser(payload models.CommunityUserPayload) (int,
 		return http.StatusForbidden, CANNOT_ADD_MEMBER_ERR
 	}
 
-	if err := h.validateUser(payload.Signing_addr, payload.Timestamp, payload.Composite_signatures); err != nil {
-		log.Error().Err(err)
-		return http.StatusForbidden, err
+	if payload.Voucher != nil {
+		if err := h.validateUserViaVoucher(payload.Signing_addr, payload.Voucher); err != nil {
+			log.Error().Err(err)
+			return http.StatusForbidden, err
+		}
+	} else {
+		if err := h.validateUser(payload.Signing_addr, payload.Timestamp, payload.Composite_signatures); err != nil {
+			log.Error().Err(err)
+			return http.StatusForbidden, err
+		}
 	}
 
 	// check that community user doesnt already exist
@@ -889,11 +912,63 @@ func (h *Helpers) validateUser(addr, timestamp string, compositeSignatures *[]sh
 	return nil
 }
 
+func (h *Helpers) validateUserViaVoucher(addr string, voucher *shared.Voucher) error {
+	timestamp := voucher.Arguments[0]["value"]
+	if err := h.validateTimestamp(timestamp, 60); err != nil {
+		return err
+	}
+
+	compositeSignatures := shared.GetUserCompositeSignatureFromVoucher(voucher)
+	// Validate authorizer
+	authorizer := voucher.Authorizers[0]
+	if authorizer != addr || authorizer != (*compositeSignatures)[0].Addr {
+		err := errors.New("authorizer address must match voter address and envelope signer")
+		log.Error().Err(err)
+		return err
+	}
+	// validate signature using encoded transaction payload as message
+	message := shared.EncodeMessageFromVoucher(voucher)
+	if err := h.validateTxSignature(addr, message, compositeSignatures); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (h *Helpers) validateUserWithRole(addr, timestamp string, compositeSignatures *[]shared.CompositeSignature, communityId int, role string) error {
 	if err := h.validateTimestamp(timestamp, 60); err != nil {
 		return err
 	}
 	if err := h.validateUserSignature(addr, timestamp, compositeSignatures); err != nil {
+		return err
+	}
+	if err := models.EnsureRoleForCommunity(h.A.DB, addr, communityId, role); err != nil {
+		errMsg := fmt.Sprintf("Account %s is not an author for community %d.", addr, communityId)
+		log.Error().Err(err).Msg(errMsg)
+		return err
+	}
+
+	return nil
+}
+
+func (h *Helpers) validateUserWithRoleViaVoucher(addr string, voucher *shared.Voucher, communityId int, role string) error {
+	timestamp := voucher.Arguments[0]["value"]
+	if err := h.validateTimestamp(timestamp, 60); err != nil {
+		return err
+	}
+
+	compositeSignatures := shared.GetUserCompositeSignatureFromVoucher(voucher)
+	// Validate authorizer
+	authorizer := voucher.Authorizers[0]
+	if authorizer != addr || authorizer != (*compositeSignatures)[0].Addr {
+		err := errors.New("authorizer address must match voter address and envelope signer")
+		log.Error().Err(err)
+		return err
+	}
+
+	// validate signature using encoded transaction payload as message
+	message := shared.EncodeMessageFromVoucher(voucher)
+	if err := h.validateTxSignature(addr, message, compositeSignatures); err != nil {
 		return err
 	}
 	if err := models.EnsureRoleForCommunity(h.A.DB, addr, communityId, role); err != nil {

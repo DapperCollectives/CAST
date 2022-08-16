@@ -245,10 +245,27 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := helpers.validateUserWithRole(payload.Signing_addr, payload.Timestamp, payload.Composite_signatures, p.Community_id, "author"); err != nil {
-		log.Error().Err(err)
-		respondWithError(w, http.StatusForbidden, err.Error())
-		return
+	if payload.Voucher != nil {
+		if err := helpers.validateUserWithRoleViaVoucher(
+			payload.Signing_addr,
+			payload.Voucher,
+			p.Community_id,
+			"author"); err != nil {
+			log.Error().Err(err)
+			respondWithError(w, http.StatusForbidden, err.Error())
+			return
+		}
+	} else {
+		if err := helpers.validateUserWithRole(
+			payload.Signing_addr,
+			payload.Timestamp,
+			payload.Composite_signatures,
+			p.Community_id,
+			"author"); err != nil {
+			log.Error().Err(err)
+			respondWithError(w, http.StatusForbidden, err.Error())
+			return
+		}
 	}
 
 	p.Status = &payload.Status

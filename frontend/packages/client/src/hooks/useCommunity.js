@@ -1,7 +1,8 @@
 import { useCallback, useReducer } from 'react';
 import { useErrorHandlerContext } from '../contexts/ErrorHandler';
+import { useWebContext } from 'contexts/Web3';
 import { useFileUploader } from 'hooks';
-import { checkResponse, getCompositeSigs } from 'utils';
+import { checkResponse } from 'utils';
 import {
   INITIAL_STATE,
   PAGINATION_INITIAL_STATE,
@@ -31,6 +32,8 @@ export default function useCommunity({
   const { notifyError } = useErrorHandlerContext();
   // for now not using modal notification if there was an error uploading image
   const { uploadFile } = useFileUploader({ useModalNotifications: false });
+  const { user, services, signMessageByWalletProvider } = useWebContext();
+  console.log('walletProviderId', user?.services[0]?.uid);
 
   const getCommunities = useCallback(async () => {
     dispatch({ type: 'PROCESSING' });
@@ -56,13 +59,11 @@ export default function useCommunity({
       try {
         const timestamp = Date.now().toString();
         const hexTime = Buffer.from(timestamp).toString('hex');
-        const _compositeSignatures = await injectedProvider
-          .currentUser()
-          .signUserMessage(hexTime);
 
-        const compositeSignatures = getCompositeSigs(_compositeSignatures);
+        const [compositeSignatures, voucher] =
+          await signMessageByWalletProvider(user?.services[0]?.uid, hexTime);
 
-        if (!compositeSignatures) {
+        if (!compositeSignatures & !voucher) {
           const statusText = 'No valid user signature found.';
           // modal error will open
           notifyError(
@@ -152,8 +153,9 @@ export default function useCommunity({
             proposalThreshold: setDefaultValue(propThreshold, '0'),
             strategies,
             onlyAuthorsToSubmit: Boolean(onlyAuthorsToSubmitProposals),
-            timestamp,
+            timestamp: hexTime,
             compositeSignatures,
+            voucher,
           }),
         };
         const response = await fetch(url, fetchOptions);

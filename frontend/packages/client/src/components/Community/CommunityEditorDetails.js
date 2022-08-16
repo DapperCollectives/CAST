@@ -159,7 +159,9 @@ const CommunityMembersEditor = ({
 } = {}) => {
   const {
     user: { addr },
+    user,
     injectedProvider,
+    signMessageByWalletProvider,
   } = useWebContext();
   const { notifyError } = useErrorHandlerContext();
   const {
@@ -195,14 +197,14 @@ const CommunityMembersEditor = ({
     setSavingData(true);
     const timestamp = Date.now().toString();
     const hexTime = Buffer.from(timestamp).toString('hex');
-    const _compositeSignatures = await injectedProvider
-      .currentUser()
-      .signUserMessage(hexTime);
 
-    const compositeSignatures = getCompositeSigs(_compositeSignatures);
+    const [compositeSignatures, voucher] = await signMessageByWalletProvider(
+      user?.services[0]?.uid,
+      hexTime
+    );
 
     // No valid user signature found.
-    if (!compositeSignatures) {
+    if (!compositeSignatures && !voucher) {
       notifyError(
         {
           message: JSON.stringify({
@@ -218,8 +220,9 @@ const CommunityMembersEditor = ({
 
     const body = {
       signingAddr: addr,
-      timestamp,
+      timestamp: hexTime,
       compositeSignatures,
+      voucher,
     };
 
     const toRemove = userAddrList

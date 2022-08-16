@@ -36,9 +36,10 @@ type UserCommunity struct {
 
 type CommunityUserPayload struct {
 	CommunityUser
-	Signing_addr         string                  `json:"signingAddr" validate:"required"`
-	Timestamp            string                  `json:"timestamp" validate:"required"`
-	Composite_signatures *[]s.CompositeSignature `json:"compositeSignatures" validate:"required"`
+	Signing_addr         string                  `json:"signingAddr"`
+	Timestamp            string                  `json:"timestamp"`
+	Composite_signatures *[]s.CompositeSignature `json:"compositeSignatures"`
+	Voucher              *s.Voucher              `json:"voucher"`
 }
 
 type UserAchievements = []struct {
@@ -386,7 +387,7 @@ func mergeUserRolesForCommunities(communities []UserCommunity, start, count int)
 	var mergedCommunities = []UserCommunity{}
 	communitiesMap := make(map[int]int)
 	for i := range communities {
-		if index, ok := communitiesMap[communities[i].ID]; ok{
+		if index, ok := communitiesMap[communities[i].ID]; ok {
 			mergedCommunities[index].Roles = strings.Join([]string{mergedCommunities[index].Roles, communities[i].Roles}, ",")
 		} else {
 			mergedCommunities = append(mergedCommunities, communities[i])

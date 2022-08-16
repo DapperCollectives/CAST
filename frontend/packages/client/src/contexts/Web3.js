@@ -2,7 +2,9 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { WalletConnectModal } from 'components';
 import { useFclUser } from 'hooks';
 import { IS_LOCAL_DEV } from 'const';
+import { getCompositeSigs } from 'utils';
 import * as fcl from '@onflow/fcl';
+import * as t from '@onflow/types';
 import networks from 'networks';
 
 // create our app context
@@ -139,6 +141,47 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
   const closeModal = () => {
     setOpenModal(false);
   };
+
+  const signMessageVoucher = async (data) => {
+    const voucher = await fcl.serialize([
+      fcl.transaction`
+        transaction() {
+          prepare(acct: AuthAccount) {
+            // this transaction does nothing and will not be run,
+            // it is only used to collect a signature.
+          }
+        }
+      `,
+      fcl.args([fcl.arg(data, t.String)]),
+      fcl.limit(999),
+      fcl.proposer(fcl.authz),
+      fcl.authorizations([fcl.authz]),
+      fcl.payer(fcl.authz),
+    ]);
+    return JSON.parse(voucher);
+  };
+
+  const signMessageByWalletProvider = async (walletProvider, data) => {
+    try {
+      let voucher;
+      switch (walletProvider) {
+        case 'dapper#authn':
+          voucher = await signMessageVoucher(data);
+          return [null, voucher];
+        case 'fcl-ledger-authz':
+          voucher = await signMessageVoucher(data);
+          return [null, voucher];
+        default:
+          const _compositeSignatures = await fcl
+            .currentUser()
+            .signUserMessage(data);
+          return [getCompositeSigs(_compositeSignatures), null];
+      }
+    } catch (e) {
+      return [null, null];
+    }
+  };
+
   // use props as a way to pass configuration values
   const providerProps = {
     executeTransaction,
@@ -151,12 +194,16 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
     },
     injectedProvider: fcl,
     user,
+    services: user?.services,
     address: user.addr,
+    // walletProviderId: user?.services[0]?.uid,
     isLedger,
     network,
     logOut,
     openWalletModal,
     isValidFlowAddress,
+    signMessageByWalletProvider,
+    signMessageVoucher,
     ...props,
   };
 

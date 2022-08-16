@@ -7,7 +7,9 @@ import { INITIAL_STATE, defaultReducer } from 'reducers';
 export default function useCommunityDetails(id) {
   const {
     user: { addr },
+    user,
     injectedProvider,
+    signMessageByWalletProvider,
   } = useWebContext();
   const { notifyError } = useErrorHandlerContext();
   const [state, dispatch] = useReducer(defaultReducer, INITIAL_STATE);
@@ -42,13 +44,10 @@ export default function useCommunityDetails(id) {
       try {
         const timestamp = Date.now().toString();
         const hexTime = Buffer.from(timestamp).toString('hex');
-        const _compositeSignatures = await injectedProvider
-          .currentUser()
-          .signUserMessage(hexTime);
+        const [compositeSignatures, voucher] =
+          await signMessageByWalletProvider(user?.services[0].uid, hexTime);
 
-        const compositeSignatures = getCompositeSigs(_compositeSignatures);
-
-        if (!compositeSignatures) {
+        if (!compositeSignatures && !voucher) {
           return { error: 'No valid user signature found.' };
         }
 
@@ -60,8 +59,9 @@ export default function useCommunityDetails(id) {
           body: JSON.stringify({
             ...update,
             signingAddr: addr,
-            timestamp,
+            timestamp: hexTime,
             compositeSignatures,
+            voucher,
           }),
         };
         dispatch({ type: 'PROCESSING' });

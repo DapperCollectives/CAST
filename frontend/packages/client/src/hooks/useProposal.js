@@ -1,11 +1,8 @@
 import { useCallback, useReducer } from 'react';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
+import { useWebContext } from 'contexts/Web3';
 import { checkResponse, getCompositeSigs } from 'utils';
 import * as fcl from '@onflow/fcl';
-import {
-  encodeTransactionEnvelope,
-  encodeTransactionPayload,
-} from '@onflow/sdk';
 import { CODE as transferTokensCode } from '@onflow/six-transfer-tokens';
 import * as t from '@onflow/types';
 import { INITIAL_STATE, defaultReducer } from '../reducers';
@@ -16,6 +13,8 @@ export default function useProposal() {
     loading: false,
   });
   const { notifyError } = useErrorHandlerContext();
+  const { user, walletProviderId, signMessageByWalletProvider } =
+    useWebContext();
 
   const createProposal = useCallback(
     async (injectedProvider, data) => {
@@ -25,13 +24,10 @@ export default function useProposal() {
       try {
         const timestamp = Date.now().toString();
         const hexTime = Buffer.from(timestamp).toString('hex');
-        const _compositeSignatures = await injectedProvider
-          .currentUser()
-          .signUserMessage(hexTime);
+        const [compositeSignatures, voucher] =
+          await signMessageByWalletProvider(user?.services[0]?.uid, hexTime);
 
-        const compositeSignatures = getCompositeSigs(_compositeSignatures);
-
-        if (!compositeSignatures) {
+        if (!compositeSignatures && !voucher) {
           const statusText = 'No valid user signature found.';
           // modal error will open
           notifyError(
@@ -52,8 +48,9 @@ export default function useProposal() {
           },
           body: JSON.stringify({
             ...proposalData,
-            timestamp,
+            timestamp: hexTime,
             compositeSignatures,
+            voucher,
           }),
         };
 
@@ -72,16 +69,15 @@ export default function useProposal() {
     injectedProvider,
     proposal,
     voteData,
-    walletProvider
+    walletProviderId
   ) => {
-    console.log('walletProvider', walletProvider);
-    switch (walletProvider) {
+    console.log('walletProvider', walletProviderId);
+    switch (walletProviderId) {
       case 'dapper#authn':
         return voteOnProposalWithTxSig(injectedProvider, proposal, voteData);
       case 'fcl-ledger-authz':
         return voteOnProposalWithTxSig(injectedProvider, proposal, voteData);
       default:
-        // return voteOnProposalWithTxSig(injectedProvider, proposal, voteData);
         return voteOnProposalWithMessageSig(
           injectedProvider,
           proposal,
@@ -112,12 +108,10 @@ export default function useProposal() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            vote: {
-              ...voteData,
-              compositeSignatures,
-              message: hexMessage,
-              timestamp,
-            },
+            ...voteData,
+            compositeSignatures,
+            message: hexMessage,
+            timestamp,
             voucher: null,
           }),
         };
@@ -149,12 +143,10 @@ export default function useProposal() {
 
         const voucher = await fcl.serialize([
           fcl.transaction`
-            transaction(proposalId: String, choice: String, timestamp: String) {
+            transaction() {
               prepare(acct: AuthAccount) {
-                // this transaction does nothing and will not be run
-                // it is only used to collect a signature
-                // for your vote on this proposal.
-                // you will not be charged a gas fee.
+                // this transaction does nothing and will not be run,
+                // it is only used to collect a signature.
               }
             }
           `,
@@ -176,11 +168,9 @@ export default function useProposal() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            vote: {
-              ...voteData,
-              message,
-              timestamp,
-            },
+            ...voteData,
+            message,
+            timestamp,
             voucher: voucherJSON,
           }),
         };
@@ -244,11 +234,11 @@ export default function useProposal() {
       try {
         const timestamp = Date.now().toString();
         const hexTime = Buffer.from(timestamp).toString('hex');
-        const _compositeSignatures = await injectedProvider
-          .currentUser()
-          .signUserMessage(hexTime);
-        const compositeSignatures = getCompositeSigs(_compositeSignatures);
-        if (!compositeSignatures) {
+
+        const [compositeSignatures, voucher] =
+          await signMessageByWalletProvider(user?.services[0]?.uid, hexTime);
+
+        if (!compositeSignatures && !voucher) {
           return { error: 'No valid user signature found.' };
         }
 
@@ -259,8 +249,9 @@ export default function useProposal() {
           },
           body: JSON.stringify({
             ...update,
-            timestamp,
+            timestamp: hexTime,
             compositeSignatures,
+            voucher,
           }),
         };
         dispatch({ type: 'PROCESSING' });
