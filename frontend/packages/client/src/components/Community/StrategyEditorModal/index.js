@@ -34,7 +34,9 @@ const getRequiredFields = (strategy) => {
     maxWeight: (maxWeight) =>
       maxWeight?.trim().length > 0 && /^[0-9]+$/.test(maxWeight),
     threshold: (threshold) =>
-      threshold?.trim().length > 0 && /^[0-9]+$/.test(threshold),
+      threshold?.trim().length >= 1 &&
+      threshold >= 1 &&
+      /^[0-9]+$/.test(threshold),
   };
 
   if (strategy === 'float-nfts') {
