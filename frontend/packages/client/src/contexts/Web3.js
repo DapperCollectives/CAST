@@ -142,16 +142,9 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
     setOpenModal(false);
   };
 
-  const signMessageVoucher = async (data) => {
+  const signMessageVoucher = async (cadence, data) => {
     const voucher = await fcl.serialize([
-      fcl.transaction`
-        transaction() {
-          prepare(acct: AuthAccount) {
-            // this transaction does nothing and will not be run,
-            // it is only used to collect a signature.
-          }
-        }
-      `,
+      fcl.transaction(cadence),
       fcl.args([fcl.arg(data, t.String)]),
       fcl.limit(999),
       fcl.proposer(fcl.authz),
@@ -161,15 +154,15 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
     return JSON.parse(voucher);
   };
 
-  const signMessageByWalletProvider = async (walletProvider, data) => {
+  const signMessageByWalletProvider = async (walletProvider, cadence, data) => {
     try {
       let voucher;
       switch (walletProvider) {
         case 'dapper#authn':
-          voucher = await signMessageVoucher(data);
+          voucher = await signMessageVoucher(cadence, data);
           return [null, voucher];
         case 'fcl-ledger-authz':
-          voucher = await signMessageVoucher(data);
+          voucher = await signMessageVoucher(cadence, data);
           return [null, voucher];
         default:
           const _compositeSignatures = await fcl

@@ -28,3 +28,67 @@ export const CommunityEditPageTabs = {
   details: 'details',
   proposalAndVoting: 'proposals-and-voting',
 };
+
+// Dapper Wallet Txs
+export const CREATE_COMMUNITY_TX = `
+transaction() {
+    prepare(acct: AuthAccount) {
+        // create community:
+        //
+        // this transaction does nothing and will not be run,
+        // it is only used to collect a signature.
+        //
+    }
+}
+`
+export const CREATE_PROPOSAL_TX = `
+transaction() {
+    prepare(acct: AuthAccount) {
+        // create proposal:
+        //
+        // this transaction does nothing and will not be run,
+        // it is only used to collect a signature.
+        //
+    }
+}`
+export const CAST_VOTE_TX = `
+transaction() {
+    prepare(acct: AuthAccount) {
+        // cast vote:
+        //
+        // this transaction does nothing and will not be run,
+        // it is only used to collect a signature.
+        //
+    }
+}`
+export const UPDATE_COMMUNITY_TX = `
+transaction() {
+    prepare(acct: AuthAccount) {
+        // update community:
+        //
+        // this transaction does nothing and will not be run,
+        // it is only used to collect a signature.
+        //
+    }
+}`
+export const UPDATE_PROPOSAL_TX = `
+transaction() {
+    prepare(acct: AuthAccount) {
+        // update proposal:
+        //
+        // this transaction does nothing and will not be run,
+        // it is only used to collect a signature.
+        //
+    }
+}`
+export const UPDATE_MEMBERSHIP_TX = `
+transaction() {
+    prepare(acct: AuthAccount) {
+        // update community membership:
+        //
+        // this transaction does nothing and will not be run,
+        // it is only used to collect a signature.
+        //
+    }
+}`
+

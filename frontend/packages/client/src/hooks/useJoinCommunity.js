@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from 'react-query';
 import { useErrorHandlerContext } from '../contexts/ErrorHandler';
 import { useWebContext } from 'contexts/Web3';
 import { getCompositeSigs } from 'utils';
+import { UPDATE_MEMBERSHIP_TX } from 'const';
 
 export default function useJoinCommunity() {
   const queryClient = useQueryClient();
@@ -16,6 +17,7 @@ export default function useJoinCommunity() {
       const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}/users`;
       const [compositeSignatures, voucher] = await signMessageByWalletProvider(
         user?.services[0].uid,
+        UPDATE_MEMBERSHIP_TX,
         hexTime
       );
 
@@ -72,6 +74,7 @@ export default function useJoinCommunity() {
       const hexTime = Buffer.from(timestamp).toString('hex');
       const [compositeSignatures, voucher] = await signMessageByWalletProvider(
         user?.services[0].uid,
+        UPDATE_MEMBERSHIP_TX,
         hexTime
       );
       if (!compositeSignatures && !voucher) {

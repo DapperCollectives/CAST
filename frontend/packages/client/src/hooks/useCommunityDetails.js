@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useReducer } from 'react';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
+import { UPDATE_COMMUNITY_TX } from 'const';
 import { useWebContext } from 'contexts/Web3';
 import { checkResponse, getCompositeSigs } from 'utils';
 import { INITIAL_STATE, defaultReducer } from 'reducers';
@@ -45,7 +46,7 @@ export default function useCommunityDetails(id) {
         const timestamp = Date.now().toString();
         const hexTime = Buffer.from(timestamp).toString('hex');
         const [compositeSignatures, voucher] =
-          await signMessageByWalletProvider(user?.services[0].uid, hexTime);
+          await signMessageByWalletProvider(user?.services[0].uid, UPDATE_COMMUNITY_TX, hexTime);
 
         if (!compositeSignatures && !voucher) {
           return { error: 'No valid user signature found.' };

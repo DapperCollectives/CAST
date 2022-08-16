@@ -8,6 +8,7 @@ import useFlowAddrValidator, {
 } from './hooks/useFlowAddrValidator';
 import { useCommunityUsers } from 'hooks';
 import { getCompositeSigs } from 'utils';
+import { UPDATE_COMMUNITY_TX } from 'const';
 
 export const CommunityUsersForm = ({
   title,
@@ -200,6 +201,7 @@ const CommunityMembersEditor = ({
 
     const [compositeSignatures, voucher] = await signMessageByWalletProvider(
       user?.services[0]?.uid,
+      UPDATE_COMMUNITY_TX,
       hexTime
     );
 
