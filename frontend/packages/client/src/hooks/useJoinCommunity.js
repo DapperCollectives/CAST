@@ -1,6 +1,6 @@
-import { useMutation, useQueryClient } from 'react-query';
 import { useErrorHandlerContext } from '../contexts/ErrorHandler';
 import { getCompositeSigs } from 'utils';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 export default function useJoinCommunity() {
   const queryClient = useQueryClient();
