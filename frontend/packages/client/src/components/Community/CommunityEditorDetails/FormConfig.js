@@ -81,7 +81,11 @@ const addresValidation = (
       }
     );
 
-const AddressSchema = ({ isValidFlowAddress, isEditMode = false } = {}) => {
+const AddressSchema = ({
+  fieldNames,
+  isValidFlowAddress,
+  isEditMode = false,
+} = {}) => {
   const elementValidation = addEmptyElementValidation(
     yup
       .array(
@@ -99,13 +103,13 @@ const AddressSchema = ({ isValidFlowAddress, isEditMode = false } = {}) => {
       .unique('addr', 'Invalid duplicated address'),
     isEditMode
   );
-  return yup.object().shape({
-    ...(isEditMode
-      ? { addrList: elementValidation }
-      : {
-          listAddrAdmins: elementValidation,
-          listAddrAuthors: elementValidation,
-        }),
-  });
+  return yup
+    .object()
+    .shape(
+      Object.assign(
+        {},
+        ...fieldNames.map((fieldName) => ({ [fieldName]: elementValidation }))
+      )
+    );
 };
 export { AddressSchema, addresValidation };

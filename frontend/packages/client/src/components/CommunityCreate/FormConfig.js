@@ -1,3 +1,4 @@
+import { AddressSchema } from 'components/Community/CommunityEditorDetails';
 import {
   LinksSchema,
   linksFieldsArray,
@@ -18,9 +19,14 @@ const initialValues = { ...linksInitialValues, ...profileInitialValues };
 
 const stepOne = {
   Schema: StepOneSchema,
+  FieldsArray: StepOneFieldsArray,
+  initialValues,
+};
+
+const stepTwo = {
+  Schema: AddressSchema,
 };
 const stepThree = {
   Schema: StepThreeSchema,
 };
-
-export { stepOne, stepThree, StepOneSchema, StepOneFieldsArray, initialValues };
+export { stepOne, stepTwo, stepThree };

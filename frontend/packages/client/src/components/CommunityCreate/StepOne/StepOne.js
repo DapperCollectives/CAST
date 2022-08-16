@@ -5,22 +5,20 @@ import { CommunityLinksForm } from 'components/Community/CommunityEditorLinks';
 import { CommunityProfileForm } from 'components/Community/CommunityEditorProfile';
 import { yupResolver } from '@hookform/resolvers/yup';
 import pick from 'lodash/pick';
-import {
-  StepOneFieldsArray,
-  StepOneSchema,
-  initialValues,
-} from '../FormConfig';
+import { stepOne } from '../FormConfig';
+
+const { FieldsArray, Schema, initialValues } = stepOne;
 
 export default function StepOne({ stepData, onDataChange, moveToNextStep }) {
   const fieldsObj = Object.assign(
     {},
     initialValues,
-    pick(stepData || {}, StepOneFieldsArray)
+    pick(stepData || {}, FieldsArray)
   );
 
   const { register, handleSubmit, formState, control, setValue } = useForm({
     defaultValues: fieldsObj,
-    resolver: yupResolver(StepOneSchema),
+    resolver: yupResolver(Schema),
     reValidateMode: 'onChange',
   });
 

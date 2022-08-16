@@ -38,7 +38,11 @@ export default function MembersEditor({
   const { register, control, handleSubmit, reset, formState } = useForm({
     mode: 'all',
     resolver: yupResolver(
-      AddressSchema({ isValidFlowAddress, isEditMode: true })
+      AddressSchema({
+        fieldNames: ['addrList'],
+        isValidFlowAddress,
+        isEditMode: true,
+      })
     ),
   });
 
