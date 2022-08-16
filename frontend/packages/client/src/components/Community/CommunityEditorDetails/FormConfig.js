@@ -43,7 +43,7 @@ const addEmptyElementValidation = (schema, isEditMode) => {
   return schema;
 };
 
-const addresValidation = (
+const addressValidation = (
   yupSchema,
   isValidFlowAddress,
   excludeEmptyString = true
@@ -90,7 +90,7 @@ const AddressSchema = ({
     yup
       .array(
         yup.object({
-          addr: addresValidation(
+          addr: addressValidation(
             isEditMode
               ? yup.string().required('Please enter a Flow Address')
               : yup.string(),
@@ -112,4 +112,4 @@ const AddressSchema = ({
       )
     );
 };
-export { AddressSchema, addresValidation };
+export { AddressSchema, addressValidation };
