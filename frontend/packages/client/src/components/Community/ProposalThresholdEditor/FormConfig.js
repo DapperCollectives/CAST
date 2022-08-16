@@ -30,7 +30,11 @@ const Schema = (isValidFlowAddress) =>
       .when('onlyAuthorsToSubmitProposals', {
         is: true,
         then: addresValidation(yup.string(), isValidFlowAddress, true),
-        otherwise: addresValidation(yup.string(), isValidFlowAddress, false),
+        otherwise: addresValidation(
+          yup.string().required('Please enter a contract address'),
+          isValidFlowAddress,
+          false
+        ),
       }),
     contractName: yup
       .string()
