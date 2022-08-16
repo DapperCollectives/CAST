@@ -33,11 +33,11 @@ export default function useCommunityMembers({
         return [start + count, count, totalRecords, next];
       },
       enabled: !!communityId,
+      onError: (error) => {
+        notifyError(error);
+      },
     }
   );
-  if (isError) {
-    notifyError(error);
-  }
 
   const [start = 0, count = countParam, totalRecords = 0, next = -1] =
     data?.pageParam ?? getPaginationInfo(data?.pages);
