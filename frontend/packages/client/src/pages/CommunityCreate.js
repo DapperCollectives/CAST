@@ -141,7 +141,7 @@ export default function CommunityCreate() {
       return;
     }
 
-    const communityData = {
+    const communityPayload = {
       creatorAddr,
       ...fields,
       listAddrAdmins: addrAdmins,
@@ -149,7 +149,7 @@ export default function CommunityCreate() {
       slug: generateSlug(),
     };
 
-    await createCommunity({ injectedProvider, communityData });
+    await createCommunity({ injectedProvider, communityPayload });
   };
 
   const props = {
