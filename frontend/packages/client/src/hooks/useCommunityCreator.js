@@ -17,7 +17,7 @@ export default function useCommunityCreator() {
     data,
     error,
   } = useMutation(
-    async ({ injectedProvider, communityData }) => {
+    async ({ injectedProvider, communityPayload }) => {
       const timestamp = Date.now().toString();
       const hexTime = Buffer.from(timestamp).toString('hex');
       const _compositeSignatures = await injectedProvider
@@ -36,7 +36,7 @@ export default function useCommunityCreator() {
         return;
       }
 
-      const { logo, banner, ...otherProps } = communityData;
+      const { logo, banner, ...otherProps } = communityPayload;
 
       // check for logo / banner uploads
       // admins can edit later the images
