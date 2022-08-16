@@ -7,12 +7,13 @@ export default function useCommunityCategory() {
 
   const { isLoading, isError, data, error } = useQuery(
     ['community-categories'],
-    async () => fetchCommunityCategories()
+    async () => fetchCommunityCategories(),
+    {
+      onError: (error) => {
+        notifyError(error);
+      },
+    }
   );
-
-  if (isError) {
-    notifyError(error, 'community-categories');
-  }
 
   return {
     isLoading,
