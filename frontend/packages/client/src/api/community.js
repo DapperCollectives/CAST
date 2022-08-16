@@ -23,6 +23,11 @@ export const fetchActiveStrategies = async (communityId) => {
   return checkResponse(response);
 };
 
+export const fetchCommunityDetails = async (communityId) => {
+  const response = await fetch(`${COMMUNITIES_URL}/${communityId}`);
+  return checkResponse(response);
+};
+
 export const createCommunityApiReq = async ({
   payload,
   timestamp,
@@ -83,5 +88,24 @@ export const createCommunityApiReq = async ({
 
   const response = await fetch(COMMUNITIES_URL, fetchOptions);
 
+  return checkResponse(response);
+};
+
+export const updateCommunityDetailsApiReq = async ({
+  updatePayload,
+  communityId,
+} = {}) => {
+  const fetchOptions = {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(updatePayload),
+  };
+
+  const response = await fetch(
+    `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}`,
+    fetchOptions
+  );
   return checkResponse(response);
 };
