@@ -153,7 +153,7 @@ export default function useCommunity({
             ),
             contractName: setDefaultValue(contractN, flowAddress.contractName),
             publicPath: setDefaultValue(storageP, flowAddress.storagePath),
-            proosalThreshold: setDefaultValue(proosalThreshold, '0'),
+            proposalThreshold: setDefaultValue(proosalThreshold, '0'),
             strategies,
             onlyAuthorsToSubmit: Boolean(onlyAuthorsToSubmitProposals),
             timestamp,
