@@ -138,7 +138,7 @@ func GetAllVotesForProposal(db *s.Database, proposalId int, strategy string) ([]
 		return []*VoteWithBalance{}, nil
 	}
 
-	if strategy == "balance-of-nfts" {
+	if strategy == "balance-of-nfts" || strategy == "float-nfts" {
 		votesWithNFTs, err := getUsersNFTs(db, votes)
 		if err != nil {
 			return nil, err
