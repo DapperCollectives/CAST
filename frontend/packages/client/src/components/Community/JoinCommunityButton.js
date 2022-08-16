@@ -7,7 +7,6 @@ import classnames from 'classnames';
 
 export default function JoinCommunityButton({
   communityId,
-  setTotalMembers = () => {},
   // callback to notify leaveCommunity was called
   onLeaveCommunity = async () => {},
   onJoinCommunity = async () => {},
@@ -27,10 +26,6 @@ export default function JoinCommunityButton({
     communityId,
     roles: ['member'],
   });
-
-  const refresh = (updateFn) => {
-    setTotalMembers(updateFn);
-  };
 
   useEffect(() => {
     if (user?.addr && isModalErrorOpened) {
@@ -61,30 +56,35 @@ export default function JoinCommunityButton({
       setIsModalErrorOpened(true);
       return;
     }
-    const { success } = await createCommunityUser({
-      communityId,
-      user,
-      injectedProvider,
-    });
-    if (success) {
-      refresh((totalMembers) => ++totalMembers);
-      await onJoinCommunity();
-    }
+    await createCommunityUser(
+      {
+        communityId,
+        user,
+        injectedProvider,
+      },
+      {
+        onSuccess: async () => {
+          await onJoinCommunity();
+        },
+      }
+    );
   };
 
   const leaveCommunity = async (event) => {
     event.preventDefault();
     event.stopPropagation();
-    const { success } = await deleteUserFromCommunity({
-      communityId,
-      user,
-      injectedProvider,
-    });
-
-    if (success) {
-      refresh((totalMembers) => --totalMembers);
-      await onLeaveCommunity();
-    }
+    await deleteUserFromCommunity(
+      {
+        communityId,
+        user,
+        injectedProvider,
+      },
+      {
+        onSuccess: async () => {
+          await onLeaveCommunity();
+        },
+      }
+    );
   };
 
   const classNamesContainer = `column is-narrow-tablet is-full-mobile ${classNames} ${containerAlignment}`;
