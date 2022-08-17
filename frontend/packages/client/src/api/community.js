@@ -77,8 +77,7 @@ export const createCommunityApiReq = async ({
         flowAddress.contractName
       ),
       publicPath: setDefaultValue(payload?.storageP, flowAddress.storagePath),
-      proosalThreshold: setDefaultValue(payload?.proposalThreshold, '0'),
-
+      proposalThreshold: setDefaultValue(payload?.proposalThreshold, '0'),
       strategies,
       onlyAuthorsToSubmit: Boolean(payload?.onlyAuthorsToSubmitProposals),
       timestamp,
