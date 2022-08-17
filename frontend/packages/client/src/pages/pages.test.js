@@ -1,7 +1,7 @@
-import { cleanup, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { Router } from 'react-router-dom';
 import '@testing-library/jest-dom';
+import { cleanup, render, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import AppPages from '.';
 

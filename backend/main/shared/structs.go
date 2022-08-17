@@ -96,6 +96,10 @@ func (b *FTBalanceResponse) NewFTBalance() {
 		b.PrimaryAccountBalance = 11100000
 		b.SecondaryAccountBalance = 12300000
 		b.StakingBalance = 13500000
+	} else {
+		b.PrimaryAccountBalance = 0
+		b.SecondaryAccountBalance = 0
+		b.StakingBalance = 0
 	}
 }
 
