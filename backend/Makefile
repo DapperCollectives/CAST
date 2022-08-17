@@ -12,6 +12,10 @@ run:
 test:
 	go test -v -cover ./...
 
+	# creates proposals
+proposals:
+	go test -v ./... -run CreateManyProposals -amount=$(amount) -db=$(db)   
+
 build_and_run: build run
 
 macrun: build_macos run && NFTdeploy

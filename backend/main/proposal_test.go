@@ -2,8 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
+	"log"
 	"net/http"
+	"strconv"
 	"testing"
 	"time"
 
@@ -214,6 +217,41 @@ func TestUpdateProposal(t *testing.T) {
 		var cancelled models.Proposal
 		json.Unmarshal(response.Body.Bytes(), &cancelled)
 		assert.Equal(t, "cancelled", *cancelled.Computed_status)
+	})
+}
+
+func TestCreateManyProposals(t *testing.T) {
+	clearTable("communities")
+	clearTable("community_users")
+	clearTable("proposals")
+
+	// Create a community
+	authorName := "account"
+	communityId := otu.AddCommunitiesWithUsers(1, authorName)[0]
+
+	t.Run("A community author should be able to create many proposals", func(t *testing.T) {
+		arg := flag.Args()
+		numProposals, err := strconv.Atoi(arg[0])
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		for i := 0; i < numProposals; i++ {
+			proposalStruct := otu.GenerateProposalStruct(authorName, communityId)
+			payload := otu.GenerateProposalPayload(authorName, proposalStruct)
+			response := otu.CreateProposalAPI(payload)
+
+			CheckResponseCode(t, http.StatusCreated, response.Code)
+			var p models.Proposal
+			json.Unmarshal(response.Body.Bytes(), &p)
+
+			// Get proposal after create
+			response = otu.GetProposalByIdAPI(communityId, p.ID)
+			var created models.Proposal
+			json.Unmarshal(response.Body.Bytes(), &created)
+
+			assert.Equal(t, "pending", *created.Computed_status)
+		}
 	})
 
 }

@@ -107,6 +107,15 @@ func (a *App) Initialize() {
 	// Clients
 	////////////
 
+	// when running "make proposals" sets db to dev not test
+	arg := flag.String("db", "local", "database type")
+	flag.Int("amount", 4, "Amount of proposals to create")
+
+	flag.Parse()
+	if *arg == "local" {
+		os.Setenv("APP_ENV", "DEV")
+	}
+
 	// Postgres
 	dbname := os.Getenv("DB_NAME")
 	if os.Getenv("APP_ENV") == "TEST" {
@@ -114,22 +123,22 @@ func (a *App) Initialize() {
 	}
 
 	a.ConnectDB(
-		os.Getenv("DB_USERNAME"), 
-		os.Getenv("DB_PASSWORD"), 
-		os.Getenv("DB_HOST"), 
-		os.Getenv("DB_PORT"), 
+		os.Getenv("DB_USERNAME"),
+		os.Getenv("DB_PASSWORD"),
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_PORT"),
 		dbname,
 	)
 
 	// IPFS
 	a.IpfsClient = shared.NewIpfsClient(os.Getenv("IPFS_KEY"), os.Getenv("IPFS_SECRET"))
-	
+
 	// Flow
 	if os.Getenv("FLOW_ENV") == "" {
 		os.Setenv("FLOW_ENV", "emulator")
 	}
 	a.FlowAdapter = shared.NewFlowClient(os.Getenv("FLOW_ENV"))
-	
+
 	// Snapshot
 	log.Info().Msgf("SNAPSHOT_BASE_URL: %s", os.Getenv("SNAPSHOT_BASE_URL"))
 	a.SnapshotClient = shared.NewSnapshotClient(os.Getenv("SNAPSHOT_BASE_URL"))
