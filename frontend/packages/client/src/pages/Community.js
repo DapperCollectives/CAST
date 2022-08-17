@@ -250,6 +250,7 @@ export default function Community() {
     slug,
     id,
     name,
+    body,
   } = community ?? {};
 
   return (
@@ -298,7 +299,7 @@ export default function Community() {
                       <Tablink
                         ref={proposalRef}
                         linkText="Proposals"
-                        linkUrl={`/community/${community.id}?tab=proposals`}
+                        linkUrl={`/community/${id}?tab=proposals`}
                         isActive={activeTabMap['proposals']}
                         className="tab-community pb-4 px-2 mr-4"
                       />
@@ -311,7 +312,7 @@ export default function Community() {
                       <Tablink
                         ref={memberRef}
                         linkText="Members"
-                        linkUrl={`/community/${community.id}?tab=members`}
+                        linkUrl={`/community/${id}?tab=members`}
                         isActive={activeTabMap['members']}
                         className="tab-community pb-4 px-2 mx-4"
                       />
@@ -322,7 +323,7 @@ export default function Community() {
                       <Tablink
                         ref={aboutRef}
                         linkText="About"
-                        linkUrl={`/community/${community.id}?tab=about`}
+                        linkUrl={`/community/${id}?tab=about`}
                         isActive={activeTabMap['about']}
                         className="tab-community pb-4 px-2 ml-4"
                       />
@@ -337,7 +338,7 @@ export default function Community() {
                       showLeaderBoard && (
                         <LeaderBoard
                           onClickViewMore={onClickViewMore}
-                          communityId={community.id}
+                          communityId={id}
                         />
                       )
                     }
@@ -353,7 +354,7 @@ export default function Community() {
                     communityAbout={
                       <CommunityAbout
                         isMobile={!notMobile}
-                        textAbout={community?.body}
+                        textAbout={body}
                         adminMembers={(admins ?? []).map((admin) => ({
                           name: admin.addr,
                         }))}
@@ -370,10 +371,7 @@ export default function Community() {
                   />
                 )}
                 {activeTabMap['proposals'] && (
-                  <CommunityProposals
-                    communityId={community.id}
-                    admins={admins ?? []}
-                  />
+                  <CommunityProposals communityId={id} admins={admins ?? []} />
                 )}
                 {activeTabMap['members'] && (
                   <MembersLayout
@@ -387,7 +385,7 @@ export default function Community() {
                       />
                     }
                     communityMemberList={
-                      <CommunityMemberList communityId={community.id} />
+                      <CommunityMemberList communityId={id} />
                     }
                   />
                 )}

@@ -12,46 +12,48 @@ export default function useCommunityProposalsWithVotes({
   status,
   scrollToFetchMore = true,
 } = {}) {
-  const {
-    data,
-    loading,
-    getCommunityProposals,
-    fetchMore,
-    resetResults,
-    pagination,
-  } = useCommunityProposals({ communityId, start, count, status });
+  const { data, isLoading, fetchNextPage, pagination } = useCommunityProposals({
+    communityId,
+    start,
+    count,
+    status,
+  });
 
+  console.log(data);
   const {
     user: { addr },
   } = useWebContext();
-  const { getVotesForAddress, data: votesForAddressData } =
-    useVotesForAddress();
+  const {
+    getVotesForAddress,
+    data: votesForAddressData,
+    loading: isLoadingVotes,
+  } = useVotesForAddress();
   const votesFromAddress = votesForAddressData?.[addr];
 
-  useEffect(() => {
-    async function getVotes() {
-      // get only if voted for the ones that are not completed
-      getVotesForAddress(
-        data
-          .filter((datum) => datum.voted === undefined)
-          .map((datum) => datum.id),
-        addr
-      );
-    }
-    if (addr && !loading && Array.isArray(data)) {
-      getVotes();
-    }
-  }, [addr, data, loading, getVotesForAddress]);
+  // useEffect(() => {
+  //   async function getVotes() {
+  //     // get only if voted for the ones that are not completed
+  //     getVotesForAddress(
+  //       data
+  //         .filter((datum) => datum.voted === undefined)
+  //         .map((datum) => datum.id),
+  //       addr
+  //     );
+  //   }
+  //   if (addr && !isLoading && Array.isArray(data) && !isLoadingVotes) {
+  //     getVotes();
+  //   }
+  // }, [addr, data, isLoading, getVotesForAddress, isLoadingVotes]);
 
   const hasMore = pagination.next > 0;
 
   useEffect(() => {
     if (scrollToFetchMore) {
       document.hasMore = hasMore;
-      document.loadingProposals = loading;
-      document.fetchMore = fetchMore;
+      document.loadingProposals = isLoading;
+      document.fetchNextPage = fetchNextPage;
     }
-  }, [hasMore, loading, fetchMore, scrollToFetchMore]);
+  }, [hasMore, isLoading, fetchNextPage, scrollToFetchMore]);
 
   function pullDataFromApi() {
     return debounce(() => {
@@ -60,7 +62,7 @@ export default function useCommunityProposalsWithVotes({
         window.pageYOffset + window.innerHeight
       ) {
         if (document.hasMore && !document.loadingProposals) {
-          document.fetchMore();
+          document.fetchNextPage();
         }
       }
     }, 500);
@@ -98,10 +100,8 @@ export default function useCommunityProposalsWithVotes({
 
   return {
     data: mergedData,
-    loading: loading,
-    getCommunityProposals,
-    fetchMore,
-    resetResults,
+    loading: isLoading,
+    fetchNextPage,
     hasMore: pagination.next > 0,
   };
 }
