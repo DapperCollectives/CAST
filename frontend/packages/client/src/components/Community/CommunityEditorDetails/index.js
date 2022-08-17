@@ -1,4 +1,4 @@
-export { addresValidation } from './FormConfig';
+export { addressValidation } from './FormConfig';
 export {
   default as CommunityEditorDetails,
   CommunityUsersForm,
