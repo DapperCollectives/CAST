@@ -7,13 +7,14 @@ import * as yup from 'yup';
 const ProfileSchema = yup.object().shape({
   communityName: yup
     .string()
+    .trim()
     .max(
       COMMUNITY_NAME_MAX_LENGTH,
       // eslint-disable-next-line no-template-curly-in-string
       'The maximum length for Community Name is ${max} characters'
     )
     .required('Please provide a Communiy Name'),
-  communityDescription: yup.string().max(
+  communityDescription: yup.string().trim().max(
     COMMUNITY_DESCRIPTION_MAX_LENGTH,
     // eslint-disable-next-line no-template-curly-in-string
     'The maximum length for Community Description is ${max} characters'
