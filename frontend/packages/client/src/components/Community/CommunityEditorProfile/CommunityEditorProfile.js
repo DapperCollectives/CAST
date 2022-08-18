@@ -102,6 +102,7 @@ export default function CommunityEditorProfile({
     <ProfileForm
       submitComponent={
         <ActionButton
+          type="submit"
           label="save"
           enabled={isDirty && !isSubmitting}
           loading={isSubmitting}
