@@ -352,10 +352,12 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Validate Contract Thresholds
-	err = validateContractThreshold(*payload.Strategies)
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, err.Error())
-		return
+	if payload.Strategies != nil {
+		err = validateContractThreshold(*payload.Strategies)
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, err.Error())
+			return
+		}
 	}
 
 	c, httpStatus, err := helpers.updateCommunity(id, payload)
