@@ -1,4 +1,4 @@
-const addresValidation = (
+const addressValidation = (
   yupSchema,
   isValidFlowAddress,
   excludeEmptyString = true
@@ -36,4 +36,4 @@ const addresValidation = (
       }
     );
 
-export { addresValidation };
+export { addressValidation };

@@ -23,3 +23,7 @@ func GetVotingStrategies(db *s.Database) ([]*VotingStrategy, error) {
 	}
 	return votingStrategies, nil
 }
+
+func IsNFTStrategy(name string) bool {
+	return name == "balance-of-nfts" || name == "float-nfts"
+}
