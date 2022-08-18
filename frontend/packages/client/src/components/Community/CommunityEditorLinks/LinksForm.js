@@ -11,17 +11,9 @@ export default function EditorForm({
   register,
   errors,
   isSubmitting,
-  removeInnerForm,
+  removeInnerForm = false,
   handleSubmit = () => {},
 } = {}) {
-  const formFieldsComponent = (
-    <FormFields
-      formFields={formFields}
-      register={register}
-      isSubmitting={isSubmitting}
-      errors={errors}
-    />
-  );
   return (
     <WrapperResponsive
       classNames="border-light rounded-lg columns is-flex-direction-column is-mobile m-0"
@@ -48,14 +40,19 @@ export default function EditorForm({
           </div>
         </div>
       </div>
-      {removeInnerForm ? (
-        <>{formFieldsComponent}</>
-      ) : (
-        <Form methods={{ register }} handleSubmit={handleSubmit}>
-          {formFieldsComponent}
-          {submitComponent}
-        </Form>
-      )}
+      <Form
+        methods={{ register }}
+        removeInnerForm={removeInnerForm}
+        onSubmit={handleSubmit}
+      >
+        <FormFields
+          formFields={formFields}
+          register={register}
+          isSubmitting={isSubmitting}
+          errors={errors}
+        />
+        {submitComponent}
+      </Form>
     </WrapperResponsive>
   );
 }
