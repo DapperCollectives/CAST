@@ -322,7 +322,7 @@ func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Validate Contract Thresholds
-	err = validateConractThreshold(*payload.Strategies)
+	err = validateContractThreshold(*payload.Strategies)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, err.Error())
 		return
@@ -352,7 +352,7 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Validate Contract Thresholds
-	err = validateConractThreshold(*payload.Strategies)
+	err = validateContractThreshold(*payload.Strategies)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, err.Error())
 		return
@@ -365,17 +365,6 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondWithJSON(w, http.StatusOK, c)
-}
-
-func validateConractThreshold(s []models.Strategy) error {
-	for _, s := range s {
-		if s.Threshold != nil {
-			if *s.Threshold < 1 {
-				return errors.New("Contract Threshold Cannot Be < 1.")
-			}
-		}
-	}
-	return nil
 }
 
 // Voting Strategies
