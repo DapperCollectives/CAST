@@ -55,5 +55,6 @@ export default function useCommunityProposals({
     error,
     fetchNextPage,
     queryKey: queryUniqueKey,
+    pages: data?.pages ?? [],
   };
 }
