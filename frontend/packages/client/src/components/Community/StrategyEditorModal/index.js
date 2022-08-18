@@ -1,6 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import { ActionButton } from 'components';
-import { isValidAddress } from 'utils';
+import React, { useState } from 'react';
 import networks from 'networks';
 import StrategyInformationForm from './StrategyInformationForm';
 import StrategySelector from './StrategySelector';
@@ -26,27 +24,6 @@ const getFormFields = (strategy) => {
   return formFields;
 };
 
-const getRequiredFields = (strategy) => {
-  const requiredFields = {
-    addr: (addr) => addr?.trim().length > 0 && isValidAddress(addr),
-    name: (name) => name?.trim().length > 0 && name?.trim().length <= 150,
-    publicPath: (path) => path?.trim().length > 0 && path?.trim().length <= 150,
-    maxWeight: (maxWeight) =>
-      maxWeight?.trim().length > 0 && /^[0-9]+$/.test(maxWeight),
-    threshold: (threshold) =>
-      threshold?.trim().length >= 1 &&
-      threshold >= 1 &&
-      /^[0-9]+$/.test(threshold),
-  };
-
-  if (strategy === 'float-nfts') {
-    requiredFields.floatEventId = (floatEventId) =>
-      floatEventId?.trim().length > 0 && /^[0-9]+$/.test(floatEventId);
-  }
-
-  return requiredFields;
-};
-
 export default function StrategyEditorModal({
   strategies = [],
   enableDismiss = true,
@@ -58,22 +35,11 @@ export default function StrategyEditorModal({
   // 1 - strategy name
   // 2 - contract strategy info
   const [step, setSep] = useState(ModalSteps[1]);
-  const [formIsValid, setIsFormValid] = useState(false);
 
   const [strategyData, setStrategyData] = useState({
     name: '',
     contract: {},
   });
-
-  // this useEffect validates form on second step
-  useEffect(() => {
-    const requiredFields = getRequiredFields(strategyData.name);
-
-    const isValid = Object.keys(requiredFields).every((field) =>
-      requiredFields[field](strategyData.contract[field])
-    );
-    setIsFormValid(isValid);
-  }, [strategyData]);
 
   const setStrategy = (strategyName) => {
     //
@@ -107,19 +73,9 @@ export default function StrategyEditorModal({
     onDismiss();
   };
 
-  const onConfirmDone = () => {
-    onDone(strategyData);
+  const onConfirmDone = (data) => {
+    onDone({ ...strategyData, contract: data });
   };
-
-  const setContractInfoField = (field) => (value) =>
-    setStrategyData((state) => ({
-      ...state,
-      contract: {
-        ...state.contract,
-        [field]: value,
-      },
-    }));
-
   const strategyName =
     strategyData?.name &&
     strategies.find((s) => s.key === strategyData.name).name;
@@ -127,7 +83,7 @@ export default function StrategyEditorModal({
   return (
     <div
       className="modal-card has-background-white m-0 p-5 p-1-mobile full-height"
-      style={{ minHeight: '467px' }}
+      style={{ minHeight: '540px' }}
     >
       <header
         className="modal-card-head has-background-white columns is-mobile m-0 px-4 pt-4"
@@ -163,17 +119,9 @@ export default function StrategyEditorModal({
         )}
         {step === ModalSteps[2] && (
           <StrategyInformationForm
-            setField={setContractInfoField}
             formData={strategyData.contract}
             formFields={Object.keys(getFormFields(strategyData.name))}
-            actionButton={
-              <ActionButton
-                label="done"
-                enabled={formIsValid}
-                onClick={onConfirmDone}
-                classNames="mt-5 has-button-border-hover"
-              />
-            }
+            onSubmit={onConfirmDone}
           />
         )}
       </section>

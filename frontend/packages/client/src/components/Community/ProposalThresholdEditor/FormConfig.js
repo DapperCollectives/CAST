@@ -38,6 +38,7 @@ const Schema = (isValidFlowAddress) =>
       }),
     contractName: yup
       .string()
+      .trim()
       .makeOtherFieldsRequired(
         'Please enter a contract name if other fields are not empty'
       )
@@ -48,6 +49,7 @@ const Schema = (isValidFlowAddress) =>
       }),
     storagePath: yup
       .string()
+      .trim()
       .makeOtherFieldsRequired(
         'Please enter a storage path if other fields are not empty'
       )
@@ -58,6 +60,7 @@ const Schema = (isValidFlowAddress) =>
       }),
     proposalThreshold: yup
       .string()
+      .trim()
       .makeOtherFieldsRequired(
         'Please enter a proposal threshold if other fields are not empty'
       )

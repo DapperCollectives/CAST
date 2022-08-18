@@ -1,91 +1,28 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
-import { Loader, WrapperResponsive } from 'components';
+import { Form, WrapperResponsive } from 'components';
 import { Upload } from 'components/Svg';
-import {
-  COMMUNITY_DESCRIPTION_MAX_LENGTH,
-  COMMUNITY_NAME_MAX_LENGTH,
-  MAX_AVATAR_FILE_SIZE,
-  MAX_FILE_SIZE,
-} from 'const';
-import { getReducedImg, validateLength } from 'utils';
+import { MAX_AVATAR_FILE_SIZE, MAX_FILE_SIZE } from 'const';
+import { getReducedImg } from 'utils';
 import classnames from 'classnames';
+import FormFields from './FormFields';
 
-function CommunityEditorProfile({
-  name,
-  body = '',
-  logo,
-  banner,
-  // fn to update community payload
-  updateCommunity,
-  // fn to upload image
-  uploadFile,
+export default function ProfileForm({
+  submitComponent,
+  register,
+  errors,
+  isSubmitting,
+  removeInnerForm = false,
+  setValue,
+  control,
+  handleSubmit = () => {},
+  logoImage,
+  isUpdatingLogo = false,
+  bannerImage,
+  isUpdatingBanner = false,
 } = {}) {
-  const [communityName, setCommunityName] = useState(name);
-  const [communityDescription, setCommunityDescription] = useState(body);
-  const [isUpdating, setIsUpdating] = useState('');
-  const [isUpdatingImage, setIsUpdatingImage] = useState(false);
-  const [isUpdatingBanner, setIsUpdatingBanner] = useState(false);
-  const [enableSave, setEnableSave] = useState(false);
-  const [image, setImage] = useState({ imageUrl: logo });
-  const [bannerImage, setBannerImage] = useState({ imageUrl: banner });
   const { notifyError } = useErrorHandlerContext();
-
-  useEffect(() => {
-    if (
-      (communityName !== name &&
-        communityName.length > 0 &&
-        validateLength(communityName, COMMUNITY_NAME_MAX_LENGTH)) ||
-      communityDescription !== body ||
-      image.file ||
-      bannerImage.file
-    ) {
-      setEnableSave(true);
-    }
-    if (
-      communityName.trim().length === 0 ||
-      (communityName === name &&
-        communityDescription === body &&
-        image.file === undefined &&
-        bannerImage.file === undefined) ||
-      !validateLength(communityName, COMMUNITY_NAME_MAX_LENGTH) ||
-      !validateLength(communityDescription, COMMUNITY_DESCRIPTION_MAX_LENGTH)
-    ) {
-      setEnableSave(false);
-    }
-  }, [name, body, communityName, communityDescription, image, bannerImage]);
-
-  const saveData = async () => {
-    setIsUpdating(true);
-    // upload images if any
-    let newImageUrl;
-    let newBannerImageUrl;
-    if (image.file) {
-      setIsUpdatingImage(true);
-      newImageUrl = await uploadFile(image.file);
-    }
-    if (bannerImage.file) {
-      setIsUpdatingBanner(true);
-      newBannerImageUrl = await uploadFile(bannerImage.file);
-    }
-    const updates = {
-      ...(communityName !== name ? { name: communityName.trim() } : undefined),
-      ...(communityDescription !== body
-        ? { body: communityDescription.trim() }
-        : undefined),
-      ...(newImageUrl?.fileUrl ? { logo: newImageUrl.fileUrl } : undefined),
-      ...(newBannerImageUrl?.fileUrl
-        ? { bannerImgUrl: newBannerImageUrl.fileUrl }
-        : undefined),
-    };
-    // updated fields
-    if (Object.keys(updates).length > 0) await updateCommunity(updates);
-    setIsUpdating(false);
-    setIsUpdatingImage(false);
-    setIsUpdatingBanner(false);
-    setEnableSave(false);
-  };
 
   const onDrop = useCallback(
     (filename, dataKey, maxFileSize, maxWidth) => (acceptedFiles) => {
@@ -95,13 +32,13 @@ function CommunityEditorProfile({
           !['image/png', 'image/jpeg', 'image/jpg'].includes(imageFile.type)
         ) {
           notifyError({
-            status: 'Image Type not supported',
+            status: 'Image type not supported',
             statusText: 'Please upload a .png or .jpeg file type extension',
           });
           return;
         }
         // validate size
-        if (imageFile.size > MAX_AVATAR_FILE_SIZE) {
+        if (imageFile.size > maxFileSize) {
           const sizeLimit =
             maxFileSize === MAX_AVATAR_FILE_SIZE ? '2MB' : '5MB';
           notifyError({
@@ -111,28 +48,33 @@ function CommunityEditorProfile({
           return;
         }
         const imageAsURL = URL.createObjectURL(imageFile);
-        const setters = {
-          logo: setImage,
-          banner: setBannerImage,
-        };
+
         const img = new Image();
         img.onload = function (e) {
           // reduce images if necessary before upload
           if (e.target.width > maxWidth) {
             getReducedImg(e.target, maxWidth, filename).then((result) => {
-              setters[dataKey]({
-                imageUrl: imageAsURL,
-                file: result.imageFile,
-              });
+              setValue(
+                dataKey,
+                {
+                  imageUrl: imageAsURL,
+                  file: result.imageFile,
+                },
+                { shouldValidate: true, shouldDirty: true }
+              );
             });
           } else {
-            setters[dataKey]({ imageUrl: imageAsURL, file: imageFile });
+            setValue(
+              dataKey,
+              { imageUrl: imageAsURL, file: imageFile },
+              { shouldValidate: true, shouldDirty: true }
+            );
           }
         };
         img.src = imageAsURL;
       });
     },
-    [setImage, setBannerImage, notifyError]
+    [setValue, notifyError]
   );
 
   const { getRootProps: getLogoRootProps, getInputProps: getLogoInputProps } =
@@ -154,18 +96,10 @@ function CommunityEditorProfile({
   const imageDropClasses = classnames(
     'is-flex is-flex-direction-column is-align-items-center is-justify-content-center cursor-pointer rounded-lg',
     {
-      'border-dashed-dark': !bannerImage.file && !bannerImage.imageUrl,
+      'border-dashed-dark': !bannerImage?.file && !bannerImage?.imageUrl,
     }
   );
 
-  const showNameInputError = !validateLength(
-    communityName ?? '',
-    COMMUNITY_NAME_MAX_LENGTH
-  );
-  const showDescriptionInputError = !validateLength(
-    communityDescription ?? '',
-    COMMUNITY_DESCRIPTION_MAX_LENGTH
-  );
   return (
     <WrapperResponsive
       classNames="border-light rounded-lg columns is-flex-direction-column is-mobile m-0"
@@ -199,24 +133,24 @@ function CommunityEditorProfile({
               width: '90px',
               overflow: 'hidden',
               position: 'relative',
-              ...(!image?.imageUrl
+              ...(!logoImage?.imageUrl
                 ? { border: '2px dashed #757575' }
                 : undefined),
             }}
             {...getLogoRootProps()}
           >
-            {!isUpdatingImage && !image?.imageUrl && !image?.file && (
+            {!isUpdatingLogo && !logoImage?.imageUrl && !logoImage?.file && (
               <>
                 <Upload />
                 <span className="smaller-text">Avatar</span>
                 <input {...getLogoInputProps()} />
               </>
             )}
-            {image?.imageUrl && (
+            {logoImage?.imageUrl && (
               <div
                 className="is-flex flex-1 is-flex-direction-column is-align-items-center is-justify-content-center"
                 style={{
-                  backgroundImage: `url(${image.imageUrl})`,
+                  backgroundImage: `url(${logoImage.imageUrl})`,
                   backgroundRepeat: 'no-repeat',
                   backgroundSize: 'cover',
                   width: '100%',
@@ -224,7 +158,7 @@ function CommunityEditorProfile({
                 }}
               />
             )}
-            {!isUpdatingImage && (image?.imageUrl || image?.file) && (
+            {!isUpdatingLogo && (logoImage?.imageUrl || logoImage?.file) && (
               <div
                 className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center"
                 style={{
@@ -239,7 +173,7 @@ function CommunityEditorProfile({
                 <input {...getLogoInputProps()} />
               </div>
             )}
-            {isUpdatingImage && (
+            {isUpdatingLogo && (
               <div
                 className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center"
                 style={{
@@ -282,7 +216,7 @@ function CommunityEditorProfile({
                 }}
               />
             )}
-            {!isUpdatingBanner && (bannerImage.imageUrl || bannerImage.file) && (
+            {!isUpdatingBanner && (bannerImage?.imageUrl || bannerImage?.file) && (
               <div
                 className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center"
                 style={{
@@ -311,51 +245,19 @@ function CommunityEditorProfile({
           </div>
         </div>
       </div>
-      <input
-        type="text"
-        name="community_name"
-        className="rounded-sm border-light p-3 column is-full mt-2"
-        value={communityName}
-        onChange={(event) => setCommunityName(event.target.value)}
-        disabled={isUpdating}
-      />
-      {showNameInputError && (
-        <div className="pl-1 mt-2 transition-all">
-          <p className="smaller-text has-text-red">
-            The maximum length for Community Name is 50 characters
-          </p>
-        </div>
-      )}
-      <textarea
-        className="text-area rounded-sm border-light p-3 column is-full mt-5"
-        type="text"
-        value={communityDescription}
-        placeholder="Short Description"
-        name="community_details"
-        rows="3"
-        cols="30"
-        onChange={(event) => setCommunityDescription(event.target.value)}
-        disabled={isUpdating}
-      />
-      {showDescriptionInputError && (
-        <div className="pl-1 mt-2 transition-all">
-          <p className="smaller-text has-text-red">
-            The maximum length for Community Description is 1000 characters
-          </p>
-        </div>
-      )}
-      <button
-        style={{ height: 48, width: '100%' }}
-        className={`button vote-button transition-all is-flex has-background-yellow rounded-sm mt-5 is-uppercase is-${
-          enableSave && !isUpdating ? 'enabled' : 'disabled'
-        }`}
-        onClick={!enableSave ? () => {} : saveData}
+      <Form
+        methods={{ register }}
+        removeInnerForm={removeInnerForm}
+        onSubmit={handleSubmit}
       >
-        {!isUpdating && <>Save</>}
-        {isUpdating && <Loader size={18} spacing="mx-button-loader" />}
-      </button>
+        <FormFields
+          register={register}
+          isSubmitting={isSubmitting}
+          errors={errors}
+          control={control}
+        />
+        {submitComponent}
+      </Form>
     </WrapperResponsive>
   );
 }
-
-export default CommunityEditorProfile;
