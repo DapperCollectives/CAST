@@ -4,7 +4,11 @@ import * as yup from 'yup';
 const getSchema = (formFields, isValidFlowAddress) => {
   const includeEvent = formFields.includes('floatEventId');
   return yup.object().shape({
-    addr: addressValidation(yup.string(), isValidFlowAddress, false),
+    addr: addressValidation(
+      yup.string().required('Please enter a contract address'),
+      isValidFlowAddress,
+      false
+    ),
     name: yup
       .string()
       .max(150, 'The maximum length for contract name is 150 characters')
@@ -15,10 +19,12 @@ const getSchema = (formFields, isValidFlowAddress) => {
       .required('Please enter a storage path'),
     maxWeight: yup
       .string()
-      .matches(/(^[0-9]+$)/, 'Proposal threshold must be a number'),
+      .required('Please enter a max weight number')
+      .matches(/(^[0-9]+$)/, 'Proposal max weight must be a number'),
     threshold: yup
       .string()
-      .matches(/(^[0-9]+$)/, 'Proposal threshold must be a number'),
+      .required('Please enter a minimun balance number')
+      .matches(/(^[0-9]+$)/, 'Proposal minimun balance be a number'),
     ...(includeEvent
       ? {
           floatEventId: yup
