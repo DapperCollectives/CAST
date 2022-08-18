@@ -105,7 +105,7 @@ export default function ProposalCreatePage() {
       communityId,
     };
 
-    await createProposal(injectedProvider, proposalData);
+    await createProposal(proposalData);
     plausible('Proposal Created');
   };
 

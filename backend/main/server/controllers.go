@@ -251,7 +251,6 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 			payload.Voucher,
 			p.Community_id,
 			"author"); err != nil {
-			log.Error().Err(err)
 			respondWithError(w, http.StatusForbidden, err.Error())
 			return
 		}
@@ -262,7 +261,6 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 			payload.Composite_signatures,
 			p.Community_id,
 			"author"); err != nil {
-			log.Error().Err(err)
 			respondWithError(w, http.StatusForbidden, err.Error())
 			return
 		}

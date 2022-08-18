@@ -16,7 +16,7 @@ export default function useProposal() {
   const { user, signMessageByWalletProvider } = useWebContext();
 
   const createProposal = useCallback(
-    async (injectedProvider, data) => {
+    async (data) => {
       dispatch({ type: 'PROCESSING' });
       const { communityId, ...proposalData } = data;
       const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}/proposals`;
@@ -74,7 +74,6 @@ export default function useProposal() {
     voteData,
     walletProviderId
   ) => {
-    console.log('walletProvider', walletProviderId);
     switch (walletProviderId) {
       case 'dapper#authn':
         return voteOnProposalWithTxSig(injectedProvider, proposal, voteData);

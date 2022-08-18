@@ -9,7 +9,7 @@ export default function useJoinCommunity() {
   const { signMessageByWalletProvider } = useWebContext();
 
   const { mutateAsync: createCommunityUserMutation } = useMutation(
-    async ({ communityId, user, injectedProvider }) => {
+    async ({ communityId, user }) => {
       const { addr } = user;
       const timestamp = Date.now().toString();
       const hexTime = Buffer.from(timestamp).toString('hex');
@@ -64,7 +64,7 @@ export default function useJoinCommunity() {
   );
 
   const { mutateAsync: deleteUserFromCommunityMutation } = useMutation(
-    async ({ communityId, user, injectedProvider }) => {
+    async ({ communityId, user }) => {
       const { addr } = user;
       const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}/users/${addr}/member`;
       const timestamp = Date.now().toString();

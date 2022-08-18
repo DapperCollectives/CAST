@@ -111,6 +111,17 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
             icon: '/images/blocto.png',
           },
         },
+        {
+          f_type: 'Service',
+          f_vsn: '1.0.0',
+          type: 'authn',
+          method: 'POP/RPC',
+          uid: 'dapper#authn',
+          provider: {
+            name: 'Blocto',
+            icon: '/images/dapper.svg',
+          },
+        },
       ]);
     }
   }, []);
