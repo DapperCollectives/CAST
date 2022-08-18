@@ -1,7 +1,8 @@
 import { useEffect, useMemo } from 'react';
 import { useWebContext } from 'contexts/Web3';
-import { checkResponse, debounce } from 'utils';
+import { debounce } from 'utils';
 import { useQueries } from '@tanstack/react-query';
+import { fetchProposalUserVotes } from 'api/proposals';
 import assign from 'lodash/assign';
 import { PAGINATION_INITIAL_STATE } from '../reducers';
 import useCommunityProposals from './useCommunityProposals';
@@ -34,12 +35,7 @@ export default function useCommunityProposalsWithVotes({
       return {
         queryKey: ['user-votes', addr, proposalIds],
         queryFn: async () => {
-          const response = await fetch(
-            `${
-              process.env.REACT_APP_BACK_END_SERVER_API
-            }/votes/${addr}?proposalIds=[${proposalIds.join(',')}]`
-          );
-          const userVotes = await checkResponse(response);
+          const userVotes = await fetchProposalUserVotes(addr, proposalIds);
           const mergedMapResults = assign(
             {},
             ...proposalIds.map((id) => ({ [id]: null })),
