@@ -1,10 +1,10 @@
-import { addresValidation } from 'components/Community/CommunityEditorDetails';
+import { addressValidation } from 'components/Community/CommunityEditorDetails';
 import * as yup from 'yup';
 
 const getSchema = (formFields, isValidFlowAddress) => {
   const includeEvent = formFields.includes('floatEventId');
   return yup.object().shape({
-    addr: addresValidation(yup.string(), isValidFlowAddress, false),
+    addr: addressValidation(yup.string(), isValidFlowAddress, false),
     name: yup
       .string()
       .max(150, 'The maximum length for contract name is 150 characters')
