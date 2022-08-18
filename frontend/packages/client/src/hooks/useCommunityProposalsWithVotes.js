@@ -1,9 +1,10 @@
 import { useEffect, useMemo } from 'react';
 import { useWebContext } from 'contexts/Web3';
-import { debounce } from 'utils';
+import { checkResponse, debounce } from 'utils';
+import { useQueries } from '@tanstack/react-query';
+import assign from 'lodash/assign';
 import { PAGINATION_INITIAL_STATE } from '../reducers';
 import useCommunityProposals from './useCommunityProposals';
-import useVotesForAddress from './useVotesForAddress';
 
 export default function useCommunityProposalsWithVotes({
   communityId,
@@ -12,38 +13,70 @@ export default function useCommunityProposalsWithVotes({
   status,
   scrollToFetchMore = true,
 } = {}) {
-  const { data, isLoading, fetchNextPage, pagination } = useCommunityProposals({
-    communityId,
-    start,
-    count,
-    status,
-  });
+  const { data, isLoading, fetchNextPage, pagination, pages } =
+    useCommunityProposals({
+      communityId,
+      start,
+      count,
+      status,
+    });
 
-  console.log(data);
   const {
     user: { addr },
   } = useWebContext();
-  const {
-    getVotesForAddress,
-    data: votesForAddressData,
-    loading: isLoadingVotes,
-  } = useVotesForAddress();
-  const votesFromAddress = votesForAddressData?.[addr];
 
-  // useEffect(() => {
-  //   async function getVotes() {
-  //     // get only if voted for the ones that are not completed
-  //     getVotesForAddress(
-  //       data
-  //         .filter((datum) => datum.voted === undefined)
-  //         .map((datum) => datum.id),
-  //       addr
-  //     );
-  //   }
-  //   if (addr && !isLoading && Array.isArray(data) && !isLoadingVotes) {
-  //     getVotes();
-  //   }
-  // }, [addr, data, isLoading, getVotesForAddress, isLoadingVotes]);
+  // using https://tanstack.com/query/v4/docs/guides/parallel-queries#dynamic-parallel-queries-with-usequeries
+  // this enables fetching user votes per page on proposal list for a group of proposals
+  const userVotesQueries = useQueries({
+    enabled: pages.length > 0 && addr,
+    queries: pages.map((page) => {
+      const proposalIds = page.data?.map((datum) => datum.id);
+      return {
+        queryKey: ['user-votes', addr, proposalIds],
+        queryFn: async () => {
+          const response = await fetch(
+            `${
+              process.env.REACT_APP_BACK_END_SERVER_API
+            }/votes/${addr}?proposalIds=[${proposalIds.join(',')}]`
+          );
+          const userVotes = await checkResponse(response);
+          const mergedMapResults = assign(
+            {},
+            ...proposalIds.map((id) => ({ [id]: null })),
+            ...(userVotes?.data ?? []).map(({ proposalId, choice }) => ({
+              [proposalId]: choice,
+            }))
+          );
+
+          return mergedMapResults;
+        },
+        onError: () => {
+          console.error('Error while trying to fetch user votes');
+        },
+      };
+    }),
+  });
+
+  const mergedData = useMemo(() => {
+    if (data) {
+      const mapVotes = assign(
+        {},
+        ...(userVotesQueries?.map(({ data, error }) => (error ? [] : data)) ??
+          [])
+      );
+      const mergedData = data.map((datum) => {
+        return {
+          ...datum,
+          // if vote is not in mapVotes:
+          // - it might not be loaded yet or
+          // - user is not connected
+          // either case return false
+          voted: Boolean(mapVotes?.[datum.id]),
+        };
+      });
+      return mergedData;
+    } else return null;
+  }, [data, userVotesQueries]);
 
   const hasMore = pagination.next > 0;
 
@@ -76,27 +109,6 @@ export default function useCommunityProposalsWithVotes({
       scrollToFetchMore &&
       document.removeEventListener('scroll', pullDataFromApi());
   }, [scrollToFetchMore]);
-
-  // merges user votes with list of proposals
-  const mergedData = useMemo(() => {
-    if (data && addr !== null) {
-      const mapVotes = Object.assign({}, ...(votesFromAddress || []));
-      return data.map((datum) => {
-        return {
-          ...datum,
-          voted: datum.voted === undefined ? !!mapVotes[datum.id] : false,
-        };
-      });
-      // user is not logged in
-    } else if (data && addr === null) {
-      return data.map((datum) => {
-        return {
-          ...datum,
-          voted: false,
-        };
-      });
-    } else return null;
-  }, [votesFromAddress, data, addr]);
 
   return {
     data: mergedData,
