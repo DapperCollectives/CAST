@@ -1,7 +1,7 @@
 import React from 'react';
 import FadeIn from 'components/FadeIn';
 
-export default function Input({
+export default function TextArea({
   style = {},
   classNames = '',
   name,
@@ -9,16 +9,19 @@ export default function Input({
   register,
   disabled,
   error,
-  type = 'text',
-} = {}) {
+  rows = '3',
+  cols = '30',
+}) {
   return (
-    <div className="is-flex is-flex-direction-column flex-1">
-      <input
-        type={type}
+    <div>
+      <textarea
         style={{ width: '100%', ...style }}
-        placeholder={placeholder}
+        type="text"
         className={classNames}
+        placeholder={placeholder}
         {...register(name, { disabled })}
+        rows={rows}
+        cols={cols}
       />
       {error && (
         <FadeIn>
