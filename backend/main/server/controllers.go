@@ -321,6 +321,13 @@ func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//Validate Contract Thresholds
+	err = validateContractThreshold(*payload.Strategies)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
 	c, httpStatus, err := helpers.createCommunity(payload)
 	if err != nil {
 		respondWithError(w, httpStatus, err.Error())
@@ -340,6 +347,13 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 	var payload models.UpdateCommunityRequestPayload
 
 	if err := validatePayload(r.Body, &payload); err != nil {
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	//Validate Contract Thresholds
+	err = validateContractThreshold(*payload.Strategies)
+	if err != nil {
 		respondWithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
