@@ -251,19 +251,13 @@ const VoteOptions = ({
 
   const isActive = status === FilterValues.active;
 
-  const { getVotesForAddress, data, loading } = useVotesForAddress();
+  const { data: votesFromAddress } = useVotesForAddress({
+    enabled: Boolean(addr && proposal?.id),
+    proposalIds: [proposal.id],
+    addr,
+  });
 
-  const votesFromAddress = data?.[addr];
   const checkedVotes = Array.isArray(votesFromAddress);
-
-  useEffect(() => {
-    async function getVotes() {
-      getVotesForAddress([proposal.id], addr);
-    }
-    if (addr && !loading && proposal.id && !checkedVotes) {
-      getVotes();
-    }
-  }, [addr, proposal, loading, getVotesForAddress, checkedVotes]);
 
   const hasntVoted =
     !castVote &&
