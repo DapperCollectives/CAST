@@ -12,6 +12,7 @@ import {
  * @param  {int} count page size, used for pagination limiting the number of elements returned. Defaults to 10. Max value is 25.
  * @param  {int} start indicates the start index for paginated results. Defaults to 0.
  */
+// REFACTOR
 export default function useProposalVotes({
   proposalId,
   count = PAGINATION_INITIAL_STATE.count,

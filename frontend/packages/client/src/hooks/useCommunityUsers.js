@@ -14,6 +14,9 @@ import {
  * @param  {int} start indicates the start index for paginated results. Defaults to 0.
  * @param  {int} type optional filter that enables filter user type on fetch .
  */
+
+// REFACTOR
+
 export default function useCommunityUsers({
   communityId,
   start = PAGINATION_INITIAL_STATE.start,

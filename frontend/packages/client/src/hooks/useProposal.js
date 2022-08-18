@@ -5,6 +5,8 @@ import { CODE as transferTokensCode } from '@onflow/six-transfer-tokens';
 import * as t from '@onflow/types';
 import { INITIAL_STATE, defaultReducer } from '../reducers';
 
+// REFACTOR
+
 export default function useProposal() {
   const [state, dispatch] = useReducer(defaultReducer, {
     ...INITIAL_STATE,

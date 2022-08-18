@@ -3,6 +3,8 @@ import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { checkResponse } from 'utils';
 import { INITIAL_STATE, defaultReducer } from '../reducers';
 
+// REFACTOR
+
 export default function useFileUploader({ useModalNotifications = true } = {}) {
   const [state, dispatch] = useReducer(defaultReducer, {
     ...INITIAL_STATE,
