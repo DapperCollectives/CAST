@@ -66,6 +66,19 @@ func TestCreateCommunity(t *testing.T) {
 	assert.NotNil(t, community.ID)
 }
 
+func TestCreateCommunityFail(t *testing.T) {
+	// Prep
+	clearTable("communities")
+	clearTable("community_users")
+
+	// Create Community
+	communityStruct := otu.GenerateFailCommunityStruct("account")
+	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
+
+	response := otu.CreateCommunityAPI(communityPayload)
+	checkResponseCode(t, http.StatusBadRequest, response.Code)
+}
+
 func TestCommunityAdminRoles(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")
@@ -158,7 +171,7 @@ func TestGetCommunityActiveStrategies(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")
 	clearTable("proposals")
-	
+
 	communityId := otu.AddCommunitiesWithUsers(1, "user1")[0]
 
 	proposalStruct := otu.GenerateProposalStruct("user1", communityId)
