@@ -68,7 +68,7 @@ export default function useCommunity({
             hexTime
           );
 
-        if (!compositeSignatures & !voucher) {
+        if (!compositeSignatures && !voucher) {
           const statusText = 'No valid user signature found.';
           // modal error will open
           notifyError(
