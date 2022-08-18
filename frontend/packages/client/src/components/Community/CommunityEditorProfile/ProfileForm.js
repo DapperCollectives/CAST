@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { Form, WrapperResponsive } from 'components';
@@ -13,7 +13,7 @@ export default function ProfileForm({
   register,
   errors,
   isSubmitting,
-  removeInnerForm,
+  removeInnerForm = false,
   setValue,
   control,
   handleSubmit = () => {},
@@ -98,15 +98,6 @@ export default function ProfileForm({
     {
       'border-dashed-dark': !bannerImage?.file && !bannerImage?.imageUrl,
     }
-  );
-
-  const formFieldsComponent = (
-    <FormFields
-      register={register}
-      isSubmitting={isSubmitting}
-      errors={errors}
-      control={control}
-    />
   );
 
   return (
@@ -254,14 +245,19 @@ export default function ProfileForm({
           </div>
         </div>
       </div>
-      {removeInnerForm ? (
-        <>{formFieldsComponent}</>
-      ) : (
-        <Form methods={{ register }} handleSubmit={handleSubmit}>
-          {formFieldsComponent}
-          {submitComponent}
-        </Form>
-      )}
+      <Form
+        methods={{ register }}
+        removeInnerForm={removeInnerForm}
+        onSubmit={handleSubmit}
+      >
+        <FormFields
+          register={register}
+          isSubmitting={isSubmitting}
+          errors={errors}
+          control={control}
+        />
+        {submitComponent}
+      </Form>
     </WrapperResponsive>
   );
 }
