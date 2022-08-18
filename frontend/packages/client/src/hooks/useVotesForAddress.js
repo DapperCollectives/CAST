@@ -1,41 +1,40 @@
-import { useCallback, useReducer } from 'react';
+import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { checkResponse } from 'utils';
-import { INITIAL_STATE, defaultReducer } from '../reducers';
+import { useQuery } from '@tanstack/react-query';
 
-export default function useVotesForAddress() {
-  const [state, dispatch] = useReducer(defaultReducer, {
-    ...INITIAL_STATE,
-    loading: false,
-  });
+export default function useVotesForAddress({
+  proposalIds,
+  addr,
+  enabled = true,
+} = {}) {
+  const { notifyError } = useErrorHandlerContext();
+  const { isLoading, isError, data, error } = useQuery(
+    ['user-votes', addr, proposalIds],
+    async () => {
+      const response = await fetch(
+        `${
+          process.env.REACT_APP_BACK_END_SERVER_API
+        }/votes/${addr}?proposalIds=[${proposalIds.join(',')}]`
+      );
 
-  const getVotesForAddress = useCallback(
-    async (proposalIds, addr) => {
-      dispatch({ type: 'PROCESSING' });
-      try {
-        const response = await fetch(
-          `${
-            process.env.REACT_APP_BACK_END_SERVER_API
-          }/votes/${addr}?proposalIds=[${proposalIds.join(',')}]`
-        );
-        const userVotes = await checkResponse(response);
+      const userVotes = await checkResponse(response);
 
-        dispatch({
-          type: 'SUCCESS',
-          payload: {
-            [addr]: (userVotes?.data ?? []).map(({ proposalId, choice }) => ({
-              [proposalId]: choice,
-            })),
-          },
-        });
-      } catch (err) {
-        dispatch({ type: 'ERROR', payload: { errorData: err.message } });
-      }
+      return (userVotes?.data ?? []).map(({ proposalId, choice }) => ({
+        [proposalId]: choice,
+      }));
     },
-    [dispatch]
+    {
+      enabled,
+      onError: (error) => {
+        notifyError(error);
+      },
+    }
   );
 
   return {
-    ...state,
-    getVotesForAddress,
+    isLoading,
+    isError,
+    error,
+    data: data ?? [],
   };
 }
