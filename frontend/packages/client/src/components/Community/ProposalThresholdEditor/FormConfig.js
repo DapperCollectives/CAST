@@ -1,4 +1,4 @@
-import { addresValidation } from 'components/Community/CommunityEditorDetails';
+import { addressValidation } from 'components/Community/CommunityEditorDetails';
 import omit from 'lodash/omit';
 import values from 'lodash/values';
 import * as yup from 'yup';
@@ -29,11 +29,16 @@ const Schema = (isValidFlowAddress) =>
       )
       .when('onlyAuthorsToSubmitProposals', {
         is: true,
-        then: addresValidation(yup.string(), isValidFlowAddress, true),
-        otherwise: addresValidation(yup.string(), isValidFlowAddress, false),
+        then: addressValidation(yup.string(), isValidFlowAddress, true),
+        otherwise: addressValidation(
+          yup.string().required('Please enter a contract address'),
+          isValidFlowAddress,
+          false
+        ),
       }),
     contractName: yup
       .string()
+      .trim()
       .makeOtherFieldsRequired(
         'Please enter a contract name if other fields are not empty'
       )
@@ -44,6 +49,7 @@ const Schema = (isValidFlowAddress) =>
       }),
     storagePath: yup
       .string()
+      .trim()
       .makeOtherFieldsRequired(
         'Please enter a storage path if other fields are not empty'
       )
@@ -54,6 +60,7 @@ const Schema = (isValidFlowAddress) =>
       }),
     proposalThreshold: yup
       .string()
+      .trim()
       .makeOtherFieldsRequired(
         'Please enter a proposal threshold if other fields are not empty'
       )

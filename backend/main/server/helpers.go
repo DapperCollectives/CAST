@@ -917,11 +917,10 @@ func (h *Helpers) processTokenThreshold(address string, s models.Strategy) (bool
 	var scriptPath string
 	stratName := *s.Name
 
-	if stratName == "balance-of-nfts" {
+	if models.IsNFTStrategy(stratName) {
 		scriptPath = "./main/cadence/scripts/get_nfts_ids.cdc"
 	} else {
 		scriptPath = "./main/cadence/scripts/get_balance.cdc"
-
 	}
 
 	hasBalance, err := h.A.FlowAdapter.EnforceTokenThreshold(scriptPath, address, &s.Contract)
@@ -949,4 +948,15 @@ func (h *Helpers) pinJSONToIpfs(data interface{}) (*string, error) {
 		return nil, err
 	}
 	return &pin.IpfsHash, nil
+}
+
+func validateContractThreshold(s []models.Strategy) error {
+	for _, s := range s {
+		if s.Threshold != nil {
+			if *s.Threshold < 1 {
+				return errors.New("Contract Threshold Cannot Be < 1.")
+			}
+		}
+	}
+	return nil
 }
