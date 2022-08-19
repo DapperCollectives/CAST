@@ -27,6 +27,7 @@ type Vote struct {
 	Cid                  *string                 `json:"cid"`
 	Message              string                  `json:"message"`
 	Voucher              *shared.Voucher         `json:"voucher,omitempty"`
+	IsCancelled          bool                    `json:"isCancelled"`
 }
 
 type VoteWithBalance struct {
@@ -56,7 +57,8 @@ type VotingStreak struct {
 }
 
 const (
-	timestampExpiry = 60
+	timestampExpiry     = 60
+	defaultStreakLength = 3
 )
 
 const (
@@ -71,12 +73,13 @@ const (
 
 func GetVotesForAddress(
 	db *s.Database,
-	start, count int,
 	address string,
 	proposalIds *[]int,
+	pageParams shared.PageParams,
 ) ([]*VoteWithBalance, int, error) {
 	var votes []*VoteWithBalance
 	var err error
+
 	sql := `select v.*, 
 		b.primary_account_balance,
 		b.secondary_account_balance,
@@ -84,17 +87,17 @@ func GetVotesForAddress(
 		from votes v
 		left join balances b on b.addr = v.addr
 		WHERE v.addr = $3`
+
 	// Conditionally add proposal_id condition
 	if len(*proposalIds) > 0 {
 		sql = sql + " AND proposal_id = ANY($4)"
 		sql = sql + "LIMIT $1 OFFSET $2 "
 		err = pgxscan.Select(db.Context, db.Conn, &votes,
-			sql, count, start, address, *proposalIds)
+			sql, pageParams.Count, pageParams.Start, address, *proposalIds)
 	} else {
 		sql = sql + "LIMIT $1 OFFSET $2 "
 		err = pgxscan.Select(db.Context, db.Conn, &votes,
-
-			sql, count, start, address)
+			sql, pageParams.Count, pageParams.Start, address)
 	}
 
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
@@ -134,7 +137,7 @@ func GetAllVotesForProposal(db *s.Database, proposalId int, strategy string) ([]
 		return []*VoteWithBalance{}, nil
 	}
 
-	if strategy == "balance-of-nfts" {
+	if IsNFTStrategy(strategy) {
 		votesWithNFTs, err := getUsersNFTs(db, votes)
 		if err != nil {
 			return nil, err
@@ -145,10 +148,16 @@ func GetAllVotesForProposal(db *s.Database, proposalId int, strategy string) ([]
 	return votes, nil
 }
 
-func GetVotesForProposal(db *s.Database, start, count int, order string, proposalId int, strategy string) ([]*VoteWithBalance, int, error) {
+func GetVotesForProposal(
+	db *s.Database,
+	proposalId int,
+	strategy string,
+	pageParams shared.PageParams,
+) ([]*VoteWithBalance, int, error) {
 	var votes []*VoteWithBalance
 	var orderBySql string
-	if order == "desc" {
+
+	if pageParams.Order == "desc" {
 		orderBySql = "ORDER BY b.created_at DESC"
 	} else {
 		orderBySql = "ORDER BY b.created_at ASC"
@@ -168,7 +177,15 @@ func GetVotesForProposal(db *s.Database, start, count int, order string, proposa
 	sql = sql + " " + orderBySql
 	sql = sql + " LIMIT $1 OFFSET $2"
 
-	err := pgxscan.Select(db.Context, db.Conn, &votes, sql, count, start, proposalId)
+	err := pgxscan.Select(
+		db.Context,
+		db.Conn,
+		&votes,
+		sql,
+		pageParams.Count,
+		pageParams.Start,
+		proposalId,
+	)
 
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		log.Error().Err(err).Msg("Error querying votes for proposal")
@@ -177,7 +194,7 @@ func GetVotesForProposal(db *s.Database, start, count int, order string, proposa
 		return []*VoteWithBalance{}, 0, nil
 	}
 
-	if strategy == "balance-of-nfts" {
+	if IsNFTStrategy(strategy) {
 		votes, err = getUsersNFTs(db, votes)
 		if err != nil {
 			log.Error().Err(err).Msg("Error getting user NFTs")
@@ -513,7 +530,7 @@ func addDefaultStreak(db *s.Database, addr string, communityId int, proposals []
 }
 
 func addOrUpdateStreak(db *s.Database, addr string, communityId int, proposals []uint64, details string) error {
-	v := new(Vote)
+	var id int
 	// If previous streak exists, then update with new streak details, or insert new streak
 	// e.g. If previous streak = 1,2,3 and current streak = 1,2,3,4 then update row with current streak details
 	previousStreakDetails := fmt.Sprintf("%s:%s:%d:%s", Streak, addr, communityId, strings.Trim(strings.Join(strings.Fields(fmt.Sprint(proposals[:len(proposals)-1])), ","), "[]"))
@@ -524,7 +541,7 @@ func addOrUpdateStreak(db *s.Database, addr string, communityId int, proposals [
 						DO UPDATE SET proposals = $4, details = $6
 						RETURNING id
 					`
-	return db.Conn.QueryRow(db.Context, sql, addr, Streak, communityId, proposals, previousStreakDetails, details).Scan(&v.ID)
+	return db.Conn.QueryRow(db.Context, sql, addr, Streak, communityId, proposals, previousStreakDetails, details).Scan(&id)
 }
 
 func checkErrorIgnoreNoRows(err error) bool {

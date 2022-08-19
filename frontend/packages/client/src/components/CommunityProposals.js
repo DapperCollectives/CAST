@@ -68,7 +68,7 @@ export default function CommunityProposals({ communityId = 1, admins } = {}) {
           </WrapperResponsive>
           {!notMobile && (
             <div className="column p-0 mt-2 pl-2">
-              <Link to={`/proposal/create?communityId=${communityId}`}>
+              <Link to={`/community/${communityId}/proposal/create`}>
                 <div
                   className="button rounded-sm is-uppercase is-flex small-text has-text-white has-background-black"
                   style={{ minHeight: '40px' }}
@@ -83,7 +83,7 @@ export default function CommunityProposals({ communityId = 1, admins } = {}) {
         {notMobile && (
           <div className="columns m-0">
             <div className="column p-0 is-10">
-              <Link to={`/proposal/create?communityId=${communityId}`}>
+              <Link to={`/community/${communityId}/proposal/create`}>
                 <div
                   className="button is-fullwidth rounded-sm is-uppercase is-flex small-text has-text-white has-background-black"
                   style={{ minHeight: '40px' }}

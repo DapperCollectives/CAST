@@ -27,6 +27,7 @@ export const CommunityEditPageTabs = {
   profile: 'profile',
   details: 'details',
   proposalAndVoting: 'proposals-and-voting',
+  votingStrategies: 'voting-strategies',
 };
 
 // Dapper Wallet Txs

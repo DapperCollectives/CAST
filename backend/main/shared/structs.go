@@ -37,7 +37,7 @@ type PaginatedResponse struct {
 	Next         int         `json:"next"`
 }
 
-type OrderedPageParams struct {
+type PageParams struct {
 	Start        int
 	Count        int
 	Order        string
@@ -96,26 +96,30 @@ func (b *FTBalanceResponse) NewFTBalance() {
 		b.PrimaryAccountBalance = 11100000
 		b.SecondaryAccountBalance = 12300000
 		b.StakingBalance = 13500000
+	} else {
+		b.PrimaryAccountBalance = 0
+		b.SecondaryAccountBalance = 0
+		b.StakingBalance = 0
 	}
 }
 
 // Underlying value of payload needs to be a slice
-func GetPaginatedResponseWithPayload(payload interface{}, o OrderedPageParams) *PaginatedResponse {
+func GetPaginatedResponseWithPayload(payload interface{}, p PageParams) *PaginatedResponse {
 	// Tricky way of getting the length of a slice
 	// that is typed as interface{}
 
 	_count := reflect.ValueOf(payload).Len()
 	var next int
-	if o.Start+_count >= o.TotalRecords {
+	if p.Start+_count >= p.TotalRecords {
 		next = -1
 	} else {
-		next = o.Start + _count
+		next = p.Start + _count
 	}
 	response := PaginatedResponse{
 		Data:         payload,
-		Start:        o.Start,
+		Start:        p.Start,
 		Count:        _count,
-		TotalRecords: o.TotalRecords,
+		TotalRecords: p.TotalRecords,
 		Next:         next,
 	}
 

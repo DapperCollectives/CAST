@@ -32,6 +32,9 @@ export default function CommunityCreate() {
   const modalContext = useModalContext();
 
   useEffect(() => {
+    // if (data && data[0]?.id && isBlocking) {
+    //   setIsBlocking(false);
+    // }
     if (data && data[0]?.id) {
       history.push(`/community/${data[0].id}`);
     }
@@ -154,11 +157,14 @@ export default function CommunityCreate() {
   const props = {
     finalLabel: 'Publish',
     onSubmit,
-    isSubmitting: creatingCommunity && !error,
+    isSubmitting: (creatingCommunity || data) && !error,
     submittingMessage: 'Creating community...',
     passNextToComp: true,
     passSubmitToComp: true,
     preStep: <StartSteps />,
+    blockNavigationOut: true && !data,
+    blockNavigationText:
+      'Community creation is not complete yet, are you sure you want to leave?',
     steps: [
       {
         label: 'Community Profile',

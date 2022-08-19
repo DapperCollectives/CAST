@@ -26,60 +26,6 @@ func (h *Helpers) Initialize(app *App) {
 	h.A = app
 }
 
-func (h *Helpers) uploadFile(r *http.Request) (interface{}, error) {
-	file, handler, err := r.FormFile("file")
-	if err != nil {
-		log.Error().Err(err).Msg("FormFile Retrieval Error.")
-		return nil, err
-	}
-	defer file.Close()
-
-	// ensure mime type is allowed
-	mime := handler.Header.Get("Content-Type")
-	if !funk.Contains(allowedFileTypes, mime) {
-		msg := fmt.Sprintf("Uploaded file type of '%s' is not allowed.", mime)
-		log.Error().Msg(msg)
-		return nil, errors.New(msg)
-	}
-
-	pin, err := h.A.IpfsClient.PinFile(file, handler.Filename)
-	if err != nil {
-		log.Error().Err(err).Msg("Error pinning file to IPFS.")
-		return nil, err
-	}
-
-	resp := struct {
-		Cid string `json:"cid"`
-	}{
-		Cid: pin.IpfsHash,
-	}
-
-	return resp, nil
-}
-
-func (h *Helpers) fetchProposal(vars map[string]string, query string) (models.Proposal, error) {
-	proposalId, err := strconv.Atoi(vars[query])
-	if err != nil {
-		msg := fmt.Sprintf("Invalid proposalId: %s", vars["proposalId"])
-		log.Error().Err(err).Msg(msg)
-		return models.Proposal{}, errors.New(msg)
-	}
-
-	p := models.Proposal{ID: proposalId}
-
-	if err := p.GetProposalById(h.A.DB); err != nil {
-		switch err.Error() {
-		case pgx.ErrNoRows.Error():
-			msg := fmt.Sprintf("Proposal with ID %d not found.", proposalId)
-			return models.Proposal{}, errors.New(msg)
-		default:
-			return models.Proposal{}, err
-		}
-	}
-
-	return p, nil
-}
-
 func (h *Helpers) useStrategyTally(
 	p models.Proposal,
 	v []*models.VoteWithBalance,
@@ -130,7 +76,92 @@ func (h *Helpers) useStrategyGetVoteWeight(
 	if err != nil {
 		return 0, err
 	}
+
 	return weight, nil
+}
+
+func (h *Helpers) useStrategyFetchBalance(
+	v models.Vote,
+	p models.Proposal,
+	s Strategy,
+) (models.VoteWithBalance, error) {
+
+	emptyBalance := &models.Balance{
+		Addr:        v.Addr,
+		Proposal_id: p.ID,
+	}
+	if p.Block_height != nil {
+		emptyBalance.BlockHeight = *p.Block_height
+	}
+
+	balance, err := s.FetchBalance(emptyBalance, &p)
+	if err != nil {
+		log.Error().Err(err).Msgf("Error fetching balance for address %v.", v.Addr)
+		return models.VoteWithBalance{}, errors.New("Error fetching balance for address.")
+	}
+
+	vb := models.VoteWithBalance{
+		Vote:                    v,
+		PrimaryAccountBalance:   &balance.PrimaryAccountBalance,
+		SecondaryAccountBalance: &balance.SecondaryAccountBalance,
+		StakingBalance:          &balance.StakingBalance,
+	}
+
+	return vb, nil
+}
+
+func (h *Helpers) fetchProposal(vars map[string]string, query string) (models.Proposal, error) {
+	proposalId, err := strconv.Atoi(vars[query])
+	if err != nil {
+		msg := fmt.Sprintf("Invalid proposalId: %s", vars["proposalId"])
+		log.Error().Err(err).Msg(msg)
+		return models.Proposal{}, errors.New(msg)
+	}
+
+	p := models.Proposal{ID: proposalId}
+
+	if err := p.GetProposalById(h.A.DB); err != nil {
+		switch err.Error() {
+		case pgx.ErrNoRows.Error():
+			msg := fmt.Sprintf("Proposal with ID %d not found.", proposalId)
+			return models.Proposal{}, errors.New(msg)
+		default:
+			return models.Proposal{}, err
+		}
+	}
+
+	return p, nil
+}
+
+func (h *Helpers) uploadFile(r *http.Request) (interface{}, error) {
+	file, handler, err := r.FormFile("file")
+	if err != nil {
+		log.Error().Err(err).Msg("FormFile Retrieval Error.")
+		return nil, err
+	}
+	defer file.Close()
+
+	// ensure mime type is allowed
+	mime := handler.Header.Get("Content-Type")
+	if !funk.Contains(allowedFileTypes, mime) {
+		msg := fmt.Sprintf("Uploaded file type of '%s' is not allowed.", mime)
+		log.Error().Msg(msg)
+		return nil, errors.New(msg)
+	}
+
+	pin, err := h.A.IpfsClient.PinFile(file, handler.Filename)
+	if err != nil {
+		log.Error().Err(err).Msg("Error pinning file to IPFS.")
+		return nil, err
+	}
+
+	resp := struct {
+		Cid string `json:"cid"`
+	}{
+		Cid: pin.IpfsHash,
+	}
+
+	return resp, nil
 }
 
 func (h *Helpers) getPaginatedVotes(
@@ -138,37 +169,25 @@ func (h *Helpers) getPaginatedVotes(
 	p models.Proposal,
 ) (
 	[]*models.VoteWithBalance,
-	shared.OrderedPageParams,
+	shared.PageParams,
 	error,
 ) {
 
-	start, count, order := getOrderedPageParams(
-		r.FormValue("start"),
-		r.FormValue("count"),
-		r.FormValue("order"),
-		25,
-	)
+	pageParams := getPageParams(*r, 25)
 
 	votes, totalRecords, err := models.GetVotesForProposal(
 		h.A.DB,
-		start,
-		count,
-		order,
 		p.ID,
 		*p.Strategy,
+		pageParams,
 	)
 	if err != nil {
-		return nil, shared.OrderedPageParams{}, err
+		return nil, shared.PageParams{}, err
 	}
 
-	ordered := shared.OrderedPageParams{
-		Start:        start,
-		Count:        count,
-		Order:        order,
-		TotalRecords: totalRecords,
-	}
+	pageParams.TotalRecords = totalRecords
 
-	return votes, ordered, nil
+	return votes, pageParams, nil
 }
 
 func (h *Helpers) processVote(addr string, p models.Proposal) (*models.VoteWithBalance, error) {
@@ -202,28 +221,28 @@ func (h *Helpers) fetchVote(addr string, id int) (*models.VoteWithBalance, error
 			return nil, err
 		}
 	}
+
 	return voteWithBalance, nil
 }
 
 func (h *Helpers) processVotes(
 	addr string,
 	ids []int,
-	order shared.OrderedPageParams,
+	pageParams shared.PageParams,
 ) (
 	[]*models.VoteWithBalance,
-	shared.OrderedPageParams,
+	shared.PageParams,
 	error,
 ) {
 	votes, totalRecords, err := models.GetVotesForAddress(
 		h.A.DB,
-		order.Start,
-		order.Count,
 		addr,
 		&ids,
+		pageParams,
 	)
 	if err != nil {
 		log.Error().Err(err).Msg("Error getting votes for address.")
-		return nil, order, err
+		return nil, pageParams, err
 	}
 
 	var votesWithBalances []*models.VoteWithBalance
@@ -235,29 +254,29 @@ func (h *Helpers) processVotes(
 			switch err.Error() {
 			case pgx.ErrNoRows.Error():
 				msg := fmt.Sprintf("Proposal with ID %d not found.", vote.Proposal_id)
-				return nil, order, errors.New(msg)
+				return nil, pageParams, errors.New(msg)
 			default:
-				return nil, order, err
+				return nil, pageParams, err
 			}
 		}
 
 		s := strategyMap[*proposal.Strategy]
 		if s == nil {
-			return nil, order, errors.New("Strategy not found.")
+			return nil, pageParams, errors.New("Strategy not found.")
 		}
 
 		weight, err := s.GetVoteWeightForBalance(vote, &proposal)
 		if err != nil {
-			return nil, order, err
+			return nil, pageParams, err
 		}
 
 		vote.Weight = &weight
 		votesWithBalances = append(votesWithBalances, vote)
 	}
 
-	order.TotalRecords = totalRecords
+	pageParams.TotalRecords = totalRecords
 
-	return votesWithBalances, order, nil
+	return votesWithBalances, pageParams, nil
 }
 
 func (h *Helpers) createVote(r *http.Request, p models.Proposal) (*models.VoteWithBalance, error) {
@@ -295,38 +314,30 @@ func (h *Helpers) createVote(r *http.Request, p models.Proposal) (*models.VoteWi
 		return nil, errors.New("Proposal strategy not found.")
 	}
 
-	emptyBalance := &models.Balance{
-		Addr:        v.Addr,
-		Proposal_id: p.ID,
-	}
-	if p.Block_height != nil {
-		emptyBalance.BlockHeight = *p.Block_height
-	}
-
-	balance, err := s.FetchBalance(emptyBalance, &p)
+	vb, err := h.useStrategyFetchBalance(v, p, s)
 	if err != nil {
-		log.Error().Err(err).Msgf("Error fetching balance for address %v.", v.Addr)
-		return nil, errors.New("Error fetching balance for address.")
+		return nil, err
 	}
 
-	vb := models.VoteWithBalance{
-		Vote:                    v,
-		PrimaryAccountBalance:   &balance.PrimaryAccountBalance,
-		SecondaryAccountBalance: &balance.SecondaryAccountBalance,
-		StakingBalance:          &balance.StakingBalance,
+	if err := h.insertVote(vb, p); err != nil {
+		return nil, err
 	}
 
-	weight, err := s.GetVoteWeightForBalance(&vb, &p)
+	return &vb, nil
+}
+
+func (h *Helpers) insertVote(v models.VoteWithBalance, p models.Proposal) error {
+	weight, err := h.useStrategyGetVoteWeight(p, &v)
 	if err != nil {
 		msg := fmt.Sprintf("Error getting vote weight for address %s.", v.Addr)
 		log.Error().Err(err).Msg(msg)
-		return nil, errors.New(msg)
+		return errors.New(msg)
 	}
 
 	if err = p.ValidateBalance(weight); err != nil {
 		msg := fmt.Sprintf("Account balance is too low to vote on this proposal.")
 		log.Error().Err(err).Msg(msg)
-		return nil, errors.New(msg)
+		return errors.New(msg)
 	}
 
 	// Include voucher in vote data when pinning
@@ -337,16 +348,16 @@ func (h *Helpers) createVote(r *http.Request, p models.Proposal) (*models.VoteWi
 	if err != nil {
 		msg := fmt.Sprintf("Error pinning proposal to IPFS.")
 		log.Error().Err(err).Msg(msg)
-		return nil, errors.New(msg)
+		return errors.New(msg)
 	}
 
 	if err := v.CreateVote(h.A.DB); err != nil {
 		msg := fmt.Sprintf("Error creating vote for address %s.", v.Addr)
 		log.Error().Err(err).Msg(msg)
-		return nil, errors.New(msg)
+		return errors.New(msg)
 	}
 
-	return &vb, nil
+	return nil
 }
 
 func (h *Helpers) validateVote(p models.Proposal, v models.Vote) error {
@@ -454,42 +465,15 @@ func (h *Helpers) createProposal(communityId int, p models.Proposal) (models.Pro
 		return models.Proposal{}, http.StatusInternalServerError, errors.New(errMsg)
 
 	}
-	s := h.initStrategy(*strategy.Name)
-
 	p.Min_balance = strategy.Contract.Threshold
 	p.Max_weight = strategy.Contract.MaxWeight
 
-	var snapshotResponse *shared.SnapshotResponse
-	if s.RequiresSnapshot() {
-		snapshotResponse, err = h.A.SnapshotClient.TakeSnapshot(strategy.Contract)
-		if err != nil {
-			errMsg := "Error taking snapshot."
-			log.Error().Err(err).Msg(errMsg)
-			return models.Proposal{}, http.StatusInternalServerError, errors.New(errMsg)
-		}
-		p.Block_height = &snapshotResponse.Data.BlockHeight
-		p.Snapshot_status = &snapshotResponse.Data.Status
+	if err := h.snapshot(&strategy, &p); err != nil {
+		return models.Proposal{}, http.StatusInternalServerError, err
 	}
 
-	if *community.Only_authors_to_submit {
-		if err := models.EnsureRoleForCommunity(h.A.DB, p.Creator_addr, communityId, "author"); err != nil {
-			errMsg := fmt.Sprintf("Account %s is not an author for community %d.", p.Creator_addr, p.Community_id)
-			log.Error().Err(err).Msg(errMsg)
-			return models.Proposal{}, http.StatusForbidden, errors.New(errMsg)
-		}
-	} else {
-		hasBalance, err := h.processTokenThreshold(p.Creator_addr, strategy)
-		if err != nil {
-			errMsg := "Error processing Token Threshold."
-			log.Error().Err(err).Msg(errMsg)
-			return models.Proposal{}, http.StatusForbidden, errors.New(errMsg)
-		}
-
-		if !hasBalance {
-			errMsg := "Insufficient token balance to create proposal."
-			log.Error().Err(err).Msg(errMsg)
-			return models.Proposal{}, http.StatusForbidden, errors.New(errMsg)
-		}
+	if err := h.enforceCommunityResitrictions(community, p, strategy); err != nil {
+		return models.Proposal{}, http.StatusForbidden, err
 	}
 
 	if err := h.processSnapshotStatus(&strategy, &p); err != nil {
@@ -505,7 +489,6 @@ func (h *Helpers) createProposal(communityId int, p models.Proposal) (models.Pro
 		return models.Proposal{}, http.StatusInternalServerError, errors.New(errMsg)
 	}
 
-	// validate proposal fields
 	validate := validator.New()
 	vErr := validate.Struct(p)
 	if vErr != nil {
@@ -524,6 +507,53 @@ func (h *Helpers) createProposal(communityId int, p models.Proposal) (models.Pro
 	}
 
 	return p, http.StatusCreated, nil
+}
+
+func (h *Helpers) enforceCommunityResitrictions(
+	c models.Community,
+	p models.Proposal,
+	s models.Strategy,
+) error {
+
+	if *c.Only_authors_to_submit {
+		if err := models.EnsureRoleForCommunity(h.A.DB, p.Creator_addr, c.ID, "author"); err != nil {
+			errMsg := fmt.Sprintf("Account %s is not an author for community %d.", p.Creator_addr, p.Community_id)
+			log.Error().Err(err).Msg(errMsg)
+			return errors.New(errMsg)
+		}
+	} else {
+		hasBalance, err := h.processTokenThreshold(p.Creator_addr, s)
+		if err != nil {
+			errMsg := "Error processing Token Threshold."
+			log.Error().Err(err).Msg(errMsg)
+			return errors.New(errMsg)
+		}
+
+		if !hasBalance {
+			errMsg := "Insufficient token balance to create proposal."
+			log.Error().Err(err).Msg(errMsg)
+			return errors.New(errMsg)
+		}
+	}
+
+	return nil
+}
+
+func (h *Helpers) snapshot(strategy *models.Strategy, p *models.Proposal) error {
+	s := h.initStrategy(*strategy.Name)
+
+	//var snapshotResponse *shared.SnapshotResponse
+	if s.RequiresSnapshot() {
+		snapshotResponse, err := h.A.SnapshotClient.TakeSnapshot(strategy.Contract)
+		if err != nil {
+			errMsg := "Error taking snapshot."
+			return errors.New(errMsg)
+		}
+		p.Block_height = &snapshotResponse.Data.BlockHeight
+		p.Snapshot_status = &snapshotResponse.Data.Status
+	}
+
+	return nil
 }
 
 func (h *Helpers) createCommunity(payload models.CreateCommunityRequestPayload) (models.Community, int, error) {
@@ -562,31 +592,44 @@ func (h *Helpers) createCommunity(payload models.CreateCommunityRequestPayload) 
 		return models.Community{}, http.StatusInternalServerError, errors.New(errMsg)
 	}
 
-	if err := models.GrantRolesToCommunityCreator(h.A.DB, c.Creator_addr, c.ID); err != nil {
-		errMsg := "Database error adding community creator roles."
+	if err := h.processCommunityRoles(&c, &payload); err != nil {
+		errMsg := "Error processing community roles."
 		log.Error().Err(err).Msg(errMsg)
 		return models.Community{}, http.StatusInternalServerError, errors.New(errMsg)
 	}
 
-	if payload.Additional_admins != nil {
-		for _, addr := range *payload.Additional_admins {
+	return c, http.StatusCreated, nil
+}
+
+func (h *Helpers) processCommunityRoles(
+	c *models.Community,
+	p *models.CreateCommunityRequestPayload,
+) error {
+	if err := models.GrantRolesToCommunityCreator(h.A.DB, c.Creator_addr, c.ID); err != nil {
+		errMsg := "Database error adding community creator roles."
+		log.Error().Err(err).Msg(errMsg)
+		return errors.New(errMsg)
+	}
+
+	if p.Additional_admins != nil {
+		for _, addr := range *p.Additional_admins {
 			if err := models.GrantAdminRolesToAddress(h.A.DB, c.ID, addr); err != nil {
 				log.Error().Err(err)
-				return models.Community{}, http.StatusInternalServerError, err
+				return err
 			}
 		}
 	}
 
-	if payload.Additional_authors != nil {
-		for _, addr := range *payload.Additional_authors {
+	if p.Additional_authors != nil {
+		for _, addr := range *p.Additional_authors {
 			if err := models.GrantAuthorRolesToAddress(h.A.DB, c.ID, addr); err != nil {
 				log.Error().Err(err)
-				return models.Community{}, http.StatusInternalServerError, err
+				return err
 			}
 		}
 	}
 
-	return c, http.StatusCreated, nil
+	return nil
 }
 
 func (h *Helpers) updateCommunity(id int, payload models.UpdateCommunityRequestPayload) (models.Community, int, error) {
@@ -1007,11 +1050,10 @@ func (h *Helpers) processTokenThreshold(address string, s models.Strategy) (bool
 	var scriptPath string
 	stratName := *s.Name
 
-	if stratName == "balance-of-nfts" {
+	if models.IsNFTStrategy(stratName) {
 		scriptPath = "./main/cadence/scripts/get_nfts_ids.cdc"
 	} else {
 		scriptPath = "./main/cadence/scripts/get_balance.cdc"
-
 	}
 
 	hasBalance, err := h.A.FlowAdapter.EnforceTokenThreshold(scriptPath, address, &s.Contract)
@@ -1039,4 +1081,15 @@ func (h *Helpers) pinJSONToIpfs(data interface{}) (*string, error) {
 		return nil, err
 	}
 	return &pin.IpfsHash, nil
+}
+
+func validateContractThreshold(s []models.Strategy) error {
+	for _, s := range s {
+		if s.Threshold != nil {
+			if *s.Threshold < 1 {
+				return errors.New("Contract Threshold Cannot Be < 1.")
+			}
+		}
+	}
+	return nil
 }

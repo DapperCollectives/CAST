@@ -35,7 +35,6 @@ type Community struct {
 	Slug                     *string     `json:"slug,omitempty"                  validate:"required"`
 	Is_featured              *bool       `json:"isFeatured,omitempty"`
 
-	//TODO we can remove this from the struct as contract data is inside Strategies now
 	Contract_name *string  `json:"contractName,omitempty"`
 	Contract_addr *string  `json:"contractAddr,omitempty"`
 	Public_path   *string  `json:"publicPath,omitempty"`
@@ -75,6 +74,12 @@ type UpdateCommunityRequestPayload struct {
 	Proposal_threshold       *string         `json:"proposalThreshold,omitempty"`
 	Voucher                  *shared.Voucher `json:"voucher,omitempty"`
 
+	//TODO dup fields in Community struct, make sub struct for both to use
+	Contract_name *string  `json:"contractName,omitempty"`
+	Contract_addr *string  `json:"contractAddr,omitempty"`
+	Public_path   *string  `json:"publicPath,omitempty"`
+	Threshold     *float64 `json:"threshold,omitempty"`
+
 	s.TimestampSignaturePayload
 }
 
@@ -108,13 +113,13 @@ func (c *Community) GetCommunity(db *s.Database) error {
 		c.ID)
 }
 
-func GetCommunities(db *s.Database, start, count int) ([]*Community, int, error) {
+func GetCommunities(db *s.Database, pageParams shared.PageParams) ([]*Community, int, error) {
 	var communities []*Community
 	err := pgxscan.Select(db.Context, db.Conn, &communities,
 		`
 		SELECT * FROM communities
 		LIMIT $1 OFFSET $2
-		`, count, start)
+		`, pageParams.Count, pageParams.Start)
 
 	// If we get pgx.ErrNoRows, just return an empty array
 	// and obfuscate error
@@ -138,7 +143,7 @@ func (c *Community) GetCommunityByProposalId(db *s.Database, proposalId int) err
 		proposalId)
 }
 
-func GetCommunitiesForHomePage(db *s.Database, start, count int) ([]*Community, int, error) {
+func GetCommunitiesForHomePage(db *s.Database, params shared.PageParams) ([]*Community, int, error) {
 	var communities []*Community
 
 	err := pgxscan.Select(db.Context, db.Conn, &communities,
@@ -162,7 +167,7 @@ func GetCommunitiesForHomePage(db *s.Database, start, count int) ([]*Community, 
   	))
 	OR is_featured = 'true'
 		LIMIT $1 OFFSET $2
-		`, count, start)
+		`, params.Count, params.Start)
 
 	// If we get pgx.ErrNoRows, just return an empty array
 	// and obfuscate error
@@ -210,8 +215,12 @@ func (c *Community) UpdateCommunity(db *s.Database, p *UpdateCommunityRequestPay
 	proposal_validation = COALESCE($12, proposal_validation),
 	proposal_threshold = COALESCE($13, proposal_threshold),
 	category = COALESCE($14, category),
-	terms_and_conditions_url = COALESCE($15, terms_and_conditions_url)
-	WHERE id = $16
+	terms_and_conditions_url = COALESCE($15, terms_and_conditions_url),
+	contract_name = COALESCE($16, contract_name),
+	contract_addr = COALESCE($17, contract_addr),
+	public_path = COALESCE($18, public_path),
+	threshold = COALESCE($19, threshold)
+	WHERE id = $20
 	`,
 		p.Name,
 		p.Body,
@@ -228,8 +237,13 @@ func (c *Community) UpdateCommunity(db *s.Database, p *UpdateCommunityRequestPay
 		p.Proposal_threshold,
 		p.Category,
 		p.Terms_and_conditions_url,
+		p.Contract_name,
+		p.Contract_addr,
+		p.Public_path,
+		p.Threshold,
 		c.ID,
 	)
+
 	return err
 }
 
