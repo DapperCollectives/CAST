@@ -20,6 +20,7 @@ function StepByStep({
   const [isStepValid, setStepValid] = useState(false);
   const [stepsData, setStepsData] = useState({});
   const refs = React.useRef();
+  const formRef = React.useRef();
 
   const onStepAdvance = (direction = 'next') => {
     if (direction === 'next') {
@@ -122,6 +123,8 @@ function StepByStep({
 
   const child = showPreStep ? preStep : steps[currentStep].component;
 
+  const { useHookForms = false } = steps[currentStep];
+
   const getBackLabel = () => (
     <div
       className="is-flex is-align-items-center has-text-grey cursor-pointer"
@@ -139,18 +142,29 @@ function StepByStep({
     [onSubmit, stepsData]
   );
 
-  const getNextButton = () => (
-    <div className="my-6">
-      <div
-        className={`button is-block has-background-yellow rounded-sm py-2 px-4 has-text-centered ${
-          !isStepValid && 'is-disabled'
-        }`}
-        onClick={moveToNextStep}
-      >
-        Next
+  const getNextButton = ({ formRef } = {}) => {
+    console.log('formId', formRef);
+    return (
+      <div className="my-6">
+        <buton
+          className={`button is-block has-background-yellow rounded-sm py-2 px-4 has-text-centered`}
+          onClick={
+            formRef
+              ? (e) => {
+                  e.preventDefault();
+
+                  formRef.current.dispatchEvent(
+                    new Event('submit', { cancelable: true, bubbles: true })
+                  );
+                }
+              : moveToNextStep
+          }
+        >
+          Next
+        </buton>
       </div>
-    </div>
-  );
+    );
+  };
 
   const getSubmitButton = () => (
     <div className="my-6">
@@ -165,6 +179,7 @@ function StepByStep({
     </div>
   );
 
+  console.log('currentStep', steps[currentStep]);
   return (
     <>
       {blockNavigationOut && (
@@ -203,7 +218,7 @@ function StepByStep({
             <div>{steps.map((step, i) => getStepIcon(i, step.label))}</div>
             {currentStep < steps.length - 1 &&
               !passNextToComp &&
-              getNextButton()}
+              getNextButton(useHookForms ? { formRef } : undefined)}
             {currentStep === steps.length - 1 &&
               !passSubmitToComp &&
               getSubmitButton()}
@@ -257,15 +272,21 @@ function StepByStep({
                   ? { onSubmit: _onSubmit }
                   : undefined),
                 ...(showPreStep ? { dismissPreStep } : undefined),
+                formId: `form-Id-${currentStep}`,
+                ...(useHookForms ? { formRef } : undefined),
               })}
-            <div className="is-hidden-tablet">
+            {/* <div className="is-hidden-tablet">
               {currentStep < steps.length - 1 &&
                 !passNextToComp &&
-                getNextButton()}
+                getNextButton({
+                  formId: useHookForms ? `form-Id-${currentStep}` : undefined,
+                })}
               {currentStep === steps.length - 1 &&
                 !passSubmitToComp &&
-                getSubmitButton()}
-            </div>
+                getSubmitButton({
+                  formId: useHookForms ? `form-Id-${currentStep}` : undefined,
+                })}
+            </div> */}
           </div>
         </div>
       </section>

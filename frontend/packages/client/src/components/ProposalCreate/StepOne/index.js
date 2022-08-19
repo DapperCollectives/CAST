@@ -6,12 +6,16 @@ import React, {
   useState,
 } from 'react';
 import { Editor } from 'react-draft-wysiwyg';
+import { useForm, useWatch } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import { useModalContext } from 'contexts/NotificationModal';
 import { Dropdown, Error, UploadImageModal } from 'components';
 import { Image } from 'components/Svg';
+import Form from 'components/common/Form';
+import Input from 'components/common/Input';
 import { useCommunityDetails } from 'hooks';
 import { kebabToString } from 'utils';
+import { yupResolver } from '@hookform/resolvers/yup';
 import {
   AtomicBlockUtils,
   ContentState,
@@ -21,6 +25,8 @@ import {
   SelectionState,
 } from 'draft-js';
 import { Map } from 'immutable';
+import pick from 'lodash/pick';
+import { stepOne } from './FormConfig';
 import ImageChoices from './ImageChoices';
 import TextBasedChoices from './TextBasedChoices';
 
@@ -65,6 +71,8 @@ const StepOne = ({
   setStepValid,
   onDataChange,
   setPreCheckStepAdvance,
+  formRef,
+  moveToNextStep,
 }) => {
   const dropDownRef = useRef();
 
@@ -127,7 +135,7 @@ const StepOne = ({
     const isValid = Object.keys(requiredFields).every(
       (field) => stepData && requiredFields[field](stepData[field])
     );
-    setStepValid(isValid);
+    setStepValid(true);
   }, [stepData, setStepValid, onDataChange, tabOption]);
 
   useEffect(() => {
@@ -168,6 +176,7 @@ const StepOne = ({
 
   const { strategy } = stepData ?? {};
 
+  console.log('formId > ', formRef);
   useEffect(() => {
     setPreCheckStepAdvance(() => {
       if (!strategy) {
@@ -384,6 +393,26 @@ const StepOne = ({
 
   const showTitleInputError = !checkValidTitleLength(stepData?.title ?? '');
 
+  const fieldsObj = Object.assign(
+    {},
+    stepOne.initialValues,
+    pick(stepData || {}, ['title'])
+  );
+  const { register, handleSubmit, formState, control, setValue, reset } =
+    useForm({
+      defaultValues: fieldsObj,
+      resolver: yupResolver(stepOne.Schema),
+    });
+
+  const { isDirty, isSubmitting, errors, submit } = formState;
+
+  const field = useWatch({ control, name: 'title' });
+  console.log('watchinig ', field);
+
+  const onSubmit = (data) => {
+    console.log('data submitted >>> ', data);
+    // moveToNextStep();
+  };
   return (
     <>
       {showUploadImagesModal && (
@@ -392,126 +421,122 @@ const StepOne = ({
           onDone={addImagesToEditor}
         />
       )}
-      <div className="is-flex-direction-column">
-        <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6">
-          <h4 className="title is-5 mb-2">
-            Title <span className="has-text-danger">*</span>
-          </h4>
-          <p className="has-text-grey mb-4">
-            Give your proposal a title based on the decision or initiative being
-            voted on. Best to keep it simple and specific.
-          </p>
-          <input
-            type="text"
-            className="rounded-sm border-light p-3 column is-full"
-            value={stepData?.title || ''}
-            onChange={(event) =>
-              onDataChange({
-                title: event.target.value,
-              })
-            }
-          />
-          {showTitleInputError && (
-            <div className="pl-1 mt-2 transition-all">
-              <p className="smaller-text has-text-red">
-                The maximum length for Title is 128 characters
-              </p>
-            </div>
-          )}
-        </div>
-        <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6">
-          <h4 className="title is-5 mb-2">
-            Description <span className="has-text-danger">*</span>
-          </h4>
-          <p className="has-text-grey mb-4">
-            This is where you build the key information for the proposal: the
-            details of what’s being voted on; background information for
-            context; the expected costs and benefits of this collective
-            decision.
-          </p>
-          <Editor
-            toolbar={{ options, inline, list, link }}
-            editorState={localEditorState}
-            toolbarClassName="toolbarClassName"
-            wrapperClassName="border-light rounded-sm"
-            editorClassName="px-4 content"
-            onEditorStateChange={onEditorChange}
-            toolbarCustomButtons={[<AddImageOption addImage={addImage} />]}
-            customStyleMap={styleMap}
-            blockRenderMap={extendedBlockRenderMap}
-          />
-        </div>
-        <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6">
-          <h4 className="title is-5 mb-2">Voting Strategy</h4>
-          <p className="has-text-grey mb-5">
-            Select a strategy for how voting power is calculated. Voting
-            strategies are set by community admins.
-          </p>
-          <Dropdown
-            defaultValue={defaultValueStrategy}
-            label="Select from drop-down menu"
-            values={
-              votingStrategies?.map((vs) => ({
-                label: vs.name,
-                value: vs.key,
-              })) ?? []
-            }
-            disabled={votingStrategies.length === 0}
-            onSelectValue={onSelectStrategy}
-            ref={dropDownRef}
-          />
-        </div>
-        <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6">
-          <h4 className="title is-5 mb-2">
-            Choices <span className="has-text-danger">*</span>
-          </h4>
-          <p className="has-text-grey mb-4">
-            Provide the specific options you’d like to cast votes for. Use
-            Text-based presentation for choices that described in words. Use
-            Visual for side-by-side visual options represented by images.
-          </p>
-          <div className="tabs choice-option is-toggle mt-2 mb-4">
-            <ul>
-              <li>
-                <button
-                  className={`button left ${
-                    tabOption === 'text-based' ? 'is-black' : 'outlined'
-                  }`}
-                  onClick={setTab('text-based')}
-                >
-                  <span>Text-based</span>
-                </button>
-              </li>
-              <li>
-                <button
-                  className={`button right ${
-                    tabOption === 'visual' ? 'is-black' : 'outlined'
-                  }`}
-                  onClick={setTab('visual')}
-                >
-                  <span>Visual</span>
-                </button>
-              </li>
-            </ul>
+
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Input
+          classNames="rounded-sm border-light p-3 column is-full"
+          register={register}
+          error={errors['title']}
+          name="title"
+        />
+        <div className="is-flex-direction-column">
+          <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6">
+            <h4 className="title is-5 mb-2">
+              Title <span className="has-text-danger">*</span>
+            </h4>
+            <p className="has-text-grey mb-4">
+              Give your proposal a title based on the decision or initiative
+              being voted on. Best to keep it simple and specific.
+            </p>
           </div>
-          {tabOption === 'text-based' && (
-            <TextBasedChoices
-              choices={choices}
-              onChoiceChange={onChoiceChange}
-              onDestroyChoice={onDestroyChoice}
-              onCreateChoice={onCreateChoice}
-              initChoices={initChoices}
+          <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6">
+            <h4 className="title is-5 mb-2">
+              Description <span className="has-text-danger">*</span>
+            </h4>
+            <p className="has-text-grey mb-4">
+              This is where you build the key information for the proposal: the
+              details of what’s being voted on; background information for
+              context; the expected costs and benefits of this collective
+              decision.
+            </p>
+            <Editor
+              toolbar={{ options, inline, list, link }}
+              editorState={localEditorState}
+              toolbarClassName="toolbarClassName"
+              wrapperClassName="border-light rounded-sm"
+              editorClassName="px-4 content"
+              onEditorStateChange={onEditorChange}
+              toolbarCustomButtons={[<AddImageOption addImage={addImage} />]}
+              customStyleMap={styleMap}
+              blockRenderMap={extendedBlockRenderMap}
             />
-          )}
-          {tabOption === 'visual' && (
-            <ImageChoices
-              choices={choices}
-              onChoiceChange={onChoiceChange}
-              initChoices={initChoices}
+          </div>
+          <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6">
+            <h4 className="title is-5 mb-2">Voting Strategy</h4>
+            <p className="has-text-grey mb-5">
+              Select a strategy for how voting power is calculated. Voting
+              strategies are set by community admins.
+            </p>
+            <Dropdown
+              defaultValue={defaultValueStrategy}
+              label="Select from drop-down menu"
+              values={
+                votingStrategies?.map((vs) => ({
+                  label: vs.name,
+                  value: vs.key,
+                })) ?? []
+              }
+              disabled={votingStrategies.length === 0}
+              onSelectValue={onSelectStrategy}
+              ref={dropDownRef}
             />
-          )}
+          </div>
+          <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6">
+            <h4 className="title is-5 mb-2">
+              Choices <span className="has-text-danger">*</span>
+            </h4>
+            <p className="has-text-grey mb-4">
+              Provide the specific options you’d like to cast votes for. Use
+              Text-based presentation for choices that described in words. Use
+              Visual for side-by-side visual options represented by images.
+            </p>
+            <div className="tabs choice-option is-toggle mt-2 mb-4">
+              <ul>
+                <li>
+                  <button
+                    className={`button left ${
+                      tabOption === 'text-based' ? 'is-black' : 'outlined'
+                    }`}
+                    onClick={setTab('text-based')}
+                  >
+                    <span>Text-based</span>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    className={`button right ${
+                      tabOption === 'visual' ? 'is-black' : 'outlined'
+                    }`}
+                    onClick={setTab('visual')}
+                  >
+                    <span>Visual</span>
+                  </button>
+                </li>
+              </ul>
+            </div>
+            {tabOption === 'text-based' && (
+              <TextBasedChoices
+                choices={choices}
+                onChoiceChange={onChoiceChange}
+                onDestroyChoice={onDestroyChoice}
+                onCreateChoice={onCreateChoice}
+                initChoices={initChoices}
+              />
+            )}
+            {tabOption === 'visual' && (
+              <ImageChoices
+                choices={choices}
+                onChoiceChange={onChoiceChange}
+                initChoices={initChoices}
+              />
+            )}
+          </div>
         </div>
-      </div>
+        <input
+          className={`button is-block has-background-yellow rounded-sm py-2 px-4 has-text-centered`}
+          type="submit"
+        />
+      </form>
     </>
   );
 };

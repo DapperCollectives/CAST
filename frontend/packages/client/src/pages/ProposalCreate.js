@@ -123,6 +123,7 @@ export default function ProposalCreatePage() {
         description:
           'Some description of what you can write here that is useful.',
         component: <PropCreateStepOne />,
+        useHookForms: true,
       },
       {
         label: 'Set Date & Time',
