@@ -347,7 +347,6 @@ const StepOne = ({
     setShowUploadImagesModal(false);
   };
 
-  console.log('step data comes with', stepData);
   const fieldsObj = Object.assign(
     {},
     stepOne.initialValues,
