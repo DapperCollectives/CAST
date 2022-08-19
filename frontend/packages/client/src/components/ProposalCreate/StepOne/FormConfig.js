@@ -1,19 +1,24 @@
 import * as yup from 'yup';
 
-const initialValues = {
-  title: '',
-};
+const formFields = ['title', 'strategy'];
+
 const Schema = yup.object().shape({
-  name: yup
+  title: yup
     .string()
     .trim()
     .required('Please enter a proposal title')
     .max(150, 'The maximum length for title is 128 characters'),
+  strategy: yup.string().required('Please select a strategy'),
 });
 
+const initialValues = Object.assign(
+  {},
+  ...formFields.map((key) => ({ [key]: '' }))
+);
 const stepOne = {
   Schema,
   initialValues,
+  formFields,
 };
 
 export { stepOne };

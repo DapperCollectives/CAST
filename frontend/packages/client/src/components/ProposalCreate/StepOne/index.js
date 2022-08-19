@@ -9,8 +9,9 @@ import { Editor } from 'react-draft-wysiwyg';
 import { useForm, useWatch } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import { useModalContext } from 'contexts/NotificationModal';
-import { Dropdown, Error, UploadImageModal } from 'components';
+import { Error, UploadImageModal } from 'components';
 import { Image } from 'components/Svg';
+import Dropdown from 'components/common/Dropdown';
 import Form from 'components/common/Form';
 import Input from 'components/common/Input';
 import { useCommunityDetails } from 'hooks';
@@ -29,8 +30,6 @@ import pick from 'lodash/pick';
 import { stepOne } from './FormConfig';
 import ImageChoices from './ImageChoices';
 import TextBasedChoices from './TextBasedChoices';
-
-const checkValidTitleLength = (text) => text?.length <= 128;
 
 // using a React component to render custom blocks
 const ImageCaptionCustomBlock = (props) => {
@@ -105,7 +104,6 @@ const StepOne = ({
 
   useEffect(() => {
     const requiredFields = {
-      title: (text) => text?.trim().length > 0 && checkValidTitleLength(text),
       description: (body) => body?.getCurrentContent().hasText(),
       choices: (opts) => {
         const getLabel = (o) => o?.value?.trim();
@@ -174,36 +172,6 @@ const StepOne = ({
     },
   };
 
-  const { strategy } = stepData ?? {};
-
-  useEffect(() => {
-    setPreCheckStepAdvance(() => {
-      if (!strategy) {
-        openModal(
-          React.createElement(Error, {
-            error: (
-              <div className="mt-5">
-                <button
-                  className="button"
-                  onClick={() => {
-                    closeModal();
-                    dropDownRef.current.focus();
-                  }}
-                >
-                  Select Strategy
-                </button>
-              </div>
-            ),
-            errorTitle: 'Please select a strategy.',
-          }),
-          { classNameModalContent: 'rounded-sm' }
-        );
-        return false;
-      }
-      return true;
-    });
-  }, [strategy, setPreCheckStepAdvance, openModal, closeModal]);
-
   const choices = useMemo(() => stepData?.choices || [], [stepData?.choices]);
 
   const onCreateChoice = useCallback(() => {
@@ -252,15 +220,6 @@ const StepOne = ({
     },
     [onDataChange]
   );
-
-  const onSelectStrategy = (strategy) => {
-    const strategySelected = votingStrategies?.find(
-      (vs) => vs.key === strategy
-    );
-    onDataChange({
-      strategy: { label: strategySelected.name, value: strategySelected.key },
-    });
-  };
 
   const addImage = () => {
     setShowUploadImagesModal(true);
@@ -388,38 +347,28 @@ const StepOne = ({
     setShowUploadImagesModal(false);
   };
 
-  const defaultValueStrategy = stepData?.strategy;
-
-  const showTitleInputError = !checkValidTitleLength(stepData?.title ?? '');
-
   console.log('step data comes with', stepData);
   const fieldsObj = Object.assign(
     {},
     stepOne.initialValues,
-    pick(stepData || {}, ['title'])
+    pick(stepData || {}, stepOne.formFields)
   );
 
-  // const { register, handleSubmit, formState, control, setValue, reset } =
-  //   useForm({
-
-  //     resolver: yupResolver(stepOne.Schema),
-  //   });
-
-  // const { isDirty, isSubmitting, errors, submit } = formState;
-
-  // const field = useWatch({ control, name: 'example' });
-  // console.log('watchinig ', field);
-
-  const { register, handleSubmit, watch, formState } = useForm({
+  const { register, handleSubmit, watch, formState, control } = useForm({
     defaultValues: fieldsObj,
+    resolver: yupResolver(stepOne.Schema),
   });
+
   const onSubmit = (data) => {
     console.log('data on submit >>', data);
     onDataChange(data);
     moveToNextStep();
   };
 
-  const { isDirty, isSubmitting, errors } = formState;
+  const { isDirty, isSubmitting, isValid, errors } = formState;
+
+  console.log('ERRORS => ', errors);
+  console.log('isValid => ', isValid);
 
   console.log(watch('example')); // watch input value by passing the name of it
   // const onSubmit = (data) => {
@@ -482,17 +431,17 @@ const StepOne = ({
               strategies are set by community admins.
             </p>
             <Dropdown
-              defaultValue={defaultValueStrategy}
               label="Select from drop-down menu"
-              values={
+              name="strategy"
+              margin="mt-4"
+              options={
                 votingStrategies?.map((vs) => ({
                   label: vs.name,
                   value: vs.key,
                 })) ?? []
               }
-              disabled={votingStrategies.length === 0}
-              onSelectValue={onSelectStrategy}
-              ref={dropDownRef}
+              disabled={isSubmitting || votingStrategies.length === 0}
+              control={control}
             />
           </div>
           <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6">

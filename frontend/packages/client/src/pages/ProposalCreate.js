@@ -117,6 +117,8 @@ export default function ProposalCreatePage() {
     blockNavigationOut: true && !data,
     blockNavigationText:
       'Proposal creation is not complete yet, are you sure you want to leave?',
+    passNextToComp: true,
+    showActionButtonLeftPannel: true,
     steps: [
       {
         label: 'Draft Proposal',

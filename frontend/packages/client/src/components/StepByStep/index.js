@@ -1,8 +1,10 @@
 import React, { useCallback, useState } from 'react';
 import { Prompt } from 'react-router-dom';
+import { isValid } from 'date-fns';
 import Loader from '../Loader';
 import { ArrowLeft, CheckMark } from '../Svg';
 import NextButton from './NexStepButton';
+import SubmitButton from './SubmitButton';
 
 function StepByStep({
   finalLabel,
@@ -12,6 +14,7 @@ function StepByStep({
   isSubmitting,
   submittingMessage,
   passNextToComp = false,
+  showActionButtonLeftPannel = false,
   passSubmitToComp = false,
   blockNavigationOut = false,
   blockNavigationText,
@@ -144,52 +147,11 @@ function StepByStep({
     [onSubmit, stepsData]
   );
 
-  const getNextButton = ({ formId: formIdParam } = {}) => {
-    const classNames = `button is-block has-background-yellow rounded-sm py-2 px-4 has-text-centered ${
-      !isStepValid && 'is-disabled'
-    }`;
-
-    return (
-      <div className="my-6">
-        {formIdParam ? (
-          <button className={classNames} form={formIdParam} type="submit">
-            Next
-          </button>
-        ) : (
-          <div className={classNames} onClick={moveToNextStep}>
-            Next
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  const getSubmitButton = ({ formId: formIdParam } = {}) => (
-    <div className="my-6">
-      {formIdParam ? (
-        <button
-          className={`button is-block has-background-yellow rounded-sm py-2 px-4 has-text-centered ${
-            !isStepValid && 'is-disabled'
-          }`}
-          form={formIdParam}
-          type="submit"
-        >
-          {finalLabel}
-        </button>
-      ) : (
-        <div
-          className={`button is-block has-background-yellow rounded-sm py-2 px-4 has-text-centered ${
-            !isStepValid && 'is-disabled'
-          }`}
-          onClick={_onSubmit}
-        >
-          {finalLabel}
-        </div>
-      )}
-    </div>
-  );
+  const showNextButton = !passNextToComp || showActionButtonLeftPannel;
+  const showSubmitButton = !passSubmitToComp || showActionButtonLeftPannel;
 
   console.log('currentStep', steps[currentStep]);
+
   return (
     <>
       {blockNavigationOut && (
@@ -226,13 +188,21 @@ function StepByStep({
               {currentStep > 0 && getBackLabel()}
             </div>
             <div>{steps.map((step, i) => getStepIcon(i, step.label))}</div>
-            {currentStep < steps.length - 1 &&
-              !passNextToComp &&
-              getNextButton({ formId })}
-            <NextButton formId={formId} moveToNextStep={moveToNextStep} disabled/>
-            {currentStep === steps.length - 1 &&
-              !passSubmitToComp &&
-              getSubmitButton({ formId })}
+            {currentStep < steps.length - 1 && showNextButton && (
+              <NextButton
+                formId={formId}
+                moveToNextStep={moveToNextStep}
+                disabled={!isStepValid}
+              />
+            )}
+            {currentStep === steps.length - 1 && showSubmitButton && (
+              <SubmitButton
+                formId={formId}
+                disabled={!isStepValid}
+                onSubmit={_onSubmit}
+                label={finalLabel}
+              />
+            )}
           </div>
           {/* left panel mobile */}
           <div
@@ -286,12 +256,21 @@ function StepByStep({
                 ...(useHookForms ? { formId } : undefined),
               })}
             <div className="is-hidden-tablet">
-              {currentStep < steps.length - 1 &&
-                !passNextToComp &&
-                getNextButton({ formId })}
-              {currentStep === steps.length - 1 &&
-                !passSubmitToComp &&
-                getSubmitButton({ formId })}
+              {currentStep < steps.length - 1 && showNextButton && (
+                <NextButton
+                  formId={formId}
+                  moveToNextStep={moveToNextStep}
+                  disabled={!isStepValid}
+                />
+              )}
+              {currentStep === steps.length - 1 && showSubmitButton && (
+                <SubmitButton
+                  formId={formId}
+                  disabled={!isStepValid}
+                  onSubmit={_onSubmit}
+                  label={finalLabel}
+                />
+              )}
             </div>
           </div>
         </div>
