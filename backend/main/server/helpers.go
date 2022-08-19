@@ -402,12 +402,12 @@ func (h *Helpers) fetchCommunity(id int) (models.Community, int, error) {
 	return community, http.StatusOK, nil
 }
 
-func (h *Helpers) createProposal(communityId int, p models.Proposal) (models.Proposal, int, error) {
+func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, int, error) {
 	if err := h.validateUser(p.Creator_addr, p.Timestamp, p.Composite_signatures); err != nil {
 		return models.Proposal{}, http.StatusForbidden, err
 	}
 
-	community, httpStatus, err := h.fetchCommunity(communityId)
+	community, httpStatus, err := h.fetchCommunity(p.Community_id)
 	if err != nil {
 		return models.Proposal{}, httpStatus, err
 	}
@@ -426,7 +426,7 @@ func (h *Helpers) createProposal(communityId int, p models.Proposal) (models.Pro
 		return models.Proposal{}, http.StatusInternalServerError, err
 	}
 
-	if err := h.enforceCommunityResitrictions(community, p, strategy); err != nil {
+	if err := h.enforceCommunityRestrictions(community, p, strategy); err != nil {
 		return models.Proposal{}, http.StatusForbidden, err
 	}
 
@@ -463,7 +463,7 @@ func (h *Helpers) createProposal(communityId int, p models.Proposal) (models.Pro
 	return p, http.StatusCreated, nil
 }
 
-func (h *Helpers) enforceCommunityResitrictions(
+func (h *Helpers) enforceCommunityRestrictions(
 	c models.Community,
 	p models.Proposal,
 	s models.Strategy,
@@ -476,7 +476,19 @@ func (h *Helpers) enforceCommunityResitrictions(
 			return errors.New(errMsg)
 		}
 	} else {
-		hasBalance, err := h.processTokenThreshold(p.Creator_addr, s)
+		threshold, err := strconv.ParseFloat(*c.Proposal_threshold, 32)
+		if err != nil {
+			log.Error().Err(err).Msg("Invalid proposal threshold")
+			return errors.New("Invalid proposal threshold")
+		}
+
+		contract := shared.Contract{
+			Name: c.Contract_name,
+			Addr: c.Contract_addr,
+			Public_path: c.Public_path,
+			Threshold: &threshold,
+		}
+		hasBalance, err := h.processTokenThreshold(p.Creator_addr, contract, *c.Contract_type)
 		if err != nil {
 			errMsg := "Error processing Token Threshold."
 			log.Error().Err(err).Msg(errMsg)
@@ -914,17 +926,18 @@ func (h *Helpers) processSnapshotStatus(s *models.Strategy, p *models.Proposal) 
 
 }
 
-func (h *Helpers) processTokenThreshold(address string, s models.Strategy) (bool, error) {
+func (h *Helpers) processTokenThreshold(address string, c shared.Contract, contractType string) (bool, error) {
 	var scriptPath string
-	stratName := *s.Name
 
-	if models.IsNFTStrategy(stratName) {
+	if contractType == "nft" {
 		scriptPath = "./main/cadence/scripts/get_nfts_ids.cdc"
 	} else {
 		scriptPath = "./main/cadence/scripts/get_balance.cdc"
 	}
 
-	hasBalance, err := h.A.FlowAdapter.EnforceTokenThreshold(scriptPath, address, &s.Contract)
+	fmt.Println(c.Addr)
+
+	hasBalance, err := h.A.FlowAdapter.EnforceTokenThreshold(scriptPath, address, &c)
 	if err != nil {
 		return false, err
 	}
