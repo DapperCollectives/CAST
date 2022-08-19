@@ -370,12 +370,6 @@ const StepOne = ({
   console.log('ERRORS => ', errors);
   console.log('isValid => ', isValid);
 
-  console.log(watch('example')); // watch input value by passing the name of it
-  // const onSubmit = (data) => {
-  //   console.log('data submitted >>> ', data);
-  //   // moveToNextStep();
-  // };
-
   return (
     <>
       {showUploadImagesModal && (
