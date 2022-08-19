@@ -101,7 +101,7 @@ export default function useCommunity({
           banner,
           contractAddress: contractAddr,
           contractName: contractN,
-          contractType,
+          contractType: contractT,
           storagePath: storageP,
           proposalThreshold,
           onlyAuthorsToSubmitProposals,
@@ -153,7 +153,7 @@ export default function useCommunity({
               flowAddress.contractAddr
             ),
             contractName: setDefaultValue(contractN, flowAddress.contractName),
-            contractType,
+            contractType: setDefaultValue(contractT, flowAddress.contractType),
             publicPath: setDefaultValue(storageP, flowAddress.storagePath),
             proposalThreshold: setDefaultValue(proposalThreshold, '0'),
             strategies,

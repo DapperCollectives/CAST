@@ -935,8 +935,6 @@ func (h *Helpers) processTokenThreshold(address string, c shared.Contract, contr
 		scriptPath = "./main/cadence/scripts/get_balance.cdc"
 	}
 
-	fmt.Println(c.Addr)
-
 	hasBalance, err := h.A.FlowAdapter.EnforceTokenThreshold(scriptPath, address, &c)
 	if err != nil {
 		return false, err

@@ -15,7 +15,7 @@ const { flowAddress } = networkConfig;
 const defaultValues = {
   contractAddress: flowAddress.contractAddr,
   contractName: flowAddress.contractName,
-  contractType: 'ft',
+  contractType: flowAddress.contractType,
   storagePath: flowAddress.storagePath,
   proposalThreshold: '0',
 };

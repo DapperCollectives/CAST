@@ -40,6 +40,10 @@ export default function ThresholdForm({
           margin="mt-4"
           options={[
             {
+              label: 'Default',
+              value: '',
+            },
+            {
               label: 'NFT',
               value: 'nft',
             },
