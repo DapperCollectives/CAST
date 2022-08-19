@@ -1,16 +1,13 @@
-import React, { forwardRef } from 'react';
+import React from 'react';
 
-const Form = forwardRef((props, ref) => {
-  const { removeInnerForm, children, onSubmit, formId } = props;
-
+const Form = ({ removeInnerForm = false, children, onSubmit, formId } = {}) => {
   return removeInnerForm ? (
     <>{children}</>
   ) : (
-    <form onSubmit={onSubmit} id={formId} ref={ref}>
-      <>ddffdfdf {formId}</>
+    <form onSubmit={onSubmit} id={formId}>
       {children}
     </form>
   );
-});
+};
 
 export default Form;

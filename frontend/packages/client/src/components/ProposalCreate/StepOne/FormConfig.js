@@ -1,7 +1,7 @@
 import * as yup from 'yup';
 
 const initialValues = {
-  name: '',
+  title: '',
 };
 const Schema = yup.object().shape({
   name: yup

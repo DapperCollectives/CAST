@@ -71,7 +71,7 @@ const StepOne = ({
   setStepValid,
   onDataChange,
   setPreCheckStepAdvance,
-  formRef,
+  formId,
   moveToNextStep,
 }) => {
   const dropDownRef = useRef();
@@ -176,7 +176,6 @@ const StepOne = ({
 
   const { strategy } = stepData ?? {};
 
-  console.log('formId > ', formRef);
   useEffect(() => {
     setPreCheckStepAdvance(() => {
       if (!strategy) {
@@ -393,26 +392,41 @@ const StepOne = ({
 
   const showTitleInputError = !checkValidTitleLength(stepData?.title ?? '');
 
+  console.log('step data comes with', stepData);
   const fieldsObj = Object.assign(
     {},
     stepOne.initialValues,
     pick(stepData || {}, ['title'])
   );
-  const { register, handleSubmit, formState, control, setValue, reset } =
-    useForm({
-      defaultValues: fieldsObj,
-      resolver: yupResolver(stepOne.Schema),
-    });
 
-  const { isDirty, isSubmitting, errors, submit } = formState;
+  // const { register, handleSubmit, formState, control, setValue, reset } =
+  //   useForm({
 
-  const field = useWatch({ control, name: 'title' });
-  console.log('watchinig ', field);
+  //     resolver: yupResolver(stepOne.Schema),
+  //   });
 
+  // const { isDirty, isSubmitting, errors, submit } = formState;
+
+  // const field = useWatch({ control, name: 'example' });
+  // console.log('watchinig ', field);
+
+  const { register, handleSubmit, watch, formState } = useForm({
+    defaultValues: fieldsObj,
+  });
   const onSubmit = (data) => {
-    console.log('data submitted >>> ', data);
-    // moveToNextStep();
+    console.log('data on submit >>', data);
+    onDataChange(data);
+    moveToNextStep();
   };
+
+  const { isDirty, isSubmitting, errors } = formState;
+
+  console.log(watch('example')); // watch input value by passing the name of it
+  // const onSubmit = (data) => {
+  //   console.log('data submitted >>> ', data);
+  //   // moveToNextStep();
+  // };
+
   return (
     <>
       {showUploadImagesModal && (
@@ -422,13 +436,7 @@ const StepOne = ({
         />
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <Input
-          classNames="rounded-sm border-light p-3 column is-full"
-          register={register}
-          error={errors['title']}
-          name="title"
-        />
+      <Form onSubmit={handleSubmit(onSubmit)} formId={formId}>
         <div className="is-flex-direction-column">
           <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6">
             <h4 className="title is-5 mb-2">
@@ -438,6 +446,12 @@ const StepOne = ({
               Give your proposal a title based on the decision or initiative
               being voted on. Best to keep it simple and specific.
             </p>
+            <Input
+              classNames="rounded-sm border-light p-3 column is-full"
+              register={register}
+              error={errors['title']}
+              name="title"
+            />
           </div>
           <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6">
             <h4 className="title is-5 mb-2">
@@ -532,11 +546,7 @@ const StepOne = ({
             )}
           </div>
         </div>
-        <input
-          className={`button is-block has-background-yellow rounded-sm py-2 px-4 has-text-centered`}
-          type="submit"
-        />
-      </form>
+      </Form>
     </>
   );
 };
