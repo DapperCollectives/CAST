@@ -170,7 +170,13 @@ export default function useCommunity({
         dispatch({ type: 'ERROR', payload: { errorData: err.message } });
       }
     },
-    [dispatch, notifyError, uploadFile]
+    [
+      dispatch,
+      notifyError,
+      uploadFile,
+      signMessageByWalletProvider,
+      user?.services,
+    ]
   );
 
   return {

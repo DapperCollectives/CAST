@@ -9,7 +9,6 @@ export default function useCommunityDetails(id) {
   const {
     user: { addr },
     user,
-    injectedProvider,
     signMessageByWalletProvider,
   } = useWebContext();
   const { notifyError } = useErrorHandlerContext();
@@ -83,7 +82,7 @@ export default function useCommunityDetails(id) {
         return { error: err.message };
       }
     },
-    [dispatch, notifyError, addr, injectedProvider]
+    [dispatch, notifyError, addr, signMessageByWalletProvider, user?.services]
   );
 
   return {

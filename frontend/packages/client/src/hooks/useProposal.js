@@ -65,7 +65,7 @@ export default function useProposal() {
         dispatch({ type: 'ERROR', payload: { errorData: err.message } });
       }
     },
-    [dispatch, notifyError]
+    [dispatch, notifyError, signMessageByWalletProvider, user?.services]
   );
 
   const voteOnProposal = async (
@@ -280,7 +280,7 @@ export default function useProposal() {
         return { error: err.message };
       }
     },
-    [dispatch, notifyError]
+    [dispatch, notifyError, signMessageByWalletProvider, user?.services]
   );
   return {
     ...state,
