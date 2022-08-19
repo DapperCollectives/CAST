@@ -1,4 +1,3 @@
-import { useQuery } from 'react-query';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useQuery } from '@tanstack/react-query';
 import { fetchActiveStrategies } from 'api/community';

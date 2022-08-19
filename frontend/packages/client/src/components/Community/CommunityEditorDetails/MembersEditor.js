@@ -4,7 +4,7 @@ import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useWebContext } from 'contexts/Web3';
 import { ActionButton } from 'components';
 import { useCommunityUsers } from 'hooks';
-import { getCompositeSigs } from 'utils';
+import { UPDATE_COMMUNITY_TX } from 'const';
 import { yupResolver } from '@hookform/resolvers/yup';
 import AddressForm from './AddressForm';
 import { AddressSchema } from './FormConfig';
@@ -17,7 +17,7 @@ export default function MembersEditor({
 } = {}) {
   const {
     user: { addr },
-    injectedProvider,
+    user,
     isValidFlowAddress,
     signMessageByWalletProvider,
   } = useWebContext();
@@ -94,7 +94,7 @@ export default function MembersEditor({
 
     const body = {
       signingAddr: addr,
-      timestamp:  hexTime,
+      timestamp: hexTime,
       compositeSignatures,
       voucher,
     };
