@@ -21,8 +21,7 @@ export default function useProposal() {
       const { communityId, ...proposalData } = data;
       const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}/proposals`;
       try {
-        const timestamp = Date.now().toString();
-        const hexTime = Buffer.from(timestamp).toString('hex');
+        const hexTime = Buffer.from(Date.now().toString()).toString('hex');
         const [compositeSignatures, voucher] =
           await signMessageByWalletProvider(
             user?.services[0]?.uid,
@@ -227,8 +226,7 @@ export default function useProposal() {
     async (injectedProvider, proposalData, update) => {
       const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${proposalData.communityId}/proposals/${proposalData.id}`;
       try {
-        const timestamp = Date.now().toString();
-        const hexTime = Buffer.from(timestamp).toString('hex');
+        const hexTime = Buffer.from(Date.now().toString()).toString('hex');
 
         const [compositeSignatures, voucher] =
           await signMessageByWalletProvider(

@@ -53,12 +53,11 @@ export default function useCommunity({
   }, [dispatch, notifyError, count, start]);
 
   const createCommunity = useCallback(
-    async (injectedProvider, communityData) => {
+    async (communityData) => {
       dispatch({ type: 'PROCESSING' });
       const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities`;
       try {
-        const timestamp = Date.now().toString();
-        const hexTime = Buffer.from(timestamp).toString('hex');
+        const hexTime = Buffer.from(Date.now().toString()).toString('hex');
 
         const [compositeSignatures, voucher] =
           await signMessageByWalletProvider(

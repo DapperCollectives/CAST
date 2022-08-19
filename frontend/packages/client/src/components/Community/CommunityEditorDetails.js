@@ -194,9 +194,7 @@ const CommunityMembersEditor = ({
 
   const saveData = async () => {
     setSavingData(true);
-    const timestamp = Date.now().toString();
-    const hexTime = Buffer.from(timestamp).toString('hex');
-
+    const hexTime = Buffer.from(Date.now().toString()).toString('hex');
     const [compositeSignatures, voucher] = await signMessageByWalletProvider(
       user?.services[0]?.uid,
       UPDATE_COMMUNITY_TX,
