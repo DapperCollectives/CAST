@@ -8,6 +8,7 @@ export default function ActionButton({
   loading = false,
   label = '',
   classNames,
+  type,
 } = {}) {
   const clNames = classnames(
     'button is-flex is-align-items-centered rounded-sm is-uppercase',
@@ -19,6 +20,7 @@ export default function ActionButton({
   );
   return (
     <button
+      type={type}
       style={{ height: 48, width: '100%' }}
       className={clNames}
       onClick={!enabled ? () => {} : onClick}

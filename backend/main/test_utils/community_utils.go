@@ -23,10 +23,10 @@ type PaginatedResponseWithUser struct {
 
 type PaginatedResponseWithCommunity struct {
 	Data         []models.Community `json:"data"`
-	Start        int                    `json:"start"`
-	Count        int                    `json:"count"`
-	TotalRecords int                    `json:"totalRecords"`
-	Next         int                    `json:"next"`
+	Start        int                `json:"start"`
+	Count        int                `json:"count"`
+	TotalRecords int                `json:"totalRecords"`
+	Next         int                `json:"next"`
 }
 
 type PaginatedResponseWithUserCommunity struct {
@@ -102,7 +102,19 @@ var (
 			Public_path: &flowPublicPath,
 		},
 	}
-	strategies = []models.Strategy{defaultStrategy}
+
+	failStrategy = models.Strategy{
+		Name: &tokenWeighted,
+		Contract: s.Contract{
+			Name:        &flowContractName,
+			Addr:        &flowContractAddr,
+			Public_path: &flowPublicPath,
+			Threshold:   &threshold,
+		},
+	}
+
+	strategies     = []models.Strategy{defaultStrategy}
+	failStrategies = []models.Strategy{failStrategy}
 
 	updatedStrategies = []models.Strategy{
 		defaultStrategy,
@@ -117,6 +129,28 @@ var (
 		Logo:                   &logo,
 		Slug:                   &slug,
 		Strategies:             &strategies,
+		Only_authors_to_submit: &onlyAuthors,
+	}
+
+	FailCommunity = models.Community{
+		Name:                   "TestDAO",
+		Category:               &category,
+		Body:                   &body,
+		Creator_addr:           "<replace>",
+		Logo:                   &logo,
+		Slug:                   &slug,
+		Strategies:             &failStrategies,
+		Only_authors_to_submit: &onlyAuthors,
+	}
+
+	NilStrategyCommunity = models.Community{
+		Name:                   "TestDAO",
+		Category:               &category,
+		Body:                   &body,
+		Creator_addr:           "<replace>",
+		Logo:                   &logo,
+		Slug:                   &slug,
+		Strategies:             nil,
 		Only_authors_to_submit: &onlyAuthors,
 	}
 
@@ -158,6 +192,7 @@ var (
 		Instagram_url:            &instagram,
 		Strategies:               &updatedStrategies,
 		Terms_and_conditions_url: &termsAndConditions,
+		Only_authors_to_submit:   &notOnlyAuthors,
 	}
 )
 
@@ -183,6 +218,24 @@ func (otu *OverflowTestUtils) GenerateCommunityStruct(accountName string) *model
 
 	// this does a deep copy
 	community := DefaultCommunity
+	community.Creator_addr = "0x" + account.Address().String()
+	return &community
+}
+
+func (otu *OverflowTestUtils) GenerateFailCommunityStruct(accountName string) *models.Community {
+	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", accountName))
+
+	// this does a deep copy
+	community := FailCommunity
+	community.Creator_addr = "0x" + account.Address().String()
+	return &community
+}
+
+func (otu *OverflowTestUtils) GenerateNilStrategyCommunityStruct(accountName string) *models.Community {
+	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", accountName))
+
+	// this does a deep copy
+	community := NilStrategyCommunity
 	community.Creator_addr = "0x" + account.Address().String()
 	return &community
 }
@@ -265,6 +318,12 @@ func (otu *OverflowTestUtils) GetCommunityUsersAPI(id int) *httptest.ResponseRec
 
 func (otu *OverflowTestUtils) GetCommunityUsersAPIByType(id int, userType string) *httptest.ResponseRecorder {
 	req, _ := http.NewRequest("GET", "/communities/"+strconv.Itoa(id)+"/users/type/"+userType, nil)
+	response := otu.ExecuteRequest(req)
+	return response
+}
+
+func (otu *OverflowTestUtils) GetCommunityActiveStrategies(id int) *httptest.ResponseRecorder {
+	req, _ := http.NewRequest("GET", "/communities/"+strconv.Itoa(id)+"/strategies", nil)
 	response := otu.ExecuteRequest(req)
 	return response
 }

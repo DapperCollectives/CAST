@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/DapperCollectives/CAST/backend/main/shared"
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/jackc/pgx/v4"
@@ -56,7 +57,12 @@ var computedStatusSQL = `
 	END as computed_status
 	`
 
-func GetProposalsForCommunity(db *s.Database, start, count int, communityId int, status string, order string) ([]*Proposal, int, error) {
+func GetProposalsForCommunity(
+	db *s.Database,
+	communityId int,
+	status string,
+	params shared.PageParams,
+) ([]*Proposal, int, error) {
 	var proposals []*Proposal
 	var err error
 
@@ -81,11 +87,11 @@ func GetProposalsForCommunity(db *s.Database, start, count int, communityId int,
 		statusFilter = ` AND status = 'published' AND end_time > (now() at time zone 'utc')`
 	}
 
-	orderBySql := fmt.Sprintf(` ORDER BY created_at %s`, order)
+	orderBySql := fmt.Sprintf(` ORDER BY created_at %s`, params.Order)
 	limitOffsetSql := ` LIMIT $1 OFFSET $2`
 	sql = sql + statusFilter + orderBySql + limitOffsetSql
 
-	err = pgxscan.Select(db.Context, db.Conn, &proposals, sql, count, start, communityId)
+	err = pgxscan.Select(db.Context, db.Conn, &proposals, sql, params.Count, params.Start, communityId)
 
 	// If we get pgx.ErrNoRows, just return an empty array
 	// and obfuscate error
@@ -163,6 +169,13 @@ func (p *Proposal) UpdateProposal(db *s.Database) error {
 
 	if err != nil {
 		return err
+	}
+
+	if *p.Status == "cancelled" {
+		err := handleCancelledProposal(db, p.ID)
+		if err != nil {
+			return err
+		}
 	}
 
 	err = p.GetProposalById(db)
@@ -255,4 +268,124 @@ func (p *Proposal) EnforceMaxWeight(balance float64) float64 {
 	}
 
 	return allowedBalance
+}
+
+func GetActiveStrategiesForCommunity(db *s.Database, communityId int) ([]string, error) {
+	var strategies []string
+	var err error
+
+	// Get Strategies from active proposals
+	sql := `
+		SELECT strategy FROM proposals 
+		WHERE community_id = $1
+		AND (
+			(status = 'published' AND start_time > (now() at time zone 'utc')) OR 
+			(status = 'published' AND start_time < (now() at time zone 'utc') AND end_time > (now() at time zone 'utc')) OR 
+			(status = 'published' AND end_time > (now() at time zone 'utc'))
+		)
+		GROUP BY strategy
+		`
+
+	err = pgxscan.Select(db.Context, db.Conn, &strategies, sql, communityId)
+
+	// If we get pgx.ErrNoRows, just return an empty array
+	// and obfuscate error
+	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
+		return nil, err
+	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
+		return nil, nil
+	}
+
+	return strategies, nil
+}
+
+func handleCancelledProposal(db *s.Database, proposalId int) error {
+
+	// Delete All votes for cancelled proposal
+	_, err := db.Conn.Exec(db.Context, `
+		UPDATE votes SET is_cancelled = 'true' WHERE proposal_id = $1
+	`, proposalId)
+
+	if err != nil {
+		return err
+	}
+
+	// Delete All non-streak achievements
+	_, err = db.Conn.Exec(db.Context, `
+		DELETE FROM user_achievements WHERE $1 = ANY (proposals) AND achievement_type != 'streak'
+	`, proposalId)
+
+	if err != nil {
+		return err
+	}
+
+	err = updateStreak(db, proposalId)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func updateStreak(db *s.Database, proposalId int) error {
+	var achievements = []struct {
+		Id        int64   `json:"id"`
+		Proposals []int64 `json:"proposals"`
+		Details   string  `json:"details"`
+	}{}
+
+	err := pgxscan.Select(db.Context, db.Conn, &achievements, `
+		SELECT id, proposals, details FROM user_achievements WHERE $1 = ANY (proposals) AND achievement_type = 'streak'
+	`, proposalId)
+
+	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
+		return err
+	}
+
+	for _, a := range achievements {
+		pId := int64(proposalId)
+
+		// Find index of proposal id being cancelled
+		index := -1
+		for i, id := range a.Proposals {
+			if id == pId {
+				index = i
+				break
+			}
+		}
+
+		// Remove cancelled proposalId from array
+		copy(a.Proposals[index:], a.Proposals[index+1:])
+		a.Proposals = a.Proposals[:len(a.Proposals)-1]
+
+		// NOTE: If cancelled proposal is in the middle of a streak greater than 3, the user will maintain
+		// their streak, but it will be one less in length. Streaks are not split into smaller streaks wrt
+		// cancelled proposals.
+
+		defaultStreakLength := 3
+		if len(a.Proposals) >= defaultStreakLength {
+			// update details with updated proposals array
+			updatedStreak := strings.Trim(strings.Join(strings.Fields(fmt.Sprint(a.Proposals)), ","), "[]")
+			s := strings.Split(a.Details, ":")
+			s[3] = updatedStreak
+			a.Details = strings.Join(s, ":")
+
+			_, err := db.Conn.Exec(db.Context, `
+				UPDATE user_achievements
+				SET proposals = $1, details = $2
+				WHERE id = $3
+			`, a.Proposals, a.Details, a.Id)
+
+			if err != nil {
+				return err
+			}
+		} else {
+			_, err := db.Conn.Exec(db.Context, `DELETE FROM user_achievements WHERE id = $1`, a.Id)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }

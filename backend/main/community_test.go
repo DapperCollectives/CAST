@@ -66,6 +66,42 @@ func TestCreateCommunity(t *testing.T) {
 	assert.NotNil(t, community.ID)
 }
 
+func TestCreateCommunityFail(t *testing.T) {
+	// Prep
+	clearTable("communities")
+	clearTable("community_users")
+
+	// Create Community
+	communityStruct := otu.GenerateFailCommunityStruct("account")
+	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
+
+	response := otu.CreateCommunityAPI(communityPayload)
+	checkResponseCode(t, http.StatusBadRequest, response.Code)
+}
+
+func TestCreateCommunityNilStrategy(t *testing.T) {
+	// Prep
+	clearTable("communities")
+	clearTable("community_users")
+
+	// Create Community
+	communityStruct := otu.GenerateNilStrategyCommunityStruct("account")
+	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
+
+	response := otu.CreateCommunityAPI(communityPayload)
+	checkResponseCode(t, http.StatusCreated, response.Code)
+
+	// Parse
+	var community models.Community
+	json.Unmarshal(response.Body.Bytes(), &community)
+
+	// Validate
+	assert.Equal(t, utils.NilStrategyCommunity.Name, community.Name)
+	assert.Equal(t, utils.NilStrategyCommunity.Body, community.Body)
+	assert.Equal(t, utils.NilStrategyCommunity.Logo, community.Logo)
+	assert.NotNil(t, community.ID)
+}
+
 func TestCommunityAdminRoles(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")
@@ -152,6 +188,32 @@ func TestGetCommunitiesForHomepageAPI(t *testing.T) {
 	json.Unmarshal(response.Body.Bytes(), &p)
 
 	assert.Equal(t, 1, len(p.Data))
+}
+
+func TestGetCommunityActiveStrategies(t *testing.T) {
+	clearTable("communities")
+	clearTable("community_users")
+	clearTable("proposals")
+
+	communityId := otu.AddCommunitiesWithUsers(1, "user1")[0]
+
+	proposalStruct := otu.GenerateProposalStruct("user1", communityId)
+	payload1 := otu.GenerateProposalPayload("user1", proposalStruct)
+	otu.CreateProposalAPI(payload1)
+
+	payload2 := otu.GenerateProposalPayload("user1", proposalStruct)
+	otu.CreateProposalAPI(payload2)
+
+	cancelPayload := otu.GenerateCancelProposalStruct("user1", payload1.ID)
+	otu.UpdateProposalAPI(payload1.ID, cancelPayload)
+
+	response := otu.GetCommunityActiveStrategies(communityId)
+	CheckResponseCode(t, http.StatusOK, response.Code)
+
+	var results []string
+	json.Unmarshal(response.Body.Bytes(), &results)
+
+	assert.Equal(t, 1, len(results))
 }
 
 func TestUpdateCommunity(t *testing.T) {

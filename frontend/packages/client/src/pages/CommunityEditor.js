@@ -2,13 +2,14 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import { useWebContext } from 'contexts/Web3';
 import {
-  CommunityEditorDetails,
   CommunityEditorLinks,
-  CommunityEditorProfile,
   CommunityPropsAndVoting,
   Dropdown,
   Loader,
+  ProposalThresholdEditor,
 } from 'components';
+import { CommunityEditorDetails } from 'components/Community/CommunityEditorDetails';
+import { CommunityEditorProfile } from 'components/Community/CommunityEditorProfile';
 import { ArrowLeft, ArrowLeftBold } from 'components/Svg';
 import {
   useCommunityDetails,
@@ -16,6 +17,7 @@ import {
   useMediaQuery,
   useUserRoleOnCommunity,
 } from 'hooks';
+import useCommunityActiveVotingStrategies from 'hooks/useCommunityActiveStrategies';
 import { CommunityEditPageTabs } from 'const';
 
 const MenuTabs = ({ tabs, communityId, onClickButtonTab = () => {} } = {}) => {
@@ -62,6 +64,16 @@ const MenuTabs = ({ tabs, communityId, onClickButtonTab = () => {} } = {}) => {
           Proposals &amp; Voting
         </button>
       </div>
+      <div className="is-flex flex-1" style={{ marginTop: '18px' }}>
+        <button
+          className={`button is-white px-2 small-text ${
+            tabs.votingStrategies ? 'has-text-weight-bold' : ''
+          }`}
+          onClick={onClickButtonTab('voting-strategies')}
+        >
+          Voting Strategies
+        </button>
+      </div>
     </div>
   );
 };
@@ -97,6 +109,10 @@ const DropdownMenu = ({ communityId, onClickButtonTab = () => {} } = {}) => {
             label: 'Proposals & Voting',
             value: CommunityEditPageTabs.proposalAndVoting,
           },
+          {
+            label: 'Voting Strategies',
+            value: CommunityEditPageTabs.votingStrategies,
+          },
         ]}
         onSelectValue={(value) => {
           onClickButtonTab(value)();
@@ -116,6 +132,8 @@ export default function CommunityEditorPage() {
     loading,
     updateCommunityDetails,
   } = useCommunityDetails(communityId);
+  const { data: activeStrategies } =
+    useCommunityActiveVotingStrategies(communityId);
 
   const { uploadFile } = useFileUploader();
   const notMobile = useMediaQuery();
@@ -127,6 +145,7 @@ export default function CommunityEditorPage() {
       profile: value === CommunityEditPageTabs.profile,
       details: value === CommunityEditPageTabs.details,
       proposalsAndVoting: value === CommunityEditPageTabs.proposalAndVoting,
+      votingStrategies: value === CommunityEditPageTabs.votingStrategies,
     });
   };
 
@@ -190,7 +209,9 @@ export default function CommunityEditorPage() {
                   name={community?.name}
                   body={community?.body}
                   logo={community?.logo}
+                  category={community?.category}
                   banner={community?.bannerImgUrl}
+                  terms={community?.termsAndConditionsUrl}
                   updateCommunity={updateCommunity}
                   uploadFile={uploadFile}
                 />
@@ -208,11 +229,25 @@ export default function CommunityEditorPage() {
               <CommunityEditorDetails communityId={community?.id} />
             )}
             {tabs.proposalsAndVoting && (
+              <ProposalThresholdEditor
+                communityId={community?.id}
+                updateCommunity={updateCommunity}
+                updatingCommunity={loading}
+                contractAddress={community?.contractAddr}
+                contractName={community?.contractName}
+                contractType={community?.contractType}
+                storagePath={community?.publicPath}
+                proposalThreshold={community?.proposalThreshold}
+                onlyAuthorsToSubmitProposals={community?.onlyAuthorsToSubmit}
+              />
+            )}
+            {tabs.votingStrategies && (
               <CommunityPropsAndVoting
                 communityId={community?.id}
                 updateCommunity={updateCommunity}
                 updatingCommunity={loading}
                 communityVotingStrategies={community.strategies}
+                activeStrategies={activeStrategies}
               />
             )}
           </div>

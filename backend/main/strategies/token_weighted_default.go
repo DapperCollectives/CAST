@@ -7,7 +7,6 @@ import (
 	"github.com/DapperCollectives/CAST/backend/main/models"
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	shared "github.com/DapperCollectives/CAST/backend/main/shared"
-	"github.com/jackc/pgx/v4"
 	"github.com/rs/zerolog/log"
 )
 
@@ -24,11 +23,6 @@ func (s *TokenWeightedDefault) FetchBalance(
 
 	var c models.Community
 	if err := c.GetCommunityByProposalId(s.DB, b.Proposal_id); err != nil {
-		return nil, err
-	}
-
-	if err := b.GetBalanceByAddressAndBlockHeight(s.DB); err != nil && err.Error() != pgx.ErrNoRows.Error() {
-		log.Error().Err(err).Msg("Error fetching balance from database.")
 		return nil, err
 	}
 

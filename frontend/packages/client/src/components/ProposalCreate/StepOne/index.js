@@ -6,10 +6,11 @@ import React, {
   useState,
 } from 'react';
 import { Editor } from 'react-draft-wysiwyg';
+import { useParams } from 'react-router-dom';
 import { useModalContext } from 'contexts/NotificationModal';
 import { Dropdown, Error, UploadImageModal } from 'components';
 import { Image } from 'components/Svg';
-import { useCommunityDetails, useQueryParams } from 'hooks';
+import { useCommunityDetails } from 'hooks';
 import { kebabToString } from 'utils';
 import {
   AtomicBlockUtils,
@@ -67,7 +68,7 @@ const StepOne = ({
 }) => {
   const dropDownRef = useRef();
 
-  const { communityId } = useQueryParams({ communityId: 'communityId' });
+  const { communityId } = useParams();
 
   const { data: community } = useCommunityDetails(communityId);
 

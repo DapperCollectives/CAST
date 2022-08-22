@@ -10,7 +10,7 @@ run:
 	./${BINARY_NAME}
 
 test:
-	go test -v ./...
+	go test -v -cover ./...
 
 build_and_run: build run
 
