@@ -177,6 +177,7 @@ export default function ImageChoiceUploader({
     onDrop,
     maxFiles: 1,
     accept: 'image/jpeg,image/png,image/gif',
+    useFsAccessApi: false,
   });
 
   return (
