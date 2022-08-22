@@ -1,7 +1,9 @@
 import { useCallback, useReducer } from 'react';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
+import { useWebContext } from 'contexts/Web3';
+import { CAST_VOTE_TX, CREATE_PROPOSAL_TX, UPDATE_PROPOSAL_TX } from 'const';
 import { checkResponse, getCompositeSigs } from 'utils';
-import { CODE as transferTokensCode } from '@onflow/six-transfer-tokens';
+import * as fcl from '@onflow/fcl';
 import * as t from '@onflow/types';
 import { INITIAL_STATE, defaultReducer } from '../reducers';
 
@@ -11,22 +13,23 @@ export default function useProposal() {
     loading: false,
   });
   const { notifyError } = useErrorHandlerContext();
+  const { user, signMessageByWalletProvider } = useWebContext();
 
   const createProposal = useCallback(
-    async (injectedProvider, data) => {
+    async (data) => {
       dispatch({ type: 'PROCESSING' });
       const { communityId, ...proposalData } = data;
       const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}/proposals`;
       try {
-        const timestamp = Date.now().toString();
-        const hexTime = Buffer.from(timestamp).toString('hex');
-        const _compositeSignatures = await injectedProvider
-          .currentUser()
-          .signUserMessage(hexTime);
+        const hexTime = Buffer.from(Date.now().toString()).toString('hex');
+        const [compositeSignatures, voucher] =
+          await signMessageByWalletProvider(
+            user?.services[0]?.uid,
+            CREATE_PROPOSAL_TX,
+            hexTime
+          );
 
-        const compositeSignatures = getCompositeSigs(_compositeSignatures);
-
-        if (!compositeSignatures) {
+        if (!compositeSignatures && !voucher) {
           const statusText = 'No valid user signature found.';
           // modal error will open
           notifyError(
@@ -47,8 +50,9 @@ export default function useProposal() {
           },
           body: JSON.stringify({
             ...proposalData,
-            timestamp,
+            timestamp: hexTime,
             compositeSignatures,
+            voucher,
           }),
         };
 
@@ -60,113 +64,30 @@ export default function useProposal() {
         dispatch({ type: 'ERROR', payload: { errorData: err.message } });
       }
     },
-    [dispatch, notifyError]
+    [dispatch, notifyError, signMessageByWalletProvider, user?.services]
   );
 
   const voteOnProposal = async (
     injectedProvider,
     proposal,
     voteData,
-    isLedger
+    walletProviderId
   ) => {
-    return isLedger
-      ? voteOnProposalLedger(injectedProvider, proposal, voteData)
-      : voteOnProposalBlocto(injectedProvider, proposal, voteData);
+    switch (walletProviderId) {
+      case 'dapper#authn':
+        return voteOnProposalWithTxSig(injectedProvider, proposal, voteData);
+      case 'fcl-ledger-authz':
+        return voteOnProposalWithTxSig(injectedProvider, proposal, voteData);
+      default:
+        return voteOnProposalWithMessageSig(
+          injectedProvider,
+          proposal,
+          voteData
+        );
+    }
   };
 
-  const voteOnProposalLedger = useCallback(
-    async (injectedProvider, proposal, voteData) => {
-      try {
-        const timestamp = Date.now();
-        const hexChoice = Buffer.from(voteData.choice).toString('hex');
-        // use static transaction to address for voting option
-        const txOptionsAddresses = (
-          process.env.REACT_APP_TX_OPTIONS_ADDRS || ''
-        ).split(',');
-        const optionId = proposal.choices
-          .map((c) => c.value)
-          .indexOf(voteData.choice);
-        const toAddress = txOptionsAddresses[optionId];
-        let _compositeSignatures = '';
-
-        if (!toAddress) {
-          return { error: 'Missing voting transaction to address' };
-        }
-        const buildAuthz = (address) => {
-          return async function authz(account) {
-            return {
-              ...account,
-              addr: injectedProvider.sansPrefix(address),
-              keyId: 0,
-              signingFunction: async (signable) => {
-                const result = await injectedProvider.authz();
-                const signedResult = await result.signingFunction(signable);
-                _compositeSignatures = signedResult;
-                return {
-                  addr: injectedProvider.withPrefix(address),
-                  keyId: 0,
-                  signature: signedResult.signature,
-                };
-              },
-            };
-          };
-        };
-
-        // only serialize the tx not send
-        const { transactionId } = await injectedProvider.send([
-          injectedProvider.transaction(transferTokensCode),
-          injectedProvider.args([
-            injectedProvider.arg('0.0', t.UFix64),
-            injectedProvider.arg(toAddress, t.Address),
-          ]),
-          injectedProvider.proposer(buildAuthz(voteData.addr)),
-          injectedProvider.authorizations([injectedProvider.authz]),
-          injectedProvider.payer(injectedProvider.authz),
-          injectedProvider.limit(100),
-        ]);
-
-        const message = `${proposal.id}:${hexChoice}:${timestamp}:ledger-${transactionId}`;
-        const compositeSignatures = getCompositeSigs([_compositeSignatures]);
-        if (!compositeSignatures) {
-          return { error: 'No valid user signature found.' };
-        }
-
-        // wait on the client till transaction is sealed
-        await injectedProvider.tx(transactionId).onceSealed();
-
-        const fetchOptions = {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            ...voteData,
-            compositeSignatures,
-            message,
-            timestamp,
-            transactionId,
-          }),
-        };
-        const { id } = proposal;
-        const response = await fetch(
-          `${process.env.REACT_APP_BACK_END_SERVER_API}/proposals/${id}/votes`,
-          fetchOptions
-        );
-
-        if (response.json) {
-          const json = await response.json();
-          return json;
-        }
-
-        return { error: response };
-      } catch (err) {
-        return { error: String(err) };
-      }
-    },
-    []
-  );
-
-  const voteOnProposalBlocto = useCallback(
+  const voteOnProposalWithMessageSig = useCallback(
     async (injectedProvider, proposal, voteData) => {
       try {
         const timestamp = Date.now();
@@ -190,8 +111,61 @@ export default function useProposal() {
           body: JSON.stringify({
             ...voteData,
             compositeSignatures,
+            message: hexMessage,
+            timestamp,
+            voucher: null,
+          }),
+        };
+        const { id } = proposal;
+        const response = await fetch(
+          `${process.env.REACT_APP_BACK_END_SERVER_API}/proposals/${id}/votes`,
+          fetchOptions
+        );
+
+        if (response.json) {
+          const json = await response.json();
+          return json;
+        }
+
+        return { error: response };
+      } catch (err) {
+        return { error: String(err) };
+      }
+    },
+    []
+  );
+
+  const voteOnProposalWithTxSig = useCallback(
+    async (injectedProvider, proposal, voteData) => {
+      try {
+        const timestamp = Date.now();
+        const hexChoice = Buffer.from(voteData.choice).toString('hex');
+        const message = `${proposal.id}:${hexChoice}:${timestamp}`;
+
+        const voucher = await fcl.serialize([
+          fcl.transaction(CAST_VOTE_TX),
+          fcl.args([
+            fcl.arg(`${proposal.id}`, t.String),
+            fcl.arg(hexChoice, t.String),
+            fcl.arg(`${timestamp}`, t.String),
+          ]),
+          fcl.limit(999),
+          fcl.proposer(fcl.authz),
+          fcl.authorizations([fcl.authz]),
+          fcl.payer(fcl.authz),
+        ]);
+        const voucherJSON = JSON.parse(voucher);
+
+        const fetchOptions = {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...voteData,
             message,
             timestamp,
+            voucher: voucherJSON,
           }),
         };
         const { id } = proposal;
@@ -252,13 +226,16 @@ export default function useProposal() {
     async (injectedProvider, proposalData, update) => {
       const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${proposalData.communityId}/proposals/${proposalData.id}`;
       try {
-        const timestamp = Date.now().toString();
-        const hexTime = Buffer.from(timestamp).toString('hex');
-        const _compositeSignatures = await injectedProvider
-          .currentUser()
-          .signUserMessage(hexTime);
-        const compositeSignatures = getCompositeSigs(_compositeSignatures);
-        if (!compositeSignatures) {
+        const hexTime = Buffer.from(Date.now().toString()).toString('hex');
+
+        const [compositeSignatures, voucher] =
+          await signMessageByWalletProvider(
+            user?.services[0]?.uid,
+            UPDATE_PROPOSAL_TX,
+            hexTime
+          );
+
+        if (!compositeSignatures && !voucher) {
           return { error: 'No valid user signature found.' };
         }
 
@@ -269,8 +246,9 @@ export default function useProposal() {
           },
           body: JSON.stringify({
             ...update,
-            timestamp,
+            timestamp: hexTime,
             compositeSignatures,
+            voucher,
           }),
         };
         dispatch({ type: 'PROCESSING' });
@@ -300,7 +278,7 @@ export default function useProposal() {
         return { error: err.message };
       }
     },
-    [dispatch, notifyError]
+    [dispatch, notifyError, signMessageByWalletProvider, user?.services]
   );
   return {
     ...state,
