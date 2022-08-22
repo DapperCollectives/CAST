@@ -192,6 +192,7 @@ var (
 		Instagram_url:            &instagram,
 		Strategies:               &updatedStrategies,
 		Terms_and_conditions_url: &termsAndConditions,
+		Only_authors_to_submit:   &notOnlyAuthors,
 	}
 )
 
