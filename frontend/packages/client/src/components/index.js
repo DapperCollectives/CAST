@@ -19,13 +19,13 @@ export { default as CommunityPulse } from './CommunityPulse';
 export { default as CommunityMemberList } from './CommunityMembersList';
 export { default as CommunityAbout } from './CommunityAbout';
 export { default as JoinCommunityButton } from './Community/JoinCommunityButton';
-export { default as CommunityEditorProfile } from './Community/CommunityEditorProfile';
-export { default as CommunityEditorLinks } from './Community/CommunityEditorLinks';
-export { default as CommunityEditorDetails } from './Community/CommunityEditorDetails';
+export { CommunityEditorProfile } from './Community/CommunityEditorProfile';
+export { CommunityEditorLinks } from './Community/CommunityEditorLinks';
+export { CommunityEditorDetails } from './Community/CommunityEditorDetails';
 export { default as CommunityPropsAndVoting } from './Community/CommunityPropsAndVoting';
+export { ProposalThresholdEditor } from './Community/ProposalThresholdEditor';
 export { default as AddButton } from './AddButton';
 export { default as ActionButton } from './ActionButton';
-export { default as Input } from './Input';
 export { default as Title } from './Title';
 export {
   PropCreateStepOne,
@@ -42,3 +42,5 @@ export { default as WalletConnectModal } from './WalletConnectModal';
 export { default as Label } from './Label';
 export { default as ModalAboutItem } from './ModalAboutItem';
 export { default as CommunityHeader } from './CommunityHeader';
+export { default as Form } from './common/Form';
+export { default as Input } from './Input';

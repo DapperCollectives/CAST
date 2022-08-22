@@ -2,11 +2,14 @@ import { useCallback, useReducer } from 'react';
 import { useErrorHandlerContext } from '../contexts/ErrorHandler';
 import { useFileUploader } from 'hooks';
 import { checkResponse, getCompositeSigs } from 'utils';
+import networks from 'networks';
 import {
   INITIAL_STATE,
   PAGINATION_INITIAL_STATE,
   paginationReducer,
 } from '../reducers';
+
+const networkConfig = networks[process.env.REACT_APP_FLOW_ENV];
 
 const setDefaultValue = (field, fallbackValue) => {
   if (field === undefined || field === '') {
@@ -52,6 +55,7 @@ export default function useCommunity({
   const createCommunity = useCallback(
     async (injectedProvider, communityData) => {
       dispatch({ type: 'PROCESSING' });
+      const { flowAddress } = networkConfig;
       const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities`;
       try {
         const timestamp = Date.now().toString();
@@ -82,7 +86,7 @@ export default function useCommunity({
         const {
           communityName: name,
           communityDescription: body,
-          category: categorySelected,
+          communityCategory: category,
           communityTerms: termsAndConditionsUrl,
           listAddrAdmins,
           listAddrAuthors,
@@ -98,7 +102,7 @@ export default function useCommunity({
           contractAdrress: contractAddr,
           contractName: contractN,
           storagePath: storageP,
-          proposalThreshold: propThreshold,
+          proposalThreshold,
           onlyAuthorsToSubmitProposals,
           strategies,
         } = communityData;
@@ -130,7 +134,7 @@ export default function useCommunity({
           body: JSON.stringify({
             name,
             body,
-            category: categorySelected?.value,
+            category,
             termsAndConditionsUrl,
             creatorAddr,
             additionalAuthors: listAddrAuthors,
@@ -143,13 +147,13 @@ export default function useCommunity({
             discordUrl,
             logo: communityLogo?.fileUrl,
             bannerImgUrl: communityBanner?.fileUrl,
-            contractAddress: setDefaultValue(
+            contractAddr: setDefaultValue(
               contractAddr,
-              '0x0ae53cb6e3f42a79'
+              flowAddress.contractAddr
             ),
-            contractName: setDefaultValue(contractN, 'FlowToken'),
-            storagePath: setDefaultValue(storageP, 'flowTokenBalance'),
-            proposalThreshold: setDefaultValue(propThreshold, '0'),
+            contractName: setDefaultValue(contractN, flowAddress.contractName),
+            publicPath: setDefaultValue(storageP, flowAddress.storagePath),
+            proposalThreshold: setDefaultValue(proposalThreshold, '0'),
             strategies,
             onlyAuthorsToSubmit: Boolean(onlyAuthorsToSubmitProposals),
             timestamp,
