@@ -12,7 +12,7 @@ run:
 test:
 	go test -v -cover ./...
 
-	# creates proposals
+	# creates proposals against local db for manual emulator testing
 proposals:
 	go test -v ./... -run CreateManyProposals -amount=4 -db=local
 
