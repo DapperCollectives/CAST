@@ -5,7 +5,7 @@ const DEFAULT_PAGE_SIZE = 10;
 const getLeaderBoardUrl = (communityId, addr, pageSize) =>
   `${COMMUNITIES_URL}/${communityId}/leaderboard?count=${pageSize}&addr=${addr}`;
 
-const fetchLeaderBoard = async (
+export const fetchLeaderBoard = async (
   communityId,
   addr,
   pageSize = DEFAULT_PAGE_SIZE
@@ -20,4 +20,13 @@ const fetchLeaderBoard = async (
   }
 };
 
-export default fetchLeaderBoard;
+export const fetchActiveStrategies = async (communityId) => {
+  try {
+    const response = await fetch(
+      `${COMMUNITIES_URL}/${communityId}/strategies`
+    );
+    return await checkResponse(response);
+  } catch (err) {
+    throw err;
+  }
+};

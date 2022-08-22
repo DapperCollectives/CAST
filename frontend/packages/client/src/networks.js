@@ -7,6 +7,12 @@ const networksConfig = {
     walletDiscoveryApi: null,
     walletDiscoveryInclude: [],
     strategiesConfig: {},
+    flowAddress: {
+      contractName: 'FlowToken',
+      contractAddr: '0x0ae53cb6e3f42a79',
+      storagePath: 'flowTokenBalance',
+      contractType: 'ft',
+    },
   },
   testnet: {
     accessApi: 'https://rest-testnet.onflow.org',
@@ -17,6 +23,12 @@ const networksConfig = {
       // '0x82ec283f88a62e65' // Dapper Wallet
     ],
     strategiesConfig: {},
+    flowAddress: {
+      contractName: 'FlowToken',
+      contractAddr: '0x7e60df042a9c0868',
+      storagePath: 'flowTokenBalance',
+      contractType: 'ft',
+    },
   },
   mainnet: {
     accessApi: 'https://rest-mainnet.onflow.org',
@@ -27,6 +39,12 @@ const networksConfig = {
       // '0xead892083b3e2c6c' // Dapper Wallet
     ],
     strategiesConfig: {},
+    flowAddress: {
+      contractName: 'FlowToken',
+      contractAddr: '0x1654653399040a61',
+      storagePath: 'flowTokenBalance',
+      contractType: 'ft',
+    },
   },
 };
 

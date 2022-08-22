@@ -1,8 +1,6 @@
 package strategies
 
 import (
-	"math"
-
 	"github.com/DapperCollectives/CAST/backend/main/models"
 	"github.com/DapperCollectives/CAST/backend/main/shared"
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
@@ -37,9 +35,21 @@ func (b *BalanceOfNfts) FetchBalance(
 		return nil, err
 	}
 
+	if err := b.queryNFTs(*vb, strategy, balance); err != nil {
+		return nil, err
+	}
+
+	return balance, nil
+}
+
+func (b *BalanceOfNfts) queryNFTs(
+	vb models.VoteWithBalance,
+	strategy models.Strategy,
+	balance *models.Balance,
+) error {
 	nftIds, err := b.FlowAdapter.GetNFTIds(balance.Addr, &strategy.Contract)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	for _, nftId := range nftIds {
@@ -49,19 +59,19 @@ func (b *BalanceOfNfts) FetchBalance(
 		vb.NFTs = append(vb.NFTs, nft)
 	}
 
-	doesExist, err := models.DoesNFTExist(b.DB, vb)
+	doesExist, err := models.DoesNFTExist(b.DB, &vb)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	//only if the NFT ID is not already in the DB,
 	//do we add the balance
 	if !doesExist && err == nil {
-		err = models.CreateUserNFTRecord(b.DB, vb)
+		err = models.CreateUserNFTRecord(b.DB, &vb)
 		balance.NFTCount = len(vb.NFTs)
 	}
 
-	return balance, nil
+	return err
 }
 
 func (b *BalanceOfNfts) TallyVotes(
@@ -71,18 +81,17 @@ func (b *BalanceOfNfts) TallyVotes(
 ) (models.ProposalResults, error) {
 
 	for _, vote := range votes {
-
 		if len(vote.NFTs) != 0 {
 			var allowedBalance float64
 
 			if proposal.Max_weight != nil {
-				allowedBalance = proposal.EnforceMaxWeight(float64(*vote.PrimaryAccountBalance))
+				allowedBalance = proposal.EnforceMaxWeight(float64(len(vote.NFTs)))
 			} else {
 				allowedBalance = float64(len(vote.NFTs))
 			}
 
-			r.Results[vote.Choice] += int(allowedBalance * math.Pow(10, -8))
-			r.Results_float[vote.Choice] += allowedBalance * math.Pow(10, -8)
+			r.Results[vote.Choice] += int(allowedBalance)
+			r.Results_float[vote.Choice] += allowedBalance
 		}
 	}
 

@@ -1,6 +1,8 @@
 package test_utils
 
-import "strconv"
+import (
+	"strconv"
+)
 
 func (otu *OverflowTestUtils) GenerateVotes(communityId int, numProposals int, numUsers int) {
 	if numProposals == 0 {

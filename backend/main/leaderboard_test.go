@@ -12,48 +12,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetLeaderboard(t *testing.T) {
-
+func resetTables() {
 	clearTable("communities")
+	clearTable("balances")
 	clearTable("community_users")
 	clearTable("user_achievements")
 	clearTable("proposals")
 	clearTable("votes")
-
-	communityId := otu.AddCommunities(1)[0]
-
-	expectedUsers := 2
-	expectedProposals := 2
-
-	// users get single vote for each proposal they voted on
-	expectedScore := expectedProposals
-
-	otu.GenerateVotes(communityId, expectedProposals, expectedUsers)
-
-	// Remove all achievements to test base case for scoring
-
-	response := otu.GetCommunityLeaderboardAPI(communityId)
-	checkResponseCode(t, http.StatusOK, response.Code)
-
-	var p test_utils.PaginatedResponseWithLeaderboardUser
-	json.Unmarshal(response.Body.Bytes(), &p)
-
-	users := p.Data.Users
-
-	receivedUser1Score := users[0].Score
-	receivedUser2Score := users[1].Score
-
-	assert.Equal(t, expectedUsers, len(users))
-	assert.Equal(t, expectedScore, receivedUser1Score)
-	assert.Equal(t, expectedScore, receivedUser2Score)
 }
 
 func TestGetLeaderboardCurrentUser(t *testing.T) {
-	clearTable("communities")
-	clearTable("community_users")
-	clearTable("user_achievements")
-	clearTable("proposals")
-	clearTable("votes")
+	resetTables()
 
 	communityId := otu.AddCommunities(1)[0]
 	proposalId := otu.AddActiveProposals(communityId, 1)[0]
@@ -78,11 +47,7 @@ func TestGetLeaderboardCurrentUser(t *testing.T) {
 }
 
 func TestGetLeaderboardWithEarlyVotes(t *testing.T) {
-	clearTable("communities")
-	clearTable("community_users")
-	clearTable("user_achievements")
-	clearTable("proposals")
-	clearTable("votes")
+	resetTables()
 
 	communityId := otu.AddCommunities(1)[0]
 	earlyVoteBonus := 1
@@ -109,16 +74,12 @@ func TestGetLeaderboardWithEarlyVotes(t *testing.T) {
 }
 
 func TestGetLeaderboardWithSingleStreak(t *testing.T) {
-	clearTable("communities")
-	clearTable("community_users")
-	clearTable("user_achievements")
-	clearTable("proposals")
-	clearTable("votes")
+	resetTables()
 
 	communityId := otu.AddCommunities(1)[0]
 	streaks := []int{3, 4}
 	streakBonus := 1
-	expectedUsers := 2
+	expectedUsers := len(streaks)
 	expectedScoreA := streaks[0] + (1 * streakBonus)
 	expectedScoreB := streaks[1] + (1 * streakBonus)
 
@@ -145,12 +106,17 @@ func TestGetLeaderboardWithSingleStreak(t *testing.T) {
 	assert.Equal(t, expectedScoreB, receivedScoreB)
 }
 
+// func TestGetLeaderboardWithMultiStreaks(t *testing.T) {
+// 	resetTables()
+
+// 	communityId := otu.AddCommunities(1)[0]
+// 	streaks := []int{3, 4}
+// 	streakBonus := 1
+// 	expectedUsers := 1
+
 func TestGetLeaderboardWithMultiStreaks(t *testing.T) {
-	clearTable("communities")
-	clearTable("community_users")
-	clearTable("user_achievements")
-	clearTable("proposals")
-	clearTable("votes")
+	resetTables()
+
 	communityId := otu.AddCommunities(1)[0]
 	streaks := []int{3, 4}
 	streakBonus := 1
@@ -176,12 +142,8 @@ func TestGetLeaderboardWithMultiStreaks(t *testing.T) {
 }
 
 func TestGetLeaderboardWithWinningVote(t *testing.T) {
-	clearTable("communities")
-	clearTable("community_users")
-	clearTable("user_achievements")
-	clearTable("proposals")
-	clearTable("proposal_results")
-	clearTable("votes")
+	resetTables()
+
 	communityId := otu.AddCommunities(1)[0]
 	winningVoteBonus := 1
 
@@ -219,11 +181,7 @@ func TestGetLeaderboardWithWinningVote(t *testing.T) {
 }
 
 func TestGetLeaderboardDefaultPaging(t *testing.T) {
-	clearTable("communities")
-	clearTable("community_users")
-	clearTable("user_achievements")
-	clearTable("proposals")
-	clearTable("votes")
+	resetTables()
 
 	communityId := otu.AddCommunities(1)[0]
 
@@ -243,11 +201,7 @@ func TestGetLeaderboardDefaultPaging(t *testing.T) {
 }
 
 func TestGetLeaderboardPaging(t *testing.T) {
-	clearTable("communities")
-	clearTable("community_users")
-	clearTable("user_achievements")
-	clearTable("proposals")
-	clearTable("votes")
+	resetTables()
 
 	communityId := otu.AddCommunities(1)[0]
 
