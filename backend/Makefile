@@ -14,7 +14,7 @@ test:
 
 	# creates proposals
 proposals:
-	go test -v ./... -run CreateManyProposals -amount=$(amount) -db=$(db)   
+	go test -v ./... -run CreateManyProposals -amount=4 -db=local
 
 build_and_run: build run
 

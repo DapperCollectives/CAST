@@ -2,11 +2,8 @@ package main
 
 import (
 	"encoding/json"
-	"flag"
 	"fmt"
-	"log"
 	"net/http"
-	"strconv"
 	"testing"
 	"time"
 
@@ -230,11 +227,7 @@ func TestCreateManyProposals(t *testing.T) {
 	communityId := otu.AddCommunitiesWithUsers(1, authorName)[0]
 
 	t.Run("A community author should be able to create many proposals", func(t *testing.T) {
-		arg := flag.Args()
-		numProposals, err := strconv.Atoi(arg[0])
-		if err != nil {
-			log.Fatal(err)
-		}
+		numProposals := 4
 
 		for i := 0; i < numProposals; i++ {
 			proposalStruct := otu.GenerateProposalStruct(authorName, communityId)
