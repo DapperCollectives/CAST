@@ -11,7 +11,7 @@ import {
   PropCreateStepTwo,
 } from 'components/ProposalCreate';
 import { useProposal } from 'hooks';
-import { customDraftToHTML, parseDateToServer } from 'utils';
+import { parseDateToServer } from 'utils';
 
 export default function ProposalCreatePage() {
   const { createProposal, data, loading, error } = useProposal();
@@ -72,9 +72,7 @@ export default function ProposalCreatePage() {
     }
     const name = stepsData[0].title;
 
-    const currentContent = stepsData[0]?.description?.getCurrentContent();
-
-    const body = customDraftToHTML(currentContent);
+    const body = stepsData[0]?.body;
 
     const startTime = parseDateToServer(
       stepsData[1].startDate,

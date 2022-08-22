@@ -1,69 +1,18 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
-import { Editor } from 'react-draft-wysiwyg';
-import { useForm, useWatch } from 'react-hook-form';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import { useModalContext } from 'contexts/NotificationModal';
-import { Error, UploadImageModal } from 'components';
-import { Image } from 'components/Svg';
 import Dropdown from 'components/common/Dropdown';
 import Form from 'components/common/Form';
 import Input from 'components/common/Input';
 import { useCommunityDetails } from 'hooks';
 import { kebabToString } from 'utils';
 import { yupResolver } from '@hookform/resolvers/yup';
-import {
-  AtomicBlockUtils,
-  ContentState,
-  DefaultDraftBlockRenderMap,
-  EditorState,
-  Modifier,
-  SelectionState,
-} from 'draft-js';
-import { Map } from 'immutable';
 import pick from 'lodash/pick';
+import CustomEditor from './Editor';
 import { stepOne } from './FormConfig';
 import ImageChoices from './ImageChoices';
 import TextBasedChoices from './TextBasedChoices';
-
-// using a React component to render custom blocks
-const ImageCaptionCustomBlock = (props) => {
-  return <div className="image-caption-draft-js">{props.children}</div>;
-};
-const blockRenderMap = Map({
-  'image-caption-block': {
-    // element is used during paste or html conversion to auto match your component;
-    // it is also retained as part of this.props.children and not stripped out. Example:
-    // element: "section",
-    wrapper: <ImageCaptionCustomBlock />,
-  },
-});
-
-// keep support for other draft default block types and add our image-caption type
-const extendedBlockRenderMap = DefaultDraftBlockRenderMap.merge(blockRenderMap);
-
-function AddImageOption({ addImage }) {
-  return (
-    <>
-      <div
-        className="rdw-image-wrapper"
-        aria-haspopup="true"
-        aria-label="rdw-image-control"
-        aria-expanded="false"
-        onClick={() => addImage()}
-      >
-        <div className="rdw-option-wrapper" title="Image">
-          <Image />
-        </div>
-      </div>
-    </>
-  );
-}
 
 const StepOne = ({
   stepData,
@@ -73,8 +22,6 @@ const StepOne = ({
   formId,
   moveToNextStep,
 }) => {
-  const dropDownRef = useRef();
-
   const { communityId } = useParams();
 
   const { data: community } = useCommunityDetails(communityId);
@@ -96,15 +43,10 @@ const StepOne = ({
     () => stepData?.proposalType || 'text-based',
     [stepData?.proposalType]
   );
-  const [localEditorState, setLocalEditorState] = useState(
-    stepData?.description || EditorState.createEmpty()
-  );
-
-  const [showUploadImagesModal, setShowUploadImagesModal] = useState(false);
 
   useEffect(() => {
     const requiredFields = {
-      description: (body) => body?.getCurrentContent().hasText(),
+      // description: (body) => body?.getCurrentContent().hasText(),
       choices: (opts) => {
         const getLabel = (o) => o?.value?.trim();
         const getImageUrl = (o) => o?.choiceImgUrl?.trim();
@@ -136,10 +78,10 @@ const StepOne = ({
     setStepValid(true);
   }, [stepData, setStepValid, onDataChange, tabOption]);
 
-  useEffect(() => {
-    onDataChange({ description: localEditorState });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [localEditorState]);
+  // useEffect(() => {
+  //   onDataChange({ description: localEditorState });
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [localEditorState]);
 
   const setTab = (option) => () => {
     onDataChange({
@@ -147,30 +89,9 @@ const StepOne = ({
     });
   };
 
-  const onEditorChange = (changes) => {
-    setLocalEditorState(changes);
-  };
-
-  const options = ['blockType', 'inline', 'list', 'link', 'emoji'];
-  const inline = {
-    options: ['bold', 'italic', 'underline'],
-  };
-  const list = {
-    options: ['unordered'],
-  };
-  const link = {
-    options: ['link'],
-    defaultTargetOption: '_blank',
-  };
-
-  const styleMap = {
-    IMAGE_CAPTION: {
-      fontFamily: 'Arimo',
-      fontStyle: 'normal',
-      fontWeight: 400,
-      fontSize: '12px',
-    },
-  };
+  // const onEditorChange = (changes) => {
+  //   setLocalEditorState(changes);
+  // };
 
   const choices = useMemo(() => stepData?.choices || [], [stepData?.choices]);
 
@@ -221,132 +142,6 @@ const StepOne = ({
     [onDataChange]
   );
 
-  const addImage = () => {
-    setShowUploadImagesModal(true);
-  };
-  const onDismissModal = () => {
-    setShowUploadImagesModal(false);
-  };
-
-  // function to update editor state
-  // used to insert more than one image at the time
-  function updateEditorState(
-    editorState,
-    { src, height, width, alt },
-    caption
-  ) {
-    const entityKey = editorState
-      .getCurrentContent()
-      .createEntity('IMAGE', 'MUTABLE', {
-        src,
-        height,
-        width,
-        alt,
-      })
-      .getLastCreatedEntityKey();
-
-    const selection = editorState.getSelection();
-
-    const currentFocusKey = selection.getFocusKey();
-
-    const newESWidthImageAndExtraBlock = AtomicBlockUtils.insertAtomicBlock(
-      editorState,
-      entityKey,
-      ' '
-    );
-    // user did not add caption text
-    if (caption.length === 0) {
-      return newESWidthImageAndExtraBlock;
-    }
-    // using cs: content state
-    const contentState = newESWidthImageAndExtraBlock.getCurrentContent();
-
-    const atomicBlockInserted = contentState.getBlockAfter(currentFocusKey);
-
-    // AtomicBlockUtils.insertAtomicBlock inserts an empty block right after the cursor position
-    const emptyBlockInserted = contentState.getBlockAfter(
-      atomicBlockInserted.getKey()
-    );
-
-    const lastBlockAddedKey = emptyBlockInserted.getKey();
-
-    // get existing blocks and
-    // filter and remove the last block added
-    // bc it's not necessary and caption block goes right after it
-    const blockMapArray = contentState
-      .getBlocksAsArray()
-      .filter((block) => block.getKey() !== lastBlockAddedKey);
-
-    // create new temporal content state to extract block with text
-    const tempCSWithCaption = ContentState.createFromText(caption);
-    // get the block with the text from temp content
-    const [tempBlockArray] = tempCSWithCaption.getBlocksAsArray();
-
-    // update block type so it's a custom type: image-caption
-    const csWithUpdatedBlock = Modifier.setBlockType(
-      ContentState.createFromBlockArray([tempBlockArray]),
-      SelectionState.createEmpty(tempBlockArray.key),
-      'image-caption-block'
-    );
-    // get the block with custom type and with text
-    const [updatedBlock] = csWithUpdatedBlock.getBlocksAsArray();
-
-    const newBlockMapArray = blockMapArray.reduce(
-      (accumulator, currentValue) => {
-        if (currentValue.getKey() === atomicBlockInserted.getKey()) {
-          return [
-            ...accumulator,
-            currentValue,
-            updatedBlock,
-            emptyBlockInserted,
-          ];
-        }
-        return [...accumulator, currentValue];
-      },
-      []
-    );
-    // add block updated and concat empty block at the end
-    const newContentState = ContentState.createFromBlockArray(
-      newBlockMapArray,
-      contentState.getEntityMap()
-    );
-
-    // this keeps the history of the action
-    const editorStateWithImageAndCaption = EditorState.push(
-      newESWidthImageAndExtraBlock,
-      newContentState,
-      'insert-fragment'
-    );
-
-    // move cursor to the end
-    const newState = EditorState.moveSelectionToEnd(
-      editorStateWithImageAndCaption
-    );
-    return newState;
-  }
-
-  const addImagesToEditor = (images, captionValues) => {
-    // captionValue
-    let tempEditorState = localEditorState;
-
-    for (let index = 0; index < images.length; index++) {
-      const image = images[index];
-      const caption = captionValues[index];
-      tempEditorState = updateEditorState(
-        tempEditorState,
-        {
-          src: image.imageUrl,
-          height: 'auto',
-          width: '100%',
-          alt: caption,
-        },
-        caption
-      );
-    }
-    setLocalEditorState(tempEditorState);
-    setShowUploadImagesModal(false);
-  };
-
   const fieldsObj = Object.assign(
     {},
     stepOne.initialValues,
@@ -363,21 +158,16 @@ const StepOne = ({
     onDataChange(data);
     moveToNextStep();
   };
+  const body = useWatch({ control, name: 'body' });
 
   const { isDirty, isSubmitting, isValid, errors } = formState;
 
   console.log('ERRORS => ', errors);
   console.log('isValid => ', isValid);
+  console.log('body => ', body);
 
   return (
     <>
-      {showUploadImagesModal && (
-        <UploadImageModal
-          onDismiss={onDismissModal}
-          onDone={addImagesToEditor}
-        />
-      )}
-
       <Form onSubmit={handleSubmit(onSubmit)} formId={formId}>
         <div className="is-flex-direction-column">
           <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6">
@@ -405,16 +195,12 @@ const StepOne = ({
               context; the expected costs and benefits of this collective
               decision.
             </p>
-            <Editor
-              toolbar={{ options, inline, list, link }}
-              editorState={localEditorState}
-              toolbarClassName="toolbarClassName"
-              wrapperClassName="border-light rounded-sm"
-              editorClassName="px-4 content"
-              onEditorStateChange={onEditorChange}
-              toolbarCustomButtons={[<AddImageOption addImage={addImage} />]}
-              customStyleMap={styleMap}
-              blockRenderMap={extendedBlockRenderMap}
+            <Controller
+              name="body"
+              control={control}
+              render={({ field: { value, onChange } }) => {
+                return <CustomEditor value={value} onChange={onChange} />;
+              }}
             />
           </div>
           <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6">

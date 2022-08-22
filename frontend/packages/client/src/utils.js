@@ -1,5 +1,6 @@
 import { formatDistance } from 'date-fns';
 import { stateToHTML } from 'draft-js-export-html';
+import { stateFromHTML } from 'draft-js-import-html';
 import { customAlphabet } from 'nanoid';
 
 const nanoid = customAlphabet('1234567890abcdef', 10);
@@ -180,6 +181,9 @@ export const customDraftToHTML = (content) => {
   return stateToHTML(content, options);
 };
 
+export const customHTMLtoDraft = (html) => {
+  return stateFromHTML(html);
+};
 export const isValidAddress = (addr) => /0[x,X][a-zA-Z0-9]{16}$/gim.test(addr);
 
 export const wait = async (milliSeconds = 5000) =>
