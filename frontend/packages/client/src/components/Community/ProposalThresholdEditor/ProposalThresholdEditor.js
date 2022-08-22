@@ -50,9 +50,13 @@ const checkIfNeedsDefaultValues = ({
 }) => {
   if (
     onlyAuthorsToSubmit &&
-    [contractAddr, contractName, publicPath, proposalThreshold].every(
-      (field) => field === ''
-    )
+    [
+      contractAddr,
+      contractName,
+      publicPath,
+      proposalThreshold,
+      contractType,
+    ].every((field) => field === '')
   ) {
     return {
       contractAddr: defaultValues.contractAddress,
