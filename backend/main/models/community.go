@@ -72,6 +72,7 @@ type UpdateCommunityRequestPayload struct {
 	Terms_and_conditions_url *string     `json:"termsAndConditionsUrl,omitempty"`
 	Proposal_validation      *string     `json:"proposalValidation,omitempty"`
 	Proposal_threshold       *string     `json:"proposalThreshold,omitempty"`
+	Only_authors_to_submit 	 *bool       `json:"onlyAuthorsToSubmit,omitempty"`
 
 	//TODO dup fields in Community struct, make sub struct for both to use
 	Contract_name *string  `json:"contractName,omitempty"`
@@ -219,8 +220,9 @@ func (c *Community) UpdateCommunity(db *s.Database, p *UpdateCommunityRequestPay
 	contract_name = COALESCE($16, contract_name),
 	contract_addr = COALESCE($17, contract_addr),
 	public_path = COALESCE($18, public_path),
-	threshold = COALESCE($19, threshold)
-	WHERE id = $20
+	threshold = COALESCE($19, threshold),
+	only_authors_to_submit = COALESCE($20, only_authors_to_submit)
+	WHERE id = $21
 	`,
 		p.Name,
 		p.Body,
@@ -241,6 +243,7 @@ func (c *Community) UpdateCommunity(db *s.Database, p *UpdateCommunityRequestPay
 		p.Contract_addr,
 		p.Public_path,
 		p.Threshold,
+		p.Only_authors_to_submit,
 		c.ID,
 	)
 
