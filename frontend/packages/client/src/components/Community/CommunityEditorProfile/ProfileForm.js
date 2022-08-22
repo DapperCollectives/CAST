@@ -82,6 +82,7 @@ export default function ProfileForm({
       onDrop: onDrop('community_image', 'logo', MAX_AVATAR_FILE_SIZE, 150),
       maxFiles: 1,
       accept: 'image/jpeg,image/png',
+      useFsAccessApi: false,
     });
 
   const {
@@ -91,6 +92,7 @@ export default function ProfileForm({
     onDrop: onDrop('community_banner', 'banner', MAX_FILE_SIZE, 1200),
     maxFiles: 1,
     accept: 'image/jpeg,image/png',
+    useFsAccessApi: false,
   });
 
   const imageDropClasses = classnames(

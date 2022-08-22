@@ -103,8 +103,9 @@ export default function useCommunity({
           websiteUrl,
           logo,
           banner,
-          contractAdrress: contractAddr,
+          contractAddress: contractAddr,
           contractName: contractN,
+          contractType: contractT,
           storagePath: storageP,
           proposalThreshold,
           onlyAuthorsToSubmitProposals,
@@ -156,6 +157,7 @@ export default function useCommunity({
               flowAddress.contractAddr
             ),
             contractName: setDefaultValue(contractN, flowAddress.contractName),
+            contractType: setDefaultValue(contractT, flowAddress.contractType),
             publicPath: setDefaultValue(storageP, flowAddress.storagePath),
             proposalThreshold: setDefaultValue(proposalThreshold, '0'),
             strategies,
@@ -165,6 +167,7 @@ export default function useCommunity({
             voucher,
           }),
         };
+
         const response = await fetch(url, fetchOptions);
         const json = await checkResponse(response);
         dispatch({ type: 'SUCCESS', payload: { data: [json] } });
