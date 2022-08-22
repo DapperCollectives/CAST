@@ -11,6 +11,7 @@ const networksConfig = {
       contractName: 'FlowToken',
       contractAddr: '0x0ae53cb6e3f42a79',
       storagePath: 'flowTokenBalance',
+      contractType: 'ft',
     },
   },
   testnet: {
@@ -26,6 +27,7 @@ const networksConfig = {
       contractName: 'FlowToken',
       contractAddr: '0x7e60df042a9c0868',
       storagePath: 'flowTokenBalance',
+      contractType: 'ft',
     },
   },
   mainnet: {
@@ -41,6 +43,7 @@ const networksConfig = {
       contractName: 'FlowToken',
       contractAddr: '0x1654653399040a61',
       storagePath: 'flowTokenBalance',
+      contractType: 'ft',
     },
   },
 };

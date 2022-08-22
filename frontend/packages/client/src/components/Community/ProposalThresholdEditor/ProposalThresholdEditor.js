@@ -15,6 +15,7 @@ const { flowAddress } = networkConfig;
 const defaultValues = {
   contractAddress: flowAddress.contractAddr,
   contractName: flowAddress.contractName,
+  contractType: flowAddress.contractType,
   storagePath: flowAddress.storagePath,
   proposalThreshold: '0',
 };
@@ -22,6 +23,7 @@ const defaultValues = {
 const checkFieldValues = ({
   contractAddress,
   contractName,
+  contractType,
   storagePath,
   proposalThreshold,
   onlyAuthorsToSubmitProposals,
@@ -31,6 +33,7 @@ const checkFieldValues = ({
     isEqual(defaultValues, {
       contractAddress,
       contractName,
+      contractType,
       storagePath,
       proposalThreshold,
     })
@@ -40,6 +43,7 @@ const checkFieldValues = ({
 const checkIfNeedsDefaultValues = ({
   contractAddress: contractAddr,
   contractName,
+  contractType,
   storagePath: publicPath,
   proposalThreshold,
   onlyAuthorsToSubmitProposals: onlyAuthorsToSubmit,
@@ -53,6 +57,7 @@ const checkIfNeedsDefaultValues = ({
     return {
       contractAddr: defaultValues.contractAddress,
       contractName: defaultValues.contractName,
+      contractType: defaultValues.contractType,
       publicPath: defaultValues.storagePath,
       proposalThreshold: defaultValues.proposalThreshold,
       onlyAuthorsToSubmit,
@@ -61,6 +66,7 @@ const checkIfNeedsDefaultValues = ({
   return {
     contractAddr,
     contractName,
+    contractType,
     publicPath,
     proposalThreshold,
     onlyAuthorsToSubmit,
@@ -71,6 +77,7 @@ export default function ProposalThresholdEditor({
   updateCommunity = () => {},
   contractAddress,
   contractName,
+  contractType,
   storagePath,
   proposalThreshold,
   onlyAuthorsToSubmitProposals,
@@ -84,12 +91,13 @@ export default function ProposalThresholdEditor({
   const useEmptyFields = checkFieldValues({
     contractAddress,
     contractName,
+    contractType,
     storagePath,
     proposalThreshold,
     onlyAuthorsToSubmitProposals,
   });
 
-  const { register, handleSubmit, formState, reset } = useForm({
+  const { control, register, handleSubmit, formState, reset } = useForm({
     resolver: yupResolver(Schema(isValidFlowAddress)),
     defaultValues: {
       ...(useEmptyFields
@@ -97,9 +105,16 @@ export default function ProposalThresholdEditor({
             proposalThreshold: '',
             contractAddress: '',
             contractName: '',
+            contractType: '',
             storagePath: '',
           }
-        : { proposalThreshold, contractAddress, contractName, storagePath }),
+        : {
+            proposalThreshold,
+            contractAddress,
+            contractName,
+            contractType,
+            storagePath,
+          }),
       onlyAuthorsToSubmitProposals,
     },
   });
@@ -122,6 +137,7 @@ export default function ProposalThresholdEditor({
       handleSubmit={handleSubmit(onSubmit)}
       errors={errors}
       register={register}
+      control={control}
       isSubmitting={isSubmitting}
       submitComponent={
         <div className="columns mb-5">

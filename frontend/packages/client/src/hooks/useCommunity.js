@@ -86,7 +86,7 @@ export default function useCommunity({
         const {
           communityName: name,
           communityDescription: body,
-          category: categorySelected,
+          communityCategory: category,
           communityTerms: termsAndConditionsUrl,
           listAddrAdmins,
           listAddrAuthors,
@@ -99,10 +99,11 @@ export default function useCommunity({
           websiteUrl,
           logo,
           banner,
-          contractAdrress: contractAddr,
+          contractAddress: contractAddr,
           contractName: contractN,
+          contractType: contractT,
           storagePath: storageP,
-          proosalThreshold,
+          proposalThreshold,
           onlyAuthorsToSubmitProposals,
           strategies,
         } = communityData;
@@ -134,7 +135,7 @@ export default function useCommunity({
           body: JSON.stringify({
             name,
             body,
-            category: categorySelected?.value,
+            category,
             termsAndConditionsUrl,
             creatorAddr,
             additionalAuthors: listAddrAuthors,
@@ -152,14 +153,16 @@ export default function useCommunity({
               flowAddress.contractAddr
             ),
             contractName: setDefaultValue(contractN, flowAddress.contractName),
+            contractType: setDefaultValue(contractT, flowAddress.contractType),
             publicPath: setDefaultValue(storageP, flowAddress.storagePath),
-            proposalThreshold: setDefaultValue(proosalThreshold, '0'),
+            proposalThreshold: setDefaultValue(proposalThreshold, '0'),
             strategies,
             onlyAuthorsToSubmit: Boolean(onlyAuthorsToSubmitProposals),
             timestamp,
             compositeSignatures,
           }),
         };
+
         const response = await fetch(url, fetchOptions);
         const json = await checkResponse(response);
         dispatch({ type: 'SUCCESS', payload: { data: [json] } });

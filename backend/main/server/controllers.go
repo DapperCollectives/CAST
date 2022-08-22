@@ -210,7 +210,7 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	proposal, httpStatus, err := helpers.createProposal(communityId, p)
+	proposal, httpStatus, err := helpers.createProposal(p)
 	if err != nil {
 		respondWithError(w, httpStatus, err.Error())
 		return
@@ -320,6 +320,15 @@ func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	
+	//Validate Contract Thresholds
+	if payload.Strategies != nil {
+		err = validateContractThreshold(*payload.Strategies)
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+	}
 
 	c, httpStatus, err := helpers.createCommunity(payload)
 	if err != nil {
@@ -342,6 +351,15 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 	if err := validatePayload(r.Body, &payload); err != nil {
 		respondWithError(w, http.StatusBadRequest, err.Error())
 		return
+	}
+
+	//Validate Contract Thresholds
+	if payload.Strategies != nil {
+		err = validateContractThreshold(*payload.Strategies)
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, err.Error())
+			return
+		}
 	}
 
 	c, httpStatus, err := helpers.updateCommunity(id, payload)

@@ -2,14 +2,14 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import { useWebContext } from 'contexts/Web3';
 import {
-  CommunityEditorDetails,
   CommunityEditorLinks,
-  CommunityEditorProfile,
   CommunityPropsAndVoting,
   Dropdown,
   Loader,
   ProposalThresholdEditor,
 } from 'components';
+import { CommunityEditorDetails } from 'components/Community/CommunityEditorDetails';
+import { CommunityEditorProfile } from 'components/Community/CommunityEditorProfile';
 import { ArrowLeft, ArrowLeftBold } from 'components/Svg';
 import {
   useCommunityDetails,
@@ -209,7 +209,9 @@ export default function CommunityEditorPage() {
                   name={community?.name}
                   body={community?.body}
                   logo={community?.logo}
+                  category={community?.category}
                   banner={community?.bannerImgUrl}
+                  terms={community?.termsAndConditionsUrl}
                   updateCommunity={updateCommunity}
                   uploadFile={uploadFile}
                 />
