@@ -476,7 +476,7 @@ func (h *Helpers) enforceCommunityRestrictions(
 			return errors.New(errMsg)
 		}
 	} else {
-		threshold, err := strconv.ParseFloat(*c.Proposal_threshold, 32)
+		threshold, err := strconv.ParseFloat(*c.Proposal_threshold, 64)
 		if err != nil {
 			log.Error().Err(err).Msg("Invalid proposal threshold")
 			return errors.New("Invalid proposal threshold")
