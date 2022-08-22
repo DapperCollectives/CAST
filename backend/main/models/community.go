@@ -188,12 +188,12 @@ func (c *Community) CreateCommunity(db *s.Database) error {
 	err := db.Conn.QueryRow(db.Context,
 		`
 	INSERT INTO communities(
-		name, category, logo, slug, strategies, strategy, banner_img_url, website_url, twitter_url, github_url, discord_url, instagram_url, terms_and_conditions_url, proposal_validation, proposal_threshold, body, cid, creator_addr, contract_name, contract_addr, public_path, threshold, only_authors_to_submit, contract_type)
+		name, category, logo, slug, strategies, strategy, banner_img_url, website_url, twitter_url, github_url, discord_url, instagram_url, terms_and_conditions_url, proposal_validation, proposal_threshold, body, cid, creator_addr, contract_name, contract_addr, contract_type, public_path, threshold, only_authors_to_submit)
 	VALUES(
 		$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24
 	)
 	RETURNING id, created_at
-	`, c.Name, c.Category, c.Logo, c.Slug, c.Strategies, c.Strategy, c.Banner_img_url, c.Website_url, c.Twitter_url, c.Github_url, c.Discord_url, c.Instagram_url, c.Terms_and_conditions_url, c.Proposal_validation, c.Proposal_threshold, c.Body, c.Cid, c.Creator_addr, c.Contract_name, c.Contract_addr, c.Public_path, c.Threshold, c.Only_authors_to_submit, c.Contract_type).Scan(&c.ID, &c.Created_at)
+	`, c.Name, c.Category, c.Logo, c.Slug, c.Strategies, c.Strategy, c.Banner_img_url, c.Website_url, c.Twitter_url, c.Github_url, c.Discord_url, c.Instagram_url, c.Terms_and_conditions_url, c.Proposal_validation, c.Proposal_threshold, c.Body, c.Cid, c.Creator_addr, c.Contract_name, c.Contract_addr, c.Contract_type, c.Public_path, c.Threshold, c.Only_authors_to_submit).Scan(&c.ID, &c.Created_at)
 	return err
 }
 
@@ -219,10 +219,11 @@ func (c *Community) UpdateCommunity(db *s.Database, p *UpdateCommunityRequestPay
 	terms_and_conditions_url = COALESCE($15, terms_and_conditions_url),
 	contract_name = COALESCE($16, contract_name),
 	contract_addr = COALESCE($17, contract_addr),
-	public_path = COALESCE($18, public_path),
-	threshold = COALESCE($19, threshold),
-	only_authors_to_submit = COALESCE($20, only_authors_to_submit)
-	WHERE id = $21
+	contract_type = COALESCE($18, contract_type),
+	public_path = COALESCE($19, public_path),
+	threshold = COALESCE($20, threshold),
+	only_authors_to_submit = COALESCE($21, only_authors_to_submit)
+	WHERE id = $22
 	`,
 		p.Name,
 		p.Body,
@@ -241,6 +242,7 @@ func (c *Community) UpdateCommunity(db *s.Database, p *UpdateCommunityRequestPay
 		p.Terms_and_conditions_url,
 		p.Contract_name,
 		p.Contract_addr,
+		p.Contract_type,
 		p.Public_path,
 		p.Threshold,
 		p.Only_authors_to_submit,

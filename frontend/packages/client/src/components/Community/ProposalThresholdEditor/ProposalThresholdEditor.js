@@ -148,7 +148,7 @@ export default function ProposalThresholdEditor({
           <div className="column is-12">
             <ActionButton
               type="submit"
-              label="Next: VOTING STRATEGIES"
+              label="save"
               enabled={isDirty && !isSubmitting}
               classNames="vote-button transition-all has-background-yellow mt-5"
             />
