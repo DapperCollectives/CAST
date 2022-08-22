@@ -129,7 +129,6 @@ export default function ProposalThresholdEditor({
     // if user leaves all fields empty and onlyAuthorsToSubmitProposals === true
     // the it adds Flow contract information
     const payload = checkIfNeedsDefaultValues(data);
-    console.log('data', data);
     await updateCommunity(payload);
 
     reset(data, { keepDirty: false });
