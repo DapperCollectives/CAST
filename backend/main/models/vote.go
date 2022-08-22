@@ -440,19 +440,18 @@ func getStreakAchievement(db *s.Database, addr string, communityId int) (int, er
 		for i, vote := range votes {
 			// user voted on proposal
 			if vote.Addr != "" {
+				//TODO: CHECK FOR is_cancelled before adding the value
 				proposals = append(proposals, vote.Proposal_id)
-			}
+				// check if vote is last in a streak
+				fmt.Println(i, len(proposals))
+				if len(proposals) >= defaultStreakLength && (i == len(votes)-1 || (i < len(votes)-1 && votes[i+1].Addr == "")) {
+					streaks = streaks + 1
 
-			// user voted on several proposals in a row, count streak
-			if len(proposals) >= defaultStreakLength && (i == len(votes)-1 || (i < len(votes)-1 && votes[i+1].Addr == "")) {
-				streaks = streaks + 1
-
-				// reset proposals to check for other streaks
-				proposals = nil
-			}
-
-			// user did not vote on proposal, reset to look for new streak
-			if vote.Addr == "" {
+					// reset proposals to check for other streaks
+					proposals = nil
+				}
+			} else {
+				// user did not vote on proposal, reset to look for new streak
 				proposals = nil
 			}
 		}
@@ -466,13 +465,15 @@ func getUserVotes(db *s.Database, addr string, communityId int) ([]VotingStreak,
 	// Proposals with the user address count as a vote for that proposal
 	// NULL means the user did not vote
 	sql := fmt.Sprintf(`
-		SELECT p.id as proposal_id, 
-		CASE WHEN v.addr is NULL THEN '' ELSE v.addr END as addr 
+		SELECT 
+			p.id as proposal_id, 
+			v.is_cancelled as is_cancelled,
+			COALESCE(v.addr, '') as addr
 		FROM proposals p 
 		LEFT OUTER JOIN (
 			SELECT * FROM votes where addr = '%s'
 		) v ON v.proposal_id = p.id 
-		where p.community_id = $1 and v.is_cancelled != 'true'
+		where p.community_id = $1
 		ORDER BY start_time ASC
 	`, addr)
 	var votingStreak []VotingStreak

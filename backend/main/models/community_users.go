@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"sort"
 	"strings"
 
@@ -302,6 +303,7 @@ func getUserAchievements(db *s.Database, communityId int) (UserAchievements, err
 	// Determine if user has any streaks
 	for i, ua := range userAchievements {
 		streaks, err := getStreakAchievement(db, ua.Addr, communityId)
+		fmt.Println("Streaks:", streaks)
 		if err != nil {
 			return userAchievements, err
 		}
