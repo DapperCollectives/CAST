@@ -1,5 +1,5 @@
 # BUILD CLIENT
-FROM node:16.3.0-alpine as build-stage
+FROM node:16.10.0-alpine as build-stage
 
 WORKDIR /app
 COPY ./package*.json ./
