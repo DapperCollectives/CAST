@@ -7,12 +7,10 @@ const ImageChoices = ({ choices = [], onChoiceChange, initChoices } = {}) => {
     if (getProposalType(choices) !== 'image') {
       initChoices([
         {
-          id: 1,
           value: '',
           choiceImgUrl: '',
         },
         {
-          id: 2,
           value: '',
           choiceImgUrl: '',
         },

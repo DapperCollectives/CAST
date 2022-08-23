@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
+import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import { useModalContext } from 'contexts/NotificationModal';
 import Dropdown from 'components/common/Dropdown';
@@ -36,8 +36,6 @@ const StepOne = ({
       })),
     [strategies]
   );
-
-  const { openModal, closeModal } = useModalContext();
 
   const tabOption = useMemo(
     () => stepData?.proposalType || 'text-based',
@@ -78,70 +76,36 @@ const StepOne = ({
     setStepValid(true);
   }, [stepData, setStepValid, onDataChange, tabOption]);
 
-  const setTab = (option) => () => {
+  const setTab = (option) => (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     onDataChange({
       proposalType: option,
     });
   };
 
-  const choices = useMemo(() => stepData?.choices || [], [stepData?.choices]);
-
-  const onCreateChoice = useCallback(() => {
-    onDataChange({
-      choices: choices.concat([
-        {
-          id: choices.length + 1,
-          value: '',
-        },
-      ]),
-    });
-  }, [onDataChange, choices]);
-
-  const onDestroyChoice = useCallback(
-    (choiceIdx) => {
-      const newChoices = choices.slice(0);
-      newChoices.splice(choiceIdx, 1);
-      onDataChange({ choices: newChoices });
-    },
-    [choices, onDataChange]
-  );
-
-  const onChoiceChange = useCallback(
-    (choiceUpdate, choiceIdx) => {
-      const newChoices = choices.map((choice, idx) => {
-        if (idx === choiceIdx) {
-          return {
-            ...choice,
-            ...choiceUpdate,
-          };
-        }
-
-        return choice;
-      });
-
-      onDataChange({ choices: newChoices });
-    },
-    [choices, onDataChange]
-  );
-
-  const initChoices = useCallback(
-    (choices) => {
-      onDataChange({
-        choices,
-      });
-    },
-    [onDataChange]
-  );
-
   const fieldsObj = Object.assign(
     {},
     stepOne.initialValues,
+    { choices: [] },
     pick(stepData || {}, stepOne.formFields)
   );
 
-  const { register, handleSubmit, watch, formState, control } = useForm({
+  const { register, handleSubmit, formState, control } = useForm({
     defaultValues: fieldsObj,
     resolver: yupResolver(stepOne.Schema),
+  });
+
+  const {
+    fields: choicesField,
+    append,
+    remove,
+    update,
+    replace,
+  } = useFieldArray({
+    control,
+    name: 'choices',
+    focusAppend: true,
   });
 
   const onSubmit = (data) => {
@@ -149,13 +113,32 @@ const StepOne = ({
     onDataChange(data);
     moveToNextStep();
   };
-  const body = useWatch({ control, name: 'body' });
+
+  const onCreateChoice = () =>
+    append({
+      value: '',
+    });
+
+  const onDestroyChoice = (choiceIdx) => {
+    remove(choiceIdx);
+  };
+
+  const onChoiceChange = (choiceUpdate, choiceIdx) => {
+    update(choiceIdx, choiceUpdate);
+  };
+
+  const initChoices = (choices) => {
+    replace(choices);
+  };
+
+  const choicesss = useWatch({ control, name: 'choices' });
 
   const { isDirty, isSubmitting, isValid, errors } = formState;
 
   console.log('ERRORS => ', errors);
   console.log('isValid => ', isValid);
-  console.log('body => ', body);
+  console.log('choices  => ', choicesss);
+  console.log('choicesN  => ', choicesField);
 
   return (
     <>
@@ -243,7 +226,7 @@ const StepOne = ({
             </div>
             {tabOption === 'text-based' && (
               <TextBasedChoices
-                choices={choices}
+                choices={choicesField}
                 onChoiceChange={onChoiceChange}
                 onDestroyChoice={onDestroyChoice}
                 onCreateChoice={onCreateChoice}
@@ -252,7 +235,7 @@ const StepOne = ({
             )}
             {tabOption === 'visual' && (
               <ImageChoices
-                choices={choices}
+                choices={choicesField}
                 onChoiceChange={onChoiceChange}
                 initChoices={initChoices}
               />
