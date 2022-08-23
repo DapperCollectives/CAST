@@ -1,5 +1,5 @@
-ALTER TABLE votes DROP COLUMN is_early;
-ALTER TABLE votes DROP COLUMN is_winning;
+ALTER TABLE votes DROP COLUMN IF EXISTS is_early;
+ALTER TABLE votes DROP COLUMN IF EXISTS is_winning;
 
 CREATE TYPE achievement_types AS enum ('earlyVote', 'streak', 'winningVote');
 
