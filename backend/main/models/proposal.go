@@ -36,13 +36,15 @@ type Proposal struct {
 	Block_height         *uint64                 `json:"block_height"`
 	Total_votes          int                     `json:"total_votes"`
 	Timestamp            string                  `json:"timestamp" validate:"required"`
-	Composite_signatures *[]s.CompositeSignature `json:"compositeSignatures" validate:"required"`
+	Composite_signatures *[]s.CompositeSignature `json:"compositeSignatures"`
 	Computed_status      *string                 `json:"computedStatus,omitempty"`
 	Snapshot_status      *string                 `json:"snapshotStatus,omitempty"`
+	Voucher              *shared.Voucher         `json:"voucher,omitempty"`
 }
 
 type UpdateProposalRequestPayload struct {
-	Status string `json:"status"`
+	Status  string     `json:"status"`
+	Voucher *s.Voucher `json:"voucher,omitempty"`
 
 	s.TimestampSignaturePayload
 }
@@ -135,9 +137,10 @@ func (p *Proposal) CreateProposal(db *s.Database) error {
 	body, 
 	block_height, 
 	cid, 
-	composite_signatures
+	composite_signatures,
+	voucher
 	)
-	VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+	VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
 	RETURNING id, created_at
 	`,
 		p.Community_id,
@@ -154,6 +157,7 @@ func (p *Proposal) CreateProposal(db *s.Database) error {
 		p.Block_height,
 		p.Cid,
 		p.Composite_signatures,
+		p.Voucher,
 	).Scan(&p.ID, &p.Created_at)
 
 	return err

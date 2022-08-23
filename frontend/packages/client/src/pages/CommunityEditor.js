@@ -235,6 +235,7 @@ export default function CommunityEditorPage() {
                 updatingCommunity={loading}
                 contractAddress={community?.contractAddr}
                 contractName={community?.contractName}
+                contractType={community?.contractType}
                 storagePath={community?.publicPath}
                 proposalThreshold={community?.proposalThreshold}
                 onlyAuthorsToSubmitProposals={community?.onlyAuthorsToSubmit}

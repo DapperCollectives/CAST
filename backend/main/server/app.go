@@ -2,6 +2,7 @@ package server
 
 import (
 	// "errors"
+
 	"context"
 	"flag"
 	"fmt"
@@ -83,7 +84,6 @@ var helpers Helpers
 
 func (a *App) Initialize() {
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
-	log.Logger = log.Logger.Level(zerolog.InfoLevel)
 
 	// Env
 	env := os.Getenv("APP_ENV")
@@ -94,7 +94,15 @@ func (a *App) Initialize() {
 		env = "PROD"
 	}
 	a.Env = strings.TrimSpace(env)
-	log.Info().Msgf("APP_ENV=%s", a.Env)
+
+	// Set log level based on env
+	if a.Env == "PROD" {
+		log.Logger = log.Logger.Level(zerolog.InfoLevel)
+		log.Info().Msgf("Log level: %s for APP_ENV=%s", "INFO", a.Env)
+	} else {
+		log.Logger = log.Logger.Level(zerolog.DebugLevel)
+		log.Info().Msgf("Log level: %s for APP_ENV=%s", "DEBUG", a.Env)
+	}
 
 	// Set App-wide Config
 	err := envconfig.Process("FVT", &a.Config)
