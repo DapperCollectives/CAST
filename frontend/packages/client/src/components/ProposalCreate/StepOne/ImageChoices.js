@@ -20,7 +20,7 @@ const ImageChoices = ({ choices = [], onChoiceChange, initChoices } = {}) => {
   }, []);
 
   const onImageUpdate = (index) => (image) => {
-    onChoiceChange({ value: image.text, choiceImgUrl: image.imageUrl }, index);
+    onChoiceChange(index, { value: image.text, choiceImgUrl: image.imageUrl });
   };
 
   const [choiceA, choiceB] = choices;

@@ -1,7 +1,6 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
-import { useModalContext } from 'contexts/NotificationModal';
 import Dropdown from 'components/common/Dropdown';
 import { Editor } from 'components/common/Editor';
 import Form from 'components/common/Form';
@@ -10,9 +9,8 @@ import { useCommunityDetails } from 'hooks';
 import { kebabToString } from 'utils';
 import { yupResolver } from '@hookform/resolvers/yup';
 import pick from 'lodash/pick';
+import ChoiceOptionCreator from './ChoiceOptionCreator';
 import { stepOne } from './FormConfig';
-import ImageChoices from './ImageChoices';
-import TextBasedChoices from './TextBasedChoices';
 
 const StepOne = ({
   stepData,
@@ -37,61 +35,14 @@ const StepOne = ({
     [strategies]
   );
 
-  const tabOption = useMemo(
-    () => stepData?.proposalType || 'text-based',
-    [stepData?.proposalType]
-  );
-
-  useEffect(() => {
-    const requiredFields = {
-      // description: (body) => body?.getCurrentContent().hasText(),
-      choices: (opts) => {
-        const getLabel = (o) => o?.value?.trim();
-        const getImageUrl = (o) => o?.choiceImgUrl?.trim();
-        const moreThanOne = Array.isArray(opts) && opts.length > 1;
-
-        const optLabels = (opts || []).map((opt) => getLabel(opt));
-
-        const haveLabels =
-          moreThanOne && optLabels.every((opt) => opt.length > 0);
-
-        const eachUnique =
-          moreThanOne &&
-          optLabels.every((opt, idx) => optLabels.indexOf(opt) === idx);
-
-        if (tabOption === 'text-based') return haveLabels && eachUnique;
-
-        const imagesUrl = (opts || []).map((opt) => getImageUrl(opt));
-
-        const validImageOpts = imagesUrl.every(
-          (imgUrl) => imgUrl && imgUrl.length > 0
-        );
-
-        return haveLabels && eachUnique && validImageOpts;
-      },
-    };
-    const isValid = Object.keys(requiredFields).every(
-      (field) => stepData && requiredFields[field](stepData[field])
-    );
-    setStepValid(true);
-  }, [stepData, setStepValid, onDataChange, tabOption]);
-
-  const setTab = (option) => (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    onDataChange({
-      proposalType: option,
-    });
-  };
-
   const fieldsObj = Object.assign(
     {},
     stepOne.initialValues,
-    { choices: [] },
+    { choices: [], tabOption: 'text-based' },
     pick(stepData || {}, stepOne.formFields)
   );
 
-  const { register, handleSubmit, formState, control } = useForm({
+  const { register, handleSubmit, formState, control, setValue } = useForm({
     defaultValues: fieldsObj,
     resolver: yupResolver(stepOne.Schema),
   });
@@ -114,31 +65,13 @@ const StepOne = ({
     moveToNextStep();
   };
 
-  const onCreateChoice = () =>
-    append({
-      value: '',
-    });
-
-  const onDestroyChoice = (choiceIdx) => {
-    remove(choiceIdx);
-  };
-
-  const onChoiceChange = (choiceUpdate, choiceIdx) => {
-    update(choiceIdx, choiceUpdate);
-  };
-
-  const initChoices = (choices) => {
-    replace(choices);
-  };
-
-  const choicesss = useWatch({ control, name: 'choices' });
+  const tabOption = useWatch({ control, name: 'tabOption' });
 
   const { isDirty, isSubmitting, isValid, errors } = formState;
 
-  console.log('ERRORS => ', errors);
-  console.log('isValid => ', isValid);
-  console.log('choices  => ', choicesss);
-  console.log('choicesN  => ', choicesField);
+  useEffect(() => {
+    setStepValid((isDirty || isValid) && !isSubmitting);
+  }, [isDirty, isValid, isSubmitting, setStepValid]);
 
   return (
     <>
@@ -200,46 +133,16 @@ const StepOne = ({
               Text-based presentation for choices that described in words. Use
               Visual for side-by-side visual options represented by images.
             </p>
-            <div className="tabs choice-option is-toggle mt-2 mb-4">
-              <ul>
-                <li>
-                  <button
-                    className={`button left ${
-                      tabOption === 'text-based' ? 'is-black' : 'outlined'
-                    }`}
-                    onClick={setTab('text-based')}
-                  >
-                    <span>Text-based</span>
-                  </button>
-                </li>
-                <li>
-                  <button
-                    className={`button right ${
-                      tabOption === 'visual' ? 'is-black' : 'outlined'
-                    }`}
-                    onClick={setTab('visual')}
-                  >
-                    <span>Visual</span>
-                  </button>
-                </li>
-              </ul>
-            </div>
-            {tabOption === 'text-based' && (
-              <TextBasedChoices
-                choices={choicesField}
-                onChoiceChange={onChoiceChange}
-                onDestroyChoice={onDestroyChoice}
-                onCreateChoice={onCreateChoice}
-                initChoices={initChoices}
-              />
-            )}
-            {tabOption === 'visual' && (
-              <ImageChoices
-                choices={choicesField}
-                onChoiceChange={onChoiceChange}
-                initChoices={initChoices}
-              />
-            )}
+            <ChoiceOptionCreator
+              choices={choicesField}
+              tabOption={tabOption}
+              setValue={setValue}
+              append={append}
+              remove={remove}
+              update={update}
+              replace={replace}
+              error={errors['choices']}
+            />
           </div>
         </div>
       </Form>

@@ -1,6 +1,6 @@
 import yup from 'helpers/validation';
 
-const formFields = ['title', 'strategy', 'body', 'choices'];
+const formFields = ['title', 'strategy', 'body', 'choices', 'tabOption'];
 
 const Schema = yup.object().shape({
   title: yup
@@ -10,14 +10,26 @@ const Schema = yup.object().shape({
     .max(150, 'The maximum length for title is 128 characters'),
   strategy: yup.string().required('Please select a strategy'),
   body: yup.string().required('Please enter a proposal description'),
+  tabOption: yup.string().oneOf(['text-based', 'visual']),
   choices: yup
     .array(
-      yup.object({
-        value: yup.string().required('Please enter option value'),
-        choiceImgUrl: yup.string(),
-      })
+      yup
+        .object({
+          value: yup.string().required('Please enter option value'),
+          choiceImgUrl: yup.string().nullable(),
+        })
+        .when('tabOption', {
+          is: (option) => option === 'visual',
+          then: yup.object({
+            value: yup.string().required('Please enter option value'),
+            choiceImgUrl: yup
+              .string()
+              .url()
+              .required('Image option is not valid'),
+          }),
+        })
     )
-    .min(2, 'Please add an option, minimun amout of options is two')
+    .min(2, 'Please add a choice, minimun amout is two')
     .unique('value', 'Invalid duplicated option'),
 });
 

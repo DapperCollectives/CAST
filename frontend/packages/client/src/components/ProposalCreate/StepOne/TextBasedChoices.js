@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import AddButton from 'components/AddButton';
+import FadeIn from 'components/FadeIn';
 import { Bin } from 'components/Svg';
 import { getProposalType } from 'utils';
 
@@ -9,6 +10,7 @@ const TextBasedChoices = ({
   onDestroyChoice,
   onCreateChoice,
   initChoices,
+  error,
 } = {}) => {
   useEffect(() => {
     if (getProposalType(choices) !== 'text-based') {
@@ -16,38 +18,64 @@ const TextBasedChoices = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
   return (
     <>
-      {choices?.map((choice, i) => (
-        <div
-          key={i}
-          className="columns is-mobile p-0 m-0"
-          style={{ position: 'relative' }}
-        >
-          <input
-            type="text"
-            placeholder="Enter choice name"
-            value={choice.value}
-            className="border-light rounded-sm p-3 mb-4 column is-full pr-6"
-            key={i}
-            onChange={(event) =>
-              onChoiceChange({ value: event.target.value }, i)
-            }
-            autoFocus
-          />
-          <div
-            className="cursor-pointer"
-            style={{
-              position: 'absolute',
-              right: 15,
-              top: 7,
-            }}
-            onClick={() => onDestroyChoice(i)}
-          >
-            <Bin />
+      {choices?.map((choice, index) => {
+        const errorInField = Array.isArray(error)
+          ? error?.[index]?.value
+          : null;
+        return (
+          <>
+            <div
+              key={choice.id}
+              className="columns is-mobile p-0 m-0"
+              style={{ position: 'relative' }}
+            >
+              <input
+                type="text"
+                placeholder="Enter choice name"
+                key={choice.id}
+                className={`border-light rounded-sm p-3 column is-full pr-6 ${
+                  !errorInField ? 'mb-4' : ''
+                }`}
+                value={choice.value}
+                onChange={(event) =>
+                  onChoiceChange(index, { value: event.target.value })
+                }
+                autoFocus
+              />
+              <div
+                className="cursor-pointer"
+                style={{
+                  position: 'absolute',
+                  right: 15,
+                  top: 7,
+                }}
+                onClick={() => onDestroyChoice(index)}
+              >
+                <Bin />
+              </div>
+            </div>
+            {errorInField && (
+              <FadeIn>
+                <div className="pl-1 mt-2 mb-4">
+                  <p className="smaller-text has-text-red">
+                    {errorInField.message}
+                  </p>
+                </div>
+              </FadeIn>
+            )}
+          </>
+        );
+      })}
+      {error?.message && (
+        <FadeIn>
+          <div className="pl-1">
+            <p className="smaller-text has-text-red">{error.message}</p>
           </div>
-        </div>
-      ))}
+        </FadeIn>
+      )}
       <div className="is-flex">
         <AddButton
           onAdd={onCreateChoice}
