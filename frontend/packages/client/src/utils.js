@@ -182,7 +182,14 @@ export const customDraftToHTML = (content) => {
 };
 
 export const customHTMLtoDraft = (html) => {
-  return stateFromHTML(html);
+  const options = {
+    customBlockFn: (element) => {
+      if (element.tagName === 'P' && element.className === 'image-caption') {
+        return { type: 'image-caption-block' };
+      }
+    },
+  };
+  return stateFromHTML(html, options);
 };
 export const isValidAddress = (addr) => /0[x,X][a-zA-Z0-9]{16}$/gim.test(addr);
 

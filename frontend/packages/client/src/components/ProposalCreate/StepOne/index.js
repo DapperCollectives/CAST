@@ -1,15 +1,15 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { Controller, useForm, useWatch } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import { useModalContext } from 'contexts/NotificationModal';
 import Dropdown from 'components/common/Dropdown';
+import { Editor } from 'components/common/Editor';
 import Form from 'components/common/Form';
 import Input from 'components/common/Input';
 import { useCommunityDetails } from 'hooks';
 import { kebabToString } from 'utils';
 import { yupResolver } from '@hookform/resolvers/yup';
 import pick from 'lodash/pick';
-import CustomEditor from './Editor';
 import { stepOne } from './FormConfig';
 import ImageChoices from './ImageChoices';
 import TextBasedChoices from './TextBasedChoices';
@@ -78,20 +78,11 @@ const StepOne = ({
     setStepValid(true);
   }, [stepData, setStepValid, onDataChange, tabOption]);
 
-  // useEffect(() => {
-  //   onDataChange({ description: localEditorState });
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [localEditorState]);
-
   const setTab = (option) => () => {
     onDataChange({
       proposalType: option,
     });
   };
-
-  // const onEditorChange = (changes) => {
-  //   setLocalEditorState(changes);
-  // };
 
   const choices = useMemo(() => stepData?.choices || [], [stepData?.choices]);
 
@@ -195,13 +186,7 @@ const StepOne = ({
               context; the expected costs and benefits of this collective
               decision.
             </p>
-            <Controller
-              name="body"
-              control={control}
-              render={({ field: { value, onChange } }) => {
-                return <CustomEditor value={value} onChange={onChange} />;
-              }}
-            />
+            <Editor name="body" control={control} error={errors['body']} />
           </div>
           <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6">
             <h4 className="title is-5 mb-2">Voting Strategy</h4>

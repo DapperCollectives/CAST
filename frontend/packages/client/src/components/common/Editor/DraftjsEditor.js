@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Editor } from 'react-draft-wysiwyg';
 import { UploadImageModal } from 'components';
-import { Image } from 'components/Svg';
 import { customDraftToHTML, customHTMLtoDraft } from 'utils';
 import {
   AtomicBlockUtils,
@@ -12,6 +11,7 @@ import {
   SelectionState,
 } from 'draft-js';
 import { Map } from 'immutable';
+import AddImageOption from './ImageOption';
 
 const options = ['blockType', 'inline', 'list', 'link', 'emoji'];
 const inline = {
@@ -50,47 +50,33 @@ const blockRenderMap = Map({
 // keep support for other draft default block types and add our image-caption type
 const extendedBlockRenderMap = DefaultDraftBlockRenderMap.merge(blockRenderMap);
 
-function AddImageOption({ addImage }) {
-  return (
-    <>
-      <div
-        className="rdw-image-wrapper"
-        aria-haspopup="true"
-        aria-label="rdw-image-control"
-        aria-expanded="false"
-        onClick={() => addImage()}
-      >
-        <div className="rdw-option-wrapper" title="Image">
-          <Image />
-        </div>
-      </div>
-    </>
-  );
-}
-export default function CustomEditor({ onChange, value } = {}) {
+export default function CustomEditor({ onChange, value, ref } = {}) {
   const [localEditorState, setLocalEditorState] = useState(
     EditorState.createEmpty()
   );
   const [updated, setUpdated] = useState(false);
 
+  // this effect runs on initial component load to create editor from html
   useEffect(() => {
     if (!updated) {
       const defaultValue = value ? value : '';
-      console.log('loads content', defaultValue);
-      const blocksFromHtml = customHTMLtoDraft(defaultValue);
-      //   const contentState = ContentState.createFromBlockArray(
-      //     blocksFromHtml.contentBlocks,
-      //     blocksFromHtml.entityMap
-      //   );
-      const newEditorState = EditorState.createWithContent(blocksFromHtml);
+      const htmlToState = customHTMLtoDraft(defaultValue);
+      const newEditorState = EditorState.createWithContent(htmlToState);
       setLocalEditorState(newEditorState);
     }
-  }, [value]);
+  }, [value, updated]);
 
   const onEditorStateChange = (editorState) => {
-    setUpdated(true);
+    !updated && setUpdated(true);
     setLocalEditorState(editorState);
-    return onChange(customDraftToHTML(editorState.getCurrentContent()));
+    console.log(
+      'customDraftToHTML',
+      customDraftToHTML(editorState.getCurrentContent())
+    );
+    const pureHtml = customDraftToHTML(editorState.getCurrentContent());
+    // when editor es empty but has been changed it will return <p><br></p>
+    const textOnly = pureHtml.replace(/<[^>]+>/g, '');
+    return onChange('' === textOnly ? '' : pureHtml);
   };
 
   const [showUploadImagesModal, setShowUploadImagesModal] = useState(false);
@@ -98,11 +84,6 @@ export default function CustomEditor({ onChange, value } = {}) {
   const addImage = () => {
     setShowUploadImagesModal(true);
   };
-
-  //   const onEditorChange = (changes) => {
-  //     setLocalEditorState(changes);
-  //     onChange(changes);
-  //   };
 
   // function to update editor state
   // used to insert more than one image at the time
@@ -219,7 +200,7 @@ export default function CustomEditor({ onChange, value } = {}) {
         caption
       );
     }
-    setLocalEditorState(tempEditorState);
+    onEditorStateChange(tempEditorState);
     setShowUploadImagesModal(false);
   };
 
@@ -244,6 +225,7 @@ export default function CustomEditor({ onChange, value } = {}) {
         toolbarCustomButtons={[<AddImageOption addImage={addImage} />]}
         customStyleMap={styleMap}
         blockRenderMap={extendedBlockRenderMap}
+        ref={ref}
       />
     </>
   );
