@@ -210,7 +210,7 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	proposal, httpStatus, err := helpers.createProposal(communityId, p)
+	proposal, httpStatus, err := helpers.createProposal(p)
 	if err != nil {
 		respondWithError(w, httpStatus, err.Error())
 		return
@@ -240,10 +240,25 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := helpers.validateUserWithRole(payload.Signing_addr, payload.Timestamp, payload.Composite_signatures, p.Community_id, "author"); err != nil {
-		log.Error().Err(err)
-		respondWithError(w, http.StatusForbidden, err.Error())
-		return
+	if payload.Voucher != nil {
+		if err := helpers.validateUserWithRoleViaVoucher(
+			payload.Signing_addr,
+			payload.Voucher,
+			p.Community_id,
+			"author"); err != nil {
+			respondWithError(w, http.StatusForbidden, err.Error())
+			return
+		}
+	} else {
+		if err := helpers.validateUserWithRole(
+			payload.Signing_addr,
+			payload.Timestamp,
+			payload.Composite_signatures,
+			p.Community_id,
+			"author"); err != nil {
+			respondWithError(w, http.StatusForbidden, err.Error())
+			return
+		}
 	}
 
 	p.Status = &payload.Status
@@ -320,12 +335,14 @@ func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-
+	
 	//Validate Contract Thresholds
-	err = validateContractThreshold(*payload.Strategies)
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, err.Error())
-		return
+	if payload.Strategies != nil {
+		err = validateContractThreshold(*payload.Strategies)
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, err.Error())
+			return
+		}
 	}
 
 	c, httpStatus, err := helpers.createCommunity(payload)
@@ -352,10 +369,12 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Validate Contract Thresholds
-	err = validateContractThreshold(*payload.Strategies)
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, err.Error())
-		return
+	if payload.Strategies != nil {
+		err = validateContractThreshold(*payload.Strategies)
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, err.Error())
+			return
+		}
 	}
 
 	c, httpStatus, err := helpers.updateCommunity(id, payload)

@@ -17,18 +17,20 @@ export default function StepThree({
     proposalThreshold = '',
     contractAddress = '',
     contractName = '',
+    contractType = '',
     storagePath = '',
     onlyAuthorsToSubmitProposals = false,
   } = stepData;
 
   const { isValidFlowAddress } = useWebContext();
 
-  const { register, handleSubmit, formState } = useForm({
+  const { control, register, handleSubmit, formState } = useForm({
     resolver: yupResolver(Schema(isValidFlowAddress)),
     defaultValues: {
       proposalThreshold,
       contractAddress,
       contractName,
+      contractType,
       storagePath,
       onlyAuthorsToSubmitProposals,
     },
@@ -45,6 +47,7 @@ export default function StepThree({
       handleSubmit={handleSubmit(onSubmit)}
       errors={errors}
       register={register}
+      control={control}
       isSubmitting={isSubmitting}
       submitComponent={
         <div className="columns mb-5">

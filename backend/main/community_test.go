@@ -79,6 +79,29 @@ func TestCreateCommunityFail(t *testing.T) {
 	checkResponseCode(t, http.StatusBadRequest, response.Code)
 }
 
+func TestCreateCommunityNilStrategy(t *testing.T) {
+	// Prep
+	clearTable("communities")
+	clearTable("community_users")
+
+	// Create Community
+	communityStruct := otu.GenerateNilStrategyCommunityStruct("account")
+	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
+
+	response := otu.CreateCommunityAPI(communityPayload)
+	checkResponseCode(t, http.StatusCreated, response.Code)
+
+	// Parse
+	var community models.Community
+	json.Unmarshal(response.Body.Bytes(), &community)
+
+	// Validate
+	assert.Equal(t, utils.NilStrategyCommunity.Name, community.Name)
+	assert.Equal(t, utils.NilStrategyCommunity.Body, community.Body)
+	assert.Equal(t, utils.NilStrategyCommunity.Logo, community.Logo)
+	assert.NotNil(t, community.ID)
+}
+
 func TestCommunityAdminRoles(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")
