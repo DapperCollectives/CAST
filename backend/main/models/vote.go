@@ -49,12 +49,13 @@ type NFT struct {
 	ID             interface{} `json:"id"`
 	Contract_addr  string      `json:"contract_addr"`
 	Created_at     time.Time   `json:"created_at"`
-	FLoat_event_id uint64      `json:"event_id,omitempty"`
+	Float_event_id uint64      `json:"event_id,omitempty"`
 }
 
 type VotingStreak struct {
-	Proposal_id uint64
-	Addr        string
+	Proposal_id  uint64
+	Addr         string
+	Is_cancelled bool
 }
 
 const (

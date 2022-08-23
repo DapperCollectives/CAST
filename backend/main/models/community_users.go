@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"sort"
 	"strings"
 
@@ -291,7 +290,7 @@ func getUserAchievements(db *s.Database, communityId int) (UserAchievements, err
 			COUNT(v.id) FILTER (WHERE is_winning = 'true') AS winning_votes
 		FROM votes v
 		LEFT JOIN proposals p ON p.id = v.proposal_id
-		WHERE p.community_id = $1 AND v.is_cancelled != 'true'
+		WHERE p.community_id = $1
 		GROUP BY v.addr
 	`, communityId)
 
@@ -304,7 +303,6 @@ func getUserAchievements(db *s.Database, communityId int) (UserAchievements, err
 	// Determine if user has any streaks
 	for i, ua := range userAchievements {
 		streaks, err := getStreakAchievement(db, ua.Addr, communityId)
-		fmt.Println("Streaks:", streaks)
 		if err != nil {
 			return userAchievements, err
 		}
