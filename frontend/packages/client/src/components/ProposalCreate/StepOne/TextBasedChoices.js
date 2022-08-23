@@ -26,7 +26,7 @@ const TextBasedChoices = ({
           ? error?.[index]?.value
           : null;
         return (
-          <>
+          <React.Fragment key={choice.id}>
             <div
               key={choice.id}
               className="columns is-mobile p-0 m-0"
@@ -66,7 +66,7 @@ const TextBasedChoices = ({
                 </div>
               </FadeIn>
             )}
-          </>
+          </React.Fragment>
         );
       })}
       {error?.message && (

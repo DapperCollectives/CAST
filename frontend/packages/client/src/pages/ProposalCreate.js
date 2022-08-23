@@ -116,6 +116,7 @@ export default function ProposalCreatePage() {
     blockNavigationText:
       'Proposal creation is not complete yet, are you sure you want to leave?',
     passNextToComp: true,
+    passSubmitToComp: true,
     showActionButtonLeftPannel: true,
     steps: [
       {
@@ -129,13 +130,14 @@ export default function ProposalCreatePage() {
         label: 'Set Date & Time',
         description:
           'Some description of what you can write here that is useful.',
-        component: <PropCreateStepTwo stepData={{ test: 'ok' }} />,
+        component: <PropCreateStepTwo />,
+        useHookForms: true,
       },
       {
         label: 'Preview Proposal',
         description:
           'Some description of what you can write here that is useful.',
-        component: <PropCreateStepThree stepData={{ test: 'ok' }} />,
+        component: <PropCreateStepThree />,
       },
     ],
   };

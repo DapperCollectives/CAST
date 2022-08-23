@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { forwardRef, useEffect, useState } from 'react';
 import { Editor } from 'react-draft-wysiwyg';
 import { UploadImageModal } from 'components';
 import { customDraftToHTML, customHTMLtoDraft } from 'utils';
@@ -50,7 +50,7 @@ const blockRenderMap = Map({
 // keep support for other draft default block types and add our image-caption type
 const extendedBlockRenderMap = DefaultDraftBlockRenderMap.merge(blockRenderMap);
 
-export default function CustomEditor({ onChange, value, ref } = {}) {
+const CustomEditor = forwardRef(({ onChange, value }, ref) => {
   const [localEditorState, setLocalEditorState] = useState(
     EditorState.createEmpty()
   );
@@ -69,10 +69,6 @@ export default function CustomEditor({ onChange, value, ref } = {}) {
   const onEditorStateChange = (editorState) => {
     !updated && setUpdated(true);
     setLocalEditorState(editorState);
-    console.log(
-      'customDraftToHTML',
-      customDraftToHTML(editorState.getCurrentContent())
-    );
     const pureHtml = customDraftToHTML(editorState.getCurrentContent());
     // when editor es empty but has been changed it will return <p><br></p>
     const textOnly = pureHtml.replace(/<[^>]+>/g, '');
@@ -229,4 +225,6 @@ export default function CustomEditor({ onChange, value, ref } = {}) {
       />
     </>
   );
-}
+});
+
+export default CustomEditor;

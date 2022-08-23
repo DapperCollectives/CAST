@@ -1,8 +1,10 @@
+import { Schema } from 'components/Community/ProposalThresholdEditor';
 import yup from 'helpers/validation';
 
-const formFields = ['title', 'strategy', 'body', 'choices', 'tabOption'];
+const formFieldsStepOne = ['title', 'strategy', 'body', 'choices', 'tabOption'];
+const formFieldsStepTwo = [];
 
-const Schema = yup.object().shape({
+const StepOneSchema = yup.object().shape({
   title: yup
     .string()
     .trim()
@@ -33,14 +35,26 @@ const Schema = yup.object().shape({
     .unique('value', 'Invalid duplicated option'),
 });
 
-const initialValues = Object.assign(
-  {},
-  ...formFields.map((key) => ({ [key]: '' }))
-);
+const StepTwoSchema = yup.object().shape({
+  startDate: yup.date().required('Please provide a start date'),
+  startTime: yup.date().required('Please provide a start time'),
+  endDate: yup.date().required('Please provide a end date'),
+  endTime: yup.date().required('Please provide a end time'),
+});
+
+const initialValues = (fields = []) =>
+  Object.assign({}, ...fields.map((key) => ({ [key]: '' })));
+
 const stepOne = {
-  Schema,
-  initialValues,
-  formFields,
+  Schema: StepOneSchema,
+  initialValues: initialValues(formFieldsStepOne),
+  formFields: formFieldsStepOne,
 };
 
-export { stepOne };
+const stepTwo = {
+  Schema: StepTwoSchema,
+  initialValues: initialValues(formFieldsStepTwo),
+  formFields: formFieldsStepTwo,
+};
+
+export { stepOne, stepTwo };

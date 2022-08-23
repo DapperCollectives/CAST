@@ -1,30 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
+import { useForm, useWatch } from 'react-hook-form';
 import { Calendar, CaretDown } from 'components/Svg';
+import CustomDatePicker from 'components/common/CustomDatePicker';
+import Form from 'components/common/Form';
 import { useMediaQuery } from 'hooks';
+import { yupResolver } from '@hookform/resolvers/yup';
+import pick from 'lodash/pick';
+import { stepTwo } from './FormConfig';
 
 const detectTimeZone = () =>
   new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
+const StepTwo = ({
+  stepData,
+  setStepValid,
+  onDataChange,
+  formId,
+  moveToNextStep,
+}) => {
   const [isStartTimeOpen, setStartTimeOpen] = useState(false);
   const [isEndTimeOpen, setEndTimeOpen] = useState(false);
 
   const notMobile = useMediaQuery();
-
-  useEffect(() => {
-    const isDate = (d) => Object.prototype.toString.call(d) === '[object Date]';
-    const requiredFields = {
-      startDate: isDate,
-      endDate: isDate,
-      startTime: isDate,
-      endTime: isDate,
-    };
-    const isValid = Object.keys(requiredFields).every(
-      (field) => stepData && requiredFields[field](stepData[field])
-    );
-    setStepValid(isValid);
-  }, [stepData, setStepValid, onDataChange]);
 
   const closeStartOnBlur = () => {
     setStartTimeOpen(false);
@@ -90,21 +88,44 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
 
   const onSetStartTimeOpen = () => setStartTimeOpen(true);
 
-  const setStartTime = (itemValue) => () => {
-    onDataChange({
-      startTime: itemValue,
-    });
-    setStartTimeOpen(false);
-  };
-  const setEndTime = (itemValue) => () => {
-    onDataChange({
-      endTime: itemValue,
-    });
-    setEndTimeOpen(false);
+  const fieldsObj = Object.assign(
+    {},
+    stepTwo.initialValues,
+    pick(stepData || {}, stepTwo.formFields)
+  );
+
+  const { handleSubmit, formState, control, setValue } = useForm({
+    defaultValues: fieldsObj,
+    resolver: yupResolver(stepTwo.Schema),
+  });
+
+  const setTime = (field, itemValue) => (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setValue(field, itemValue);
+    field === 'startTime' ? setStartTimeOpen(false) : setEndTimeOpen(false);
   };
 
+  const { errors, isValid, isDirty, isSubmitting } = formState;
+
+  console.log('errors ', errors);
+
+  const onSubmit = (data) => {
+    onDataChange(data);
+    moveToNextStep();
+  };
+
+  const startDate = useWatch({ control, name: 'startDate' });
+  const startTime = useWatch({ control, name: 'startTime' });
+  const endDate = useWatch({ control, name: 'endDate' });
+  const endTime = useWatch({ control, name: 'endTime' });
+
+  useEffect(() => {
+    setStepValid((isValid || isDirty) && !isSubmitting);
+  }, [isValid, isDirty, isSubmitting, setStepValid]);
+
   return (
-    <div>
+    <Form onSubmit={handleSubmit(onSubmit)} formId={formId}>
       <div className="border-light rounded-lg is-flex-direction-column is-mobile m-0 p-6 mb-6">
         <h4 className="title is-5 mb-5">
           Start date and time <span className="has-text-danger">*</span>
@@ -114,20 +135,10 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
             className="columns is-mobile p-0 pr-2 p-0-mobile mb-4-mobile m-0 column is-half"
             style={{ position: 'relative' }}
           >
-            <DatePicker
-              required
-              placeholderText="Choose date"
-              selected={stepData?.startDate}
-              minDate={new Date()}
-              onFocus={(e) => !notMobile && e.target.blur()}
-              onChange={(date) => {
-                onDataChange({
-                  startDate: date,
-                  // resets time in case user has selected a future date and comes back to present with a non valid hour
-                  startTime: isToday(date) ? null : stepData?.startTime,
-                });
-              }}
-              className="border-light rounded-sm column is-full is-full-mobile p-3"
+            <CustomDatePicker
+              control={control}
+              fieldName="startDate"
+              notMobile={notMobile}
             />
             <div
               style={{
@@ -144,7 +155,7 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
             <div
               className={`dropdown columns is-mobile p-0 m-0 is-right is-flex is-flex-grow-1${
                 isStartTimeOpen ? ' is-active' : ''
-              } ${stepData?.startDate ? '' : ' is-disabled'}`}
+              } ${startDate ? '' : ' is-disabled'}`}
               onBlur={closeStartOnBlur}
               aria-haspopup="true"
               aria-controls="dropdown-menu"
@@ -157,9 +168,7 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
                   onClick={onSetStartTimeOpen}
                 >
                   <div className="is-flex is-flex-grow-1 is-align-items-center is-justify-content-space-between has-text-grey small-text">
-                    {stepData?.startTime
-                      ? formatTime(stepData.startTime)
-                      : 'Select Time'}
+                    {startTime ? formatTime(startTime) : 'Select Time'}
                     <CaretDown className="has-text-black" />
                   </div>
                 </button>
@@ -176,9 +185,9 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
                   {timeIntervals.map((itemValue, index) => (
                     <button
                       className={`button is-white dropdown-item has-text-grey${
-                        itemValue === stepData?.startTime ? ' is-active' : ''
+                        itemValue === startTime ? ' is-active' : ''
                       }`}
-                      onMouseDown={setStartTime(itemValue)}
+                      onMouseDown={setTime('startTime', itemValue)}
                       key={`drop-down-${index}`}
                     >
                       {formatTime(itemValue)}
@@ -199,19 +208,12 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
             className="columns is-mobile p-0 pr-2 p-0-mobile mb-4-mobile m-0 column is-half"
             style={{ position: 'relative' }}
           >
-            <DatePicker
-              required
-              placeholderText="Choose date"
-              selected={stepData?.endDate}
-              minDate={addDays(new Date(stepData?.startDate), 1)}
-              disabled={
-                !Boolean(stepData?.startDate) || !Boolean(stepData?.startTime)
-              }
-              onFocus={(e) => !notMobile && e.target.blur()}
-              onChange={(date) => {
-                onDataChange({ endDate: date });
-              }}
-              className="border-light rounded-sm column is-full is-full-mobile p-3"
+            <CustomDatePicker
+              control={control}
+              fieldName="endDate"
+              notMobile={notMobile}
+              minDate={addDays(new Date(startDate), 1)}
+              disabled={!Boolean(startDate) || !Boolean(startTime)}
             />
             <div
               style={{
@@ -228,7 +230,7 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
             <div
               className={`dropdown columns is-mobile p-0 m-0 is-right is-flex is-flex-grow-1${
                 isEndTimeOpen ? ' is-active' : ''
-              } ${stepData?.endDate ? '' : 'is-disabled'}`}
+              } ${endDate ? '' : 'is-disabled'}`}
               onBlur={closeEndOnBlur}
               aria-haspopup="true"
               aria-controls="dropdown-menu"
@@ -241,9 +243,7 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
                   onClick={() => setEndTimeOpen(true)}
                 >
                   <div className="is-flex is-flex-grow-1 is-align-items-center is-justify-content-space-between has-text-grey small-text">
-                    {stepData?.endTime
-                      ? formatTime(stepData.endTime)
-                      : 'Select Time'}
+                    {endTime ? formatTime(endTime) : 'Select Time'}
                     <CaretDown className="has-text-black" />
                   </div>
                 </button>
@@ -262,7 +262,7 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
                       className={`button is-white dropdown-item has-text-grey${
                         itemValue === stepData?.endTime ? ' is-active' : ''
                       }`}
-                      onMouseDown={setEndTime(itemValue)}
+                      onMouseDown={setTime('endTime', itemValue)}
                       key={`drop-down-${index}`}
                     >
                       {formatTime(itemValue)}
@@ -280,7 +280,7 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
           zone as: {timeZone}
         </div>
       )}
-    </div>
+    </Form>
   );
 };
 

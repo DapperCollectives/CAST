@@ -9,14 +9,13 @@ import { useCommunityDetails } from 'hooks';
 import { kebabToString } from 'utils';
 import { yupResolver } from '@hookform/resolvers/yup';
 import pick from 'lodash/pick';
+import { stepOne } from '../FormConfig';
 import ChoiceOptionCreator from './ChoiceOptionCreator';
-import { stepOne } from './FormConfig';
 
 const StepOne = ({
   stepData,
   setStepValid,
   onDataChange,
-  setPreCheckStepAdvance,
   formId,
   moveToNextStep,
 }) => {
@@ -60,7 +59,6 @@ const StepOne = ({
   });
 
   const onSubmit = (data) => {
-    console.log('data on submit >>', data);
     onDataChange(data);
     moveToNextStep();
   };
