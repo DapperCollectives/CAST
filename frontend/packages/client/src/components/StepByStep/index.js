@@ -150,8 +150,6 @@ function StepByStep({
   const showNextButton = !passNextToComp || showActionButtonLeftPannel;
   const showSubmitButton = !passSubmitToComp || showActionButtonLeftPannel;
 
-  console.log('currentStep', steps[currentStep]);
-
   return (
     <>
       {blockNavigationOut && (
