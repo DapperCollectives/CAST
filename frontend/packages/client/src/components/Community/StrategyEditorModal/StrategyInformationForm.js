@@ -30,8 +30,6 @@ export default function StrategyInformationForm({
 
   const { isDirty, isSubmitting, errors, isValid } = formState;
 
-  console.log('errors', errors);
-
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="columns is-flex-direction-column is-mobile m-0">

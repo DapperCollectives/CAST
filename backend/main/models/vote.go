@@ -26,8 +26,8 @@ type Vote struct {
 	Created_at           time.Time               `json:"createdAt,omitempty"`
 	Cid                  *string                 `json:"cid"`
 	Message              string                  `json:"message"`
-	TransactionId        string                  `json:"transactionId"`
-	IsCancelled		 	 bool					 `json:"isCancelled"`
+	Voucher              *shared.Voucher         `json:"voucher,omitempty"`
+	IsCancelled          bool                    `json:"isCancelled"`
 }
 
 type VoteWithBalance struct {
@@ -57,7 +57,7 @@ type VotingStreak struct {
 }
 
 const (
-	timestampExpiry = 60
+	timestampExpiry     = 60
 	defaultStreakLength = 3
 )
 
@@ -269,8 +269,9 @@ func (v *Vote) CreateVote(db *s.Database) error {
 	return err
 }
 
-func (v *Vote) ValidateMessage(proposal Proposal) error {
-	vars := strings.Split(v.Message, ":")
+func ValidateVoteMessage(message string, proposal Proposal) error {
+	log.Info().Msgf("validating message: %s", message)
+	vars := strings.Split(message, ":")
 
 	// check proposal choices to see if choice is valid
 	encodedChoice := vars[1]

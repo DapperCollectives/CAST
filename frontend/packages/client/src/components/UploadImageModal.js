@@ -204,6 +204,7 @@ export default function UploadImageModal({
     onDrop,
     maxFiles: maxImageFiles,
     accept: 'image/jpeg,image/png,image/gif',
+    useFsAccessApi: false,
   });
 
   const onUploadStared = useCallback(
