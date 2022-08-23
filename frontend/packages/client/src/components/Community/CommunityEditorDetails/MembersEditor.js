@@ -4,7 +4,7 @@ import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useWebContext } from 'contexts/Web3';
 import { ActionButton } from 'components';
 import { useCommunityUsers } from 'hooks';
-import { getCompositeSigs } from 'utils';
+import { UPDATE_COMMUNITY_TX } from 'const';
 import { yupResolver } from '@hookform/resolvers/yup';
 import AddressForm from './AddressForm';
 import { AddressSchema } from './FormConfig';
@@ -17,8 +17,9 @@ export default function MembersEditor({
 } = {}) {
   const {
     user: { addr },
-    injectedProvider,
+    user,
     isValidFlowAddress,
+    signMessageByWalletProvider,
   } = useWebContext();
 
   const { notifyError } = useErrorHandlerContext();
@@ -71,14 +72,14 @@ export default function MembersEditor({
     // use original list passed by props to identify addresses to add and remove
     const originalList = communityUsers.map((el) => el.addr);
 
-    const timestamp = Date.now().toString();
-    const hexTime = Buffer.from(timestamp).toString('hex');
-    const _compositeSignatures = await injectedProvider
-      .currentUser()
-      .signUserMessage(hexTime);
-    const compositeSignatures = getCompositeSigs(_compositeSignatures);
+    const hexTime = Buffer.from(Date.now().toString()).toString('hex');
+    const [compositeSignatures, voucher] = await signMessageByWalletProvider(
+      user?.services[0]?.uid,
+      UPDATE_COMMUNITY_TX,
+      hexTime
+    );
     // No valid user signature found.
-    if (!compositeSignatures) {
+    if (!compositeSignatures && !voucher) {
       notifyError(
         {
           message: JSON.stringify({
@@ -93,8 +94,9 @@ export default function MembersEditor({
 
     const body = {
       signingAddr: addr,
-      timestamp,
+      timestamp: hexTime,
       compositeSignatures,
+      voucher,
     };
 
     const toRemove = originalList.filter(
