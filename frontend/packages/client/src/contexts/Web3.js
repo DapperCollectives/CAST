@@ -117,9 +117,9 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
           f_vsn: '1.0.0',
           type: 'authn',
           method: 'POP/RPC',
-          uid: 'dapper#authn',
+          uid: 'dapper-wallet#authn',
           provider: {
-            name: 'Blocto',
+            name: 'Dapper Wallet',
             icon: '/images/dapper.svg',
           },
         },
