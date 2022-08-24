@@ -993,7 +993,8 @@ func (h *Helpers) validateUserWithRole(addr, timestamp string, compositeSignatur
 	if err := h.validateTimestamp(timestamp, 60); err != nil {
 		return err
 	}
-	if err := h.validateUserSignature(addr, timestamp, compositeSignatures); err != nil {
+	message := hex.EncodeToString([]byte(timestamp))
+	if err := h.validateUserSignature(addr, message, compositeSignatures); err != nil {
 		return err
 	}
 	if err := models.EnsureRoleForCommunity(h.A.DB, addr, communityId, role); err != nil {
@@ -1063,7 +1064,7 @@ func (h *Helpers) processTokenThreshold(address string, c shared.Contract, contr
 	if contractType == "nft" {
 		scriptPath = "./main/cadence/scripts/get_nfts_ids.cdc"
 	} else {
-		scriptPath = "./main/cadence/scripts/get_balance.cdc"
+		scriptPath = "./main/cadence/scripts/custom/nba_topshot_get_balance.cdc"
 	}
 
 	hasBalance, err := h.A.FlowAdapter.EnforceTokenThreshold(scriptPath, address, &c)

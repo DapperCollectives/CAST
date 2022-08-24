@@ -91,7 +91,7 @@ func TestCreateProposal(t *testing.T) {
 		var m map[string]interface{}
 		json.Unmarshal(response.Body.Bytes(), &m)
 
-		assert.Equal(t, "Invalid signature.", m["error"])
+		assert.Equal(t, "invalid signature", m["error"])
 	})
 
 	t.Run("Should throw an error if timestamp is more than 60 seconds", func(t *testing.T) {
