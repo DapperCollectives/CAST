@@ -18,6 +18,7 @@ env:
   argo_token: ${{ secrets.ARGO_TOKEN }}
   backend_api: ${{ secrets.BACKEND_API }}
   tx_options: ${{ secrets.TX_OPTIONS }}
+  hotjar_site_id: ${{ secrets.HOTJAR_STAGE_ID }}
 
 jobs:
 
@@ -136,7 +137,7 @@ jobs:
         BACKEND: ${{ env.backend_api }}
         TX: ${{ env.tx_options }}
       run: | 
-        cd frontend && docker build -f Dockerfile.stage . -t bruddev/cast-stage:$TAG-fe
+        cd frontend && sed -i -e 's/REPLACE_HOTJAR_SITE_ID/${{ env.hotjar_site_id }}/g' Dockerfile.stage && docker build -f Dockerfile.stage . -t bruddev/cast-stage:$TAG-fe
         docker push bruddev/cast-stage:$TAG-fe
 
 ## ARGO FROM HERE
