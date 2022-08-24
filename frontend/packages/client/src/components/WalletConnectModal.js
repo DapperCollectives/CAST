@@ -1,6 +1,5 @@
-import React, { useMemo }, { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { IS_LOCAL_DEV } from 'const';
-import * as fcl from '@onflow/fcl';
 import * as fcl from '@onflow/fcl';
 import classnames from 'classnames';
 import sortBy from 'lodash/sortBy';
