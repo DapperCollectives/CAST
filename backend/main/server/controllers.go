@@ -53,8 +53,13 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if *proposal.Computed_status == "closed" {
-		models.AddWinningVoteAchievement(a.DB, votes, results, proposal.Community_id)
+	if *proposal.Computed_status == "closed" && !proposal.Achievements_done {
+		if err := models.AddWinningVoteAchievement(a.DB, votes, results); err != nil {
+			errMsg := "Error calculating winning votes"
+			log.Error().Err(err).Msg(errMsg)
+			respondWithError(w, http.StatusInternalServerError, errors.New(errMsg).Error())
+		}
+		
 	}
 
 	respondWithJSON(w, http.StatusOK, results)
