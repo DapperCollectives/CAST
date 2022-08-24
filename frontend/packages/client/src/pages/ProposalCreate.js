@@ -102,6 +102,7 @@ export default function ProposalCreatePage() {
       strategy: strategy?.value,
       status: 'published',
       communityId,
+      achievementsDone: false,
     };
 
     await createProposal(proposalData);
