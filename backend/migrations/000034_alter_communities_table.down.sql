@@ -1,1 +1,1 @@
-ALTER TABLE communities DROP COLUMN contract_type;
+ALTER TABLE communities DROP COLUMN IF EXISTS contract_type;
