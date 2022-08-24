@@ -68,12 +68,13 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
     } = networks[network];
     const iconUrl = window.location.origin + '/logo.png';
 
+    // discovery.wallet.method config will be delayed
+    // untill user selects wallet to conect
     fcl.config({
       'app.detail.title': 'CAST',
       'app.detail.icon': iconUrl,
       'accessNode.api': accessApi, // connect to Flow
       'discovery.wallet': walletDiscovery, // use wallets on public discovery
-      'discovery.wallet.method': 'POP/RPC',
       'discovery.authn.endpoint': walletDiscoveryApi, // public discovery api endpoint
       'discovery.authn.include': walletDiscoveryInclude, // opt-in wallets
     });
