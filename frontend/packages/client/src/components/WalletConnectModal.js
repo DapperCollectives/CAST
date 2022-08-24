@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { IS_LOCAL_DEV } from 'const';
+import * as fcl from '@onflow/fcl';
 import classnames from 'classnames';
 import sortBy from 'lodash/sortBy';
 import { ArrowRight, Close } from './Svg';
@@ -24,16 +25,29 @@ export default function WalletConnectModal({
   };
 
   // sorting alphabetically services
-  const listOfServices = sortBy(
-    services.map((service) => ({
-      connectToService: () => {
-        injectedProvider.authenticate(!IS_LOCAL_DEV ? { service } : undefined);
-        closeModal();
-      },
-      icon: walletIcon[service.provider.name] ?? '',
-      name: service.provider.name,
-    })),
-    (service) => service.name
+  const listOfServices = useMemo(
+    () =>
+      sortBy(
+        services.map((service) => ({
+          connectToService: () => {
+            if (service.uid === 'dapper-wallet#authn') {
+              // dapper wallet uses POP/RPC
+              fcl.config().put('discovery.wallet.method', 'POP/RPC');
+            } else {
+              // other wallets are fine with IFRAME/RPC
+              fcl.config().put('discovery.wallet.method', 'IFRAME/RPC');
+            }
+            injectedProvider.authenticate(
+              !IS_LOCAL_DEV ? { service } : undefined
+            );
+            closeModal();
+          },
+          icon: walletIcon[service.provider.name] ?? '',
+          name: service.provider.name,
+        })),
+        (service) => service.name
+      ),
+    [services, closeModal, injectedProvider]
   );
 
   return (
