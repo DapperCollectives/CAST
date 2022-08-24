@@ -29,7 +29,7 @@ float:
 	flow accounts add-contract GrantedAccountAccess ./main/cadence/float/GrantedAccountAccess.cdc && \
 	flow accounts add-contract FLOAT ./main/cadence/float/FLOAT.cdc && \
 	flow accounts add-contract FLOATVerifiers ./main/cadence/float/FLOATVerifiers.cdc && \
-	flow transactions send ./main/cadence/float/transactions/create_group.cdc "cast-group""image" "local-dev-group" && \
+	flow transactions send ./main/cadence/float/transactions/create_group.cdc "cast-group" "image" "local-dev-group" && \
 	flow transactions send ./main/cadence/float/transactions/create_event.cdc 0xf8d6e0586b0a20c7 true "local-dev" "for emulator smoke testing" "image" "www.url.com" true false 10000.00 86400.00 false "secret" false 100 '["cast-group"]' false 0.0 false 0.0
 
 	

@@ -1,6 +1,7 @@
 import FLOAT from 0xf8d6e0586b0a20c7
 import FLOATVerifiers from 0xf8d6e0586b0a20c7
 import NonFungibleToken from 0xf8d6e0586b0a20c7
+import MetadataViews from 0xf8d6e0586b0a20c7
 import GrantedAccountAccess from 0xf8d6e0586b0a20c7
 
 transaction(groupName: String, image: String, description: String) {
