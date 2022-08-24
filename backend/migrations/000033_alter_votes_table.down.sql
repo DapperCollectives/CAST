@@ -1,1 +1,1 @@
-ALTER TABLE votes DROP COLUMN is_cancelled;
+ALTER TABLE votes DROP COLUMN IF EXISTS is_cancelled;

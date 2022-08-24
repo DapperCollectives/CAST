@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"sort"
 	"strings"
 
@@ -37,17 +36,18 @@ type UserCommunity struct {
 
 type CommunityUserPayload struct {
 	CommunityUser
-	Signing_addr         string                  `json:"signingAddr" validate:"required"`
-	Timestamp            string                  `json:"timestamp" validate:"required"`
-	Composite_signatures *[]s.CompositeSignature `json:"compositeSignatures" validate:"required"`
+	Signing_addr         string                  `json:"signingAddr"`
+	Timestamp            string                  `json:"timestamp"`
+	Composite_signatures *[]s.CompositeSignature `json:"compositeSignatures"`
+	Voucher              *s.Voucher              `json:"voucher"`
 }
 
 type UserAchievements = []struct {
-	Address     string
+	Addr     string
 	NumVotes    int
-	EarlyVote   int
-	Streak      int
-	WinningVote int
+	EarlyVotes   int
+	Streaks      int
+	WinningVotes int
 }
 
 type LeaderboardUser struct {
@@ -133,6 +133,7 @@ func GetCommunityLeaderboard(
 	userAchievements, err := getUserAchievements(db, communityId)
 
 	if err != nil {
+		log.Error().Err(err).Msg("Error Getting User Achievements.")
 		return payload, 0, err
 	}
 
@@ -280,55 +281,34 @@ func EnsureValidRole(userType string) bool {
 }
 
 func getUserAchievements(db *s.Database, communityId int) (UserAchievements, error) {
-	var userAchievements UserAchievements
-	// Retrieve each user in the community with totals for
-	// their votes and achievements (e.g. early votes, streaks and winning choices)
-	// Note 1: crosstab is a postgres extension that creates a pivot table.
-	// Achievements are joined as columns for each user.
-	// Note 2: crosstab Subselects in community_id not replaced properly by $1, so has been
-	// substituted in string first.
-	sql := fmt.Sprintf(
-		`
-		SELECT v.addr as address, count(*) as num_votes,
-		COALESCE(a.early_vote, 0) as early_vote,
-		COALESCE(b.streak, 0) as streak,
-		COALESCE(c.winning_vote, 0) as winning_vote
+	userAchievements := UserAchievements{}
+	
+	err := pgxscan.Select(db.Context, db.Conn, &userAchievements, `
+		SELECT 
+			v.addr, 
+			COUNT(v.id) AS num_votes,
+			COUNT(v.id) FILTER (WHERE is_early = 'true') AS early_votes,
+			COUNT(v.id) FILTER (WHERE is_winning = 'true') AS winning_votes
 		FROM votes v
-		LEFT OUTER JOIN proposals p ON p.id = v.proposal_id
-		LEFT OUTER JOIN (
-			SELECT * FROM crosstab(
-				$$SELECT addr, achievement_type, count(*) FROM user_achievements
-				WHERE community_id = %d and achievement_type = 'earlyVote'
-				GROUP BY addr, achievement_type
-				ORDER BY 1,2$$
-			) AS ct(address varchar(18), early_vote bigint)
-		) a ON v.addr = a.address
-		LEFT OUTER JOIN (
-			SELECT * FROM crosstab(
-				$$SELECT addr, achievement_type, count(*) FROM user_achievements
-				WHERE community_id = %d and achievement_type = 'streak'
-				GROUP BY addr, achievement_type
-				ORDER BY 1,2$$
-			) AS ct(address varchar(18), streak bigint)
-		) b ON v.addr = b.address
-		LEFT OUTER JOIN (
-			SELECT * FROM crosstab(
-				$$SELECT addr, achievement_type, count(*) FROM user_achievements
-				WHERE community_id = %d and achievement_type = 'winningVote'
-				GROUP BY addr, achievement_type
-				ORDER BY 1,2$$
-			) AS ct(address varchar(18), winning_vote bigint)
-		) c ON v.addr = c.address
-			WHERE p.community_id = $1 AND v.is_cancelled != 'true'
-			GROUP BY v.addr, a.early_vote, b.streak, c.winning_vote
-		`, communityId, communityId, communityId)
-
-	err := pgxscan.Select(db.Context, db.Conn, &userAchievements, sql, communityId)
+		LEFT JOIN proposals p ON p.id = v.proposal_id
+		WHERE p.community_id = $1
+		GROUP BY v.addr
+	`, communityId)
 
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
+		log.Error().Err(err).Msg("Error Getting User Achievements.")
 		return nil, err
 	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
-		return UserAchievements{}, nil
+		return userAchievements, nil
+	}
+
+	// Determine if user has any streaks
+	for i, ua := range userAchievements {
+		streaks, err := getStreakAchievement(db, ua.Addr, communityId)
+		if err != nil {
+			return userAchievements, err
+		}
+		userAchievements[i].Streaks = streaks
 	}
 
 	return userAchievements, nil
@@ -342,15 +322,15 @@ func getLeaderboardUsers(userAchievements UserAchievements, currentUserAddr stri
 	var defaultWinningVoteWeight = 1
 
 	for _, user := range userAchievements {
-		score := user.NumVotes + (user.EarlyVote * defaultEarlyVoteWeight) + (user.Streak * defaultStreakWeight) + (user.WinningVote * defaultWinningVoteWeight)
+		score := user.NumVotes + (user.EarlyVotes * defaultEarlyVoteWeight) + (user.Streaks * defaultStreakWeight) + (user.WinningVotes * defaultWinningVoteWeight)
 
 		var leaderboardUser = LeaderboardUser{}
-		leaderboardUser.Addr = user.Address
+		leaderboardUser.Addr = user.Addr
 		leaderboardUser.Score = score
 		leaderboardUsers = append(leaderboardUsers, leaderboardUser)
-		if user.Address == currentUserAddr {
+		if user.Addr == currentUserAddr {
 			currentUser = LeaderboardUser{}
-			currentUser.Addr = user.Address
+			currentUser.Addr = user.Addr
 			currentUser.Score = score
 		}
 	}

@@ -111,7 +111,6 @@ func (s *BalanceOfNfts) GetVotes(
 	votes []*models.VoteWithBalance,
 	proposal *models.Proposal,
 ) ([]*models.VoteWithBalance, error) {
-
 	for _, vote := range votes {
 		weight, err := s.GetVoteWeightForBalance(vote, proposal)
 		if err != nil {

@@ -143,6 +143,17 @@ var (
 		Only_authors_to_submit: &onlyAuthors,
 	}
 
+	NilStrategyCommunity = models.Community{
+		Name:                   "TestDAO",
+		Category:               &category,
+		Body:                   &body,
+		Creator_addr:           "<replace>",
+		Logo:                   &logo,
+		Slug:                   &slug,
+		Strategies:             nil,
+		Only_authors_to_submit: &onlyAuthors,
+	}
+
 	CommunityWithThreshold = models.Community{
 		Name:                   "With Threshold",
 		Category:               &category,
@@ -181,6 +192,7 @@ var (
 		Instagram_url:            &instagram,
 		Strategies:               &updatedStrategies,
 		Terms_and_conditions_url: &termsAndConditions,
+		Only_authors_to_submit:   &notOnlyAuthors,
 	}
 )
 
@@ -215,6 +227,15 @@ func (otu *OverflowTestUtils) GenerateFailCommunityStruct(accountName string) *m
 
 	// this does a deep copy
 	community := FailCommunity
+	community.Creator_addr = "0x" + account.Address().String()
+	return &community
+}
+
+func (otu *OverflowTestUtils) GenerateNilStrategyCommunityStruct(accountName string) *models.Community {
+	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", accountName))
+
+	// this does a deep copy
+	community := NilStrategyCommunity
 	community.Creator_addr = "0x" + account.Address().String()
 	return &community
 }
