@@ -5,11 +5,13 @@ import classnames from 'classnames';
 import sortBy from 'lodash/sortBy';
 import { ArrowRight, Close } from './Svg';
 
-const walletIcon = {
-  Blocto: 'https://fcl-discovery.onflow.org/images/blocto.png',
-  Lilico:
-    'https://raw.githubusercontent.com/Outblock/Lilico-Web/main/asset/logo-dis.png',
+const getWalletIcon = (provider) => {
+  if (provider?.name === 'Lilico') {
+    return provider.icon;
+  }
+  return `https://fcl-discovery.onflow.org${provider.icon}`;
 };
+
 export default function WalletConnectModal({
   services = [],
   openModal,
@@ -42,7 +44,7 @@ export default function WalletConnectModal({
             );
             closeModal();
           },
-          icon: walletIcon[service.provider.name] ?? '',
+          icon: getWalletIcon(service.provider),
           name: service.provider.name,
         })),
         (service) => service.name
@@ -55,7 +57,7 @@ export default function WalletConnectModal({
       <div className="modal-background" onClick={handleClickOnBackground}></div>
       <div
         className="modal-card rounded-sm has-background-white"
-        style={{ maxWidth: '375px', maxHeight: '370px' }}
+        style={{ maxWidth: '375px', maxHeight: '420px' }}
       >
         <header
           className="modal-card-head has-background-white columns is-mobile m-0 px-5 pt-5"
