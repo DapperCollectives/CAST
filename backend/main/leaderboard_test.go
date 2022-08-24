@@ -16,7 +16,6 @@ func resetTables() {
 	clearTable("communities")
 	clearTable("balances")
 	clearTable("community_users")
-	clearTable("user_achievements")
 	clearTable("proposals")
 	clearTable("votes")
 }
@@ -32,10 +31,10 @@ func TestGetLeaderboardCurrentUser(t *testing.T) {
 	response := otu.GetCommunityLeaderboardAPI(communityId)
 	checkResponseCode(t, http.StatusOK, response.Code)
 
-	var p test_utils.PaginatedResponseWithLeaderboardUser
-	json.Unmarshal(response.Body.Bytes(), &p)
+	var p1 test_utils.PaginatedResponseWithLeaderboardUser
+	json.Unmarshal(response.Body.Bytes(), &p1)
 
-	assert.Equal(t, models.LeaderboardUser{}, p.Data.CurrentUser)
+	assert.Equal(t, models.LeaderboardUser{}, p1.Data.CurrentUser)
 
 	response = otu.GetCommunityLeaderboardAPIWithCurrentUser(communityId, vote.Addr)
 	checkResponseCode(t, http.StatusOK, response.Code)

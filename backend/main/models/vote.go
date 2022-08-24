@@ -427,6 +427,12 @@ func AddWinningVoteAchievement(db *s.Database, votes []*VoteWithBalance, p Propo
 			}
 		}
 	}
+
+	_, err := db.Conn.Exec(db.Context, `UPDATE proposals SET achievements_done = 'true' WHERE id = $1`, p.Proposal_id)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -440,12 +446,10 @@ func getStreakAchievement(db *s.Database, addr string, communityId int) (int, er
 	if len(votes) >= defaultStreakLength {
 		var proposals []uint64
 		for i, vote := range votes {
-			// user voted on proposal
-			if vote.Addr != "" {
-				//TODO: CHECK FOR is_cancelled before adding the value
+			// check if user voted on non-cancelled proposal
+			if vote.Addr != "" && !vote.Is_cancelled {
 				proposals = append(proposals, vote.Proposal_id)
 				// check if vote is last in a streak
-				fmt.Println(i, len(proposals))
 				if len(proposals) >= defaultStreakLength && (i == len(votes)-1 || (i < len(votes)-1 && votes[i+1].Addr == "")) {
 					streaks = streaks + 1
 
@@ -469,7 +473,7 @@ func getUserVotes(db *s.Database, addr string, communityId int) ([]VotingStreak,
 	sql := fmt.Sprintf(`
 		SELECT 
 			p.id as proposal_id, 
-			v.is_cancelled as is_cancelled,
+			COALESCE(v.is_cancelled, 'false') as is_cancelled,
 			COALESCE(v.addr, '') as addr
 		FROM proposals p 
 		LEFT OUTER JOIN (

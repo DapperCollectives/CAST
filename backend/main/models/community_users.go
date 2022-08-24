@@ -133,6 +133,7 @@ func GetCommunityLeaderboard(
 	userAchievements, err := getUserAchievements(db, communityId)
 
 	if err != nil {
+		log.Error().Err(err).Msg("Error Getting User Achievements.")
 		return payload, 0, err
 	}
 
@@ -295,6 +296,7 @@ func getUserAchievements(db *s.Database, communityId int) (UserAchievements, err
 	`, communityId)
 
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
+		log.Error().Err(err).Msg("Error Getting User Achievements.")
 		return nil, err
 	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
 		return userAchievements, nil

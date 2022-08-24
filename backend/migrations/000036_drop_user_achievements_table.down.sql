@@ -18,3 +18,5 @@ CREATE TABLE user_achievements (
 
 ALTER TABLE user_achievements ADD UNIQUE (details);
 
+ALTER TABLE proposals DROP COLUMN IF EXISTS achievements_done;
+
