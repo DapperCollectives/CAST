@@ -248,7 +248,6 @@ func (h *Helpers) processVotes(
 	var votesWithBalances []*models.VoteWithBalance
 
 	for _, vote := range votes {
-
 		proposal := models.Proposal{ID: vote.Proposal_id}
 		if err := proposal.GetProposalById(h.A.DB); err != nil {
 			switch err.Error() {

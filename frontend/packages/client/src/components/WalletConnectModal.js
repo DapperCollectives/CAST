@@ -1,14 +1,17 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { IS_LOCAL_DEV } from 'const';
+import * as fcl from '@onflow/fcl';
 import classnames from 'classnames';
 import sortBy from 'lodash/sortBy';
 import { ArrowRight, Close } from './Svg';
 
-const walletIcon = {
-  Blocto: 'https://fcl-discovery.onflow.org/images/blocto.png',
-  Lilico:
-    'https://raw.githubusercontent.com/Outblock/Lilico-Web/main/asset/logo-dis.png',
+const getWalletIcon = (provider) => {
+  if (provider?.name === 'Lilico') {
+    return provider.icon;
+  }
+  return `https://fcl-discovery.onflow.org${provider.icon}`;
 };
+
 export default function WalletConnectModal({
   services = [],
   openModal,
@@ -24,16 +27,29 @@ export default function WalletConnectModal({
   };
 
   // sorting alphabetically services
-  const listOfServices = sortBy(
-    services.map((service) => ({
-      connectToService: () => {
-        injectedProvider.authenticate(!IS_LOCAL_DEV ? { service } : undefined);
-        closeModal();
-      },
-      icon: walletIcon[service.provider.name] ?? '',
-      name: service.provider.name,
-    })),
-    (service) => service.name
+  const listOfServices = useMemo(
+    () =>
+      sortBy(
+        services.map((service) => ({
+          connectToService: () => {
+            if (service.uid === 'dapper-wallet#authn') {
+              // dapper wallet uses POP/RPC
+              fcl.config().put('discovery.wallet.method', 'POP/RPC');
+            } else {
+              // other wallets are fine with IFRAME/RPC
+              fcl.config().put('discovery.wallet.method', 'IFRAME/RPC');
+            }
+            injectedProvider.authenticate(
+              !IS_LOCAL_DEV ? { service } : undefined
+            );
+            closeModal();
+          },
+          icon: getWalletIcon(service.provider),
+          name: service.provider.name,
+        })),
+        (service) => service.name
+      ),
+    [services, closeModal, injectedProvider]
   );
 
   return (
@@ -41,7 +57,7 @@ export default function WalletConnectModal({
       <div className="modal-background" onClick={handleClickOnBackground}></div>
       <div
         className="modal-card rounded-sm has-background-white"
-        style={{ maxWidth: '375px', maxHeight: '370px' }}
+        style={{ maxWidth: '375px', maxHeight: '420px' }}
       >
         <header
           className="modal-card-head has-background-white columns is-mobile m-0 px-5 pt-5"
