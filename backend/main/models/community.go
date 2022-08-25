@@ -35,11 +35,10 @@ type Community struct {
 	Slug                     *string     `json:"slug,omitempty"                  validate:"required"`
 	Is_featured              *bool       `json:"isFeatured,omitempty"`
 
-	Contract_name *string  `json:"contractName,omitempty"`
-	Contract_addr *string  `json:"contractAddr,omitempty"`
-	Contract_type *string  `json:"contractType,omitempty"`
-	Public_path   *string  `json:"publicPath,omitempty"`
-	Threshold     *float64 `json:"threshold,omitempty"`
+	Contract_name *string `json:"contractName,omitempty"`
+	Contract_addr *string `json:"contractAddr,omitempty"`
+	Contract_type *string `json:"contractType,omitempty"`
+	Public_path   *string `json:"publicPath,omitempty"`
 
 	Timestamp            string                  `json:"timestamp"             validate:"required"`
 	Composite_signatures *[]s.CompositeSignature `json:"compositeSignatures"`
@@ -190,12 +189,60 @@ func (c *Community) CreateCommunity(db *s.Database) error {
 	err := db.Conn.QueryRow(db.Context,
 		`
 	INSERT INTO communities(
-		name, category, logo, slug, strategies, strategy, banner_img_url, website_url, twitter_url, github_url, discord_url, instagram_url, terms_and_conditions_url, proposal_validation, proposal_threshold, body, cid, creator_addr, contract_name, contract_addr, contract_type, public_path, threshold, only_authors_to_submit, voucher)
+		name, 
+		category, 
+		logo, 
+		slug, 
+		strategies, 
+		strategy, 
+		banner_img_url, 
+		website_url, 
+		twitter_url, 
+		github_url, 
+		discord_url, 
+		instagram_url, 
+		terms_and_conditions_url, 
+		proposal_validation, 
+		proposal_threshold, 
+		body, 
+		cid, 
+		creator_addr, 
+		contract_name, 
+		contract_addr, 
+		contract_type, 
+		public_path, 
+		only_authors_to_submit, 
+		voucher)
 	VALUES(
-		$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25
+		$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, 
+		$14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24
 	)
 	RETURNING id, created_at
-	`, c.Name, c.Category, c.Logo, c.Slug, c.Strategies, c.Strategy, c.Banner_img_url, c.Website_url, c.Twitter_url, c.Github_url, c.Discord_url, c.Instagram_url, c.Terms_and_conditions_url, c.Proposal_validation, c.Proposal_threshold, c.Body, c.Cid, c.Creator_addr, c.Contract_name, c.Contract_addr, c.Contract_type, c.Public_path, c.Threshold, c.Only_authors_to_submit, c.Voucher).Scan(&c.ID, &c.Created_at)
+	`, c.Name,
+		c.Category,
+		c.Logo,
+		c.Slug,
+		c.Strategies,
+		c.Strategy,
+		c.Banner_img_url,
+		c.Website_url,
+		c.Twitter_url,
+		c.Github_url,
+		c.Discord_url,
+		c.Instagram_url,
+		c.Terms_and_conditions_url,
+		c.Proposal_validation,
+		c.Proposal_threshold,
+		c.Body,
+		c.Cid,
+		c.Creator_addr,
+		c.Contract_name,
+		c.Contract_addr,
+		c.Contract_type,
+		c.Public_path,
+		c.Only_authors_to_submit,
+		c.Voucher).
+		Scan(&c.ID, &c.Created_at)
 	return err
 }
 
