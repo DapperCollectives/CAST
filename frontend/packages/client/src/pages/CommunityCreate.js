@@ -17,7 +17,6 @@ export default function CommunityCreate() {
   const [modalError, setModalError] = useState(false);
   const {
     user: { addr: creatorAddr },
-    injectedProvider,
     isValidFlowAddress,
   } = useWebContext();
 
@@ -152,7 +151,7 @@ export default function CommunityCreate() {
       slug: generateSlug(),
     };
 
-    await createCommunity(injectedProvider, communityData);
+    await createCommunity(communityData);
   };
 
   const props = {

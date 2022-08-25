@@ -2,6 +2,7 @@ package test_utils
 
 import (
 	"bytes"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -143,6 +144,17 @@ var (
 		Only_authors_to_submit: &onlyAuthors,
 	}
 
+	NilStrategyCommunity = models.Community{
+		Name:                   "TestDAO",
+		Category:               &category,
+		Body:                   &body,
+		Creator_addr:           "<replace>",
+		Logo:                   &logo,
+		Slug:                   &slug,
+		Strategies:             nil,
+		Only_authors_to_submit: &onlyAuthors,
+	}
+
 	CommunityWithThreshold = models.Community{
 		Name:                   "With Threshold",
 		Category:               &category,
@@ -181,6 +193,7 @@ var (
 		Instagram_url:            &instagram,
 		Strategies:               &updatedStrategies,
 		Terms_and_conditions_url: &termsAndConditions,
+		Only_authors_to_submit:   &notOnlyAuthors,
 	}
 )
 
@@ -189,9 +202,10 @@ func (otu *OverflowTestUtils) GenerateCommunityPayload(signer string, payload *m
 	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", signer))
 	signingAddr := fmt.Sprintf("0x%s", account.Address().String())
 	timestamp := fmt.Sprint(time.Now().UnixNano() / int64(time.Millisecond))
+	hexTimestamp := hex.EncodeToString([]byte(fmt.Sprint(timestamp)))
 	compositeSignatures := otu.GenerateCompositeSignatures(signer, timestamp)
 
-	payload.Timestamp = timestamp
+	payload.Timestamp = hexTimestamp
 	payload.Composite_signatures = compositeSignatures
 	payload.Signing_addr = &signingAddr
 	if payload.Strategies == nil {
@@ -215,6 +229,15 @@ func (otu *OverflowTestUtils) GenerateFailCommunityStruct(accountName string) *m
 
 	// this does a deep copy
 	community := FailCommunity
+	community.Creator_addr = "0x" + account.Address().String()
+	return &community
+}
+
+func (otu *OverflowTestUtils) GenerateNilStrategyCommunityStruct(accountName string) *models.Community {
+	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", accountName))
+
+	// this does a deep copy
+	community := NilStrategyCommunity
 	community.Creator_addr = "0x" + account.Address().String()
 	return &community
 }

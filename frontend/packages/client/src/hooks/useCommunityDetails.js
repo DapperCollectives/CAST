@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useReducer } from 'react';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useWebContext } from 'contexts/Web3';
-import { checkResponse, getCompositeSigs } from 'utils';
+import { UPDATE_COMMUNITY_TX } from 'const';
+import { checkResponse } from 'utils';
 import { INITIAL_STATE, defaultReducer } from 'reducers';
 
 export default function useCommunityDetails(id) {
   const {
     user: { addr },
-    injectedProvider,
+    user,
+    signMessageByWalletProvider,
   } = useWebContext();
   const { notifyError } = useErrorHandlerContext();
   const [state, dispatch] = useReducer(defaultReducer, INITIAL_STATE);
@@ -40,15 +42,15 @@ export default function useCommunityDetails(id) {
     async (communityId, update) => {
       const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}`;
       try {
-        const timestamp = Date.now().toString();
-        const hexTime = Buffer.from(timestamp).toString('hex');
-        const _compositeSignatures = await injectedProvider
-          .currentUser()
-          .signUserMessage(hexTime);
+        const hexTime = Buffer.from(Date.now().toString()).toString('hex');
+        const [compositeSignatures, voucher] =
+          await signMessageByWalletProvider(
+            user?.services[0].uid,
+            UPDATE_COMMUNITY_TX,
+            hexTime
+          );
 
-        const compositeSignatures = getCompositeSigs(_compositeSignatures);
-
-        if (!compositeSignatures) {
+        if (!compositeSignatures && !voucher) {
           return { error: 'No valid user signature found.' };
         }
 
@@ -60,8 +62,9 @@ export default function useCommunityDetails(id) {
           body: JSON.stringify({
             ...update,
             signingAddr: addr,
-            timestamp,
+            timestamp: hexTime,
             compositeSignatures,
+            voucher,
           }),
         };
         dispatch({ type: 'PROCESSING' });
@@ -78,7 +81,7 @@ export default function useCommunityDetails(id) {
         return { error: err.message };
       }
     },
-    [dispatch, notifyError, addr, injectedProvider]
+    [dispatch, notifyError, addr, signMessageByWalletProvider, user?.services]
   );
 
   return {

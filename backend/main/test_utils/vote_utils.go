@@ -67,12 +67,13 @@ func (otu *OverflowTestUtils) GenerateValidVotePayload(accountName string, propo
 	timestamp := time.Now().UnixNano() / int64(time.Millisecond)
 	hexChoice := hex.EncodeToString([]byte(choice))
 	message := strconv.Itoa(proposalId) + ":" + hexChoice + ":" + fmt.Sprint(timestamp)
+	hexMessage := hex.EncodeToString([]byte(strconv.Itoa(proposalId) + ":" + hexChoice + ":" + fmt.Sprint(timestamp)))
 	compositeSignatures := otu.GenerateCompositeSignatures(accountName, message)
 	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", accountName))
 	address := fmt.Sprintf("0x%s", account.Address().String())
 
 	vote := models.Vote{Proposal_id: proposalId, Addr: address, Choice: choice,
-		Composite_signatures: compositeSignatures, Message: message}
+		Composite_signatures: compositeSignatures, Message: hexMessage}
 
 	return &vote
 }

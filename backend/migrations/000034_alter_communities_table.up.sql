@@ -1,0 +1,1 @@
+ALTER TABLE communities ADD COLUMN contract_type VARCHAR(5);

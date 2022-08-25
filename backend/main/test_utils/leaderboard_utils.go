@@ -22,7 +22,7 @@ func (otu *OverflowTestUtils) GenerateVotes(communityId int, numProposals int, n
 	}
 }
 
-func (otu *OverflowTestUtils) GenerateEarlyVoteAchievements(communityId int, numProposals int, numUsers int) {
+func (otu *OverflowTestUtils) GenerateEarlyVoteAchievements(communityId int, numProposals int, numUsers int) []int {
 	if numProposals == 0 {
 		panic("0 invalid value for numProposals")
 	}
@@ -38,6 +38,8 @@ func (otu *OverflowTestUtils) GenerateEarlyVoteAchievements(communityId int, num
 			otu.CreateVoteAPI(id, otu.GenerateValidVotePayload("user"+strconv.Itoa(i), id, voteChoice))
 		}
 	}
+
+	return proposalIds
 }
 
 func (otu *OverflowTestUtils) GenerateSingleStreakAchievements(communityId int, streakLengths []int) {

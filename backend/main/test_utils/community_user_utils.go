@@ -2,6 +2,7 @@ package test_utils
 
 import (
 	"bytes"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -24,10 +25,11 @@ func (otu *OverflowTestUtils) GenerateCommunityUserPayload(signer string, user *
 	signingAddr := fmt.Sprintf("0x%s", account.Address().String())
 	timestamp := fmt.Sprint(time.Now().UnixNano() / int64(time.Millisecond))
 	compositeSignatures := otu.GenerateCompositeSignatures(signer, timestamp)
+	hexTimestamp := hex.EncodeToString([]byte(fmt.Sprint(timestamp)))
 
 	var signedPayload = models.CommunityUserPayload{
 		CommunityUser:        *user,
-		Timestamp:            timestamp,
+		Timestamp:            hexTimestamp,
 		Composite_signatures: compositeSignatures,
 		Signing_addr:         signingAddr,
 	}

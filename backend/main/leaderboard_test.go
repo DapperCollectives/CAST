@@ -16,7 +16,6 @@ func resetTables() {
 	clearTable("communities")
 	clearTable("balances")
 	clearTable("community_users")
-	clearTable("user_achievements")
 	clearTable("proposals")
 	clearTable("votes")
 }
@@ -32,10 +31,10 @@ func TestGetLeaderboardCurrentUser(t *testing.T) {
 	response := otu.GetCommunityLeaderboardAPI(communityId)
 	checkResponseCode(t, http.StatusOK, response.Code)
 
-	var p test_utils.PaginatedResponseWithLeaderboardUser
-	json.Unmarshal(response.Body.Bytes(), &p)
+	var p1 test_utils.PaginatedResponseWithLeaderboardUser
+	json.Unmarshal(response.Body.Bytes(), &p1)
 
-	assert.Equal(t, models.LeaderboardUser{}, p.Data.CurrentUser)
+	assert.Equal(t, models.LeaderboardUser{}, p1.Data.CurrentUser)
 
 	response = otu.GetCommunityLeaderboardAPIWithCurrentUser(communityId, vote.Addr)
 	checkResponseCode(t, http.StatusOK, response.Code)
@@ -106,14 +105,6 @@ func TestGetLeaderboardWithSingleStreak(t *testing.T) {
 	assert.Equal(t, expectedScoreB, receivedScoreB)
 }
 
-// func TestGetLeaderboardWithMultiStreaks(t *testing.T) {
-// 	resetTables()
-
-// 	communityId := otu.AddCommunities(1)[0]
-// 	streaks := []int{3, 4}
-// 	streakBonus := 1
-// 	expectedUsers := 1
-
 func TestGetLeaderboardWithMultiStreaks(t *testing.T) {
 	resetTables()
 
@@ -178,6 +169,53 @@ func TestGetLeaderboardWithWinningVote(t *testing.T) {
 
 	assert.Equal(t, expectedWinners, receivedWinners)
 	assert.Equal(t, expectedLosers, receivedLosers)
+}
+
+func TestGetLeaderboardWithCancelledProposal(t *testing.T) {
+	authorName := "user1"
+
+	t.Run("User should lose vote on cancelled proposal", func(t *testing.T) {
+		resetTables()
+		communityId := otu.AddCommunitiesWithUsers(1, authorName)[0]
+		proposalIds := otu.AddActiveProposals(communityId, 3)
+
+		for _, id := range proposalIds {
+			vote := otu.GenerateValidVotePayload(authorName, id, "a")
+			otu.CreateVoteAPI(id, vote)
+		}
+	
+		// Cancel proposal
+		cancelPayload := otu.GenerateCancelProposalStruct(authorName, proposalIds[1])
+		otu.UpdateProposalAPI(proposalIds[1], cancelPayload)
+		
+		response := otu.GetCommunityLeaderboardAPI(communityId)
+		checkResponseCode(t, http.StatusOK, response.Code)
+	
+		var p test_utils.PaginatedResponseWithLeaderboardUser
+		json.Unmarshal(response.Body.Bytes(), &p)
+	
+		assert.Equal(t, 2, p.Data.Users[0].Score)
+	})
+
+	t.Run("User should lose early vote achievement on cancelled proposal", func(t *testing.T) {
+		numProposals := 4
+		communityId := otu.AddCommunitiesWithUsers(1, authorName)[0]
+		proposalIds := otu.GenerateEarlyVoteAchievements(communityId, numProposals, 1)
+		
+		// Cancel a proposalId
+		cancelPayload := otu.GenerateCancelProposalStruct(authorName, proposalIds[1])
+		otu.UpdateProposalAPI(proposalIds[1], cancelPayload)
+		
+		response := otu.GetCommunityLeaderboardAPI(communityId)
+		checkResponseCode(t, http.StatusOK, response.Code)
+	
+		var p test_utils.PaginatedResponseWithLeaderboardUser
+		json.Unmarshal(response.Body.Bytes(), &p)
+
+		// User get votes + early votes, but no extra on cancelled proposal
+		expectedResult := (numProposals - 1) * 2
+		assert.Equal(t, expectedResult, p.Data.Users[0].Score)
+	})
 }
 
 func TestGetLeaderboardDefaultPaging(t *testing.T) {

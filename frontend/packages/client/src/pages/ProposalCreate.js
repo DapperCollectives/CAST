@@ -18,7 +18,6 @@ export default function ProposalCreatePage() {
   const [modalError, setModalError] = useState(null);
   const {
     user: { addr: creatorAddr },
-    injectedProvider,
   } = useWebContext();
   const history = useHistory();
 
@@ -101,9 +100,10 @@ export default function ProposalCreatePage() {
       strategy: strategy?.value,
       status: 'published',
       communityId,
+      achievementsDone: false,
     };
 
-    await createProposal(injectedProvider, proposalData);
+    await createProposal(proposalData);
     plausible('Proposal Created');
   };
 
