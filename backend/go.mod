@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/axiomzen/envconfig v1.3.0
 	github.com/bjartek/overflow v1.0.0-rc1
+	github.com/ethereum/go-ethereum v1.10.21
 	github.com/georgysavva/scany v0.3.0
 	github.com/go-playground/validator/v10 v10.10.0
 	github.com/google/uuid v1.3.0
@@ -37,7 +38,6 @@ require (
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/ef-ds/deque v1.0.4 // indirect
 	github.com/enescakir/emoji v1.0.0 // indirect
-	github.com/ethereum/go-ethereum v1.10.21 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/fxamacker/cbor/v2 v2.4.1-0.20220515183430-ad2eae63303f // indirect
 	github.com/fxamacker/circlehash v0.3.0 // indirect

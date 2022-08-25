@@ -521,6 +521,8 @@ func (h *Helpers) enforceCommunityRestrictions(
 			return errors.New(errMsg)
 		}
 	} else {
+		fmt.Println("Community does not require authors to submit proposals")
+
 		threshold, err := strconv.ParseFloat(*c.Proposal_threshold, 64)
 		if err != nil {
 			log.Error().Err(err).Msg("Invalid proposal threshold")
@@ -1072,7 +1074,7 @@ func (h *Helpers) processTokenThreshold(address string, c shared.Contract, contr
 	if contractType == "nft" {
 		scriptPath = "./main/cadence/scripts/get_nfts_ids.cdc"
 	} else {
-		scriptPath = "./main/cadence/scripts/custom/nba_topshot_get_balance.cdc"
+		scriptPath = "./main/cadence/scripts/get_balance.cdc"
 	}
 
 	hasBalance, err := h.A.FlowAdapter.EnforceTokenThreshold(scriptPath, address, &c)
