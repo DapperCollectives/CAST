@@ -1238,6 +1238,11 @@
   resolved "https://registry.yarnpkg.com/@hookform/resolvers/-/resolvers-2.9.7.tgz#8b257ae67234ce0270e6b044c1a61fb98ec02b4b"
   integrity sha512-BloehX3MOLwuFEwT4yZnmolPjVmqyn8VsSuodLfazbCIqxBHsQ4qUZsi+bvNNCduRli1AGWFrkDLGD5QoNzsoA==
 
+"@hotjar/browser@^1.0.6":
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/@hotjar/browser/-/browser-1.0.6.tgz#5e1c9a2b0c7c21d65acb741b76c39ed81eaa4e5f"
+  integrity sha512-yq8pFrCk/pGe1LeI9kgd4NZNI3C8eQlck+ISmWnL3T8RtN/YYEmzDFEZ1AFZ9GGAbxyxG6xUdaL3/S7sOSqeCQ==
+
 "@humanwhocodes/config-array@^0.5.0":
   version "0.5.0"
   resolved "https://registry.yarnpkg.com/@humanwhocodes/config-array/-/config-array-0.5.0.tgz#1407967d4c6eecd7388f83acf1eaf4d0c6e58ef9"
