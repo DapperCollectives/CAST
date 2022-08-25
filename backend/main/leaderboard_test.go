@@ -198,8 +198,9 @@ func TestGetLeaderboardWithCancelledProposal(t *testing.T) {
 	})
 
 	t.Run("User should lose early vote achievement on cancelled proposal", func(t *testing.T) {
+		numProposals := 4
 		communityId := otu.AddCommunitiesWithUsers(1, authorName)[0]
-		proposalIds := otu.GenerateEarlyVoteAchievements(communityId, 4, 1)
+		proposalIds := otu.GenerateEarlyVoteAchievements(communityId, numProposals, 1)
 		
 		// Cancel a proposalId
 		cancelPayload := otu.GenerateCancelProposalStruct(authorName, proposalIds[1])
@@ -210,8 +211,10 @@ func TestGetLeaderboardWithCancelledProposal(t *testing.T) {
 	
 		var p test_utils.PaginatedResponseWithLeaderboardUser
 		json.Unmarshal(response.Body.Bytes(), &p)
-	
-		assert.Equal(t, 7, p.Data.Users[0].Score)
+
+		// User get votes + early votes, but no extra on cancelled proposal
+		expectedResult := (numProposals - 1) * 2
+		assert.Equal(t, expectedResult, p.Data.Users[0].Score)
 	})
 }
 

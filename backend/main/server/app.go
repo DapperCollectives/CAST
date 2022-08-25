@@ -115,6 +115,15 @@ func (a *App) Initialize() {
 	// Clients
 	////////////
 
+	// when running "make proposals" sets db to dev not test
+	arg := flag.String("db", "", "database type")
+	flag.Int("amount", 4, "Amount of proposals to create")
+
+	flag.Parse()
+	if *arg == "local" {
+		os.Setenv("APP_ENV", "DEV")
+	}
+
 	// Postgres
 	dbname := os.Getenv("DB_NAME")
 	if os.Getenv("APP_ENV") == "TEST" {

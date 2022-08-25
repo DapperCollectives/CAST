@@ -2,6 +2,7 @@ package test_utils
 
 import (
 	"bytes"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -119,9 +120,10 @@ func (otu *OverflowTestUtils) GenerateClosedProposalStruct(
 
 func (otu *OverflowTestUtils) GenerateProposalPayload(signer string, proposal *models.Proposal) *models.Proposal {
 	timestamp := fmt.Sprint(time.Now().UnixNano() / int64(time.Millisecond))
+	hexTimestamp := hex.EncodeToString([]byte(fmt.Sprint(timestamp)))
 	compositeSignatures := otu.GenerateCompositeSignatures(signer, timestamp)
 
-	proposal.Timestamp = timestamp
+	proposal.Timestamp = hexTimestamp
 	proposal.Composite_signatures = compositeSignatures
 
 	return proposal
