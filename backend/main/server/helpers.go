@@ -1089,13 +1089,11 @@ func (h *Helpers) initStrategy(name string) Strategy {
 }
 
 func (h *Helpers) pinJSONToIpfs(data interface{}) (*string, error) {
-	//pin, err := h.A.IpfsClient.PinJson(data)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	dummyHash := "dummyHash"
-	return &dummyHash, nil
+	pin, err := h.A.IpfsClient.PinJson(data)
+	if err != nil {
+		return nil, err
+	}
+	return &pin.IpfsHash, nil
 }
 
 func validateContractThreshold(s []models.Strategy) error {
