@@ -67,6 +67,8 @@ var (
 	onlyAuthors    = true
 	notOnlyAuthors = false
 
+	threshold = 0.000069
+
 	banner             = "banner"
 	website            = "website"
 	twitter            = "twitter"
@@ -75,11 +77,10 @@ var (
 	instagram          = "instagram"
 	termsAndConditions = "termsAndConditions"
 
-	flowContractName = "FlowToken"
-	flowContractAddr = "0x0ae53cb6e3f42a79"
-	flowPublicPath   = "flowTokenBalance"
-	threshold        = 0.0000069
-
+	flowContractName     = "FlowToken"
+	flowContractAddr     = "0x0ae53cb6e3f42a79"
+	flowPublicPath       = "flowTokenBalance"
+	proposal_threshold   = "0.010"
 	exampleNFTName       = "ExampleNFT"
 	exampleNFTAddr       = "0xf8d6e0586b0a20c7"
 	exampleNFTPublicPath = "exampleNFTCollection"
@@ -162,10 +163,10 @@ var (
 		Creator_addr:           "<replace>",
 		Logo:                   &logo,
 		Slug:                   &slug,
+		Proposal_threshold:     &proposal_threshold,
 		Contract_name:          &flowContractName,
 		Contract_addr:          &flowContractAddr,
 		Public_path:            &flowPublicPath,
-		Threshold:              &threshold,
 		Only_authors_to_submit: &notOnlyAuthors,
 	}
 
