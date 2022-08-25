@@ -521,6 +521,8 @@ func (h *Helpers) enforceCommunityRestrictions(
 			return errors.New(errMsg)
 		}
 	} else {
+		fmt.Println("Community does not require authors to submit proposals")
+
 		threshold, err := strconv.ParseFloat(*c.Proposal_threshold, 64)
 		if err != nil {
 			log.Error().Err(err).Msg("Invalid proposal threshold")
@@ -682,8 +684,16 @@ func (h *Helpers) updateCommunity(id int, payload models.UpdateCommunityRequestP
 }
 
 func (h *Helpers) removeUserRole(payload models.CommunityUserPayload) (int, error) {
-	if err := h.validateUser(payload.Signing_addr, payload.Timestamp, payload.Composite_signatures); err != nil {
-		return http.StatusForbidden, err
+	if payload.Voucher != nil {
+		if err := h.validateUserViaVoucher(payload.Signing_addr, payload.Voucher); err != nil {
+			log.Error().Err(err)
+			return http.StatusForbidden, err
+		}
+	} else {
+		if err := h.validateUser(payload.Signing_addr, payload.Timestamp, payload.Composite_signatures); err != nil {
+			log.Error().Err(err)
+			return http.StatusForbidden, err
+		}
 	}
 
 	if payload.User_type == "member" {
@@ -993,7 +1003,8 @@ func (h *Helpers) validateUserWithRole(addr, timestamp string, compositeSignatur
 	if err := h.validateTimestamp(timestamp, 60); err != nil {
 		return err
 	}
-	if err := h.validateUserSignature(addr, timestamp, compositeSignatures); err != nil {
+	message := hex.EncodeToString([]byte(timestamp))
+	if err := h.validateUserSignature(addr, message, compositeSignatures); err != nil {
 		return err
 	}
 	if err := models.EnsureRoleForCommunity(h.A.DB, addr, communityId, role); err != nil {
