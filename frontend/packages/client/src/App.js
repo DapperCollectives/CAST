@@ -6,11 +6,15 @@ import { HashRouter as Router } from 'react-router-dom';
 import NotificationModalProvider from 'contexts/NotificationModal';
 import { Web3Provider } from 'contexts/Web3';
 import { ErrorHandler } from 'components';
+import Hotjar from '@hotjar/browser';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import './App.sass';
 import AppPages from './pages';
 import Error from './pages/Error';
+
+const hotjarVersion = 6;
+Hotjar.init(process.env.REACT_APP_HOTJAR_SITE_ID, hotjarVersion);
 
 // create react-query client
 const queryClient = new QueryClient();
