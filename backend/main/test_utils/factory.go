@@ -110,6 +110,7 @@ func (otu *OverflowTestUtils) AddCommunities(count int) []int {
 	retIds := []int{}
 	for i := 0; i < count; i++ {
 		community := otu.GenerateCommunityStruct("account")
+
 		if err := community.CreateCommunity(otu.A.DB); err != nil {
 			fmt.Printf("Error in otu.AddCommunities.")
 		}

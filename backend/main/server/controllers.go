@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -59,7 +60,7 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 			log.Error().Err(err).Msg(errMsg)
 			respondWithError(w, http.StatusInternalServerError, errors.New(errMsg).Error())
 		}
-		
+
 	}
 
 	respondWithJSON(w, http.StatusOK, results)
@@ -238,6 +239,9 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//print the payload with text
+	fmt.Println("payload", payload)
+
 	// Check that status update is valid
 	// For now we are assuming proposals are creating with status 'published' and may be cancelled.
 	if payload.Status != "cancelled" {
@@ -309,6 +313,7 @@ func (a *App) getCommunity(w http.ResponseWriter, r *http.Request) {
 
 	c, httpStatus, err := helpers.fetchCommunity(id)
 	if err != nil {
+		fmt.Printf("err: %v", err)
 		respondWithError(w, httpStatus, err.Error())
 		return
 	}
@@ -340,7 +345,7 @@ func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	
+
 	//Validate Contract Thresholds
 	if payload.Strategies != nil {
 		err = validateContractThreshold(*payload.Strategies)
@@ -588,7 +593,7 @@ func (a *App) getLatestSnapshot(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) addFungibleToken(w http.ResponseWriter, r *http.Request) {
-	payload := struct{
+	payload := struct {
 		Addr string `json:"addr" validate:"required"`
 		Name string `json:"name" validate:"required"`
 		Path string `json:"path" validate:"required"`

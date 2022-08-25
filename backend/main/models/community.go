@@ -270,9 +270,8 @@ func (c *Community) UpdateCommunity(db *s.Database, p *UpdateCommunityRequestPay
 	contract_addr = COALESCE($17, contract_addr),
 	contract_type = COALESCE($18, contract_type),
 	public_path = COALESCE($19, public_path),
-	threshold = COALESCE($20, threshold),
-	only_authors_to_submit = COALESCE($21, only_authors_to_submit)
-	WHERE id = $22
+	only_authors_to_submit = COALESCE($20, only_authors_to_submit)
+	WHERE id = $21
 	`,
 		p.Name,
 		p.Body,
@@ -293,7 +292,6 @@ func (c *Community) UpdateCommunity(db *s.Database, p *UpdateCommunityRequestPay
 		p.Contract_addr,
 		p.Contract_type,
 		p.Public_path,
-		p.Threshold,
 		p.Only_authors_to_submit,
 		c.ID,
 	)
