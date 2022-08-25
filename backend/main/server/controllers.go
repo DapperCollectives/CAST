@@ -784,8 +784,9 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 func validatePayload(body io.ReadCloser, data interface{}) error {
 	decoder := json.NewDecoder(body)
 	if err := decoder.Decode(&data); err != nil {
-		log.Error().Err(err)
-		return errors.New("Invalid request payload.")
+		errMsg := "Invalid request payload."
+		log.Error().Err(err).Msg(errMsg)
+		return errors.New(errMsg)
 	}
 
 	defer body.Close()

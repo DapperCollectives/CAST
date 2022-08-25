@@ -464,8 +464,14 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, int, error
 		return models.Proposal{}, http.StatusInternalServerError, errors.New(errMsg)
 
 	}
-	p.Min_balance = strategy.Contract.Threshold
-	p.Max_weight = strategy.Contract.MaxWeight
+
+	// Set Min Balance/Max Weight to community defaults if not provided
+	if p.Min_balance == nil {
+		p.Min_balance = strategy.Contract.Threshold
+	}
+	if p.Max_weight == nil {
+		p.Max_weight = strategy.Contract.MaxWeight
+	}
 
 	if err := h.snapshot(&strategy, &p); err != nil {
 		return models.Proposal{}, http.StatusInternalServerError, err
@@ -748,14 +754,14 @@ func (h *Helpers) createCommunityUser(payload models.CommunityUserPayload) (int,
 	// validate user is allowed to create this user
 	if payload.User_type != "member" {
 		if payload.Signing_addr == payload.Addr {
-			CANNOT_GRANT_SELF_ERR := errors.New("Users cannot grant themselves a priviledged user_type.")
+			CANNOT_GRANT_SELF_ERR := errors.New("Users cannot grant themselves a privileged user_type.")
 			log.Error().Err(CANNOT_GRANT_SELF_ERR)
 			return http.StatusForbidden, CANNOT_GRANT_SELF_ERR
 		}
 		// If signing address is not user address, verify they have admin status in this community
 		var communityAdmin = models.CommunityUser{Community_id: payload.Community_id, Addr: payload.Signing_addr, User_type: "admin"}
 		if err := communityAdmin.GetCommunityUser(h.A.DB); err != nil {
-			USER_MUST_BE_ADMIN_ERR := errors.New("User must be community admin to grant priviledges.")
+			USER_MUST_BE_ADMIN_ERR := errors.New("User must be community admin to grant privileges.")
 			log.Error().Err(err).Msg("Database error.")
 			log.Error().Err(USER_MUST_BE_ADMIN_ERR)
 			return http.StatusForbidden, USER_MUST_BE_ADMIN_ERR

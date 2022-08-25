@@ -90,7 +90,7 @@ export default function ProposalCreatePage() {
       choiceImgUrl: c?.choiceImgUrl ?? null,
     }));
 
-    const { strategy } = stepsData[0];
+    const { strategy, minBalance, maxWeight } = stepsData[0];
 
     const proposalData = {
       name,
@@ -100,6 +100,8 @@ export default function ProposalCreatePage() {
       endTime,
       startTime,
       strategy: strategy?.value,
+      minBalance: minBalance && parseFloat(minBalance),
+      maxWeight: maxWeight && parseFloat(maxWeight),
       status: 'published',
       communityId,
       achievementsDone: false,

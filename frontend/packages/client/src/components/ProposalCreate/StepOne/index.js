@@ -460,6 +460,32 @@ const StepOne = ({
             onSelectValue={onSelectStrategy}
             ref={dropDownRef}
           />
+          {defaultValueStrategy && (
+            <>
+              <input
+                type="text"
+                placeholder="Minimum Balance"
+                className="rounded-sm border-light p-3 column is-full mt-4 mb-4"
+                value={stepData?.minBalance}
+                onChange={(event) =>
+                  onDataChange({
+                    minBalance: event.target.value,
+                  })
+                }
+              />
+              <input
+                type="text"
+                placeholder="Maximum Weight"
+                className="rounded-sm border-light p-3 column is-full"
+                value={stepData?.maxWeight}
+                onChange={(event) =>
+                  onDataChange({
+                    maxWeight: event.target.value,
+                  })
+                }
+              />
+            </>
+          )}
         </div>
         <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6">
           <h4 className="title is-5 mb-2">
