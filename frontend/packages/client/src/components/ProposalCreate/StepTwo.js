@@ -58,6 +58,11 @@ const TimeIntervals = ({ date, time, setTime, type } = {}) => {
 
   const timeIntervals = getTimeIntervals(startTimeInterval);
 
+  // this enables setting start time inmediatly
+  if (startDateIsToday && !HAS_DELAY_ON_START_TIME) {
+    // push date now to the top of timeIntervals
+    timeIntervals[0] !== new Date() && timeIntervals.unshift(new Date());
+  }
   return (
     <>
       {timeIntervals.map((itemValue, index) => (
