@@ -223,6 +223,7 @@ func TestUpdateCommunity(t *testing.T) {
 	// Create Community
 	communityStruct := otu.GenerateCommunityStruct("account")
 	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
+
 	response := otu.CreateCommunityAPI(communityPayload)
 
 	// Check response code

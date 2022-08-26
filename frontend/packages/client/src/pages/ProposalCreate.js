@@ -11,7 +11,7 @@ import {
   PropCreateStepTwo,
 } from 'components/ProposalCreate';
 import { useProposal } from 'hooks';
-import { customDraftToHTML, parseDateToServer } from 'utils';
+import { customDraftToHTML, isStartTimeValid, parseDateToServer } from 'utils';
 
 export default function ProposalCreatePage() {
   const { createProposal, data, loading, error } = useProposal();
@@ -74,6 +74,19 @@ export default function ProposalCreatePage() {
     const currentContent = stepsData[0]?.description?.getCurrentContent();
 
     const body = customDraftToHTML(currentContent);
+
+    const hasValidStartTime = isStartTimeValid(
+      stepsData[1].startTime,
+      stepsData[1].startDate
+    );
+
+    if (!hasValidStartTime) {
+      notifyError({
+        status: 'Invalid start time for proposal',
+        statusText: 'Please update start time on Set Date & Time step',
+      });
+      return;
+    }
 
     const startTime = parseDateToServer(
       stepsData[1].startDate,
