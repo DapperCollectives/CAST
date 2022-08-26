@@ -3,7 +3,6 @@ import DatePicker from 'react-datepicker';
 import { Calendar, CaretDown } from 'components/Svg';
 import { useMediaQuery } from 'hooks';
 import { HAS_DELAY_ON_START_TIME } from 'const';
-import { isStartTimeValid } from 'utils';
 
 const detectTimeZone = () =>
   new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -91,10 +90,9 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
       endTime: isDate,
     };
 
-    const isValid =
-      Object.keys(requiredFields).every(
-        (field) => stepData && requiredFields[field](stepData[field])
-      ) && isStartTimeValid(stepData?.startTime, stepData?.startDate);
+    const isValid = Object.keys(requiredFields).every(
+      (field) => stepData && requiredFields[field](stepData[field])
+    );
 
     setStepValid(isValid);
   }, [stepData, setStepValid, onDataChange]);
