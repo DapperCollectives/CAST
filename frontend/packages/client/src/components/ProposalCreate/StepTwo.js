@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import { Calendar, CaretDown } from 'components/Svg';
 import { useMediaQuery } from 'hooks';
@@ -48,9 +48,36 @@ const isToday = (date) => {
   return date?.setHours(0, 0, 0, 0) === new Date().setHours(0, 0, 0, 0);
 };
 
+const TimeIntervals = ({ date, time, setTime, type } = {}) => {
+  const startDateIsToday = date ? isToday(date) : false;
+
+  const startTimeInterval = startDateIsToday
+    ? HAS_DELAY_ON_START_TIME
+      ? new Date(Date.now() + 60 * 60 * 1000)
+      : Date.now()
+    : 0;
+
+  const timeIntervals = getTimeIntervals(startTimeInterval);
+
+  return (
+    <>
+      {timeIntervals.map((itemValue, index) => (
+        <button
+          className={`button is-white dropdown-item has-text-grey${
+            itemValue === time ? ' is-active' : ''
+          }`}
+          onMouseDown={setTime(itemValue)}
+          key={`drop-down-${type}-${index}`}
+        >
+          {formatTime(itemValue)}
+        </button>
+      ))}
+    </>
+  );
+};
+
 const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
   const [isStartTimeOpen, setStartTimeOpen] = useState(false);
-  const [startTimeIntervals, setStartTimeIntervals] = useState([]);
   const [isEndTimeOpen, setEndTimeOpen] = useState(false);
 
   const notMobile = useMediaQuery();
@@ -80,48 +107,29 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
     setEndTimeOpen(false);
   };
 
-  const { startDate } = stepData ?? {};
-
-  // on open dropdown set time intervals
-  useEffect(() => {
-    if (isStartTimeOpen && startDate && startTimeIntervals.length === 0) {
-      const startDateIsToday = isToday(startDate);
-
-      const startTimeInterval = startDateIsToday
-        ? HAS_DELAY_ON_START_TIME
-          ? new Date(Date.now() + 60 * 60 * 1000)
-          : Date.now()
-        : 0;
-
-      const timeIntervals = getTimeIntervals(startTimeInterval);
-      setStartTimeIntervals(timeIntervals);
-    }
-  }, [isStartTimeOpen, startTimeIntervals, startDate]);
-
-  // clear intervals
-  useEffect(() => {
-    if (!isStartTimeOpen && startTimeIntervals.length !== 0) {
-      setStartTimeIntervals([]);
-    }
-  }, [isStartTimeOpen, startTimeIntervals]);
-
   const timeZone = detectTimeZone();
 
   const onSetStartTimeOpen = () => setStartTimeOpen(true);
 
-  const setStartTime = (itemValue) => () => {
-    onDataChange({
-      startTime: itemValue,
-    });
-    setStartTimeOpen(false);
-  };
+  const setStartTime = useCallback(
+    (itemValue) => () => {
+      onDataChange({
+        startTime: itemValue,
+      });
+      setStartTimeOpen(false);
+    },
+    [onDataChange]
+  );
 
-  const setEndTime = (itemValue) => () => {
-    onDataChange({
-      endTime: itemValue,
-    });
-    setEndTimeOpen(false);
-  };
+  const setEndTime = useCallback(
+    (itemValue) => () => {
+      onDataChange({
+        endTime: itemValue,
+      });
+      setEndTimeOpen(false);
+    },
+    [onDataChange]
+  );
 
   const minDateForStartDate = new Date(
     HAS_DELAY_ON_START_TIME ? Date.now() + 60 * 60 * 1000 : Date.now()
@@ -202,17 +210,12 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
                   className="dropdown-content"
                   style={{ maxHeight: 300, overflow: 'auto' }}
                 >
-                  {startTimeIntervals.map((itemValue, index) => (
-                    <button
-                      className={`button is-white dropdown-item has-text-grey${
-                        itemValue === stepData?.startTime ? ' is-active' : ''
-                      }`}
-                      onMouseDown={setStartTime(itemValue)}
-                      key={`drop-down-${index}`}
-                    >
-                      {formatTime(itemValue)}
-                    </button>
-                  ))}
+                  <TimeIntervals
+                    date={stepData?.startDate}
+                    time={stepData?.startTime}
+                    setTime={setStartTime}
+                    type="start"
+                  />
                 </div>
               </div>
             </div>
@@ -286,17 +289,11 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
                   className="dropdown-content"
                   style={{ maxHeight: 300, overflow: 'auto' }}
                 >
-                  {getTimeIntervals().map((itemValue, index) => (
-                    <button
-                      className={`button is-white dropdown-item has-text-grey${
-                        itemValue === stepData?.endTime ? ' is-active' : ''
-                      }`}
-                      onMouseDown={setEndTime(itemValue)}
-                      key={`drop-down-${index}`}
-                    >
-                      {formatTime(itemValue)}
-                    </button>
-                  ))}
+                  <TimeIntervals
+                    setTime={setEndTime}
+                    time={stepData?.endTime}
+                    type="end"
+                  />
                 </div>
               </div>
             </div>
