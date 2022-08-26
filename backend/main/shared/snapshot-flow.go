@@ -16,6 +16,7 @@ type SnapshotClient struct {
 	BaseURL    string
 	HTTPClient *http.Client
 	Env        string
+	Fa         FlowAdapter
 }
 
 type Snapshot struct {
@@ -55,8 +56,8 @@ type SnapshotData struct {
 }
 
 type FungibleTokenContract struct {
-	ContractAddress       string `json:"contractAddress"`
-	ContractName          string `json:"contractName"`
+	ContractAddress      string `json:"contractAddress"`
+	ContractName         string `json:"contractName"`
 	PublicCapabilityPath string `json:"publicCapabilityPath"`
 }
 
@@ -76,13 +77,14 @@ var (
 	}
 )
 
-func NewSnapshotClient(baseUrl string) *SnapshotClient {
+func NewSnapshotClient(baseUrl string, fa FlowAdapter) *SnapshotClient {
 	return &SnapshotClient{
 		BaseURL: baseUrl,
 		HTTPClient: &http.Client{
 			Timeout: time.Second * 10,
 		},
 		Env: os.Getenv("APP_ENV"),
+		Fa:  fa,
 	}
 }
 
@@ -152,7 +154,17 @@ func (c *SnapshotClient) GetAddressBalanceAtBlockHeight(
 	contract *Contract,
 ) error {
 	if c.bypass() {
-		log.Info().Msgf("overriding snapshotter service for dev")
+		log.Info().Msgf("overriding snapshotter service for dev, getting local balance")
+		balance, err := c.Fa.GetFlowBalance(address)
+		if err != nil {
+			log.Debug().Err(err).Msg(
+				"SnapshotClient GetAddressBalanceAtBlockHeight request error",
+			)
+			return err
+		}
+		uintBalance := floatBalanceToUint(balance)
+		balanceResponse.PrimaryAccountBalance = uintBalance
+
 		return nil
 	}
 
@@ -215,7 +227,7 @@ func (c *SnapshotClient) GetLatestSnapshot(contract Contract) (*Snapshot, error)
 	return &snapshot, nil
 }
 
-func (c *SnapshotClient) AddFungibleToken(addr, name, path string) (error) {
+func (c *SnapshotClient) AddFungibleToken(addr, name, path string) error {
 	if c.bypass() {
 		return nil
 	}
@@ -223,8 +235,8 @@ func (c *SnapshotClient) AddFungibleToken(addr, name, path string) (error) {
 	url := fmt.Sprintf(`%s/add-fungible-token`, c.BaseURL)
 
 	payload := FungibleTokenContract{
-		ContractAddress: addr,
-		ContractName: name,
+		ContractAddress:      addr,
+		ContractName:         name,
 		PublicCapabilityPath: path,
 	}
 
@@ -240,7 +252,9 @@ func (c *SnapshotClient) AddFungibleToken(addr, name, path string) (error) {
 		return err
 	}
 
-	resBody := struct{ Data string `json:"data"` }{}
+	resBody := struct {
+		Data string `json:"data"`
+	}{}
 	if status, err := c.sendRequest(req, &resBody); err != nil {
 		// snapshotter returns 400 when token exists. Ignore since it is not technically an error
 		if status != 400 {

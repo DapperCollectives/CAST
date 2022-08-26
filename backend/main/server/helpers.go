@@ -1097,6 +1097,12 @@ func (h *Helpers) initStrategy(name string) Strategy {
 }
 
 func (h *Helpers) pinJSONToIpfs(data interface{}) (*string, error) {
+	shouldOverride := flag.Lookup("ipfs-override").Value.(flag.Getter).Get().(bool)
+	if shouldOverride {
+		dummyHash := "dummy-hash"
+		return &dummyHash, nil
+	}
+
 	pin, err := h.A.IpfsClient.PinJson(data)
 	if err != nil {
 		return nil, err

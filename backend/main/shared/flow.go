@@ -238,6 +238,39 @@ func (fa *FlowAdapter) EnforceTokenThreshold(scriptPath, creatorAddr string, c *
 	return true, nil
 }
 
+func (fa *FlowAdapter) GetFlowBalance(address string) (float64, error) {
+	flowAddress := flow.HexToAddress(address)
+	cadenceAddress := cadence.NewAddress(flowAddress)
+
+	script, err := ioutil.ReadFile("./main/cadence/scripts/get_balance.cdc")
+	if err != nil {
+		log.Error().Err(err).Msgf("Error reading cadence script file.")
+		return 0, err
+	}
+
+	script = fa.ReplaceContractPlaceholders(string(script[:]), nil, true)
+
+	cadenceValue, err := fa.Client.ExecuteScriptAtLatestBlock(
+		fa.Context,
+		script,
+		[]cadence.Value{
+			cadenceAddress,
+		})
+	if err != nil {
+		log.Error().Err(err).Msg("Error executing Funigble-Token Script.")
+		return 0, err
+	}
+
+	value := CadenceValueToInterface(cadenceValue)
+	balance, err := strconv.ParseFloat(value.(string), 64)
+	if err != nil {
+		log.Error().Err(err).Msg("Error converting cadence value to float.")
+		return 0, err
+	}
+
+	return balance, nil
+}
+
 func (fa *FlowAdapter) GetNFTIds(voterAddr string, c *Contract) ([]interface{}, error) {
 	flowAddress := flow.HexToAddress(voterAddr)
 	cadenceAddress := cadence.NewAddress(flowAddress)
@@ -454,4 +487,8 @@ func CadenceValueToInterface(field cadence.Value) interface{} {
 		}
 		return result
 	}
+}
+
+func floatBalanceToUint(balance float64) uint64 {
+	return uint64(balance * 1000000)
 }
