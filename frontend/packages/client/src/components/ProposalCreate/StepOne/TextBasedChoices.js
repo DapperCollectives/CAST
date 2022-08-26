@@ -6,7 +6,8 @@ import { getProposalType } from 'utils';
 
 const TextBasedChoices = ({
   choices = [],
-  onChoiceChange,
+  fieldName = 'choices',
+  register,
   onDestroyChoice,
   onCreateChoice,
   initChoices,
@@ -39,10 +40,7 @@ const TextBasedChoices = ({
                 className={`border-light rounded-sm p-3 column is-full pr-6 ${
                   !errorInField ? 'mb-4' : ''
                 }`}
-                value={choice.value}
-                onChange={(event) =>
-                  onChoiceChange(index, { value: event.target.value })
-                }
+                {...register(`${fieldName}.${index}.value`)}
                 autoFocus
               />
               <div

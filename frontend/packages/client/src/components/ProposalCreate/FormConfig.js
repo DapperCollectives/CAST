@@ -1,4 +1,3 @@
-import { Schema } from 'components/Community/ProposalThresholdEditor';
 import yup from 'helpers/validation';
 
 const formFieldsStepOne = ['title', 'strategy', 'body', 'choices', 'tabOption'];
@@ -14,7 +13,8 @@ const StepOneSchema = yup.object().shape({
   body: yup.string().required('Please enter a proposal description'),
   tabOption: yup.string().oneOf(['text-based', 'visual']),
   choices: yup
-    .array(
+    .array()
+    .of(
       yup
         .object({
           value: yup.string().required('Please enter option value'),

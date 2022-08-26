@@ -2,7 +2,13 @@ import React, { useEffect } from 'react';
 import { getProposalType } from 'utils';
 import ImageChoiceUploader from './ImageChoiceUploader';
 
-const ImageChoices = ({ choices = [], onChoiceChange, initChoices } = {}) => {
+const ImageChoices = ({
+  choices = [],
+  onChoiceChange,
+  initChoices,
+  error,
+} = {}) => {
+  const [errorOptOne, errorOptTwo] = error;
   useEffect(() => {
     if (getProposalType(choices) !== 'image') {
       initChoices([
@@ -42,6 +48,7 @@ const ImageChoices = ({ choices = [], onChoiceChange, initChoices } = {}) => {
             }}
             letterLabel="A"
             onImageUpdate={onImageUpdate(0)}
+            error={errorOptOne}
           />
         </div>
         <div className="column">
@@ -52,6 +59,7 @@ const ImageChoices = ({ choices = [], onChoiceChange, initChoices } = {}) => {
             }}
             letterLabel="B"
             onImageUpdate={onImageUpdate(1)}
+            error={errorOptTwo}
           />
         </div>
       </div>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import ImageChoices from './ImageChoices';
 import TextBasedChoices from './TextBasedChoices';
 
@@ -11,6 +11,8 @@ export default function ChoiceOptionCreator({
   update,
   setValue = () => {},
   error = [],
+  register,
+  fieldName,
 } = {}) {
   // tabOption value is sabed on form
   const setTab = (option) => (e) => {
@@ -59,11 +61,12 @@ export default function ChoiceOptionCreator({
       {tabOption === 'text-based' && (
         <TextBasedChoices
           choices={choices}
-          onChoiceChange={update}
           onDestroyChoice={remove}
           onCreateChoice={onCreateChoice}
           initChoices={initChoices}
           error={error}
+          register={register}
+          fieldName={fieldName}
         />
       )}
       {tabOption === 'visual' && (

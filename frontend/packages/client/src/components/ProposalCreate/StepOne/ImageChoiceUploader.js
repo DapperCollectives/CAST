@@ -58,6 +58,7 @@ export default function ImageChoiceUploader({
   onImageUpdate,
   image: imageParam,
   letterLabel,
+  error: errorParam,
 } = {}) {
   const [errorMessage, setErrorMessage] = useState(null);
   // existing image and component receives props

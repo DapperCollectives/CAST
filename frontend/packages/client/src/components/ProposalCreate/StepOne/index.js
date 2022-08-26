@@ -71,6 +71,7 @@ const StepOne = ({
     setStepValid((isDirty || isValid) && !isSubmitting);
   }, [isDirty, isValid, isSubmitting, setStepValid]);
 
+  console.log('all errors ', errors);
   return (
     <>
       <Form onSubmit={handleSubmit(onSubmit)} formId={formId}>
@@ -137,9 +138,11 @@ const StepOne = ({
               setValue={setValue}
               append={append}
               remove={remove}
-              update={update}
               replace={replace}
               error={errors['choices']}
+              fieldName="choices"
+              register={register}
+              update={update}
             />
           </div>
         </div>
