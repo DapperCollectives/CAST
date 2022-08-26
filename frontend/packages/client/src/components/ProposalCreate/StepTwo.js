@@ -2,9 +2,8 @@ import React, { useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import { Calendar, CaretDown } from 'components/Svg';
 import { useMediaQuery } from 'hooks';
-
-const HAS_DELAY_ON_START_TIME =
-  process.env.REACT_APP_APP_ENV?.toUpperCase() === 'PRODUCTION';
+import { HAS_DELAY_ON_START_TIME } from 'const';
+import { isStartTimeValid } from 'utils';
 
 const detectTimeZone = () =>
   new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -43,18 +42,6 @@ const formatTime = (date) => {
   hours = hours ? hours : 12; // the hour '0' should be '12'
   minutes = minutes < 10 ? '0' + minutes : minutes;
   return hours + ':' + minutes + ' ' + ampm;
-};
-
-const isStartTimeValid = (startTime, startDate) => {
-  const dateNow = new Date();
-
-  const startDateAndTime = new Date(startDate);
-
-  startDateAndTime.setHours(startTime.getHours(), startTime.getMinutes());
-
-  const dif = (startDateAndTime - dateNow) / (60 * 60 * 1000);
-
-  return dif > 1;
 };
 
 const isToday = (date) => {
