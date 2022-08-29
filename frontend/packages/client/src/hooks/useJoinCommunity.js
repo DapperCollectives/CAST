@@ -89,6 +89,7 @@ export default function useJoinCommunity() {
             signingAddr: addr,
             timestamp: hexTime,
             compositeSignatures,
+            voucher,
           }),
         };
 

@@ -527,6 +527,8 @@ func (h *Helpers) enforceCommunityRestrictions(
 			return errors.New(errMsg)
 		}
 	} else {
+		fmt.Println("Community does not require authors to submit proposals")
+
 		threshold, err := strconv.ParseFloat(*c.Proposal_threshold, 64)
 		if err != nil {
 			log.Error().Err(err).Msg("Invalid proposal threshold")
@@ -688,8 +690,16 @@ func (h *Helpers) updateCommunity(id int, payload models.UpdateCommunityRequestP
 }
 
 func (h *Helpers) removeUserRole(payload models.CommunityUserPayload) (int, error) {
-	if err := h.validateUser(payload.Signing_addr, payload.Timestamp, payload.Composite_signatures); err != nil {
-		return http.StatusForbidden, err
+	if payload.Voucher != nil {
+		if err := h.validateUserViaVoucher(payload.Signing_addr, payload.Voucher); err != nil {
+			log.Error().Err(err)
+			return http.StatusForbidden, err
+		}
+	} else {
+		if err := h.validateUser(payload.Signing_addr, payload.Timestamp, payload.Composite_signatures); err != nil {
+			log.Error().Err(err)
+			return http.StatusForbidden, err
+		}
 	}
 
 	if payload.User_type == "member" {
@@ -1070,7 +1080,7 @@ func (h *Helpers) processTokenThreshold(address string, c shared.Contract, contr
 	if contractType == "nft" {
 		scriptPath = "./main/cadence/scripts/get_nfts_ids.cdc"
 	} else {
-		scriptPath = "./main/cadence/scripts/custom/nba_topshot_get_balance.cdc"
+		scriptPath = "./main/cadence/scripts/get_balance.cdc"
 	}
 
 	hasBalance, err := h.A.FlowAdapter.EnforceTokenThreshold(scriptPath, address, &c)

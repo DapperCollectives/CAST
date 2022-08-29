@@ -32,12 +32,8 @@ export default function WalletConnectModal({
       sortBy(
         services.map((service) => ({
           connectToService: () => {
-            if (service.uid === 'dapper-wallet#authn') {
-              // dapper wallet uses POP/RPC
-              fcl.config().put('discovery.wallet.method', 'POP/RPC');
-            } else {
-              // other wallets are fine with IFRAME/RPC
-              fcl.config().put('discovery.wallet.method', 'IFRAME/RPC');
+            if (service.uid !== 'Lilico') {
+              fcl.config().put('discovery.wallet.method', service.method);
             }
             injectedProvider.authenticate(
               !IS_LOCAL_DEV ? { service } : undefined
