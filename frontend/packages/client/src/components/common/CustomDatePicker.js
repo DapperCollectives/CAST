@@ -8,7 +8,9 @@ export default function CustomDatePicker({
   fieldName,
   notMobile,
   minDate,
+  maxDate,
   disabled = false,
+  placeholderText,
 } = {}) {
   return (
     <Controller
@@ -17,9 +19,10 @@ export default function CustomDatePicker({
       render={({ field }) => (
         <DatePicker
           required
-          placeholderText="Choose date"
+          placeholderText={placeholderText}
           selected={field.value}
           minDate={minDate ?? new Date()}
+          maxDate={maxDate}
           onFocus={(e) => !notMobile && e.target.blur()}
           onChange={(date) => field.onChange(date)}
           className="border-light rounded-sm column is-full is-full-mobile p-3"

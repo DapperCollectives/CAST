@@ -64,6 +64,7 @@ const StepOne = ({
   };
 
   const tabOption = useWatch({ control, name: 'tabOption' });
+  const defaultValueStrategy = useWatch({ control, name: 'strategy' });
 
   const { isDirty, isSubmitting, isValid, errors } = formState;
 
@@ -71,9 +72,8 @@ const StepOne = ({
     setStepValid((isDirty || isValid) && !isSubmitting);
   }, [isDirty, isValid, isSubmitting, setStepValid]);
 
-  const defaultValueStrategy = stepData?.strategy;
-
   console.log('all errors ', errors);
+
   return (
     <>
       <Form onSubmit={handleSubmit(onSubmit)} formId={formId}>
@@ -126,27 +126,19 @@ const StepOne = ({
             />
             {defaultValueStrategy && (
               <>
-                <input
-                  type="text"
+                <Input
                   placeholder="Minimum Balance"
-                  className="rounded-sm border-light p-3 column is-full mt-4 mb-4"
-                  value={stepData?.minBalance}
-                  onChange={(event) =>
-                    onDataChange({
-                      minBalance: event.target.value,
-                    })
-                  }
+                  classNames="rounded-sm border-light p-3 column is-full mt-4 mb-4"
+                  register={register}
+                  error={errors['minBalance']}
+                  name="minBalance"
                 />
-                <input
-                  type="text"
+                <Input
                   placeholder="Maximum Weight"
-                  className="rounded-sm border-light p-3 column is-full"
-                  value={stepData?.maxWeight}
-                  onChange={(event) =>
-                    onDataChange({
-                      maxWeight: event.target.value,
-                    })
-                  }
+                  classNames="rounded-sm border-light p-3 column is-full"
+                  register={register}
+                  error={errors['maxWeight']}
+                  name="maxWeight"
                 />
               </>
             )}
