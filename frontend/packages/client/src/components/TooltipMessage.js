@@ -52,7 +52,10 @@ export default function TooltipMesssage({ onClose = () => {} } = {}) {
               </p>
             </div>
             <div className={classesClose}>
-              <div onClick={() => setCloseToolTip(true)}>
+              <div
+                className="cursor-pointer"
+                onClick={() => setCloseToolTip(true)}
+              >
                 <Close width="15" height="15" />
               </div>
             </div>
