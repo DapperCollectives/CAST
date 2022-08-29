@@ -118,6 +118,7 @@ func (a *App) Initialize() {
 	// when running "make proposals" sets db to dev not test
 	arg := flag.String("db", "", "database type")
 	flag.Bool("ipfs-override", false, "overrides ipfs call")
+	flag.Int("port", 5001, "port")
 	flag.Int("amount", 4, "Amount of proposals to create")
 
 	flag.Parse()
