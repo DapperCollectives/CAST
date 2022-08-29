@@ -51,8 +51,8 @@ export default function HomePage() {
   const [showToolTip, setValue] = useLocalStorage('dw-safary-tooltip', null);
 
   useEffect(() => {
-    const isSafary = 'Apple Safari' === browserName;
-    if (isSafary && showToolTip === null) {
+    const isSafari = 'Apple Safari' === browserName;
+    if (isSafari && showToolTip === null) {
       setValue(true);
     }
   }, [browserName, setValue, showToolTip]);
