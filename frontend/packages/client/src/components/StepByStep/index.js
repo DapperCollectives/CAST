@@ -130,10 +130,10 @@ function StepByStep({
 
   const formId = useHookForms ? `form-Id-${currentStep}` : undefined;
 
-  const getBackLabel = () => (
+  const getBackLabel = (isSubmitting) => (
     <div
       className="is-flex is-align-items-center has-text-grey cursor-pointer"
-      onClick={() => onStepAdvance('prev')}
+      onClick={!isSubmitting ? () => onStepAdvance('prev') : () => {}}
     >
       <ArrowLeft />
       <span className="ml-4">Back</span>
@@ -183,7 +183,7 @@ function StepByStep({
             className="has-background-white-ter pl-4 is-hidden-mobile"
           >
             <div className="mb-6" style={{ minHeight: 24 }}>
-              {currentStep > 0 && getBackLabel()}
+              {currentStep > 0 && getBackLabel(isSubmitting)}
             </div>
             <div>{steps.map((step, i) => getStepIcon(i, step.label))}</div>
             {currentStep < steps.length - 1 && showNextButton && (
@@ -199,6 +199,7 @@ function StepByStep({
                 disabled={!isStepValid}
                 onSubmit={_onSubmit}
                 label={finalLabel}
+                isSubmitting={isSubmitting}
               />
             )}
           </div>
@@ -209,7 +210,7 @@ function StepByStep({
           >
             <div className="is-flex is-justify-content-space-between is-align-items-center">
               <div style={{ minHeight: 24 }}>
-                {currentStep > 0 && getBackLabel()}
+                {currentStep > 0 && getBackLabel(isSubmitting)}
               </div>
               <div className="is-flex">
                 {steps.map((step, i) => getStepIcon(i, null))}
@@ -217,7 +218,9 @@ function StepByStep({
             </div>
           </div>
           {/* right panel */}
-          <div className="step-by-step-body flex-1 has-background-white px-4-mobile pt-7-mobile">
+          <div
+            className={`step-by-step-body flex-1 has-background-white px-4-mobile pt-7-mobile is-flex-mobile is-flex-direction-column-mobile`}
+          >
             {isSubmitting && (
               <div
                 className="is-flex flex-1 is-flex-direction-column is-align-items-center is-justify-content-center"
@@ -267,6 +270,7 @@ function StepByStep({
                   disabled={!isStepValid}
                   onSubmit={_onSubmit}
                   label={finalLabel}
+                  isSubmitting={isSubmitting}
                 />
               )}
             </div>

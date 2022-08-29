@@ -464,8 +464,14 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, int, error
 		return models.Proposal{}, http.StatusInternalServerError, errors.New(errMsg)
 
 	}
-	p.Min_balance = strategy.Contract.Threshold
-	p.Max_weight = strategy.Contract.MaxWeight
+
+	// Set Min Balance/Max Weight to community defaults if not provided
+	if p.Min_balance == nil {
+		p.Min_balance = strategy.Contract.Threshold
+	}
+	if p.Max_weight == nil {
+		p.Max_weight = strategy.Contract.MaxWeight
+	}
 
 	if err := h.snapshot(&strategy, &p); err != nil {
 		return models.Proposal{}, http.StatusInternalServerError, err
@@ -521,6 +527,8 @@ func (h *Helpers) enforceCommunityRestrictions(
 			return errors.New(errMsg)
 		}
 	} else {
+		fmt.Println("Community does not require authors to submit proposals")
+
 		threshold, err := strconv.ParseFloat(*c.Proposal_threshold, 64)
 		if err != nil {
 			log.Error().Err(err).Msg("Invalid proposal threshold")
@@ -682,8 +690,16 @@ func (h *Helpers) updateCommunity(id int, payload models.UpdateCommunityRequestP
 }
 
 func (h *Helpers) removeUserRole(payload models.CommunityUserPayload) (int, error) {
-	if err := h.validateUser(payload.Signing_addr, payload.Timestamp, payload.Composite_signatures); err != nil {
-		return http.StatusForbidden, err
+	if payload.Voucher != nil {
+		if err := h.validateUserViaVoucher(payload.Signing_addr, payload.Voucher); err != nil {
+			log.Error().Err(err)
+			return http.StatusForbidden, err
+		}
+	} else {
+		if err := h.validateUser(payload.Signing_addr, payload.Timestamp, payload.Composite_signatures); err != nil {
+			log.Error().Err(err)
+			return http.StatusForbidden, err
+		}
 	}
 
 	if payload.User_type == "member" {
@@ -748,14 +764,14 @@ func (h *Helpers) createCommunityUser(payload models.CommunityUserPayload) (int,
 	// validate user is allowed to create this user
 	if payload.User_type != "member" {
 		if payload.Signing_addr == payload.Addr {
-			CANNOT_GRANT_SELF_ERR := errors.New("Users cannot grant themselves a priviledged user_type.")
+			CANNOT_GRANT_SELF_ERR := errors.New("Users cannot grant themselves a privileged user_type.")
 			log.Error().Err(CANNOT_GRANT_SELF_ERR)
 			return http.StatusForbidden, CANNOT_GRANT_SELF_ERR
 		}
 		// If signing address is not user address, verify they have admin status in this community
 		var communityAdmin = models.CommunityUser{Community_id: payload.Community_id, Addr: payload.Signing_addr, User_type: "admin"}
 		if err := communityAdmin.GetCommunityUser(h.A.DB); err != nil {
-			USER_MUST_BE_ADMIN_ERR := errors.New("User must be community admin to grant priviledges.")
+			USER_MUST_BE_ADMIN_ERR := errors.New("User must be community admin to grant privileges.")
 			log.Error().Err(err).Msg("Database error.")
 			log.Error().Err(USER_MUST_BE_ADMIN_ERR)
 			return http.StatusForbidden, USER_MUST_BE_ADMIN_ERR
@@ -1064,7 +1080,7 @@ func (h *Helpers) processTokenThreshold(address string, c shared.Contract, contr
 	if contractType == "nft" {
 		scriptPath = "./main/cadence/scripts/get_nfts_ids.cdc"
 	} else {
-		scriptPath = "./main/cadence/scripts/custom/nba_topshot_get_balance.cdc"
+		scriptPath = "./main/cadence/scripts/get_balance.cdc"
 	}
 
 	hasBalance, err := h.A.FlowAdapter.EnforceTokenThreshold(scriptPath, address, &c)

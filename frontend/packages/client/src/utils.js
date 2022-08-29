@@ -1,3 +1,4 @@
+import { HAS_DELAY_ON_START_TIME } from 'const';
 import { formatDistance } from 'date-fns';
 import { stateToHTML } from 'draft-js-export-html';
 import { stateFromHTML } from 'draft-js-import-html';
@@ -224,3 +225,16 @@ export const getPaginationInfo = (pages) => {
 
 export const validateLength = (string, MaxLength) =>
   string?.length <= MaxLength;
+
+// validates if date made of startTime and startDate is 1 hour ahead of time
+export const isStartTimeValid = (startTime, startDate) => {
+  const dateNow = new Date();
+
+  const startDateAndTime = new Date(startDate);
+
+  startDateAndTime.setHours(startTime.getHours(), startTime.getMinutes());
+
+  const dif = (startDateAndTime - dateNow) / (60 * 60 * 1000);
+
+  return HAS_DELAY_ON_START_TIME ? dif > 1 : true;
+};

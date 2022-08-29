@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -59,7 +60,7 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 			log.Error().Err(err).Msg(errMsg)
 			respondWithError(w, http.StatusInternalServerError, errors.New(errMsg).Error())
 		}
-		
+
 	}
 
 	respondWithJSON(w, http.StatusOK, results)
@@ -309,6 +310,7 @@ func (a *App) getCommunity(w http.ResponseWriter, r *http.Request) {
 
 	c, httpStatus, err := helpers.fetchCommunity(id)
 	if err != nil {
+		fmt.Printf("err: %v", err)
 		respondWithError(w, httpStatus, err.Error())
 		return
 	}
@@ -340,7 +342,7 @@ func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	
+
 	//Validate Contract Thresholds
 	if payload.Strategies != nil {
 		err = validateContractThreshold(*payload.Strategies)
@@ -588,7 +590,7 @@ func (a *App) getLatestSnapshot(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) addFungibleToken(w http.ResponseWriter, r *http.Request) {
-	payload := struct{
+	payload := struct {
 		Addr string `json:"addr" validate:"required"`
 		Name string `json:"name" validate:"required"`
 		Path string `json:"path" validate:"required"`
@@ -784,8 +786,9 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 func validatePayload(body io.ReadCloser, data interface{}) error {
 	decoder := json.NewDecoder(body)
 	if err := decoder.Decode(&data); err != nil {
-		log.Error().Err(err)
-		return errors.New("Invalid request payload.")
+		errMsg := "Invalid request payload."
+		log.Error().Err(err).Msg(errMsg)
+		return errors.New(errMsg)
 	}
 
 	defer body.Close()
