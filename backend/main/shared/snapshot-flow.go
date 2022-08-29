@@ -162,7 +162,7 @@ func (c *SnapshotClient) GetAddressBalanceAtBlockHeight(
 			)
 			return err
 		}
-		uintBalance := floatBalanceToUint(balance)
+		uintBalance := FloatBalanceToUint(balance)
 		balanceResponse.PrimaryAccountBalance = uintBalance
 
 		return nil

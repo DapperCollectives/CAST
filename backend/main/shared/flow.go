@@ -238,6 +238,7 @@ func (fa *FlowAdapter) EnforceTokenThreshold(scriptPath, creatorAddr string, c *
 	return true, nil
 }
 
+//this function only gets called in local dev when snapshot is being overidden
 func (fa *FlowAdapter) GetFlowBalance(address string) (float64, error) {
 	flowAddress := flow.HexToAddress(address)
 	cadenceAddress := cadence.NewAddress(flowAddress)
@@ -248,12 +249,24 @@ func (fa *FlowAdapter) GetFlowBalance(address string) (float64, error) {
 		return 0, err
 	}
 
-	script = fa.ReplaceContractPlaceholders(string(script[:]), nil, true)
+	contractName := "FlowToken"
+	publicPath := "flowTokenBalance"
+	contracAddress := "0x0ae53cb6e3f42a79"
+
+	dummyContract := Contract{
+		Name:        &contractName,
+		Public_path: &publicPath,
+		Addr:        &contracAddress,
+	}
+
+	script = fa.ReplaceContractPlaceholders(string(script[:]), &dummyContract, true)
+	cadencePath := cadence.Path{Domain: "public", Identifier: *dummyContract.Public_path}
 
 	cadenceValue, err := fa.Client.ExecuteScriptAtLatestBlock(
 		fa.Context,
 		script,
 		[]cadence.Value{
+			cadencePath,
 			cadenceAddress,
 		})
 	if err != nil {
@@ -489,6 +502,6 @@ func CadenceValueToInterface(field cadence.Value) interface{} {
 	}
 }
 
-func floatBalanceToUint(balance float64) uint64 {
+func FloatBalanceToUint(balance float64) uint64 {
 	return uint64(balance * 1000000)
 }
