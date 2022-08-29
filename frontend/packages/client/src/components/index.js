@@ -45,3 +45,4 @@ export { default as CommunityHeader } from './CommunityHeader';
 export { default as Form } from './common/Form';
 export { default as Input } from './Input';
 export { default as TooltipMessage } from './TooltipMessage';
+export { default as FadeInOut } from './FadeInOut';

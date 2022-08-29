@@ -1,8 +1,16 @@
 import React from 'react';
 import { useWebContext } from 'contexts/Web3';
-import { FadeIn, HomeFooter, HomeHeader, Loader } from 'components';
+import {
+  FadeIn,
+  HomeFooter,
+  HomeHeader,
+  Loader,
+  TooltipMessage,
+} from 'components';
 import CommunitiesPresenter from 'components/Community/CommunitiesPresenter';
+import useBrowserName from 'hooks/useBrowserName';
 import useFeaturedCommunities from 'hooks/useFeaturedCommunities';
+import useLocalStorage from 'hooks/useLocalStorage';
 import useUserCommunities from 'hooks/useUserCommunities';
 import classnames from 'classnames';
 
@@ -39,8 +47,28 @@ export default function HomePage() {
     'pt-6-mobile pt-6-tablet pt-9-desktop': isMyCommunitiesVisible,
   });
 
+  const browserName = useBrowserName();
+  const isSafary = 'Apple Safari' === browserName;
+
+  const [showToolTip, setValue] = useLocalStorage(
+    'dw-safary-tooltip',
+    isSafary
+  );
+
+  // if tooltips is present this will make paddin-top smaller
+  const classNames = classnames('section', {
+    'section-small': isSafary && showToolTip,
+  });
+
   return (
-    <section className="section">
+    <section className={classNames}>
+      {showToolTip && (
+        <TooltipMessage
+          onClose={() => {
+            setValue(false);
+          }}
+        />
+      )}
       <HomeHeader />
       {(loading || loadingFeaturedCommunities) && (
         <div style={{ height: '50vh' }}>
