@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useWebContext } from 'contexts/Web3';
 import {
   FadeIn,
@@ -48,16 +48,18 @@ export default function HomePage() {
   });
 
   const browserName = useBrowserName();
-  const isSafary = 'Apple Safari' === browserName;
+  const [showToolTip, setValue] = useLocalStorage('dw-safary-tooltip', null);
 
-  const [showToolTip, setValue] = useLocalStorage(
-    'dw-safary-tooltip',
-    isSafary
-  );
+  useEffect(() => {
+    const isSafary = 'Apple Safari' === browserName;
+    if (isSafary && showToolTip === null) {
+      setValue(true);
+    }
+  }, [browserName, setValue, showToolTip]);
 
   // if tooltips is present this will make paddin-top smaller
   const classNames = classnames('section', {
-    'section-small': isSafary && showToolTip,
+    'section-small': showToolTip,
   });
 
   return (
