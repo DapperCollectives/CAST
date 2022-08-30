@@ -1,7 +1,7 @@
 import yup from 'helpers/validation';
 
 const formFieldsStepOne = ['title', 'strategy', 'body', 'choices', 'tabOption'];
-const formFieldsStepTwo = [];
+const formFieldsStepTwo = ['startDate', 'endDate', 'startTime', 'endTime'];
 
 const StepOneSchema = yup.object().shape({
   title: yup
@@ -53,7 +53,7 @@ const StepTwoSchema = yup.object().shape({
 });
 
 const initialValues = (fields = []) =>
-  Object.assign({}, ...fields.map((key) => ({ [key]: '' })));
+  Object.assign({}, ...fields.map((key) => ({ [key]: undefined })));
 
 const stepOne = {
   Schema: StepOneSchema,

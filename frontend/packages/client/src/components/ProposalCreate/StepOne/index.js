@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from 'react';
-import { useFieldArray, useForm, useWatch } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import Dropdown from 'components/common/Dropdown';
 import { Editor } from 'components/common/Editor';
@@ -37,7 +37,10 @@ const StepOne = ({
   const fieldsObj = Object.assign(
     {},
     stepOne.initialValues,
-    { choices: [], tabOption: 'text-based' },
+    {
+      choices: [],
+      tabOption: 'text-based',
+    },
     pick(stepData || {}, stepOne.formFields)
   );
 
@@ -45,18 +48,6 @@ const StepOne = ({
     reValidateMode: 'onChange',
     defaultValues: fieldsObj,
     resolver: yupResolver(stepOne.Schema),
-  });
-
-  const {
-    fields: choicesField,
-    append,
-    remove,
-    update,
-    replace,
-  } = useFieldArray({
-    control,
-    name: 'choices',
-    focusAppend: true,
   });
 
   const onSubmit = (data) => {
@@ -70,7 +61,6 @@ const StepOne = ({
     moveToNextStep();
   };
 
-  const tabOption = useWatch({ control, name: 'tabOption' });
   const defaultValueStrategy = useWatch({ control, name: 'strategy' });
 
   const { isDirty, isSubmitting, isValid, errors } = formState;
@@ -134,7 +124,8 @@ const StepOne = ({
             <>
               <Input
                 placeholder="Minimum Balance"
-                classNames="rounded-sm border-light p-3 column is-full mt-4 mb-4"
+                classNames="rounded-sm border-light p-3 column is-full"
+                conatinerClassNames="mt-4 mb-4"
                 register={register}
                 error={errors['minBalance']}
                 name="minBalance"
@@ -142,6 +133,7 @@ const StepOne = ({
               <Input
                 placeholder="Maximum Weight"
                 classNames="rounded-sm border-light p-3 column is-full"
+                conatinerClassNames="mb-4"
                 register={register}
                 error={errors['maxWeight']}
                 name="maxWeight"
@@ -159,16 +151,11 @@ const StepOne = ({
             Visual for side-by-side visual options represented by images.
           </p>
           <ChoiceOptionCreator
-            choices={choicesField}
-            tabOption={tabOption}
             setValue={setValue}
-            append={append}
-            remove={remove}
-            replace={replace}
             error={errors['choices']}
             fieldName="choices"
             register={register}
-            update={update}
+            control={control}
           />
         </div>
       </div>

@@ -1,31 +1,22 @@
 import React from 'react';
+import { useWatch } from 'react-hook-form';
 import ImageChoices from './ImageChoices';
 import TextBasedChoices from './TextBasedChoices';
 
 export default function ChoiceOptionCreator({
-  tabOption,
-  choices,
-  append,
-  remove,
-  update,
   setValue = () => {},
   error = [],
   register,
   fieldName,
+  control,
 } = {}) {
-  // tabOption value is sabed on form
+  const tabOption = useWatch({ control, name: 'tabOption' });
+
+  // tabOption value is saved on form
   const setTab = (option) => (e) => {
     e.preventDefault();
     e.stopPropagation();
     setValue('tabOption', option);
-  };
-
-  const onCreateChoice = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    append({
-      value: '',
-    });
   };
 
   return (
@@ -54,19 +45,16 @@ export default function ChoiceOptionCreator({
           </li>
         </ul>
       </div>
-
       {tabOption === 'text-based' && (
         <TextBasedChoices
-          choices={choices}
-          onDestroyChoice={remove}
-          onCreateChoice={onCreateChoice}
           error={error}
           register={register}
           fieldName={fieldName}
+          control={control}
         />
       )}
       {tabOption === 'visual' && (
-        <ImageChoices choices={choices} onChoiceChange={update} error={error} />
+        <ImageChoices control={control} error={error} />
       )}
     </>
   );

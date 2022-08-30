@@ -1,16 +1,33 @@
 import React from 'react';
+import { useFieldArray } from 'react-hook-form';
 import AddButton from 'components/AddButton';
 import FadeIn from 'components/FadeIn';
 import { Bin } from 'components/Svg';
 
 const TextBasedChoices = ({
-  choices = [],
   fieldName = 'choices',
   register,
-  onDestroyChoice,
-  onCreateChoice,
   error,
+  control,
 } = {}) => {
+  const {
+    fields: choices,
+    append,
+    remove,
+  } = useFieldArray({
+    control,
+    name: 'choices',
+    focusAppend: true,
+  });
+
+  const onCreateChoice = (index) => (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    append({
+      value: '',
+    });
+  };
+
   return (
     <>
       {choices?.map((choice, index) => {
@@ -18,9 +35,9 @@ const TextBasedChoices = ({
           ? error?.[index]?.value
           : null;
         return (
-          <React.Fragment key={choice.id}>
+          <React.Fragment key={index}>
             <div
-              key={choice.id}
+              key={`container-${index}`}
               className="columns is-mobile p-0 m-0"
               style={{ position: 'relative' }}
             >
@@ -32,7 +49,6 @@ const TextBasedChoices = ({
                   !errorInField ? 'mb-4' : ''
                 }`}
                 {...register(`${fieldName}.${index}.value`)}
-                autoFocus
               />
               <div
                 className="cursor-pointer"
@@ -41,7 +57,7 @@ const TextBasedChoices = ({
                   right: 15,
                   top: 7,
                 }}
-                onClick={() => onDestroyChoice(index)}
+                onClick={() => remove(index)}
               >
                 <Bin />
               </div>

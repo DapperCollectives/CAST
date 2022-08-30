@@ -1,14 +1,32 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useFieldArray } from 'react-hook-form';
 import ImageChoiceUploader from './ImageChoiceUploader';
 
-const ImageChoices = ({ choices = [], onChoiceChange, error } = {}) => {
+const ImageChoices = ({ error, control } = {}) => {
   const [errorOptOne, errorOptTwo] = Array.isArray(error) ? error : [];
 
+  const {
+    fields: choices,
+    update,
+    append,
+  } = useFieldArray({
+    control,
+    name: 'choices',
+    focusAppend: true,
+  });
+
+  useEffect(() => {
+    if (choices.length < 2) {
+      const size = 2 - choices.length;
+      const toAdd = new Array(size).fill({ value: '', choiceImgUrl: '' });
+      append(toAdd);
+    }
+  }, [choices, append]);
+
   const onImageUpdate = (index) => (image) => {
-    onChoiceChange(index, { value: image.text, choiceImgUrl: image.imageUrl });
+    update(index, { value: image.text, choiceImgUrl: image.imageUrl });
   };
 
-  console.log('cjoices', choices);
   const [choiceA, choiceB] = choices;
   return (
     <>
