@@ -48,8 +48,8 @@ const StepOneSchema = yup.object().shape({
 const StepTwoSchema = yup.object().shape({
   startDate: yup.date().required('Please provide a start date'),
   startTime: yup.date().required('Please provide a start time'),
-  endDate: yup.date().required('Please provide a end date'),
-  endTime: yup.date().required('Please provide a end time'),
+  endDate: yup.date().required('Please provide an end date'),
+  endTime: yup.date().required('Please provide an end time'),
 });
 
 const initialValues = (fields = []) =>

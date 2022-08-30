@@ -20,7 +20,7 @@ const TextBasedChoices = ({
     focusAppend: true,
   });
 
-  const onCreateChoice = (index) => (e) => {
+  const onCreateChoice = (e) => {
     e.preventDefault();
     e.stopPropagation();
     append({

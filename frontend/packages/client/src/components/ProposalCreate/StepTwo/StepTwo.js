@@ -1,32 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
+import { FadeIn } from 'components';
 import { Calendar, CaretDown } from 'components/Svg';
 import CustomDatePicker from 'components/common/CustomDatePicker';
 import Form from 'components/common/Form';
 import { useMediaQuery } from 'hooks';
 import { HAS_DELAY_ON_START_TIME } from 'const';
+import { formatTime } from 'utils';
 import { yupResolver } from '@hookform/resolvers/yup';
 import pick from 'lodash/pick';
-import { stepTwo } from './FormConfig';
+import { stepTwo } from '../FormConfig';
+import TimeIntervals from './TimeIntervals';
 
 const detectTimeZone = () =>
   new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-const getTimeIntervals = (cutOffDate = 0) => {
-  const timeIntervals = [];
-  for (let i = 0; i < 24; i++) {
-    for (let j = 0; j < 4; j++) {
-      let time = new Date();
-      time.setHours(i);
-      time.setMinutes(j * 15);
-      time.setSeconds(0);
-      if (time.getTime() >= cutOffDate) {
-        timeIntervals.push(time);
-      }
-    }
-  }
-  return timeIntervals;
-};
 
 const addDays = (date, days) => {
   date.setDate(date.getDate() + days);
@@ -38,51 +25,8 @@ const subtractDays = (date, days) => {
   return date;
 };
 
-const formatTime = (date) => {
-  let hours = date.getHours();
-  let minutes = date.getMinutes();
-  const ampm = hours >= 12 ? 'pm' : 'am';
-  hours = hours % 12;
-  hours = hours ? hours : 12; // the hour '0' should be '12'
-  minutes = minutes < 10 ? '0' + minutes : minutes;
-  return hours + ':' + minutes + ' ' + ampm;
-};
-
 const isToday = (date) => {
   return date?.setHours(0, 0, 0, 0) === new Date().setHours(0, 0, 0, 0);
-};
-
-const TimeIntervals = ({ date, time, setTime, type } = {}) => {
-  const startDateIsToday = date ? isToday(date) : false;
-
-  const startTimeInterval = startDateIsToday
-    ? HAS_DELAY_ON_START_TIME
-      ? new Date(Date.now() + 60 * 60 * 1000)
-      : Date.now()
-    : 0;
-
-  const timeIntervals = getTimeIntervals(startTimeInterval);
-
-  // this enables setting start time inmediatly
-  if (startDateIsToday && !HAS_DELAY_ON_START_TIME) {
-    // push date now to the top of timeIntervals
-    timeIntervals[0] !== new Date() && timeIntervals.unshift(new Date());
-  }
-  return (
-    <>
-      {timeIntervals.map((itemValue, index) => (
-        <button
-          className={`button is-white dropdown-item has-text-grey${
-            itemValue === time ? ' is-active' : ''
-          }`}
-          onMouseDown={setTime(itemValue)}
-          key={`drop-down-${type}-${index}`}
-        >
-          {formatTime(itemValue)}
-        </button>
-      ))}
-    </>
-  );
 };
 
 const StepTwo = ({
@@ -212,18 +156,31 @@ const StepTwo = ({
               aria-haspopup="true"
               aria-controls="dropdown-menu"
             >
-              <div className="dropdown-trigger columns m-0 is-flex-grow-1">
-                <button
-                  className="button rounded-sm is-outlined border-light column m-0 py-0 px-3 is-full-mobile"
-                  aria-haspopup="true"
-                  aria-controls="dropdown-menu"
-                  onClick={onSetStartTimeOpen}
-                >
-                  <div className="is-flex is-flex-grow-1 is-align-items-center is-justify-content-space-between has-text-grey small-text">
-                    {startTime ? formatTime(startTime) : 'Select Time'}
-                    <CaretDown className="has-text-black" />
+              <div className="dropdown-trigger columns is-multiline m-0 p-0 is-flex-grow-1">
+                <div className="column p-0 is-12">
+                  <button
+                    className="button rounded-sm is-outlined border-light column m-0 py-0 px-3 is-fullwidth"
+                    aria-haspopup="true"
+                    aria-controls="dropdown-menu"
+                    onClick={onSetStartTimeOpen}
+                  >
+                    <div className="is-flex is-flex-grow-1 is-align-items-center is-justify-content-space-between has-text-grey small-text">
+                      {startTime ? formatTime(startTime) : 'Select Time'}
+                      <CaretDown className="has-text-black" />
+                    </div>
+                  </button>
+                </div>
+                {errors?.startTime?.message && (
+                  <div className="column p-0 is-12">
+                    <FadeIn>
+                      <div className="pl-1 mt-2 mb-4">
+                        <p className="smaller-text has-text-red">
+                          {errors?.startTime?.message}
+                        </p>
+                      </div>
+                    </FadeIn>
                   </div>
-                </button>
+                )}
               </div>
               <div
                 className="dropdown-menu column p-0 is-full"
@@ -251,28 +208,41 @@ const StepTwo = ({
           End date and time <span className="has-text-danger">*</span>
         </h4>
         <div className="columns p-0 m-0">
-          <div
-            className="columns is-mobile p-0 pr-2 p-0-mobile mb-4-mobile m-0 column is-half"
-            style={{ position: 'relative' }}
-          >
-            <CustomDatePicker
-              placeholderText="Choose date"
-              control={control}
-              fieldName="endDate"
-              notMobile={notMobile}
-              minDate={addDays(new Date(startDate), 1)}
-              disabled={!Boolean(startDate) || !Boolean(startTime)}
-            />
+          <div className="columns is-multiline p-0 m-0 is-flex-grow-1">
             <div
-              style={{
-                position: 'absolute',
-                right: 15,
-                top: 7,
-                pointerEvents: 'none',
-              }}
+              className="p-0 pr-2 p-0-mobile mb-4-mobile m-0 column is-fullwidth"
+              style={{ position: 'relative' }}
             >
-              <Calendar />
+              <CustomDatePicker
+                placeholderText="Choose date"
+                control={control}
+                fieldName="endDate"
+                notMobile={notMobile}
+                minDate={addDays(new Date(startDate), 1)}
+                disabled={!Boolean(startDate) || !Boolean(startTime)}
+              />
+              <div
+                style={{
+                  position: 'absolute',
+                  right: 15,
+                  top: 7,
+                  pointerEvents: 'none',
+                }}
+              >
+                <Calendar />
+              </div>
             </div>
+            {errors?.endTime?.message && (
+              <div className="column p-0 is-12">
+                <FadeIn>
+                  <div className="pl-1 mt-2 mb-4">
+                    <p className="smaller-text has-text-red">
+                      {errors?.endTime?.message}
+                    </p>
+                  </div>
+                </FadeIn>
+              </div>
+            )}
           </div>
           <div className="columns is-mobile p-0 pl-2 p-0-mobile m-0 column is-half">
             <div
@@ -283,18 +253,31 @@ const StepTwo = ({
               aria-haspopup="true"
               aria-controls="dropdown-menu"
             >
-              <div className="dropdown-trigger columns m-0 is-flex-grow-1">
-                <button
-                  className="button rounded-sm is-outlined border-light column m-0 py-0 px-3 is-full-mobile"
-                  aria-haspopup="true"
-                  aria-controls="dropdown-menu"
-                  onClick={onSetEndTimeOpen}
-                >
-                  <div className="is-flex is-flex-grow-1 is-align-items-center is-justify-content-space-between has-text-grey small-text">
-                    {endTime ? formatTime(endTime) : 'Select Time'}
-                    <CaretDown className="has-text-black" />
+              <div className="dropdown-trigger columns is-multiline m-0 p-0 is-flex-grow-1">
+                <div className="column p-0 is-12">
+                  <button
+                    className="button rounded-sm is-outlined border-light column m-0 py-0 px-3 is-fullwidth"
+                    aria-haspopup="true"
+                    aria-controls="dropdown-menu"
+                    onClick={onSetEndTimeOpen}
+                  >
+                    <div className="is-flex is-flex-grow-1 is-align-items-center is-justify-content-space-between has-text-grey small-text">
+                      {endTime ? formatTime(endTime) : 'Select Time'}
+                      <CaretDown className="has-text-black" />
+                    </div>
+                  </button>
+                </div>
+                {errors?.endTime?.message && (
+                  <div className="column p-0 is-12">
+                    <FadeIn>
+                      <div className="pl-1 mt-2 mb-4">
+                        <p className="smaller-text has-text-red">
+                          {errors?.endTime?.message}
+                        </p>
+                      </div>
+                    </FadeIn>
                   </div>
-                </button>
+                )}
               </div>
               <div
                 className="dropdown-menu column p-0 is-full"
