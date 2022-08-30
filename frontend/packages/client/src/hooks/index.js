@@ -21,3 +21,6 @@ export { default as useCommunityUsers } from './useCommunityUsers';
 export { default as useCommunityCategory } from './useCommunityCategory';
 export { default as useBeforeUnload } from './useBeforeUnload';
 export { default as useStarAnimation } from './useStarAnimation';
+export { default as useAddFungibleToken } from './useAddFungibleToken';
+export { default as useBrowserName } from './useBrowserName';
+export { default as useLocalStorage } from './useLocalStorage';

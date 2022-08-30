@@ -77,8 +77,7 @@ export default function ProposalPage() {
 
   const modalContext = useModalContext();
 
-  const { user, injectedProvider, isLedger, setWebContextConfig } =
-    useWebContext();
+  const { user, injectedProvider, setWebContextConfig } = useWebContext();
 
   // setting this manually for users that do not have a ledger device
   useEffect(() => {
@@ -213,7 +212,7 @@ export default function ProposalPage() {
       injectedProvider,
       proposal,
       voteBody,
-      isLedger
+      user.services[0]?.uid
     );
     if (response?.error) {
       setVoteError(response.error);

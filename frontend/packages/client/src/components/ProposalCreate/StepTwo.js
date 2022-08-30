@@ -1,10 +1,84 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import DatePicker from 'react-datepicker';
 import { Calendar, CaretDown } from 'components/Svg';
 import { useMediaQuery } from 'hooks';
+import { HAS_DELAY_ON_START_TIME } from 'const';
 
 const detectTimeZone = () =>
   new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+const getTimeIntervals = (cutOffDate = 0) => {
+  const timeIntervals = [];
+  for (let i = 0; i < 24; i++) {
+    for (let j = 0; j < 4; j++) {
+      let time = new Date();
+      time.setHours(i);
+      time.setMinutes(j * 15);
+      time.setSeconds(0);
+      if (time.getTime() >= cutOffDate) {
+        timeIntervals.push(time);
+      }
+    }
+  }
+  return timeIntervals;
+};
+
+const addDays = (date, days) => {
+  date.setDate(date.getDate() + days);
+  return date;
+};
+
+const subtractDays = (date, days) => {
+  date.setDate(date.getDate() - days);
+  return date;
+};
+
+const formatTime = (date) => {
+  let hours = date.getHours();
+  let minutes = date.getMinutes();
+  const ampm = hours >= 12 ? 'pm' : 'am';
+  hours = hours % 12;
+  hours = hours ? hours : 12; // the hour '0' should be '12'
+  minutes = minutes < 10 ? '0' + minutes : minutes;
+  return hours + ':' + minutes + ' ' + ampm;
+};
+
+const isToday = (date) => {
+  return date?.setHours(0, 0, 0, 0) === new Date().setHours(0, 0, 0, 0);
+};
+
+const TimeIntervals = ({ date, time, setTime, type } = {}) => {
+  const startDateIsToday = date ? isToday(date) : false;
+
+  const startTimeInterval = startDateIsToday
+    ? HAS_DELAY_ON_START_TIME
+      ? new Date(Date.now() + 60 * 60 * 1000)
+      : Date.now()
+    : 0;
+
+  const timeIntervals = getTimeIntervals(startTimeInterval);
+
+  // this enables setting start time inmediatly
+  if (startDateIsToday && !HAS_DELAY_ON_START_TIME) {
+    // push date now to the top of timeIntervals
+    timeIntervals[0] !== new Date() && timeIntervals.unshift(new Date());
+  }
+  return (
+    <>
+      {timeIntervals.map((itemValue, index) => (
+        <button
+          className={`button is-white dropdown-item has-text-grey${
+            itemValue === time ? ' is-active' : ''
+          }`}
+          onMouseDown={setTime(itemValue)}
+          key={`drop-down-${type}-${index}`}
+        >
+          {formatTime(itemValue)}
+        </button>
+      ))}
+    </>
+  );
+};
 
 const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
   const [isStartTimeOpen, setStartTimeOpen] = useState(false);
@@ -20,9 +94,11 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
       startTime: isDate,
       endTime: isDate,
     };
+
     const isValid = Object.keys(requiredFields).every(
       (field) => stepData && requiredFields[field](stepData[field])
     );
+
     setStepValid(isValid);
   }, [stepData, setStepValid, onDataChange]);
 
@@ -34,74 +110,37 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
     setEndTimeOpen(false);
   };
 
-  const getTimeIntervals = (cutOffDate = 0) => {
-    const timeIntervals = [];
-    for (let i = 0; i < 24; i++) {
-      for (let j = 0; j < 4; j++) {
-        let time = new Date();
-        time.setHours(i);
-        time.setMinutes(j * 15);
-        time.setSeconds(0);
-        if (time.getTime() >= cutOffDate) {
-          timeIntervals.push(time);
-        }
-      }
-    }
-
-    // push now if date is today and not already in time interval
-    if (cutOffDate) {
-      const nowDate =
-        process.env.REACT_APP_APP_ENV?.toUpperCase() === 'PRODUCTION'
-          ? new Date(Date.now() + 60 * 60 * 1000) // delay by an hour in prod env
-          : new Date();
-      nowDate.setSeconds(0);
-      const doesntExist = timeIntervals.every((ti) => ti !== nowDate);
-      if (doesntExist) {
-        timeIntervals.unshift(nowDate);
-      }
-    }
-
-    return timeIntervals;
-  };
-
-  const formatTime = (date) => {
-    let hours = date.getHours();
-    let minutes = date.getMinutes();
-    const ampm = hours >= 12 ? 'pm' : 'am';
-    hours = hours % 12;
-    hours = hours ? hours : 12; // the hour '0' should be '12'
-    minutes = minutes < 10 ? '0' + minutes : minutes;
-    return hours + ':' + minutes + ' ' + ampm;
-  };
-
-  const addDays = (date, days) => {
-    date.setDate(date.getDate() + days);
-    return date;
-  };
-
   const timeZone = detectTimeZone();
-
-  const isToday = (date) => {
-    return date?.setHours(0, 0, 0, 0) === new Date().setHours(0, 0, 0, 0);
-  };
-
-  const startDateIsToday = isToday(stepData?.startDate);
-  const timeIntervals = getTimeIntervals(startDateIsToday ? Date.now() : 0);
 
   const onSetStartTimeOpen = () => setStartTimeOpen(true);
 
-  const setStartTime = (itemValue) => () => {
-    onDataChange({
-      startTime: itemValue,
-    });
-    setStartTimeOpen(false);
-  };
-  const setEndTime = (itemValue) => () => {
-    onDataChange({
-      endTime: itemValue,
-    });
-    setEndTimeOpen(false);
-  };
+  const setStartTime = useCallback(
+    (itemValue) => () => {
+      onDataChange({
+        startTime: itemValue,
+      });
+      setStartTimeOpen(false);
+    },
+    [onDataChange]
+  );
+
+  const setEndTime = useCallback(
+    (itemValue) => () => {
+      onDataChange({
+        endTime: itemValue,
+      });
+      setEndTimeOpen(false);
+    },
+    [onDataChange]
+  );
+
+  const minDateForStartDate = new Date(
+    HAS_DELAY_ON_START_TIME ? Date.now() + 60 * 60 * 1000 : Date.now()
+  );
+
+  const maxDateForStartDate = stepData?.endDate
+    ? subtractDays(new Date(stepData?.endDate), 1)
+    : undefined;
 
   return (
     <div>
@@ -118,7 +157,8 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
               required
               placeholderText="Choose date"
               selected={stepData?.startDate}
-              minDate={new Date()}
+              minDate={minDateForStartDate}
+              maxDate={maxDateForStartDate}
               onFocus={(e) => !notMobile && e.target.blur()}
               onChange={(date) => {
                 onDataChange({
@@ -173,17 +213,12 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
                   className="dropdown-content"
                   style={{ maxHeight: 300, overflow: 'auto' }}
                 >
-                  {timeIntervals.map((itemValue, index) => (
-                    <button
-                      className={`button is-white dropdown-item has-text-grey${
-                        itemValue === stepData?.startTime ? ' is-active' : ''
-                      }`}
-                      onMouseDown={setStartTime(itemValue)}
-                      key={`drop-down-${index}`}
-                    >
-                      {formatTime(itemValue)}
-                    </button>
-                  ))}
+                  <TimeIntervals
+                    date={stepData?.startDate}
+                    time={stepData?.startTime}
+                    setTime={setStartTime}
+                    type="start"
+                  />
                 </div>
               </div>
             </div>
@@ -257,17 +292,11 @@ const StepTwo = ({ stepData, setStepValid, onDataChange }) => {
                   className="dropdown-content"
                   style={{ maxHeight: 300, overflow: 'auto' }}
                 >
-                  {getTimeIntervals().map((itemValue, index) => (
-                    <button
-                      className={`button is-white dropdown-item has-text-grey${
-                        itemValue === stepData?.endTime ? ' is-active' : ''
-                      }`}
-                      onMouseDown={setEndTime(itemValue)}
-                      key={`drop-down-${index}`}
-                    >
-                      {formatTime(itemValue)}
-                    </button>
-                  ))}
+                  <TimeIntervals
+                    setTime={setEndTime}
+                    time={stepData?.endTime}
+                    type="end"
+                  />
                 </div>
               </div>
             </div>

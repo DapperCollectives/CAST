@@ -1,25 +1,25 @@
 import { useErrorHandlerContext } from '../contexts/ErrorHandler';
-import { getCompositeSigs } from 'utils';
+import { useWebContext } from 'contexts/Web3';
+import { UPDATE_MEMBERSHIP_TX } from 'const';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 export default function useJoinCommunity() {
   const queryClient = useQueryClient();
   const { notifyError } = useErrorHandlerContext();
+  const { signMessageByWalletProvider } = useWebContext();
 
   const { mutateAsync: createCommunityUserMutation } = useMutation(
-    async ({ communityId, user, injectedProvider }) => {
+    async ({ communityId, user }) => {
       const { addr } = user;
-      const { currentUser } = injectedProvider;
-      const { signUserMessage } = currentUser();
-      const timestamp = Date.now().toString();
-      const hexTime = Buffer.from(timestamp).toString('hex');
+      const hexTime = Buffer.from(Date.now().toString()).toString('hex');
       const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}/users`;
-      const _compositeSignatures = await signUserMessage(hexTime);
-      if (_compositeSignatures.indexOf('Declined:') > -1) {
-        return { success: false };
-      }
-      const compositeSignatures = getCompositeSigs(_compositeSignatures);
-      if (!compositeSignatures) {
+      const [compositeSignatures, voucher] = await signMessageByWalletProvider(
+        user?.services[0].uid,
+        UPDATE_MEMBERSHIP_TX,
+        hexTime
+      );
+
+      if (!compositeSignatures && !voucher) {
         return { error: 'No valid user signature found.' };
       }
 
@@ -34,8 +34,9 @@ export default function useJoinCommunity() {
             addr,
             userType: 'member',
             signingAddr: addr,
-            timestamp,
+            timestamp: hexTime,
             compositeSignatures,
+            voucher,
           }),
         };
 
@@ -62,19 +63,16 @@ export default function useJoinCommunity() {
   );
 
   const { mutateAsync: deleteUserFromCommunityMutation } = useMutation(
-    async ({ communityId, user, injectedProvider }) => {
+    async ({ communityId, user }) => {
       const { addr } = user;
-      const { currentUser } = injectedProvider;
-      const { signUserMessage } = currentUser();
       const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}/users/${addr}/member`;
-      const timestamp = Date.now().toString();
-      const hexTime = Buffer.from(timestamp).toString('hex');
-      const _compositeSignatures = await signUserMessage(hexTime);
-      if (_compositeSignatures.indexOf('Declined:') > -1) {
-        return { success: false };
-      }
-      const compositeSignatures = getCompositeSigs(_compositeSignatures);
-      if (!compositeSignatures) {
+      const hexTime = Buffer.from(Date.now().toString()).toString('hex');
+      const [compositeSignatures, voucher] = await signMessageByWalletProvider(
+        user?.services[0].uid,
+        UPDATE_MEMBERSHIP_TX,
+        hexTime
+      );
+      if (!compositeSignatures && !voucher) {
         return { error: 'No valid user signature found.' };
       }
 
@@ -89,8 +87,9 @@ export default function useJoinCommunity() {
             addr,
             userType: 'member',
             signingAddr: addr,
-            timestamp,
+            timestamp: hexTime,
             compositeSignatures,
+            voucher,
           }),
         };
 

@@ -11,14 +11,13 @@ import {
   PropCreateStepTwo,
 } from 'components/ProposalCreate';
 import { useProposal } from 'hooks';
-import { customDraftToHTML, parseDateToServer } from 'utils';
+import { customDraftToHTML, isStartTimeValid, parseDateToServer } from 'utils';
 
 export default function ProposalCreatePage() {
   const { createProposal, data, loading, error } = useProposal();
   const [modalError, setModalError] = useState(null);
   const {
     user: { addr: creatorAddr },
-    injectedProvider,
   } = useWebContext();
   const history = useHistory();
 
@@ -76,6 +75,19 @@ export default function ProposalCreatePage() {
 
     const body = customDraftToHTML(currentContent);
 
+    const hasValidStartTime = isStartTimeValid(
+      stepsData[1].startTime,
+      stepsData[1].startDate
+    );
+
+    if (!hasValidStartTime) {
+      notifyError({
+        status: 'Invalid start time for proposal',
+        statusText: 'Please update start time on Set Date & Time step',
+      });
+      return;
+    }
+
     const startTime = parseDateToServer(
       stepsData[1].startDate,
       stepsData[1].startTime
@@ -103,9 +115,10 @@ export default function ProposalCreatePage() {
       strategy: strategy?.value,
       status: 'published',
       communityId,
+      achievementsDone: false,
     };
 
-    await createProposal(injectedProvider, proposalData);
+    await createProposal(proposalData);
     plausible('Proposal Created');
   };
 

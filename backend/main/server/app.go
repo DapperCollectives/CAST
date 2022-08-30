@@ -2,6 +2,7 @@ package server
 
 import (
 	// "errors"
+
 	"context"
 	"flag"
 	"fmt"
@@ -83,7 +84,6 @@ var helpers Helpers
 
 func (a *App) Initialize() {
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
-	log.Logger = log.Logger.Level(zerolog.InfoLevel)
 
 	// Env
 	env := os.Getenv("APP_ENV")
@@ -94,7 +94,15 @@ func (a *App) Initialize() {
 		env = "PROD"
 	}
 	a.Env = strings.TrimSpace(env)
-	log.Info().Msgf("APP_ENV=%s", a.Env)
+
+	// Set log level based on env
+	if a.Env == "PROD" {
+		log.Logger = log.Logger.Level(zerolog.InfoLevel)
+		log.Info().Msgf("Log level: %s for APP_ENV=%s", "INFO", a.Env)
+	} else {
+		log.Logger = log.Logger.Level(zerolog.DebugLevel)
+		log.Info().Msgf("Log level: %s for APP_ENV=%s", "DEBUG", a.Env)
+	}
 
 	// Set App-wide Config
 	err := envconfig.Process("FVT", &a.Config)
@@ -107,6 +115,16 @@ func (a *App) Initialize() {
 	// Clients
 	////////////
 
+	// when running "make proposals" sets db to dev not test
+	arg := flag.String("db", "", "database type")
+	flag.Int("port", 5001, "port")
+	flag.Int("amount", 4, "Amount of proposals to create")
+
+	flag.Parse()
+	if *arg == "local" {
+		os.Setenv("APP_ENV", "DEV")
+	}
+
 	// Postgres
 	dbname := os.Getenv("DB_NAME")
 	if os.Getenv("APP_ENV") == "TEST" {
@@ -114,22 +132,22 @@ func (a *App) Initialize() {
 	}
 
 	a.ConnectDB(
-		os.Getenv("DB_USERNAME"), 
-		os.Getenv("DB_PASSWORD"), 
-		os.Getenv("DB_HOST"), 
-		os.Getenv("DB_PORT"), 
+		os.Getenv("DB_USERNAME"),
+		os.Getenv("DB_PASSWORD"),
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_PORT"),
 		dbname,
 	)
 
 	// IPFS
 	a.IpfsClient = shared.NewIpfsClient(os.Getenv("IPFS_KEY"), os.Getenv("IPFS_SECRET"))
-	
+
 	// Flow
 	if os.Getenv("FLOW_ENV") == "" {
 		os.Setenv("FLOW_ENV", "emulator")
 	}
 	a.FlowAdapter = shared.NewFlowClient(os.Getenv("FLOW_ENV"))
-	
+
 	// Snapshot
 	log.Info().Msgf("SNAPSHOT_BASE_URL: %s", os.Getenv("SNAPSHOT_BASE_URL"))
 	a.SnapshotClient = shared.NewSnapshotClient(os.Getenv("SNAPSHOT_BASE_URL"))

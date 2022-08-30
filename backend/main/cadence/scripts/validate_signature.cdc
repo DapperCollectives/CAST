@@ -2,19 +2,22 @@ import Crypto
 
 pub fun main(
   address: Address,
-  keyIds: [UInt],
+  keyIds: [Int],
   signatures: [String],
-  message: String
+  message: String,
+  domainSeparationTag: String
 ): Bool {
   let keyList = Crypto.KeyList()
   
   let account = getAccount(address)
   let keys = account.keys
-  let signatureBytes = signature.decodeHex()
-  let messageBytes = message.utf8
+  let messageBytes = message.decodeHex()
   var i = 0
-  while true {
-    if let key = keys.get(keyIndex: i) {
+  var totalWeight = 0.0
+  while i < keyIds.length {
+    if let key = keys.get(keyIndex: keyIds[i]) {
+      let signature = signatures[i]
+      let signatureBytes = signature.decodeHex()
       if key.isRevoked {
         // do not check revoked keys
         i = i + 1
@@ -27,11 +30,14 @@ pub fun main(
       if pk.verify(
         signature: signatureBytes,
         signedData: messageBytes,
-        domainSeparationTag: "FLOW-V0.0-user",
+        domainSeparationTag: domainSeparationTag,
         hashAlgorithm: key.hashAlgorithm
       ) {
-        // this key is good
-        return true
+        // this key is good, add weight to total weight
+        totalWeight = totalWeight + key.weight
+        if totalWeight >= 999.0 {
+            return true
+        }
       }
     } else {
       // checked all the keys, none of them match

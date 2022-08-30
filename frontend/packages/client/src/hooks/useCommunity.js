@@ -1,7 +1,9 @@
 import { useCallback, useReducer } from 'react';
 import { useErrorHandlerContext } from '../contexts/ErrorHandler';
+import { useWebContext } from 'contexts/Web3';
 import { useFileUploader } from 'hooks';
-import { checkResponse, getCompositeSigs } from 'utils';
+import { CREATE_COMMUNITY_TX } from 'const';
+import { checkResponse } from 'utils';
 import networks from 'networks';
 import {
   INITIAL_STATE,
@@ -34,6 +36,7 @@ export default function useCommunity({
   const { notifyError } = useErrorHandlerContext();
   // for now not using modal notification if there was an error uploading image
   const { uploadFile } = useFileUploader({ useModalNotifications: false });
+  const { user, signMessageByWalletProvider } = useWebContext();
 
   const getCommunities = useCallback(async () => {
     dispatch({ type: 'PROCESSING' });
@@ -53,20 +56,21 @@ export default function useCommunity({
   }, [dispatch, notifyError, count, start]);
 
   const createCommunity = useCallback(
-    async (injectedProvider, communityData) => {
+    async (communityData) => {
       dispatch({ type: 'PROCESSING' });
       const { flowAddress } = networkConfig;
       const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities`;
       try {
-        const timestamp = Date.now().toString();
-        const hexTime = Buffer.from(timestamp).toString('hex');
-        const _compositeSignatures = await injectedProvider
-          .currentUser()
-          .signUserMessage(hexTime);
+        const hexTime = Buffer.from(Date.now().toString()).toString('hex');
 
-        const compositeSignatures = getCompositeSigs(_compositeSignatures);
+        const [compositeSignatures, voucher] =
+          await signMessageByWalletProvider(
+            user?.services[0]?.uid,
+            CREATE_COMMUNITY_TX,
+            hexTime
+          );
 
-        if (!compositeSignatures) {
+        if (!compositeSignatures && !voucher) {
           const statusText = 'No valid user signature found.';
           // modal error will open
           notifyError(
@@ -158,8 +162,9 @@ export default function useCommunity({
             proposalThreshold: setDefaultValue(proposalThreshold, '0'),
             strategies,
             onlyAuthorsToSubmit: Boolean(onlyAuthorsToSubmitProposals),
-            timestamp,
+            timestamp: hexTime,
             compositeSignatures,
+            voucher,
           }),
         };
 
@@ -171,7 +176,13 @@ export default function useCommunity({
         dispatch({ type: 'ERROR', payload: { errorData: err.message } });
       }
     },
-    [dispatch, notifyError, uploadFile]
+    [
+      dispatch,
+      notifyError,
+      uploadFile,
+      signMessageByWalletProvider,
+      user?.services,
+    ]
   );
 
   return {
