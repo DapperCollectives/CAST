@@ -15,22 +15,24 @@ const StepOneSchema = yup.object().shape({
   choices: yup
     .array()
     .of(
-      yup
-        .object({
-          value: yup.string().required('Please enter option value'),
-          choiceImgUrl: yup.string().nullable(),
-        })
-        .when('tabOption', {
-          is: (option) => option === 'visual',
-          then: yup.object({
-            value: yup.string().required('Please enter option value'),
-            choiceImgUrl: yup
-              .string()
-              .url()
-              .required('Image option is not valid'),
-          }),
-        })
+      yup.object({
+        value: yup.string().required('Please enter option value'),
+        choiceImgUrl: yup.string().nullable(),
+      })
     )
+    .when('tabOption', {
+      is: 'visual',
+      then: yup.array().of(
+        yup.object({
+          value: yup.string().required('Please enter option value'),
+          choiceImgUrl: yup
+            .string()
+            .trim()
+            .url('Image option is not valid')
+            .required('Please upload an image'),
+        })
+      ),
+    })
     .min(2, 'Please add a choice, minimun amout is two')
     .unique('value', 'Invalid duplicated option'),
   maxWeight: yup

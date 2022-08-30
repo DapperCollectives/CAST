@@ -1,34 +1,14 @@
-import React, { useEffect } from 'react';
-import { getProposalType } from 'utils';
+import React from 'react';
 import ImageChoiceUploader from './ImageChoiceUploader';
 
-const ImageChoices = ({
-  choices = [],
-  onChoiceChange,
-  initChoices,
-  error,
-} = {}) => {
-  const [errorOptOne, errorOptTwo] = error;
-  useEffect(() => {
-    if (getProposalType(choices) !== 'image') {
-      initChoices([
-        {
-          value: '',
-          choiceImgUrl: '',
-        },
-        {
-          value: '',
-          choiceImgUrl: '',
-        },
-      ]);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+const ImageChoices = ({ choices = [], onChoiceChange, error } = {}) => {
+  const [errorOptOne, errorOptTwo] = Array.isArray(error) ? error : [];
 
   const onImageUpdate = (index) => (image) => {
     onChoiceChange(index, { value: image.text, choiceImgUrl: image.imageUrl });
   };
 
+  console.log('cjoices', choices);
   const [choiceA, choiceB] = choices;
   return (
     <>

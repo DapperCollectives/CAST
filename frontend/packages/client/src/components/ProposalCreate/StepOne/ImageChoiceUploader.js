@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Loader } from 'components';
+import { FadeIn, Loader } from 'components';
 import { Bin, Upload } from 'components/Svg';
 import { useFileUploader } from 'hooks';
 import { MAX_FILE_SIZE } from 'const';
@@ -46,14 +46,6 @@ const UploadArea = ({ getRootProps, getInputProps, errorMessage }) => {
   );
 };
 
-// initial state when no image has been uploaded
-const initialState = {
-  imageUrl: null,
-  uploadStatus: null,
-  file: null,
-  text: '',
-};
-
 export default function ImageChoiceUploader({
   onImageUpdate,
   image: imageParam,
@@ -62,17 +54,15 @@ export default function ImageChoiceUploader({
 } = {}) {
   const [errorMessage, setErrorMessage] = useState(null);
   // existing image and component receives props
+  console.log('imageParam', imageParam);
   const { imageUrl, text } = imageParam;
-  const existingImage = {
-    imageUrl,
-    uploadStatus: IMAGE_STATUS.uploaded,
+
+  const [image, setImage] = useState({
+    imageUrl: imageUrl === '' ? null : imageUrl,
+    uploadStatus: imageUrl === '' ? null : IMAGE_STATUS.uploaded,
     file: null,
     text,
-  };
-
-  const [image, setImage] = useState(
-    imageParam.imageUrl === '' ? initialState : existingImage
-  );
+  });
 
   const { uploadFile, loading, error } = useFileUploader({
     useModalNotifications: false,
@@ -254,6 +244,15 @@ export default function ImageChoiceUploader({
         }
         style={{ width: '100%' }}
       />
+      {errorParam?.value?.message && (
+        <FadeIn>
+          <div className="pl-1 pt-2">
+            <p className="smaller-text has-text-red">
+              {errorParam.value.message}
+            </p>
+          </div>
+        </FadeIn>
+      )}
     </div>
   );
 }

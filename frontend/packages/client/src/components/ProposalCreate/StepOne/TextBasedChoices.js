@@ -1,8 +1,7 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import AddButton from 'components/AddButton';
 import FadeIn from 'components/FadeIn';
 import { Bin } from 'components/Svg';
-import { getProposalType } from 'utils';
 
 const TextBasedChoices = ({
   choices = [],
@@ -10,16 +9,8 @@ const TextBasedChoices = ({
   register,
   onDestroyChoice,
   onCreateChoice,
-  initChoices,
   error,
 } = {}) => {
-  useEffect(() => {
-    if (getProposalType(choices) !== 'text-based') {
-      initChoices([]);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   return (
     <>
       {choices?.map((choice, index) => {

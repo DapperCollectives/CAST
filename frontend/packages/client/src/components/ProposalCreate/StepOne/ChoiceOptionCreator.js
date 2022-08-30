@@ -7,7 +7,6 @@ export default function ChoiceOptionCreator({
   choices,
   append,
   remove,
-  replace,
   update,
   setValue = () => {},
   error = [],
@@ -28,8 +27,6 @@ export default function ChoiceOptionCreator({
       value: '',
     });
   };
-
-  const initChoices = (choices) => replace(choices);
 
   return (
     <>
@@ -63,19 +60,13 @@ export default function ChoiceOptionCreator({
           choices={choices}
           onDestroyChoice={remove}
           onCreateChoice={onCreateChoice}
-          initChoices={initChoices}
           error={error}
           register={register}
           fieldName={fieldName}
         />
       )}
       {tabOption === 'visual' && (
-        <ImageChoices
-          choices={choices}
-          onChoiceChange={update}
-          initChoices={initChoices}
-          error={error}
-        />
+        <ImageChoices choices={choices} onChoiceChange={update} error={error} />
       )}
     </>
   );
