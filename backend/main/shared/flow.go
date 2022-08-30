@@ -35,8 +35,9 @@ type FlowContract struct {
 }
 
 type FlowConfig struct {
-	Contracts map[string]FlowContract `json:"contracts"`
-	Networks  map[string]string       `json:"networks"`
+	Contracts   map[string]FlowContract `json:"contracts"`
+	Networks    map[string]string       `json:"networks"`
+	DpsNetworks map[string]string       `json:"networksDps"`
 }
 
 type Contract struct {
@@ -50,13 +51,20 @@ type Contract struct {
 }
 
 var (
+	// Custom
 	placeholderTokenName            = regexp.MustCompile(`"[^"\s]*TOKEN_NAME"`)
 	placeholderTokenAddr            = regexp.MustCompile(`"[^"\s]*TOKEN_ADDRESS"`)
-	placeholderFungibleTokenAddr    = regexp.MustCompile(`"[^"\s]*FUNGIBLE_TOKEN_ADDRESS"`)
-	placeholderNonFungibleTokenAddr = regexp.MustCompile(`"[^"\s]*NON_FUNGIBLE_TOKEN_ADDRESS"`)
-	placeholderMetadataViewsAddr    = regexp.MustCompile(`"[^"\s]*METADATA_VIEWS_ADDRESS"`)
 	placeholderCollectionPublicPath = regexp.MustCompile(`"[^"\s]*COLLECTION_PUBLIC_PATH"`)
-	placeholderTopshotAddr          = regexp.MustCompile(`"[^"\s]*TOPSHOT_ADDRESS"`)
+
+	// Static
+	placeholderFungibleTokenAddr     = regexp.MustCompile(`"[^"\s]*FUNGIBLE_TOKEN_ADDRESS"`)
+	placeholderNonFungibleTokenAddr  = regexp.MustCompile(`"[^"\s]*NON_FUNGIBLE_TOKEN_ADDRESS"`)
+	placeholderMetadataViewsAddr     = regexp.MustCompile(`"[^"\s]*METADATA_VIEWS_ADDRESS"`)
+	placeholderFlowStorageFeesAddr   = regexp.MustCompile(`"[^"\s]*FLOW_STORAGE_FEES"`)
+	placeholderFlowIdTableStaking    = regexp.MustCompile(`"[^"\s]*FLOW_ID_TABLE_STAKING"`)
+	placeholderFlowStakingCollection = regexp.MustCompile(`"[^"\s]*FLOW_STAKING_COLLECTION"`)
+	placeholderLockedTokens          = regexp.MustCompile(`"[^"\s]*LOCKED_TOKENS"`)
+	placeholderTopshotAddr           = regexp.MustCompile(`"[^"\s]*TOPSHOT_ADDRESS"`)
 )
 
 func NewFlowClient(flowEnv string, customScriptsMap map[string]CustomScript) *FlowAdapter {
@@ -417,30 +425,23 @@ func (fa *FlowAdapter) GetEventNFT(voterAddr string, c *Contract) (interface{}, 
 	return value, nil
 }
 
+func (config *FlowConfig) InsertCoreContractAddresses(code string) string {
+	code = placeholderFungibleTokenAddr.ReplaceAllString(code, config.Contracts["FungibleToken"].Aliases[os.Getenv("FLOW_ENV")])
+	code = placeholderNonFungibleTokenAddr.ReplaceAllString(code, config.Contracts["NonFungibleToken"].Aliases[os.Getenv("FLOW_ENV")])
+	code = placeholderMetadataViewsAddr.ReplaceAllString(code, config.Contracts["MetadataViews"].Aliases[os.Getenv("FLOW_ENV")])
+	code = placeholderFlowStorageFeesAddr.ReplaceAllString(code, config.Contracts["FlowStorageFees"].Aliases[os.Getenv("FLOW_ENV")])
+	code = placeholderFlowIdTableStaking.ReplaceAllString(code, config.Contracts["FlowIdTableStaking"].Aliases[os.Getenv("FLOW_ENV")])
+	code = placeholderFlowStakingCollection.ReplaceAllString(code, config.Contracts["FlowStakingCollection"].Aliases[os.Getenv("FLOW_ENV")])
+	code = placeholderLockedTokens.ReplaceAllString(code, config.Contracts["LockedTokens"].Aliases[os.Getenv("FLOW_ENV")])
+	code = placeholderTopshotAddr.ReplaceAllString(code, config.Contracts["TopShot"].Aliases[os.Getenv("FLOW_ENV")])
+	return code
+}
+
 func (fa *FlowAdapter) ReplaceContractPlaceholders(code string, c *Contract, isFungible bool) []byte {
-	var (
-		fungibleTokenAddr    string
-		nonFungibleTokenAddr string
-		metadataViewsAddr    string
-		topshotAddr          string
-	)
-
-	nonFungibleTokenAddr = fa.Config.Contracts["NonFungibleToken"].Aliases[os.Getenv("FLOW_ENV")]
-	fungibleTokenAddr = fa.Config.Contracts["FungibleToken"].Aliases[os.Getenv("FLOW_ENV")]
-	metadataViewsAddr = fa.Config.Contracts["MetadataViews"].Aliases[os.Getenv("FLOW_ENV")]
-	topshotAddr = fa.Config.Contracts["TopShot"].Aliases[os.Getenv("FLOW_ENV")]
-
-	if isFungible {
-		code = placeholderFungibleTokenAddr.ReplaceAllString(code, fungibleTokenAddr)
-	} else {
-		code = placeholderCollectionPublicPath.ReplaceAllString(code, *c.Public_path)
-		code = placeholderNonFungibleTokenAddr.ReplaceAllString(code, nonFungibleTokenAddr)
-	}
-
-	code = placeholderMetadataViewsAddr.ReplaceAllString(code, metadataViewsAddr)
+	code = fa.Config.InsertCoreContractAddresses(code)
+	code = placeholderCollectionPublicPath.ReplaceAllString(code, *c.Public_path)
 	code = placeholderTokenName.ReplaceAllString(code, *c.Name)
 	code = placeholderTokenAddr.ReplaceAllString(code, *c.Addr)
-	code = placeholderTopshotAddr.ReplaceAllString(code, topshotAddr)
 
 	return []byte(code)
 }

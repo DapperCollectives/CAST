@@ -10,7 +10,6 @@ import (
 	"github.com/DapperCollectives/CAST/backend/main/models"
 	"github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/gorilla/mux"
-	"github.com/onflow/cadence"
 	"github.com/rs/zerolog/log"
 )
 
@@ -957,17 +956,13 @@ func (a *App) removeUserRole(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, "OK")
 }
 
-func (a *App) dps(w http.ResponseWriter, r *http.Request) {
-	var args []cadence.Value
-	script := `
-	pub fun main(): String {
-		return "Hello World!"
-	}
-	`
-	result, err := a.dpsInvoker.Script(35558948, []byte(script), args)
-	if err != nil {
-		log.Error().Err(err)
-	}
+func (a *App) getBalanceAtBlockheight(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	addr := vars["addr"]
+	blockheight, _ := strconv.Atoi(vars["blockHeight"])
+	log.Info().Msgf("getting balance for %s at blockheight %d", addr, blockheight)
+
+	result := a.DpsAdapter.GetFlowBalanceAtBlockheight(addr, uint64(blockheight))
 	log.Info().Msgf("value: %v", result)
 
 	respondWithJSON(w, http.StatusOK, result)

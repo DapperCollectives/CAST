@@ -57,5 +57,6 @@ func (a *App) initializeRoutes() {
 	// Snapshotter
 	a.Router.HandleFunc("/latest-snapshot", a.getLatestSnapshot).Methods("GET")
 	a.Router.HandleFunc("/add-fungible-token", a.addFungibleToken).Methods("POST", "OPTIONS")
-	a.Router.HandleFunc("/dps", a.dps).Methods("GET")
+	a.Router.HandleFunc("/get-token-balance-at-blockheight/{addr:0x[a-zA-Z0-9]{16}}/{blockHeight:[0-9]+}", a.getBalanceAtBlockheight).Methods("POST", "OPTIONS")
+
 }

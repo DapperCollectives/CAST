@@ -19,10 +19,6 @@ import (
 	"github.com/axiomzen/envconfig"
 	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v4/pgxpool"
-	dpsApi "github.com/optakt/flow-dps/api/dps"
-	"github.com/optakt/flow-dps/codec/zbor"
-	"github.com/optakt/flow-dps/service/invoker"
-	"google.golang.org/grpc"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -50,7 +46,7 @@ type App struct {
 	DB          *shared.Database
 	IpfsClient  *shared.IpfsClient
 	FlowAdapter *shared.FlowAdapter
-	dpsInvoker  *invoker.Invoker
+	DpsAdapter  *shared.DpsAdapter
 
 	SnapshotClient     *shared.SnapshotClient
 	TxOptionsAddresses []string
@@ -180,34 +176,8 @@ func (a *App) Initialize() {
 	}
 	a.FlowAdapter = shared.NewFlowClient(os.Getenv("FLOW_ENV"), customScriptsMap)
 
-	// Initialize the DPS API client.
-	codec := zbor.NewCodec()
-
-	dpsUrl := "http://dps-001.mainnet18.nodes.onflow.org:5005"
-	conn, err := grpc.DialContext(context.Background(), dpsUrl, grpc.WithInsecure())
-	if err != nil {
-		log.Error().Str("dps", dpsUrl).Err(err).Msg("could not dial API host")
-		panic("error initializing DPS gRPC connection")
-	}
-	defer conn.Close()
-
-	log.Info().Msgf("CONN: %v", conn)
-
-	client := dpsApi.NewAPIClient(conn)
-	index := dpsApi.IndexFromAPI(client, codec)
-	log.Info().Msgf("CLIENT: %v", client)
-
-	cacheSize := uint64(100_000_000)
-	_invoker, err := invoker.New(index, invoker.WithCacheSize(cacheSize))
-	a.dpsInvoker = _invoker
-	log.Info().Msgf("INVOKER: %v", _invoker)
-
-	log.Info().Msgf("DPS Invoker initialized with url: %s", dpsUrl)
-
-	if err != nil {
-		log.Error().Err(err).Msg("could not initialize script invoker")
-		panic("error initializing DPS script invoker")
-	}
+	a.DpsAdapter = shared.NewDpsClient(os.Getenv("FLOW_ENV"))
+	a.DpsAdapter.Config = a.FlowAdapter.Config
 
 	// Snapshot
 	log.Info().Msgf("SNAPSHOT_BASE_URL: %s", os.Getenv("SNAPSHOT_BASE_URL"))
