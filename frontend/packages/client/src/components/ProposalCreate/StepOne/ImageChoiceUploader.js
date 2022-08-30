@@ -13,6 +13,13 @@ const IMAGE_STATUS = {
   toBeDeleted: 'to-be-deleted',
 };
 
+const initialState = {
+  imageUrl: null,
+  uploadStatus: null,
+  file: null,
+  text: '',
+};
+
 const UploadArea = ({ getRootProps, getInputProps, errorMessage }) => {
   return (
     <>
