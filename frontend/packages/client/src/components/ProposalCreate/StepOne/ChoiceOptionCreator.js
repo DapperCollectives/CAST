@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import ImageChoices from './ImageChoices';
 import TextBasedChoices from './TextBasedChoices';
 
