@@ -61,7 +61,7 @@ export default function ImageChoiceUploader({
 } = {}) {
   const [errorMessage, setErrorMessage] = useState(null);
   // existing image and component receives props
-  console.log('imageParam', imageParam);
+
   const { imageUrl, text } = imageParam;
 
   const [image, setImage] = useState({
