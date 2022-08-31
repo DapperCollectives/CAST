@@ -38,11 +38,17 @@ const StepOneSchema = yup.object().shape({
   maxWeight: yup
     .string()
     .trim()
-    .matches(/\s+$|^$|(^[0-9]+$)/, 'Proposal max weight must be a number'),
+    .matches(
+      /\s+$|^$|(^[0-9]+$)/,
+      'Proposal maximun weight must be a valid number'
+    ),
   minBalance: yup
     .string()
     .trim()
-    .matches(/\s+$|^$|(^[0-9]+$)/, 'Proposal min balance must be a number'),
+    .matches(
+      /\s+$|^$|(^[0-9]+$)/,
+      'Proposal minimun balance must be a valid number'
+    ),
 });
 
 const StepTwoSchema = yup.object().shape({
