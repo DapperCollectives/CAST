@@ -1,0 +1,8 @@
+[
+  {
+    "key": "nba-top-shot",
+    "name": "NBA TopShot",
+    "description": "Strategy based on NBA TopShot traits",
+    "src": "nba_top_shot.cdc"
+  }
+]

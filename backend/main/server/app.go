@@ -4,8 +4,10 @@ import (
 	// "errors"
 
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
@@ -53,8 +55,6 @@ type App struct {
 	Config             shared.Config
 }
 
-var allowedFileTypes = []string{"image/jpg", "image/jpeg", "image/png", "image/gif"}
-
 type Strategy interface {
 	TallyVotes(votes []*models.VoteWithBalance, p *models.ProposalResults, proposal *models.Proposal) (models.ProposalResults, error)
 	GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error)
@@ -69,12 +69,11 @@ var strategyMap = map[string]Strategy{
 	"staked-token-weighted-default": &strategies.StakedTokenWeightedDefault{},
 	"one-address-one-vote":          &strategies.OneAddressOneVote{},
 	"balance-of-nfts":               &strategies.BalanceOfNfts{},
-	"float-nfts":                    &strategies.FloatNFTs{},
+	"float-nfts":                     &strategies.FloatNFTs{},
+	"custom-script":                 &strategies.CustomScript{},
 }
 
-const (
-	maxFileSize = 5 * 1024 * 1024 // 5MB
-)
+var customScripts []models.CustomScript
 
 var helpers Helpers
 
@@ -143,6 +142,18 @@ func (a *App) Initialize() {
 	a.IpfsClient = shared.NewIpfsClient(os.Getenv("IPFS_KEY"), os.Getenv("IPFS_SECRET"))
 
 	// Flow
+
+	// Load custom scripts for strategies
+	scripts, err := ioutil.ReadFile("./main/cadence/scripts/custom/scripts.json")
+	if err != nil {
+		log.Error().Err(err).Msg("Error Reading Custom Strategy scripts.")
+	}
+
+    err = json.Unmarshal(scripts, &customScripts)
+    if err != nil {
+        log.Error().Err(err).Msg("Error during Unmarshalling custom scripts")
+    }
+
 	if os.Getenv("FLOW_ENV") == "" {
 		os.Setenv("FLOW_ENV", "emulator")
 	}

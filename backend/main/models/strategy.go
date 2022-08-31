@@ -6,9 +6,17 @@ import (
 )
 
 type VotingStrategy struct {
-	Key         string `json:"key" validate:"required"`
-	Name        string `json:"name" validate:"required"`
-	Description string `json:"description,omitempty"`
+	Key         string         `json:"key" validate:"required"`
+	Name        string         `json:"name" validate:"required"`
+	Description string 		   `json:"description,omitempty"`
+	Scripts 	[]CustomScript `json:"scripts,omitempty"`
+}
+
+type CustomScript struct {
+	Key 		string `json:"key" validate:"required"`
+	Name 		string `json:"name" validate:"required"`
+	Description string `json:"description" validate:"required"`
+	Src 		string `json:"src" validate:"required"`
 }
 
 func GetVotingStrategies(db *s.Database) ([]*VotingStrategy, error) {
@@ -21,6 +29,7 @@ func GetVotingStrategies(db *s.Database) ([]*VotingStrategy, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return votingStrategies, nil
 }
 
