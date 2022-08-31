@@ -343,8 +343,6 @@ func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Printf("%+v\n", payload.Strategies)
-
 	//Validate Contract Thresholds
 	if payload.Strategies != nil {
 		err = validateContractThreshold(*payload.Strategies)

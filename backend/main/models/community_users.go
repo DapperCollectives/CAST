@@ -303,8 +303,6 @@ func getUserAchievements(db *s.Database, communityId int) (UserAchievements, err
 		return userAchievements, nil
 	}
 
-	fmt.Printf("%+v", userAchievements)
-
 	// Determine if user has any streaks
 	for i, ua := range userAchievements {
 		streaks, err := getStreakAchievement(db, ua.Addr, communityId)

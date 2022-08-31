@@ -57,7 +57,6 @@ export default function useCommunity({
 
   const createCommunity = useCallback(
     async (communityData) => {
-      console.log(communityData);
       dispatch({ type: 'PROCESSING' });
       const { flowAddress } = networkConfig;
       const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities`;
