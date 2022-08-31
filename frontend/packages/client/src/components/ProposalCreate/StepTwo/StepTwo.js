@@ -51,24 +51,13 @@ const StepTwo = ({
 
   const timeZone = detectTimeZone();
 
-  const onSetStartTimeOpen = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setStartTimeOpen(true);
-  };
-  const onSetEndTimeOpen = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setEndTimeOpen(true);
-  };
-
   const fieldsObj = Object.assign(
     {},
     stepTwo.initialValues,
     pick(stepData || {}, stepTwo.formFields)
   );
 
-  const { handleSubmit, formState, control, setValue } = useForm({
+  const { handleSubmit, formState, control, setValue, clearErrors } = useForm({
     defaultValues: fieldsObj,
     resolver: yupResolver(stepTwo.Schema),
   });
@@ -85,6 +74,20 @@ const StepTwo = ({
   const onSubmit = (data) => {
     onDataChange(data);
     moveToNextStep();
+  };
+
+  const onSetStartTimeOpen = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    clearErrors('startTime');
+    setStartTimeOpen(true);
+  };
+
+  const onSetEndTimeOpen = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    clearErrors('endTime');
+    setEndTimeOpen(true);
   };
 
   const startDate = useWatch({ control, name: 'startDate' });
