@@ -107,7 +107,7 @@ export default function ProposalCreatePage() {
       creatorAddr,
       endTime,
       startTime,
-      strategy: strategy?.value,
+      strategy: strategy,
       ...(minBalance !== ''
         ? { minBalance: parseFloat(minBalance) }
         : undefined),
