@@ -178,14 +178,26 @@ export default function ImageChoiceUploader({
     useFsAccessApi: false,
   });
 
+  console.log(errorParam);
   return (
     <div>
       {!image.imageUrl && (
-        <UploadArea
-          getRootProps={getRootProps}
-          getInputProps={getInputProps}
-          errorMessage={errorMessage}
-        />
+        <>
+          <UploadArea
+            getRootProps={getRootProps}
+            getInputProps={getInputProps}
+            errorMessage={errorMessage}
+          />
+          {errorParam?.choiceImgUrl?.message && (
+            <FadeIn>
+              <div className="pl-1 pt-2">
+                <p className="smaller-text has-text-red">
+                  {errorParam.choiceImgUrl.message}
+                </p>
+              </div>
+            </FadeIn>
+          )}
+        </>
       )}
       {(image?.uploadStatus === IMAGE_STATUS.notStarted ||
         image?.uploadStatus === IMAGE_STATUS.uploading) && (
