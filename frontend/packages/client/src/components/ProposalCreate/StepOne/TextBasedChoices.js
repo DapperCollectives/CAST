@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useFieldArray } from 'react-hook-form';
 import AddButton from 'components/AddButton';
 import FadeIn from 'components/FadeIn';
@@ -9,6 +9,7 @@ const TextBasedChoices = ({
   register,
   error,
   control,
+  clearErrors,
 } = {}) => {
   const {
     fields: choices,
@@ -27,6 +28,19 @@ const TextBasedChoices = ({
       value: '',
     });
   };
+
+  // when choices.length === 2 error for min(2) on schema is not removed: this causes the error to be listed
+  // without cleaning the error message user is able to submit (which is expected, and the error is removed)
+  // This useEffect handles cleaning the error message
+  useEffect(() => {
+    if (
+      choices.length === 2 &&
+      choices[1].value === '' &&
+      error?.message === 'Please add a choice, minimun amout is two'
+    ) {
+      clearErrors('choices');
+    }
+  }, [choices, clearErrors, error]);
 
   return (
     <>

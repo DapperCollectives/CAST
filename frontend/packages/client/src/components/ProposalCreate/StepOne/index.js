@@ -44,11 +44,12 @@ const StepOne = ({
     pick(stepData || {}, stepOne.formFields)
   );
 
-  const { register, handleSubmit, formState, control, setValue } = useForm({
-    reValidateMode: 'onChange',
-    defaultValues: fieldsObj,
-    resolver: yupResolver(stepOne.Schema),
-  });
+  const { register, handleSubmit, formState, control, setValue, clearErrors } =
+    useForm({
+      reValidateMode: 'onChange',
+      defaultValues: fieldsObj,
+      resolver: yupResolver(stepOne.Schema),
+    });
 
   const onSubmit = (data) => {
     let choices;
@@ -154,6 +155,7 @@ const StepOne = ({
             fieldName="choices"
             register={register}
             control={control}
+            clearErrors={clearErrors}
           />
         </div>
       </div>
