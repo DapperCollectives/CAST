@@ -178,7 +178,6 @@ export default function ImageChoiceUploader({
     useFsAccessApi: false,
   });
 
-  console.log(errorParam);
   return (
     <div>
       {!image.imageUrl && (
