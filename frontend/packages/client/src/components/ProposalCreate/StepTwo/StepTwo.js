@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { FadeIn } from 'components';
-import { Calendar, CaretDown } from 'components/Svg';
+import { CaretDown } from 'components/Svg';
 import CustomDatePicker from 'components/common/CustomDatePicker';
 import Form from 'components/common/Form';
 import { useMediaQuery } from 'hooks';
@@ -122,29 +122,14 @@ const StepTwo = ({
           Start date and time <span className="has-text-danger">*</span>
         </h4>
         <div className="columns p-0 m-0">
-          <div
-            className="columns is-mobile p-0 pr-2 p-0-mobile mb-4-mobile m-0 column is-half"
-            style={{ position: 'relative' }}
-          >
-            <CustomDatePicker
-              control={control}
-              fieldName="startDate"
-              notMobile={notMobile}
-              placeholderText="Choose date"
-              minDate={minDateForStartDate}
-              maxDate={maxDateForStartDate}
-            />
-            <div
-              style={{
-                position: 'absolute',
-                right: 15,
-                top: 7,
-                pointerEvents: 'none',
-              }}
-            >
-              <Calendar />
-            </div>
-          </div>
+          <CustomDatePicker
+            control={control}
+            fieldName="startDate"
+            notMobile={notMobile}
+            placeholderText="Choose date"
+            minDate={minDateForStartDate}
+            maxDate={maxDateForStartDate}
+          />
           <div className="columns is-mobile p-0 pl-2 p-0-mobile m-0 column is-half">
             <div
               className={`dropdown columns is-mobile p-0 m-0 is-right is-flex is-flex-grow-1${
@@ -206,42 +191,15 @@ const StepTwo = ({
           End date and time <span className="has-text-danger">*</span>
         </h4>
         <div className="columns p-0 m-0">
-          <div className="columns is-multiline p-0 m-0 is-flex-grow-1">
-            <div
-              className="p-0 pr-2 p-0-mobile mb-4-mobile m-0 column is-fullwidth"
-              style={{ position: 'relative' }}
-            >
-              <CustomDatePicker
-                placeholderText="Choose date"
-                control={control}
-                fieldName="endDate"
-                notMobile={notMobile}
-                minDate={addDays(new Date(startDate), 1)}
-                disabled={!Boolean(startDate) || !Boolean(startTime)}
-              />
-              <div
-                style={{
-                  position: 'absolute',
-                  right: 15,
-                  top: 7,
-                  pointerEvents: 'none',
-                }}
-              >
-                <Calendar />
-              </div>
-            </div>
-            {errors?.endTime?.message && (
-              <div className="column p-0 is-12">
-                <FadeIn>
-                  <div className="pl-1 mt-2 mb-4">
-                    <p className="smaller-text has-text-red">
-                      {errors?.endTime?.message}
-                    </p>
-                  </div>
-                </FadeIn>
-              </div>
-            )}
-          </div>
+          <CustomDatePicker
+            placeholderText="Choose date"
+            control={control}
+            fieldName="endDate"
+            notMobile={notMobile}
+            minDate={addDays(new Date(startDate), 1)}
+            disabled={!Boolean(startDate) || !Boolean(startTime)}
+            errorMessage={errors?.endTime?.message}
+          />
           <div className="columns is-mobile p-0 pl-2 p-0-mobile m-0 column is-half">
             <div
               className={`dropdown columns is-mobile p-0 m-0 is-right is-flex is-flex-grow-1${
