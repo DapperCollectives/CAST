@@ -1,6 +1,5 @@
 import React, { useCallback, useState } from 'react';
 import { Prompt } from 'react-router-dom';
-import { isValid } from 'date-fns';
 import Loader from '../Loader';
 import { ArrowLeft, CheckMark } from '../Svg';
 import NextButton from './NexStepButton';
