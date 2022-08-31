@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
 import { parseDateToServer } from 'utils';
-import { customDraftToHTML } from 'utils';
 import { ProposalStatus, VoteOptions } from '../Proposal';
 
 const StepThree = ({ stepsData, setStepValid }) => {
@@ -27,9 +26,7 @@ const StepThree = ({ stepsData, setStepValid }) => {
       })),
   };
 
-  const currentContent = stepsData[0]?.description?.getCurrentContent();
-
-  const htmlBody = customDraftToHTML(currentContent);
+  const htmlBody = stepsData[0]?.body;
 
   return (
     <div>
