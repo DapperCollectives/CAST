@@ -82,8 +82,6 @@ const StepTwo = ({
 
   const { errors, isValid, isDirty, isSubmitting } = formState;
 
-  console.log('errors ', errors);
-
   const onSubmit = (data) => {
     onDataChange(data);
     moveToNextStep();

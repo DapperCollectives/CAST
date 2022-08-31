@@ -69,8 +69,6 @@ const StepOne = ({
     setStepValid((isDirty || isValid) && !isSubmitting);
   }, [isDirty, isValid, isSubmitting, setStepValid]);
 
-  console.log('all errors ', errors);
-
   return (
     <Form onSubmit={handleSubmit(onSubmit)} formId={formId}>
       <div className="is-flex-direction-column">
