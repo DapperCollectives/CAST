@@ -18,7 +18,6 @@ export default function CustomDatePicker({
       name={fieldName}
       render={({ field }) => (
         <DatePicker
-          required
           placeholderText={placeholderText}
           selected={field.value}
           minDate={minDate ?? new Date()}

@@ -108,8 +108,10 @@ export default function ProposalCreatePage() {
       endTime,
       startTime,
       strategy: strategy?.value,
-      minBalance: minBalance && parseFloat(minBalance),
-      maxWeight: maxWeight && parseFloat(maxWeight),
+      ...(minBalance !== ''
+        ? { minBalance: parseFloat(minBalance) }
+        : undefined),
+      ...(maxWeight !== '' ? { maxWeight: parseFloat(maxWeight) } : undefined),
       status: 'published',
       communityId,
       achievementsDone: false,
