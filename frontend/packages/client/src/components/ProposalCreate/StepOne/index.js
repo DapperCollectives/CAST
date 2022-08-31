@@ -85,8 +85,8 @@ const StepOne = ({
           <Input
             classNames="rounded-sm border-light p-3 column is-full"
             register={register}
-            error={errors['title']}
-            name="title"
+            error={errors['name']}
+            name="name"
           />
         </div>
         <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6">

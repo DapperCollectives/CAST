@@ -1,10 +1,10 @@
 import yup from 'helpers/validation';
 
-const formFieldsStepOne = ['title', 'strategy', 'body', 'choices', 'tabOption'];
+const formFieldsStepOne = ['name', 'strategy', 'body', 'choices', 'tabOption'];
 const formFieldsStepTwo = ['startDate', 'endDate', 'startTime', 'endTime'];
 
 const StepOneSchema = yup.object().shape({
-  title: yup
+  name: yup
     .string()
     .trim()
     .required('Please enter a proposal title')
