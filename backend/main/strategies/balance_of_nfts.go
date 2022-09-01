@@ -47,7 +47,12 @@ func (b *BalanceOfNfts) queryNFTs(
 	strategy models.Strategy,
 	balance *models.Balance,
 ) error {
-	nftIds, err := b.FlowAdapter.GetNFTIds(balance.Addr, &strategy.Contract)
+	scriptPath := "./main/cadence/scripts/get_nfts_ids.cdc"
+	nftIds, err := b.FlowAdapter.GetNFTIds(
+		balance.Addr,
+		&strategy.Contract,
+		scriptPath,
+	)
 	if err != nil {
 		return err
 	}

@@ -39,13 +39,13 @@ type FlowConfig struct {
 }
 
 type Contract struct {
-	Name             *string  `json:"name,omitempty"`
-	Addr             *string  `json:"addr,omitempty"`
-	Public_path      *string  `json:"publicPath,omitempty"`
-	Threshold        *float64 `json:"threshold,omitempty,string"`
-	MaxWeight        *float64 `json:"maxWeight,omitempty,string"`
-	Float_event_id   *uint64  `json:"floatEventId,omitempty,string"`
-	Script 			 *string  `json:"script,omitempty"`
+	Name           *string  `json:"name,omitempty"`
+	Addr           *string  `json:"addr,omitempty"`
+	Public_path    *string  `json:"publicPath,omitempty"`
+	Threshold      *float64 `json:"threshold,omitempty,string"`
+	MaxWeight      *float64 `json:"maxWeight,omitempty,string"`
+	Float_event_id *uint64  `json:"floatEventId,omitempty,string"`
+	Script         *string  `json:"script,omitempty"`
 }
 
 var (
@@ -239,11 +239,11 @@ func (fa *FlowAdapter) EnforceTokenThreshold(scriptPath, creatorAddr string, c *
 	return true, nil
 }
 
-func (fa *FlowAdapter) GetNFTIds(voterAddr string, c *Contract) ([]interface{}, error) {
+func (fa *FlowAdapter) GetNFTIds(voterAddr string, c *Contract, path string) ([]interface{}, error) {
 	flowAddress := flow.HexToAddress(voterAddr)
 	cadenceAddress := cadence.NewAddress(flowAddress)
 
-	script, err := ioutil.ReadFile("./main/cadence/scripts/get_nfts_ids.cdc")
+	script, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Error().Err(err).Msgf("Error reading cadence script file.")
 		return nil, err
