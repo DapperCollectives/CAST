@@ -239,6 +239,52 @@ func (fa *FlowAdapter) EnforceTokenThreshold(scriptPath, creatorAddr string, c *
 	return true, nil
 }
 
+//this function only gets called in local dev when snapshot is being overidden
+func (fa *FlowAdapter) GetFlowBalance(address string) (float64, error) {
+	flowAddress := flow.HexToAddress(address)
+	cadenceAddress := cadence.NewAddress(flowAddress)
+
+	script, err := ioutil.ReadFile("./main/cadence/scripts/get_balance.cdc")
+	if err != nil {
+		log.Error().Err(err).Msgf("Error reading cadence script file.")
+		return 0, err
+	}
+
+	contractName := "FlowToken"
+	publicPath := "flowTokenBalance"
+	contracAddress := "0x0ae53cb6e3f42a79"
+
+	dummyContract := Contract{
+		Name:        &contractName,
+		Public_path: &publicPath,
+		Addr:        &contracAddress,
+	}
+
+	script = fa.ReplaceContractPlaceholders(string(script[:]), &dummyContract, true)
+	cadencePath := cadence.Path{Domain: "public", Identifier: *dummyContract.Public_path}
+
+	cadenceValue, err := fa.Client.ExecuteScriptAtLatestBlock(
+		fa.Context,
+		script,
+		[]cadence.Value{
+			cadencePath,
+			cadenceAddress,
+		})
+	if err != nil {
+		log.Error().Err(err).Msg("Error executing Funigble-Token Script.")
+		return 0, err
+	}
+
+	value := CadenceValueToInterface(cadenceValue)
+	balance, err := strconv.ParseFloat(value.(string), 64)
+	if err != nil {
+		log.Error().Err(err).Msg("Error converting cadence value to float.")
+		return 0, err
+	}
+
+	return balance, nil
+}
+
 func (fa *FlowAdapter) GetNFTIds(voterAddr string, c *Contract, path string) ([]interface{}, error) {
 	flowAddress := flow.HexToAddress(voterAddr)
 	cadenceAddress := cadence.NewAddress(flowAddress)
@@ -455,4 +501,8 @@ func CadenceValueToInterface(field cadence.Value) interface{} {
 		}
 		return result
 	}
+}
+
+func FloatBalanceToUint(balance float64) uint64 {
+	return uint64(balance * 1000000)
 }
