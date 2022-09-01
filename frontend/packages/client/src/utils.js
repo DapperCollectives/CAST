@@ -1,6 +1,7 @@
 import { HAS_DELAY_ON_START_TIME } from 'const';
 import { formatDistance } from 'date-fns';
 import { stateToHTML } from 'draft-js-export-html';
+import { stateFromHTML } from 'draft-js-import-html';
 import { customAlphabet } from 'nanoid';
 
 const nanoid = customAlphabet('1234567890abcdef', 10);
@@ -181,6 +182,16 @@ export const customDraftToHTML = (content) => {
   return stateToHTML(content, options);
 };
 
+export const customHTMLtoDraft = (html) => {
+  const options = {
+    customBlockFn: (element) => {
+      if (element.tagName === 'P' && element.className === 'image-caption') {
+        return { type: 'image-caption-block' };
+      }
+    },
+  };
+  return stateFromHTML(html, options);
+};
 export const isValidAddress = (addr) => /0[x,X][a-zA-Z0-9]{16}$/gim.test(addr);
 
 export const wait = async (milliSeconds = 5000) =>
@@ -226,4 +237,14 @@ export const isStartTimeValid = (startTime, startDate) => {
   const dif = (startDateAndTime - dateNow) / (60 * 60 * 1000);
 
   return HAS_DELAY_ON_START_TIME ? dif > 1 : true;
+};
+
+export const formatTime = (date) => {
+  let hours = date.getHours();
+  let minutes = date.getMinutes();
+  const ampm = hours >= 12 ? 'pm' : 'am';
+  hours = hours % 12;
+  hours = hours ? hours : 12; // the hour '0' should be '12'
+  minutes = minutes < 10 ? '0' + minutes : minutes;
+  return hours + ':' + minutes + ' ' + ampm;
 };
