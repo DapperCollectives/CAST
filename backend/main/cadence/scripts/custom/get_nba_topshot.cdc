@@ -17,7 +17,7 @@ pub fun main(address: Address): [UInt64] {
         let metadata = view as! TopShot.TopShotMomentMetadataView
 
         if metadata.teamAtMoment == "Toronto Raptors" {
-            nftIds = nftIds.concat(id)
+             nftIds.append(id)
         }
     }
     
