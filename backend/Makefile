@@ -20,6 +20,17 @@ build_and_run: build run
 
 macrun: build_macos run && NFTdeploy
 
+topshot: 
+	make nft && \
+	flow accounts add-contract TopShotLocking ./main/cadence/nba/TopShotLocking.cdc && \
+	flow accounts add-contract TopShot ./main/cadence/nba/TopShot.cdc && \
+	flow accounts add-contract Market ./main/cadence/nba/MarketTopshot.cdc && \
+	flow transactions send ./main/cadence/nba/transactions/admin/create_play.cdc '{"teamAtMoment": "Toronto Raptors"}' && \
+	flow transactions send ./main/cadence/nba/transactions/admin/create_set.cdc "local-host" && \
+	flow transactions send ./main/cadence/nba/transactions/admin/add_play_to_set.cdc 1 1 && \
+	flow transactions send ./main/cadence/nba/transactions/admin/mint_moment.cdc 1 1 0xf8d6e0586b0a20c7 
+
+
 nft:
 		flow accounts add-contract NonFungibleToken ./main/cadence/contracts/NonFungibleToken.cdc && \
 		flow accounts add-contract MetadataViews ./main/cadence/contracts/MetadataViews.cdc && \
