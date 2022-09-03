@@ -108,7 +108,10 @@ func (cs *CustomScript) TallyVotes(
 	return *r, nil
 }
 
-func (cs *CustomScript) GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error) {
+func (cs *CustomScript) GetVoteWeightForBalance(
+	vote *models.VoteWithBalance,
+	proposal *models.Proposal,
+) (float64, error) {
 	nftIds, err := models.GetUserNFTs(cs.DB, vote)
 	if err != nil {
 		log.Error().Err(err).Msg("error in GetVoteWeightForBalance for Custom Script strategy")

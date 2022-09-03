@@ -1,5 +1,5 @@
-import TopShot from 0x0b2a3299cc857e29
-import MetadataViews from 0x1d7e57aa55817448
+import TopShot from 0xf8d6e0586b0a20c7
+import MetadataViews from 0xf8d6e0586b0a20c7
 
 pub fun main(address: Address): [UInt64] {
     let account = getAccount(address)
