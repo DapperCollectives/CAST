@@ -2,6 +2,8 @@ import React, { useCallback, useState } from 'react';
 import { Prompt } from 'react-router-dom';
 import Loader from '../Loader';
 import { ArrowLeft, CheckMark } from '../Svg';
+import NextButton from './NexStepButton';
+import SubmitButton from './SubmitButton';
 
 function StepByStep({
   finalLabel,
@@ -11,6 +13,7 @@ function StepByStep({
   isSubmitting,
   submittingMessage,
   passNextToComp = false,
+  showActionButtonLeftPannel = false,
   passSubmitToComp = false,
   blockNavigationOut = false,
   blockNavigationText,
@@ -122,10 +125,14 @@ function StepByStep({
 
   const child = showPreStep ? preStep : steps[currentStep].component;
 
-  const getBackLabel = () => (
+  const { useHookForms = false } = steps[currentStep];
+
+  const formId = useHookForms ? `form-Id-${currentStep}` : undefined;
+
+  const getBackLabel = (isSubmitting) => (
     <div
       className="is-flex is-align-items-center has-text-grey cursor-pointer"
-      onClick={() => onStepAdvance('prev')}
+      onClick={!isSubmitting ? () => onStepAdvance('prev') : () => {}}
     >
       <ArrowLeft />
       <span className="ml-4">Back</span>
@@ -139,31 +146,8 @@ function StepByStep({
     [onSubmit, stepsData]
   );
 
-  const getNextButton = () => (
-    <div className="my-6">
-      <div
-        className={`button is-block has-background-yellow rounded-sm py-2 px-4 has-text-centered ${
-          !isStepValid && 'is-disabled'
-        }`}
-        onClick={moveToNextStep}
-      >
-        Next
-      </div>
-    </div>
-  );
-
-  const getSubmitButton = () => (
-    <div className="my-6">
-      <div
-        className={`button is-block has-background-yellow rounded-sm py-2 px-4 has-text-centered ${
-          !isStepValid && 'is-disabled'
-        }`}
-        onClick={_onSubmit}
-      >
-        {finalLabel}
-      </div>
-    </div>
-  );
+  const showNextButton = !passNextToComp || showActionButtonLeftPannel;
+  const showSubmitButton = !passSubmitToComp || showActionButtonLeftPannel;
 
   return (
     <>
@@ -198,15 +182,25 @@ function StepByStep({
             className="has-background-white-ter pl-4 is-hidden-mobile"
           >
             <div className="mb-6" style={{ minHeight: 24 }}>
-              {currentStep > 0 && getBackLabel()}
+              {currentStep > 0 && getBackLabel(isSubmitting)}
             </div>
             <div>{steps.map((step, i) => getStepIcon(i, step.label))}</div>
-            {currentStep < steps.length - 1 &&
-              !passNextToComp &&
-              getNextButton()}
-            {currentStep === steps.length - 1 &&
-              !passSubmitToComp &&
-              getSubmitButton()}
+            {currentStep < steps.length - 1 && showNextButton && (
+              <NextButton
+                formId={formId}
+                moveToNextStep={moveToNextStep}
+                disabled={!isStepValid}
+              />
+            )}
+            {currentStep === steps.length - 1 && showSubmitButton && (
+              <SubmitButton
+                formId={formId}
+                disabled={!isStepValid}
+                onSubmit={_onSubmit}
+                label={finalLabel}
+                isSubmitting={isSubmitting}
+              />
+            )}
           </div>
           {/* left panel mobile */}
           <div
@@ -215,7 +209,7 @@ function StepByStep({
           >
             <div className="is-flex is-justify-content-space-between is-align-items-center">
               <div style={{ minHeight: 24 }}>
-                {currentStep > 0 && getBackLabel()}
+                {currentStep > 0 && getBackLabel(isSubmitting)}
               </div>
               <div className="is-flex">
                 {steps.map((step, i) => getStepIcon(i, null))}
@@ -223,7 +217,9 @@ function StepByStep({
             </div>
           </div>
           {/* right panel */}
-          <div className="step-by-step-body flex-1 has-background-white px-4-mobile pt-7-mobile">
+          <div
+            className={`step-by-step-body flex-1 has-background-white px-4-mobile pt-7-mobile is-flex-mobile is-flex-direction-column-mobile`}
+          >
             {isSubmitting && (
               <div
                 className="is-flex flex-1 is-flex-direction-column is-align-items-center is-justify-content-center"
@@ -257,14 +253,25 @@ function StepByStep({
                   ? { onSubmit: _onSubmit }
                   : undefined),
                 ...(showPreStep ? { dismissPreStep } : undefined),
+                ...(useHookForms ? { formId } : undefined),
               })}
             <div className="is-hidden-tablet">
-              {currentStep < steps.length - 1 &&
-                !passNextToComp &&
-                getNextButton()}
-              {currentStep === steps.length - 1 &&
-                !passSubmitToComp &&
-                getSubmitButton()}
+              {currentStep < steps.length - 1 && showNextButton && (
+                <NextButton
+                  formId={formId}
+                  moveToNextStep={moveToNextStep}
+                  disabled={!isStepValid}
+                />
+              )}
+              {currentStep === steps.length - 1 && showSubmitButton && (
+                <SubmitButton
+                  formId={formId}
+                  disabled={!isStepValid}
+                  onSubmit={_onSubmit}
+                  label={finalLabel}
+                  isSubmitting={isSubmitting}
+                />
+              )}
             </div>
           </div>
         </div>

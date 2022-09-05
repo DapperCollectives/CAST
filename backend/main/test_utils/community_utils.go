@@ -2,6 +2,7 @@ package test_utils
 
 import (
 	"bytes"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -23,10 +24,10 @@ type PaginatedResponseWithUser struct {
 
 type PaginatedResponseWithCommunity struct {
 	Data         []models.Community `json:"data"`
-	Start        int                    `json:"start"`
-	Count        int                    `json:"count"`
-	TotalRecords int                    `json:"totalRecords"`
-	Next         int                    `json:"next"`
+	Start        int                `json:"start"`
+	Count        int                `json:"count"`
+	TotalRecords int                `json:"totalRecords"`
+	Next         int                `json:"next"`
 }
 
 type PaginatedResponseWithUserCommunity struct {
@@ -66,6 +67,8 @@ var (
 	onlyAuthors    = true
 	notOnlyAuthors = false
 
+	threshold = 0.000069
+
 	banner             = "banner"
 	website            = "website"
 	twitter            = "twitter"
@@ -74,11 +77,10 @@ var (
 	instagram          = "instagram"
 	termsAndConditions = "termsAndConditions"
 
-	flowContractName = "FlowToken"
-	flowContractAddr = "0x0ae53cb6e3f42a79"
-	flowPublicPath   = "flowTokenBalance"
-	threshold        = 0.0000069
-
+	flowContractName     = "FlowToken"
+	flowContractAddr     = "0x0ae53cb6e3f42a79"
+	flowPublicPath       = "flowTokenBalance"
+	proposal_threshold   = "0.010"
 	exampleNFTName       = "ExampleNFT"
 	exampleNFTAddr       = "0xf8d6e0586b0a20c7"
 	exampleNFTPublicPath = "exampleNFTCollection"
@@ -102,7 +104,19 @@ var (
 			Public_path: &flowPublicPath,
 		},
 	}
-	strategies = []models.Strategy{defaultStrategy}
+
+	failStrategy = models.Strategy{
+		Name: &tokenWeighted,
+		Contract: s.Contract{
+			Name:        &flowContractName,
+			Addr:        &flowContractAddr,
+			Public_path: &flowPublicPath,
+			Threshold:   &threshold,
+		},
+	}
+
+	strategies     = []models.Strategy{defaultStrategy}
+	failStrategies = []models.Strategy{failStrategy}
 
 	updatedStrategies = []models.Strategy{
 		defaultStrategy,
@@ -120,6 +134,28 @@ var (
 		Only_authors_to_submit: &onlyAuthors,
 	}
 
+	FailCommunity = models.Community{
+		Name:                   "TestDAO",
+		Category:               &category,
+		Body:                   &body,
+		Creator_addr:           "<replace>",
+		Logo:                   &logo,
+		Slug:                   &slug,
+		Strategies:             &failStrategies,
+		Only_authors_to_submit: &onlyAuthors,
+	}
+
+	NilStrategyCommunity = models.Community{
+		Name:                   "TestDAO",
+		Category:               &category,
+		Body:                   &body,
+		Creator_addr:           "<replace>",
+		Logo:                   &logo,
+		Slug:                   &slug,
+		Strategies:             nil,
+		Only_authors_to_submit: &onlyAuthors,
+	}
+
 	CommunityWithThreshold = models.Community{
 		Name:                   "With Threshold",
 		Category:               &category,
@@ -127,10 +163,10 @@ var (
 		Creator_addr:           "<replace>",
 		Logo:                   &logo,
 		Slug:                   &slug,
+		Proposal_threshold:     &proposal_threshold,
 		Contract_name:          &flowContractName,
 		Contract_addr:          &flowContractAddr,
 		Public_path:            &flowPublicPath,
-		Threshold:              &threshold,
 		Only_authors_to_submit: &notOnlyAuthors,
 	}
 
@@ -158,6 +194,7 @@ var (
 		Instagram_url:            &instagram,
 		Strategies:               &updatedStrategies,
 		Terms_and_conditions_url: &termsAndConditions,
+		Only_authors_to_submit:   &notOnlyAuthors,
 	}
 )
 
@@ -166,9 +203,10 @@ func (otu *OverflowTestUtils) GenerateCommunityPayload(signer string, payload *m
 	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", signer))
 	signingAddr := fmt.Sprintf("0x%s", account.Address().String())
 	timestamp := fmt.Sprint(time.Now().UnixNano() / int64(time.Millisecond))
+	hexTimestamp := hex.EncodeToString([]byte(fmt.Sprint(timestamp)))
 	compositeSignatures := otu.GenerateCompositeSignatures(signer, timestamp)
 
-	payload.Timestamp = timestamp
+	payload.Timestamp = hexTimestamp
 	payload.Composite_signatures = compositeSignatures
 	payload.Signing_addr = &signingAddr
 	if payload.Strategies == nil {
@@ -183,6 +221,24 @@ func (otu *OverflowTestUtils) GenerateCommunityStruct(accountName string) *model
 
 	// this does a deep copy
 	community := DefaultCommunity
+	community.Creator_addr = "0x" + account.Address().String()
+	return &community
+}
+
+func (otu *OverflowTestUtils) GenerateFailCommunityStruct(accountName string) *models.Community {
+	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", accountName))
+
+	// this does a deep copy
+	community := FailCommunity
+	community.Creator_addr = "0x" + account.Address().String()
+	return &community
+}
+
+func (otu *OverflowTestUtils) GenerateNilStrategyCommunityStruct(accountName string) *models.Community {
+	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", accountName))
+
+	// this does a deep copy
+	community := NilStrategyCommunity
 	community.Creator_addr = "0x" + account.Address().String()
 	return &community
 }
@@ -274,5 +330,3 @@ func (otu *OverflowTestUtils) GetCommunityActiveStrategies(id int) *httptest.Res
 	response := otu.ExecuteRequest(req)
 	return response
 }
-
-

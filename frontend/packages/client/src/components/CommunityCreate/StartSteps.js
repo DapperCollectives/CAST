@@ -31,6 +31,7 @@ export default function StartSteps({ dismissPreStep }) {
           style={{ height: 48, width: '100%' }}
           className="button vote-button transition-all is-flex has-background-yellow rounded-sm is-enabled is-size-6"
           onClick={() => dismissPreStep()}
+          autoFocus
         >
           GET STARTED
         </button>

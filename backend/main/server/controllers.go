@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -53,8 +54,13 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if *proposal.Computed_status == "closed" {
-		models.AddWinningVoteAchievement(a.DB, votes, results, proposal.Community_id)
+	if *proposal.Computed_status == "closed" && !proposal.Achievements_done {
+		if err := models.AddWinningVoteAchievement(a.DB, votes, results); err != nil {
+			errMsg := "Error calculating winning votes"
+			log.Error().Err(err).Msg(errMsg)
+			respondWithError(w, http.StatusInternalServerError, errors.New(errMsg).Error())
+		}
+
 	}
 
 	respondWithJSON(w, http.StatusOK, results)
@@ -210,7 +216,7 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	proposal, httpStatus, err := helpers.createProposal(communityId, p)
+	proposal, httpStatus, err := helpers.createProposal(p)
 	if err != nil {
 		respondWithError(w, httpStatus, err.Error())
 		return
@@ -240,10 +246,25 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := helpers.validateUserWithRole(payload.Signing_addr, payload.Timestamp, payload.Composite_signatures, p.Community_id, "author"); err != nil {
-		log.Error().Err(err)
-		respondWithError(w, http.StatusForbidden, err.Error())
-		return
+	if payload.Voucher != nil {
+		if err := helpers.validateUserWithRoleViaVoucher(
+			payload.Signing_addr,
+			payload.Voucher,
+			p.Community_id,
+			"author"); err != nil {
+			respondWithError(w, http.StatusForbidden, err.Error())
+			return
+		}
+	} else {
+		if err := helpers.validateUserWithRole(
+			payload.Signing_addr,
+			payload.Timestamp,
+			payload.Composite_signatures,
+			p.Community_id,
+			"author"); err != nil {
+			respondWithError(w, http.StatusForbidden, err.Error())
+			return
+		}
 	}
 
 	p.Status = &payload.Status
@@ -289,6 +310,7 @@ func (a *App) getCommunity(w http.ResponseWriter, r *http.Request) {
 
 	c, httpStatus, err := helpers.fetchCommunity(id)
 	if err != nil {
+		fmt.Printf("err: %v", err)
 		respondWithError(w, httpStatus, err.Error())
 		return
 	}
@@ -321,6 +343,15 @@ func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//Validate Contract Thresholds
+	if payload.Strategies != nil {
+		err = validateContractThreshold(*payload.Strategies)
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+	}
+
 	c, httpStatus, err := helpers.createCommunity(payload)
 	if err != nil {
 		respondWithError(w, httpStatus, err.Error())
@@ -342,6 +373,15 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 	if err := validatePayload(r.Body, &payload); err != nil {
 		respondWithError(w, http.StatusBadRequest, err.Error())
 		return
+	}
+
+	//Validate Contract Thresholds
+	if payload.Strategies != nil {
+		err = validateContractThreshold(*payload.Strategies)
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, err.Error())
+			return
+		}
 	}
 
 	c, httpStatus, err := helpers.updateCommunity(id, payload)
@@ -549,6 +589,27 @@ func (a *App) getLatestSnapshot(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, snapshot)
 }
 
+func (a *App) addFungibleToken(w http.ResponseWriter, r *http.Request) {
+	payload := struct {
+		Addr string `json:"addr" validate:"required"`
+		Name string `json:"name" validate:"required"`
+		Path string `json:"path" validate:"required"`
+	}{}
+
+	if err := validatePayload(r.Body, &payload); err != nil {
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err := a.SnapshotClient.AddFungibleToken(payload.Addr, payload.Name, payload.Path)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, "OK")
+}
+
 ///////////
 // Users //
 ///////////
@@ -725,8 +786,9 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 func validatePayload(body io.ReadCloser, data interface{}) error {
 	decoder := json.NewDecoder(body)
 	if err := decoder.Decode(&data); err != nil {
-		log.Error().Err(err)
-		return errors.New("Invalid request payload.")
+		errMsg := "Invalid request payload."
+		log.Error().Err(err).Msg(errMsg)
+		return errors.New(errMsg)
 	}
 
 	defer body.Close()

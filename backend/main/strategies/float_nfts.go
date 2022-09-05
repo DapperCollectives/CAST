@@ -1,6 +1,8 @@
 package strategies
 
 import (
+	"errors"
+
 	"github.com/DapperCollectives/CAST/backend/main/models"
 	"github.com/DapperCollectives/CAST/backend/main/shared"
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
@@ -57,8 +59,9 @@ func (s *FloatNFTs) queryNFTs(
 	}
 
 	if !hasEventNFT {
-		log.Error().Err(err).Msg("the user does not have this Float event in their wallet")
-		return err
+		errMsg := "the user does not have this Float event in their wallet"
+		log.Error().Err(err).Msg(errMsg)
+		return errors.New(errMsg)
 	}
 
 	nftIds, err := s.FlowAdapter.GetFloatNFTIds(vb.Vote.Addr, &strategy.Contract)
