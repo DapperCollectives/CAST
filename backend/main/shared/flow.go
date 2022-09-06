@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -55,6 +56,7 @@ var (
 	placeholderNonFungibleTokenAddr = regexp.MustCompile(`"[^"\s]*NON_FUNGIBLE_TOKEN_ADDRESS"`)
 	placeholderMetadataViewsAddr    = regexp.MustCompile(`"[^"\s]*METADATA_VIEWS_ADDRESS"`)
 	placeholderCollectionPublicPath = regexp.MustCompile(`"[^"\s]*COLLECTION_PUBLIC_PATH"`)
+	placeholderTopshotAddr          = regexp.MustCompile(`"[^"\s]*TOPSHOT_ADDRESS"`)
 )
 
 func NewFlowClient(flowEnv string) *FlowAdapter {
@@ -418,11 +420,13 @@ func (fa *FlowAdapter) ReplaceContractPlaceholders(code string, c *Contract, isF
 		fungibleTokenAddr    string
 		nonFungibleTokenAddr string
 		metadataViewsAddr    string
+		topshotAddr          string
 	)
 
 	nonFungibleTokenAddr = fa.Config.Contracts["NonFungibleToken"].Aliases[os.Getenv("FLOW_ENV")]
 	fungibleTokenAddr = fa.Config.Contracts["FungibleToken"].Aliases[os.Getenv("FLOW_ENV")]
 	metadataViewsAddr = fa.Config.Contracts["MetadataViews"].Aliases[os.Getenv("FLOW_ENV")]
+	topshotAddr = fa.Config.Contracts["TopShot"].Aliases[os.Getenv("FLOW_ENV")]
 
 	if isFungible {
 		code = placeholderFungibleTokenAddr.ReplaceAllString(code, fungibleTokenAddr)
@@ -434,6 +438,9 @@ func (fa *FlowAdapter) ReplaceContractPlaceholders(code string, c *Contract, isF
 	code = placeholderMetadataViewsAddr.ReplaceAllString(code, metadataViewsAddr)
 	code = placeholderTokenName.ReplaceAllString(code, *c.Name)
 	code = placeholderTokenAddr.ReplaceAllString(code, *c.Addr)
+	code = placeholderTopshotAddr.ReplaceAllString(code, topshotAddr)
+
+	fmt.Printf("code: %s \n", code)
 
 	return []byte(code)
 }

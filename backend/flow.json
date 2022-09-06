@@ -43,6 +43,14 @@
 				"testnet": "0x631e88ae7f1d7c20",
 				"mainnet": "0x1d7e57aa55817448"
 			}
+		},
+		"TopShot": {
+			"source": "./main/cadence/nba/Topshot.cdc",
+			"aliases": {
+				"emulator": "0xf8d6e0586b0a20c7",
+				"testnet": "0x877931736ee77cff",
+				"mainnet": "0x0b2a3299cc857e29"
+			}
 		}
 	},
 	"networks": {
