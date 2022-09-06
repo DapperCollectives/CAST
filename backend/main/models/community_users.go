@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"sort"
 	"strings"
 
@@ -44,8 +43,8 @@ type CommunityUserPayload struct {
 }
 
 type UserAchievements = []struct {
-	Addr     string
-	NumVotes    int
+	Addr         string
+	NumVotes     int
 	EarlyVotes   int
 	Streaks      int
 	WinningVotes int
@@ -150,7 +149,7 @@ func GetCommunityLeaderboard(
 	)
 
 	totalUsers := len(leaderboardUsers)
-	if(totalUsers > pageParams.Count) {
+	if totalUsers > pageParams.Count {
 		totalUsers = pageParams.Count
 	}
 
@@ -283,7 +282,7 @@ func EnsureValidRole(userType string) bool {
 
 func getUserAchievements(db *s.Database, communityId int) (UserAchievements, error) {
 	userAchievements := UserAchievements{}
-	
+
 	err := pgxscan.Select(db.Context, db.Conn, &userAchievements, `
 		SELECT 
 			v.addr, 

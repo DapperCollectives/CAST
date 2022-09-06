@@ -8,7 +8,6 @@ export default function Checkbox({
   label,
   disabled,
   error,
-  type = 'text',
 } = {}) {
   return (
     <div className="is-flex flex-1">

@@ -1,6 +1,5 @@
-import TopShot from 0xTOPSHOTADDRESS
-import MetadataViews from 0xMETADATAVIEWSADDRESS
-
+import TopShot from 0xf8d6e0586b0a20c7
+import MetadataViews from 0xf8d6e0586b0a20c7
 
 pub fun main(address: Address): [UInt64] {
     let account = getAccount(address)
@@ -18,7 +17,7 @@ pub fun main(address: Address): [UInt64] {
         let metadata = view as! TopShot.TopShotMomentMetadataView
 
         if metadata.teamAtMoment == "Toronto Raptors" {
-            nftIds = nftIds.concat(id)
+             nftIds.append(id)
         }
     }
     

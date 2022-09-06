@@ -10,9 +10,12 @@ export default function Input({
   disabled,
   error,
   type = 'text',
+  conatinerClassNames = '',
 } = {}) {
   return (
-    <div className="is-flex is-flex-direction-column flex-1">
+    <div
+      className={`is-flex is-flex-direction-column flex-1 ${conatinerClassNames}`.trim()}
+    >
       <input
         type={type}
         style={{ width: '100%', ...style }}

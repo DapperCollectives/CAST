@@ -51,7 +51,13 @@ func (cs *CustomScript) queryNFTs(
 	strategy models.Strategy,
 	balance *models.Balance,
 ) error {
-	nftIds, err := cs.FlowAdapter.GetNFTIds(balance.Addr, &strategy.Contract)
+	//not sure if I can get this path on some other struct now?
+	scriptPath := "./main/cadence/scripts/custom/get_nba_topshot.cdc"
+	nftIds, err := cs.FlowAdapter.GetNFTIds(
+		balance.Addr,
+		&strategy.Contract,
+		scriptPath,
+	)
 	if err != nil {
 		return err
 	}
@@ -102,7 +108,10 @@ func (cs *CustomScript) TallyVotes(
 	return *r, nil
 }
 
-func (cs *CustomScript) GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error) {
+func (cs *CustomScript) GetVoteWeightForBalance(
+	vote *models.VoteWithBalance,
+	proposal *models.Proposal,
+) (float64, error) {
 	nftIds, err := models.GetUserNFTs(cs.DB, vote)
 	if err != nil {
 		log.Error().Err(err).Msg("error in GetVoteWeightForBalance for Custom Script strategy")
