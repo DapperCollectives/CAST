@@ -117,6 +117,7 @@ func (a *App) Initialize() {
 
 	// when running "make proposals" sets db to dev not test
 	arg := flag.String("db", "", "database type")
+	flag.Bool("ipfs-override", false, "overrides ipfs call")
 	flag.Int("port", 5001, "port")
 	flag.Int("amount", 4, "Amount of proposals to create")
 
@@ -150,7 +151,10 @@ func (a *App) Initialize() {
 
 	// Snapshot
 	log.Info().Msgf("SNAPSHOT_BASE_URL: %s", os.Getenv("SNAPSHOT_BASE_URL"))
-	a.SnapshotClient = shared.NewSnapshotClient(os.Getenv("SNAPSHOT_BASE_URL"))
+	a.SnapshotClient = shared.NewSnapshotClient(
+		os.Getenv("SNAPSHOT_BASE_URL"),
+		*a.FlowAdapter,
+	)
 	a.TxOptionsAddresses = strings.Fields(os.Getenv("TX_OPTIONS_ADDRS"))
 
 	// Router
