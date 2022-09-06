@@ -65,12 +65,14 @@ const SignInOutButton = ({
   const dropdownBackground = classnames('', {
     'wallet-connect-background': dropDownClass && !notMobile,
   });
+
   const buttonClass = classnames(
     'wallet-connect button is-uppercase transition-all small-text rounded-sm',
     { 'is-primary': !loggedIn },
     { 'px-2': !notMobile }
   );
   const addressStyle = classnames('', { 'smaller-text': !notMobile });
+
   const containerAddressStyle = classnames('is-flex', { 'pl-2': !notMobile });
 
   const containerButtonStyle = classnames('is-flex is-align-items-center', {
