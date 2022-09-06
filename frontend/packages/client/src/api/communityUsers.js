@@ -1,12 +1,13 @@
 import { API_BASE_URL } from './constants';
 import { checkResponse } from 'utils';
 
-export const createCommunityUserApiRep = async ({
+export const addUserToCommunityUserApiRep = async ({
   communityId,
   addr,
   hexTime,
   compositeSignatures,
   voucher,
+  userType = 'member',
 }) => {
   const url = `${API_BASE_URL}/communities/${communityId}/users`;
 
@@ -18,7 +19,7 @@ export const createCommunityUserApiRep = async ({
     body: JSON.stringify({
       communityId: parseInt(communityId),
       addr,
-      userType: 'member',
+      userType,
       signingAddr: addr,
       timestamp: hexTime,
       compositeSignatures,
@@ -36,8 +37,9 @@ export const deleteCommunityMemberApiReq = async ({
   hexTime,
   compositeSignatures,
   voucher,
+  userType = 'member',
 }) => {
-  const url = `${API_BASE_URL}/communities/${communityId}/users/${addr}/member`;
+  const url = `${API_BASE_URL}/communities/${communityId}/users/${addr}/${userType}`;
 
   const fetchOptions = {
     method: 'DELETE',

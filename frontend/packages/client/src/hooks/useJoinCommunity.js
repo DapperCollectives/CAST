@@ -3,7 +3,7 @@ import { useWebContext } from 'contexts/Web3';
 import { UPDATE_MEMBERSHIP_TX } from 'const';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  createCommunityUserApiRep,
+  addUserToCommunityUserApiRep,
   deleteCommunityMemberApiReq,
 } from 'api/communityUsers';
 
@@ -26,12 +26,13 @@ export default function useJoinCommunity() {
         throw new Error('No valid user signature found.');
       }
 
-      return createCommunityUserApiRep({
+      return addUserToCommunityUserApiRep({
         communityId,
         addr,
         hexTime,
         compositeSignatures,
         voucher,
+        userType: 'member',
       });
     },
     {
@@ -94,7 +95,9 @@ export default function useJoinCommunity() {
   );
 
   return {
+    // adds user as member
     createCommunityUser: createCommunityUserMutation,
+    // removes all roles from user
     deleteUserFromCommunity: deleteUserFromCommunityMutation,
   };
 }
