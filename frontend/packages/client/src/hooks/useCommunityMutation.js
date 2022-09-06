@@ -4,7 +4,7 @@ import { getCompositeSigs } from 'utils';
 import { useMutation } from '@tanstack/react-query';
 import { createCommunityApiReq } from 'api/community';
 
-export default function useCommunityCreator() {
+export default function useCommunityMutation() {
   const { notifyError } = useErrorHandlerContext();
   // for now not using modal notification if there was an error uploading image
   const { uploadFile } = useFileUploader({ useModalNotifications: false });

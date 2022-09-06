@@ -10,7 +10,7 @@ import {
   StepThree,
   StepTwo,
 } from 'components/CommunityCreate';
-import useCommunityCreator from 'hooks/useCommunityCreator';
+import useCommunityMutation from 'hooks/useCommunityMutation';
 import { generateSlug } from 'utils';
 
 export default function CommunityCreate() {
@@ -25,7 +25,7 @@ export default function CommunityCreate() {
     data,
     isLoading: creatingCommunity,
     error,
-  } = useCommunityCreator({ initialLoading: false });
+  } = useCommunityMutation({ initialLoading: false });
 
   const history = useHistory();
 
