@@ -241,6 +241,7 @@ const VoteOptions = ({
   optionChosen,
   castVote,
   onConfirmVote,
+  loggedIn,
   addr,
   readOnly = false,
 }) => {
@@ -272,8 +273,7 @@ const VoteOptions = ({
       (voteObj) => String(proposal.id) !== Object.keys(voteObj)[0]
     );
 
-  const canVote = addr && isActive && hasntVoted;
-
+  const canVote = isActive && (hasntVoted || !loggedIn);
   const voteClasses = `vote-options border-light rounded-sm mb-6 ${
     !canVote && 'is-disabled'
   } ${!hasntVoted && 'is-voted'}`;
