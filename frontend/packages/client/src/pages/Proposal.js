@@ -77,7 +77,8 @@ export default function ProposalPage() {
 
   const modalContext = useModalContext();
 
-  const { user, injectedProvider, setWebContextConfig } = useWebContext();
+  const { user, injectedProvider, setWebContextConfig, openWalletModal } =
+    useWebContext();
 
   // setting this manually for users that do not have a ledger device
   useEffect(() => {
@@ -149,7 +150,11 @@ export default function ProposalPage() {
   };
 
   const onConfirmVote = () => {
-    setConfirmingVote(true);
+    if (user.loggedIn) {
+      setConfirmingVote(true);
+    } else {
+      openWalletModal();
+    }
   };
 
   const onCancelVote = () => {
@@ -543,6 +548,7 @@ export default function ProposalPage() {
                 <VoteOptions
                   labelType="desktop"
                   readOnly={isClosed}
+                  loggedIn={user?.loggedIn}
                   addr={user?.addr}
                   proposal={proposal}
                   onOptionSelect={onOptionSelect}
