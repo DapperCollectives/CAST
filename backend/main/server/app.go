@@ -73,7 +73,8 @@ var strategyMap = map[string]Strategy{
 	"custom-script":                 &strategies.CustomScript{},
 }
 
-var customScripts []models.CustomScript
+var customScripts []shared.CustomScript
+
 
 var helpers Helpers
 
@@ -155,10 +156,16 @@ func (a *App) Initialize() {
 		log.Error().Err(err).Msg("Error during Unmarshalling custom scripts")
 	}
 
+	// Create Map for Flow Adaptor to look up when voting
+	var customScriptsMap = make(map[string]shared.CustomScript)
+	for _, script := range customScripts {
+		customScriptsMap[script.Key] = script
+	}
+
 	if os.Getenv("FLOW_ENV") == "" {
 		os.Setenv("FLOW_ENV", "emulator")
 	}
-	a.FlowAdapter = shared.NewFlowClient(os.Getenv("FLOW_ENV"))
+	a.FlowAdapter = shared.NewFlowClient(os.Getenv("FLOW_ENV"), customScriptsMap)
 
 	// Snapshot
 	log.Info().Msgf("SNAPSHOT_BASE_URL: %s", os.Getenv("SNAPSHOT_BASE_URL"))

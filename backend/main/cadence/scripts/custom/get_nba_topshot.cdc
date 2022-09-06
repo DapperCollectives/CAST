@@ -2,6 +2,7 @@ import TopShot from "TOPSHOT_ADDRESS"
 import MetadataViews from "METADATA_VIEWS_ADDRESS"
 
 pub fun main(address: Address): [UInt64] {
+
     let account = getAccount(address)
 
     let collectionRef = account.getCapability(/public/MomentCollection)

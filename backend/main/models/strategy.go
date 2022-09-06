@@ -6,18 +6,18 @@ import (
 )
 
 type VotingStrategy struct {
-	Key         string         `json:"key" validate:"required"`
-	Name        string         `json:"name" validate:"required"`
-	Description string 		   `json:"description,omitempty"`
-	Scripts 	[]CustomScript `json:"scripts,omitempty"`
+	Key         string           `json:"key" validate:"required"`
+	Name        string           `json:"name" validate:"required"`
+	Description string 		     `json:"description,omitempty"`
+	Scripts 	[]s.CustomScript `json:"scripts,omitempty"`
 }
 
-type CustomScript struct {
-	Key 		string `json:"key" validate:"required"`
-	Name 		string `json:"name" validate:"required"`
-	Description string `json:"description" validate:"required"`
-	Src 		string `json:"src" validate:"required"`
-}
+// type CustomScript struct {
+// 	Key 		string `json:"key" validate:"required"`
+// 	Name 		string `json:"name" validate:"required"`
+// 	Description string `json:"description" validate:"required"`
+// 	Src 		string `json:"src" validate:"required"`
+// }
 
 func GetVotingStrategies(db *s.Database) ([]*VotingStrategy, error) {
 	var votingStrategies []*VotingStrategy

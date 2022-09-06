@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"flag"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -25,6 +24,7 @@ type FlowAdapter struct {
 	Config  FlowConfig
 	Client  *client.Client
 	Context context.Context
+	CustomScriptsMap map[string]CustomScript
 	URL     string
 	Env     string
 }
@@ -59,10 +59,11 @@ var (
 	placeholderTopshotAddr          = regexp.MustCompile(`"[^"\s]*TOPSHOT_ADDRESS"`)
 )
 
-func NewFlowClient(flowEnv string) *FlowAdapter {
+func NewFlowClient(flowEnv string, customScriptsMap map[string]CustomScript) *FlowAdapter {
 	adapter := FlowAdapter{}
 	adapter.Context = context.Background()
 	adapter.Env = flowEnv
+	adapter.CustomScriptsMap = customScriptsMap
 	path := "./flow.json"
 
 	content, err := ioutil.ReadFile(path)
@@ -439,8 +440,6 @@ func (fa *FlowAdapter) ReplaceContractPlaceholders(code string, c *Contract, isF
 	code = placeholderTokenName.ReplaceAllString(code, *c.Name)
 	code = placeholderTokenAddr.ReplaceAllString(code, *c.Addr)
 	code = placeholderTopshotAddr.ReplaceAllString(code, topshotAddr)
-
-	fmt.Printf("code: %s \n", code)
 
 	return []byte(code)
 }

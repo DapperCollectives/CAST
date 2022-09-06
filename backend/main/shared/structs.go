@@ -91,6 +91,13 @@ type FTBalanceResponse struct {
 	CreatedAt               time.Time `json:"createdAt"`
 }
 
+type CustomScript struct {
+	Key 		string `json:"key" validate:"required"`
+	Name 		string `json:"name" validate:"required"`
+	Description string `json:"description" validate:"required"`
+	Src 		string `json:"src" validate:"required"`
+}
+
 func (b *FTBalanceResponse) NewFTBalance() {
 	if os.Getenv("APP_ENV") == "TEST" || os.Getenv("APP_ENV") == "DEV" {
 		b.PrimaryAccountBalance = 11100000

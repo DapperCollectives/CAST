@@ -1,6 +1,8 @@
 package strategies
 
 import (
+	"fmt"
+
 	"github.com/DapperCollectives/CAST/backend/main/models"
 	"github.com/DapperCollectives/CAST/backend/main/shared"
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
@@ -51,8 +53,8 @@ func (cs *CustomScript) queryNFTs(
 	strategy models.Strategy,
 	balance *models.Balance,
 ) error {
-	//not sure if I can get this path on some other struct now?
-	scriptPath := "./main/cadence/scripts/custom/get_nba_topshot.cdc"
+	scriptName := cs.FlowAdapter.CustomScriptsMap[*strategy.Contract.Script].Src
+	scriptPath := fmt.Sprintf("./main/cadence/scripts/custom/%s", scriptName) 
 	nftIds, err := cs.FlowAdapter.GetNFTIds(
 		balance.Addr,
 		&strategy.Contract,
