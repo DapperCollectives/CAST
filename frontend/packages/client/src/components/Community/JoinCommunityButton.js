@@ -19,7 +19,7 @@ export default function JoinCommunityButton({
 }) {
   const [isModalErrorOpened, setIsModalErrorOpened] = useState(false);
   const { createCommunityUser, deleteUserFromCommunity } = useJoinCommunity();
-  const { injectedProvider, user } = useWebContext();
+  const { user } = useWebContext();
   const { openModal, closeModal } = useModalContext();
   const isMember = useUserRoleOnCommunity({
     addr: user?.addr,
@@ -60,7 +60,6 @@ export default function JoinCommunityButton({
       {
         communityId,
         user,
-        injectedProvider,
       },
       {
         onSuccess: async () => {
@@ -77,7 +76,6 @@ export default function JoinCommunityButton({
       {
         communityId,
         user,
-        injectedProvider,
       },
       {
         onSuccess: async () => {

@@ -9,7 +9,7 @@ export default function useJoinCommunity() {
   const { signMessageByWalletProvider } = useWebContext();
 
   const { mutate: createCommunityUserMutation } = useMutation(
-    async ({ communityId, user, injectedProvider }) => {
+    async ({ communityId, user }) => {
       const { addr } = user;
       const hexTime = Buffer.from(Date.now().toString()).toString('hex');
       const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}/users`;
@@ -23,22 +23,21 @@ export default function useJoinCommunity() {
         return { error: 'No valid user signature found.' };
       }
 
-      try {
-        const fetchOptions = {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            communityId: parseInt(communityId),
-            addr,
-            userType: 'member',
-            signingAddr: addr,
-            timestamp: hexTime,
-            compositeSignatures,
-            voucher,
-          }),
-        };
+      const fetchOptions = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          communityId: parseInt(communityId),
+          addr,
+          userType: 'member',
+          signingAddr: addr,
+          timestamp: hexTime,
+          compositeSignatures,
+          voucher,
+        }),
+      };
 
       const response = await fetch(url, fetchOptions);
       return checkResponse(response);
@@ -62,7 +61,7 @@ export default function useJoinCommunity() {
   );
 
   const { mutate: deleteUserFromCommunityMutation } = useMutation(
-    async ({ communityId, user, injectedProvider }) => {
+    async ({ communityId, user }) => {
       const { addr } = user;
       const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}/users/${addr}/member`;
       const hexTime = Buffer.from(Date.now().toString()).toString('hex');
@@ -75,22 +74,21 @@ export default function useJoinCommunity() {
         return { error: 'No valid user signature found.' };
       }
 
-      try {
-        const fetchOptions = {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            communityId: parseInt(communityId),
-            addr,
-            userType: 'member',
-            signingAddr: addr,
-            timestamp: hexTime,
-            compositeSignatures,
-            voucher,
-          }),
-        };
+      const fetchOptions = {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          communityId: parseInt(communityId),
+          addr,
+          userType: 'member',
+          signingAddr: addr,
+          timestamp: hexTime,
+          compositeSignatures,
+          voucher,
+        }),
+      };
 
       const response = await fetch(url, fetchOptions);
       return checkResponse(response);
