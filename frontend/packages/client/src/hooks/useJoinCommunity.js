@@ -1,7 +1,11 @@
 import { useErrorHandlerContext } from '../contexts/ErrorHandler';
-import { checkResponse, useWebContext } from 'contexts/Web3';
+import { useWebContext } from 'contexts/Web3';
 import { UPDATE_MEMBERSHIP_TX } from 'const';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  createCommunityUserApiRep,
+  deleteCommunityMemberApiReq,
+} from 'api/communityUsers';
 
 export default function useJoinCommunity() {
   const queryClient = useQueryClient();
@@ -12,7 +16,6 @@ export default function useJoinCommunity() {
     async ({ communityId, user }) => {
       const { addr } = user;
       const hexTime = Buffer.from(Date.now().toString()).toString('hex');
-      const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}/users`;
       const [compositeSignatures, voucher] = await signMessageByWalletProvider(
         user?.services[0].uid,
         UPDATE_MEMBERSHIP_TX,
@@ -20,27 +23,16 @@ export default function useJoinCommunity() {
       );
 
       if (!compositeSignatures && !voucher) {
-        return { error: 'No valid user signature found.' };
+        throw new Error('No valid user signature found.');
       }
 
-      const fetchOptions = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          communityId: parseInt(communityId),
-          addr,
-          userType: 'member',
-          signingAddr: addr,
-          timestamp: hexTime,
-          compositeSignatures,
-          voucher,
-        }),
-      };
-
-      const response = await fetch(url, fetchOptions);
-      return checkResponse(response);
+      return createCommunityUserApiRep({
+        communityId,
+        addr,
+        hexTime,
+        compositeSignatures,
+        voucher,
+      });
     },
     {
       onSuccess: async (_, variables) => {
@@ -63,35 +55,25 @@ export default function useJoinCommunity() {
   const { mutate: deleteUserFromCommunityMutation } = useMutation(
     async ({ communityId, user }) => {
       const { addr } = user;
-      const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}/users/${addr}/member`;
       const hexTime = Buffer.from(Date.now().toString()).toString('hex');
+
       const [compositeSignatures, voucher] = await signMessageByWalletProvider(
         user?.services[0].uid,
         UPDATE_MEMBERSHIP_TX,
         hexTime
       );
+
       if (!compositeSignatures && !voucher) {
-        return { error: 'No valid user signature found.' };
+        throw new Error('No valid user signature found.');
       }
 
-      const fetchOptions = {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          communityId: parseInt(communityId),
-          addr,
-          userType: 'member',
-          signingAddr: addr,
-          timestamp: hexTime,
-          compositeSignatures,
-          voucher,
-        }),
-      };
-
-      const response = await fetch(url, fetchOptions);
-      return checkResponse(response);
+      return deleteCommunityMemberApiReq({
+        communityId,
+        addr,
+        hexTime,
+        compositeSignatures,
+        voucher,
+      });
     },
     {
       onSuccess: async (_, variables) => {
