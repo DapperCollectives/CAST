@@ -101,7 +101,7 @@ const SignInOutButton = ({
                     ...(loggedIn ? { width: '147px' } : { width: '206px' }),
                     height: '40px',
                   }
-                : { width: '119px', height: '31px' }
+                : { width: '119px', height: '32px' }
             }
           >
             {loggedIn ? (
@@ -144,18 +144,15 @@ const SignInOutButton = ({
                 <CopyToClipboard text={addr} onCopy={markAddressCopied}>
                   <div
                     className="columns flex-1 is-mobile m-0 px-4 py-0 rounded-sm button is-white border-light"
-                    style={{ borderColor: 'hsl(0deg, 0%, 86%)' }}
+                    style={{
+                      borderColor: 'hsl(0deg, 0%, 86%)',
+                      height: '32px',
+                    }}
                   >
-                    <div
-                      className="column p-0 is-flex is-align-items-center"
-                      style={{ height: '32px' }}
-                    >
+                    <div className="column p-0 is-flex is-align-items-center">
                       <span className="small-text">{addr}</span>
                     </div>
-                    <div
-                      className="column p-0 is-flex is-align-items-center is-narrow"
-                      style={{ height: '32px' }}
-                    >
+                    <div className="column p-0 is-flex is-align-items-center is-narrow">
                       <div
                         className="is-flex is-align-items-center py-0 px-1"
                         style={{ height: '23px' }}
@@ -172,7 +169,7 @@ const SignInOutButton = ({
             <div className="px-4 pb-4 pt-2">
               <div
                 className="button is-fullwidth rounded-sm is-uppercase is-flex small-text has-text-white has-background-black"
-                style={{ minHeight: '32px' }}
+                style={{ height: '32px' }}
                 onClick={signOut}
               >
                 disconnect
