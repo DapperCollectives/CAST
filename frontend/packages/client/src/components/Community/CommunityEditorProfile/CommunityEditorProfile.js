@@ -91,6 +91,7 @@ export default function CommunityEditorProfile({
 
     // updated fields
     if (Object.keys(updates).length > 0) {
+      console.log(updates);
       await updateCommunity(updates);
     }
     // call if value as true

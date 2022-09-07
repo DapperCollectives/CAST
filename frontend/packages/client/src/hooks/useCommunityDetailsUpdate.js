@@ -1,14 +1,11 @@
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useWebContext } from 'contexts/Web3';
-import { getCompositeSigs } from 'utils';
+import { UPDATE_COMMUNITY_TX } from 'const';
 import { useMutation } from '@tanstack/react-query';
 import { updateCommunityDetailsApiReq } from 'api/community';
 
 export default function useCommunityDetailsUpdate() {
-  const {
-    user: { addr },
-    injectedProvider,
-  } = useWebContext();
+  const { user, signMessageByWalletProvider } = useWebContext();
 
   const { notifyError } = useErrorHandlerContext();
 
@@ -23,14 +20,17 @@ export default function useCommunityDetailsUpdate() {
     async ({ communityId, updatePayload }) => {
       const timestamp = Date.now().toString();
       const hexTime = Buffer.from(timestamp).toString('hex');
-      const _compositeSignatures = await injectedProvider
-        .currentUser()
-        .signUserMessage(hexTime);
 
-      const compositeSignatures = getCompositeSigs(_compositeSignatures);
+      console.log(updatePayload);
+      const { addr } = user;
+      const [compositeSignatures, voucher] = await signMessageByWalletProvider(
+        user?.services[0].uid,
+        UPDATE_COMMUNITY_TX,
+        hexTime
+      );
 
-      if (!compositeSignatures) {
-        return { error: 'No valid user signature found.' };
+      if (!compositeSignatures && !voucher) {
+        throw new Error('No valid user signature found.');
       }
 
       return updateCommunityDetailsApiReq({
@@ -51,7 +51,7 @@ export default function useCommunityDetailsUpdate() {
   );
 
   return {
-    mutate: updateCommunityDetails,
+    updateCommunityDetails,
     isLoading,
     isError,
     isSuccess,
