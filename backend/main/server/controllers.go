@@ -962,7 +962,18 @@ func (a *App) getBalanceAtBlockheight(w http.ResponseWriter, r *http.Request) {
 	blockheight, _ := strconv.Atoi(vars["blockHeight"])
 	log.Info().Msgf("getting balance for %s at blockheight %d", addr, blockheight)
 
-	result := a.DpsAdapter.GetFlowBalanceAtBlockheight(addr, uint64(blockheight))
+	name := "StarlyToken"
+	path := "starlyTokenBalance"
+	contractAddr := "0x142fa6570b62fd97"
+	contract := shared.Contract{Name: &name, Addr: &contractAddr, Public_path: &path}
+	// result := a.DpsAdapter.GetTokenBalanceAtBlockheight(addr, uint64(blockheight), &contract)
+	// name := "FlowToken"
+	// contractAddr := "0x142fa6570b62fd97"
+	// contract := shared.Contract{Name: &name, Addr: &contractAddr}
+	result, _ := a.DpsAdapter.GetBalanceAtBlockheight(addr, uint64(blockheight), &contract)
+
+	// result := a.DpsAdapter.GetAccountAtBlockHeight(addr, uint64(blockheight))
+
 	log.Info().Msgf("value: %v", result)
 
 	respondWithJSON(w, http.StatusOK, result)

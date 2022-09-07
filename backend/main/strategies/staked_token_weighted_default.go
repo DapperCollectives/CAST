@@ -12,8 +12,8 @@ import (
 
 type StakedTokenWeightedDefault struct {
 	s.StrategyStruct
-	SC s.SnapshotClient
-	DB *s.Database
+	DPS s.DpsAdapter
+	DB  *s.Database
 }
 
 func (s *StakedTokenWeightedDefault) FetchBalance(
@@ -53,29 +53,30 @@ func (s *StakedTokenWeightedDefault) FetchBalanceFromSnapshot(
 	ftBalance.NewFTBalance()
 
 	if *strategy.Contract.Name == "FlowToken" {
-		if err := s.SC.GetAddressBalanceAtBlockHeight(
-			b.Addr,
-			b.BlockHeight,
-			ftBalance,
-			&strategy.Contract,
-		); err != nil {
-			log.Error().Err(err).Msg("Error fetching balance from snapshot client")
-			return err
-		}
+		// if err := s.DPS.GetAddressBalanceAtBlockHeight()
+		// if err := s.SC.GetAddressBalanceAtBlockHeight(
+		// 	b.Addr,
+		// 	b.BlockHeight,
+		// 	ftBalance,
+		// 	&strategy.Contract,
+		// ); err != nil {
+		// 	log.Error().Err(err).Msg("Error fetching balance from snapshot client")
+		// 	return err
+		// }
 		b.PrimaryAccountBalance = ftBalance.PrimaryAccountBalance
 		b.SecondaryAccountBalance = ftBalance.SecondaryAccountBalance
 		b.StakingBalance = ftBalance.StakingBalance
 
 	} else {
-		if err := s.SC.GetAddressBalanceAtBlockHeight(
-			b.Addr,
-			b.BlockHeight,
-			ftBalance,
-			&strategy.Contract,
-		); err != nil {
-			log.Error().Err(err).Msg("Error fetching balance.")
-			return err
-		}
+		// if err := s.SC.GetAddressBalanceAtBlockHeight(
+		// 	b.Addr,
+		// 	b.BlockHeight,
+		// 	ftBalance,
+		// 	&strategy.Contract,
+		// ); err != nil {
+		// 	log.Error().Err(err).Msg("Error fetching balance.")
+		// 	return err
+		// }
 		b.PrimaryAccountBalance = ftBalance.Balance
 		b.SecondaryAccountBalance = 0
 		b.StakingBalance = 0
@@ -152,16 +153,12 @@ func (s *StakedTokenWeightedDefault) GetVotes(
 	return votes, nil
 }
 
-func (s *StakedTokenWeightedDefault) RequiresSnapshot() bool {
-	return true
-}
-
 func (s *StakedTokenWeightedDefault) InitStrategy(
 	f *shared.FlowAdapter,
 	db *shared.Database,
-	sc *s.SnapshotClient,
+	dps *s.DpsAdapter,
 ) {
 	s.FlowAdapter = f
 	s.DB = db
-	s.SC = *sc
+	s.DPS = *dps
 }

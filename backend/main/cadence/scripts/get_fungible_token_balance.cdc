@@ -1,4 +1,4 @@
-import FungibleToken from "FUNGIBLE_TOKEN"
+import FungibleToken from "FUNGIBLE_TOKEN_ADDRESS"
 import "TOKEN_NAME" from "TOKEN_ADDRESS"
 
 pub struct AccountInfo {
@@ -13,26 +13,19 @@ pub struct AccountInfo {
     }
 }
 
-pub fun main(addresses: [Address], balanceCapPath: PublicPath): {Address: AccountInfo} {
-    let accountDict: {Address: AccountInfo} = {}
+pub fun main(address: Address): AccountInfo {
+    var info: AccountInfo = AccountInfo()
+    let account = getAccount(address)
+    info.address = address
 
-    for address in addresses {
-        var info: AccountInfo = AccountInfo()
-        let account = getAccount(address)
-        info.address = address
-
-        if let vaultRef = account.getCapability(balanceCapPath)
-            .borrow<&{{TOKEN_NAME}}.Vault{FungibleToken.Balance}>() {
-                info.balance = vaultRef.balance
-                info.hasVault = true
-        }
-        else {
-            info.hasVault = false
-        }
-        
-
-        accountDict.insert(key: address, info)
+    if let vaultRef = account.getCapability(/public/"TOKEN_BALANCE_PATH")
+        .borrow<&"TOKEN_NAME".Vault{FungibleToken.Balance}>() {
+            info.balance = vaultRef.balance
+            info.hasVault = true
     }
-    return accountDict
+    else {
+        info.hasVault = false
+    }
+    return info
 }
  

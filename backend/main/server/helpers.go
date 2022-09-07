@@ -493,10 +493,6 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, error) {
 		p.Max_weight = strategy.Contract.MaxWeight
 	}
 
-	if err := h.snapshot(&strategy, &p); err != nil {
-		return models.Proposal{}, err
-	}
-
 	if err := h.enforceCommunityRestrictions(community, p, strategy); err != nil {
 		return models.Proposal{}, err
 	}
@@ -572,23 +568,6 @@ func (h *Helpers) enforceCommunityRestrictions(
 			log.Error().Err(err).Msg(errMsg)
 			return errors.New(errMsg)
 		}
-	}
-
-	return nil
-}
-
-func (h *Helpers) snapshot(strategy *models.Strategy, p *models.Proposal) error {
-	s := h.initStrategy(*strategy.Name)
-
-	//var snapshotResponse *shared.SnapshotResponse
-	if s.RequiresSnapshot() {
-		snapshotResponse, err := h.A.SnapshotClient.TakeSnapshot(strategy.Contract)
-		if err != nil {
-			errMsg := "Error taking snapshot."
-			return errors.New(errMsg)
-		}
-		p.Block_height = &snapshotResponse.Data.BlockHeight
-		p.Snapshot_status = &snapshotResponse.Data.Status
 	}
 
 	return nil
@@ -1116,7 +1095,7 @@ func (h *Helpers) initStrategy(name string) Strategy {
 		return nil
 	}
 
-	s.InitStrategy(h.A.FlowAdapter, h.A.DB, h.A.SnapshotClient)
+	s.InitStrategy(h.A.FlowAdapter, h.A.DB, h.A.DpsAdapter)
 
 	return s
 }

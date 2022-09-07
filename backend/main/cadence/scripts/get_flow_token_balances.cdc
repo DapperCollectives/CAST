@@ -1,6 +1,6 @@
 import FlowStorageFees from "FLOW_STORAGE_FEES"
-import FungibleToken from "FUNGIBLE_TOKEN"
-import FlowToken from "FLOW_TOKEN"
+import FungibleToken from "FUNGIBLE_TOKEN_ADDRESS"
+import FlowToken from "FLOW_TOKEN_ADDRESS"
 import FlowIDTableStaking from "FLOW_ID_TABLE_STAKING"
 import LockedTokens from "LOCKED_TOKENS"
 import FlowStakingCollection from "FLOW_STAKING_COLLECTION"
@@ -119,7 +119,7 @@ pub fun getStakesAndDelegations(_ account: PublicAccount) : {String:UFix64} {
 }
 
 
-pub fun main(addresses: Address): AccountInfo} {
+pub fun main(address: Address): AccountInfo {
     var info: AccountInfo = AccountInfo()
 
     let account = getAccount(address)

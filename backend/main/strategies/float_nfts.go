@@ -10,8 +10,8 @@ import (
 
 type FloatNFTs struct {
 	shared.StrategyStruct
-	SC shared.SnapshotClient
-	DB *shared.Database
+	DPS shared.DpsAdapter
+	DB  *shared.Database
 }
 
 func (f *FloatNFTs) FetchBalance(
@@ -139,16 +139,12 @@ func (f *FloatNFTs) GetVotes(
 	return votes, nil
 }
 
-func (f *FloatNFTs) RequiresSnapshot() bool {
-	return false
-}
-
 func (f *FloatNFTs) InitStrategy(
 	fa *shared.FlowAdapter,
 	db *shared.Database,
-	sc *shared.SnapshotClient,
+	dps *shared.DpsAdapter,
 ) {
 	f.FlowAdapter = fa
 	f.DB = db
-	f.SC = *sc
+	f.DPS = *dps
 }

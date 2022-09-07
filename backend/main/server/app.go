@@ -60,9 +60,8 @@ type Strategy interface {
 	TallyVotes(votes []*models.VoteWithBalance, p *models.ProposalResults, proposal *models.Proposal) (models.ProposalResults, error)
 	GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error)
 	GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error)
-	InitStrategy(f *shared.FlowAdapter, db *shared.Database, sc *shared.SnapshotClient)
+	InitStrategy(f *shared.FlowAdapter, db *shared.Database, sc *shared.DpsAdapter)
 	FetchBalance(b *models.Balance, p *models.Proposal) (*models.Balance, error)
-	RequiresSnapshot() bool
 }
 
 var strategyMap = map[string]Strategy{

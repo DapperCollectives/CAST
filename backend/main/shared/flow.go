@@ -54,12 +54,14 @@ var (
 	// Custom
 	placeholderTokenName            = regexp.MustCompile(`"[^"\s]*TOKEN_NAME"`)
 	placeholderTokenAddr            = regexp.MustCompile(`"[^"\s]*TOKEN_ADDRESS"`)
+	placeholderTokenBalancePath     = regexp.MustCompile(`"[^"\s]*TOKEN_BALANCE_PATH"`)
 	placeholderCollectionPublicPath = regexp.MustCompile(`"[^"\s]*COLLECTION_PUBLIC_PATH"`)
 
 	// Static
 	placeholderFungibleTokenAddr     = regexp.MustCompile(`"[^"\s]*FUNGIBLE_TOKEN_ADDRESS"`)
 	placeholderNonFungibleTokenAddr  = regexp.MustCompile(`"[^"\s]*NON_FUNGIBLE_TOKEN_ADDRESS"`)
 	placeholderMetadataViewsAddr     = regexp.MustCompile(`"[^"\s]*METADATA_VIEWS_ADDRESS"`)
+	placeholderFlowTokenAddr         = regexp.MustCompile(`"[^"\s]*FLOW_TOKEN_ADDRESS"`)
 	placeholderFlowStorageFeesAddr   = regexp.MustCompile(`"[^"\s]*FLOW_STORAGE_FEES"`)
 	placeholderFlowIdTableStaking    = regexp.MustCompile(`"[^"\s]*FLOW_ID_TABLE_STAKING"`)
 	placeholderFlowStakingCollection = regexp.MustCompile(`"[^"\s]*FLOW_STAKING_COLLECTION"`)
@@ -429,11 +431,19 @@ func (config *FlowConfig) InsertCoreContractAddresses(code string) string {
 	code = placeholderFungibleTokenAddr.ReplaceAllString(code, config.Contracts["FungibleToken"].Aliases[os.Getenv("FLOW_ENV")])
 	code = placeholderNonFungibleTokenAddr.ReplaceAllString(code, config.Contracts["NonFungibleToken"].Aliases[os.Getenv("FLOW_ENV")])
 	code = placeholderMetadataViewsAddr.ReplaceAllString(code, config.Contracts["MetadataViews"].Aliases[os.Getenv("FLOW_ENV")])
+	code = placeholderFlowTokenAddr.ReplaceAllString(code, config.Contracts["FlowToken"].Aliases[os.Getenv("FLOW_ENV")])
 	code = placeholderFlowStorageFeesAddr.ReplaceAllString(code, config.Contracts["FlowStorageFees"].Aliases[os.Getenv("FLOW_ENV")])
-	code = placeholderFlowIdTableStaking.ReplaceAllString(code, config.Contracts["FlowIdTableStaking"].Aliases[os.Getenv("FLOW_ENV")])
+	code = placeholderFlowIdTableStaking.ReplaceAllString(code, config.Contracts["FlowIDTableStaking"].Aliases[os.Getenv("FLOW_ENV")])
 	code = placeholderFlowStakingCollection.ReplaceAllString(code, config.Contracts["FlowStakingCollection"].Aliases[os.Getenv("FLOW_ENV")])
 	code = placeholderLockedTokens.ReplaceAllString(code, config.Contracts["LockedTokens"].Aliases[os.Getenv("FLOW_ENV")])
 	code = placeholderTopshotAddr.ReplaceAllString(code, config.Contracts["TopShot"].Aliases[os.Getenv("FLOW_ENV")])
+	return code
+}
+
+func (config *FlowConfig) InsertTokenContract(code string, c *Contract) string {
+	code = placeholderTokenName.ReplaceAllString(code, *c.Name)
+	code = placeholderTokenAddr.ReplaceAllString(code, *c.Addr)
+	code = placeholderTokenBalancePath.ReplaceAllString(code, *c.Public_path)
 	return code
 }
 

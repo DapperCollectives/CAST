@@ -4,14 +4,17 @@ import (
 	"context"
 	"encoding/json"
 	"io/ioutil"
+	"strings"
 
 	"github.com/onflow/cadence"
+	dpsApi "github.com/onflow/flow-dps/api/dps"
+	"github.com/onflow/flow-dps/codec/zbor"
+	"github.com/onflow/flow-dps/service/invoker"
 	"github.com/onflow/flow-go-sdk"
-	dpsApi "github.com/optakt/flow-dps/api/dps"
-	"github.com/optakt/flow-dps/codec/zbor"
-	"github.com/optakt/flow-dps/service/invoker"
+	_flow "github.com/onflow/flow-go/model/flow"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type DpsAdapter struct {
@@ -54,12 +57,18 @@ func NewDpsClient(flowEnv string) *DpsAdapter {
 	// Initialize the DPS API client.
 	codec := zbor.NewCodec()
 
-	conn, err := grpc.DialContext(adapter.Context, adapter.URL, grpc.WithInsecure())
+	conn, err := grpc.DialContext(
+		adapter.Context,
+		adapter.URL,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.FailOnNonTempDialError(true), // DialContext will fail immediately if passed bad connection string
+		grpc.WithBlock(),                  // connection should be blocking
+	)
+
 	if err != nil {
 		log.Error().Str("dps", adapter.URL).Err(err).Msg("could not dial API host")
 		panic("error initializing DPS gRPC connection")
 	}
-	defer conn.Close()
 
 	client := dpsApi.NewAPIClient(conn)
 	index := dpsApi.IndexFromAPI(client, codec)
@@ -72,13 +81,12 @@ func NewDpsClient(flowEnv string) *DpsAdapter {
 		log.Error().Str("dps", adapter.URL).Err(err)
 		panic("error initializing DPS Invoker")
 	}
-
 	return &adapter
 }
 
 // FLOW token has its own function for fetching balance because
 // it has its own script to account for locked/staked tokens.
-func (dps *DpsAdapter) GetFlowBalanceAtBlockheight(addr string, blockheight uint64) cadence.Value {
+func (dps *DpsAdapter) GetFlowBalanceAtBlockheightScript(addr string, blockheight uint64) (cadence.Value, error) {
 	var args []cadence.Value
 
 	// Prepare Args
@@ -91,19 +99,57 @@ func (dps *DpsAdapter) GetFlowBalanceAtBlockheight(addr string, blockheight uint
 
 	if err != nil {
 		log.Error().Err(err).Msgf("Error reading cadence script file.")
+		return nil, err
 	}
 
 	// Replace script args
 	script := dps.Config.InsertCoreContractAddresses(string(_script))
+	// log.Info().Msgf("index height: %s", dps.Invoker.index.Height(blockheight))
+	log.Info().Msgf("blockheight: %d", blockheight)
+	log.Info().Msgf("args: %d", args)
+	log.Info().Msgf("script: %s", script)
 
 	result, err := dps.Invoker.Script(blockheight, []byte(script), args)
 	if err != nil {
-		log.Error().Err(err)
+		log.Error().Err(err).Msg("invoker.Script failed")
+		return nil, err
 	}
-	return result
+	return result, nil
 }
 
-func (dps *DpsAdapter) GetTokenBalanceAtBlockheight(addr string, blockheight uint64, c *Contract) cadence.Value {
+func (dps *DpsAdapter) GetBalanceAtBlockheight(addr string, blockheight uint64, c *Contract) (*FTBalanceResponse, error) {
+	if dps.bypass() {
+		log.Info().Msgf("overriding dps service for emulator")
+		return nil, nil
+	}
+
+	var err error
+	var result cadence.Value
+
+	tokenBalanceResponse := FTBalanceResponse{}
+	tokenBalanceResponse.NewFTBalance()
+	tokenBalanceResponse.Addr = addr
+	tokenBalanceResponse.BlockHeight = blockheight
+
+	result, err = dps.GetFlowBalanceAtBlockheightScript(addr, blockheight)
+	if err != nil {
+		return nil, err
+	}
+	fields := result.(cadence.Struct).Fields
+	if *c.Name == "FlowToken" {
+		tokenBalanceResponse.PrimaryAccountBalance = uint64(fields[0].ToGoValue().(float64) * 10e8)
+		tokenBalanceResponse.StakingBalance = uint64(fields[3].ToGoValue().(float64) * 10e8)
+		tokenBalanceResponse.Stakes = strings.Split(fields[5].ToGoValue().(string), ", ")
+
+		return &tokenBalanceResponse, nil
+	} else {
+		tokenBalanceResponse.Balance = uint64(fields[1].ToGoValue().(float64) * 10e8)
+
+		return &tokenBalanceResponse, nil
+	}
+}
+
+func (dps *DpsAdapter) GetTokenBalanceAtBlockheightScript(addr string, blockheight uint64, c *Contract) (cadence.Value, error) {
 	var args []cadence.Value
 
 	// Prepare Args
@@ -112,17 +158,46 @@ func (dps *DpsAdapter) GetTokenBalanceAtBlockheight(addr string, blockheight uin
 
 	args = append(args, cadenceAddress)
 
+	log.Debug().Msgf("getting %s balance for %s at blockheight %d", *c.Name, addr, blockheight)
+
 	_script, err := ioutil.ReadFile("./main/cadence/scripts/get_fungible_token_balance.cdc")
 	if err != nil {
 		log.Error().Err(err).Msgf("Error reading cadence script file.")
+		return nil, err
 	}
 
-	// Replace script args
+	// Set Contract Addresses based on Flow env
 	script := dps.Config.InsertCoreContractAddresses(string(_script))
+	// Set Token name/address
+	script = dps.Config.InsertTokenContract(script, c)
 
 	result, err := dps.Invoker.Script(blockheight, []byte(script), args)
 	if err != nil {
 		log.Error().Err(err)
+		return nil, err
 	}
-	return result
+	return result, nil
+}
+
+func (dps *DpsAdapter) GetAccountAtBlockHeight(addr string, blockheight uint64) (*_flow.Account, error) {
+	var _account *_flow.Account
+	flowAddress := _flow.HexToAddress(addr)
+	_account, err := dps.Invoker.Account(blockheight, flowAddress)
+	if err != nil {
+		log.Error().Err(err).Msgf("invoker.Account failed")
+		return nil, err
+	}
+	account := *_account
+
+	log.Info().Msgf("account addr: %s", account.Address)
+	log.Info().Msgf("account balance: %d", account.Balance)
+	log.Info().Msgf("account keys: %v", account.Keys)
+	log.Info().Msgf("account contracts: %v", account.Contracts)
+
+	return &account, nil
+}
+
+// Don't hit DPS service if using emulator
+func (dps *DpsAdapter) bypass() bool {
+	return dps.Env == "emulator"
 }
