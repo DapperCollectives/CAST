@@ -5,7 +5,7 @@ import { fetchCommunityDetails } from 'api/community';
 export default function useCommunityDetails(id) {
   const { notifyError } = useErrorHandlerContext();
 
-  const { isLoading, isError, data, error } = useQuery(
+  const query = useQuery(
     ['community-details', id],
     async () => fetchCommunityDetails(id),
     {
@@ -16,10 +16,5 @@ export default function useCommunityDetails(id) {
     }
   );
 
-  return {
-    isLoading,
-    isError,
-    data,
-    error,
-  };
+  return query;
 }

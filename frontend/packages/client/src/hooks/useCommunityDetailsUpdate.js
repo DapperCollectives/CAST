@@ -2,14 +2,18 @@ import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useWebContext } from 'contexts/Web3';
 import { UPDATE_COMMUNITY_TX } from 'const';
 import { useMutation } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { updateCommunityDetailsApiReq } from 'api/community';
 
 export default function useCommunityDetailsUpdate() {
   const { user, signMessageByWalletProvider } = useWebContext();
 
+  const queryClient = useQueryClient();
+
   const { notifyError } = useErrorHandlerContext();
 
   const {
+    mutateAsync: updateCommunityDetailsAsync,
     mutate: updateCommunityDetails,
     isLoading,
     isError,
@@ -44,6 +48,10 @@ export default function useCommunityDetailsUpdate() {
       });
     },
     {
+      onSuccess: async (_, variables) => {
+        const { communityId } = variables;
+        await queryClient.invalidateQueries(['community-details', communityId]);
+      },
       onError: (error) => {
         notifyError(error);
       },
@@ -52,6 +60,7 @@ export default function useCommunityDetailsUpdate() {
 
   return {
     updateCommunityDetails,
+    updateCommunityDetailsAsync,
     isLoading,
     isError,
     isSuccess,

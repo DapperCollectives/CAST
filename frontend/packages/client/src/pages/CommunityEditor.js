@@ -128,8 +128,13 @@ export default function CommunityEditorPage() {
   const {
     user: { addr },
   } = useWebContext();
-  const { data: community, isLoding } = useCommunityDetails(communityId);
-  const { updateCommunityDetails, isUpdating } = useCommunityDetailsUpdate();
+  const { data: community, isLoading } = useCommunityDetails(communityId);
+
+  const {
+    updateCommunityDetailsAsync: updateCommunityDetails,
+    isLoading: isUpdating,
+  } = useCommunityDetailsUpdate();
+
   const { data: activeStrategies } =
     useCommunityActiveVotingStrategies(communityId);
 
@@ -146,9 +151,10 @@ export default function CommunityEditorPage() {
       votingStrategies: value === CommunityEditPageTabs.votingStrategies,
     });
   };
-  // to be removed
+
   const updateCommunity = useCallback(
-    async (updateData) => updateCommunityDetails({ communityId, updateData }),
+    async (updatePayload) =>
+      updateCommunityDetails({ communityId, updatePayload }),
     [communityId, updateCommunityDetails]
   );
 
@@ -169,7 +175,7 @@ export default function CommunityEditorPage() {
   }, [isAdmin, addr, history]);
 
   // initial loading
-  if (isLoding && !community) {
+  if (isLoading) {
     return (
       <section className="section full-height">
         <div className="container is-flex full-height is-justify-content-center">
