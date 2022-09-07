@@ -272,3 +272,11 @@ export const setDefaultValue = (field, fallbackValue) => {
   }
   return field;
 };
+
+export function truncateAddress(str, initial = 3, tail = 10) {
+  return (
+    str.substr(0, initial) +
+    '...' +
+    str.substr((tail - str.length) * -1, str.length)
+  );
+}
