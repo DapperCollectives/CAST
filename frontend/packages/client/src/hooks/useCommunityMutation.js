@@ -1,6 +1,7 @@
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
+import { useWebContext } from 'contexts/Web3';
 import { useFileUploader } from 'hooks';
-import { getCompositeSigs } from 'utils';
+import { CREATE_COMMUNITY_TX } from 'const';
 import { useMutation } from '@tanstack/react-query';
 import { createCommunityApiReq } from 'api/community';
 
@@ -8,7 +9,7 @@ export default function useCommunityMutation() {
   const { notifyError } = useErrorHandlerContext();
   // for now not using modal notification if there was an error uploading image
   const { uploadFile } = useFileUploader({ useModalNotifications: false });
-
+  const { user, signMessageByWalletProvider } = useWebContext();
   const {
     mutate: createCommunity,
     isLoading,
@@ -17,26 +18,19 @@ export default function useCommunityMutation() {
     data,
     error,
   } = useMutation(
-    async ({ injectedProvider, communityPayload }) => {
+    async ({ logo, banner, ...otherProps }) => {
       const timestamp = Date.now().toString();
       const hexTime = Buffer.from(timestamp).toString('hex');
-      const _compositeSignatures = await injectedProvider
-        .currentUser()
-        .signUserMessage(hexTime);
 
-      const compositeSignatures = getCompositeSigs(_compositeSignatures);
+      const [compositeSignatures, voucher] = await signMessageByWalletProvider(
+        user?.services[0].uid,
+        CREATE_COMMUNITY_TX,
+        hexTime
+      );
 
-      if (!compositeSignatures) {
-        const statusText = 'No valid user signature found.';
-        // modal error will open
-        notifyError({
-          status: 'Something went wrong with creating the community.',
-          statusText,
-        });
-        return;
+      if (!compositeSignatures && !voucher) {
+        throw new Error('No valid user signature found.');
       }
-
-      const { logo, banner, ...otherProps } = communityPayload;
 
       // check for logo / banner uploads
       // admins can edit later the images
@@ -64,11 +58,15 @@ export default function useCommunityMutation() {
         },
         timestamp,
         compositeSignatures,
+        voucher,
       });
     },
     {
       onError: (error) => {
-        notifyError(error);
+        notifyError({
+          status: 'Something went wrong with creating the community.',
+          statusText: error.message,
+        });
       },
     }
   );

@@ -25,7 +25,7 @@ export default function CommunityCreate() {
     data,
     isLoading: creatingCommunity,
     error,
-  } = useCommunityMutation({ initialLoading: false });
+  } = useCommunityMutation();
 
   const history = useHistory();
 

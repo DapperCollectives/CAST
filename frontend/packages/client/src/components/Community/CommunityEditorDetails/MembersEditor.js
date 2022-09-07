@@ -3,7 +3,7 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useWebContext } from 'contexts/Web3';
 import { ActionButton } from 'components';
-import { useCommunityUsers } from 'hooks';
+import { useCommunityUsers, useCommunityUsersMutation } from 'hooks';
 import { UPDATE_COMMUNITY_TX } from 'const';
 import { yupResolver } from '@hookform/resolvers/yup';
 import AddressForm from './AddressForm';
@@ -24,17 +24,16 @@ export default function MembersEditor({
 
   const { notifyError } = useErrorHandlerContext();
 
-  const {
-    data: communityUsers,
-    loading: loadingUsers,
-    removeCommunityUsers,
-    addCommunityUsers,
-  } = useCommunityUsers({
+  const { data: communityUsers, isLoading: loadingUsers } = useCommunityUsers({
     communityId,
     type: addrType.toLocaleLowerCase(),
     // if list goes up from 100 we need to add a fetch more button
     count: 100,
   });
+
+  const { removeCommunityUsers, addCommunityUsers } = useCommunityUsersMutation(
+    { communityId }
+  );
 
   const { register, control, handleSubmit, reset, formState } = useForm({
     mode: 'all',
@@ -109,14 +108,14 @@ export default function MembersEditor({
       if (toRemove.length > 0) {
         await removeCommunityUsers({
           addrs: toRemove,
-          type: addrType.toLocaleLowerCase(),
+          userType: addrType.toLocaleLowerCase(),
           body,
         });
       }
       if (toAdd.length > 0) {
         await addCommunityUsers({
           addrs: toAdd,
-          type: addrType.toLocaleLowerCase(),
+          userType: addrType.toLocaleLowerCase(),
           body,
         });
       }

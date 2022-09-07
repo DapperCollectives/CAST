@@ -17,6 +17,7 @@ export { default as useUserCommunities } from './useUserCommunities';
 export { default as useUserRoleOnCommunity } from './useUserRoleOnCommunity';
 export { default as useJoinCommunity } from './useJoinCommunity';
 export { default as useCommunityUsers } from './useCommunityUsers';
+export { default as useCommunityUsersMutation } from './useCommunityUsersMutation';
 export { default as useCommunityCategory } from './useCommunityCategory';
 export { default as useBeforeUnload } from './useBeforeUnload';
 export { default as useStarAnimation } from './useStarAnimation';

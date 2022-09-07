@@ -32,6 +32,7 @@ export const createCommunityApiReq = async ({
   payload,
   timestamp,
   compositeSignatures,
+  voucher,
 }) => {
   const {
     communityTerms: termsAndConditionsUrl,
@@ -45,6 +46,9 @@ export const createCommunityApiReq = async ({
     strategies,
     logo,
     bannerImgUrl,
+    body,
+    name,
+    communityCategory,
   } = payload;
 
   const fetchOptions = {
@@ -53,9 +57,9 @@ export const createCommunityApiReq = async ({
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      name: payload.name,
-      body: payload?.body,
-      category: payload.category.value,
+      name,
+      body,
+      category: communityCategory,
       termsAndConditionsUrl,
       creatorAddr,
       additionalAuthors: payload?.listAddrAuthors,
@@ -82,6 +86,7 @@ export const createCommunityApiReq = async ({
       onlyAuthorsToSubmit: Boolean(payload?.onlyAuthorsToSubmitProposals),
       timestamp,
       compositeSignatures,
+      voucher,
     }),
   };
 
