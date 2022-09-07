@@ -120,7 +120,7 @@ func (dps *DpsAdapter) GetFlowBalanceAtBlockheightScript(addr string, blockheigh
 func (dps *DpsAdapter) GetBalanceAtBlockheight(addr string, blockheight uint64, c *Contract) (*FTBalanceResponse, error) {
 	if dps.bypass() {
 		log.Info().Msgf("overriding dps service for emulator")
-		return nil, nil
+		return &DummyBalance, nil
 	}
 
 	var err error

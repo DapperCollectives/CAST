@@ -52,21 +52,21 @@ type Contract struct {
 
 var (
 	// Custom
-	placeholderTokenName            = regexp.MustCompile(`"[^"\s]*TOKEN_NAME"`)
-	placeholderTokenAddr            = regexp.MustCompile(`"[^"\s]*TOKEN_ADDRESS"`)
-	placeholderTokenBalancePath     = regexp.MustCompile(`"[^"\s]*TOKEN_BALANCE_PATH"`)
-	placeholderCollectionPublicPath = regexp.MustCompile(`"[^"\s]*COLLECTION_PUBLIC_PATH"`)
+	placeholderTokenName            = regexp.MustCompile(`"^\"TOKEN_NAME"`)
+	placeholderTokenAddr            = regexp.MustCompile(`"^\"TOKEN_ADDRESS"`)
+	placeholderTokenBalancePath     = regexp.MustCompile(`"^\"TOKEN_BALANCE_PATH"`)
+	placeholderCollectionPublicPath = regexp.MustCompile(`"^\"COLLECTION_PUBLIC_PATH"`)
 
 	// Static
-	placeholderFungibleTokenAddr     = regexp.MustCompile(`"[^"\s]*FUNGIBLE_TOKEN_ADDRESS"`)
-	placeholderNonFungibleTokenAddr  = regexp.MustCompile(`"[^"\s]*NON_FUNGIBLE_TOKEN_ADDRESS"`)
-	placeholderMetadataViewsAddr     = regexp.MustCompile(`"[^"\s]*METADATA_VIEWS_ADDRESS"`)
-	placeholderFlowTokenAddr         = regexp.MustCompile(`"[^"\s]*FLOW_TOKEN_ADDRESS"`)
-	placeholderFlowStorageFeesAddr   = regexp.MustCompile(`"[^"\s]*FLOW_STORAGE_FEES"`)
-	placeholderFlowIdTableStaking    = regexp.MustCompile(`"[^"\s]*FLOW_ID_TABLE_STAKING"`)
-	placeholderFlowStakingCollection = regexp.MustCompile(`"[^"\s]*FLOW_STAKING_COLLECTION"`)
-	placeholderLockedTokens          = regexp.MustCompile(`"[^"\s]*LOCKED_TOKENS"`)
-	placeholderTopshotAddr           = regexp.MustCompile(`"[^"\s]*TOPSHOT_ADDRESS"`)
+	placeholderFungibleTokenAddr     = regexp.MustCompile(`"^\"FUNGIBLE_TOKEN_ADDRESS"`)
+	placeholderNonFungibleTokenAddr  = regexp.MustCompile(`"^\"NON_FUNGIBLE_TOKEN_ADDRESS"`)
+	placeholderMetadataViewsAddr     = regexp.MustCompile(`"^\"METADATA_VIEWS_ADDRESS"`)
+	placeholderFlowTokenAddr         = regexp.MustCompile(`"^\"FLOW_TOKEN_ADDRESS"`)
+	placeholderFlowStorageFeesAddr   = regexp.MustCompile(`"^\"FLOW_STORAGE_FEES"`)
+	placeholderFlowIdTableStaking    = regexp.MustCompile(`"^\"FLOW_ID_TABLE_STAKING"`)
+	placeholderFlowStakingCollection = regexp.MustCompile(`"^\"FLOW_STAKING_COLLECTION"`)
+	placeholderLockedTokens          = regexp.MustCompile(`"^\"LOCKED_TOKENS"`)
+	placeholderTopshotAddr           = regexp.MustCompile(`"^\"TOPSHOT_ADDRESS"`)
 )
 
 func NewFlowClient(flowEnv string, customScriptsMap map[string]CustomScript) *FlowAdapter {
