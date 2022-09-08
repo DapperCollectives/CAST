@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useModalContext } from 'contexts/NotificationModal';
 import { useWebContext } from 'contexts/Web3';
 import { Error, WalletConnect } from 'components';
+import { Eye, HideEye } from 'components/Svg';
 import { useJoinCommunity, useUserRoleOnCommunity } from 'hooks';
 import classnames from 'classnames';
 
@@ -11,12 +12,7 @@ export default function JoinCommunityButton({
   // callback to notify leaveCommunity was called
   onLeaveCommunity = async () => {},
   onJoinCommunity = async () => {},
-  darkMode = true,
-  classNames,
-  buttonClassNames = '',
-  extraStyles,
-  borderRadious = 'rounded-lg',
-  containerAlignment = 'is-align-self-center',
+  size = 'small',
 }) {
   const [isModalErrorOpened, setIsModalErrorOpened] = useState(false);
   const { createCommunityUser, deleteUserFromCommunity } = useJoinCommunity();
@@ -87,27 +83,40 @@ export default function JoinCommunityButton({
     }
   };
 
-  const classNamesContainer = `column is-narrow-tablet is-full-mobile ${classNames} ${containerAlignment}`;
-
-  const classNamesButton = classnames(
-    `button is-uppercase is-fullwidth ${buttonClassNames} ${borderRadious}`,
+  const buttonClasses = classnames(
+    'button join-community-button p-0 is-fullwidth full-height',
     {
-      'has-background-black has-text-white-bis': darkMode,
-      'rounded-sm has-text-black border-lighter-dark-grey small-text':
-        !darkMode,
+      'is-active': isMember,
+      'rounded-lg': size === 'small',
+      'rounded-xl small-text px-4': size === 'large',
     }
   );
 
+  const containerStyles =
+    size === 'small'
+      ? { width: 40, height: 40 }
+      : { height: 48, maxWidth: 125 };
+
+  let joinCopy = 'Watch';
+  if (isMember) joinCopy += 'ing';
+
   return (
     <div
-      className={classNamesContainer}
-      style={{ minWidth: '117px', ...extraStyles }}
+      className="column p-0 is-narrow-tablet is-full-mobile"
+      style={containerStyles}
     >
       <button
-        className={classNamesButton}
+        className={buttonClasses}
         onClick={isMember ? leaveCommunity : joinCommunity}
       >
-        {isMember ? 'Leave' : 'Join'}
+        <Eye />
+        <HideEye />
+        {!isMember && (
+          <span className="join-community-cta py-2 px-4 rounded-lg has-text-white has-background-black smaller-text">
+            Watch this community
+          </span>
+        )}
+        {size === 'large' && <span className="ml-2">{joinCopy}</span>}
       </button>
     </div>
   );
