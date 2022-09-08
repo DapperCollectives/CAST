@@ -7,6 +7,7 @@ export const addUserToCommunityUserApiRep = async ({
   hexTime,
   compositeSignatures,
   voucher,
+  signingAddr,
   userType = 'member',
 }) => {
   const url = `${API_BASE_URL}/communities/${communityId}/users`;
@@ -20,7 +21,7 @@ export const addUserToCommunityUserApiRep = async ({
       communityId: parseInt(communityId),
       addr,
       userType,
-      signingAddr: addr,
+      signingAddr,
       timestamp: hexTime,
       compositeSignatures,
       voucher,
@@ -38,6 +39,7 @@ export const deleteCommunityMemberApiReq = async ({
   compositeSignatures,
   voucher,
   userType = 'member',
+  signingAddr,
 }) => {
   const url = `${API_BASE_URL}/communities/${communityId}/users/${addr}/${userType}`;
 
@@ -49,8 +51,8 @@ export const deleteCommunityMemberApiReq = async ({
     body: JSON.stringify({
       communityId: parseInt(communityId),
       addr,
-      userType: 'member',
-      signingAddr: addr,
+      userType,
+      signingAddr,
       timestamp: hexTime,
       compositeSignatures,
       voucher,
@@ -58,5 +60,21 @@ export const deleteCommunityMemberApiReq = async ({
   };
 
   const response = await fetch(url, fetchOptions);
+  return checkResponse(response);
+};
+
+export const communityUsersApiReq = async ({
+  communityId,
+  type,
+  count,
+  start,
+}) => {
+  const url = `${
+    process.env.REACT_APP_BACK_END_SERVER_API
+  }/communities/${communityId}/users${
+    type ? `/type/${type}` : ''
+  }?count=${count}&start=${start}`;
+
+  const response = await fetch(url);
   return checkResponse(response);
 };
