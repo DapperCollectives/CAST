@@ -18,6 +18,12 @@ import (
 	"github.com/thoas/go-funk"
 )
 
+var allowedFileTypes = []string{"image/jpg", "image/jpeg", "image/png", "image/gif"}
+
+const (
+	maxFileSize = 5 * 1024 * 1024 // 5MB
+)
+
 type Helpers struct {
 	A *App
 }

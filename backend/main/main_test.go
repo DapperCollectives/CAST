@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -45,7 +47,24 @@ func TestMain(m *testing.M) {
 
 	A.Initialize()
 
-	adapter := shared.NewFlowClient(os.Getenv("FLOW_ENV"))
+	// Load custom scripts for strategies
+	scripts, err := ioutil.ReadFile("./main/cadence/scripts/custom/scripts.json")
+	if err != nil {
+		log.Error().Err(err).Msg("Error Reading Custom Strategy scripts.")
+	}
+
+	var customScripts []shared.CustomScript
+	err = json.Unmarshal(scripts, &customScripts)
+	if err != nil {
+		log.Error().Err(err).Msg("Error during Unmarshalling custom scripts")
+	}
+
+	var customScriptsMap = make(map[string]shared.CustomScript)
+	for _, script := range customScripts {
+		customScriptsMap[script.Key] = script
+	}
+
+	adapter := shared.NewFlowClient(os.Getenv("FLOW_ENV"), customScriptsMap)
 
 	// Setup overflow test utils struct
 	otu = &utils.OverflowTestUtils{T: nil, A: &A, O: O, Adapter: adapter}

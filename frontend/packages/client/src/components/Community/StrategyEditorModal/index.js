@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import networks from 'networks';
+import CustomScriptSelector from './CustomScriptSelector';
 import StrategyInformationForm from './StrategyInformationForm';
 import StrategySelector from './StrategySelector';
 
@@ -11,6 +12,13 @@ const ModalSteps = {
 };
 
 const getFormFields = (strategy) => {
+  if (strategy === 'custom-script') {
+    return {
+      threshold: '',
+      maxWeight: '',
+    };
+  }
+
   const formFields = {
     addr: '',
     name: '',
@@ -76,9 +84,9 @@ export default function StrategyEditorModal({
   const onConfirmDone = (data) => {
     onDone({ ...strategyData, contract: data });
   };
-  const strategyName =
-    strategyData?.name &&
-    strategies.find((s) => s.key === strategyData.name).name;
+
+  const strategy = strategies.find((s) => s.key === strategyData.name);
+  const strategyName = strategyData?.name && strategy.name;
 
   return (
     <div
@@ -117,13 +125,23 @@ export default function StrategyEditorModal({
             onSelectStrategy={setStrategy}
           />
         )}
-        {step === ModalSteps[2] && (
-          <StrategyInformationForm
-            formData={strategyData.contract}
-            formFields={Object.keys(getFormFields(strategyData.name))}
-            onSubmit={onConfirmDone}
-          />
-        )}
+        {step === ModalSteps[2] ? (
+          strategy.key === 'custom-script' ? (
+            <CustomScriptSelector
+              scripts={strategy.scripts}
+              formData={strategyData.contract}
+              formFields={Object.keys(getFormFields(strategyData.name))}
+              onSubmit={onConfirmDone}
+            />
+          ) : (
+            <StrategyInformationForm
+              strategy={strategy}
+              formData={strategyData.contract}
+              formFields={Object.keys(getFormFields(strategyData.name))}
+              onSubmit={onConfirmDone}
+            />
+          )
+        ) : null}
       </section>
     </div>
   );
