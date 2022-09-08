@@ -1,8 +1,6 @@
 import { useEffect } from 'react';
 import useUserCommunities from './useUserCommunities';
 
-// REFACTOR
-
 export default function useUserRoleOnCommunity({
   addr,
   communityId,

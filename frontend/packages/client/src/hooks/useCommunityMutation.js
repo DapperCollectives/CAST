@@ -63,10 +63,7 @@ export default function useCommunityMutation() {
     },
     {
       onError: (error) => {
-        notifyError({
-          status: 'Something went wrong with creating the community.',
-          statusText: error.message,
-        });
+        notifyError(error);
       },
     }
   );

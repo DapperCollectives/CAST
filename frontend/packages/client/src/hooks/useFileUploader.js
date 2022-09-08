@@ -30,10 +30,7 @@ export default function useFileUploader({ useModalNotifications = true } = {}) {
     {
       onError: (error) => {
         if (useModalNotifications) {
-          notifyError({
-            status: 'Image file was not uploaded',
-            statusText: error.message,
-          });
+          notifyError(error);
         }
       },
     }

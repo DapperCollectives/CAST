@@ -46,10 +46,7 @@ export default function useProposalMutation() {
         await queryClient.setQueryData(['proposal', String(result.id)], result);
       },
       onError: (error) => {
-        notifyError({
-          status: 'Something went wrong with your proposal.',
-          statusText: error.message,
-        });
+        notifyError(error);
       },
     }
   );
