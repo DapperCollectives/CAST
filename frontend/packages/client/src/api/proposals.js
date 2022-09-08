@@ -58,3 +58,43 @@ export const createProposalApiReq = async ({
   const response = await fetch(url, fetchOptions);
   return checkResponse(response);
 };
+
+export const updateProposalApiReq = async ({
+  communityId,
+  proposalId,
+  updatePayload,
+  hexTime,
+  compositeSignatures,
+  voucher,
+} = {}) => {
+  const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}/proposals/${proposalId}`;
+  const fetchOptions = {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      ...updatePayload,
+      timestamp: hexTime,
+      compositeSignatures,
+      voucher,
+    }),
+  };
+
+  const response = await fetch(url, fetchOptions);
+  const json = await checkResponse(response);
+
+  const sortedProposalChoices =
+    json?.choices?.sort((a, b) => (a.choiceText > b.choiceText ? 1 : -1)) ?? [];
+
+  const updatedResponse = {
+    ...json,
+    choices: sortedProposalChoices.map((choice) => ({
+      label: choice.choiceText,
+      value: choice.choiceText,
+      choiceImgUrl: choice.choiceImgUrl,
+    })),
+  };
+
+  return updatedResponse;
+};

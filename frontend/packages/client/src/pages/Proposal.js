@@ -172,13 +172,18 @@ export default function ProposalPage() {
     };
 
     const onCancelProposal = async () => {
-      const response = await updateProposal(injectedProvider, proposal, {
-        status: 'cancelled',
-        signingAddr: user?.addr,
-      });
-      if (response.error) {
+      try {
+        await updateProposal({
+          ...proposal,
+          updatePayload: {
+            status: 'cancelled',
+            signingAddr: user?.addr,
+          },
+        });
+      } catch (error) {
         return;
       }
+      // is no errors continue
       setCancelProposal(false);
       setCancelled(true);
     };
