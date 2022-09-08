@@ -1,19 +1,21 @@
 package strategies
 
 import (
+	"fmt"
+
 	"github.com/DapperCollectives/CAST/backend/main/models"
 	"github.com/DapperCollectives/CAST/backend/main/shared"
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/rs/zerolog/log"
 )
 
-type BalanceOfNfts struct {
+type CustomScript struct {
 	s.StrategyStruct
 	SC s.SnapshotClient
 	DB *s.Database
 }
 
-func (b *BalanceOfNfts) FetchBalance(
+func (cs *CustomScript) FetchBalance(
 	balance *models.Balance,
 	p *models.Proposal,
 ) (*models.Balance, error) {
@@ -25,7 +27,7 @@ func (b *BalanceOfNfts) FetchBalance(
 	}
 
 	var c models.Community
-	if err := c.GetCommunityByProposalId(b.DB, balance.Proposal_id); err != nil {
+	if err := c.GetCommunityByProposalId(cs.DB, balance.Proposal_id); err != nil {
 		return nil, err
 	}
 
@@ -35,20 +37,25 @@ func (b *BalanceOfNfts) FetchBalance(
 		return nil, err
 	}
 
-	if err := b.queryNFTs(*vb, strategy, balance); err != nil {
+	if strategy.Contract.Script == nil {
+		log.Error().Msg("No custom script name field was found for contract.")
+	}
+
+	if err := cs.queryNFTs(*vb, strategy, balance); err != nil {
 		return nil, err
 	}
 
 	return balance, nil
 }
 
-func (b *BalanceOfNfts) queryNFTs(
+func (cs *CustomScript) queryNFTs(
 	vb models.VoteWithBalance,
 	strategy models.Strategy,
 	balance *models.Balance,
 ) error {
-	scriptPath := "./main/cadence/scripts/get_nfts_ids.cdc"
-	nftIds, err := b.FlowAdapter.GetNFTIds(
+	scriptName := cs.FlowAdapter.CustomScriptsMap[*strategy.Contract.Script].Src
+	scriptPath := fmt.Sprintf("./main/cadence/scripts/custom/%s", scriptName) 
+	nftIds, err := cs.FlowAdapter.GetNFTIds(
 		balance.Addr,
 		&strategy.Contract,
 		scriptPath,
@@ -64,7 +71,7 @@ func (b *BalanceOfNfts) queryNFTs(
 		vb.NFTs = append(vb.NFTs, nft)
 	}
 
-	doesExist, err := models.DoesNFTExist(b.DB, &vb)
+	doesExist, err := models.DoesNFTExist(cs.DB, &vb)
 	if err != nil {
 		return err
 	}
@@ -72,14 +79,14 @@ func (b *BalanceOfNfts) queryNFTs(
 	//only if the NFT ID is not already in the DB,
 	//do we add the balance
 	if !doesExist && err == nil {
-		err = models.CreateUserNFTRecord(b.DB, &vb)
+		err = models.CreateUserNFTRecord(cs.DB, &vb)
 		balance.NFTCount = len(vb.NFTs)
 	}
 
 	return err
 }
 
-func (b *BalanceOfNfts) TallyVotes(
+func (cs *CustomScript) TallyVotes(
 	votes []*models.VoteWithBalance,
 	r *models.ProposalResults,
 	proposal *models.Proposal,
@@ -103,21 +110,24 @@ func (b *BalanceOfNfts) TallyVotes(
 	return *r, nil
 }
 
-func (b *BalanceOfNfts) GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error) {
-	nftIds, err := models.GetUserNFTs(b.DB, vote)
+func (cs *CustomScript) GetVoteWeightForBalance(
+	vote *models.VoteWithBalance,
+	proposal *models.Proposal,
+) (float64, error) {
+	nftIds, err := models.GetUserNFTs(cs.DB, vote)
 	if err != nil {
-		log.Error().Err(err).Msg("error in GetVoteWeightForBalance for BalanceOfNFTs strategy")
+		log.Error().Err(err).Msg("error in GetVoteWeightForBalance for Custom Script strategy")
 		return 0.00, err
 	}
 	return float64(len(nftIds)), nil
 }
 
-func (s *BalanceOfNfts) GetVotes(
+func (cs *CustomScript) GetVotes(
 	votes []*models.VoteWithBalance,
 	proposal *models.Proposal,
 ) ([]*models.VoteWithBalance, error) {
 	for _, vote := range votes {
-		weight, err := s.GetVoteWeightForBalance(vote, proposal)
+		weight, err := cs.GetVoteWeightForBalance(vote, proposal)
 		if err != nil {
 			return nil, err
 		}
@@ -127,16 +137,16 @@ func (s *BalanceOfNfts) GetVotes(
 	return votes, nil
 }
 
-func (s *BalanceOfNfts) RequiresSnapshot() bool {
+func (cs *CustomScript) RequiresSnapshot() bool {
 	return false
 }
 
-func (s *BalanceOfNfts) InitStrategy(
+func (cs *CustomScript) InitStrategy(
 	f *shared.FlowAdapter,
 	db *shared.Database,
 	sc *s.SnapshotClient,
 ) {
-	s.FlowAdapter = f
-	s.DB = db
-	s.SC = *sc
+	cs.FlowAdapter = f
+	cs.DB = db
+	cs.SC = *sc
 }

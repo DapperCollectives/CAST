@@ -24,6 +24,7 @@ type FlowAdapter struct {
 	Config  FlowConfig
 	Client  *client.Client
 	Context context.Context
+	CustomScriptsMap map[string]CustomScript
 	URL     string
 	Env     string
 }
@@ -45,6 +46,7 @@ type Contract struct {
 	Threshold      *float64 `json:"threshold,omitempty,string"`
 	MaxWeight      *float64 `json:"maxWeight,omitempty,string"`
 	Float_event_id *uint64  `json:"floatEventId,omitempty,string"`
+	Script         *string  `json:"script,omitempty"`
 }
 
 var (
@@ -54,12 +56,14 @@ var (
 	placeholderNonFungibleTokenAddr = regexp.MustCompile(`"[^"\s]*NON_FUNGIBLE_TOKEN_ADDRESS"`)
 	placeholderMetadataViewsAddr    = regexp.MustCompile(`"[^"\s]*METADATA_VIEWS_ADDRESS"`)
 	placeholderCollectionPublicPath = regexp.MustCompile(`"[^"\s]*COLLECTION_PUBLIC_PATH"`)
+	placeholderTopshotAddr          = regexp.MustCompile(`"[^"\s]*TOPSHOT_ADDRESS"`)
 )
 
-func NewFlowClient(flowEnv string) *FlowAdapter {
+func NewFlowClient(flowEnv string, customScriptsMap map[string]CustomScript) *FlowAdapter {
 	adapter := FlowAdapter{}
 	adapter.Context = context.Background()
 	adapter.Env = flowEnv
+	adapter.CustomScriptsMap = customScriptsMap
 	path := "./flow.json"
 
 	content, err := ioutil.ReadFile(path)
@@ -284,11 +288,11 @@ func (fa *FlowAdapter) GetFlowBalance(address string) (float64, error) {
 	return balance, nil
 }
 
-func (fa *FlowAdapter) GetNFTIds(voterAddr string, c *Contract) ([]interface{}, error) {
+func (fa *FlowAdapter) GetNFTIds(voterAddr string, c *Contract, path string) ([]interface{}, error) {
 	flowAddress := flow.HexToAddress(voterAddr)
 	cadenceAddress := cadence.NewAddress(flowAddress)
 
-	script, err := ioutil.ReadFile("./main/cadence/scripts/get_nfts_ids.cdc")
+	script, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Error().Err(err).Msgf("Error reading cadence script file.")
 		return nil, err
@@ -417,11 +421,13 @@ func (fa *FlowAdapter) ReplaceContractPlaceholders(code string, c *Contract, isF
 		fungibleTokenAddr    string
 		nonFungibleTokenAddr string
 		metadataViewsAddr    string
+		topshotAddr          string
 	)
 
 	nonFungibleTokenAddr = fa.Config.Contracts["NonFungibleToken"].Aliases[os.Getenv("FLOW_ENV")]
 	fungibleTokenAddr = fa.Config.Contracts["FungibleToken"].Aliases[os.Getenv("FLOW_ENV")]
 	metadataViewsAddr = fa.Config.Contracts["MetadataViews"].Aliases[os.Getenv("FLOW_ENV")]
+	topshotAddr = fa.Config.Contracts["TopShot"].Aliases[os.Getenv("FLOW_ENV")]
 
 	if isFungible {
 		code = placeholderFungibleTokenAddr.ReplaceAllString(code, fungibleTokenAddr)
@@ -433,6 +439,7 @@ func (fa *FlowAdapter) ReplaceContractPlaceholders(code string, c *Contract, isF
 	code = placeholderMetadataViewsAddr.ReplaceAllString(code, metadataViewsAddr)
 	code = placeholderTokenName.ReplaceAllString(code, *c.Name)
 	code = placeholderTokenAddr.ReplaceAllString(code, *c.Addr)
+	code = placeholderTopshotAddr.ReplaceAllString(code, topshotAddr)
 
 	return []byte(code)
 }
