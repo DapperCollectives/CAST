@@ -71,7 +71,11 @@ export default function ImageChoiceUploader({
     text,
   });
 
-  const { uploadFile, loading, error } = useFileUploader({
+  const {
+    uploadFile,
+    isLoading: loading,
+    error,
+  } = useFileUploader({
     useModalNotifications: false,
   });
 

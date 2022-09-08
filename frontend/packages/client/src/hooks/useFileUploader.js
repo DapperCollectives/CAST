@@ -1,50 +1,50 @@
-import { useCallback, useReducer } from 'react';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { checkResponse } from 'utils';
-import { INITIAL_STATE, defaultReducer } from '../reducers';
-
-// REFACTOR
+import { useMutation } from '@tanstack/react-query';
 
 export default function useFileUploader({ useModalNotifications = true } = {}) {
-  const [state, dispatch] = useReducer(defaultReducer, {
-    ...INITIAL_STATE,
-    loading: false,
-  });
   const { notifyError } = useErrorHandlerContext();
 
-  const uploadFile = useCallback(
+  const {
+    mutateAsync: uploadFile,
+    isLoading,
+    isError,
+    isSuccess,
+    data,
+    error,
+  } = useMutation(
     async (image) => {
-      dispatch({ type: 'PROCESSING' });
       const formData = new FormData();
       formData.append('file', image);
       const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/upload`;
-      try {
-        const fetchOptions = {
-          method: 'POST',
-          body: formData,
-        };
-        const response = await fetch(url, fetchOptions);
-        const upload = await checkResponse(response);
-        // complete url on IPFS
-        const fileUrl = `${process.env.REACT_APP_IPFS_GATEWAY}${upload.cid}`;
-        dispatch({
-          type: 'SUCCESS',
-          payload: { ...upload, fileUrl },
-        });
-        return { ...upload, fileUrl };
-      } catch (err) {
-        // notify user of error
-        if (useModalNotifications) {
-          notifyError(err, url);
-        }
-        dispatch({ type: 'ERROR', payload: { errorData: err.message } });
-      }
+      const fetchOptions = {
+        method: 'POST',
+        body: formData,
+      };
+      const response = await fetch(url, fetchOptions);
+      const upload = await checkResponse(response);
+      // complete url on IPFS
+      const fileUrl = `${process.env.REACT_APP_IPFS_GATEWAY}${upload.cid}`;
+      return { ...upload, fileUrl };
     },
-    [dispatch, notifyError, useModalNotifications]
+    {
+      onError: (error) => {
+        if (useModalNotifications) {
+          notifyError({
+            status: 'Image file was not uploaded',
+            statusText: error.message,
+          });
+        }
+      },
+    }
   );
 
   return {
-    ...state,
+    isLoading,
+    isError,
+    isSuccess,
+    data,
+    error,
     uploadFile,
   };
 }
