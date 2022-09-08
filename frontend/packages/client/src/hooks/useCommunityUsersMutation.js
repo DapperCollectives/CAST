@@ -1,5 +1,7 @@
+import { useCallback } from 'react';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useMutation } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   addUserToCommunityUserApiRep,
   deleteCommunityMemberApiReq,
@@ -8,92 +10,113 @@ import {
 export default function useCommunityUsersMutation({ communityId } = {}) {
   const { notifyError } = useErrorHandlerContext();
 
-  const { mutate, isLoading, isError, isSuccess, data, error } = useMutation(
-    async ({ actionType, ...otherProps }) => {
-      const {
+  const queryClient = useQueryClient();
+
+  const { mutate } = useMutation(async ({ actionType, ...otherProps }) => {
+    const {
+      communityId,
+      addr,
+      hexTime,
+      compositeSignatures,
+      voucher,
+      signingAddr,
+      userType,
+    } = otherProps;
+
+    if (actionType === 'add') {
+      return addUserToCommunityUserApiRep({
+        communityId,
+        addr,
+        timestamp: hexTime,
+        compositeSignatures,
+        voucher,
+        userType,
+        signingAddr,
+      });
+    }
+    if (actionType === 'delete') {
+      return deleteCommunityMemberApiReq({
         communityId,
         addr,
         hexTime,
         compositeSignatures,
         voucher,
         userType,
-      } = otherProps;
-      if (actionType === 'add') {
-        return addUserToCommunityUserApiRep({
-          communityId,
-          addr,
-          hexTime,
-          compositeSignatures,
-          voucher,
-          userType,
-        });
-      }
-      if (actionType === 'delete') {
-        return deleteCommunityMemberApiReq({
-          communityId,
-          addr,
-          hexTime,
-          compositeSignatures,
-          voucher,
-          userType,
-        });
-      }
+        signingAddr,
+      });
     }
+  });
+
+  const removeCommunityUsers = useCallback(
+    async ({ userType, addrs, body }) => {
+      return new Promise((resolve, reject) => {
+        addrs.forEach((addrToRemove) => {
+          mutate(
+            {
+              communityId,
+              addr: addrToRemove,
+              userType,
+              ...body,
+              actionType: 'delete',
+            },
+            {
+              onSuccess: () => {
+                // Will execute only once, for the last mutation (Todo 3),
+                // regardless which mutation resolves first
+                resolve();
+              },
+              onError: (error) => {
+                notifyError(error);
+                resolve();
+              },
+            }
+          );
+        });
+      });
+    },
+    [communityId, mutate, notifyError]
   );
 
-  const removeCommunityUsers = async ({ userType, addrs, body }) => {
-    addrs.forEach((addrToRemove) => {
-      mutate(
-        {
-          communityId,
-          addr: addrToRemove,
-          userType,
-          ...body,
-          actionType: 'delete',
-        },
-        {
-          onSuccess: (data, error, variables, context) => {
-            // Will execute only once, for the last mutation (Todo 3),
-            // regardless which mutation resolves first
-          },
-          onError: (error) => {
-            notifyError(error);
-          },
-        }
-      );
-    });
-  };
-
-  const addCommunityUsers = async ({ userType, addrs, body }) => {
-    addrs.forEach((addrToRemove) => {
-      mutate(
-        {
-          communityId,
-          addr: addrToRemove,
-          userType,
-          ...body,
-          actionType: 'add',
-        },
-        {
-          onSuccess: (data, error, variables, context) => {
-            // Will execute only once, for the last mutation (Todo 3),
-            // regardless which mutation resolves first
-          },
-          onError: (error) => {
-            notifyError(error);
-          },
-        }
-      );
-    });
-  };
+  const addCommunityUsers = useCallback(
+    async ({ userType, addrs, body }) => {
+      return new Promise((resolve, reject) => {
+        addrs.forEach((addrToRemove) => {
+          mutate(
+            {
+              communityId,
+              addr: addrToRemove,
+              userType,
+              ...body,
+              actionType: 'add',
+            },
+            {
+              onSuccess: async () => {
+                // Will execute only once, for the last mutation (Todo 3),
+                // regardless which mutation resolves first
+                if (userType === 'admin') {
+                  // reload author list when new admins are added
+                  await queryClient.invalidateQueries([
+                    'community-users',
+                    String(communityId),
+                    'author',
+                  ]);
+                }
+                resolve();
+              },
+              onError: (error) => {
+                notifyError(error);
+                resolve();
+              },
+            }
+          );
+        });
+      });
+    },
+    [communityId, mutate, notifyError, queryClient]
+  );
 
   return {
     removeCommunityUsers,
     addCommunityUsers,
-    isLoading,
-    isError,
-    isSuccess,
-    data,
-    error,
   };
 }
