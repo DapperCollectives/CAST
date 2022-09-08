@@ -26,7 +26,7 @@ export default function useProposalVotes({
       const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/proposals/${propId}/votes?count=${count}&start=${start}`;
 
       const response = await fetch(url);
-      return checkResponse(response);
+      return await checkResponse(response);
     },
     {
       getNextPageParam: (lastPage) => {

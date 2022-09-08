@@ -33,7 +33,7 @@ export default function useCommunityProposals({
       }`;
 
       const response = await fetch(url);
-      return checkResponse(response);
+      return await checkResponse(response);
     },
     {
       getNextPageParam: (lastPage, pages) => {

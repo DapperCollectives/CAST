@@ -12,7 +12,7 @@ export default function useVotingResults(proposalId) {
         `${process.env.REACT_APP_BACK_END_SERVER_API}/proposals/${proposalId}/results`
       );
 
-      return checkResponse(response);
+      return await checkResponse(response);
     },
     {
       enabled: !!proposalId,

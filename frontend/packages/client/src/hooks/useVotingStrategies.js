@@ -12,7 +12,7 @@ export default function useVotingStrategies() {
         `${process.env.REACT_APP_BACK_END_SERVER_API}/voting-strategies`
       );
 
-      return checkResponse(response);
+      return await checkResponse(response);
     },
     {
       onError: (error) => {

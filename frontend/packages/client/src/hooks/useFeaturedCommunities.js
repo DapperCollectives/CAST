@@ -12,13 +12,9 @@ export default function useFeaturedCommunities({
     ['communities-for-homepage'],
     async ({ pageParam = 0 }) => {
       const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities-for-homepage?count=${count}&start=${pageParam}`;
-      try {
-        const response = await fetch(url);
-        const communities = await checkResponse(response);
-        return communities;
-      } catch (err) {
-        throw err;
-      }
+
+      const response = await fetch(url);
+      return await checkResponse(response);
     },
     {
       getNextPageParam: (lastPage) => {
