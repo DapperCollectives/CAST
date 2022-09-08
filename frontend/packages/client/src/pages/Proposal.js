@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
+import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useModalContext } from 'contexts/NotificationModal';
 import { useWebContext } from 'contexts/Web3';
 import {
-  Error,
   Loader,
   Message,
   ProposalInformation,
@@ -79,8 +79,9 @@ export default function ProposalPage() {
 
   const modalContext = useModalContext();
 
-  const { user, injectedProvider, setWebContextConfig, openWalletModal } =
-    useWebContext();
+  const { notifyError } = useErrorHandlerContext();
+
+  const { user, setWebContextConfig, openWalletModal } = useWebContext();
 
   // setting this manually for users that do not have a ledger device
   useEffect(() => {
@@ -207,41 +208,24 @@ export default function ProposalPage() {
       return;
     }
 
-    const voteBody = {
+    const voteData = {
       choice: optionChosen,
       addr: user.addr,
     };
 
     setCastingVote(true);
-    const response = await voteOnProposal(
-      injectedProvider,
-      proposal,
-      voteBody,
-      user.services[0]?.uid
-    );
-    if (response?.error) {
-      setVoteError(response.error);
+    try {
+      await voteOnProposal({ proposal, voteData });
+    } catch (error) {
+      setVoteError(error);
       setConfirmingVote(false);
-      modalContext.openModal(
-        React.createElement(Error, {
-          error: (
-            <p className="has-text-red">
-              <b>{response.error}</b>
-            </p>
-          ),
-          errorTitle: 'Something went wrong with your vote.',
-        }),
-        {
-          classNameModalContent: 'rounded-sm',
-        }
-      );
+      notifyError(error);
       setCastingVote(false);
       return;
-    } else {
-      setCastingVote(false);
-      setConfirmingVote(false);
-      setCastVote(optionChosen);
     }
+    setCastingVote(false);
+    setConfirmingVote(false);
+    setCastVote(optionChosen);
   };
 
   const onConfirmCastVote = () => {
