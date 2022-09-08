@@ -305,8 +305,6 @@ func (a *App) searchCommunities(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 	}
 
-	fmt.Printf("results: %v \n", results)
-
 	respondWithJSON(w, http.StatusOK, results)
 }
 

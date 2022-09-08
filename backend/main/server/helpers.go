@@ -441,7 +441,7 @@ func (h *Helpers) fetchCommunity(id int) (models.Community, int, error) {
 	return community, http.StatusOK, nil
 }
 
-func (h *Helpers) searchCommuntities(query string) ([]models.Community, error) {
+func (h *Helpers) searchCommuntities(query string) (interface{}, error) {
 	results, err := models.SearchForCommunity(h.A.DB, query)
 	if err != nil {
 		return []models.Community{}, err

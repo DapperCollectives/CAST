@@ -308,21 +308,29 @@ func (c *Community) CanUpdateCommunity(db *s.Database, addr string) error {
 }
 
 func SearchForCommunity(db *s.Database, query string) ([]Community, error) {
-	var results []Community
-
+	var communities []Community
 	rows, err := db.Conn.Query(
 		db.Context,
-		`SELECT DISTINCT(event_type) FROM storm_events WHERE DIFFERENCE(event_type, 'test') > 2`,
+		`SELECT name FROM communities WHERE name % $1`,
 		query,
 	)
 	if err != nil {
-		return results, fmt.Errorf("error searching for a community with the the param %s", query)
+		return communities, fmt.Errorf("error searching for a community with the the param %s", query)
 	}
 
-	if err := rows.Scan(results); err != nil {
-		return []Community{}, fmt.Errorf("could not scan the query results into the community struct, type mismatch")
+	defer rows.Close()
+
+	for rows.Next() {
+		var c Community
+		err = rows.Scan(&c.Name)
+		if err != nil {
+			return communities, fmt.Errorf("error scanning community row: %v", err)
+		}
+		communities = append(communities, c)
 	}
-	return results, nil
+
+	fmt.Printf("communitites : %v", communities)
+	return communities, nil
 }
 
 func MatchStrategyByProposal(s []Strategy, strategyToMatch string) (Strategy, error) {
