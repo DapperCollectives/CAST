@@ -441,6 +441,15 @@ func (h *Helpers) fetchCommunity(id int) (models.Community, int, error) {
 	return community, http.StatusOK, nil
 }
 
+func (h *Helpers) searchCommuntities(query string) ([]models.Community, error) {
+	results, err := models.SearchForCommunity(h.A.DB, query)
+	if err != nil {
+		return []models.Community{}, err
+	}
+
+	return results, nil
+}
+
 func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, int, error) {
 	if p.Voucher != nil {
 		if err := h.validateUserViaVoucher(p.Creator_addr, p.Voucher); err != nil {

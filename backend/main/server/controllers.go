@@ -283,7 +283,6 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 }
 
 // Communities
-
 func (a *App) getCommunities(w http.ResponseWriter, r *http.Request) {
 	pageParams := getPageParams(*r, 25)
 
@@ -299,10 +298,21 @@ func (a *App) getCommunities(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, response)
 }
 
+func (a *App) searchCommunities(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	results, err := helpers.searchCommuntities(vars["query"])
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+	}
+
+	fmt.Printf("results: %v \n", results)
+
+	respondWithJSON(w, http.StatusOK, results)
+}
+
 func (a *App) getCommunity(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
-
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "Invalid Community ID.")
 		return
