@@ -37,7 +37,7 @@ export default function useProposalCreateMuation() {
       });
     },
     {
-      onSuccess: async (result, variables, context) => {
+      onSuccess: async (result) => {
         // set new proposal created on local cache
         await queryClient.setQueryData(['proposal', String(result.id)], result);
       },
