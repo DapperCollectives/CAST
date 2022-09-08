@@ -22,7 +22,9 @@ import { ArrowLeft, Bin, CheckMark } from 'components/Svg';
 import {
   useMediaQuery,
   useProposal,
+  useProposalMutation,
   useUserRoleOnCommunity,
+  useVoteOnProposal,
   useVotingStrategies,
 } from 'hooks';
 import { FilterValues } from 'const';
@@ -90,13 +92,12 @@ export default function ProposalPage() {
   const { proposalId } = useParams();
 
   const {
-    getProposal,
-    voteOnProposal,
-    updateProposal,
-    loading,
+    isLoading: loading,
     data: proposal,
     error,
-  } = useProposal();
+  } = useProposal({ proposalId });
+  const { voteOnProposal } = useVoteOnProposal();
+  const { updateProposal } = useProposalMutation();
 
   // we need to get all strategies to obtain
   // description text to display on modal
@@ -124,12 +125,6 @@ export default function ProposalPage() {
           name: proposal.strategy,
         }
       : {};
-
-  useEffect(() => {
-    (async () => {
-      await getProposal(proposalId);
-    })();
-  }, [proposalId, getProposal]);
 
   useEffect(() => {
     if (modalContext.isOpen && user?.addr && !voteError && !cancelProposal) {

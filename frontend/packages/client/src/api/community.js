@@ -108,7 +108,7 @@ export const updateCommunityDetailsApiReq = async ({
   };
 
   const response = await fetch(
-    `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}`,
+    `${COMMUNITIES_URL}/${communityId}`,
     fetchOptions
   );
   return checkResponse(response);

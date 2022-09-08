@@ -1,5 +1,8 @@
 export { default as useFclUser } from './useFclUser';
 export { default as useProposal } from './useProposal';
+export { default as useProposalCreateMutation } from './useProposalCreateMutation';
+export { default as useProposalMutation } from './useProposalMutation';
+export { default as useVoteOnProposal } from './useVoteOnProposal';
 export { default as useProposalVotes } from './useProposalVotes';
 export { default as useVotesForAddress } from './useVotesForAddress';
 export { default as useVotingResults } from './useVotingResults';

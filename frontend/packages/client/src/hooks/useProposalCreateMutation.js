@@ -1,11 +1,11 @@
 import { useCallback, useReducer } from 'react';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useWebContext } from 'contexts/Web3';
-import { UPDATE_PROPOSAL_TX } from 'const';
+import { CREATE_PROPOSAL_TX } from 'const';
 import { checkResponse } from 'utils';
 import { INITIAL_STATE, defaultReducer } from '../reducers';
 
-export default function useProposalMutation() {
+export default function useProposalCreateMuation() {
   const [state, dispatch] = useReducer(defaultReducer, {
     ...INITIAL_STATE,
     loading: false,
@@ -13,66 +13,59 @@ export default function useProposalMutation() {
   const { notifyError } = useErrorHandlerContext();
   const { user, signMessageByWalletProvider } = useWebContext();
 
-  const updateProposal = useCallback(
-    async (injectedProvider, proposalData, update) => {
-      const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${proposalData.communityId}/proposals/${proposalData.id}`;
+  const createProposal = useCallback(
+    async (data) => {
+      dispatch({ type: 'PROCESSING' });
+      const { communityId, ...proposalData } = data;
+      const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}/proposals`;
       try {
         const hexTime = Buffer.from(Date.now().toString()).toString('hex');
-
         const [compositeSignatures, voucher] =
           await signMessageByWalletProvider(
             user?.services[0]?.uid,
-            UPDATE_PROPOSAL_TX,
+            CREATE_PROPOSAL_TX,
             hexTime
           );
 
         if (!compositeSignatures && !voucher) {
-          return { error: 'No valid user signature found.' };
+          const statusText = 'No valid user signature found.';
+          // modal error will open
+          notifyError(
+            { status: 'Something went wrong with your proposal.', statusText },
+            url
+          );
+          dispatch({
+            type: 'ERROR',
+            payload: { errorData: statusText },
+          });
+          return;
         }
 
         const fetchOptions = {
-          method: 'PUT',
+          method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            ...update,
+            ...proposalData,
             timestamp: hexTime,
             compositeSignatures,
             voucher,
           }),
         };
-        dispatch({ type: 'PROCESSING' });
+
         const response = await fetch(url, fetchOptions);
         const json = await checkResponse(response);
-
-        const sortedProposalChoices =
-          json?.choices?.sort((a, b) =>
-            a.choiceText > b.choiceText ? 1 : -1
-          ) ?? [];
-
-        const updatedResponse = {
-          ...json,
-          choices: sortedProposalChoices.map((choice) => ({
-            label: choice.choiceText,
-            value: choice.choiceText,
-            choiceImgUrl: choice.choiceImgUrl,
-          })),
-        };
-
-        dispatch({ type: 'SUCCESS', payload: updatedResponse });
-
-        return updatedResponse;
+        dispatch({ type: 'SUCCESS', payload: json });
       } catch (err) {
-        notifyError(err, url);
+        notifyError(err, url, 'Something went wrong with your proposal.');
         dispatch({ type: 'ERROR', payload: { errorData: err.message } });
-        return { error: err.message };
       }
     },
     [dispatch, notifyError, signMessageByWalletProvider, user?.services]
   );
   return {
     ...state,
-    updateProposal,
+    createProposal,
   };
 }

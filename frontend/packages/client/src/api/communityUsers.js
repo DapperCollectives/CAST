@@ -69,9 +69,7 @@ export const communityUsersApiReq = async ({
   count,
   start,
 }) => {
-  const url = `${
-    process.env.REACT_APP_BACK_END_SERVER_API
-  }/communities/${communityId}/users${
+  const url = `${API_BASE_URL}/communities/${communityId}/users${
     type ? `/type/${type}` : ''
   }?count=${count}&start=${start}`;
 
