@@ -1,6 +1,7 @@
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
-import { checkResponse, getPagination, getPlainData } from 'utils';
+import { getPagination, getPlainData } from 'utils';
 import { useInfiniteQuery } from '@tanstack/react-query';
+import { communityUsersApiReq } from 'api/communityUsers';
 import { PAGINATION_INITIAL_STATE } from '../reducers';
 
 /**
@@ -28,24 +29,7 @@ export default function useCommunityUsers({
     async ({ pageParam = initialPageParam, queryKey }) => {
       const [start, count] = pageParam;
       const communityId = queryKey[1];
-
-      const communityUsersApiReq = async ({
-        communityId,
-        type,
-        count,
-        start,
-      }) => {
-        const url = `${
-          process.env.REACT_APP_BACK_END_SERVER_API
-        }/communities/${communityId}/users${
-          type ? `/type/${type}` : ''
-        }?count=${count}&start=${start}`;
-
-        const response = await fetch(url);
-        return checkResponse(response);
-      };
-
-      return communityUsersApiReq({ communityId, start, count });
+      return communityUsersApiReq({ communityId, start, count, type });
     },
     {
       getNextPageParam: (lastPage) => {
