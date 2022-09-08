@@ -67,7 +67,7 @@ const SignInOutButton = ({
   });
 
   const buttonClass = classnames(
-    'wallet-connect button is-uppercase transition-all small-text rounded-sm',
+    'wallet-connect button transition-all small-text rounded-lg',
     { 'is-primary': !loggedIn },
     { 'px-2': !notMobile }
   );
@@ -88,10 +88,7 @@ const SignInOutButton = ({
         aria-controls="dropdown-menu"
         style={{ position: 'relative' }}
       >
-        <div
-          className="dropdown-trigger is-flex is-justify-content-flex-end"
-          style={notMobile && expandContainer ? { width: '280px' } : {}}
-        >
+        <div className="dropdown-trigger is-flex is-justify-content-flex-end">
           <button
             onClick={loggedIn ? openDropdown : connectWallet}
             className={buttonClass}
@@ -143,7 +140,7 @@ const SignInOutButton = ({
               >
                 <CopyToClipboard text={addr} onCopy={markAddressCopied}>
                   <div
-                    className="columns flex-1 is-mobile m-0 px-4 py-0 rounded-sm button is-white border-light"
+                    className="columns flex-1 is-mobile m-0 px-4 py-0 rounded-lg button is-white border-light"
                     style={{
                       borderColor: 'hsl(0deg, 0%, 86%)',
                       height: '32px',
@@ -168,11 +165,11 @@ const SignInOutButton = ({
             <hr className="dropdown-divider" />
             <div className="px-4 pb-4 pt-2">
               <div
-                className="button is-fullwidth rounded-sm is-uppercase is-flex small-text has-text-white has-background-black"
+                className="button is-fullwidth rounded-lg is-flex small-text has-text-white has-background-black"
                 style={{ height: '32px' }}
                 onClick={signOut}
               >
-                disconnect
+                Disconnect
               </div>
             </div>
           </div>

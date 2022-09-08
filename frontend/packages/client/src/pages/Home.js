@@ -63,7 +63,7 @@ export default function HomePage() {
   });
 
   return (
-    <section className={classNames}>
+    <>
       {showToolTip && (
         <TooltipMessage
           onClose={() => {
@@ -72,28 +72,30 @@ export default function HomePage() {
         />
       )}
       <HomeHeader />
-      {(loading || loadingFeaturedCommunities) && (
-        <div style={{ height: '50vh' }}>
-          <Loader fullHeight />
-        </div>
-      )}
-      {!(loading || loadingFeaturedCommunities) && (
-        <FadeIn>
-          {isMyCommunitiesVisible && (
+      <section className={classNames}>
+        {(loading || loadingFeaturedCommunities) && (
+          <div style={{ height: '50vh' }}>
+            <Loader fullHeight />
+          </div>
+        )}
+        {!(loading || loadingFeaturedCommunities) && (
+          <FadeIn>
+            {isMyCommunitiesVisible && (
+              <CommunitiesPresenter
+                title="My Communities"
+                communities={myUserCommunities}
+                hideJoin
+              />
+            )}
             <CommunitiesPresenter
-              title="My Communities"
-              communities={myUserCommunities}
-              hideJoin
+              classNames={classNamesFeatCommunities}
+              title="Featured Communities"
+              communities={featuredCommunities}
             />
-          )}
-          <CommunitiesPresenter
-            classNames={classNamesFeatCommunities}
-            title="Featured Communities"
-            communities={featuredCommunities}
-          />
-        </FadeIn>
-      )}
-      <HomeFooter />
-    </section>
+          </FadeIn>
+        )}
+        <HomeFooter />
+      </section>
+    </>
   );
 }
