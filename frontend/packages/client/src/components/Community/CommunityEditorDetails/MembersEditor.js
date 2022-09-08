@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useWebContext } from 'contexts/Web3';
@@ -6,6 +6,7 @@ import { ActionButton } from 'components';
 import { useCommunityUsers, useCommunityUsersMutation } from 'hooks';
 import { UPDATE_COMMUNITY_TX } from 'const';
 import { yupResolver } from '@hookform/resolvers/yup';
+import isEqual from 'lodash/isEqual';
 import AddressForm from './AddressForm';
 import { AddressSchema } from './FormConfig';
 
@@ -23,6 +24,8 @@ export default function MembersEditor({
   } = useWebContext();
 
   const { notifyError } = useErrorHandlerContext();
+
+  const communityUsersPrev = useRef([]);
 
   const { data: communityUsers, isLoading: loadingUsers } = useCommunityUsers({
     communityId,
@@ -58,12 +61,23 @@ export default function MembersEditor({
     name: 'addrList',
   });
 
-  // load from api existing addresses
+  // if endpoint returns new data then update list and keep a copy
   useEffect(() => {
-    if (communityUsers?.length > 0) {
+    if (
+      communityUsers?.length > 0 &&
+      !isEqual(communityUsers, communityUsersPrev.current)
+    ) {
       reset({ addrList: communityUsers.map((el) => ({ addr: el.addr })) });
+      communityUsersPrev.current = communityUsers;
     }
   }, [communityUsers, reset]);
+
+  // load from api existing addresses: runs on initial load
+  useEffect(() => {
+    if (communityUsers?.length > 0 && addrList.length === 0) {
+      reset({ addrList: communityUsers.map((el) => ({ addr: el.addr })) });
+    }
+  }, [communityUsers, reset, addrList]);
 
   const onSubmit = async (data) => {
     const { addrList } = data;
