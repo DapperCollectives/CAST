@@ -6,7 +6,7 @@ export default function useProposal({ proposalId } = {}) {
   const { notifyError } = useErrorHandlerContext();
 
   const { isLoading, isError, data, error } = useQuery(
-    ['proposal', proposalId],
+    ['proposal', String(proposalId)],
     async () => {
       return fetchProposal({ proposalId });
     },

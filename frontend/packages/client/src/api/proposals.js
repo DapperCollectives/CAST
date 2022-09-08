@@ -1,4 +1,4 @@
-import { API_BASE_URL, PROPOSALS_URL } from './constants';
+import { API_BASE_URL, COMMUNITIES_URL, PROPOSALS_URL } from './constants';
 import { checkResponse } from 'utils';
 
 export const fetchProposalUserVotes = async (addr, proposalIds) => {
@@ -32,4 +32,29 @@ export const fetchProposal = async ({ proposalId }) => {
   };
 
   return proposalData;
+};
+
+export const createProposalApiReq = async ({
+  proposalPayload,
+  compositeSignatures,
+  voucher,
+  hexTime,
+} = {}) => {
+  const { communityId, ...proposalData } = proposalPayload;
+  const url = `${COMMUNITIES_URL}/${communityId}/proposals`;
+  const fetchOptions = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      ...proposalData,
+      timestamp: hexTime,
+      compositeSignatures,
+      voucher,
+    }),
+  };
+
+  const response = await fetch(url, fetchOptions);
+  return checkResponse(response);
 };
