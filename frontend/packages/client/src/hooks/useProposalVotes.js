@@ -1,85 +1,59 @@
-import { useCallback, useEffect, useReducer } from 'react';
+import { useCallback } from 'react';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
-import { checkResponse } from 'utils';
-import {
-  INITIAL_STATE,
-  PAGINATION_INITIAL_STATE,
-  paginationReducer,
-} from '../reducers';
+import { checkResponse, getPagination, getPlainData } from 'utils';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import { PAGINATION_INITIAL_STATE } from '../reducers';
 
 /**
  * Hook to return proposal votes for a proposal. Results are paginated
  * @param  {int} count page size, used for pagination limiting the number of elements returned. Defaults to 10. Max value is 25.
  * @param  {int} start indicates the start index for paginated results. Defaults to 0.
  */
-// REFACTOR
+
 export default function useProposalVotes({
   proposalId,
-  count = PAGINATION_INITIAL_STATE.count,
-  start = PAGINATION_INITIAL_STATE.start,
+  start: startParam = PAGINATION_INITIAL_STATE.start,
+  count: countParam = PAGINATION_INITIAL_STATE.count,
 } = {}) {
-  const [state, dispatch] = useReducer(paginationReducer, {
-    ...INITIAL_STATE,
-    pagination: {
-      ...PAGINATION_INITIAL_STATE,
-      count,
-      start,
-    },
-  });
-
+  const initialPageParam = [startParam, countParam, 0, -1];
   const { notifyError } = useErrorHandlerContext();
+  const queryClient = useQueryClient();
+  const { isLoading, isError, data, error, fetchNextPage } = useInfiniteQuery(
+    ['proposal-votes', String(proposalId)],
+    async ({ pageParam = initialPageParam, queryKey }) => {
+      const [start, count] = pageParam;
+      const propId = queryKey[1];
+      const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/proposals/${propId}/votes?count=${count}&start=${start}`;
+
+      const response = await fetch(url);
+      return checkResponse(response);
+    },
+    {
+      getNextPageParam: (lastPage) => {
+        const { next, start, count, totalRecords } = lastPage;
+        return [start + count, count, totalRecords, next];
+      },
+      enabled: !!proposalId,
+      onError: (error) => {
+        notifyError(error);
+      },
+    }
+  );
+
   /**
    * Function to reset results from Api call stored in hook state
    */
-  const resetResults = useCallback(() => {
-    dispatch({ type: 'RESET_RESULTS' });
-  }, []);
-
-  /**
-   * Function to fetch more results based on pagination configuration
-   * @param  {int} proposalId id used to fetch votes from
-   */
-  const fetchMore = useCallback(async () => {
-    dispatch({ type: 'PROCESSING' });
-    const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/proposals/${proposalId}/votes?count=${state.pagination.count}&start=${state.pagination.start}`;
-    try {
-      const response = await fetch(url);
-      const proposalVotes = await response.json();
-
-      dispatch({ type: 'SUCCESS', payload: proposalVotes });
-    } catch (err) {
-      notifyError(err, url);
-      dispatch({ type: 'ERROR', payload: { errorData: err.message } });
-    }
-  }, [state.pagination, proposalId, notifyError]);
-
-  const getProposalVotes = useCallback(async () => {
-    dispatch({ type: 'PROCESSING' });
-    const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/proposals/${proposalId}/votes?count=${count}&start=${start}`;
-    try {
-      const response = await fetch(url);
-      const proposalVotes = await checkResponse(response);
-      dispatch({ type: 'SUCCESS', payload: proposalVotes });
-    } catch (err) {
-      notifyError(err, url);
-      dispatch({
-        type: 'ERROR',
-        payload: { errorData: err.message },
-      });
-    }
-  }, [proposalId, count, start, notifyError]);
-
-  // Initial Load to fetch from API
-  useEffect(() => {
-    (async () => {
-      await getProposalVotes();
-    })();
-  }, [proposalId, getProposalVotes]);
+  const resetResults = useCallback(async () => {
+    await queryClient.resetQueries(['proposal-votes', String(proposalId)]);
+  }, [queryClient, proposalId]);
 
   return {
-    ...state,
-    getProposalVotes,
     resetResults,
-    fetchMore,
+    isLoading,
+    isError,
+    data: getPlainData(data),
+    error,
+    pagination: getPagination(data, countParam),
+    fetchNextPage,
   };
 }
