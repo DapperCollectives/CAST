@@ -264,6 +264,36 @@ hr
 .dropdown.is-disabled
 	background-color: rgba(239, 239, 239, 0.3)
 	pointer-events: none
+.join-community-button
+	transition: all .3s
+	.hide-eye
+		display: none
+	&:hover, &.is-active
+		background: $yellow
+		border-color: $black
+	&:hover .join-community-cta
+		opacity: 1
+	&.is-active:hover
+		.eye
+			display: none
+		.hide-eye
+			display: block
+.join-community-cta
+	position: absolute
+	top: -50px
+	opacity: 0
+	transition: all .3s
+	pointer-events: none
+.join-community-cta::after
+		position: absolute
+		content: ""
+		bottom: -15px
+		left: 50%
+		margin-left: -5px
+		border-style: solid
+		border-width: 10px 0 10px 10px
+		border-color: transparent transparent transparent $black
+		transform: rotate(90deg)
 @media (min-width: 769px) and (max-width: 820px)
 	.is-hidden-connect
 		display: none
@@ -287,6 +317,8 @@ hr
 		color: #4a4a4a
 	.is-flex-direction-column-mobile
 		flex-direction: column
+	.is-justify-content-start-mobile
+		justify-content: flex-start !important
 	.p-0-mobile
 		padding: 0 !important
 	.mb-4-mobile
