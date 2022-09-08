@@ -27,7 +27,7 @@ const link = {
 
 const styleMap = {
   IMAGE_CAPTION: {
-    fontFamily: 'Arimo',
+    fontFamily: 'DM Sans',
     fontStyle: 'normal',
     fontWeight: 400,
     fontSize: '12px',
