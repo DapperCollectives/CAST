@@ -101,7 +101,7 @@ export default function ProposalPage() {
   // we need to get all strategies to obtain
   // description text to display on modal
   const {
-    loading: loadingStrategies,
+    isLoading: loadingStrategies,
     data: votingStrategies,
     error: strategiesError,
   } = useVotingStrategies();

@@ -28,7 +28,7 @@ export default function StrategySelectorForm({
     }
   }, [strategies, onStrategySelection, existingStrategies]);
 
-  const { data: allVotingStrategies, loading: loadingAllStrategies } =
+  const { data: allVotingStrategies, isLoading: loadingAllStrategies } =
     useVotingStrategies();
   const { addFungibleToken } = useAddFungibleToken();
 
