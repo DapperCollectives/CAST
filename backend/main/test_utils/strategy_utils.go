@@ -107,7 +107,12 @@ func (otu *OverflowTestUtils) GenerateListOfVotesWithNFTs(
 			Proposal_id: proposalId, Addr: addr, Choice: choice,
 		}
 
-		nftIds, err := otu.Adapter.GetNFTIds(addr, contract)
+		scriptPath := "./main/cadence/scripts/get_nfts_ids.cdc"
+		nftIds, err := otu.Adapter.GetNFTIds(
+			addr,
+			contract,
+			scriptPath,
+		)
 		if err != nil {
 			return nil, err
 		}
@@ -152,7 +157,12 @@ func (otu *OverflowTestUtils) GenerateSingleVoteWithNFT(
 		Proposal_id: proposalId, Addr: addr, Choice: choice,
 	}
 
-	nftIds, err := otu.Adapter.GetNFTIds(addr, contract)
+	scriptPath := "./main/cadence/scripts/get_nfts_ids.cdc"
+	nftIds, err := otu.Adapter.GetNFTIds(
+		addr,
+		contract,
+		scriptPath,
+	)
 	if err != nil {
 		return nil, err
 	}

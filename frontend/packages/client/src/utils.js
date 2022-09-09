@@ -248,3 +248,11 @@ export const formatTime = (date) => {
   minutes = minutes < 10 ? '0' + minutes : minutes;
   return hours + ':' + minutes + ' ' + ampm;
 };
+
+export function truncateAddress(str, initial = 3, tail = 10) {
+  return (
+    str.substr(0, initial) +
+    '...' +
+    str.substr((tail - str.length) * -1, str.length)
+  );
+}

@@ -91,7 +91,9 @@ export default function CommunityCreate() {
       'Contract Address': contractAddress ? [contractAddress] : [],
       'Admin List': addrAdmins,
       'Author List': addrAuthors,
-      Strategies: strategies.map(({ contract }) => contract.addr),
+      Strategies: strategies
+        .filter((st) => st.name !== 'custom-script')
+        .map(({ contract }) => contract.addr),
     };
 
     const validation = Object.entries(addressesToValidate);
@@ -161,7 +163,6 @@ export default function CommunityCreate() {
     submittingMessage: 'Creating community...',
     passNextToComp: true,
     passSubmitToComp: true,
-    showActionButtonLeftPannel: true,
     preStep: <StartSteps />,
     blockNavigationOut: true && !data,
     blockNavigationText:

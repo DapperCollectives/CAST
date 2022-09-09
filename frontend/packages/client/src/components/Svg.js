@@ -734,3 +734,72 @@ export const InfoOutLine = () => (
     />
   </svg>
 );
+
+export const Copy = () => (
+  <svg
+    width="15"
+    height="16"
+    viewBox="0 0 15 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M12.3365 5.45825H6.41855C5.69224 5.45825 5.10345 6.09252 5.10345 6.87492V13.2499C5.10345 14.0323 5.69224 14.6666 6.41855 14.6666H12.3365C13.0628 14.6666 13.6516 14.0323 13.6516 13.2499V6.87492C13.6516 6.09252 13.0628 5.45825 12.3365 5.45825Z"
+      stroke="black"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M2.47264 9.70833H1.81509C1.46631 9.70833 1.13181 9.55908 0.885182 9.2934C0.638554 9.02772 0.5 8.66739 0.5 8.29167V1.91667C0.5 1.54094 0.638554 1.18061 0.885182 0.914932C1.13181 0.649255 1.46631 0.5 1.81509 0.5H7.73302C8.0818 0.5 8.4163 0.649255 8.66293 0.914932C8.90956 1.18061 9.04811 1.54094 9.04811 1.91667V2.625"
+      stroke="black"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+export const Eye = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    fill="none"
+    viewBox="0 0 24 24"
+    className="eye"
+  >
+    <path
+      fill="#fff"
+      stroke="#171717"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+      d="M12 18c5.523 0 10-6 10-6s-4.477-6-10-6-10 6-10 6 4.477 6 10 6z"
+    />
+    <path
+      stroke="#171717"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+      d="M12 14a2 2 0 100-4 2 2 0 000 4z"
+    />
+  </svg>
+);
+
+export const HideEye = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    fill="none"
+    viewBox="0 0 24 24"
+    className="hide-eye"
+  >
+    <path
+      stroke="#000"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+      d="M4 4l16 16M16.5 16.756C15.147 17.485 13.619 18 12 18c-5.523 0-10-6-10-6s2.088-2.799 5.172-4.573M19.5 14.634C21.056 13.265 22 12 22 12s-4.477-6-10-6c-.338 0-.671.022-1 .064M13.323 13.5a2 2 0 01-2.762-2.889"
+    />
+  </svg>
+);

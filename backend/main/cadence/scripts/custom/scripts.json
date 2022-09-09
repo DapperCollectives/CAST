@@ -1,0 +1,8 @@
+[
+  {
+    "key": "nba-top-shot-raptors",
+    "name": "NBA TopShot - Toronto Raptors",
+    "description": "Strategy based on NBA TopShot teamAtMoment == Toronto Raptors",
+    "src": "get_nba_topshot.cdc"
+  }
+]

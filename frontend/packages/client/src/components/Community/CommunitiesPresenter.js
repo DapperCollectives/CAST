@@ -11,6 +11,7 @@ const CommunitiesPresenter = ({
   title,
   elementsPerRow = 2,
   communities = [],
+  hideJoin = false,
 } = {}) => {
   // used to get column size based on number of elements
   // per row
@@ -53,6 +54,7 @@ const CommunitiesPresenter = ({
                 isComingSoon={isComingSoon}
                 key={index}
                 slug={slug}
+                hideJoin={hideJoin}
               />
             </div>
           );
