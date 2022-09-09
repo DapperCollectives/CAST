@@ -396,6 +396,14 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 // Voting Strategies
 func (a *App) getVotingStrategies(w http.ResponseWriter, r *http.Request) {
 	vs, err := models.GetVotingStrategies(a.DB)
+
+	// Add custom scripts for the custom-script strategy
+	for _, strategy := range vs {
+		if strategy.Key == "custom-script" {
+			strategy.Scripts = customScripts
+		}
+	}
+
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return

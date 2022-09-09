@@ -29,7 +29,10 @@ const StepOne = ({
     () =>
       strategies.map((st) => ({
         key: st.name,
-        name: kebabToString(st.name),
+        name:
+          st.name === 'custom-script'
+            ? `${kebabToString(st.name)}: ${kebabToString(st.contract.script)}`
+            : kebabToString(st.name),
       })),
     [strategies]
   );
