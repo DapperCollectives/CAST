@@ -113,10 +113,6 @@ func (dps *DpsAdapter) GetFlowBalanceAtBlockheightScript(addr string, blockheigh
 
 	// Replace script args
 	script := dps.Config.InsertCoreContractAddresses(string(_script))
-	// log.Info().Msgf("index height: %s", dps.Invoker.index.Height(blockheight))
-	log.Info().Msgf("blockheight: %d", blockheight)
-	log.Info().Msgf("args: %d", args)
-	log.Info().Msgf("script: %s", script)
 
 	result, err := dps.Invoker.Script(blockheight, []byte(script), args)
 	if err != nil {
