@@ -17,6 +17,15 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
+var (
+	DummyBalance = FTBalanceResponse{
+		PrimaryAccountBalance:   100,
+		SecondaryAccountBalance: 100,
+		StakingBalance:          100,
+		BlockHeight:             0,
+	}
+)
+
 type DpsAdapter struct {
 	Config  FlowConfig
 	Invoker *invoker.Invoker

@@ -26,7 +26,6 @@ import (
 
 type Database shared.Database
 type IpfsClient shared.IpfsClient
-type SnapshotClient shared.SnapshotClient
 type Allowlist shared.Allowlist
 type Vote models.Vote
 type Proposal models.Proposal
@@ -48,7 +47,6 @@ type App struct {
 	FlowAdapter *shared.FlowAdapter
 	DpsAdapter  *shared.DpsAdapter
 
-	SnapshotClient     *shared.SnapshotClient
 	TxOptionsAddresses []string
 	Env                string
 	AdminAllowlist     shared.Allowlist
@@ -178,12 +176,6 @@ func (a *App) Initialize() {
 	a.DpsAdapter = shared.NewDpsClient(os.Getenv("FLOW_ENV"))
 	a.DpsAdapter.Config = a.FlowAdapter.Config
 
-	// Snapshot
-	log.Info().Msgf("SNAPSHOT_BASE_URL: %s", os.Getenv("SNAPSHOT_BASE_URL"))
-	a.SnapshotClient = shared.NewSnapshotClient(
-		os.Getenv("SNAPSHOT_BASE_URL"),
-		*a.FlowAdapter,
-	)
 	a.TxOptionsAddresses = strings.Fields(os.Getenv("TX_OPTIONS_ADDRS"))
 
 	// Router

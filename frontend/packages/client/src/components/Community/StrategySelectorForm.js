@@ -2,7 +2,7 @@ import { createElement, useEffect, useState } from 'react';
 import { useModalContext } from 'contexts/NotificationModal';
 import { AddButton, ErrorModal } from 'components';
 import StrategySelectorInput from 'components/Community/StrategySelectorInput';
-import { useAddFungibleToken, useVotingStrategies } from 'hooks';
+import { useVotingStrategies } from 'hooks';
 import { kebabToString } from 'utils';
 import isEqual from 'lodash/isEqual';
 import StrategyEditorModal from './StrategyEditorModal';
@@ -40,7 +40,6 @@ export default function StrategySelectorForm({
 
   const { data: allVotingStrategies, isLoading: loadingAllStrategies } =
     useVotingStrategies();
-  const { addFungibleToken } = useAddFungibleToken();
 
   const { openModal, closeModal } = useModalContext();
 
@@ -51,12 +50,6 @@ export default function StrategySelectorForm({
 
   const addNewStrategy = (newStrategyInfo) => {
     const { contract } = newStrategyInfo;
-    if (
-      newStrategyInfo.name === 'staked-token-weighted-default' ||
-      newStrategyInfo.name === 'token-weighted-default'
-    ) {
-      addFungibleToken(contract.addr, contract.name, contract.publicPath);
-    }
     setStrategies((state) => [...state, newStrategyInfo]);
     closeModal();
   };

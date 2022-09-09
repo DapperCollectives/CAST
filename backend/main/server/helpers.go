@@ -497,12 +497,6 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, error) {
 		return models.Proposal{}, err
 	}
 
-	if err := h.processSnapshotStatus(&strategy, &p); err != nil {
-		errMsg := "Error processing snapshot status."
-		log.Error().Err(err).Msg(errMsg)
-		return models.Proposal{}, err
-	}
-
 	p.Cid, err = h.pinJSONToIpfs(p)
 	if err != nil {
 		log.Error().Err(err).Msg("IPFS error: " + err.Error())
@@ -1047,29 +1041,6 @@ func (h *Helpers) validateUserWithRoleViaVoucher(addr string, voucher *shared.Vo
 	}
 
 	return nil
-}
-
-func (h *Helpers) processSnapshotStatus(s *models.Strategy, p *models.Proposal) error {
-	var processing = "processing"
-
-	if s.Contract.Name != nil && p.Snapshot_status == &processing {
-		snapshotResponse, err := h.A.SnapshotClient.
-			GetSnapshotStatusAtBlockHeight(
-				s.Contract,
-				*p.Block_height,
-			)
-		if err != nil {
-			return err
-		}
-
-		p.Snapshot_status = &snapshotResponse.Data.Status
-
-		if err := p.UpdateSnapshotStatus(h.A.DB); err != nil {
-			return err
-		}
-	}
-	return nil
-
 }
 
 func (h *Helpers) processTokenThreshold(address string, c shared.Contract, contractType string) (bool, error) {
