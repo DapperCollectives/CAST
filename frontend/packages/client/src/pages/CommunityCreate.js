@@ -163,7 +163,6 @@ export default function CommunityCreate() {
     submittingMessage: 'Creating community...',
     passNextToComp: true,
     passSubmitToComp: true,
-    showActionButtonLeftPannel: true,
     preStep: <StartSteps />,
     blockNavigationOut: true && !data,
     blockNavigationText:
