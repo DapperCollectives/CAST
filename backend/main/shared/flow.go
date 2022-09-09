@@ -111,12 +111,12 @@ func (fa *FlowAdapter) GetAccountAtBlockHeight(addr string, blockheight uint64) 
 	return fa.Client.GetAccountAtBlockHeight(fa.Context, hexAddr, blockheight)
 }
 
-func (fa *FlowAdapter) GetCurrentBlockHeight() (int, error) {
+func (fa *FlowAdapter) GetCurrentBlockHeight() (uint64, error) {
 	block, err := fa.Client.GetLatestBlock(fa.Context, true)
 	if err != nil {
 		return 0, err
 	}
-	return int(block.Height), nil
+	return block.Height, nil
 }
 
 func (fa *FlowAdapter) ValidateSignature(address, message string, sigs *[]CompositeSignature, messageType string) error {

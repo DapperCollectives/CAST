@@ -140,19 +140,24 @@ func (dps *DpsAdapter) GetBalanceAtBlockheight(addr string, blockheight uint64, 
 	tokenBalanceResponse.Addr = addr
 	tokenBalanceResponse.BlockHeight = blockheight
 
-	result, err = dps.GetFlowBalanceAtBlockheightScript(addr, blockheight)
-	if err != nil {
-		return nil, err
-	}
-	fields := result.(cadence.Struct).Fields
 	if *c.Name == "FlowToken" {
-		tokenBalanceResponse.PrimaryAccountBalance = uint64(fields[0].ToGoValue().(float64) * 10e8)
-		tokenBalanceResponse.StakingBalance = uint64(fields[3].ToGoValue().(float64) * 10e8)
+		result, err = dps.GetFlowBalanceAtBlockheightScript(addr, blockheight)
+		if err != nil {
+			return nil, err
+		}
+		fields := result.(cadence.Struct).Fields
+		tokenBalanceResponse.PrimaryAccountBalance = fields[0].ToGoValue().(uint64)
+		tokenBalanceResponse.StakingBalance = fields[3].ToGoValue().(uint64)
 		tokenBalanceResponse.Stakes = strings.Split(fields[5].ToGoValue().(string), ", ")
 
 		return &tokenBalanceResponse, nil
 	} else {
-		tokenBalanceResponse.Balance = uint64(fields[1].ToGoValue().(float64) * 10e8)
+		result, err = dps.GetTokenBalanceAtBlockheightScript(addr, blockheight, c)
+		if err != nil {
+			return nil, err
+		}
+		fields := result.(cadence.Struct).Fields
+		tokenBalanceResponse.Balance = uint64(fields[1].ToGoValue().(uint64))
 
 		return &tokenBalanceResponse, nil
 	}

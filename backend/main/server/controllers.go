@@ -73,6 +73,16 @@ var (
 	}
 )
 
+// Payload Structs
+
+type GetBalanceAtBlockheightPayload struct {
+	Address     string           `json:"address"`
+	Blockheight uint64           `json:"blockheight"`
+	Contract    *shared.Contract `json:"contract,omitempty"`
+}
+
+// Route controller functions
+
 func (a *App) health(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, "OK!!")
 }
@@ -877,24 +887,16 @@ func (a *App) removeUserRole(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) getBalanceAtBlockheight(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	addr := vars["addr"]
-	blockheight, _ := strconv.Atoi(vars["blockHeight"])
-	log.Info().Msgf("getting balance for %s at blockheight %d", addr, blockheight)
+	var payload GetBalanceAtBlockheightPayload
+	if err := validatePayload(r.Body, &payload); err != nil {
+		respondWithError(w, errIncompleteRequest)
+	}
 
-	name := "StarlyToken"
-	path := "starlyTokenBalance"
-	contractAddr := "0x142fa6570b62fd97"
-	contract := shared.Contract{Name: &name, Addr: &contractAddr, Public_path: &path}
-	// result := a.DpsAdapter.GetTokenBalanceAtBlockheight(addr, uint64(blockheight), &contract)
-	// name := "FlowToken"
-	// contractAddr := "0x142fa6570b62fd97"
-	// contract := shared.Contract{Name: &name, Addr: &contractAddr}
-	result, _ := a.DpsAdapter.GetBalanceAtBlockheight(addr, uint64(blockheight), &contract)
-
-	// result := a.DpsAdapter.GetAccountAtBlockHeight(addr, uint64(blockheight))
-
-	log.Info().Msgf("value: %v", result)
+	result, err := a.DpsAdapter.GetBalanceAtBlockheight(payload.Address, payload.Blockheight, payload.Contract)
+	if err != nil {
+		log.Error().Err(err).Msg("error fetching balance at blockheight")
+		respondWithError(w, errFetchingBalance)
+	}
 
 	respondWithJSON(w, http.StatusOK, result)
 }

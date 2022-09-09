@@ -482,7 +482,6 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, error) {
 	if err != nil {
 		log.Error().Err(err).Msg("Community does not have this strategy available.")
 		return models.Proposal{}, err
-
 	}
 
 	// Set Min Balance/Max Weight to community defaults if not provided
@@ -497,6 +496,15 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, error) {
 		return models.Proposal{}, err
 	}
 
+	// Set Blockheight to latest sealed
+	blockheight, err := h.A.FlowAdapter.GetCurrentBlockHeight()
+	if err != nil {
+		errMsg := "couldn't fetch current blockheight"
+		log.Error().Err(err).Msg(errMsg)
+		return models.Proposal{}, errors.New(errMsg)
+	}
+	p.Block_height = &blockheight
+
 	p.Cid, err = h.pinJSONToIpfs(p)
 	if err != nil {
 		log.Error().Err(err).Msg("IPFS error: " + err.Error())
@@ -507,13 +515,7 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, error) {
 	vErr := validate.Struct(p)
 	if vErr != nil {
 		log.Error().Err(vErr)
-		return models.Proposal{}, err
-	}
-
-	if os.Getenv("APP_ENV") == "PRODUCTION" {
-		if strategy.Contract.Name != nil && p.Start_time.Before(time.Now().UTC().Add(time.Hour)) {
-			p.Start_time = time.Now().UTC().Add(time.Hour)
-		}
+		return models.Proposal{}, errors.New("invalid proposal")
 	}
 
 	if err := p.CreateProposal(h.A.DB); err != nil {

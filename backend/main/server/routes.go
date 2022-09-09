@@ -54,6 +54,6 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/accounts/blocklist", a.getCommunityBlocklist).Methods("GET")
 
 	// Snapshotter
-	a.Router.HandleFunc("/get-token-balance-at-blockheight/{addr:0x[a-zA-Z0-9]{16}}/{blockHeight:[0-9]+}", a.getBalanceAtBlockheight).Methods("POST", "OPTIONS")
+	a.Router.HandleFunc("/get-token-balance-at-blockheight", a.getBalanceAtBlockheight).Methods("POST", "OPTIONS")
 
 }
