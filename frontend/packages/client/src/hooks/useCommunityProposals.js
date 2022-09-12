@@ -1,6 +1,7 @@
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
-import { checkResponse, getPagination, getPlainData } from 'utils';
+import { getPagination, getPlainData } from 'utils';
 import { useInfiniteQuery } from '@tanstack/react-query';
+import { fetchProposalsByStatus } from 'api/proposals';
 import { PAGINATION_INITIAL_STATE } from '../reducers';
 
 /**
@@ -26,14 +27,7 @@ export default function useCommunityProposals({
     async ({ pageParam = initialPageParam, queryKey }) => {
       const [start, count] = pageParam;
       const communityId = queryKey[1];
-      const url = `${
-        process.env.REACT_APP_BACK_END_SERVER_API
-      }/communities/${communityId}/proposals?count=${count}&start=${start}${
-        status ? `&status=${status}` : ''
-      }`;
-
-      const response = await fetch(url);
-      return await checkResponse(response);
+      return fetchProposalsByStatus({ communityId, count, start, status });
     },
     {
       getNextPageParam: (lastPage, pages) => {
