@@ -1,5 +1,5 @@
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
-import { checkResponse, getPaginationInfo } from 'utils';
+import { checkResponse, getPagination, getPlainData } from 'utils';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { PAGINATION_INITIAL_STATE } from '../reducers';
 
@@ -26,34 +26,24 @@ export default function useUserCommunities({
       }
     },
     {
-      getNextPageParam: (lastPage, pages) => {
+      getNextPageParam: (lastPage) => {
         const { next, start, count, totalRecords } = lastPage;
         return [start + count, count, totalRecords, next];
       },
       enabled: !!addr,
+      onError: (error) => {
+        notifyError(error);
+      },
+      keepPreviousData: !!addr,
     }
   );
-  if (isError) {
-    notifyError(error);
-  }
-
-  const [start, count, totalRecords, next] =
-    data?.pageParams || getPaginationInfo(data?.pages);
 
   return {
     isLoading,
     isError,
-    data: data?.pages?.reduce(
-      (prev, current) => (current.data ? [...prev, ...current.data] : prev),
-      []
-    ),
+    data: getPlainData(data),
     error,
-    pagination: {
-      count,
-      next,
-      start,
-      totalRecords,
-    },
+    pagination: getPagination(data, countParam),
     fetchNextPage,
   };
 }

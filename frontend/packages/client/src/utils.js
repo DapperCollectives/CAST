@@ -210,7 +210,7 @@ export const kebabToString = (str = '') => {
   return updated.charAt(0).toUpperCase() + updated.slice(1);
 };
 
-export const getPaginationInfo = (pages) => {
+export const getPaginationFromPages = (pages) => {
   if (!pages) {
     return [];
   }
@@ -223,6 +223,23 @@ export const getPaginationInfo = (pages) => {
   ];
 };
 
+export const getPagination = (data, countParam) => {
+  const [start = 0, count = countParam, totalRecords = 0, next = -1] =
+    data?.pageParam ?? getPaginationFromPages(data?.pages);
+  return {
+    count,
+    next,
+    start,
+    totalRecords,
+  };
+};
+
+export const getPlainData = (data) => {
+  return data?.pages?.reduce(
+    (prev, current) => (current.data ? [...prev, ...current.data] : prev),
+    []
+  );
+};
 export const validateLength = (string, MaxLength) =>
   string?.length <= MaxLength;
 
@@ -247,6 +264,13 @@ export const formatTime = (date) => {
   hours = hours ? hours : 12; // the hour '0' should be '12'
   minutes = minutes < 10 ? '0' + minutes : minutes;
   return hours + ':' + minutes + ' ' + ampm;
+};
+
+export const setDefaultValue = (field, fallbackValue) => {
+  if (field === undefined || field === '') {
+    return fallbackValue;
+  }
+  return field;
 };
 
 export function truncateAddress(str, initial = 3, tail = 10) {

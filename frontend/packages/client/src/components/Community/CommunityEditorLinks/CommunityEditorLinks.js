@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { ActionButton } from 'components';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -15,7 +15,7 @@ export default function CommunityEditorLinks(props = {}) {
     githubUrl = '',
   } = fields;
 
-  const { register, handleSubmit, formState } = useForm({
+  const { register, handleSubmit, formState, reset } = useForm({
     defaultValues: {
       websiteUrl,
       twitterUrl,
@@ -26,11 +26,19 @@ export default function CommunityEditorLinks(props = {}) {
     resolver: yupResolver(LinksSchema),
   });
 
-  const { errors, isSubmitting, isDirty, isValid } = formState;
+  const { errors, isSubmitting, isDirty, isValid, isSubmitSuccessful } =
+    formState;
 
   const onSubmit = async (data) => {
     await updateCommunity(data);
   };
+
+  // this triggers updating the form after
+  useEffect(() => {
+    if (isSubmitSuccessful) {
+      reset({}, { keepValues: true, keepDirty: false });
+    }
+  }, [isSubmitSuccessful, reset]);
 
   return (
     <EditorForm

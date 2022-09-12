@@ -20,7 +20,11 @@ function ImageUploader({
   deleteImage,
   onUploadStared,
 }) {
-  const { uploadFile, loading, error } = useFileUploader({
+  const {
+    uploadFile,
+    isLoading: loading,
+    error,
+  } = useFileUploader({
     useModalNotifications: false,
   });
   useEffect(() => {
