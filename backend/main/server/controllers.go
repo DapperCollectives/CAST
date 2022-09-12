@@ -351,7 +351,7 @@ func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//Validate Contract & Proposal Thresholds
+	//Validate Strategies & Proposal Thresholds
 	if payload.Strategies != nil {
 		err = validateContractThreshold(*payload.Strategies)
 		if err != nil {
@@ -391,7 +391,7 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//Validate Contract & Proposal Thresholds
+	//Validate Strategies & Proposal Thresholds
 	if payload.Strategies != nil {
 		err = validateContractThreshold(*payload.Strategies)
 		if err != nil {
