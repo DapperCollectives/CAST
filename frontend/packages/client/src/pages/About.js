@@ -26,7 +26,10 @@ const AboutPage = ({ location }) => {
         >
           <div className="columns px-5 px-3-mobile-only pt-4 flex-1 is-mobile">
             <div className="column px-2 pt-1">
-              <Label labelText="Beta" classNames="beta-label is-uppercase" />
+              <Label
+                labelText="Beta"
+                classNames="has-text-weight-bold smallest-text is-uppercase mr-2"
+              />
             </div>
             <div
               className={`column is-flex is-narrow has-text-right is-size-2 leading-tight cursor-pointer px-2 px-3-mobile-only pt-3`}
