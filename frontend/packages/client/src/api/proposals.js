@@ -1,4 +1,9 @@
-import { API_BASE_URL, COMMUNITIES_URL, PROPOSALS_URL } from './constants';
+import {
+  API_BASE_URL,
+  COMMUNITIES_URL,
+  IPFS_GETWAY,
+  PROPOSALS_URL,
+} from './constants';
 import { checkResponse } from 'utils';
 
 export const fetchProposalUserVotes = async (addr, proposalIds) => {
@@ -25,7 +30,7 @@ export const fetchProposal = async ({ proposalId }) => {
       choiceImgUrl: choice.choiceImgUrl,
     })),
     ipfs: proposal.cid,
-    ipfsUrl: `${process.env.REACT_APP_IPFS_GATEWAY}${proposal.cid}`,
+    ipfsUrl: `${IPFS_GETWAY}/${proposal.cid}`,
     totalVotes: proposal.total_votes,
     // this is coming as a string from db but there could be multiple based on design
     strategy: proposal.strategy || '-',
@@ -67,7 +72,7 @@ export const updateProposalApiReq = async ({
   compositeSignatures,
   voucher,
 } = {}) => {
-  const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}/proposals/${proposalId}`;
+  const url = `${COMMUNITIES_URL}/${communityId}/proposals/${proposalId}`;
   const fetchOptions = {
     method: 'PUT',
     headers: {
@@ -97,4 +102,47 @@ export const updateProposalApiReq = async ({
   };
 
   return updatedResponse;
+};
+
+export const fetchProposalsByStatus = async ({
+  communityId,
+  count,
+  start,
+  status,
+}) => {
+  const url = `${COMMUNITIES_URL}/${communityId}/proposals?count=${count}&start=${start}${
+    status ? `&status=${status}` : ''
+  }`;
+
+  const response = await fetch(url);
+  return await checkResponse(response);
+};
+
+export const voteOnProposalApiReq = async ({
+  voteData,
+  message: hexMessage,
+  timestamp,
+  compositeSignatures,
+  voucher,
+  proposalId,
+}) => {
+  const fetchOptions = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      ...voteData,
+      compositeSignatures,
+      message: hexMessage,
+      timestamp,
+      voucher,
+    }),
+  };
+
+  const response = await fetch(
+    `${PROPOSALS_URL}/${proposalId}/votes`,
+    fetchOptions
+  );
+  return await checkResponse(response);
 };
