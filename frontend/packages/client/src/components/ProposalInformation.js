@@ -212,7 +212,7 @@ const ProposalInformation = ({
   // used to store return point
   const topRef = useRef({ pointStatic: null });
 
-  const { loading: loadingVotingResults, data: votingResults } =
+  const { isLoading: loadingVotingResults, data: votingResults } =
     useVotingResults(proposalId);
 
   // this effect watches for user scroll to make info panel fixed to navbar
