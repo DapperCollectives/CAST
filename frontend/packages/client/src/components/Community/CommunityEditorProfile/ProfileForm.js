@@ -8,9 +8,7 @@ import { MAX_AVATAR_FILE_SIZE, MAX_FILE_SIZE } from 'const';
 import { getReducedImg } from 'utils';
 import classnames from 'classnames';
 import FormFields from './FormFields';
-//import ImageCropModal from './ImageCropModal';
-// import ImageCropModal2 from './ImageCropModal2';
-import ImageCropModal3 from './ImageCropModal3';
+import ImageCropModal from './ImageCropModal';
 
 export default function ProfileForm({
   submitComponent,
@@ -112,76 +110,8 @@ export default function ProfileForm({
 
   useEffect(() => {
     if (logoImage.cropped === false && !isOpen) {
-      // openModal(
-      //   <ImageCropModal
-      //     onDismiss={() => {
-      //       setValue(
-      //         'logo',
-      //         {
-      //           ...logoImage,
-      //           cropped: true,
-      //         },
-      //         { shouldValidate: true, shouldDirty: true }
-      //       );
-      //       closeModal();
-      //     }}
-      //     logoImage={logoImage}
-      //     onDone={(image) => {
-      //       setValue(
-      //         'logo',
-      //         {
-      //           file: image.imageBlob,
-      //           imageUrl: image.imageUrl,
-      //           cropped: true,
-      //         },
-      //         { shouldValidate: true, shouldDirty: true }
-      //       );
-      //       closeModal();
-      //     }}
-      //   />,
-
-      //   {
-      //     classNameModalContent: 'rounded-sm',
-      //     showCloseButton: false,
-      //   }
-      // );
-      // Option 2
-      // openModal(
-      //   <ImageCropModal2
-      //     onDismiss={() => {
-      //       setValue(
-      //         'logo',
-      //         {
-      //           ...logoImage,
-      //           cropped: true,
-      //         },
-      //         { shouldValidate: true, shouldDirty: true }
-      //       );
-      //       closeModal();
-      //     }}
-      //     logoImage={logoImage}
-      //     onDone={(image) => {
-      //       setValue(
-      //         'logo',
-      //         {
-      //           file: image.imageBlob,
-      //           imageUrl: image.imageUrl,
-      //           cropped: true,
-      //         },
-      //         { shouldValidate: true, shouldDirty: true }
-      //       );
-      //       closeModal();
-      //     }}
-      //   />,
-
-      //   {
-      //     classNameModalContent: 'rounded-sm',
-      //     showCloseButton: false,
-      //   }
-      // );
-      // Option 3
       openModal(
-        <ImageCropModal3
+        <ImageCropModal
           onDismiss={() => {
             setValue(
               'logo',

@@ -1,36 +1,61 @@
-import React, { useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { useState } from 'react';
-import AvatarEditor from 'react-avatar-editor';
+import Cropper from 'react-easy-crop';
 
 // using https://www.npmjs.com/package/react-avatar-editor
 
 export default function ImageCropModal({ logoImage, onDone, onDismiss } = {}) {
-  const [scale, setScale] = useState(1);
-  const [allowZoomOut, setAllowZoomOut] = useState(false);
-  const [borderRadius, setBorderRadius] = useState(0);
-  const editorRef = useRef();
-  console.log(borderRadius);
-  console.log(250 / (100 / borderRadius));
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [image, setImage] = useState(null);
+  const [croppedArea, setCroppedArea] = useState();
+  const [zoom, setZoom] = useState(1);
+  const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
+    console.log(croppedArea, croppedAreaPixels);
+  }, []);
 
-  const handleSave = () => {
-    const img = editorRef.current?.getImageScaledToCanvas().toDataURL();
-    const rect = editorRef.current?.getCroppingRect();
-
-    fetch(img)
-      .then((res) => res.blob())
-      .then((blob) => {
-        onDone({
-          imageBlob: blob,
-          imageUrl: window.URL.createObjectURL(blob),
-          rect,
-          scale: scale,
-          width: 250,
-          height: 250,
-          borderRadius: borderRadius,
-        });
+  console.log('crop has ', crop);
+  const getCroppedImg = (sourceImage, crop, fileName) => {
+    const canvas = document.createElement('canvas');
+    const scaleX = sourceImage.naturalWidth / sourceImage.width;
+    const scaleY = sourceImage.naturalHeight / sourceImage.height;
+    canvas.width = crop.width;
+    canvas.height = crop.height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(
+      sourceImage,
+      crop.x * scaleX,
+      crop.y * scaleY,
+      crop.width * scaleX,
+      crop.height * scaleY,
+      0,
+      0,
+      crop.width,
+      crop.height
+    );
+    try {
+      return new Promise((resolve) => {
+        canvas.toBlob((file) => {
+          resolve({ file, imageUrl: URL.createObjectURL(file) });
+        }, 'image/jpeg');
       });
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  };
 
-    if (!img || !rect) return;
+  const imageRef = useRef(null);
+
+  useEffect(() => {
+    if (imageRef.current) {
+      setImage(imageRef.current);
+    }
+  }, [imageRef]);
+
+  const handleResize = async () => {
+    console.log('image is', image);
+    const result = await getCroppedImg(image, croppedArea, 'ddd');
+    console.log('result from cropt', result);
   };
   return (
     <div
@@ -55,63 +80,45 @@ export default function ImageCropModal({ logoImage, onDone, onDismiss } = {}) {
       </header>
       <section
         className="modal-card-body py-0 px-4"
-        style={{ minHeight: '280px' }}
+        style={{ minHeight: '480px', position: 'relative' }}
       >
-        <div className="is-flex is-justify-content-center">
-          <AvatarEditor
-            ref={editorRef}
+        <div>
+          <Cropper
             image={logoImage.imageUrl}
-            width={250}
-            height={250}
-            border={50}
-            borderRadius={250 / (100 / borderRadius)}
-            backgroundColor="#00000052"
-            color={[255, 255, 255, 0.6]} // RGBA
-            scale={scale}
-            rotate={0}
+            crop={crop}
+            zoom={zoom}
+            aspect={1}
+            onCropChange={setCrop}
+            onCropComplete={onCropComplete}
+            onZoomChange={setZoom}
+            cropShape="round"
+            showGrid={false}
           />
+          <image src={logoImage.imageUrl} ref={imageRef} alt="" />
         </div>
-        <div className="columns is-multiline">
-          <div className="column is-12">
-            <di>
-              <p> Zoom</p>
-            </di>
-            <input
-              type="range"
-              min={allowZoomOut ? '0.1' : '1'}
-              max="2"
-              defaultValue="1"
-              value={scale}
-              step="0.01"
-              onChange={(e) => {
-                setScale(e.target.value);
-              }}
-            />
-          </div>
-          <div className="column is-12">
-            {'Allow Scale < 1'}
-            <input
-              name="allowZoomOut"
-              type="checkbox"
-              onChange={() => setAllowZoomOut((allowZoomOut) => !allowZoomOut)}
-              checked={allowZoomOut}
-            />
-          </div>
-          <div className="column is-12">
-            <p>Border radius:</p>
-            <input
-              name="scale"
-              type="range"
-              onChange={(e) => setBorderRadius(e.target.value)}
-              value={borderRadius}
-              min="0"
-              max="50"
-              step="1"
-              defaultValue="0"
-            />
-          </div>
-          <div className="column is-12">
-            <button onClick={handleSave}>done</button>
+        <div>
+          <div className="columns is-multiline">
+            <div className="column is-12">
+              <di>
+                <p> Zoom</p>
+              </di>
+              <input
+                type="range"
+                min={1}
+                max={3}
+                step={0.1}
+                defaultValue="1"
+                value={zoom}
+                onChange={(e) => {
+                  setZoom(e.target.value);
+                }}
+              />
+            </div>
+            <div className="column is-12">
+              <div className="column is-12">
+                <button onClick={handleResize}>done</button>
+              </div>
+            </div>
           </div>
         </div>
       </section>
