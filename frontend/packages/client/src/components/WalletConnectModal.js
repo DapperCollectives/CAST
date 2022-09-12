@@ -7,7 +7,7 @@ import { ArrowRight, Close } from './Svg';
 
 const getWalletIcon = (provider) => {
   if (provider?.name === 'Lilico') {
-    return provider.icon;
+    return 'https://raw.githubusercontent.com/Outblock/Lilico-Web/main/asset/logo-dis.png';
   }
   return `https://fcl-discovery.onflow.org${provider.icon}`;
 };
