@@ -1497,23 +1497,15 @@
   resolved "https://registry.yarnpkg.com/@jridgewell/set-array/-/set-array-1.1.2.tgz#7c6cf998d6d20b914c0a55a91ae928ff25965e72"
   integrity sha512-xnkseuNADM0gt2bs+BvhO0p78Mk762YnZdsuzFV018NoG1Sj1SCQvpSqa7XUaTam5vAGasABV9qXASMKnFMwMw==
 
-"@jridgewell/source-map@^0.3.2":
-  version "0.3.2"
-  resolved "https://registry.yarnpkg.com/@jridgewell/source-map/-/source-map-0.3.2.tgz#f45351aaed4527a298512ec72f81040c998580fb"
-  integrity sha512-m7O9o2uR8k2ObDysZYzdfhb08VuEml5oWGiosa1VdaPZ/A6QyPkAJuwN0Q1lhULOf6B7MtQmHENS743hWtCrgw==
-  dependencies:
-    "@jridgewell/gen-mapping" "^0.3.0"
-    "@jridgewell/trace-mapping" "^0.3.9"
-
 "@jridgewell/sourcemap-codec@^1.4.10":
   version "1.4.14"
   resolved "https://registry.yarnpkg.com/@jridgewell/sourcemap-codec/-/sourcemap-codec-1.4.14.tgz#add4c98d341472a289190b424efbdb096991bb24"
   integrity sha512-XPSJHWmi394fuUuzDnGz1wiKqWfo1yXecHQMRf2l6hztTO+nPru658AyDngaBe7isIxEkRsPR3FZh+s7iVa4Uw==
 
 "@jridgewell/trace-mapping@^0.3.9":
-  version "0.3.15"
-  resolved "https://registry.yarnpkg.com/@jridgewell/trace-mapping/-/trace-mapping-0.3.15.tgz#aba35c48a38d3fd84b37e66c9c0423f9744f9774"
-  integrity sha512-oWZNOULl+UbhsgB51uuZzglikfIKSUBO/M9W2OfEjn7cmqoAiCgmv9lyACTUacZwBz0ITnJ2NqjU8Tx0DHL88g==
+  version "0.3.14"
+  resolved "https://registry.yarnpkg.com/@jridgewell/trace-mapping/-/trace-mapping-0.3.14.tgz#b231a081d8f66796e475ad588a1ef473112701ed"
+  integrity sha512-bJWEfQ9lPTvm3SneWwRFVLzrh6nhjwqw7TUFFBEMzwvg7t7PCDenf2lDwqo4NQXzdpgBXyFgDWnQA+2vkruksQ==
   dependencies:
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
@@ -1862,9 +1854,9 @@
     remove-accents "0.4.2"
 
 "@tanstack/query-core@^4.0.0-beta.1":
-  version "4.2.1"
-  resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-4.2.1.tgz#21ff3a33f27bf038c990ea53af89cf7c7e8078fc"
-  integrity sha512-UOyOhHKLS/5i9qG2iUnZNVV3R9riJJmG9eG+hnMFIPT/oRh5UzAfjxCtBneNgPQZLDuP8y6YtRYs/n4qVAD5Ng==
+  version "4.1.3"
+  resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-4.1.3.tgz#06b24315577971376b5a15124fc132c0b3ebc1b3"
+  integrity sha512-mSWGovlZnEiVwC99t+Q9uLwGdV9hnq+Z2+sHNAr8tsujzMPRLFNSmWAh/AayAaxIRWPwF4Ce9dmhV2BrYmuK1A==
 
 "@tanstack/react-query-devtools@4.0.11-beta.0":
   version "4.0.11-beta.0"
@@ -1877,9 +1869,9 @@
     use-sync-external-store "^1.2.0"
 
 "@tanstack/react-query@^4.0.10", "@tanstack/react-query@^4.1.0":
-  version "4.2.1"
-  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-4.2.1.tgz#1f00f03573b35a353e62fa64f904bbb0286a1808"
-  integrity sha512-w02oTOYpoxoBzD/onAGRQNeLAvggLn7WZjS811cT05WAE/4Q3br0PTp388M7tnmyYGbgOOhFq0MkhH0wIfAKqA==
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-4.1.0.tgz#eafda4578e7268cb3e36b2840107e680a57f626c"
+  integrity sha512-ZwPCqVoCqvUvTfmvpPlC6apyrvV4JmK1XsesreFs9TxZmASyRvj9Dk1Z++ct6m5lniccDssnLOo+36E1EAi/nA==
   dependencies:
     "@tanstack/query-core" "^4.0.0-beta.1"
     "@types/use-sync-external-store" "^0.0.3"
@@ -3883,6 +3875,13 @@ copy-descriptor@^0.1.0:
   resolved "https://registry.yarnpkg.com/copy-descriptor/-/copy-descriptor-0.1.1.tgz#676f6eb3c39997c2ee1ac3a924fd6124748f578d"
   integrity sha512-XgZ0pFcakEUlbwQEVNg3+QAis1FyTL3Qel9FYy8pSkQqoG3PNoT0bOCQtOXcOkur21r2Eq2kI+IE+gsmAEVlYw==
 
+copy-to-clipboard@^3.3.1:
+  version "3.3.2"
+  resolved "https://registry.yarnpkg.com/copy-to-clipboard/-/copy-to-clipboard-3.3.2.tgz#5b263ec2366224b100181dded7ce0579b340c107"
+  integrity sha512-Vme1Z6RUDzrb6xAI7EZlVZ5uvOk2F//GaxKUxajDqm9LhOVM1inxNAD2vy+UZDYsd0uyA9s7b3/FVZPSxqrCfg==
+  dependencies:
+    toggle-selection "^1.0.6"
+
 core-js-compat@^3.21.0, core-js-compat@^3.22.1:
   version "3.24.1"
   resolved "https://registry.yarnpkg.com/core-js-compat/-/core-js-compat-3.24.1.tgz#d1af84a17e18dfdd401ee39da9996f9a7ba887de"
@@ -4602,6 +4601,21 @@ draft-js-export-html@^1.4.1:
   integrity sha512-G4VGBSalPowktIE4wp3rFbhjs+Ln9IZ2FhXeHjsZDSw0a2+h+BjKu5Enq+mcsyVb51RW740GBK8Xbf7Iic51tw==
   dependencies:
     draft-js-utils "^1.4.0"
+
+draft-js-import-element@^1.4.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/draft-js-import-element/-/draft-js-import-element-1.4.0.tgz#8760acbfeb60ed824a1c8319ec049f702681df66"
+  integrity sha512-WmYT5PrCm47lGL5FkH6sRO3TTAcn7qNHsD3igiPqLG/RXrqyKrqN4+wBgbcT2lhna/yfWTRtgzAbQsSJoS1Meg==
+  dependencies:
+    draft-js-utils "^1.4.0"
+    synthetic-dom "^1.4.0"
+
+draft-js-import-html@^1.4.1:
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/draft-js-import-html/-/draft-js-import-html-1.4.1.tgz#c222a3a40ab27dee5874fcf78526b64734fe6ea4"
+  integrity sha512-KOZmtgxZriCDgg5Smr3Y09TjubvXe7rHPy/2fuLSsL+aSzwUDwH/aHDA/k47U+WfpmL4qgyg4oZhqx9TYJV0tg==
+  dependencies:
+    draft-js-import-element "^1.4.0"
 
 draft-js-utils@^1.4.0:
   version "1.4.1"
@@ -9679,6 +9693,14 @@ react-blockies@^1.4.1:
   dependencies:
     prop-types "^15.5.10"
 
+react-copy-to-clipboard@^5.1.0:
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/react-copy-to-clipboard/-/react-copy-to-clipboard-5.1.0.tgz#09aae5ec4c62750ccb2e6421a58725eabc41255c"
+  integrity sha512-k61RsNgAayIJNoy9yDsYzDe/yAZAzEbEgcz3DZMhF686LEyukcE1hzurxe85JandPUG+yTfGVFzuEw3xt8WP/A==
+  dependencies:
+    copy-to-clipboard "^3.3.1"
+    prop-types "^15.8.1"
+
 react-datepicker@^4.6.0:
   version "4.8.0"
   resolved "https://registry.yarnpkg.com/react-datepicker/-/react-datepicker-4.8.0.tgz#11b8918d085a1ce4781eee4c8e4641b3cd592010"
@@ -11210,6 +11232,11 @@ symbol-tree@^3.2.4:
   resolved "https://registry.yarnpkg.com/symbol-tree/-/symbol-tree-3.2.4.tgz#430637d248ba77e078883951fb9aa0eed7c63fa2"
   integrity sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==
 
+synthetic-dom@^1.4.0:
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/synthetic-dom/-/synthetic-dom-1.4.0.tgz#d988d7a4652458e2fc8706a875417af913e4dd34"
+  integrity sha512-mHv51ZsmZ+ShT/4s5kg+MGUIhY7Ltq4v03xpN1c8T1Krb5pScsh/lzEjyhrVD0soVDbThbd2e+4dD9vnDG4rhg==
+
 table@^6.0.9:
   version "6.8.0"
   resolved "https://registry.yarnpkg.com/table/-/table-6.8.0.tgz#87e28f14fa4321c3377ba286f07b79b281a3b3ca"
@@ -11409,6 +11436,11 @@ to-regex@^3.0.1, to-regex@^3.0.2:
     extend-shallow "^3.0.2"
     regex-not "^1.0.2"
     safe-regex "^1.1.0"
+
+toggle-selection@^1.0.6:
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/toggle-selection/-/toggle-selection-1.0.6.tgz#6e45b1263f2017fa0acc7d89d78b15b8bf77da32"
+  integrity sha512-BiZS+C1OS8g/q2RRbJmy59xpyghNBqrr6k5L/uKBGRsTfxmu3ffiRnd8mlGPUVayg8pvfi5urfnu8TU7DVOkLQ==
 
 toidentifier@1.0.1:
   version "1.0.1"

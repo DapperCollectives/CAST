@@ -1,30 +1,25 @@
-import { useCallback, useEffect, useReducer } from 'react';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
-import { checkResponse } from 'utils';
-import { INITIAL_STATE, defaultReducer } from '../reducers';
+import { useQuery } from '@tanstack/react-query';
+import { fetchVotingStrategies } from 'api/votingStrategies';
 
 export default function useVotingStrategies() {
-  const [state, dispatch] = useReducer(defaultReducer, INITIAL_STATE);
   const { notifyError } = useErrorHandlerContext();
-  const getVotingStrategies = useCallback(async () => {
-    dispatch({ type: 'PROCESSING' });
-    const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/voting-strategies`;
-    try {
-      const response = await fetch(url);
-      const strategies = await checkResponse(response);
-      dispatch({ type: 'SUCCESS', payload: strategies });
-    } catch (err) {
-      notifyError(err, url);
-      dispatch({ type: 'ERROR', payload: { errorData: err.message } });
-    }
-  }, [dispatch, notifyError]);
 
-  useEffect(() => {
-    getVotingStrategies();
-  }, [getVotingStrategies]);
+  const { isLoading, isError, data, error } = useQuery(
+    ['voting-strategies'],
+    fetchVotingStrategies,
+
+    {
+      onError: (error) => {
+        notifyError(error);
+      },
+    }
+  );
 
   return {
-    ...state,
-    getVotingStrategies,
+    isLoading,
+    isError,
+    error,
+    data,
   };
 }

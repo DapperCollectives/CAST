@@ -10,11 +10,11 @@ import {
   PropCreateStepThree,
   PropCreateStepTwo,
 } from 'components/ProposalCreate';
-import { useProposal } from 'hooks';
-import { customDraftToHTML, isStartTimeValid, parseDateToServer } from 'utils';
+import { useProposalCreateMutation } from 'hooks';
+import { isStartTimeValid, parseDateToServer } from 'utils';
 
 export default function ProposalCreatePage() {
-  const { createProposal, data, loading, error } = useProposal();
+  const { createProposal, data, loading, error } = useProposalCreateMutation();
   const [modalError, setModalError] = useState(null);
   const {
     user: { addr: creatorAddr },
@@ -69,11 +69,8 @@ export default function ProposalCreatePage() {
       });
       return;
     }
-    const name = stepsData[0].title;
 
-    const currentContent = stepsData[0]?.description?.getCurrentContent();
-
-    const body = customDraftToHTML(currentContent);
+    const { strategy, minBalance, maxWeight, name, body } = stepsData[0];
 
     const hasValidStartTime = isStartTimeValid(
       stepsData[1].startTime,
@@ -103,8 +100,6 @@ export default function ProposalCreatePage() {
       choiceImgUrl: c?.choiceImgUrl ?? null,
     }));
 
-    const { strategy } = stepsData[0];
-
     const proposalData = {
       name,
       body,
@@ -112,7 +107,11 @@ export default function ProposalCreatePage() {
       creatorAddr,
       endTime,
       startTime,
-      strategy: strategy?.value,
+      strategy: strategy,
+      ...(minBalance !== ''
+        ? { minBalance: parseFloat(minBalance) }
+        : undefined),
+      ...(maxWeight !== '' ? { maxWeight: parseFloat(maxWeight) } : undefined),
       status: 'published',
       communityId,
       achievementsDone: false,
@@ -130,24 +129,29 @@ export default function ProposalCreatePage() {
     blockNavigationOut: true && !data,
     blockNavigationText:
       'Proposal creation is not complete yet, are you sure you want to leave?',
+    passNextToComp: true,
+    passSubmitToComp: true,
+    showActionButtonLeftPannel: true,
     steps: [
       {
         label: 'Draft Proposal',
         description:
           'Some description of what you can write here that is useful.',
         component: <PropCreateStepOne />,
+        useHookForms: true,
       },
       {
         label: 'Set Date & Time',
         description:
           'Some description of what you can write here that is useful.',
-        component: <PropCreateStepTwo stepData={{ test: 'ok' }} />,
+        component: <PropCreateStepTwo />,
+        useHookForms: true,
       },
       {
         label: 'Preview Proposal',
         description:
           'Some description of what you can write here that is useful.',
-        component: <PropCreateStepThree stepData={{ test: 'ok' }} />,
+        component: <PropCreateStepThree />,
       },
     ],
   };

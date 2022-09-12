@@ -26,7 +26,9 @@ const DropDown = forwardRef(
     const [isOpen, setIsOpen] = useState(false);
     const [innerValue, setInnerValue] = useState(defaultValue ?? { label });
 
-    const openCloseDropdown = () => {
+    const openCloseDropdown = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       setIsOpen((status) => !status);
     };
 

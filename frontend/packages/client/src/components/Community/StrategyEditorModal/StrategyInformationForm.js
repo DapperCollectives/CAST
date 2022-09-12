@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useWebContext } from 'contexts/Web3';
 import { ActionButton } from 'components';
 import Input from 'components/common/Input';
+import { IS_LOCAL_DEV } from 'const';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { getSchema } from './FormConfig';
 
@@ -25,6 +26,15 @@ export default function StrategyInformationForm({
     resolver: yupResolver(getSchema(formFields, isValidFlowAddress)),
     defaultValues: {
       ...formData,
+      ...(IS_LOCAL_DEV
+        ? {
+            addr: '0x0ae53cb6e3f42a79',
+            name: 'FlowToken',
+            threshold: '1',
+            maxWeight: '2222',
+            publicPath: 'flowTokenBalance',
+          }
+        : undefined),
     },
   });
 

@@ -241,6 +241,7 @@ const VoteOptions = ({
   optionChosen,
   castVote,
   onConfirmVote,
+  loggedIn,
   addr,
   readOnly = false,
 }) => {
@@ -251,19 +252,13 @@ const VoteOptions = ({
 
   const isActive = status === FilterValues.active;
 
-  const { getVotesForAddress, data, loading } = useVotesForAddress();
+  const { data: votesFromAddress } = useVotesForAddress({
+    enabled: Boolean(addr && proposal?.id),
+    proposalIds: [proposal.id],
+    addr,
+  });
 
-  const votesFromAddress = data?.[addr];
   const checkedVotes = Array.isArray(votesFromAddress);
-
-  useEffect(() => {
-    async function getVotes() {
-      getVotesForAddress([proposal.id], addr);
-    }
-    if (addr && !loading && proposal.id && !checkedVotes) {
-      getVotes();
-    }
-  }, [addr, proposal, loading, getVotesForAddress, checkedVotes]);
 
   const hasntVoted =
     !castVote &&
@@ -272,8 +267,7 @@ const VoteOptions = ({
       (voteObj) => String(proposal.id) !== Object.keys(voteObj)[0]
     );
 
-  const canVote = addr && isActive && hasntVoted;
-
+  const canVote = isActive && (hasntVoted || !loggedIn);
   const voteClasses = `vote-options border-light rounded-sm mb-6 ${
     !canVote && 'is-disabled'
   } ${!hasntVoted && 'is-voted'}`;

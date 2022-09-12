@@ -18,6 +18,12 @@ import (
 	"github.com/thoas/go-funk"
 )
 
+var allowedFileTypes = []string{"image/jpg", "image/jpeg", "image/png", "image/gif"}
+
+const (
+	maxFileSize = 5 * 1024 * 1024 // 5MB
+)
+
 type Helpers struct {
 	A *App
 }
@@ -441,6 +447,15 @@ func (h *Helpers) fetchCommunity(id int) (models.Community, int, error) {
 	return community, http.StatusOK, nil
 }
 
+func (h *Helpers) searchCommuntities(query string) (interface{}, error) {
+	results, err := models.SearchForCommunity(h.A.DB, query)
+	if err != nil {
+		return []models.Community{}, err
+	}
+
+	return results, nil
+}
+
 func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, int, error) {
 	if p.Voucher != nil {
 		if err := h.validateUserViaVoucher(p.Creator_addr, p.Voucher); err != nil {
@@ -464,8 +479,14 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, int, error
 		return models.Proposal{}, http.StatusInternalServerError, errors.New(errMsg)
 
 	}
-	p.Min_balance = strategy.Contract.Threshold
-	p.Max_weight = strategy.Contract.MaxWeight
+
+	// Set Min Balance/Max Weight to community defaults if not provided
+	if p.Min_balance == nil {
+		p.Min_balance = strategy.Contract.Threshold
+	}
+	if p.Max_weight == nil {
+		p.Max_weight = strategy.Contract.MaxWeight
+	}
 
 	if err := h.snapshot(&strategy, &p); err != nil {
 		return models.Proposal{}, http.StatusInternalServerError, err
@@ -758,14 +779,14 @@ func (h *Helpers) createCommunityUser(payload models.CommunityUserPayload) (int,
 	// validate user is allowed to create this user
 	if payload.User_type != "member" {
 		if payload.Signing_addr == payload.Addr {
-			CANNOT_GRANT_SELF_ERR := errors.New("Users cannot grant themselves a priviledged user_type.")
+			CANNOT_GRANT_SELF_ERR := errors.New("Users cannot grant themselves a privileged user_type.")
 			log.Error().Err(CANNOT_GRANT_SELF_ERR)
 			return http.StatusForbidden, CANNOT_GRANT_SELF_ERR
 		}
 		// If signing address is not user address, verify they have admin status in this community
 		var communityAdmin = models.CommunityUser{Community_id: payload.Community_id, Addr: payload.Signing_addr, User_type: "admin"}
 		if err := communityAdmin.GetCommunityUser(h.A.DB); err != nil {
-			USER_MUST_BE_ADMIN_ERR := errors.New("User must be community admin to grant priviledges.")
+			USER_MUST_BE_ADMIN_ERR := errors.New("User must be community admin to grant privileges.")
 			log.Error().Err(err).Msg("Database error.")
 			log.Error().Err(USER_MUST_BE_ADMIN_ERR)
 			return http.StatusForbidden, USER_MUST_BE_ADMIN_ERR
@@ -1097,6 +1118,12 @@ func (h *Helpers) initStrategy(name string) Strategy {
 }
 
 func (h *Helpers) pinJSONToIpfs(data interface{}) (*string, error) {
+	shouldOverride := flag.Lookup("ipfs-override").Value.(flag.Getter).Get().(bool)
+	if shouldOverride {
+		dummyHash := "dummy-hash"
+		return &dummyHash, nil
+	}
+
 	pin, err := h.A.IpfsClient.PinJson(data)
 	if err != nil {
 		return nil, err

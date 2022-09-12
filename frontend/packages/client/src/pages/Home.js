@@ -83,6 +83,7 @@ export default function HomePage() {
             <CommunitiesPresenter
               title="My Communities"
               communities={myUserCommunities}
+              hideJoin
             />
           )}
           <CommunitiesPresenter

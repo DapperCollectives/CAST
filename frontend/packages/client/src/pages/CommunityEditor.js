@@ -13,6 +13,7 @@ import { CommunityEditorProfile } from 'components/Community/CommunityEditorProf
 import { ArrowLeft, ArrowLeftBold } from 'components/Svg';
 import {
   useCommunityDetails,
+  useCommunityDetailsUpdate,
   useFileUploader,
   useMediaQuery,
   useUserRoleOnCommunity,
@@ -127,11 +128,13 @@ export default function CommunityEditorPage() {
   const {
     user: { addr },
   } = useWebContext();
+  const { data: community, isLoading } = useCommunityDetails(communityId);
+
   const {
-    data: community,
-    loading,
-    updateCommunityDetails,
-  } = useCommunityDetails(communityId);
+    updateCommunityDetailsAsync: updateCommunityDetails,
+    isLoading: isUpdating,
+  } = useCommunityDetailsUpdate();
+
   const { data: activeStrategies } =
     useCommunityActiveVotingStrategies(communityId);
 
@@ -150,7 +153,8 @@ export default function CommunityEditorPage() {
   };
 
   const updateCommunity = useCallback(
-    async (updateData) => updateCommunityDetails(communityId, updateData),
+    async (updatePayload) =>
+      updateCommunityDetails({ communityId, updatePayload }),
     [communityId, updateCommunityDetails]
   );
 
@@ -171,7 +175,7 @@ export default function CommunityEditorPage() {
   }, [isAdmin, addr, history]);
 
   // initial loading
-  if (loading && !community) {
+  if (isLoading) {
     return (
       <section className="section full-height">
         <div className="container is-flex full-height is-justify-content-center">
@@ -232,7 +236,7 @@ export default function CommunityEditorPage() {
               <ProposalThresholdEditor
                 communityId={community?.id}
                 updateCommunity={updateCommunity}
-                updatingCommunity={loading}
+                updatingCommunity={isUpdating}
                 contractAddress={community?.contractAddr}
                 contractName={community?.contractName}
                 contractType={community?.contractType}
@@ -245,7 +249,7 @@ export default function CommunityEditorPage() {
               <CommunityPropsAndVoting
                 communityId={community?.id}
                 updateCommunity={updateCommunity}
-                updatingCommunity={loading}
+                updatingCommunity={isUpdating}
                 communityVotingStrategies={community.strategies}
                 activeStrategies={activeStrategies}
               />

@@ -3,12 +3,9 @@ import Blockies from 'react-blockies';
 import { useVotingResults, useWindowDimensions } from 'hooks';
 import useMediaQuery, { mediaMatchers } from 'hooks/useMediaQuery';
 import { parseDateFromServer } from 'utils';
+import { truncateAddress as truncate } from 'utils';
 import { LinkOut } from './Svg';
 import Tooltip from './Tooltip';
-
-function truncate(str) {
-  return str.substr(0, 3) + '...' + str.substr(10, str.length);
-}
 
 const BlockieWithAddress = React.forwardRef(
   ({ creatorAddr, isCoreCreator }, ref) => {
@@ -215,7 +212,7 @@ const ProposalInformation = ({
   // used to store return point
   const topRef = useRef({ pointStatic: null });
 
-  const { loading: loadingVotingResults, data: votingResults } =
+  const { isLoading: loadingVotingResults, data: votingResults } =
     useVotingResults(proposalId);
 
   // this effect watches for user scroll to make info panel fixed to navbar

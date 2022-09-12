@@ -71,7 +71,7 @@ function Header(props) {
               </div>
               <div className="navbar-end">
                 <span className="navbar-item p-0">
-                  <WalletConnect />
+                  <WalletConnect expandContainer />
                 </span>
               </div>
             </nav>

@@ -1,45 +1,38 @@
-import { useCallback, useReducer } from 'react';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
-import { checkResponse } from 'utils';
-import { INITIAL_STATE, defaultReducer } from '../reducers';
+import { useMutation } from '@tanstack/react-query';
+import { addFungibleTokenApiReq } from 'api/fungibleToken';
 
 export default function useAddFungibleToken() {
-  const [state, dispatch] = useReducer(defaultReducer, INITIAL_STATE);
   const { notifyError } = useErrorHandlerContext();
 
-  const addFungibleToken = useCallback(
+  const {
+    mutate: addFungibleToken,
+    isLoading,
+    isError,
+    isSuccess,
+    data,
+    error,
+  } = useMutation(
     async (addr, name, path) => {
-      const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/add-fungible-token`;
-      try {
-        const fetchOptions = {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            addr,
-            name,
-            path,
-          }),
-        };
-        dispatch({ type: 'PROCESSING' });
-        const response = await fetch(url, fetchOptions);
-        const json = await checkResponse(response);
-        dispatch({
-          type: 'SUCCESS',
-        });
-        return json;
-      } catch (err) {
-        notifyError(err, url);
-        dispatch({ type: 'ERROR', payload: { errorData: err.message } });
-        return { error: err.message };
-      }
+      return addFungibleTokenApiReq({
+        addr,
+        name,
+        path,
+      });
     },
-    [dispatch, notifyError]
+    {
+      onError: (error) => {
+        notifyError(error);
+      },
+    }
   );
 
   return {
-    ...state,
+    isLoading,
+    isError,
+    isSuccess,
+    data,
+    error,
     addFungibleToken,
   };
 }

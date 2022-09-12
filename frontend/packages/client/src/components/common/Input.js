@@ -10,9 +10,12 @@ export default function Input({
   disabled,
   error,
   type = 'text',
+  conatinerClassNames = '',
 } = {}) {
   return (
-    <div className="is-flex is-flex-direction-column flex-1">
+    <div
+      className={`is-flex is-flex-direction-column flex-1 ${conatinerClassNames}`.trim()}
+    >
       <input
         type={type}
         style={{ width: '100%', ...style }}
@@ -23,7 +26,7 @@ export default function Input({
       {error && (
         <FadeIn>
           <div className="pl-1 mt-2">
-            <p className="smaller-text has-text-red">{error?.message}</p>
+            <p className="smaller-text has-text-danger">{error?.message}</p>
           </div>
         </FadeIn>
       )}

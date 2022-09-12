@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
+import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useModalContext } from 'contexts/NotificationModal';
 import { useWebContext } from 'contexts/Web3';
 import {
-  Error,
   Loader,
   Message,
   ProposalInformation,
@@ -22,7 +22,9 @@ import { ArrowLeft, Bin, CheckMark } from 'components/Svg';
 import {
   useMediaQuery,
   useProposal,
+  useProposalMutation,
   useUserRoleOnCommunity,
+  useVoteOnProposal,
   useVotingStrategies,
 } from 'hooks';
 import { FilterValues } from 'const';
@@ -77,7 +79,9 @@ export default function ProposalPage() {
 
   const modalContext = useModalContext();
 
-  const { user, injectedProvider, setWebContextConfig } = useWebContext();
+  const { notifyError } = useErrorHandlerContext();
+
+  const { user, setWebContextConfig, openWalletModal } = useWebContext();
 
   // setting this manually for users that do not have a ledger device
   useEffect(() => {
@@ -89,18 +93,17 @@ export default function ProposalPage() {
   const { proposalId } = useParams();
 
   const {
-    getProposal,
-    voteOnProposal,
-    updateProposal,
-    loading,
+    isLoading: loading,
     data: proposal,
     error,
-  } = useProposal();
+  } = useProposal({ proposalId });
+  const { voteOnProposal } = useVoteOnProposal();
+  const { updateProposal } = useProposalMutation();
 
   // we need to get all strategies to obtain
   // description text to display on modal
   const {
-    loading: loadingStrategies,
+    isLoading: loadingStrategies,
     data: votingStrategies,
     error: strategiesError,
   } = useVotingStrategies();
@@ -125,12 +128,6 @@ export default function ProposalPage() {
       : {};
 
   useEffect(() => {
-    (async () => {
-      await getProposal(proposalId);
-    })();
-  }, [proposalId, getProposal]);
-
-  useEffect(() => {
     if (modalContext.isOpen && user?.addr && !voteError && !cancelProposal) {
       modalContext.closeModal();
     }
@@ -149,7 +146,11 @@ export default function ProposalPage() {
   };
 
   const onConfirmVote = () => {
-    setConfirmingVote(true);
+    if (user.loggedIn) {
+      setConfirmingVote(true);
+    } else {
+      openWalletModal();
+    }
   };
 
   const onCancelVote = () => {
@@ -172,13 +173,18 @@ export default function ProposalPage() {
     };
 
     const onCancelProposal = async () => {
-      const response = await updateProposal(injectedProvider, proposal, {
-        status: 'cancelled',
-        signingAddr: user?.addr,
-      });
-      if (response.error) {
+      try {
+        await updateProposal({
+          ...proposal,
+          updatePayload: {
+            status: 'cancelled',
+            signingAddr: user?.addr,
+          },
+        });
+      } catch (error) {
         return;
       }
+      // is no errors continue
       setCancelProposal(false);
       setCancelled(true);
     };
@@ -202,41 +208,24 @@ export default function ProposalPage() {
       return;
     }
 
-    const voteBody = {
+    const voteData = {
       choice: optionChosen,
       addr: user.addr,
     };
 
     setCastingVote(true);
-    const response = await voteOnProposal(
-      injectedProvider,
-      proposal,
-      voteBody,
-      user.services[0]?.uid
-    );
-    if (response?.error) {
-      setVoteError(response.error);
+    try {
+      await voteOnProposal({ proposal, voteData });
+    } catch (error) {
+      setVoteError(error);
       setConfirmingVote(false);
-      modalContext.openModal(
-        React.createElement(Error, {
-          error: (
-            <p className="has-text-red">
-              <b>{response.error}</b>
-            </p>
-          ),
-          errorTitle: 'Something went wrong with your vote.',
-        }),
-        {
-          classNameModalContent: 'rounded-sm',
-        }
-      );
+      notifyError(error);
       setCastingVote(false);
       return;
-    } else {
-      setCastingVote(false);
-      setConfirmingVote(false);
-      setCastVote(optionChosen);
     }
+    setCastingVote(false);
+    setConfirmingVote(false);
+    setCastVote(optionChosen);
   };
 
   const onConfirmCastVote = () => {
@@ -440,7 +429,7 @@ export default function ProposalPage() {
             <div>
               <WrapperResponsive
                 as="h2"
-                classNames="title mt-5 is-4 has-text-back has-text-weight-normal"
+                classNames="title mt-5 is-4 has-text-black has-text-weight-normal"
                 extraStylesMobile={{ marginBottom: '30px' }}
               >
                 {proposal.name}
@@ -543,6 +532,7 @@ export default function ProposalPage() {
                 <VoteOptions
                   labelType="desktop"
                   readOnly={isClosed}
+                  loggedIn={user?.loggedIn}
                   addr={user?.addr}
                   proposal={proposal}
                   onOptionSelect={onOptionSelect}

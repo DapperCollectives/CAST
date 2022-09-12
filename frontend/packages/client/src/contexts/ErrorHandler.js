@@ -31,7 +31,7 @@ const ErrorHandlerProvider = ({ children }) => {
       openModal(
         React.createElement(Error, {
           error: (
-            <p className="has-text-red p-3 has-text-justified">
+            <p className="has-text-danger p-3 has-text-justified">
               <b>{error.statusText}</b>
             </p>
           ),

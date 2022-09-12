@@ -8,6 +8,17 @@ import { kebabToString } from 'utils';
 import isEqual from 'lodash/isEqual';
 import StrategyEditorModal from './StrategyEditorModal';
 
+const getStrategyName = (strategies, strategy) => {
+  if (strategy.name === 'custom-script') {
+    const custom = strategies.find((st) => st.key === strategy.name);
+    const scriptName = custom.scripts.find(
+      (s) => s.key === strategy.contract.script
+    ).name;
+    return `${kebabToString(strategy.name)}: ${scriptName}`;
+  }
+  return kebabToString(strategy.name);
+};
+
 export default function StrategySelectorForm({
   existingStrategies = [],
   activeStrategies = [],
@@ -28,7 +39,7 @@ export default function StrategySelectorForm({
     }
   }, [strategies, onStrategySelection, existingStrategies]);
 
-  const { data: allVotingStrategies, loading: loadingAllStrategies } =
+  const { data: allVotingStrategies, isLoading: loadingAllStrategies } =
     useVotingStrategies();
   const { addFungibleToken } = useAddFungibleToken();
 
@@ -79,8 +90,8 @@ export default function StrategySelectorForm({
               <div className="is-flex is-align-items-center is-justify-content-center">
                 <ul>
                   <li>
-                    <p className="smaller-text mt-2 has-text-red">
-                      - {kebabToString(strategy.name)}
+                    <p className="smaller-text mt-2 has-text-danger">
+                      - {getStrategyName(allVotingStrategies, strategy)}
                     </p>
                   </li>
                 </ul>
@@ -123,7 +134,7 @@ export default function StrategySelectorForm({
         <StrategySelectorInput
           index={index}
           key={`strategy-${index}`}
-          commuVotStra={kebabToString(st.name)}
+          commuVotStra={getStrategyName(allVotingStrategies, st)}
           onDeleteStrategy={onDeleteStrategy}
           enableDelete={enableDelete}
         />

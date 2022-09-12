@@ -4,8 +4,10 @@ import (
 	// "errors"
 
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
@@ -53,8 +55,6 @@ type App struct {
 	Config             shared.Config
 }
 
-var allowedFileTypes = []string{"image/jpg", "image/jpeg", "image/png", "image/gif"}
-
 type Strategy interface {
 	TallyVotes(votes []*models.VoteWithBalance, p *models.ProposalResults, proposal *models.Proposal) (models.ProposalResults, error)
 	GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error)
@@ -70,11 +70,11 @@ var strategyMap = map[string]Strategy{
 	"one-address-one-vote":          &strategies.OneAddressOneVote{},
 	"balance-of-nfts":               &strategies.BalanceOfNfts{},
 	"float-nfts":                    &strategies.FloatNFTs{},
+	"custom-script":                 &strategies.CustomScript{},
 }
 
-const (
-	maxFileSize = 5 * 1024 * 1024 // 5MB
-)
+var customScripts []shared.CustomScript
+
 
 var helpers Helpers
 
@@ -117,6 +117,7 @@ func (a *App) Initialize() {
 
 	// when running "make proposals" sets db to dev not test
 	arg := flag.String("db", "", "database type")
+	flag.Bool("ipfs-override", true, "overrides ipfs call")
 	flag.Int("port", 5001, "port")
 	flag.Int("amount", 4, "Amount of proposals to create")
 
@@ -143,14 +144,35 @@ func (a *App) Initialize() {
 	a.IpfsClient = shared.NewIpfsClient(os.Getenv("IPFS_KEY"), os.Getenv("IPFS_SECRET"))
 
 	// Flow
+
+	// Load custom scripts for strategies
+	scripts, err := ioutil.ReadFile("./main/cadence/scripts/custom/scripts.json")
+	if err != nil {
+		log.Error().Err(err).Msg("Error Reading Custom Strategy scripts.")
+	}
+
+	err = json.Unmarshal(scripts, &customScripts)
+	if err != nil {
+		log.Error().Err(err).Msg("Error during Unmarshalling custom scripts")
+	}
+
+	// Create Map for Flow Adaptor to look up when voting
+	var customScriptsMap = make(map[string]shared.CustomScript)
+	for _, script := range customScripts {
+		customScriptsMap[script.Key] = script
+	}
+
 	if os.Getenv("FLOW_ENV") == "" {
 		os.Setenv("FLOW_ENV", "emulator")
 	}
-	a.FlowAdapter = shared.NewFlowClient(os.Getenv("FLOW_ENV"))
+	a.FlowAdapter = shared.NewFlowClient(os.Getenv("FLOW_ENV"), customScriptsMap)
 
 	// Snapshot
 	log.Info().Msgf("SNAPSHOT_BASE_URL: %s", os.Getenv("SNAPSHOT_BASE_URL"))
-	a.SnapshotClient = shared.NewSnapshotClient(os.Getenv("SNAPSHOT_BASE_URL"))
+	a.SnapshotClient = shared.NewSnapshotClient(
+		os.Getenv("SNAPSHOT_BASE_URL"),
+		*a.FlowAdapter,
+	)
 	a.TxOptionsAddresses = strings.Fields(os.Getenv("TX_OPTIONS_ADDRS"))
 
 	// Router

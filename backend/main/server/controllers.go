@@ -283,7 +283,6 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 }
 
 // Communities
-
 func (a *App) getCommunities(w http.ResponseWriter, r *http.Request) {
 	pageParams := getPageParams(*r, 25)
 
@@ -299,10 +298,19 @@ func (a *App) getCommunities(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, response)
 }
 
+func (a *App) searchCommunities(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	results, err := helpers.searchCommuntities(vars["query"])
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+	}
+
+	respondWithJSON(w, http.StatusOK, results)
+}
+
 func (a *App) getCommunity(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
-
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "Invalid Community ID.")
 		return
@@ -396,6 +404,14 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 // Voting Strategies
 func (a *App) getVotingStrategies(w http.ResponseWriter, r *http.Request) {
 	vs, err := models.GetVotingStrategies(a.DB)
+
+	// Add custom scripts for the custom-script strategy
+	for _, strategy := range vs {
+		if strategy.Key == "custom-script" {
+			strategy.Scripts = customScripts
+		}
+	}
+
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -786,8 +802,9 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 func validatePayload(body io.ReadCloser, data interface{}) error {
 	decoder := json.NewDecoder(body)
 	if err := decoder.Decode(&data); err != nil {
-		log.Error().Err(err)
-		return errors.New("Invalid request payload.")
+		errMsg := "Invalid request payload."
+		log.Error().Err(err).Msg(errMsg)
+		return errors.New(errMsg)
 	}
 
 	defer body.Close()

@@ -1,48 +1,36 @@
-import { useCallback, useReducer } from 'react';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
-import { checkResponse } from 'utils';
-import { INITIAL_STATE, defaultReducer } from '../reducers';
+import { useMutation } from '@tanstack/react-query';
+import { uploadFileApiReq } from 'api/file';
 
 export default function useFileUploader({ useModalNotifications = true } = {}) {
-  const [state, dispatch] = useReducer(defaultReducer, {
-    ...INITIAL_STATE,
-    loading: false,
-  });
   const { notifyError } = useErrorHandlerContext();
 
-  const uploadFile = useCallback(
+  const {
+    mutateAsync: uploadFile,
+    isLoading,
+    isError,
+    isSuccess,
+    data,
+    error,
+  } = useMutation(
     async (image) => {
-      dispatch({ type: 'PROCESSING' });
-      const formData = new FormData();
-      formData.append('file', image);
-      const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/upload`;
-      try {
-        const fetchOptions = {
-          method: 'POST',
-          body: formData,
-        };
-        const response = await fetch(url, fetchOptions);
-        const upload = await checkResponse(response);
-        // complete url on IPFS
-        const fileUrl = `${process.env.REACT_APP_IPFS_GATEWAY}${upload.cid}`;
-        dispatch({
-          type: 'SUCCESS',
-          payload: { ...upload, fileUrl },
-        });
-        return { ...upload, fileUrl };
-      } catch (err) {
-        // notify user of error
-        if (useModalNotifications) {
-          notifyError(err, url);
-        }
-        dispatch({ type: 'ERROR', payload: { errorData: err.message } });
-      }
+      return uploadFileApiReq({ image });
     },
-    [dispatch, notifyError, useModalNotifications]
+    {
+      onError: (error) => {
+        if (useModalNotifications) {
+          notifyError(error);
+        }
+      },
+    }
   );
 
   return {
-    ...state,
+    isLoading,
+    isError,
+    isSuccess,
+    data,
+    error,
     uploadFile,
   };
 }
