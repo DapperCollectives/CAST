@@ -3,7 +3,9 @@ import Label from './Label';
 import WrapperResponsive from './WrapperResponsive';
 
 const Message = ({ messageText = '', labelText = null, icon = null } = {}) => {
-  const labelComponent = labelText ? <Label labelText={labelText} /> : null;
+  const labelComponent = labelText ? (
+    <Label labelText={labelText} className="mr-2" />
+  ) : null;
   return (
     <div className="container message-container">
       <div className="has-background-white-ter rounded-sm">
