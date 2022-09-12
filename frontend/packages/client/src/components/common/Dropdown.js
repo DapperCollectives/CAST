@@ -164,7 +164,9 @@ export default function DropdownWrapper({
             {error && (
               <FadeIn>
                 <div className="pl-1 mt-2">
-                  <p className="smaller-text has-text-red">{error?.message}</p>
+                  <p className="smaller-text has-text-danger">
+                    {error?.message}
+                  </p>
                 </div>
               </FadeIn>
             )}

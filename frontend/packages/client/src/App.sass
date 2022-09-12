@@ -1,23 +1,17 @@
-@import url('https://fonts.googleapis.com/css?family=Arimo:regular,bold,italic&subset=latin,latin-ext')
-@import url('https://fonts.googleapis.com/css?family=Roboto+Mono:regular,bold,italic&subset=latin,latin-ext')
+@import url('https://fonts.googleapis.com/css?family=DM+Sans:regular,bold,italic&subset=latin,latin-ext')
 @charset "utf-8"
 
 // Set brand colors
-$green: #0E5B20
-$light-green: #00EF8B
-$red: #B20D0D
-$error-red: #B20D0D
+$success: #3EAE4F
+$danger: #F54339
 $yellow: #FBD84D
 $orange: #F4AF4A
-$light-gray: #DCDCDC
-$lighter-dark-grey: #757575
+$light-grey: #DCDCDC
+$grey: #636363
 
 // Update Bulma's global variables
-$family-primary: "Arimo"
-$family-secondary: "Arimo"
-$family-code: "Roboto Mono"
-$family-monospace: "Roboto Mono"
-$title-family: $family-secondary
+$family-sans-serif: "DM Sans"
+$family-monospace: "DM Sans"
 $body-color: black
 $body-background-color: white
 $primary: $yellow
@@ -34,7 +28,7 @@ $button-border-width: 1px
 $title-size: 2.5rem
 $progress-bar-background-color: $yellow
 $input-color: black
-$white-ter: #F2F2F2
+$white-ter: #F9F9F9
 $border-color-light: #DBDBDB
 
 // Import only what you need from Bulma
@@ -148,10 +142,10 @@ code
 	border-radius: 50%
 .border-light
 	border: 1px solid $grey-lighter
-.border-lighter-dark-grey
-	border: 1px solid $lighter-dark-grey
+.border-grey
+	border: 1px solid $grey
 .border-dashed-dark
-	border: 2px dashed $lighter-dark-grey
+	border: 2px dashed $grey
 .flex-1
 	flex: 1 0 0
 .flex-2
@@ -355,10 +349,6 @@ hr
 	font-size: 0.88rem !important
 .smaller-text
 	font-size: 0.75rem !important
-.has-text-back
-	color: #000000 !important
-.has-text-red
-	color: $red
 
 @import './components/StepByStep/StepByStep.sass'
 
@@ -603,12 +593,12 @@ span[data-tooltip]
 .table
 	border-radius: 8px
 	border-style: hidden
-	box-shadow: 0 0 0 1px $light-gray
+	box-shadow: 0 0 0 1px $light-grey
 	td
 		vertical-align: middle !important
 		height: 64px !important
-	.has-background-light-gray
-		background-color: $light-gray
+	.has-background-light-grey
+		background-color: $light-grey
 	thead th
 		border-width: 0 0 1px !important
 	.index-cell
@@ -672,7 +662,7 @@ span[data-tooltip]
 .form-error-input-icon
 	padding-right: 4.5rem !important
 .form-error-input-border
-	border-color: $error-red  !important
+	border-color: $danger  !important
 
 .form-checkbox
 	-webkit-appearance: none
@@ -691,7 +681,6 @@ span[data-tooltip]
 .image-caption-draft-js
 	.public-DraftStyleDefault-block.public-DraftStyleDefault-ltr
 		margin: 0px !important
-		font-family: 'Arimo'
 		font-style: normal
 		font-weight: 400
 		font-size: 12px

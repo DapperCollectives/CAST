@@ -160,7 +160,7 @@ const StepTwo = ({
                   <div className="column p-0 is-12">
                     <FadeIn>
                       <div className="pl-1 mt-2 mb-4">
-                        <p className="smaller-text has-text-red">
+                        <p className="smaller-text has-text-danger">
                           {errors?.startTime?.message}
                         </p>
                       </div>
@@ -230,7 +230,7 @@ const StepTwo = ({
                   <div className="column p-0 is-12">
                     <FadeIn>
                       <div className="pl-1 mt-2 mb-4">
-                        <p className="smaller-text has-text-red">
+                        <p className="smaller-text has-text-danger">
                           {errors?.endTime?.message}
                         </p>
                       </div>

@@ -32,7 +32,7 @@ const ImageChoices = ({ error, control } = {}) => {
     <>
       <div className="columns flex-1">
         <div className="column pt-4">
-          <p className="smaller-text has-text-gray">
+          <p className="smaller-text has-text-grey">
             Accepted files: PNG, JPG, GIF
           </p>
         </div>

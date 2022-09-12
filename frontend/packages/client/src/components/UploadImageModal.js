@@ -308,13 +308,13 @@ export default function UploadImageModal({
               </div>
             )}
             <div className="py-4">
-              <p className="smaller-text has-text-gray">
+              <p className="smaller-text has-text-grey">
                 Accepted files: PNG, JPG, GIF
               </p>
             </div>
             {errorMessage && (
               <div className="pb-4 transition-all">
-                <p className="smaller-text has-text-red">{errorMessage}</p>
+                <p className="smaller-text has-text-danger">{errorMessage}</p>
               </div>
             )}
             {/* For now this is a single input */}
