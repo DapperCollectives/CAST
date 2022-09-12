@@ -216,7 +216,7 @@ export const LinkOut = ({ width = '18', height = '18' }) => (
   </svg>
 );
 
-export const Logo = ({ width = '110', height = '32' }) => (
+export const Logo = ({ width = '146', height = '34' }) => (
   <svg
     width={width}
     height={height}
