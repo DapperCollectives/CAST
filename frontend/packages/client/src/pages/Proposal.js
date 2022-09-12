@@ -225,7 +225,7 @@ export default function ProposalPage() {
       modalContext.openModal(
         React.createElement(Error, {
           error: (
-            <p className="has-text-red">
+            <p className="has-text-danger">
               <b>{response.error}</b>
             </p>
           ),
@@ -445,7 +445,7 @@ export default function ProposalPage() {
             <div>
               <WrapperResponsive
                 as="h2"
-                classNames="title mt-5 is-4 has-text-back has-text-weight-normal"
+                classNames="title mt-5 is-4 has-text-black has-text-weight-normal"
                 extraStylesMobile={{ marginBottom: '30px' }}
               >
                 {proposal.name}
