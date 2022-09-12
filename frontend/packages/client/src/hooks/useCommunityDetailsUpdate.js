@@ -25,7 +25,6 @@ export default function useCommunityDetailsUpdate() {
       const timestamp = Date.now().toString();
       const hexTime = Buffer.from(timestamp).toString('hex');
 
-      console.log(updatePayload);
       const { addr } = user;
       const [compositeSignatures, voucher] = await signMessageByWalletProvider(
         user?.services[0].uid,
