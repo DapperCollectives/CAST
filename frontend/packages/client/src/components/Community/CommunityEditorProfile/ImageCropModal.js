@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import { useState } from 'react';
 import Cropper from 'react-easy-crop';
+import { ActionButton } from 'components';
 
 // using https://www.npmjs.com/package/react-avatar-editor
 
@@ -80,9 +81,9 @@ export default function ImageCropModal({ logoImage, onDone, onDismiss } = {}) {
       </header>
       <section
         className="modal-card-body py-0 px-4"
-        style={{ minHeight: '480px', position: 'relative' }}
+        style={{ minHeight: '550px' }}
       >
-        <div>
+        <div style={{ minHeight: '350px', position: 'relative' }}>
           <Cropper
             image={logoImage.imageUrl}
             crop={crop}
@@ -96,7 +97,7 @@ export default function ImageCropModal({ logoImage, onDone, onDismiss } = {}) {
           />
           <image src={logoImage.imageUrl} ref={imageRef} alt="" />
         </div>
-        <div>
+        <div style={{ minHeight: '100px', position: 'relative' }}>
           <div className="columns is-multiline">
             <div className="column is-12">
               <di>
@@ -116,7 +117,7 @@ export default function ImageCropModal({ logoImage, onDone, onDismiss } = {}) {
             </div>
             <div className="column is-12">
               <div className="column is-12">
-                <button onClick={handleResize}>done</button>
+                <ActionButton onClick={handleResize} label="done" />
               </div>
             </div>
           </div>

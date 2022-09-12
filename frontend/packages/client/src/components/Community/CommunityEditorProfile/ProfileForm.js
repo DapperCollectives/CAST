@@ -109,7 +109,7 @@ export default function ProfileForm({
   );
 
   useEffect(() => {
-    if (logoImage.cropped === false && !isOpen) {
+    if (logoImage?.cropped === false && !isOpen) {
       openModal(
         <ImageCropModal
           onDismiss={() => {

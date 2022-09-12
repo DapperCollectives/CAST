@@ -37,7 +37,7 @@ export default function CommunityEditorProfile({
         communityName: name,
         communityDescription: body,
         communityCategory: category,
-        logo: logo ? { imageUrl: logo } : undefined,
+        logo: logo ? { imageUrl: logo, cropped: true } : undefined,
         banner: banner ? { imageUrl: banner } : undefined,
         communityTerms: terms,
       },
