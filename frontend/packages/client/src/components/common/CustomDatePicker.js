@@ -51,7 +51,7 @@ export default function CustomDatePicker({
         <div className="column p-0 is-12">
           <FadeIn>
             <div className="pl-1 mt-2 mb-4">
-              <p className="smaller-text has-text-red">{errorMessage}</p>
+              <p className="smaller-text has-text-danger">{errorMessage}</p>
             </div>
           </FadeIn>
         </div>

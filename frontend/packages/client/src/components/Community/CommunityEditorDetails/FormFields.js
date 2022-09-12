@@ -78,7 +78,7 @@ export default function Form({
               {errorInField && (
                 <FadeIn>
                   <div className="pl-1 mt-2">
-                    <p className="smaller-text has-text-red">
+                    <p className="smaller-text has-text-danger">
                       {errorInField.message}
                     </p>
                   </div>

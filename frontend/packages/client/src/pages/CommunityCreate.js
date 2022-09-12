@@ -128,7 +128,9 @@ export default function CommunityCreate() {
                 <ul>
                   {errorMessages.map((type, index) => (
                     <li key={`error-${index}`}>
-                      <p className="smaller-text mt-2 has-text-red">- {type}</p>
+                      <p className="smaller-text mt-2 has-text-danger">
+                        - {type}
+                      </p>
                     </li>
                   ))}
                 </ul>
@@ -160,7 +162,6 @@ export default function CommunityCreate() {
     submittingMessage: 'Creating community...',
     passNextToComp: true,
     passSubmitToComp: true,
-    showActionButtonLeftPannel: true,
     preStep: <StartSteps />,
     blockNavigationOut: true && !data,
     blockNavigationText:
