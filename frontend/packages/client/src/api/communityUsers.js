@@ -29,7 +29,7 @@ export const addUserToCommunityUserApiRep = async ({
   };
 
   const response = await fetch(url, fetchOptions);
-  return checkResponse(response);
+  return await checkResponse(response);
 };
 
 export const deleteCommunityMemberApiReq = async ({
@@ -60,7 +60,7 @@ export const deleteCommunityMemberApiReq = async ({
   };
 
   const response = await fetch(url, fetchOptions);
-  return checkResponse(response);
+  return await checkResponse(response);
 };
 
 export const communityUsersApiReq = async ({
@@ -74,5 +74,5 @@ export const communityUsersApiReq = async ({
   }?count=${count}&start=${start}`;
 
   const response = await fetch(url);
-  return checkResponse(response);
+  return await checkResponse(response);
 };

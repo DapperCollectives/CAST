@@ -1,6 +1,6 @@
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
-import { checkResponse } from 'utils';
 import { useQuery } from '@tanstack/react-query';
+import { fetchProposalUserVotes } from 'api/proposals';
 
 export default function useVotesForAddress({
   proposalIds,
@@ -10,14 +10,10 @@ export default function useVotesForAddress({
   const { notifyError } = useErrorHandlerContext();
   const { isLoading, isError, data, error } = useQuery(
     ['user-votes', addr, proposalIds],
-    async () => {
-      const response = await fetch(
-        `${
-          process.env.REACT_APP_BACK_END_SERVER_API
-        }/votes/${addr}?proposalIds=[${proposalIds.join(',')}]`
-      );
+    async ({ queryKey }) => {
+      const [, addr, proposalIds] = queryKey ?? [];
 
-      const userVotes = await checkResponse(response);
+      const userVotes = await fetchProposalUserVotes({ addr, proposalIds });
 
       return (userVotes?.data ?? []).map(({ proposalId, choice }) => ({
         [proposalId]: choice,

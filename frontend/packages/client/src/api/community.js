@@ -15,17 +15,17 @@ export const fetchLeaderBoard = async (
   pageSize = DEFAULT_PAGE_SIZE
 ) => {
   const response = await fetch(getLeaderBoardUrl(communityId, addr, pageSize));
-  return checkResponse(response);
+  return await checkResponse(response);
 };
 
 export const fetchActiveStrategies = async (communityId) => {
   const response = await fetch(`${COMMUNITIES_URL}/${communityId}/strategies`);
-  return checkResponse(response);
+  return await checkResponse(response);
 };
 
 export const fetchCommunityDetails = async (communityId) => {
   const response = await fetch(`${COMMUNITIES_URL}/${communityId}`);
-  return checkResponse(response);
+  return await checkResponse(response);
 };
 
 export const createCommunityApiReq = async ({
@@ -92,7 +92,7 @@ export const createCommunityApiReq = async ({
 
   const response = await fetch(COMMUNITIES_URL, fetchOptions);
 
-  return checkResponse(response);
+  return await checkResponse(response);
 };
 
 export const updateCommunityDetailsApiReq = async ({
@@ -111,5 +111,5 @@ export const updateCommunityDetailsApiReq = async ({
     `${COMMUNITIES_URL}/${communityId}`,
     fetchOptions
   );
-  return checkResponse(response);
+  return await checkResponse(response);
 };

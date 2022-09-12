@@ -35,7 +35,7 @@ export default function useCommunityProposalsWithVotes({
       return {
         queryKey: ['user-votes', addr, proposalIds],
         queryFn: async () => {
-          const userVotes = await fetchProposalUserVotes(addr, proposalIds);
+          const userVotes = await fetchProposalUserVotes({ addr, proposalIds });
           const mergedMapResults = assign(
             {},
             ...proposalIds.map((id) => ({ [id]: null })),
