@@ -1,6 +1,6 @@
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
-import { checkResponse } from 'utils';
 import { useMutation } from '@tanstack/react-query';
+import { uploadFileApiReq } from 'api/file';
 
 export default function useFileUploader({ useModalNotifications = true } = {}) {
   const { notifyError } = useErrorHandlerContext();
@@ -14,18 +14,7 @@ export default function useFileUploader({ useModalNotifications = true } = {}) {
     error,
   } = useMutation(
     async (image) => {
-      const formData = new FormData();
-      formData.append('file', image);
-      const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/upload`;
-      const fetchOptions = {
-        method: 'POST',
-        body: formData,
-      };
-      const response = await fetch(url, fetchOptions);
-      const upload = await checkResponse(response);
-      // complete url on IPFS
-      const fileUrl = `${process.env.REACT_APP_IPFS_GATEWAY}${upload.cid}`;
-      return { ...upload, fileUrl };
+      return uploadFileApiReq({ image });
     },
     {
       onError: (error) => {
