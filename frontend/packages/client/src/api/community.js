@@ -1,4 +1,4 @@
-import { COMMUNITIES_URL } from './constants';
+import { API_BASE_URL, COMMUNITIES_URL } from './constants';
 import { checkResponse, setDefaultValue } from 'utils';
 import networks from 'networks';
 
@@ -15,17 +15,17 @@ export const fetchLeaderBoard = async (
   pageSize = DEFAULT_PAGE_SIZE
 ) => {
   const response = await fetch(getLeaderBoardUrl(communityId, addr, pageSize));
-  return await checkResponse(response);
+  return checkResponse(response);
 };
 
 export const fetchActiveStrategies = async (communityId) => {
   const response = await fetch(`${COMMUNITIES_URL}/${communityId}/strategies`);
-  return await checkResponse(response);
+  return checkResponse(response);
 };
 
 export const fetchCommunityDetails = async (communityId) => {
   const response = await fetch(`${COMMUNITIES_URL}/${communityId}`);
-  return await checkResponse(response);
+  return checkResponse(response);
 };
 
 export const createCommunityApiReq = async ({
@@ -92,7 +92,7 @@ export const createCommunityApiReq = async ({
 
   const response = await fetch(COMMUNITIES_URL, fetchOptions);
 
-  return await checkResponse(response);
+  return checkResponse(response);
 };
 
 export const updateCommunityDetailsApiReq = async ({
@@ -111,5 +111,12 @@ export const updateCommunityDetailsApiReq = async ({
     `${COMMUNITIES_URL}/${communityId}`,
     fetchOptions
   );
-  return await checkResponse(response);
+  return checkResponse(response);
+};
+
+export const fetchCommunitiesForHomePage = async ({ count, start }) => {
+  const url = `${API_BASE_URL}/communities-for-homepage?count=${count}&start=${start}`;
+
+  const response = await fetch(url);
+  return checkResponse(response);
 };

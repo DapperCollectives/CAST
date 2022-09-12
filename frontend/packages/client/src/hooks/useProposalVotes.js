@@ -37,6 +37,7 @@ export default function useProposalVotes({
       onError: (error) => {
         notifyError(error);
       },
+      keepPreviousData: true,
     }
   );
 

@@ -1,6 +1,6 @@
 import { useErrorHandlerContext } from '../contexts/ErrorHandler';
-import { checkResponse } from 'utils';
 import { useInfiniteQuery } from '@tanstack/react-query';
+import { fetchCommunitiesForHomePage } from 'api/community';
 import { PAGINATION_INITIAL_STATE } from '../reducers';
 
 export default function useFeaturedCommunities({
@@ -11,10 +11,7 @@ export default function useFeaturedCommunities({
   const { isLoading, isError, data, error, fetchNextPage } = useInfiniteQuery(
     ['communities-for-homepage'],
     async ({ pageParam = 0 }) => {
-      const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities-for-homepage?count=${count}&start=${pageParam}`;
-
-      const response = await fetch(url);
-      return await checkResponse(response);
+      return fetchCommunitiesForHomePage({ count, start: pageParam });
     },
     {
       getNextPageParam: (lastPage) => {

@@ -17,5 +17,5 @@ export const addFungibleTokenApiReq = async ({ addr, name, path }) => {
   };
 
   const response = await fetch(url, fetchOptions);
-  return await checkResponse(response);
+  return checkResponse(response);
 };

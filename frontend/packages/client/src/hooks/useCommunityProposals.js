@@ -38,6 +38,7 @@ export default function useCommunityProposals({
       onError: (error) => {
         notifyError(error);
       },
+      keepPreviousData: true,
     }
   );
 

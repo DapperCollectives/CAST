@@ -34,6 +34,7 @@ export default function useUserCommunities({
       onError: (error) => {
         notifyError(error);
       },
+      keepPreviousData: !!addr,
     }
   );
 

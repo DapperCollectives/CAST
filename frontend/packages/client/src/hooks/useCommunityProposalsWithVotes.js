@@ -33,6 +33,7 @@ export default function useCommunityProposalsWithVotes({
     queries: pages.map((page) => {
       const proposalIds = page.data?.map((datum) => datum.id);
       return {
+        enabled: !!addr,
         queryKey: ['user-votes', addr, proposalIds],
         queryFn: async () => {
           const userVotes = await fetchProposalUserVotes({ addr, proposalIds });

@@ -40,6 +40,7 @@ export default function useCommunityUsers({
       onError: (error) => {
         notifyError(error);
       },
+      keepPreviousData: true,
     }
   );
 

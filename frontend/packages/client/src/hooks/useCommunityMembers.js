@@ -21,8 +21,7 @@ export default function useCommunityMembers({
       const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}/users?count=${count}&start=${start}`;
       try {
         const response = await fetch(url);
-        const members = await checkResponse(response);
-        return members;
+        return checkResponse(response);
       } catch (err) {
         throw err;
       }
@@ -36,6 +35,7 @@ export default function useCommunityMembers({
       onError: (error) => {
         notifyError(error);
       },
+      keepPreviousData: true,
     }
   );
 

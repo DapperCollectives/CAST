@@ -10,7 +10,7 @@ export const fetchProposalUserVotes = async ({ addr, proposalIds }) => {
   const response = await fetch(
     `${API_BASE_URL}/votes/${addr}?proposalIds=[${proposalIds.join(',')}]`
   );
-  return await checkResponse(response);
+  return checkResponse(response);
 };
 
 export const fetchProposal = async ({ proposalId }) => {
@@ -61,7 +61,7 @@ export const createProposalApiReq = async ({
   };
 
   const response = await fetch(url, fetchOptions);
-  return await checkResponse(response);
+  return checkResponse(response);
 };
 
 export const updateProposalApiReq = async ({
@@ -115,7 +115,7 @@ export const fetchProposalsByStatus = async ({
   }`;
 
   const response = await fetch(url);
-  return await checkResponse(response);
+  return checkResponse(response);
 };
 
 export const voteOnProposalApiReq = async ({
@@ -144,11 +144,11 @@ export const voteOnProposalApiReq = async ({
     `${PROPOSALS_URL}/${proposalId}/votes`,
     fetchOptions
   );
-  return await checkResponse(response);
+  return checkResponse(response);
 };
 
 export const fetchProposalResults = async ({ proposalId }) => {
   const response = await fetch(`${PROPOSALS_URL}/${proposalId}/results`);
 
-  return await checkResponse(response);
+  return checkResponse(response);
 };
