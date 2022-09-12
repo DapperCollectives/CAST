@@ -66,6 +66,7 @@ export default function HomePage() {
     <>
       {showToolTip && (
         <TooltipMessage
+          className="my-6"
           onClose={() => {
             setValue(false);
           }}

@@ -13,7 +13,6 @@ const SignInOutButton = ({
   openWalletModal,
   injectedProvider,
   closeModal,
-  expandContainer = false,
 }) => {
   const notMobile = useMediaQuery();
 
@@ -127,7 +126,7 @@ const SignInOutButton = ({
           id="dropdown-menu"
           role="menu"
           ref={dropdownRef}
-          style={!notMobile ? { left: '-160px' } : {}}
+          style={!notMobile ? { left: '-160px' } : { left: '-130px' }}
         >
           <div className="dropdown-content p-0" style={{ width: '277px' }}>
             <div className="px-4 pt-4 pb-2">
