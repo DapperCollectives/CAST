@@ -1,4 +1,4 @@
-import { API_BASE_URL } from './constants';
+import { COMMUNITIES_URL } from './constants';
 import { checkResponse } from 'utils';
 
 export const addUserToCommunityUserApiRep = async ({
@@ -10,7 +10,7 @@ export const addUserToCommunityUserApiRep = async ({
   signingAddr,
   userType = 'member',
 }) => {
-  const url = `${API_BASE_URL}/communities/${communityId}/users`;
+  const url = `${COMMUNITIES_URL}/${communityId}/users`;
 
   const fetchOptions = {
     method: 'POST',
@@ -41,7 +41,7 @@ export const deleteCommunityMemberApiReq = async ({
   userType = 'member',
   signingAddr,
 }) => {
-  const url = `${API_BASE_URL}/communities/${communityId}/users/${addr}/${userType}`;
+  const url = `${COMMUNITIES_URL}/${communityId}/users/${addr}/${userType}`;
 
   const fetchOptions = {
     method: 'DELETE',
@@ -69,7 +69,7 @@ export const communityUsersApiReq = async ({
   count,
   start,
 }) => {
-  const url = `${API_BASE_URL}/communities/${communityId}/users${
+  const url = `${COMMUNITIES_URL}/${communityId}/users${
     type ? `/type/${type}` : ''
   }?count=${count}&start=${start}`;
 
