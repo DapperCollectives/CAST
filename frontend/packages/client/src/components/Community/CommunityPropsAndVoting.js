@@ -59,7 +59,7 @@ export default function CommunityProposalsAndVoting({
                 <ul>
                   {errorMessages.map((type, index) => (
                     <li key={`error-${index}`}>
-                      <p className="smaller-text mt-2 has-text-red">
+                      <p className="smaller-text mt-2 has-text-danger">
                         - {kebabToString(type)}
                       </p>
                     </li>

@@ -79,7 +79,7 @@ const TextBasedChoices = ({
             {errorInField && (
               <FadeIn>
                 <div className="pl-1 mt-2 mb-4">
-                  <p className="smaller-text has-text-red">
+                  <p className="smaller-text has-text-danger">
                     {errorInField.message}
                   </p>
                 </div>
@@ -91,7 +91,7 @@ const TextBasedChoices = ({
       {error?.message && (
         <FadeIn>
           <div className="pl-1">
-            <p className="smaller-text has-text-red">{error.message}</p>
+            <p className="smaller-text has-text-danger">{error.message}</p>
           </div>
         </FadeIn>
       )}

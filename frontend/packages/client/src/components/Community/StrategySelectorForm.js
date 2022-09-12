@@ -39,7 +39,7 @@ export default function StrategySelectorForm({
     }
   }, [strategies, onStrategySelection, existingStrategies]);
 
-  const { data: allVotingStrategies, loading: loadingAllStrategies } =
+  const { data: allVotingStrategies, isLoading: loadingAllStrategies } =
     useVotingStrategies();
   const { addFungibleToken } = useAddFungibleToken();
 
@@ -90,7 +90,7 @@ export default function StrategySelectorForm({
               <div className="is-flex is-align-items-center is-justify-content-center">
                 <ul>
                   <li>
-                    <p className="smaller-text mt-2 has-text-red">
+                    <p className="smaller-text mt-2 has-text-danger">
                       - {getStrategyName(allVotingStrategies, strategy)}
                     </p>
                   </li>

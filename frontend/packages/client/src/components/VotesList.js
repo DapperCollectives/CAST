@@ -35,10 +35,9 @@ const ShowMoreOrLess = ({ showMore, showLess, enableMore, enableLess }) => (
 
 const VotesList = ({ proposalId, castVote }) => {
   const {
-    getProposalVotes,
-    fetchMore,
+    fetchNextPage,
     resetResults,
-    loading: loadingVotes,
+    isLoading: loadingVotes,
     data: votes,
     pagination: { next, totalRecords: totalVotes },
   } = useProposalVotes({ proposalId, count: 10 });
@@ -49,10 +48,9 @@ const VotesList = ({ proposalId, castVote }) => {
     if (castVote) {
       (async () => {
         resetResults();
-        await getProposalVotes();
       })();
     }
-  }, [castVote, getProposalVotes, resetResults]);
+  }, [castVote, resetResults]);
 
   const scrollToBottom = () => {
     window.scrollTo({
@@ -65,13 +63,12 @@ const VotesList = ({ proposalId, castVote }) => {
 
   const showMore = async () => {
     if (next > 0) {
-      await fetchMore();
+      await fetchNextPage();
       scrollToBottom();
     }
   };
   const showLess = async () => {
-    resetResults();
-    await getProposalVotes();
+    await resetResults();
     scrollToBottom();
   };
 

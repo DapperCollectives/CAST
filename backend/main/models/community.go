@@ -249,8 +249,7 @@ func (c *Community) CreateCommunity(db *s.Database) error {
 func (c *Community) UpdateCommunity(db *s.Database, p *UpdateCommunityRequestPayload) error {
 	_, err := db.Conn.Exec(
 		db.Context,
-		`
-	UPDATE communities
+		`UPDATE communities
 	SET name = COALESCE($1, name), 
 	body = COALESCE($2, body), 
 	logo = COALESCE($3, logo), 
@@ -306,6 +305,32 @@ func (c *Community) CanUpdateCommunity(db *s.Database, addr string) error {
 		return fmt.Errorf("address %s does not have permission to update community with ID %d", addr, c.ID)
 	}
 	return nil
+}
+
+func SearchForCommunity(db *s.Database, query string) ([]Community, error) {
+	var communities []Community
+	rows, err := db.Conn.Query(
+		db.Context,
+		`SELECT name FROM communities WHERE SIMILARITY(name, $1) > 0.1`,
+		query,
+	)
+	if err != nil {
+		return communities, fmt.Errorf("error searching for a community with the the param %s", query)
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var c Community
+		err = rows.Scan(&c.Name)
+		if err != nil {
+			return communities, fmt.Errorf("error scanning community row: %v", err)
+		}
+		communities = append(communities, c)
+	}
+
+	fmt.Printf("communitites : %v", communities)
+	return communities, nil
 }
 
 func MatchStrategyByProposal(s []Strategy, strategyToMatch string) (Strategy, error) {

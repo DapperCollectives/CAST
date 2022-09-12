@@ -47,7 +47,7 @@ const UploadArea = ({ getRootProps, getInputProps, errorMessage }) => {
         </div>
       </div>
       {errorMessage && (
-        <p className="small-text pt-2 has-text-red">* {errorMessage}</p>
+        <p className="small-text pt-2 has-text-danger">* {errorMessage}</p>
       )}
     </>
   );
@@ -71,7 +71,11 @@ export default function ImageChoiceUploader({
     text,
   });
 
-  const { uploadFile, loading, error } = useFileUploader({
+  const {
+    uploadFile,
+    isLoading: loading,
+    error,
+  } = useFileUploader({
     useModalNotifications: false,
   });
 
@@ -190,7 +194,7 @@ export default function ImageChoiceUploader({
           {errorParam?.choiceImgUrl?.message && (
             <FadeIn>
               <div className="pl-1 pt-2">
-                <p className="smaller-text has-text-red">
+                <p className="smaller-text has-text-danger">
                   {errorParam.choiceImgUrl.message}
                 </p>
               </div>
@@ -265,7 +269,7 @@ export default function ImageChoiceUploader({
       {errorParam?.value?.message && (
         <FadeIn>
           <div className="pl-1 pt-2">
-            <p className="smaller-text has-text-red">
+            <p className="smaller-text has-text-danger">
               {errorParam.value.message}
             </p>
           </div>

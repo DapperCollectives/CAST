@@ -4,7 +4,10 @@ import { Close, InfoOutLine } from 'components/Svg';
 import { useMediaQuery } from 'hooks';
 import classnames from 'classnames';
 
-export default function TooltipMesssage({ onClose = () => {} } = {}) {
+export default function TooltipMesssage({
+  onClose = () => {},
+  className = '',
+} = {}) {
   const notMobile = useMediaQuery();
 
   const [closeToolTip, setCloseToolTip] = useState(false);
@@ -23,6 +26,10 @@ export default function TooltipMesssage({ onClose = () => {} } = {}) {
     { 'is-align-flex-center is-align-items-center pl-2 pr-3': notMobile },
     { 'is-align-flex-start pt-2 pl-4 pr-3': !notMobile }
   );
+  const tooltipClasses = classnames(
+    'container has-background-white-ter rounded-sm',
+    className
+  );
 
   return (
     <FadeInOut
@@ -31,7 +38,7 @@ export default function TooltipMesssage({ onClose = () => {} } = {}) {
         onClose();
       }}
     >
-      <div className="container message-container has-background-white-ter rounded-sm">
+      <div className={tooltipClasses}>
         <div className="columns is-mobile m-0 p-0">
           <div className="column is-flex is-flex-grow-1 pl-3" style={styles}>
             <div className={classesInfoOutLine}>

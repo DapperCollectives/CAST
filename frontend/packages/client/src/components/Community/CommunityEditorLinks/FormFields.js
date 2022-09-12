@@ -38,7 +38,7 @@ export default function Form({
           {errors[formField.fieldName] && (
             <FadeIn>
               <div className="pl-1 mt-2">
-                <p className="smaller-text has-text-red">
+                <p className="smaller-text has-text-danger">
                   {errors[formField.fieldName]?.message}
                 </p>
               </div>
