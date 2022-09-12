@@ -1,8 +1,8 @@
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useWebContext } from 'contexts/Web3';
 import { CAST_VOTE_TX } from 'const';
-import { checkResponse } from 'utils';
 import { useMutation } from '@tanstack/react-query';
+import { voteOnProposalApiReq } from 'api/proposals';
 
 export default function useVoteOnProposal() {
   const { notifyError } = useErrorHandlerContext();
@@ -32,25 +32,14 @@ export default function useVoteOnProposal() {
         throw new Error('No valid user signature found.');
       }
 
-      const fetchOptions = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...voteData,
-          compositeSignatures,
-          message: hexMessage,
-          timestamp,
-          voucher,
-        }),
-      };
-      const { id } = proposal;
-      const response = await fetch(
-        `${process.env.REACT_APP_BACK_END_SERVER_API}/proposals/${id}/votes`,
-        fetchOptions
-      );
-      return await checkResponse(response);
+      return voteOnProposalApiReq({
+        voteData,
+        hexMessage,
+        timestamp,
+        compositeSignatures,
+        voucher,
+        proposalId: proposal.id,
+      });
     },
     {
       onError: (error) => {
