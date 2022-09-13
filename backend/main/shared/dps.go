@@ -82,8 +82,7 @@ func NewDpsClient(flowEnv string) *DpsAdapter {
 	client := dpsApi.NewAPIClient(conn)
 	index := dpsApi.IndexFromAPI(client, codec)
 
-	cacheSize := uint64(100_000_000)
-	_invoker, err := invoker.New(index, invoker.WithCacheSize(cacheSize))
+	_invoker, err := invoker.New(index)
 	adapter.Invoker = _invoker
 
 	if err != nil {
@@ -198,11 +197,6 @@ func (dps *DpsAdapter) GetAccountAtBlockHeight(addr string, blockheight uint64) 
 		return nil, err
 	}
 	account := *_account
-
-	log.Info().Msgf("account addr: %s", account.Address)
-	log.Info().Msgf("account balance: %d", account.Balance)
-	log.Info().Msgf("account keys: %v", account.Keys)
-	log.Info().Msgf("account contracts: %v", account.Contracts)
 
 	return &account, nil
 }
