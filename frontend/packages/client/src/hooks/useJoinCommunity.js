@@ -33,6 +33,7 @@ export default function useJoinCommunity() {
         compositeSignatures,
         voucher,
         userType: 'member',
+        signingAddr: addr,
       });
     },
     {
@@ -74,6 +75,7 @@ export default function useJoinCommunity() {
         hexTime,
         compositeSignatures,
         voucher,
+        signingAddr: addr,
       });
     },
     {
