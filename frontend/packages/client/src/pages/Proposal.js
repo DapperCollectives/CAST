@@ -553,7 +553,6 @@ export default function ProposalPage() {
                   startTime={proposal.startTime}
                   endTime={proposal.endTime}
                   openStrategyModal={openStrategyModal}
-                  className="has-background-white-ter"
                 />
               </div>
             </div>
