@@ -10,11 +10,11 @@ run:
 	./${BINARY_NAME}
 
 test:
-	go test -v -cover ./...
+	go test -v -cover ./tests
 
 	# creates proposals against local db for manual emulator testing
 proposals:
-	go test -v ./... -run CreateManyProposals -amount=4 -db=local
+	go test -v ./tests -run CreateManyProposals -amount=4 -db=local
 
 build_and_run: build run
 

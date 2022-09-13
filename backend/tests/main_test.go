@@ -10,7 +10,7 @@ import (
 
 	"github.com/DapperCollectives/CAST/backend/main/server"
 	"github.com/DapperCollectives/CAST/backend/main/shared"
-	utils "github.com/DapperCollectives/CAST/backend/main/test_utils"
+	utils "github.com/DapperCollectives/CAST/backend/tests/test_utils"
 	"github.com/bjartek/overflow/overflow"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
@@ -26,7 +26,7 @@ func TestMain(m *testing.M) {
 	var err error
 
 	emulator := overflow.NewOverflowEmulator()
-	emulator.Config("../flow.json")
+	emulator.Config("./flow.json")
 	emulator.BasePath("./main/cadence")
 	O = emulator.Start()
 
@@ -48,7 +48,7 @@ func TestMain(m *testing.M) {
 	A.Initialize()
 
 	// Load custom scripts for strategies
-	scripts, err := ioutil.ReadFile("./main/cadence/scripts/custom/scripts.json")
+	scripts, err := ioutil.ReadFile("../main/cadence/scripts/custom/scripts.json")
 	if err != nil {
 		log.Error().Err(err).Msg("Error Reading Custom Strategy scripts.")
 	}

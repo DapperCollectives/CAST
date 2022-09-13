@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/DapperCollectives/CAST/backend/main/models"
-	"github.com/DapperCollectives/CAST/backend/main/test_utils"
+	"github.com/DapperCollectives/CAST/backend/tests/test_utils"
 	"github.com/stretchr/testify/assert"
 )
 
