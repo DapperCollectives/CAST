@@ -5,7 +5,7 @@ import { useModalContext } from 'contexts/NotificationModal';
 import { Form, WrapperResponsive } from 'components';
 import { Upload } from 'components/Svg';
 import { MAX_AVATAR_FILE_SIZE, MAX_FILE_SIZE } from 'const';
-import { getReducedImg } from 'utils';
+import { getCroppedImg } from 'utils';
 import classnames from 'classnames';
 import FormFields from './FormFields';
 import ImageCropModal from './ImageCropModal';
@@ -26,11 +26,9 @@ export default function ProfileForm({
 } = {}) {
   const { notifyError } = useErrorHandlerContext();
 
-  console.log(logoImage);
-
   const { openModal, closeModal, isOpen } = useModalContext();
   const onDrop = useCallback(
-    (filename, dataKey, maxFileSize, maxWidth) => (acceptedFiles) => {
+    (filename, dataKey, maxFileSize) => (acceptedFiles) => {
       acceptedFiles.forEach((imageFile) => {
         // validate type
         if (
@@ -56,27 +54,13 @@ export default function ProfileForm({
 
         const img = new Image();
         img.onload = function (e) {
-          // reduce images if necessary before upload
-          if (e.target.width > maxWidth) {
-            getReducedImg(e.target, maxWidth, filename).then((result) => {
-              setValue(
-                dataKey,
-                {
-                  imageUrl: imageAsURL,
-                  file: result.imageFile,
-                  cropped: false,
-                },
-                { shouldValidate: true, shouldDirty: true }
-              );
-            });
-          } else {
-            setValue(
-              dataKey,
-              { imageUrl: imageAsURL, file: imageFile, cropped: false },
-              { shouldValidate: true, shouldDirty: true }
-            );
-          }
+          setValue(
+            dataKey,
+            { imageUrl: imageAsURL, file: e.target, cropped: false },
+            { shouldValidate: true, shouldDirty: true }
+          );
         };
+
         img.src = imageAsURL;
       });
     },
@@ -85,7 +69,7 @@ export default function ProfileForm({
 
   const { getRootProps: getLogoRootProps, getInputProps: getLogoInputProps } =
     useDropzone({
-      onDrop: onDrop('community_image', 'logo', MAX_AVATAR_FILE_SIZE, 150),
+      onDrop: onDrop('community_image', 'logo', MAX_AVATAR_FILE_SIZE),
       maxFiles: 1,
       accept: 'image/jpeg,image/png',
       useFsAccessApi: false,
@@ -95,7 +79,7 @@ export default function ProfileForm({
     getRootProps: getBannerRootProps,
     getInputProps: getBannerInputProps,
   } = useDropzone({
-    onDrop: onDrop('community_banner', 'banner', MAX_FILE_SIZE, 1200),
+    onDrop: onDrop('community_banner', 'banner', MAX_FILE_SIZE),
     maxFiles: 1,
     accept: 'image/jpeg,image/png',
     useFsAccessApi: false,
@@ -112,6 +96,12 @@ export default function ProfileForm({
     if (logoImage?.cropped === false && !isOpen) {
       openModal(
         <ImageCropModal
+          cropperFn={getCroppedImg({
+            dWidth: 150,
+            dHeight: 150,
+            fileName: 'logoImage',
+          })}
+          cropShape="round"
           onDismiss={() => {
             setValue(
               'logo',
@@ -128,7 +118,7 @@ export default function ProfileForm({
             setValue(
               'logo',
               {
-                file: image.imageBlob,
+                file: image.file,
                 imageUrl: image.imageUrl,
                 cropped: true,
               },
@@ -137,7 +127,6 @@ export default function ProfileForm({
             closeModal();
           }}
         />,
-
         {
           classNameModalContent: 'rounded-sm',
           showCloseButton: false,
@@ -145,6 +134,49 @@ export default function ProfileForm({
       );
     }
   }, [logoImage, openModal, closeModal, isOpen, setValue]);
+
+  useEffect(() => {
+    if (bannerImage?.cropped === false && !isOpen) {
+      openModal(
+        <ImageCropModal
+          cropperFn={getCroppedImg({
+            dWidth: 1200,
+            dHeight: 200,
+            fileName: 'bannerImage',
+          })}
+          aspect={12 / 2}
+          onDismiss={() => {
+            setValue(
+              'banner',
+              {
+                ...bannerImage,
+                cropped: true,
+              },
+              { shouldValidate: true, shouldDirty: true }
+            );
+            closeModal();
+          }}
+          logoImage={bannerImage}
+          onDone={(image) => {
+            setValue(
+              'banner',
+              {
+                file: image.file,
+                imageUrl: image.imageUrl,
+                cropped: true,
+              },
+              { shouldValidate: true, shouldDirty: true }
+            );
+            closeModal();
+          }}
+        />,
+        {
+          classNameModalContent: 'rounded-sm',
+          showCloseButton: false,
+        }
+      );
+    }
+  }, [bannerImage, openModal, closeModal, isOpen, setValue]);
 
   return (
     <WrapperResponsive

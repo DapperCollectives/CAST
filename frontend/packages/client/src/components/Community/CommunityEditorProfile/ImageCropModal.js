@@ -1,63 +1,31 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback } from 'react';
 import { useState } from 'react';
 import Cropper from 'react-easy-crop';
 import { ActionButton } from 'components';
 
-// using https://www.npmjs.com/package/react-avatar-editor
-
-export default function ImageCropModal({ logoImage, onDone, onDismiss } = {}) {
+export default function ImageCropperModal({
+  logoImage,
+  onDone,
+  onDismiss,
+  cropShape,
+  aspect = 1,
+  cropperFn,
+} = {}) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
-  const [image, setImage] = useState(null);
-  const [croppedArea, setCroppedArea] = useState();
+  const [croppedArea, setCroppedArea] = useState({});
   const [zoom, setZoom] = useState(1);
   const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
-    console.log(croppedArea, croppedAreaPixels);
+    setCroppedArea({ croppedArea, croppedAreaPixels });
   }, []);
 
-  console.log('crop has ', crop);
-  const getCroppedImg = (sourceImage, crop, fileName) => {
-    const canvas = document.createElement('canvas');
-    const scaleX = sourceImage.naturalWidth / sourceImage.width;
-    const scaleY = sourceImage.naturalHeight / sourceImage.height;
-    canvas.width = crop.width;
-    canvas.height = crop.height;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(
-      sourceImage,
-      crop.x * scaleX,
-      crop.y * scaleY,
-      crop.width * scaleX,
-      crop.height * scaleY,
-      0,
-      0,
-      crop.width,
-      crop.height
-    );
-    try {
-      return new Promise((resolve) => {
-        canvas.toBlob((file) => {
-          resolve({ file, imageUrl: URL.createObjectURL(file) });
-        }, 'image/jpeg');
-      });
-    } catch (error) {
-      console.log(error);
-      return null;
-    }
-  };
-
-  const imageRef = useRef(null);
-
-  useEffect(() => {
-    if (imageRef.current) {
-      setImage(imageRef.current);
-    }
-  }, [imageRef]);
-
   const handleResize = async () => {
-    console.log('image is', image);
-    const result = await getCroppedImg(image, croppedArea, 'ddd');
-    console.log('result from cropt', result);
+    const imageCropped = await cropperFn(
+      logoImage.file,
+      croppedArea.croppedAreaPixels
+    );
+    onDone(imageCropped);
   };
+
   return (
     <div
       className="modal-card has-background-white m-0 p-5 p-1-mobile full-height"
@@ -88,14 +56,13 @@ export default function ImageCropModal({ logoImage, onDone, onDismiss } = {}) {
             image={logoImage.imageUrl}
             crop={crop}
             zoom={zoom}
-            aspect={1}
+            aspect={aspect}
             onCropChange={setCrop}
             onCropComplete={onCropComplete}
             onZoomChange={setZoom}
-            cropShape="round"
+            cropShape={cropShape}
             showGrid={false}
           />
-          <image src={logoImage.imageUrl} ref={imageRef} alt="" />
         </div>
         <div style={{ minHeight: '100px', position: 'relative' }}>
           <div className="columns is-multiline">
@@ -107,7 +74,7 @@ export default function ImageCropModal({ logoImage, onDone, onDismiss } = {}) {
                 type="range"
                 min={1}
                 max={3}
-                step={0.1}
+                step={0.05}
                 defaultValue="1"
                 value={zoom}
                 onChange={(e) => {
@@ -116,9 +83,7 @@ export default function ImageCropModal({ logoImage, onDone, onDismiss } = {}) {
               />
             </div>
             <div className="column is-12">
-              <div className="column is-12">
-                <ActionButton onClick={handleResize} label="done" />
-              </div>
+              <ActionButton onClick={handleResize} label="done" />
             </div>
           </div>
         </div>

@@ -38,7 +38,7 @@ export default function CommunityEditorProfile({
         communityDescription: body,
         communityCategory: category,
         logo: logo ? { imageUrl: logo, cropped: true } : undefined,
-        banner: banner ? { imageUrl: banner } : undefined,
+        banner: banner ? { imageUrl: banner, cropped: true } : undefined,
         communityTerms: terms,
       },
       resolver: yupResolver(ProfileSchema),
