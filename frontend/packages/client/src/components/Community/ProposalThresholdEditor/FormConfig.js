@@ -19,6 +19,19 @@ yup.addMethod(yup.string, 'makeOtherFieldsRequired', function (message) {
   });
 });
 
+yup.addMethod(yup.string, 'validateThreshold', function (message) {
+  return this.test('checkLessThanOne', message, function (value, context) {
+    const { path } = context;
+    if (parseFloat(value) < 1) {
+      return this.createError({
+        path: `${path}`,
+        message,
+      });
+    }
+    return true;
+  });
+});
+
 const Schema = (isValidFlowAddress) =>
   yup.object().shape({
     onlyAuthorsToSubmitProposals: yup.boolean(),
@@ -75,6 +88,7 @@ const Schema = (isValidFlowAddress) =>
         'Please enter a proposal threshold if other fields are not empty'
       )
       .matches(/(^[0-9]+$|^$)/, 'Proposal threshold must be a number')
+      .validateThreshold('Threshold cannot be less than 1.')
       .when('onlyAuthorsToSubmitProposals', {
         is: false,
         then: yup.string().required('Please enter a proposal threshold'),
