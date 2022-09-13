@@ -6,10 +6,10 @@ import { ActionButton } from 'components';
 export default function ImageCropperModal({
   logoImage,
   onDone,
-  onDismiss,
   cropShape,
   aspect = 1,
   cropperFn,
+  defaultCropArea,
 } = {}) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [croppedArea, setCroppedArea] = useState({});
@@ -23,6 +23,11 @@ export default function ImageCropperModal({
       logoImage.file,
       croppedArea.croppedAreaPixels
     );
+    onDone(imageCropped);
+  };
+
+  const resizeOnDismiss = async () => {
+    const imageCropped = await cropperFn(logoImage.file, defaultCropArea);
     onDone(imageCropped);
   };
 
@@ -42,7 +47,7 @@ export default function ImageCropperModal({
         </div>
         <div
           className={`column is-narrow px-0 has-text-right is-size-2 leading-tight cursor-pointer`}
-          onClick={onDismiss}
+          onClick={resizeOnDismiss}
         >
           &times;
         </div>

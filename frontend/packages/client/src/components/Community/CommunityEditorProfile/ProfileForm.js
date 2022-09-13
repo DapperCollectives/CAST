@@ -102,18 +102,13 @@ export default function ProfileForm({
             fileName: 'logoImage',
           })}
           cropShape="round"
-          onDismiss={() => {
-            setValue(
-              'logo',
-              {
-                ...logoImage,
-                cropped: true,
-              },
-              { shouldValidate: true, shouldDirty: true }
-            );
-            closeModal();
-          }}
           logoImage={logoImage}
+          defaultCropArea={{
+            width: 400,
+            height: 400,
+            x: 100,
+            y: 0,
+          }}
           onDone={(image) => {
             setValue(
               'logo',
@@ -144,17 +139,12 @@ export default function ProfileForm({
             dHeight: 200,
             fileName: 'bannerImage',
           })}
-          aspect={12 / 2}
-          onDismiss={() => {
-            setValue(
-              'banner',
-              {
-                ...bannerImage,
-                cropped: true,
-              },
-              { shouldValidate: true, shouldDirty: true }
-            );
-            closeModal();
+          aspect={144 / 25}
+          defaultCropArea={{
+            width: 600,
+            height: 104,
+            x: 0,
+            y: 148,
           }}
           logoImage={bannerImage}
           onDone={(image) => {
