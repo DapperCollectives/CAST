@@ -21,7 +21,7 @@ yup.addMethod(yup.string, 'makeOtherFieldsRequired', function (message) {
 
 yup.addMethod(yup.string, 'validateThreshold', function (message) {
   return this.test('checkLessThanOne', message, function (value, context) {
-    const { path, parent } = context;
+    const { path } = context;
     if (parseFloat(value) < 1) {
       return this.createError({
         path: `${path}`,
