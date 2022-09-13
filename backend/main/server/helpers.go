@@ -1135,7 +1135,7 @@ func validateContractThreshold(s []models.Strategy) error {
 	for _, s := range s {
 		if s.Threshold != nil {
 			if *s.Threshold < 1 {
-				return errors.New("Contract Threshold Cannot Be < 1.")
+				return errors.New("Contract Threshold cannot be less than 1.")
 			}
 		}
 	}
