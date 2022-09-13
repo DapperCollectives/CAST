@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Blockies from 'react-blockies';
+import { ResultsPanel } from 'components';
 import { useVotingResults, useWindowDimensions } from 'hooks';
 import useMediaQuery, { mediaMatchers } from 'hooks/useMediaQuery';
 import { parseDateFromServer } from 'utils';
@@ -74,62 +75,6 @@ const InfoBlock = ({ title, content, component }) => {
   );
 };
 
-const Results = ({ voteResults }) => {
-  const showViewMore = false;
-  const options = Object.keys(voteResults);
-
-  const totalVotes = options.reduce(
-    (previousValue, currentValue) => previousValue + voteResults[currentValue],
-    0
-  );
-
-  return (
-    <>
-      {options.map((option, index) => {
-        const percentage =
-          totalVotes === 0 || voteResults[option] === 0
-            ? 0
-            : ((100 * voteResults[option]) / totalVotes).toFixed(2);
-
-        const optionText =
-          option.length > 120 ? `${option.substring(0, 120)}...` : option;
-        return (
-          <div key={`result-item-${index}`} style={{ marginBottom: '2.5rem' }}>
-            <div className="columns is-mobile mb-2">
-              <div className="column small-text has-text-grey has-text-left word-break">
-                {optionText}
-              </div>
-              <div className="column is-3 is-flex is-justify-content-flex-end small-text has-text-grey">
-                {`${percentage}%`}
-              </div>
-            </div>
-            <div
-              style={{ height: 8, background: '#DCDCDC' }}
-              className="has-background-grey-light rounded-lg"
-            >
-              <div
-                className="rounded-lg"
-                style={{
-                  width: `${percentage}%`,
-                  height: '100%',
-                  background: '#747474',
-                }}
-              />
-            </div>
-          </div>
-        );
-      })}
-      {showViewMore && (
-        <div className="is-flex is-justify-content-start is-align-items-center">
-          <button className="button is-white has-background-white-ter p-0">
-            View more
-          </button>
-        </div>
-      )}
-    </>
-  );
-};
-
 const WrapperSpacingTop = ({
   isMobileOnly,
   isTabletOnly,
@@ -138,34 +83,19 @@ const WrapperSpacingTop = ({
 }) => {
   let classNames = '';
   if (isMobileOnly) {
-    classNames = 'px-1 pb-0 pt-1';
+    classNames = 'px-1 py-1';
   }
   if (isTabletOnly) {
-    classNames = 'px-5 pb-0 pt-5';
+    classNames = 'px-5 py-5';
   }
   if (isDesktopOnly) {
-    classNames = 'px-6 pb-0 pt-6';
+    classNames = 'px-6 py-6';
   }
-  return <div className={classNames}>{children}</div>;
-};
-
-const WrapperSpacingBottom = ({
-  isMobileOnly,
-  isTabletOnly,
-  isDesktopOnly,
-  children,
-}) => {
-  let classNames = '';
-  if (isMobileOnly) {
-    classNames = 'px-1 pt-1 pb-1';
-  }
-  if (isTabletOnly) {
-    classNames = 'px-5 pt-3 pb-4';
-  }
-  if (isDesktopOnly) {
-    classNames = 'px-6 pt-2 pb-6';
-  }
-  return <div className={classNames}>{children}</div>;
+  return (
+    <div className={`has-background-white-ter rounded ${classNames}`}>
+      {children}
+    </div>
+  );
 };
 
 const ProposalInformation = ({
@@ -178,7 +108,6 @@ const ProposalInformation = ({
   endTime = '',
   proposalId = '',
   openStrategyModal = () => {},
-  className = '',
 }) => {
   const dateFormatConf = {
     day: 'numeric',
@@ -287,10 +216,18 @@ const ProposalInformation = ({
   return (
     <div ref={parentRef}>
       <div
-        className={`${className} rounded-sm${fixedStyle?.className || ''}`}
+        className={`${fixedStyle?.className || ''}`}
         ref={ref}
         style={fixedStyle?.style || {}}
       >
+        <div className="mb-5">
+          <ResultsPanel
+            results={votingResults?.results}
+            isMobileOnly={!isNotMobile}
+            isDesktopOnly={isNotMobile && !isTabletOnly}
+            isTabletOnly={isTabletOnly}
+          />
+        </div>
         <WrapperSpacingTop
           isMobileOnly={!isNotMobile}
           isDesktopOnly={isNotMobile && !isTabletOnly}
@@ -352,17 +289,6 @@ const ProposalInformation = ({
             )}
           />
         </WrapperSpacingTop>
-        <hr />
-        <WrapperSpacingBottom
-          isMobileOnly={!isNotMobile}
-          isDesktopOnly={isNotMobile && !isTabletOnly}
-          isTabletOnly={isTabletOnly}
-        >
-          <p className="mb-5">Current Results</p>
-          {!loadingVotingResults && (
-            <Results voteResults={votingResults?.results || []} />
-          )}
-        </WrapperSpacingBottom>
       </div>
     </div>
   );
