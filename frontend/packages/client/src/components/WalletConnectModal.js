@@ -5,13 +5,6 @@ import classnames from 'classnames';
 import sortBy from 'lodash/sortBy';
 import { ArrowRight, Close } from './Svg';
 
-const getWalletIcon = (provider) => {
-  if (provider?.name === 'Lilico') {
-    return 'https://raw.githubusercontent.com/Outblock/Lilico-Web/main/asset/logo-dis.png';
-  }
-  return `https://fcl-discovery.onflow.org${provider.icon}`;
-};
-
 export default function WalletConnectModal({
   services = [],
   openModal,
@@ -40,7 +33,7 @@ export default function WalletConnectModal({
             );
             closeModal();
           },
-          icon: getWalletIcon(service.provider),
+          icon: service.provider.icon,
           name: service.provider.name,
         })),
         (service) => service.name
