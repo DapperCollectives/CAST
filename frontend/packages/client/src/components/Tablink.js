@@ -1,6 +1,6 @@
-import React, { forwardRef } from 'react';
+import { forwardRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Star } from 'components/Svg';
+import { Svg } from '@cast/shared-components';
 
 const Tablink = forwardRef(
   (
@@ -38,7 +38,7 @@ const Tablink = forwardRef(
     const link = isActive ? (
       <>
         <b className="pr-2">{linkText + ' '}</b>
-        <Star width="13" height="13" fill="black" />
+        <Svg name="Star" width="13" height="13" fill="black" />
       </>
     ) : (
       <>{linkText}</>
