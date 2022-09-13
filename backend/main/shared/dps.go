@@ -11,7 +11,7 @@ import (
 	"github.com/onflow/flow-dps/codec/zbor"
 	"github.com/onflow/flow-dps/service/invoker"
 	"github.com/onflow/flow-go-sdk"
-	_flow "github.com/onflow/flow-go/model/flow"
+	flowGo "github.com/onflow/flow-go/model/flow"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -188,9 +188,9 @@ func (dps *DpsAdapter) GetTokenBalanceAtBlockheightScript(addr string, blockheig
 	return result, nil
 }
 
-func (dps *DpsAdapter) GetAccountAtBlockHeight(addr string, blockheight uint64) (*_flow.Account, error) {
-	var _account *_flow.Account
-	flowAddress := _flow.HexToAddress(addr)
+func (dps *DpsAdapter) GetAccountAtBlockHeight(addr string, blockheight uint64) (*flowGo.Account, error) {
+	var _account *flowGo.Account
+	flowAddress := flowGo.HexToAddress(addr)
 	_account, err := dps.Invoker.Account(blockheight, flowAddress)
 	if err != nil {
 		log.Error().Err(err).Msgf("invoker.Account failed")
