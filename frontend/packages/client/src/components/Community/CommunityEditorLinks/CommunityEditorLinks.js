@@ -44,7 +44,7 @@ export default function CommunityEditorLinks(props = {}) {
     <EditorForm
       submitComponent={
         <ActionButton
-          label="save"
+          label="Save"
           enabled={isValid && isDirty && !isSubmitting}
           loading={isSubmitting}
           classNames="vote-button transition-all has-background-yellow mt-5"

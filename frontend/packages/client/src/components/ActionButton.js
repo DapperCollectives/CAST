@@ -8,13 +8,15 @@ export default function ActionButton({
   label = '',
   classNames,
   type,
+  isUppercase = false,
 } = {}) {
   const clNames = classnames(
-    'button is-flex is-align-items-centered rounded-sm is-uppercase',
+    'button is-flex is-align-items-centered rounded-sm',
     'm-0 p-0',
     'has-background-yellow',
     { 'is-enabled': enabled },
     { 'is-disabled': !enabled },
+    { 'is-uppercase': isUppercase },
     { [classNames]: !!classNames }
   );
   return (
