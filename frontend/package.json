@@ -10,10 +10,10 @@
   "workspaces": {
     "packages": [
       "packages/*"
-    ],
-    "nohoist": [
-      "**"
     ]
   },
-  "dependencies": {}
+  "dependencies": {},
+  "resolutions": {
+    "babel-loader": "8.1.0"
+  }
 }

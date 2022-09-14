@@ -3,6 +3,7 @@ import { Link, useLocation, useParams } from 'react-router-dom';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useModalContext } from 'contexts/NotificationModal';
 import { useWebContext } from 'contexts/Web3';
+import { Svg } from '@cast/shared-components';
 import {
   Loader,
   Message,
@@ -18,7 +19,6 @@ import {
   ProposalStatus,
   VoteOptions,
 } from 'components/Proposal';
-import { ArrowLeft, Bin, CheckMark } from 'components/Svg';
 import {
   useMediaQuery,
   useProposal,
@@ -388,7 +388,7 @@ export default function ProposalPage() {
           >
             <Link to={`/community/${proposal.communityId}?tab=proposals`}>
               <span className="has-text-grey is-flex is-align-items-center back-button transition-all">
-                <ArrowLeft /> <span className="ml-3">Back</span>
+                <Svg name="ArrowLeft" /> <span className="ml-3">Back</span>
               </span>
             </Link>
           </WrapperResponsive>
@@ -397,7 +397,7 @@ export default function ProposalPage() {
               messageText={`You successfully voted for ${getVoteLabel(
                 castVote
               )}`}
-              icon={<CheckMark />}
+              icon={<Svg name="CheckMark" />}
             />
           )}
           {cancelled && (
@@ -415,7 +415,7 @@ export default function ProposalPage() {
                   onClick={onCancelProposal}
                 >
                   <div className="mr-2 is-flex is-align-items-center">
-                    <Bin />
+                    <Svg name="Bin" />
                   </div>
                   <div className="is-flex is-align-items-center is-hidden-mobile">
                     Cancel Proposal

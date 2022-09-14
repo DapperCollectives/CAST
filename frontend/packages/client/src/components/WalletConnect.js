@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Blockies from 'react-blockies';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { Web3Consumer } from '../contexts/Web3';
-import { Copy } from 'components/Svg';
+import { Svg } from '@cast/shared-components';
 import { useMediaQuery, useOnClickOutside } from 'hooks';
 import { truncateAddress } from 'utils';
 import classnames from 'classnames';
@@ -150,7 +150,7 @@ const SignInOutButton = ({
                         className="is-flex is-align-items-center py-0 px-1"
                         style={{ height: '23px' }}
                       >
-                        <Copy />
+                        <Svg name="Copy" />
                       </div>
                     </div>
                   </div>

@@ -1,9 +1,9 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
+import { Svg } from '@cast/shared-components';
 import { IS_LOCAL_DEV } from 'const';
 import * as fcl from '@onflow/fcl';
 import classnames from 'classnames';
 import sortBy from 'lodash/sortBy';
-import { ArrowRight, Close } from './Svg';
 
 const getWalletIcon = (provider) => {
   if (provider?.name === 'Lilico') {
@@ -68,7 +68,7 @@ export default function WalletConnectModal({
             className={`column is-narrow p-0 has-text-right is-size-2 leading-tight cursor-pointer`}
             onClick={closeModal}
           >
-            <Close />
+            <Svg name="Close" />
           </div>
         </header>
         <section
@@ -117,7 +117,7 @@ export default function WalletConnectModal({
                   Learn more
                 </a>
               </p>
-              <ArrowRight />
+              <Svg name="ArrowRight" />
             </div>
             <div className="column is-12">
               <p
