@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import Blockies from 'react-blockies';
+import { Svg } from '@cast/shared-components';
 import { useProposalVotes } from 'hooks';
 import millify from 'millify';
-import { AngleDown, AngleUp } from './Svg';
 
 const Core = () => (
   <div className="subtitle small-text p-2 rounded-sm has-background-white-ter has-text-black is-family-monospace">
@@ -18,7 +18,7 @@ const ShowMoreOrLess = ({ showMore, showLess, enableMore, enableLess }) => (
         className="button is-white has-text-grey small-text"
         onClick={showLess}
       >
-        <AngleUp />
+        <Svg name="AngleUp" />
         View less
       </button>
     )}
@@ -27,7 +27,7 @@ const ShowMoreOrLess = ({ showMore, showLess, enableMore, enableLess }) => (
         className="button is-white has-text-grey small-text"
         onClick={showMore}
       >
-        View more <AngleDown />
+        View more <Svg name="AngleDown" />
       </button>
     )}
   </>

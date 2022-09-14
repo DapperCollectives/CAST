@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import { useFieldArray } from 'react-hook-form';
+import { Svg } from '@cast/shared-components';
 import AddButton from 'components/AddButton';
 import FadeIn from 'components/FadeIn';
-import { Bin } from 'components/Svg';
 
 const TextBasedChoices = ({
   fieldName = 'choices',
@@ -73,7 +73,7 @@ const TextBasedChoices = ({
                 }}
                 onClick={() => remove(index)}
               >
-                <Bin />
+                <Svg name="Bin" />
               </div>
             </div>
             {errorInField && (

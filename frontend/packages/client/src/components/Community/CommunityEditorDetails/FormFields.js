@@ -1,6 +1,5 @@
-import React from 'react';
+import { Svg } from '@cast/shared-components';
 import FadeIn from 'components/FadeIn';
-import { Bin, InvalidCheckMark, ValidCheckMark } from 'components/Svg';
 
 export default function Form({
   addrList,
@@ -55,7 +54,7 @@ export default function Form({
                 {!errorInField ? (
                   isValid && checkIcon ? (
                     <div className="is-flex is-align-items-center mr-2">
-                      <ValidCheckMark />
+                      <Svg name="ValidCheckMark" />
                     </div>
                   ) : null
                 ) : (
@@ -63,7 +62,7 @@ export default function Form({
                     className="cursor-pointer is-flex is-align-items-center mr-2"
                     onClick={() => onClearField(index)}
                   >
-                    <InvalidCheckMark />
+                    <Svg name="InvalidCheckMark" />
                   </div>
                 )}
                 {enableDeletion && (
@@ -71,7 +70,7 @@ export default function Form({
                     className="cursor-pointer is-flex is-align-items-center"
                     onClick={() => onDeleteAddress(index)}
                   >
-                    <Bin />
+                    <Svg name="Bin" />
                   </div>
                 )}
               </div>

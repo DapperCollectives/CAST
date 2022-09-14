@@ -1,5 +1,4 @@
-import React from 'react';
-import { Plus } from 'components/Svg';
+import { Svg } from '@cast/shared-components';
 import classnames from 'classnames';
 
 export default function AddButton({
@@ -20,7 +19,7 @@ export default function AddButton({
   const fill = disabled ? 'hsl(0, 0%, 48%)' : 'black';
   return (
     <div className={classNames} onClick={onClick}>
-      <Plus fill={fill} />{' '}
+      <Svg name="Plus" fill={fill} />{' '}
       <span className="ml-2 small-text is-flex is-align-items-center">
         Add{` ${addText}`}
       </span>
