@@ -1,6 +1,5 @@
-import React from 'react';
 import Blockies from 'react-blockies';
-import { Star } from 'components/Svg';
+import { Svg } from '@cast/shared-components';
 
 const ProposalCardHeader = ({ creatorAddr, isAdminProposal }) => {
   return (
@@ -12,7 +11,9 @@ const ProposalCardHeader = ({ creatorAddr, isAdminProposal }) => {
         className="blockies blockies-border"
       />
       <span className="pl-2 pr-1 has-text-black is-size-7">{creatorAddr}</span>
-      {isAdminProposal && <Star fill="#F4AF4A" width="12" height="12" />}
+      {isAdminProposal && (
+        <Svg name="Star" fill="#F4AF4A" width="12" height="12" />
+      )}
     </div>
   );
 };

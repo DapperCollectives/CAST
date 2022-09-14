@@ -1,6 +1,7 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import { useWebContext } from 'contexts/Web3';
+import { Svg } from '@cast/shared-components';
 import {
   CommunityEditorLinks,
   CommunityPropsAndVoting,
@@ -10,7 +11,6 @@ import {
 } from 'components';
 import { CommunityEditorDetails } from 'components/Community/CommunityEditorDetails';
 import { CommunityEditorProfile } from 'components/Community/CommunityEditorProfile';
-import { ArrowLeft, ArrowLeftBold } from 'components/Svg';
 import {
   useCommunityDetails,
   useCommunityDetailsUpdate,
@@ -27,7 +27,7 @@ const MenuTabs = ({ tabs, communityId, onClickButtonTab = () => {} } = {}) => {
       <div className="is-flex pl-2 mb-6">
         <Link to={`/community/${communityId}?tabs=proposals`}>
           <span className="has-text-grey is-flex is-align-items-center back-button transition-all">
-            <ArrowLeft /> <span className="ml-3">Back</span>
+            <Svg name="ArrowLeft" /> <span className="ml-3">Back</span>
           </span>
         </Link>
       </div>
@@ -88,7 +88,7 @@ const DropdownMenu = ({ communityId, onClickButtonTab = () => {} } = {}) => {
           style={{ width: '100%' }}
         >
           <Link to={`/community/${communityId}?tabs=about`}>
-            <ArrowLeftBold />
+            <Svg name="ArrowLeftBold" />
           </Link>
           <p
             className="px-2 is-flex is-justify-content-center has-text-weight-bold"

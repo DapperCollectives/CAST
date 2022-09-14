@@ -1,5 +1,3 @@
-import React from 'react';
-
 const Error = (props) => (
   <div className="columns m-0 p-0 is-multiline is-mobile">
     <div className="column is-full m-0 p-0 is-flex is-justify-content-center py-5">

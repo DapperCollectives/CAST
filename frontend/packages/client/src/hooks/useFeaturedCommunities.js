@@ -1,7 +1,7 @@
-import { useErrorHandlerContext } from '../contexts/ErrorHandler';
+import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { fetchCommunitiesForHomePage } from 'api/community';
-import { PAGINATION_INITIAL_STATE } from '../reducers';
+import { PAGINATION_INITIAL_STATE } from 'reducers';
 
 export default function useFeaturedCommunities({
   count = PAGINATION_INITIAL_STATE.count,
