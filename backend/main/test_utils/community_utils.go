@@ -2,7 +2,6 @@ package test_utils
 
 import (
 	"bytes"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -203,10 +202,9 @@ func (otu *OverflowTestUtils) GenerateCommunityPayload(signer string, payload *m
 	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", signer))
 	signingAddr := fmt.Sprintf("0x%s", account.Address().String())
 	timestamp := fmt.Sprint(time.Now().UnixNano() / int64(time.Millisecond))
-	hexTimestamp := hex.EncodeToString([]byte(fmt.Sprint(timestamp)))
 	compositeSignatures := otu.GenerateCompositeSignatures(signer, timestamp)
 
-	payload.Timestamp = hexTimestamp
+	payload.Timestamp = timestamp
 	payload.Composite_signatures = compositeSignatures
 	payload.Signing_addr = &signingAddr
 	if payload.Strategies == nil {
