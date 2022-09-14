@@ -1,10 +1,9 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useModalContext } from 'contexts/NotificationModal';
 import { Svg } from '@cast/shared-components';
 import { Form, WrapperResponsive } from 'components';
-import { Upload } from 'components/Svg';
 import { MAX_AVATAR_FILE_SIZE, MAX_FILE_SIZE } from 'const';
 import { getCroppedImg } from 'utils';
 import classnames from 'classnames';
