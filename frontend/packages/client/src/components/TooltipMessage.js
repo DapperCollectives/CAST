@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { Svg } from '@cast/shared-components';
 import { FadeInOut } from 'components';
-import { Close, InfoOutLine } from 'components/Svg';
 import { useMediaQuery } from 'hooks';
 import classnames from 'classnames';
 
@@ -42,7 +42,7 @@ export default function TooltipMesssage({
         <div className="columns is-mobile m-0 p-0">
           <div className="column is-flex is-flex-grow-1 pl-3" style={styles}>
             <div className={classesInfoOutLine}>
-              <InfoOutLine />
+              <Svg name="InfoOutLine" />
             </div>
             <div className="py-2 is-flex is-align-items-center">
               <p>
@@ -63,7 +63,7 @@ export default function TooltipMesssage({
                 className="cursor-pointer"
                 onClick={() => setCloseToolTip(true)}
               >
-                <Close width="15" height="15" />
+                <Svg name="Close" width="15" height="15" />
               </div>
             </div>
           </div>
