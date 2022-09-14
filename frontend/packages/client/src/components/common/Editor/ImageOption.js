@@ -1,5 +1,4 @@
-import React from 'react';
-import { Image } from 'components/Svg';
+import { Svg } from '@cast/shared-components';
 
 export default function ImageOption({ addImage = () => {} } = {}) {
   return (
@@ -12,7 +11,7 @@ export default function ImageOption({ addImage = () => {} } = {}) {
         onClick={() => addImage()}
       >
         <div className="rdw-option-wrapper" title="Image">
-          <Image />
+          <Svg name="Image" />
         </div>
       </div>
     </>

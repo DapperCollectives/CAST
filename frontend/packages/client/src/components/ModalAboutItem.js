@@ -1,11 +1,6 @@
-import React from 'react';
-import { Star } from 'components/Svg';
+import { Svg } from '@cast/shared-components';
 
-export default function ModalAboutItem({
-  closeModal = () => {},
-  title = '',
-  subTittle = '',
-} = {}) {
+export default function ModalAboutItem({ title = '', subTittle = '' } = {}) {
   return (
     <div
       className="border-light rounded-sm is-flex is-align-ittems-center flex-1"
@@ -13,7 +8,7 @@ export default function ModalAboutItem({
     >
       <div className="columns flex-1 is-mobile p-3-mobile">
         <div className="column pr-0 is-2 is-flex is-align-items-center is-align-content-strech is-justify-content-center">
-          <Star width="24" height="24" fill="black" />
+          <Svg name="Star" width="24" height="24" fill="black" />
         </div>
 
         <div className="column pl-0 is-flex is-flex-direction-column is-justify-content-center medium-text">

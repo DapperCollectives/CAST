@@ -1,7 +1,7 @@
-import React, { forwardRef, useEffect, useState } from 'react';
+import { forwardRef, useEffect, useState } from 'react';
 import { Controller } from 'react-hook-form';
+import { Svg } from '@cast/shared-components';
 import FadeIn from 'components/FadeIn';
-import { CaretDown } from 'components/Svg';
 import classnames from 'classnames';
 
 const Dropdown = forwardRef(
@@ -96,7 +96,7 @@ const Dropdown = forwardRef(
               >
                 {innerValue?.label ?? label}
               </div>
-              <CaretDown className="has-text-black" />
+              <Svg name="CaretDown" className="has-text-black" />
             </div>
           </button>
         </div>

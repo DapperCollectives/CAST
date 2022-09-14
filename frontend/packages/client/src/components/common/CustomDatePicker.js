@@ -1,8 +1,7 @@
-import React from 'react';
 import DatePicker from 'react-datepicker';
 import { Controller } from 'react-hook-form';
+import { Svg } from '@cast/shared-components';
 import FadeIn from 'components/FadeIn';
-import { Calendar } from 'components/Svg';
 
 export default function CustomDatePicker({
   control,
@@ -44,7 +43,7 @@ export default function CustomDatePicker({
             pointerEvents: 'none',
           }}
         >
-          <Calendar />
+          <Svg name="Calendar" />
         </div>
       </div>
       {errorMessage && (
