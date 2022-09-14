@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import networks from 'networks';
 import CustomScriptSelector from './CustomScriptSelector';
 import StrategyInformationForm from './StrategyInformationForm';

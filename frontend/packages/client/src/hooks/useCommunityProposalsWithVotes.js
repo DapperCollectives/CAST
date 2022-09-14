@@ -4,7 +4,7 @@ import { debounce } from 'utils';
 import { useQueries } from '@tanstack/react-query';
 import { fetchProposalUserVotes } from 'api/proposals';
 import assign from 'lodash/assign';
-import { PAGINATION_INITIAL_STATE } from '../reducers';
+import { PAGINATION_INITIAL_STATE } from 'reducers';
 import useCommunityProposals from './useCommunityProposals';
 
 export default function useCommunityProposalsWithVotes({

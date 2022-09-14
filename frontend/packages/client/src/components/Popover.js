@@ -1,4 +1,3 @@
-import React from 'react';
 import { useMediaQuery } from 'hooks';
 import classnames from 'classnames';
 

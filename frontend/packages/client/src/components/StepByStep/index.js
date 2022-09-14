@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import { cloneElement, useCallback, useRef, useState } from 'react';
 import { Prompt } from 'react-router-dom';
 import { Svg } from '@cast/shared-components';
 import Loader from '../Loader';
@@ -22,7 +22,7 @@ function StepByStep({
   const [showPreStep, setShowPreStep] = useState(!!preStep);
   const [isStepValid, setStepValid] = useState(false);
   const [stepsData, setStepsData] = useState({});
-  const refs = React.useRef();
+  const refs = useRef();
 
   const onStepAdvance = (direction = 'next') => {
     if (direction === 'next') {
@@ -231,7 +231,7 @@ function StepByStep({
             )}
 
             {!isSubmitting &&
-              React.cloneElement(child, {
+              cloneElement(child, {
                 onDataChange: (stepData) => {
                   setStepsData({
                     ...stepsData,

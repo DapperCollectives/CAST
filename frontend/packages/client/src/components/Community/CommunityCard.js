@@ -1,4 +1,3 @@
-import React from 'react';
 import Blockies from 'react-blockies';
 import { Link } from 'react-router-dom';
 import { useMediaQuery } from 'hooks';

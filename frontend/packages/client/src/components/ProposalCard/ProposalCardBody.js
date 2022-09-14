@@ -1,7 +1,6 @@
-import React from 'react';
 import { stripHtml } from 'string-strip-html';
 
-const ProposalCardBody = ({ name, body, inlineImage }) => (
+const ProposalCardBody = ({ name, body }) => (
   <div className="proposal-body-spacing mr-0 pt-1">
     <div className="pr-0 pb-0 proposal-body-text">
       <h4 className="proposal-title is-4 mt-1 mb-4 has-text-black has-text-weight-bold">
