@@ -33,17 +33,15 @@ export default function ImageCropperModal({
 
   return (
     <div
-      className="modal-card has-background-white m-0 p-5 p-1-mobile full-height"
-      style={{ minHeight: '640px' }}
+      className="modal-card has-background-white m-0 p-0 p-1-mobile full-height"
+      style={{ minHeight: '610px', maxWidth: '400px' }}
     >
       <header
         className="modal-card-head has-background-white columns is-mobile m-0 px-4 pt-4"
         style={{ borderBottom: 'none' }}
       >
         <div className="column p-0 is-flex flex-1">
-          <h2 className="is-size-4" style={{ textTransform: 'capitalize' }}>
-            Crop the image - test
-          </h2>
+          <h2 className="medium-text">Edit Image</h2>
         </div>
         <div
           className={`column is-narrow px-0 has-text-right is-size-2 leading-tight cursor-pointer`}
@@ -52,11 +50,8 @@ export default function ImageCropperModal({
           &times;
         </div>
       </header>
-      <section
-        className="modal-card-body py-0 px-4"
-        style={{ minHeight: '550px' }}
-      >
-        <div style={{ minHeight: '350px', position: 'relative' }}>
+      <section className="modal-card-body p-0" style={{ minHeight: '540px' }}>
+        <div style={{ minHeight: '400px', position: 'relative' }}>
           <Cropper
             image={logoImage.imageUrl}
             crop={crop}
@@ -70,8 +65,8 @@ export default function ImageCropperModal({
           />
         </div>
         <div style={{ minHeight: '100px', position: 'relative' }}>
-          <div className="columns is-multiline">
-            <div className="column is-12">
+          <div className="columns is-multiline p-0 m-0 ">
+            <div className="column is-12 p-0 m-0 ">
               <di>
                 <p> Zoom</p>
               </di>
@@ -87,8 +82,15 @@ export default function ImageCropperModal({
                 }}
               />
             </div>
-            <div className="column is-12">
-              <ActionButton onClick={handleResize} label="done" />
+            <div className="column is-flex is-12 is-align-iterms-center is-justify-content-center">
+              <div className="column is-10">
+                <ActionButton
+                  onClick={handleResize}
+                  label="Done"
+                  isUppercase={false}
+                  roundedClass="rounded-lg"
+                />
+              </div>
             </div>
           </div>
         </div>
