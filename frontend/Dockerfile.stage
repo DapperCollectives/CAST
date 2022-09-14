@@ -6,6 +6,7 @@ COPY ./package*.json ./
 COPY ./yarn.lock ./
 WORKDIR /app/packages/client
 COPY ./packages/client/ ./
+COPY ./packages/shared-components/ ./
 WORKDIR /app
 RUN yarn install
 
