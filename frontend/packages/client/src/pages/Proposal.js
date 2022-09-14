@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useModalContext } from 'contexts/NotificationModal';
@@ -32,7 +32,7 @@ import { getProposalType } from 'utils';
 
 function useQueryParams() {
   const { search } = useLocation();
-  return React.useMemo(() => {
+  return useMemo(() => {
     const params = new URLSearchParams(search);
     return {
       forceLedger: params.get('ledger') === 'true',

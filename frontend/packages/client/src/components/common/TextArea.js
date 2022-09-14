@@ -1,4 +1,3 @@
-import React from 'react';
 import FadeIn from 'components/FadeIn';
 
 export default function TextArea({

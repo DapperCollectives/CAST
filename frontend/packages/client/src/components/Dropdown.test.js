@@ -1,4 +1,3 @@
-import React from 'react';
 import renderer from 'react-test-renderer';
 import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/react';

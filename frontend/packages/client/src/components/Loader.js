@@ -1,5 +1,3 @@
-import React from 'react';
-
 const StartLoader = ({ pathId, className = '', width = 35, height = 35 }) => {
   return (
     <svg

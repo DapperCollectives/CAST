@@ -1,4 +1,4 @@
-import { useErrorHandlerContext } from '../contexts/ErrorHandler';
+import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useWebContext } from 'contexts/Web3';
 import { UPDATE_MEMBERSHIP_TX } from 'const';
 import { useMutation, useQueryClient } from '@tanstack/react-query';

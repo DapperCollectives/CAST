@@ -1,4 +1,3 @@
-import React from 'react';
 import Blockies from 'react-blockies';
 import { Web3Consumer } from 'contexts/Web3';
 import { WrapperResponsive } from 'components';

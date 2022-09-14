@@ -1,4 +1,3 @@
-import React from 'react';
 import { HAS_DELAY_ON_START_TIME } from 'const';
 import { formatTime } from 'utils';
 
