@@ -937,6 +937,7 @@ func (h *Helpers) validateUserSignature(addr string, message string, sigs *[]sha
 	if err := h.A.FlowAdapter.ValidateSignature(addr, message, sigs, "USER"); err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -987,9 +988,11 @@ func (h *Helpers) validateTimestamp(timestamp string, expiry int) error {
 }
 
 func (h *Helpers) validateUser(addr, timestamp string, compositeSignatures *[]shared.CompositeSignature) error {
+
 	if err := h.validateTimestamp(timestamp, 60); err != nil {
 		return err
 	}
+
 	if err := h.validateUserSignature(addr, timestamp, compositeSignatures); err != nil {
 		return err
 	}
