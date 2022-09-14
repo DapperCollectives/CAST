@@ -5,7 +5,7 @@ const Svg = ({ name, ...props }) => {
 
   useEffect(() => {
     (async () => {
-      await import(`./${name}`)
+      import(`./${name}`)
         .then(({ default: Svg }) => setSvgComponent(<Svg {...props} />))
         .catch(console.error);
     })();
