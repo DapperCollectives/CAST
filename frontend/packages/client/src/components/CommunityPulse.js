@@ -1,6 +1,5 @@
-import React from 'react';
-import Miquela from '../assets/miquela.png';
-import PeopleToast from '../assets/people-toast.png';
+import Miquela from 'assets/miquela.png';
+import PeopleToast from 'assets/people-toast.png';
 import WrapperResponsive from './WrapperResponsive';
 
 export default function CommunityPulse() {

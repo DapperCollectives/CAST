@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import ActionButton from 'components/ActionButton';
 import StrategySelectorForm from 'components/Community/StrategySelectorForm';
 

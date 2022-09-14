@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { Fragment, useEffect } from 'react';
 import Blockies from 'react-blockies';
 import { Svg } from '@cast/shared-components';
 import { useProposalVotes } from 'hooks';
@@ -94,7 +94,7 @@ const VotesList = ({ proposalId, castVote }) => {
           {votes &&
             votes.map((vote, i) => {
               return (
-                <React.Fragment key={`column-${i}`}>
+                <Fragment key={`column-${i}`}>
                   <div
                     className={`column is-8 py-1 px-0 is-flex is-align-items-center is-justify-content-start`}
                   >
@@ -118,7 +118,7 @@ const VotesList = ({ proposalId, castVote }) => {
                       <hr />
                     </div>
                   )}
-                </React.Fragment>
+                </Fragment>
               );
             })}
           {loadingVotes && next > 0 && (
