@@ -2,6 +2,7 @@ package shared
 
 import (
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"flag"
@@ -111,6 +112,9 @@ func (fa *FlowAdapter) GetCurrentBlockHeight() (int, error) {
 
 func (fa *FlowAdapter) ValidateSignature(address, message string, sigs *[]CompositeSignature, messageType string) error {
 	log.Debug().Msgf("ValidateSignature()\nAddress: %s\nMessage: %s\nSigs: %v.", address, message, *sigs)
+
+	//hexify the message
+	message = "0x" + hex.EncodeToString([]byte(message))
 
 	// Prepare Script Args
 	flowAddress := flow.HexToAddress(address)
