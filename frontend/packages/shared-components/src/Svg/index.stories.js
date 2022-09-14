@@ -1,4 +1,4 @@
-import { Svg } from './';
+import Svg from '.';
 
 export default {
   title: 'Shared Components/Svg',
