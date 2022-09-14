@@ -11,6 +11,7 @@ export default function ActionButton({
   type,
   isUppercase = true,
   roundedClass = 'rounded-sm',
+  height = 48,
 } = {}) {
   const clNames = classnames(
     'button is-flex is-align-items-centered ',
@@ -25,7 +26,7 @@ export default function ActionButton({
   return (
     <button
       type={type}
-      style={{ height: 48, width: '100%' }}
+      style={{ height, width: '100%' }}
       className={clNames}
       onClick={!enabled ? () => {} : onClick}
     >

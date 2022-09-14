@@ -57,6 +57,7 @@ $border-color-light: #DBDBDB
 $tooltip-radius: 6px
 $popover-max-width: 20rem
 @import '@creativebulma/bulma-tooltip'
+@import '@creativebulma/bulma-tooltip'
 @import 'bulma-popover'
 
 =spacing-helpers($suffix: '')
@@ -742,3 +743,76 @@ span[data-tooltip]
 
 .modal-content-image-crop
 	max-width: 400px !important	
+	max-height: unset !important	
+
+input[type=range] 
+	height: 25px 
+	-webkit-appearance: none 
+	margin: 10px 0 
+	width: 100% 
+	&:focus 
+	outline: none 
+
+	&::-webkit-slider-runnable-track 
+		width: 100% 
+		height: 10px 
+		cursor: pointer 
+		animate: 0.2s 
+		// box-shadow: 0px 0px 0px #000000 
+		background: #FBD84D 
+		border-radius: 50px 
+		border: 0px solid #F5F5F5 
+	&::-webkit-slider-thumb 
+		// box-shadow: 0px 0px 0px #000000 
+		border: 0px solid #FFFFFF 
+		height: 19px 
+		width: 19px 
+		border-radius: 19px 
+		background: #FBD84D 
+		cursor: pointer 
+		-webkit-appearance: none 
+		margin-top: -4.5px 
+	&:focus 
+		&::-ms-fill-lower, &::-ms-fill-upper
+			background: #FBD84D 
+		&::-webkit-slider-runnable-track 
+			background: #FBD84D 
+	&::-moz-range-track 
+		width: 100% 
+		height: 10px 
+		cursor: pointer 
+		animate: 0.2s 
+		// box-shadow: 0px 0px 0px #000000 
+		background: #FBD84D 
+		border-radius: 50px 
+		border: 0px solid #F5F5F5 
+	&::-moz-range-thumb 
+		box-shadow: 0px 0px 0px #000000 
+		border: 0px solid #FFFFFF 
+		height: 19px 
+		width: 19px 
+		border-radius: 19px 
+		background: #FBD84D 
+		cursor: pointer 
+	&::-ms-track 
+		width: 100% 
+		height: 10px 
+		cursor: pointer 
+		animate: 0.2s 
+		background: transparent 
+		border-color: transparent 
+		color: transparent 
+	&::-ms-fill-lower, &::-ms-fill-upper 
+		background: #FBD84D 
+		border: 0px solid #F5F5F5 
+		border-radius: 100px 
+		box-shadow: 0px 0px 0px #000000 
+	&::-ms-thumb 
+		margin-top: 1px 
+		box-shadow: 0px 0px 0px #000000 
+		border: 0px solid #FFFFFF 
+		height: 19px 
+		width: 19px 
+		border-radius: 19px 
+		background: #FBD84D 
+		cursor: pointer

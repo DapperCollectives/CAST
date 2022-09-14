@@ -38,7 +38,7 @@ export default function ImageCropperModal({
       style={{ minHeight: '610px', maxWidth: '400px' }}
     >
       <header
-        className="modal-card-head has-background-white columns is-mobile m-0 px-4 pt-4"
+        className="modal-card-head has-background-white columns is-mobile m-0 px-5 pt-4"
         style={{ borderBottom: 'none', maxHeight: '80px' }}
       >
         <div className="column p-0 is-flex flex-1">
@@ -66,16 +66,25 @@ export default function ImageCropperModal({
           />
         </div>
         <div
-          className="is-flex flex-1 is-flex-direction-column is-justify-content-center"
+          className="is-flex flex-1 is-flex-direction-column is-justify-content-flex-start"
           style={{ minHeight: '130px', position: 'relative' }}
         >
-          <div className="columns is-multiline p-0 m-0">
-            <div className="column is-flex is-justify-content-center is-align-items-center is-12 p-0 m-0 ">
-              <div>
-                <Svg name="RemoveOutline" />
+          <div className="columns is-multiline p-0 m-0 mt-1">
+            <div
+              className="column is-flex is-justify-content-center is-align-items-center is-12 p-0 m-0 mb-2"
+              style={{ minHeight: '48px' }}
+            >
+              <div
+                className="is-flex cursor-pointer mx-1"
+                onClick={() =>
+                  setZoom((value) => (value === 1 ? value : value - 0.05))
+                }
+              >
+                <Svg name="RemoveLightFill" fill="#636363" />
               </div>
               <input
                 type="range"
+                className="slider is-fullwidth is-warning"
                 min={1}
                 max={3}
                 step={0.05}
@@ -85,13 +94,20 @@ export default function ImageCropperModal({
                   setZoom(e.target.value);
                 }}
               />
-              <div>
-                <Svg name="PlusOutline" />
+              <div
+                className="is-flex cursor-pointer mx-1"
+                onClick={() =>
+                  setZoom((value) => (value === 3 ? value : value + 0.05))
+                }
+              >
+                <Svg name="PlusLightFill" fill="#636363" />
               </div>
             </div>
             <div className="column m-0 p-0 is-flex is-12 is-align-iterms-center is-justify-content-center">
               <div className="is-flex flex-1 px-5">
                 <ActionButton
+                  height={40}
+                  classNames="has-text-weight-bold"
                   onClick={handleResize}
                   label="Done"
                   isUppercase={false}
