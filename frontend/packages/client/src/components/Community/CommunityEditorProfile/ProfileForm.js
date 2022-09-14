@@ -1,7 +1,8 @@
-import React, { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useModalContext } from 'contexts/NotificationModal';
+import { Svg } from '@cast/shared-components';
 import { Form, WrapperResponsive } from 'components';
 import { Upload } from 'components/Svg';
 import { MAX_AVATAR_FILE_SIZE, MAX_FILE_SIZE } from 'const';
@@ -209,7 +210,7 @@ export default function ProfileForm({
           >
             {!isUpdatingLogo && !logoImage?.imageUrl && !logoImage?.file && (
               <>
-                <Upload />
+                <Svg name="Upload" />
                 <span className="smaller-text">Avatar</span>
                 <input {...getLogoInputProps()} />
               </>
@@ -237,7 +238,7 @@ export default function ProfileForm({
                   backgroundColor: '#4a4a4a',
                 }}
               >
-                <Upload className="has-text-white" />
+                <Svg name="Upload" className="has-text-white" />
                 <input {...getLogoInputProps()} />
               </div>
             )}
@@ -263,7 +264,7 @@ export default function ProfileForm({
           >
             {!isUpdatingBanner && !bannerImage?.imageUrl && (
               <>
-                <Upload />
+                <Svg name="Upload" />
                 <span className="smaller-text">Community Banner Image</span>
                 <span className="smaller-text">
                   JPG or PNG 200px X 1200px recommended
@@ -296,7 +297,7 @@ export default function ProfileForm({
                   backgroundColor: '#4a4a4a',
                 }}
               >
-                <Upload className="has-text-white" />
+                <Svg name="Upload" className="has-text-white" />
                 <input {...getBannerInputProps()} />
               </div>
             )}
