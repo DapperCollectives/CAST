@@ -1,9 +1,9 @@
-import React from 'react';
+import { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 
 export default function useQueryParams(arrayParams) {
   const { search } = useLocation();
-  return React.useMemo(() => {
+  return useMemo(() => {
     const params = new URLSearchParams(search);
     const mapKeyValue = Object.keys(arrayParams).map((key) => {
       return {

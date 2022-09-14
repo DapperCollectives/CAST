@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useWebContext } from 'contexts/Web3';
 import {
   FadeIn,
@@ -8,10 +8,12 @@ import {
   TooltipMessage,
 } from 'components';
 import CommunitiesPresenter from 'components/Community/CommunitiesPresenter';
-import useBrowserName from 'hooks/useBrowserName';
-import useFeaturedCommunities from 'hooks/useFeaturedCommunities';
-import useLocalStorage from 'hooks/useLocalStorage';
-import useUserCommunities from 'hooks/useUserCommunities';
+import {
+  useBrowserName,
+  useFeaturedCommunities,
+  useLocalStorage,
+  useUserCommunities,
+} from 'hooks';
 import classnames from 'classnames';
 
 export default function HomePage() {

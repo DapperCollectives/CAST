@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useFieldArray } from 'react-hook-form';
 import ImageChoiceUploader from './ImageChoiceUploader';
 

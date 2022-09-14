@@ -21,12 +21,12 @@ import (
 )
 
 type FlowAdapter struct {
-	Config  FlowConfig
-	Client  *client.Client
-	Context context.Context
+	Config           FlowConfig
+	Client           *client.Client
+	Context          context.Context
 	CustomScriptsMap map[string]CustomScript
-	URL     string
-	Env     string
+	URL              string
+	Env              string
 }
 
 type FlowContract struct {
@@ -115,6 +115,7 @@ func (fa *FlowAdapter) ValidateSignature(address, message string, sigs *[]Compos
 	// Prepare Script Args
 	flowAddress := flow.HexToAddress(address)
 	cadenceAddress := cadence.NewAddress(flowAddress)
+	cadenceString, err := cadence.NewString(message)
 
 	// Pull out signature strings + keyIds for script
 	var cadenceSigs []cadence.Value = make([]cadence.Value, len(*sigs))
@@ -147,7 +148,7 @@ func (fa *FlowAdapter) ValidateSignature(address, message string, sigs *[]Compos
 			cadenceAddress,
 			cadence.NewArray(cadenceKeyIds),
 			cadence.NewArray(cadenceSigs),
-			cadence.String(message),
+			cadence.String(cadenceString),
 			cadence.String(domainSeparationTag),
 		},
 	)

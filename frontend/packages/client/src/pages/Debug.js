@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Web3Consumer } from '../contexts/Web3';
+import { useState } from 'react';
+import { Web3Consumer } from 'contexts/Web3';
 
 function Debug({ web3 }) {
   const { user, injectedProvider, executeTransaction } = web3;

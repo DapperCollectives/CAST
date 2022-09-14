@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import { createContext, useCallback, useContext, useState } from 'react';
 
 /**
  *
@@ -16,10 +16,10 @@ import React, { useCallback, useState } from 'react';
  *   }
  * );
  */
-const NotificationModalContext = React.createContext({});
+const NotificationModalContext = createContext({});
 
 export const useModalContext = () => {
-  const context = React.useContext(NotificationModalContext);
+  const context = useContext(NotificationModalContext);
   if (context === undefined) {
     throw new Error(
       '`useModalContext` must be used within a `NotificationModalProvider`.'

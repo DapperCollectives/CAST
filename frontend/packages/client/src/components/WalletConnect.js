@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Blockies from 'react-blockies';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { Web3Consumer } from '../contexts/Web3';
+import { Web3Consumer } from 'contexts/Web3';
 import { Svg } from '@cast/shared-components';
 import { useMediaQuery, useOnClickOutside } from 'hooks';
 import { truncateAddress } from 'utils';
