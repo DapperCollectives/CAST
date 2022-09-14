@@ -120,7 +120,7 @@ const SignInOutButton = ({
           id="dropdown-menu"
           role="menu"
           ref={dropdownRef}
-          style={!notMobile ? { left: '-165px' } : { left: '-130px' }}
+          style={!notMobile ? { left: '-170px' } : { left: '-130px' }}
         >
           <div
             className="dropdown-content p-0 rounded"
