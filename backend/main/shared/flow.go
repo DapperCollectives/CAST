@@ -114,7 +114,7 @@ func (fa *FlowAdapter) ValidateSignature(address, message string, sigs *[]Compos
 	log.Debug().Msgf("ValidateSignature()\nAddress: %s\nMessage: %s\nSigs: %v.", address, message, *sigs)
 
 	//hexify the message
-	message = "0x" + hex.EncodeToString([]byte(message))
+	message = hex.EncodeToString([]byte(message))
 
 	// Prepare Script Args
 	flowAddress := flow.HexToAddress(address)
