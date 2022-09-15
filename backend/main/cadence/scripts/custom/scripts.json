@@ -6,6 +6,12 @@
     "src": "get_nba_topshot_pistons.cdc"
   },
   {
+    "key": "nba-top-shot-kings",
+    "name": "NBA TopShot - Sacramento Kings",
+    "description": "NBA TopShot moments with teamAtMoment == Sacramento Kings",
+    "src": "get_nba_topshot_kings.cdc"
+  },
+  {
     "key": "nba-top-shot-trailblazers",
     "name": "NBA TopShot - Sacramento Kings",
     "description": "NBA TopShot moments with teamAtMoment == Portland Trailblazers",
