@@ -27,7 +27,12 @@ function Header(props) {
             <nav className="navbar is-transparent">
               <div className="navbar-brand">
                 <NavLink to="/" className="navbar-item p-0 mr-2">
-                  <Svg name="Logo" />
+                  <div className="is-hidden-tablet">
+                    <Svg name="Logo" width={100} />
+                  </div>
+                  <div className="is-hidden-mobile">
+                    <Svg name="Logo" />
+                  </div>
                 </NavLink>
                 <div className="is-flex is-align-items-center">
                   <Label
