@@ -359,13 +359,11 @@ func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	propThreshold, err := strconv.ParseFloat(*payload.Proposal_threshold, 64)
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Error Converting Proposal Threshold to Float.")
-	}
-	if propThreshold < 1 {
-		respondWithError(w, http.StatusBadRequest, "Proposal Threshold cannot be less than 1.")
-		return
+	if payload.Proposal_threshold != nil && payload.Only_authors_to_submit != nil {
+		err = validateProposalThreshold(*payload.Proposal_threshold, *payload.Only_authors_to_submit)
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, err.Error())
+		}
 	}
 
 	c, httpStatus, err := helpers.createCommunity(payload)
@@ -399,13 +397,11 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	propThreshold, err := strconv.ParseFloat(*payload.Proposal_threshold, 64)
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Error Converting Proposal Threshold to Float.")
-	}
-	if propThreshold < 1 {
-		respondWithError(w, http.StatusBadRequest, "Proposal Threshold cannot be less than 1.")
-		return
+	if payload.Proposal_threshold != nil && payload.Only_authors_to_submit != nil {
+		err = validateProposalThreshold(*payload.Proposal_threshold, *payload.Only_authors_to_submit)
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, err.Error())
+		}
 	}
 
 	c, httpStatus, err := helpers.updateCommunity(id, payload)

@@ -66,6 +66,7 @@ var (
 	body           = "<html>test body</html>"
 	onlyAuthors    = true
 	notOnlyAuthors = false
+	thresholdZero  = "0"
 
 	threshold = 0.000069
 
@@ -132,9 +133,10 @@ var (
 		Slug:                   &slug,
 		Strategies:             &strategies,
 		Only_authors_to_submit: &onlyAuthors,
+		Proposal_threshold:     &thresholdZero,
 	}
 
-	FailCommunity = models.Community{
+	FailStrategyCommunity = models.Community{
 		Name:                   "TestDAO",
 		Category:               &category,
 		Body:                   &body,
@@ -143,6 +145,18 @@ var (
 		Slug:                   &slug,
 		Strategies:             &failStrategies,
 		Only_authors_to_submit: &onlyAuthors,
+	}
+
+	FailThresholdCommunity = models.Community{
+		Name:                   "TestDAO",
+		Category:               &category,
+		Body:                   &body,
+		Creator_addr:           "<replace>",
+		Logo:                   &logo,
+		Slug:                   &slug,
+		Strategies:             &strategies,
+		Only_authors_to_submit: &notOnlyAuthors,
+		Proposal_threshold:     &thresholdZero,
 	}
 
 	NilStrategyCommunity = models.Community{
@@ -225,11 +239,20 @@ func (otu *OverflowTestUtils) GenerateCommunityStruct(accountName string) *model
 	return &community
 }
 
-func (otu *OverflowTestUtils) GenerateFailCommunityStruct(accountName string) *models.Community {
+func (otu *OverflowTestUtils) GenerateFailStrategyCommunityStruct(accountName string) *models.Community {
 	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", accountName))
 
 	// this does a deep copy
-	community := FailCommunity
+	community := FailStrategyCommunity
+	community.Creator_addr = "0x" + account.Address().String()
+	return &community
+}
+
+func (otu *OverflowTestUtils) GenerateFailThresholdCommunityStruct(accountName string) *models.Community {
+	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", accountName))
+
+	// this does a deep copy
+	community := FailThresholdCommunity
 	community.Creator_addr = "0x" + account.Address().String()
 	return &community
 }
