@@ -63,7 +63,7 @@ export default function StepThree({
           <div className="column is-12">
             <ActionButton
               type="submit"
-              label="Next: VOTING STRATEGIES"
+              label="Next: Voting Strategies"
               enabled={(isValid || isDirty) && !isSubmitting}
               classNames="vote-button transition-all has-background-yellow mt-5"
             />

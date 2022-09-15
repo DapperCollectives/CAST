@@ -157,7 +157,7 @@ export default function StepTwo({ stepData, onDataChange, moveToNextStep }) {
         <div className="column is-12">
           <ActionButton
             type="submit"
-            label="Next: PROPOSAL & VOTING"
+            label="Next: Proposal & Voting"
             enabled={(isValid || isDirty) && !isSubmitting}
             classNames="vote-button transition-all has-background-yellow mt-5"
           />
