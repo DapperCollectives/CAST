@@ -69,9 +69,9 @@ export default function ImageCropperModal({
           className="is-flex flex-1 is-flex-direction-column is-justify-content-flex-start"
           style={{ minHeight: '130px', position: 'relative' }}
         >
-          <div className="columns is-multiline p-0 m-0 mt-1">
+          <div className="columns is-justify-content-center is-multiline p-0 m-0 mt-1">
             <div
-              className="column is-flex is-justify-content-center is-align-items-center is-12 p-0 m-0 mb-2"
+              className="column is-flex is-justify-content-center is-align-items-center is-8 p-0 m-0 mb-2"
               style={{ minHeight: '48px' }}
             >
               <div
