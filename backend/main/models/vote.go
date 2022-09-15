@@ -27,8 +27,8 @@ type Vote struct {
 	Message              string                  `json:"message"`
 	Voucher              *shared.Voucher         `json:"voucher,omitempty"`
 	IsCancelled          bool                    `json:"isCancelled"`
-	IsEarly		 	 	 bool					 `json:"isEarly"`
-	IsWinning		 	 bool					 `json:"isWinning"`
+	IsEarly              bool                    `json:"isEarly"`
+	IsWinning            bool                    `json:"isWinning"`
 }
 
 type VoteWithBalance struct {
@@ -273,6 +273,8 @@ func (v *Vote) CreateVote(db *s.Database) error {
 func ValidateVoteMessage(message string, proposal Proposal) error {
 	log.Info().Msgf("validating message: %s", message)
 	vars := strings.Split(message, ":")
+
+	fmt.Printf("Validating Vote Message")
 
 	// check proposal choices to see if choice is valid
 	encodedChoice := vars[1]

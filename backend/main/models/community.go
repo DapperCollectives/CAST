@@ -186,6 +186,8 @@ func GetCommunitiesForHomePage(db *s.Database, params shared.PageParams) ([]*Com
 }
 
 func (c *Community) CreateCommunity(db *s.Database) error {
+	fmt.Printf("Creating community: %+v", c)
+
 	err := db.Conn.QueryRow(db.Context,
 		`
 	INSERT INTO communities(

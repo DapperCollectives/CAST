@@ -54,7 +54,12 @@ func (cs *CustomScript) queryNFTs(
 	balance *models.Balance,
 ) error {
 	scriptName := cs.FlowAdapter.CustomScriptsMap[*strategy.Contract.Script].Src
-	scriptPath := fmt.Sprintf("./main/cadence/scripts/custom/%s", scriptName) 
+	scriptPath := fmt.Sprintf("./main/cadence/scripts/custom/%s", scriptName)
+
+	//print script Path and script name
+	fmt.Printf("scriptPath: %s\n", scriptPath)
+	fmt.Printf("scriptName: %s\n", scriptName)
+
 	nftIds, err := cs.FlowAdapter.GetNFTIds(
 		balance.Addr,
 		&strategy.Contract,
