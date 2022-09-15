@@ -67,7 +67,7 @@ const TextBasedOptions = ({
             }`}
             onClick={readOnly ? () => {} : onConfirmVote}
           >
-            VOTE
+            Vote
           </button>
         </Wrapper>
       )}

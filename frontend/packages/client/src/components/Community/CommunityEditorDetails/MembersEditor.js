@@ -154,7 +154,7 @@ export default function MembersEditor({
       submitComponent={
         <ActionButton
           type="submit"
-          label="save"
+          label="Save"
           enabled={isDirty && !isSubmitting}
           loading={isSubmitting}
           classNames="vote-button transition-all has-background-yellow mt-5"
