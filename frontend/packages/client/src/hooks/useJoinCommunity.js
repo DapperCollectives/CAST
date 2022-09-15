@@ -15,11 +15,11 @@ export default function useJoinCommunity() {
   const { mutate: createCommunityUserMutation } = useMutation(
     async ({ communityId, user }) => {
       const { addr } = user;
-      const hexTime = Buffer.from(Date.now().toString()).toString('hex');
+      const timestamp = Date.now().toString();
       const [compositeSignatures, voucher] = await signMessageByWalletProvider(
         user?.services[0].uid,
         UPDATE_MEMBERSHIP_TX,
-        hexTime
+        timestamp
       );
 
       if (!compositeSignatures && !voucher) {
@@ -29,7 +29,7 @@ export default function useJoinCommunity() {
       return addUserToCommunityUserApiRep({
         communityId,
         addr,
-        hexTime,
+        timestamp,
         compositeSignatures,
         voucher,
         userType: 'member',
@@ -57,12 +57,12 @@ export default function useJoinCommunity() {
   const { mutate: deleteUserFromCommunityMutation } = useMutation(
     async ({ communityId, user }) => {
       const { addr } = user;
-      const hexTime = Buffer.from(Date.now().toString()).toString('hex');
+      const timestamp = Date.now().toString();
 
       const [compositeSignatures, voucher] = await signMessageByWalletProvider(
         user?.services[0].uid,
         UPDATE_MEMBERSHIP_TX,
-        hexTime
+        timestamp
       );
 
       if (!compositeSignatures && !voucher) {
@@ -72,7 +72,7 @@ export default function useJoinCommunity() {
       return deleteCommunityMemberApiReq({
         communityId,
         addr,
-        hexTime,
+        timestamp,
         compositeSignatures,
         voucher,
         signingAddr: addr,

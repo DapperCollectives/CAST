@@ -993,7 +993,8 @@ func (h *Helpers) validateUser(addr, timestamp string, compositeSignatures *[]sh
 		return err
 	}
 
-	if err := h.validateUserSignature(addr, timestamp, compositeSignatures); err != nil {
+	message := hex.EncodeToString([]byte(timestamp))
+	if err := h.validateUserSignature(addr, message, compositeSignatures); err != nil {
 		return err
 	}
 

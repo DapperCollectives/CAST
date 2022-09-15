@@ -23,13 +23,12 @@ export default function useCommunityDetailsUpdate() {
   } = useMutation(
     async ({ communityId, updatePayload }) => {
       const timestamp = Date.now().toString();
-      const hexTime = Buffer.from(timestamp).toString('hex');
 
       const { addr } = user;
       const [compositeSignatures, voucher] = await signMessageByWalletProvider(
         user?.services[0].uid,
         UPDATE_COMMUNITY_TX,
-        hexTime
+        timestamp
       );
 
       if (!compositeSignatures && !voucher) {

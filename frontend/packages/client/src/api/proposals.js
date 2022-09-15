@@ -43,7 +43,7 @@ export const createProposalApiReq = async ({
   proposalPayload,
   compositeSignatures,
   voucher,
-  hexTime,
+  timestamp,
 } = {}) => {
   const { communityId, ...proposalData } = proposalPayload;
   const url = `${COMMUNITIES_URL}/${communityId}/proposals`;
@@ -54,7 +54,7 @@ export const createProposalApiReq = async ({
     },
     body: JSON.stringify({
       ...proposalData,
-      timestamp: hexTime,
+      timestamp,
       compositeSignatures,
       voucher,
     }),
@@ -68,7 +68,7 @@ export const updateProposalApiReq = async ({
   communityId,
   proposalId,
   updatePayload,
-  hexTime,
+  timestamp,
   compositeSignatures,
   voucher,
 } = {}) => {
@@ -80,7 +80,7 @@ export const updateProposalApiReq = async ({
     },
     body: JSON.stringify({
       ...updatePayload,
-      timestamp: hexTime,
+      timestamp,
       compositeSignatures,
       voucher,
     }),
@@ -120,7 +120,7 @@ export const fetchProposalsByStatus = async ({
 
 export const voteOnProposalApiReq = async ({
   voteData,
-  message: hexMessage,
+  message,
   timestamp,
   compositeSignatures,
   voucher,
@@ -134,7 +134,7 @@ export const voteOnProposalApiReq = async ({
     body: JSON.stringify({
       ...voteData,
       compositeSignatures,
-      message: hexMessage,
+      message,
       timestamp,
       voucher,
     }),

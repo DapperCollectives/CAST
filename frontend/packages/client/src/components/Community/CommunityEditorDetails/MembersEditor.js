@@ -85,11 +85,11 @@ export default function MembersEditor({
     // use original list passed by props to identify addresses to add and remove
     const originalList = communityUsers.map((el) => el.addr);
 
-    const hexTime = Buffer.from(Date.now().toString()).toString('hex');
+    const timestamp = Date.now().toString();
     const [compositeSignatures, voucher] = await signMessageByWalletProvider(
       user?.services[0]?.uid,
       UPDATE_COMMUNITY_TX,
-      hexTime
+      timestamp
     );
     // No valid user signature found.
     if (!compositeSignatures && !voucher) {
@@ -107,7 +107,7 @@ export default function MembersEditor({
 
     const body = {
       signingAddr: addr,
-      timestamp: hexTime,
+      timestamp,
       compositeSignatures,
       voucher,
     };
