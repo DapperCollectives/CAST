@@ -1,5 +1,5 @@
 /* global plausible */
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useModalContext } from 'contexts/NotificationModal';
@@ -10,11 +10,11 @@ import {
   PropCreateStepThree,
   PropCreateStepTwo,
 } from 'components/ProposalCreate';
-import { useProposal } from 'hooks';
+import { useProposalCreateMutation } from 'hooks';
 import { isStartTimeValid, parseDateToServer } from 'utils';
 
 export default function ProposalCreatePage() {
-  const { createProposal, data, loading, error } = useProposal();
+  const { createProposal, data, loading, error } = useProposalCreateMutation();
   const [modalError, setModalError] = useState(null);
   const {
     user: { addr: creatorAddr },

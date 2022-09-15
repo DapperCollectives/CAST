@@ -1,7 +1,7 @@
-import React, { useCallback, useState } from 'react';
+import { cloneElement, useCallback, useRef, useState } from 'react';
 import { Prompt } from 'react-router-dom';
+import { Svg } from '@cast/shared-components';
 import Loader from '../Loader';
-import { ArrowLeft, CheckMark } from '../Svg';
 import NextButton from './NexStepButton';
 import SubmitButton from './SubmitButton';
 
@@ -22,7 +22,7 @@ function StepByStep({
   const [showPreStep, setShowPreStep] = useState(!!preStep);
   const [isStepValid, setStepValid] = useState(false);
   const [stepsData, setStepsData] = useState({});
-  const refs = React.useRef();
+  const refs = useRef();
 
   const onStepAdvance = (direction = 'next') => {
     if (direction === 'next') {
@@ -101,7 +101,7 @@ function StepByStep({
     } else if (!showPreStep && currentStep > stepIdx) {
       return (
         <div className={`is-flex ${stepClasses.join(' ')}`} key={stepIdx}>
-          <CheckMark circleFill="#44C42F" />
+          <Svg name="CheckMark" circleFill="#44C42F" />
           {stepLabel ? <span className="ml-4">{stepLabel}</span> : divider}
         </div>
       );
@@ -134,7 +134,7 @@ function StepByStep({
       className="is-flex is-align-items-center has-text-grey cursor-pointer"
       onClick={!isSubmitting ? () => onStepAdvance('prev') : () => {}}
     >
-      <ArrowLeft />
+      <Svg name="ArrowLeft" />
       <span className="ml-4">Back</span>
     </div>
   );
@@ -231,7 +231,7 @@ function StepByStep({
             )}
 
             {!isSubmitting &&
-              React.cloneElement(child, {
+              cloneElement(child, {
                 onDataChange: (stepData) => {
                   setStepsData({
                     ...stepsData,

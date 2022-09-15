@@ -1,9 +1,8 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 
 export default function HomeFooter() {
   return (
-    <div className="container pt-6">
+    <div className="container pt-7 mt-7">
       <div className="columns">
         <div className="column">
           <p className="has-text-grey small-text is-flex">
@@ -26,7 +25,7 @@ export default function HomeFooter() {
               href="https://docs.cast.fyi"
               className="is-underlined has-text-grey"
             >
-              Docs
+              FAQ
             </a>
           </p>
         </div>

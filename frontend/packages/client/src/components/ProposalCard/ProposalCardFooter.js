@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
+import { Svg } from '@cast/shared-components';
 import { StatusLabel, WrapperResponsive } from 'components';
-import { Active, CheckCircle } from 'components/Svg';
 import { useVotingResults } from 'hooks';
 import { FilterValues } from 'const';
 import { parseDateFromServer } from 'utils';
@@ -37,9 +37,11 @@ const IconAndText = ({ endTime, voted, status }) => {
   }, [votingResults]);
 
   const iconStatusMap = {
-    [FilterValues.active]: <Active />,
+    [FilterValues.active]: <Svg name="Active" />,
     [FilterValues.closed]:
-      textDecision !== '' ? <CheckCircle width="15" height="15" /> : null,
+      textDecision !== '' ? (
+        <Svg name="CheckCircle" width="15" height="15" />
+      ) : null,
   };
 
   const { diffDuration } = parseDateFromServer(endTime);

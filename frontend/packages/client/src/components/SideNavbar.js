@@ -1,6 +1,5 @@
-import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LinkOut, Logo } from './Svg';
+import { Svg } from '@cast/shared-components';
 
 const Sidenavbar = ({ showSidenav, closeSidenav }) => {
   return (
@@ -26,7 +25,7 @@ const Sidenavbar = ({ showSidenav, closeSidenav }) => {
             onClick={closeSidenav}
             className="navbar-item pl-0 py-6"
           >
-            <Logo width={'136'} height={'40'} />
+            <Svg name="Logo" width={'136'} height={'40'} />
           </NavLink>
           <aside className="menu">
             <ul className="menu-list">
@@ -50,7 +49,7 @@ const Sidenavbar = ({ showSidenav, closeSidenav }) => {
                   className="navbar-item pl-0 py-4 is-size-5"
                   onClick={closeSidenav}
                 >
-                  Create Community
+                  Create a Community
                 </NavLink>
               </li>
               <li>
@@ -62,7 +61,7 @@ const Sidenavbar = ({ showSidenav, closeSidenav }) => {
                   onClick={closeSidenav}
                 >
                   <span className="mr-2">Codebase</span>
-                  <LinkOut />
+                  <Svg name="LinkOut" />
                 </a>
               </li>
             </ul>

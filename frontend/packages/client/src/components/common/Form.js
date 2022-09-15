@@ -1,5 +1,3 @@
-import React from 'react';
-
 const Form = ({ removeInnerForm = false, children, onSubmit, formId } = {}) => {
   // TODO: make enter to jump to next input field on form
   const checkKeyDown = (e) => {

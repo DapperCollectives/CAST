@@ -6,7 +6,7 @@ $success: #3EAE4F
 $danger: #F54339
 $yellow: #FBD84D
 $orange: #F4AF4A
-$light-grey: #DCDCDC
+$light-grey: #F9F9F9
 $grey: #636363
 
 // Update Bulma's global variables
@@ -120,6 +120,8 @@ code
 	background: transparent
 .divider
 	border-bottom: 1px solid $grey-light
+.rounded
+	border-radius: 16px
 .rounded-sm
 	border-radius: 8px
 .rounded-sm-tl
@@ -152,6 +154,8 @@ code
 	flex: 2 0 0
 .has-background-orange
 	background-color: $orange
+.has-background-light-grey
+	background-color: $light-grey
 .has-background-yellow
 	background-color: $yellow
 	&.button
@@ -231,6 +235,8 @@ label > input[type="radio"].is-chosen + *::before
 .proposal-copy a:hover
 	filter: opacity(0.7)
 	color: $link
+header#navbar
+	border-top: 4px solid $yellow
 .navbar
 	display: flex
 	justify-content: space-between
@@ -349,6 +355,8 @@ hr
 	font-size: 0.88rem !important
 .smaller-text
 	font-size: 0.75rem !important
+.smallest-text
+	font-size: 10px
 
 @import './components/StepByStep/StepByStep.sass'
 
@@ -597,8 +605,6 @@ span[data-tooltip]
 	td
 		vertical-align: middle !important
 		height: 64px !important
-	.has-background-light-grey
-		background-color: $light-grey
 	thead th
 		border-width: 0 0 1px !important
 	.index-cell
@@ -704,9 +710,6 @@ span[data-tooltip]
 	.header-text
 		font-size: 2.5rem
 		line-height: 3rem !important
-.beta-label
-	font-size: 10px
-	font-weight: 700
 .wallet-connect-footer
 	background-color: #F2F2F2
 

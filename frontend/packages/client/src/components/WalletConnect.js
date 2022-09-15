@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Blockies from 'react-blockies';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { Web3Consumer } from '../contexts/Web3';
-import { Copy } from 'components/Svg';
+import { Web3Consumer } from 'contexts/Web3';
+import { Svg } from '@cast/shared-components';
 import { useMediaQuery, useOnClickOutside } from 'hooks';
 import { truncateAddress } from 'utils';
 import classnames from 'classnames';
@@ -13,7 +13,6 @@ const SignInOutButton = ({
   openWalletModal,
   injectedProvider,
   closeModal,
-  expandContainer = false,
 }) => {
   const notMobile = useMediaQuery();
 
@@ -67,17 +66,11 @@ const SignInOutButton = ({
   });
 
   const buttonClass = classnames(
-    'wallet-connect button is-uppercase transition-all small-text rounded-sm',
+    'wallet-connect button transition-all small-text rounded-lg',
     { 'is-primary': !loggedIn },
     { 'px-2': !notMobile }
   );
   const addressStyle = classnames('', { 'smaller-text': !notMobile });
-
-  const containerAddressStyle = classnames('is-flex', { 'pl-2': !notMobile });
-
-  const containerButtonStyle = classnames('is-flex is-align-items-center', {
-    'flex-1 is-justify-content-space-between': notMobile,
-  });
 
   return (
     <>
@@ -88,10 +81,7 @@ const SignInOutButton = ({
         aria-controls="dropdown-menu"
         style={{ position: 'relative' }}
       >
-        <div
-          className="dropdown-trigger is-flex is-justify-content-flex-end"
-          style={notMobile && expandContainer ? { width: '280px' } : {}}
-        >
+        <div className="dropdown-trigger is-flex is-justify-content-flex-end">
           <button
             onClick={loggedIn ? openDropdown : connectWallet}
             className={buttonClass}
@@ -101,18 +91,18 @@ const SignInOutButton = ({
                     ...(loggedIn ? { width: '147px' } : { width: '206px' }),
                     height: '40px',
                   }
-                : { width: '119px', height: '32px' }
+                : { width: '105px', height: '32px' }
             }
           >
             {loggedIn ? (
-              <div className={containerButtonStyle}>
+              <div className="is-flex is-align-items-center flex-1 is-justify-content-space-around">
                 <Blockies
                   seed={addr}
                   size={notMobile ? 6.5 : 5}
                   scale={4}
                   className="blockies"
                 />
-                <div className={containerAddressStyle}>
+                <div className="is-flex">
                   <p className={addressStyle}>{truncateAddress(addr, 4, 4)}</p>
                 </div>
               </div>
@@ -130,9 +120,12 @@ const SignInOutButton = ({
           id="dropdown-menu"
           role="menu"
           ref={dropdownRef}
-          style={!notMobile ? { left: '-160px' } : {}}
+          style={!notMobile ? { left: '-170px' } : { left: '-130px' }}
         >
-          <div className="dropdown-content p-0" style={{ width: '277px' }}>
+          <div
+            className="dropdown-content p-0 rounded"
+            style={{ width: '277px' }}
+          >
             <div className="px-4 pt-4 pb-2">
               <Tooltip
                 classNames="is-flex is-flex-grow-1 is-align-items-center transition-all"
@@ -143,7 +136,7 @@ const SignInOutButton = ({
               >
                 <CopyToClipboard text={addr} onCopy={markAddressCopied}>
                   <div
-                    className="columns flex-1 is-mobile m-0 px-4 py-0 rounded-sm button is-white border-light"
+                    className="columns flex-1 is-mobile m-0 px-4 py-0 rounded-lg button is-white border-light"
                     style={{
                       borderColor: 'hsl(0deg, 0%, 86%)',
                       height: '32px',
@@ -157,7 +150,7 @@ const SignInOutButton = ({
                         className="is-flex is-align-items-center py-0 px-1"
                         style={{ height: '23px' }}
                       >
-                        <Copy />
+                        <Svg name="Copy" />
                       </div>
                     </div>
                   </div>
@@ -168,11 +161,11 @@ const SignInOutButton = ({
             <hr className="dropdown-divider" />
             <div className="px-4 pb-4 pt-2">
               <div
-                className="button is-fullwidth rounded-sm is-uppercase is-flex small-text has-text-white has-background-black"
+                className="button is-fullwidth rounded-lg is-flex small-text has-text-white has-background-black"
                 style={{ height: '32px' }}
                 onClick={signOut}
               >
-                disconnect
+                Disconnect
               </div>
             </div>
           </div>

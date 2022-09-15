@@ -1,4 +1,3 @@
-import React from 'react';
 import Blockies from 'react-blockies';
 import { JoinCommunityButton } from 'components';
 import { useMediaQuery } from 'hooks';
@@ -12,7 +11,6 @@ export default function CommunityHeader({
   communityName,
   members,
   totalMembers,
-  setTotalMembers = () => {},
   onLeaveCommunity = () => {},
   onJoinCommunity = () => {},
 } = {}) {
@@ -107,7 +105,6 @@ export default function CommunityHeader({
             <div className="column is-3 pb-0-mobile pt-2-mobile is-flex is-justify-content-end is-justify-content-start-mobile">
               <JoinCommunityButton
                 communityId={id}
-                setTotalMembers={setTotalMembers}
                 onLeaveCommunity={onLeaveCommunity}
                 onJoinCommunity={onJoinCommunity}
                 size="large"

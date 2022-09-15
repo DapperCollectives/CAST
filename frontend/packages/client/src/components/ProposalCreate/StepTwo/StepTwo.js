@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
+import { Svg } from '@cast/shared-components';
 import { FadeIn } from 'components';
-import { CaretDown } from 'components/Svg';
 import CustomDatePicker from 'components/common/CustomDatePicker';
 import Form from 'components/common/Form';
 import { useMediaQuery } from 'hooks';
@@ -152,7 +152,7 @@ const StepTwo = ({
                   >
                     <div className="is-flex is-flex-grow-1 is-align-items-center is-justify-content-space-between has-text-grey small-text">
                       {startTime ? formatTime(startTime) : 'Select Time'}
-                      <CaretDown className="has-text-black" />
+                      <Svg name="CaretDown" className="has-text-black" />
                     </div>
                   </button>
                 </div>
@@ -222,7 +222,7 @@ const StepTwo = ({
                   >
                     <div className="is-flex is-flex-grow-1 is-align-items-center is-justify-content-space-between has-text-grey small-text">
                       {endTime ? formatTime(endTime) : 'Select Time'}
-                      <CaretDown className="has-text-black" />
+                      <Svg name="CaretDown" className="has-text-black" />
                     </div>
                   </button>
                 </div>

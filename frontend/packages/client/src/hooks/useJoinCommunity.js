@@ -1,18 +1,21 @@
-import { useErrorHandlerContext } from '../contexts/ErrorHandler';
+import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useWebContext } from 'contexts/Web3';
 import { UPDATE_MEMBERSHIP_TX } from 'const';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  addUserToCommunityUserApiRep,
+  deleteCommunityMemberApiReq,
+} from 'api/communityUsers';
 
 export default function useJoinCommunity() {
   const queryClient = useQueryClient();
   const { notifyError } = useErrorHandlerContext();
   const { signMessageByWalletProvider } = useWebContext();
 
-  const { mutateAsync: createCommunityUserMutation } = useMutation(
+  const { mutate: createCommunityUserMutation } = useMutation(
     async ({ communityId, user }) => {
       const { addr } = user;
       const hexTime = Buffer.from(Date.now().toString()).toString('hex');
-      const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}/users`;
       const [compositeSignatures, voucher] = await signMessageByWalletProvider(
         user?.services[0].uid,
         UPDATE_MEMBERSHIP_TX,
@@ -20,32 +23,18 @@ export default function useJoinCommunity() {
       );
 
       if (!compositeSignatures && !voucher) {
-        return { error: 'No valid user signature found.' };
+        throw new Error('No valid user signature found.');
       }
 
-      try {
-        const fetchOptions = {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            communityId: parseInt(communityId),
-            addr,
-            userType: 'member',
-            signingAddr: addr,
-            timestamp: hexTime,
-            compositeSignatures,
-            voucher,
-          }),
-        };
-
-        const response = await fetch(url, fetchOptions);
-        const json = await response.json();
-        return { success: true, data: json };
-      } catch (err) {
-        notifyError(err, url);
-      }
+      return addUserToCommunityUserApiRep({
+        communityId,
+        addr,
+        hexTime,
+        compositeSignatures,
+        voucher,
+        userType: 'member',
+        signingAddr: addr,
+      });
     },
     {
       onSuccess: async (_, variables) => {
@@ -59,46 +48,35 @@ export default function useJoinCommunity() {
           addr,
         ]);
       },
+      onError: (error) => {
+        notifyError(error);
+      },
     }
   );
 
-  const { mutateAsync: deleteUserFromCommunityMutation } = useMutation(
+  const { mutate: deleteUserFromCommunityMutation } = useMutation(
     async ({ communityId, user }) => {
       const { addr } = user;
-      const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}/users/${addr}/member`;
       const hexTime = Buffer.from(Date.now().toString()).toString('hex');
+
       const [compositeSignatures, voucher] = await signMessageByWalletProvider(
         user?.services[0].uid,
         UPDATE_MEMBERSHIP_TX,
         hexTime
       );
+
       if (!compositeSignatures && !voucher) {
-        return { error: 'No valid user signature found.' };
+        throw new Error('No valid user signature found.');
       }
 
-      try {
-        const fetchOptions = {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            communityId: parseInt(communityId),
-            addr,
-            userType: 'member',
-            signingAddr: addr,
-            timestamp: hexTime,
-            compositeSignatures,
-            voucher,
-          }),
-        };
-
-        const response = await fetch(url, fetchOptions);
-        const json = await response.json();
-        return { success: true, data: json };
-      } catch (err) {
-        notifyError(err, url);
-      }
+      return deleteCommunityMemberApiReq({
+        communityId,
+        addr,
+        hexTime,
+        compositeSignatures,
+        voucher,
+        signingAddr: addr,
+      });
     },
     {
       onSuccess: async (_, variables) => {
@@ -112,19 +90,16 @@ export default function useJoinCommunity() {
           addr,
         ]);
       },
+      onError: (error) => {
+        notifyError(error);
+      },
     }
   );
-
-  const createCommunityUser = async (props) => {
-    return createCommunityUserMutation(props);
-  };
-
-  const deleteUserFromCommunity = async (props) => {
-    return deleteUserFromCommunityMutation(props);
-  };
 
   return {
-    createCommunityUser,
-    deleteUserFromCommunity,
+    // adds user as member
+    createCommunityUser: createCommunityUserMutation,
+    // removes all roles from user
+    deleteUserFromCommunity: deleteUserFromCommunityMutation,
   };
 }

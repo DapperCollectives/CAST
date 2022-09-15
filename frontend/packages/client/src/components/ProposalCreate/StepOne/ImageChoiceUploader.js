@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { Svg } from '@cast/shared-components';
 import { FadeIn, Loader } from 'components';
-import { Bin, Upload } from 'components/Svg';
 import { useFileUploader } from 'hooks';
 import { MAX_FILE_SIZE } from 'const';
 
@@ -36,7 +36,7 @@ const UploadArea = ({ getRootProps, getInputProps, errorMessage }) => {
         {...getRootProps()}
       >
         <div className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center">
-          <Upload width="36" height="30" />
+          <Svg name="Upload" width="36" height="30" />
           <span className="smaller-text pt-3 pb-1">Drag and drop here </span>
           <span className="smaller-text py-1"> or </span>
           <span className="smaller-text py-1">
@@ -71,7 +71,11 @@ export default function ImageChoiceUploader({
     text,
   });
 
-  const { uploadFile, loading, error } = useFileUploader({
+  const {
+    uploadFile,
+    isLoading: loading,
+    error,
+  } = useFileUploader({
     useModalNotifications: false,
   });
 
@@ -243,7 +247,7 @@ export default function ImageChoiceUploader({
             }}
             onClick={onDeleteImage}
           >
-            <Bin />
+            <Svg name="Bin" />
           </div>
         </div>
       )}

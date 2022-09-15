@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useWebContext } from 'contexts/Web3';
 import {
   FadeIn,
@@ -8,10 +8,12 @@ import {
   TooltipMessage,
 } from 'components';
 import CommunitiesPresenter from 'components/Community/CommunitiesPresenter';
-import useBrowserName from 'hooks/useBrowserName';
-import useFeaturedCommunities from 'hooks/useFeaturedCommunities';
-import useLocalStorage from 'hooks/useLocalStorage';
-import useUserCommunities from 'hooks/useUserCommunities';
+import {
+  useBrowserName,
+  useFeaturedCommunities,
+  useLocalStorage,
+  useUserCommunities,
+} from 'hooks';
 import classnames from 'classnames';
 
 export default function HomePage() {
@@ -63,37 +65,40 @@ export default function HomePage() {
   });
 
   return (
-    <section className={classNames}>
+    <>
       {showToolTip && (
         <TooltipMessage
+          className="my-6"
           onClose={() => {
             setValue(false);
           }}
         />
       )}
       <HomeHeader />
-      {(loading || loadingFeaturedCommunities) && (
-        <div style={{ height: '50vh' }}>
-          <Loader fullHeight />
-        </div>
-      )}
-      {!(loading || loadingFeaturedCommunities) && (
-        <FadeIn>
-          {isMyCommunitiesVisible && (
+      <section className={classNames}>
+        {(loading || loadingFeaturedCommunities) && (
+          <div style={{ height: '50vh' }}>
+            <Loader fullHeight />
+          </div>
+        )}
+        {!(loading || loadingFeaturedCommunities) && (
+          <FadeIn>
+            {isMyCommunitiesVisible && (
+              <CommunitiesPresenter
+                title="My Communities"
+                communities={myUserCommunities}
+                hideJoin
+              />
+            )}
             <CommunitiesPresenter
-              title="My Communities"
-              communities={myUserCommunities}
-              hideJoin
+              classNames={classNamesFeatCommunities}
+              title="Featured Communities"
+              communities={featuredCommunities}
             />
-          )}
-          <CommunitiesPresenter
-            classNames={classNamesFeatCommunities}
-            title="Featured Communities"
-            communities={featuredCommunities}
-          />
-        </FadeIn>
-      )}
-      <HomeFooter />
-    </section>
+          </FadeIn>
+        )}
+        <HomeFooter />
+      </section>
+    </>
   );
 }

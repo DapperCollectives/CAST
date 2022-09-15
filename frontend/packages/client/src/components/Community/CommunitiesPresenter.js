@@ -1,4 +1,3 @@
-import React from 'react';
 import classnames from 'classnames';
 import CommunityCard from './CommunityCard';
 
@@ -36,7 +35,9 @@ const CommunitiesPresenter = ({
 
   return (
     <div className={containerClasses}>
-      <h1 className="is-uppercase small-text communities">{title}</h1>
+      <h1 className="is-uppercase has-text-weight-bold communities mb-5">
+        {title}
+      </h1>
       <div className="columns is-multiline">
         {communities.map((community, index) => {
           const { logo, name, body, id, isComingSoon, slug } = community;

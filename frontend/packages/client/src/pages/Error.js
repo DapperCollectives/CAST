@@ -1,6 +1,4 @@
-import React from 'react';
-
-export default function Error({ error, resetErrorBoundary }) {
+export default function Error({ resetErrorBoundary }) {
   return (
     <section className="section is-flex is-flex-direction-column full-height is-align-items-center is-justify-content-center">
       <p className="has-text-grey my-3">We're sorry, something went wrong...</p>

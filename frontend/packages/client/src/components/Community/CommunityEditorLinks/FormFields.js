@@ -1,4 +1,4 @@
-import React from 'react';
+import { Fragment } from 'react';
 import FadeIn from 'components/FadeIn';
 
 export default function Form({
@@ -10,7 +10,7 @@ export default function Form({
   return (
     <>
       {formFields.map((formField, index) => (
-        <React.Fragment key={`form-field-${index}`}>
+        <Fragment key={`form-field-${index}`}>
           <div
             style={{ position: 'relative' }}
             className="is-flex is-align-items-center mt-4"
@@ -44,7 +44,7 @@ export default function Form({
               </div>
             </FadeIn>
           )}
-        </React.Fragment>
+        </Fragment>
       ))}
     </>
   );

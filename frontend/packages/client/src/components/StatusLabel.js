@@ -1,5 +1,4 @@
-import React from 'react';
-import { CheckMark } from './Svg';
+import { Svg } from '@cast/shared-components';
 
 const StatusLabel = ({
   status,
@@ -16,7 +15,8 @@ const StatusLabel = ({
         style={{ fontSize: '10px' }}
         className="is-flex has-text-weight-bold"
       >
-        <CheckMark
+        <Svg
+          name="CheckMark"
           height="15"
           width="15"
           circleFill="white"

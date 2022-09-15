@@ -17,10 +17,11 @@ pub fun main(address: Address): [UInt64] {
         let view = nft.resolveView(Type<TopShot.TopShotMomentMetadataView>())!
         let metadata = view as! TopShot.TopShotMomentMetadataView
 
-        if metadata.teamAtMoment == "Toronto Raptors" {
+        if metadata.teamAtMoment == "Sacramento Kings" {
              nftIds.append(id)
         }
     }
     
     return nftIds
 }
+ 

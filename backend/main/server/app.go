@@ -75,7 +75,6 @@ var strategyMap = map[string]Strategy{
 
 var customScripts []shared.CustomScript
 
-
 var helpers Helpers
 
 //////////////////////

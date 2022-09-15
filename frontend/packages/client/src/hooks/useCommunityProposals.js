@@ -1,11 +1,8 @@
-import { useCallback, useEffect, useReducer } from 'react';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
-import { checkResponse } from 'utils';
-import {
-  INITIAL_STATE,
-  PAGINATION_INITIAL_STATE,
-  paginationReducer,
-} from '../reducers';
+import { getPagination, getPlainData } from 'utils';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import { fetchProposalsByStatus } from 'api/proposals';
+import { PAGINATION_INITIAL_STATE } from 'reducers';
 
 /**
  * Hook to return proposals created on a community. Results are paginated
@@ -15,95 +12,44 @@ import {
  */
 export default function useCommunityProposals({
   communityId,
-  start = PAGINATION_INITIAL_STATE.start,
-  count = PAGINATION_INITIAL_STATE.count,
+  start: startParam = PAGINATION_INITIAL_STATE.start,
+  count: countParam = PAGINATION_INITIAL_STATE.count,
   status,
 } = {}) {
-  const [state, dispatch] = useReducer(paginationReducer, {
-    ...INITIAL_STATE,
-    pagination: {
-      ...PAGINATION_INITIAL_STATE,
-      start,
-      count,
-    },
-  });
-
-  useEffect(() => {
-    resetResults();
-  }, [status]);
+  const initialPageParam = [startParam, countParam, 0, -1];
 
   const { notifyError } = useErrorHandlerContext();
-  /**
-   * Function to fetch more results based on pagination configuration
-   */
-  const fetchMore = useCallback(async () => {
-    dispatch({ type: 'PROCESSING' });
-    const url = `${
-      process.env.REACT_APP_BACK_END_SERVER_API
-    }/communities/${communityId}/proposals?count=${
-      state.pagination.count
-    }&start=${state.pagination.start}${status ? `&status=${status}` : ''}`;
-    try {
-      const response = await fetch(url);
-      const proposals = await checkResponse(response);
 
-      const updatedProposals = proposals.data.map((p) => ({
-        ...p,
-        // missing fields added to avoid breaking the frontend rendering
-        winCount: 4480000,
-        textDecision: 'No, do not compensate them',
-      }));
+  const queryUniqueKey = ['community-proposals', String(communityId), status];
 
-      dispatch({
-        type: 'SUCCESS',
-        payload: { ...proposals, data: updatedProposals },
-      });
-    } catch (err) {
-      notifyError(err, url);
-      dispatch({ type: 'ERROR', payload: { errorData: err.message } });
+  const { isLoading, isError, data, error, fetchNextPage } = useInfiniteQuery(
+    queryUniqueKey,
+    async ({ pageParam = initialPageParam, queryKey }) => {
+      const [start, count] = pageParam;
+      const communityId = queryKey[1];
+      return fetchProposalsByStatus({ communityId, count, start, status });
+    },
+    {
+      getNextPageParam: (lastPage, pages) => {
+        const { next, start, count, totalRecords } = lastPage;
+        return [start + count, count, totalRecords, next];
+      },
+      enabled: !!communityId,
+      onError: (error) => {
+        notifyError(error);
+      },
+      keepPreviousData: true,
     }
-  }, [state.pagination, communityId, status, notifyError]);
-
-  const getCommunityProposals = useCallback(async () => {
-    dispatch({ type: 'PROCESSING' });
-    const url = `${
-      process.env.REACT_APP_BACK_END_SERVER_API
-    }/communities/${communityId}/proposals?count=${count}&start=${start}${
-      status ? `&status=${status}` : ''
-    }`;
-    try {
-      const response = await fetch(url);
-      const proposals = await checkResponse(response);
-
-      const updatedProposals = (proposals.data || []).map((p) => ({
-        ...p,
-        // missing fields added to avoid breaking the frontend rendering
-        winCount: 4480000,
-        textDecision: 'No, do not compensate them',
-      }));
-
-      dispatch({
-        type: 'SUCCESS',
-        payload: { ...proposals, data: updatedProposals },
-      });
-    } catch (err) {
-      notifyError(err, url);
-      dispatch({ type: 'ERROR', payload: { errorData: err.message } });
-    }
-  }, [dispatch, communityId, count, start, status, notifyError]);
-
-  const resetResults = () => {
-    dispatch({ type: 'RESET_RESULTS' });
-  };
-
-  useEffect(() => {
-    getCommunityProposals();
-  }, [getCommunityProposals]);
+  );
 
   return {
-    ...state,
-    getCommunityProposals,
-    fetchMore,
-    resetResults,
+    isLoading,
+    isError,
+    data: getPlainData(data),
+    pagination: getPagination(data, countParam),
+    error,
+    fetchNextPage,
+    queryKey: queryUniqueKey,
+    pages: data?.pages ?? [],
   };
 }

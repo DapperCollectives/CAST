@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useVotesForAddress } from 'hooks';
 import { FilterValues } from 'const';
 import { getProposalType, parseDateFromServer } from 'utils';
@@ -67,7 +67,7 @@ const TextBasedOptions = ({
             }`}
             onClick={readOnly ? () => {} : onConfirmVote}
           >
-            VOTE
+            Vote
           </button>
         </Wrapper>
       )}
@@ -252,19 +252,13 @@ const VoteOptions = ({
 
   const isActive = status === FilterValues.active;
 
-  const { getVotesForAddress, data, loading } = useVotesForAddress();
+  const { data: votesFromAddress } = useVotesForAddress({
+    enabled: Boolean(addr && proposal?.id),
+    proposalIds: [proposal.id],
+    addr,
+  });
 
-  const votesFromAddress = data?.[addr];
   const checkedVotes = Array.isArray(votesFromAddress);
-
-  useEffect(() => {
-    async function getVotes() {
-      getVotesForAddress([proposal.id], addr);
-    }
-    if (addr && !loading && proposal.id && !checkedVotes) {
-      getVotes();
-    }
-  }, [addr, proposal, loading, getVotesForAddress, checkedVotes]);
 
   const hasntVoted =
     !castVote &&

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useWebContext } from 'contexts/Web3';
 import { useCommunityMembers } from 'hooks';
 import { debounce } from 'utils';
