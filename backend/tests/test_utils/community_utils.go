@@ -205,6 +205,7 @@ func (otu *OverflowTestUtils) GenerateCommunityPayload(signer string, payload *m
 	timestamp := fmt.Sprint(time.Now().UnixNano() / int64(time.Millisecond))
 	hexTimestamp := hex.EncodeToString([]byte(fmt.Sprint(timestamp)))
 	compositeSignatures := otu.GenerateCompositeSignatures(signer, timestamp)
+	threshold := "0"
 
 	payload.Timestamp = hexTimestamp
 	payload.Composite_signatures = compositeSignatures
@@ -212,6 +213,7 @@ func (otu *OverflowTestUtils) GenerateCommunityPayload(signer string, payload *m
 	if payload.Strategies == nil {
 		payload.Strategies = &strategies
 	}
+	payload.Proposal_threshold = &threshold
 
 	return payload
 }
