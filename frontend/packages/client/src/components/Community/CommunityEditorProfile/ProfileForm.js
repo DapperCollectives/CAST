@@ -161,7 +161,7 @@ export default function ProfileForm({
           }}
         />,
         {
-          classNameModalContent: 'rounded',
+          classNameModalContent: 'rounded modal-content-image-crop',
           showCloseButton: false,
         }
       );
