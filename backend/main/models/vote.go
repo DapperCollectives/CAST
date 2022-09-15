@@ -27,8 +27,8 @@ type Vote struct {
 	Message              string                  `json:"message"`
 	Voucher              *shared.Voucher         `json:"voucher,omitempty"`
 	IsCancelled          bool                    `json:"isCancelled"`
-	IsEarly		 	 	 bool					 `json:"isEarly"`
-	IsWinning		 	 bool					 `json:"isWinning"`
+	IsEarly              bool                    `json:"isEarly"`
+	IsWinning            bool                    `json:"isWinning"`
 }
 
 type VoteWithBalance struct {
