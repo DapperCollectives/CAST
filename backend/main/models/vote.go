@@ -274,8 +274,6 @@ func ValidateVoteMessage(message string, proposal Proposal) error {
 	log.Info().Msgf("validating message: %s", message)
 	vars := strings.Split(message, ":")
 
-	fmt.Printf("Validating Vote Message")
-
 	// check proposal choices to see if choice is valid
 	encodedChoice := vars[1]
 	choiceBytes, err := hex.DecodeString(encodedChoice)
