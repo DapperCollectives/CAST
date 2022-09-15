@@ -53,7 +53,7 @@ export default function StepOne({ stepData, onDataChange, moveToNextStep }) {
         <div className="column is-12">
           <ActionButton
             type="submit"
-            label="Next: COMMUNITY DETAILS"
+            label="Next: Community Details"
             enabled={(isDirty || isValid) && !isSubmitting}
             loading={isSubmitting}
             classNames="vote-button transition-all has-background-yellow mt-5 rounded-sm is-size-6"
