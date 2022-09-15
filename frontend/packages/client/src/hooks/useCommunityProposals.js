@@ -2,7 +2,7 @@ import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { getPagination, getPlainData } from 'utils';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { fetchProposalsByStatus } from 'api/proposals';
-import { PAGINATION_INITIAL_STATE } from '../reducers';
+import { PAGINATION_INITIAL_STATE } from 'reducers';
 
 /**
  * Hook to return proposals created on a community. Results are paginated

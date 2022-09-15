@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Blockies from 'react-blockies';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { Web3Consumer } from '../contexts/Web3';
+import { Web3Consumer } from 'contexts/Web3';
 import { Svg } from '@cast/shared-components';
 import { useMediaQuery, useOnClickOutside } from 'hooks';
 import { truncateAddress } from 'utils';
@@ -91,7 +91,7 @@ const SignInOutButton = ({
                     ...(loggedIn ? { width: '147px' } : { width: '206px' }),
                     height: '40px',
                   }
-                : { width: '119px', height: '32px' }
+                : { width: '105px', height: '32px' }
             }
           >
             {loggedIn ? (
@@ -120,7 +120,7 @@ const SignInOutButton = ({
           id="dropdown-menu"
           role="menu"
           ref={dropdownRef}
-          style={!notMobile ? { left: '-160px' } : { left: '-130px' }}
+          style={!notMobile ? { left: '-170px' } : { left: '-130px' }}
         >
           <div
             className="dropdown-content p-0 rounded"

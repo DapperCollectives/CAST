@@ -1,4 +1,3 @@
-import React from 'react';
 import { Form, WrapperResponsive } from 'components';
 import { FormFieldsConfig } from './FormConfig';
 import FormFields from './FormFields';

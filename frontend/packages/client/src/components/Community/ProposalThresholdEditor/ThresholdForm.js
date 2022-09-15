@@ -1,4 +1,3 @@
-import React from 'react';
 import { WrapperResponsive } from 'components';
 import Checkbox from 'components/common/Checkbox';
 import Dropdown from 'components/common/Dropdown';

@@ -1,4 +1,3 @@
-import React from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { ActionButton } from 'components';
 import { CommunityLinksForm } from 'components/Community/CommunityEditorLinks';

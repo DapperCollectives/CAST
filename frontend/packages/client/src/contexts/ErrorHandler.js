@@ -1,11 +1,19 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  createContext,
+  createElement,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { Error } from 'components';
 import { useModalContext } from './NotificationModal';
 
-const ErrorHandlerContext = React.createContext({});
+const ErrorHandlerContext = createContext({});
 
 export const useErrorHandlerContext = () => {
-  const context = React.useContext(ErrorHandlerContext);
+  const context = useContext(ErrorHandlerContext);
   if (context === undefined) {
     throw new Error(
       '`useErrorHandlerContext` must be used within a `ErrorHandlerProvider`.'
@@ -29,7 +37,7 @@ const ErrorHandlerProvider = ({ children }) => {
   useEffect(() => {
     if (error !== null && !errorOpened) {
       openModal(
-        React.createElement(Error, {
+        createElement(Error, {
           error: (
             <p className="has-text-danger p-3 has-text-justified">
               <b>{error.statusText}</b>

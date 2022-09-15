@@ -40,7 +40,9 @@ export default function WalletConnectModal({
             );
             closeModal();
           },
-          icon: getWalletIcon(service.provider),
+          icon: IS_LOCAL_DEV
+            ? getWalletIcon(service.provider)
+            : service.provider.icon,
           name: service.provider.name,
         })),
         (service) => service.name

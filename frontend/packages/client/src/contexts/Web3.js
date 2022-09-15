@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 import { WalletConnectModal } from 'components';
 import { useFclUser } from 'hooks';
 import { IS_LOCAL_DEV } from 'const';
@@ -8,10 +14,10 @@ import * as t from '@onflow/types';
 import networks from 'networks';
 
 // create our app context
-export const Web3Context = React.createContext({});
+export const Web3Context = createContext({});
 
 export const useWebContext = () => {
-  const context = React.useContext(Web3Context);
+  const context = useContext(Web3Context);
   if (context === undefined) {
     throw new Error('`useWebContext` must be used within a `Web3Context`.');
   }
