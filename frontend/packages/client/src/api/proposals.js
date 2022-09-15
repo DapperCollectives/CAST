@@ -120,7 +120,7 @@ export const fetchProposalsByStatus = async ({
 
 export const voteOnProposalApiReq = async ({
   voteData,
-  message: hexMessage,
+  message,
   timestamp,
   compositeSignatures,
   voucher,
@@ -134,7 +134,7 @@ export const voteOnProposalApiReq = async ({
     body: JSON.stringify({
       ...voteData,
       compositeSignatures,
-      message: hexMessage,
+      message,
       timestamp,
       voucher,
     }),

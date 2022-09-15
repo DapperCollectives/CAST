@@ -29,7 +29,7 @@ const CommunitySettingsButton = ({ communityId } = {}) => {
       <div className="column is-11">
         <Link to={`/community/${communityId}/edit`}>
           <div
-            className="button is-fullwidth rounded-sm is-uppercase is-flex small-text has-text-white has-background-black"
+            className="button is-fullwidth rounded-sm is-flex small-text has-text-white has-background-black"
             style={{ minHeight: '40px' }}
           >
             Community Settings
