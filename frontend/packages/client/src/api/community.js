@@ -46,8 +46,8 @@ export const createCommunityApiReq = async ({
     strategies,
     logo,
     bannerImgUrl,
-    body,
-    name,
+    communityDescription: body,
+    communityName: name,
     communityCategory,
   } = payload;
 
