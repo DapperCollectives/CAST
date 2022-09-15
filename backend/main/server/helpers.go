@@ -394,14 +394,17 @@ func (h *Helpers) validateVote(p models.Proposal, v models.Vote) error {
 			return err
 		}
 
-		voteMessageToValidate := fmt.Sprintf("%s:%s:%s",
-			voucher.Arguments[0]["value"],
-			voucher.Arguments[1]["value"],
-			voucher.Arguments[2]["value"],
-		)
+		message := voucher.Arguments[0]["value"]
+
+		messageBytes, err := hex.DecodeString(message)
+		if err != nil {
+			log.Error().Err(err)
+			return err
+		}
+
 		// validate proper message format
 		//<proposalId>:<choice>:<timestamp>
-		if err := models.ValidateVoteMessage(voteMessageToValidate, p); err != nil {
+		if err := models.ValidateVoteMessage(string(messageBytes), p); err != nil {
 			log.Error().Err(err)
 			return err
 		}
