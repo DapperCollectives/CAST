@@ -53,7 +53,7 @@ function Header(props) {
                   }}
                   className="navbar-item p-0 mr-6 is-hidden-mobile"
                 >
-                  <span className="navbar-item-hover transition-all has-text-weight-bold">
+                  <span className="navbar-item-hover transition-all has-text-weight-bold has-text-black">
                     About Us
                   </span>
                 </NavLink>
@@ -63,7 +63,7 @@ function Header(props) {
                   }}
                   className="navbar-item p-0 mr-6 is-hidden-mobile"
                 >
-                  <span className="navbar-item-hover transition-all has-text-weight-bold">
+                  <span className="navbar-item-hover transition-all has-text-weight-bold has-text-black">
                     Create a Community
                   </span>
                 </NavLink>
