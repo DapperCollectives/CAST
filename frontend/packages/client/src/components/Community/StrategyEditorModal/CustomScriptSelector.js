@@ -101,7 +101,7 @@ export default function CustomScriptSelector({
       </div>
       <ActionButton
         type="submit"
-        label="done"
+        label="Done"
         enabled={(isDirty || isValid) && !isSubmitting}
         loading={isSubmitting}
         classNames="mt-5 has-button-border-hover"

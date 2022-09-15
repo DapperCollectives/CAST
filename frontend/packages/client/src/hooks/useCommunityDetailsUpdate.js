@@ -40,7 +40,7 @@ export default function useCommunityDetailsUpdate() {
         updatePayload: {
           ...updatePayload,
           signingAddr: addr,
-          timestamp,
+          timestamp: hexTime,
           compositeSignatures,
         },
       });

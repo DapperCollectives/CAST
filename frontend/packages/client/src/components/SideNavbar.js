@@ -49,7 +49,7 @@ const Sidenavbar = ({ showSidenav, closeSidenav }) => {
                   className="navbar-item pl-0 py-4 is-size-5"
                   onClick={closeSidenav}
                 >
-                  Create Community
+                  Create a Community
                 </NavLink>
               </li>
               <li>
