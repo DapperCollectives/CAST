@@ -1,4 +1,3 @@
-import React from 'react';
 import { Router } from 'react-router-dom';
 import '@testing-library/jest-dom';
 import { cleanup, render, waitFor } from '@testing-library/react';

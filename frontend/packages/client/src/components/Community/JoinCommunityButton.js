@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useModalContext } from 'contexts/NotificationModal';
 import { useWebContext } from 'contexts/Web3';
+import { Svg } from '@cast/shared-components';
 import { Error, WalletConnect } from 'components';
-import { Eye, HideEye } from 'components/Svg';
 import { useJoinCommunity, useUserRoleOnCommunity } from 'hooks';
 import classnames from 'classnames';
 
@@ -107,8 +107,8 @@ export default function JoinCommunityButton({
         className={buttonClasses}
         onClick={isMember ? leaveCommunity : joinCommunity}
       >
-        <Eye />
-        <HideEye />
+        <Svg name="Eye" />
+        <Svg name="HideEye" />
         {!isMember && (
           <span className="join-community-cta py-2 px-4 rounded-lg has-text-white has-background-black smaller-text">
             Watch this community

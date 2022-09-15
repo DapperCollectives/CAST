@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import { createElement, useEffect, useState } from 'react';
 import { useModalContext } from 'contexts/NotificationModal';
-import { AddButton } from 'components';
-import { Error } from 'components';
+import { AddButton, Error } from 'components';
 import StrategySelectorInput from 'components/Community/StrategySelectorInput';
 import { useAddFungibleToken, useVotingStrategies } from 'hooks';
 import { kebabToString } from 'utils';
@@ -80,7 +79,7 @@ export default function StrategySelectorForm({
     const strategy = strategies[index];
     if (activeStrategies.includes(strategy.name)) {
       openModal(
-        React.createElement(Error, {
+        createElement(Error, {
           error: (
             <div className="mt-4">
               <p className="is-size-6">

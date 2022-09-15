@@ -56,7 +56,7 @@ export default function useCommunityMutation() {
           logo: communityLogo?.fileUrl,
           bannerImgUrl: communityBanner?.fileUrl,
         },
-        timestamp,
+        timestamp: hexTime,
         compositeSignatures,
         voucher,
       });

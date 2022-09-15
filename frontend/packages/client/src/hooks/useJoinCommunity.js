@@ -1,4 +1,4 @@
-import { useErrorHandlerContext } from '../contexts/ErrorHandler';
+import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useWebContext } from 'contexts/Web3';
 import { UPDATE_MEMBERSHIP_TX } from 'const';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -33,6 +33,7 @@ export default function useJoinCommunity() {
         compositeSignatures,
         voucher,
         userType: 'member',
+        signingAddr: addr,
       });
     },
     {
@@ -74,6 +75,7 @@ export default function useJoinCommunity() {
         hexTime,
         compositeSignatures,
         voucher,
+        signingAddr: addr,
       });
     },
     {

@@ -1,4 +1,3 @@
-import React from 'react';
 import renderer from 'react-test-renderer';
 import '@testing-library/jest-dom';
 import { cleanup, render } from '@testing-library/react';

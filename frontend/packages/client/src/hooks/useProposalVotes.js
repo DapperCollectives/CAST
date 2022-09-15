@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { checkResponse, getPagination, getPlainData } from 'utils';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
-import { PAGINATION_INITIAL_STATE } from '../reducers';
+import { PAGINATION_INITIAL_STATE } from 'reducers';
 
 /**
  * Hook to return proposal votes for a proposal. Results are paginated

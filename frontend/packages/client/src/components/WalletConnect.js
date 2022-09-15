@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Blockies from 'react-blockies';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { Web3Consumer } from '../contexts/Web3';
-import { Copy } from 'components/Svg';
+import { Web3Consumer } from 'contexts/Web3';
+import { Svg } from '@cast/shared-components';
 import { useMediaQuery, useOnClickOutside } from 'hooks';
 import { truncateAddress } from 'utils';
 import classnames from 'classnames';
@@ -72,12 +72,6 @@ const SignInOutButton = ({
   );
   const addressStyle = classnames('', { 'smaller-text': !notMobile });
 
-  const containerAddressStyle = classnames('is-flex', { 'pl-2': !notMobile });
-
-  const containerButtonStyle = classnames('is-flex is-align-items-center', {
-    'flex-1 is-justify-content-space-between': notMobile,
-  });
-
   return (
     <>
       <div className={dropdownBackground} />
@@ -97,18 +91,18 @@ const SignInOutButton = ({
                     ...(loggedIn ? { width: '147px' } : { width: '206px' }),
                     height: '40px',
                   }
-                : { width: '119px', height: '32px' }
+                : { width: '105px', height: '32px' }
             }
           >
             {loggedIn ? (
-              <div className={containerButtonStyle}>
+              <div className="is-flex is-align-items-center flex-1 is-justify-content-space-around">
                 <Blockies
                   seed={addr}
                   size={notMobile ? 6.5 : 5}
                   scale={4}
                   className="blockies"
                 />
-                <div className={containerAddressStyle}>
+                <div className="is-flex">
                   <p className={addressStyle}>{truncateAddress(addr, 4, 4)}</p>
                 </div>
               </div>
@@ -126,9 +120,12 @@ const SignInOutButton = ({
           id="dropdown-menu"
           role="menu"
           ref={dropdownRef}
-          style={!notMobile ? { left: '-160px' } : { left: '-130px' }}
+          style={!notMobile ? { left: '-170px' } : { left: '-130px' }}
         >
-          <div className="dropdown-content p-0" style={{ width: '277px' }}>
+          <div
+            className="dropdown-content p-0 rounded"
+            style={{ width: '277px' }}
+          >
             <div className="px-4 pt-4 pb-2">
               <Tooltip
                 classNames="is-flex is-flex-grow-1 is-align-items-center transition-all"
@@ -153,7 +150,7 @@ const SignInOutButton = ({
                         className="is-flex is-align-items-center py-0 px-1"
                         style={{ height: '23px' }}
                       >
-                        <Copy />
+                        <Svg name="Copy" />
                       </div>
                     </div>
                   </div>

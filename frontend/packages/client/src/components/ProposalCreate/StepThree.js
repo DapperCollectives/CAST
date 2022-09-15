@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { parseDateToServer } from 'utils';
 import { ProposalStatus, VoteOptions } from '../Proposal';
 

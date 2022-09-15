@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useCommunityProposalsWithVotes, useMediaQuery } from '../hooks';
+import { useCommunityProposalsWithVotes, useMediaQuery } from 'hooks';
 import { FilterValues } from 'const';
 import CommunityProposalList from './CommunityProposalList';
 import DropDown from './Dropdown';

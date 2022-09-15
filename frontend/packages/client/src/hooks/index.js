@@ -28,3 +28,4 @@ export { default as useAddFungibleToken } from './useAddFungibleToken';
 export { default as useBrowserName } from './useBrowserName';
 export { default as useLocalStorage } from './useLocalStorage';
 export { default as useOnClickOutside } from './useOnOutsideClick';
+export { default as useFeaturedCommunities } from './useFeaturedCommunities';

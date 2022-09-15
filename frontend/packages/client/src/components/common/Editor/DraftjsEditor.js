@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useState } from 'react';
+import { forwardRef, useEffect, useState } from 'react';
 import { Editor } from 'react-draft-wysiwyg';
 import { UploadImageModal } from 'components';
 import { customDraftToHTML, customHTMLtoDraft } from 'utils';
