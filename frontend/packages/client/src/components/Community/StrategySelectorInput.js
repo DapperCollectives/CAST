@@ -1,5 +1,4 @@
-import React from 'react';
-import { Bin } from 'components/Svg';
+import { Svg } from '@cast/shared-components';
 
 export default function StrategyInput({
   index,
@@ -39,7 +38,7 @@ export default function StrategyInput({
             className="cursor-pointer is-flex is-align-items-center"
             onClick={() => onDeleteStrategy(index)}
           >
-            <Bin />
+            <Svg name="Bin" />
           </div>
         )}
       </div>

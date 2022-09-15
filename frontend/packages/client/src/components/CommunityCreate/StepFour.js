@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import ActionButton from 'components/ActionButton';
 import StrategySelectorForm from 'components/Community/StrategySelectorForm';
 
@@ -31,7 +31,7 @@ export default function StepFour({
       callToAction={() => {
         return (
           <ActionButton
-            label="CREATE COMMUNITY"
+            label="Create Community"
             enabled={isStepValid}
             onClick={isStepValid ? () => onSubmit() : () => {}}
             classNames="mt-5 has-button-border-hover"

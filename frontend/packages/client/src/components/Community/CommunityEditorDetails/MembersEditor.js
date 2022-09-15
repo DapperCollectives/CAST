@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useWebContext } from 'contexts/Web3';
@@ -154,7 +154,7 @@ export default function MembersEditor({
       submitComponent={
         <ActionButton
           type="submit"
-          label="save"
+          label="Save"
           enabled={isDirty && !isSubmitting}
           loading={isSubmitting}
           classNames="vote-button transition-all has-background-yellow mt-5"

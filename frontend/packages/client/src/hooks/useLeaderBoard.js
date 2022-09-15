@@ -1,4 +1,4 @@
-import { useErrorHandlerContext } from '../contexts/ErrorHandler';
+import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useQuery } from '@tanstack/react-query';
 import { fetchLeaderBoard } from 'api/community';
 

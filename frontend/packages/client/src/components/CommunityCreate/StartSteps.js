@@ -1,4 +1,3 @@
-import React from 'react';
 import { useMediaQuery } from 'hooks';
 import classnames from 'classnames';
 
@@ -33,7 +32,7 @@ export default function StartSteps({ dismissPreStep }) {
           onClick={() => dismissPreStep()}
           autoFocus
         >
-          GET STARTED
+          Get Started
         </button>
       </div>
     </div>

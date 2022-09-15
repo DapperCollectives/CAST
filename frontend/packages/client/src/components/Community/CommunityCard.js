@@ -1,4 +1,3 @@
-import React from 'react';
 import Blockies from 'react-blockies';
 import { Link } from 'react-router-dom';
 import { useMediaQuery } from 'hooks';
@@ -75,7 +74,10 @@ const CommunityCard = ({ logo, name, body, id, slug, hideJoin }) => {
               </p>
             </div>
             {!hideJoin && (
-              <div className="column is-12-mobile p-0-mobile is-narrow-tablet is-flex is-flex-direction-column is-justify-content-start">
+              <div
+                className="is-flex is-align-items-center mr-2"
+                style={{ maxWidth: 40 }}
+              >
                 <JoinCommunityButton communityId={id} />
               </div>
             )}

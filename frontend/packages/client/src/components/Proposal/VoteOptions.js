@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useVotesForAddress } from 'hooks';
 import { FilterValues } from 'const';
 import { getProposalType, parseDateFromServer } from 'utils';
@@ -67,7 +67,7 @@ const TextBasedOptions = ({
             }`}
             onClick={readOnly ? () => {} : onConfirmVote}
           >
-            VOTE
+            Vote
           </button>
         </Wrapper>
       )}

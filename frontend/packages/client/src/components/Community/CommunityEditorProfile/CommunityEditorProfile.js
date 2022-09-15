@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { ActionButton } from 'components';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -92,7 +92,7 @@ export default function CommunityEditorProfile({
       submitComponent={
         <ActionButton
           type="submit"
-          label="save"
+          label="Save"
           enabled={isDirty && !isSubmitting}
           loading={isSubmitting}
           classNames="vote-button transition-all has-background-yellow mt-5"

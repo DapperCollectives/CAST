@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { ActionButton } from 'components';
 import Input from 'components/common/Input';
@@ -101,7 +101,7 @@ export default function CustomScriptSelector({
       </div>
       <ActionButton
         type="submit"
-        label="done"
+        label="Done"
         enabled={(isDirty || isValid) && !isSubmitting}
         loading={isSubmitting}
         classNames="mt-5 has-button-border-hover"

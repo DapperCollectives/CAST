@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { createElement, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useModalContext } from 'contexts/NotificationModal';
 import { useWebContext } from 'contexts/Web3';
@@ -118,7 +118,7 @@ export default function CommunityCreate() {
     // open modal if there are errors on addresses
     if (errorMessages.length) {
       modalContext.openModal(
-        React.createElement(Error, {
+        createElement(Error, {
           error: (
             <div className="mt-4">
               <p className="is-size-6">

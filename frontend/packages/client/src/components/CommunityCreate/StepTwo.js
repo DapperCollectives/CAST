@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { useWebContext } from 'contexts/Web3';
 import { ActionButton } from 'components';
@@ -157,7 +157,7 @@ export default function StepTwo({ stepData, onDataChange, moveToNextStep }) {
         <div className="column is-12">
           <ActionButton
             type="submit"
-            label="Next: PROPOSAL & VOTING"
+            label="Next: Proposal & Voting"
             enabled={(isValid || isDirty) && !isSubmitting}
             classNames="vote-button transition-all has-background-yellow mt-5"
           />

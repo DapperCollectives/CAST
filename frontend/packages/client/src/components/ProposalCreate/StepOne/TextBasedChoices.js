@@ -1,8 +1,7 @@
-import React, { useEffect } from 'react';
+import { Fragment, useEffect } from 'react';
 import { useFieldArray } from 'react-hook-form';
-import AddButton from 'components/AddButton';
-import FadeIn from 'components/FadeIn';
-import { Bin } from 'components/Svg';
+import { Svg } from '@cast/shared-components';
+import { AddButton, FadeIn } from 'components';
 
 const TextBasedChoices = ({
   fieldName = 'choices',
@@ -49,7 +48,7 @@ const TextBasedChoices = ({
           ? error?.[index]?.value
           : null;
         return (
-          <React.Fragment key={index}>
+          <Fragment key={index}>
             <div
               key={`container-${index}`}
               className="columns is-mobile p-0 m-0"
@@ -73,7 +72,7 @@ const TextBasedChoices = ({
                 }}
                 onClick={() => remove(index)}
               >
-                <Bin />
+                <Svg name="Bin" />
               </div>
             </div>
             {errorInField && (
@@ -85,7 +84,7 @@ const TextBasedChoices = ({
                 </div>
               </FadeIn>
             )}
-          </React.Fragment>
+          </Fragment>
         );
       })}
       {error?.message && (

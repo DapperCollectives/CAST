@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { AddButton, Loader, WrapperResponsive } from 'components';
 import pick from 'lodash/pick';
 import FormFields from './FormFields';

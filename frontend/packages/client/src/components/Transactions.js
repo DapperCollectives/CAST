@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Web3Consumer } from '../contexts/Web3';
+import { useEffect, useState } from 'react';
+import { Web3Consumer } from 'contexts/Web3';
 
 function Transaction({ web3 }) {
   const { id, status, errorMessage } = web3.transaction;

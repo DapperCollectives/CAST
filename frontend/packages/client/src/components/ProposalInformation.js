@@ -1,51 +1,43 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { cloneElement, forwardRef, useEffect, useRef, useState } from 'react';
 import Blockies from 'react-blockies';
+import { Svg } from '@cast/shared-components';
 import { useVotingResults, useWindowDimensions } from 'hooks';
 import useMediaQuery, { mediaMatchers } from 'hooks/useMediaQuery';
-import { parseDateFromServer } from 'utils';
-import { truncateAddress as truncate } from 'utils';
-import { LinkOut } from './Svg';
+import { parseDateFromServer, truncateAddress as truncate } from 'utils';
 import Tooltip from './Tooltip';
 
-const BlockieWithAddress = React.forwardRef(
-  ({ creatorAddr, isCoreCreator }, ref) => {
-    const [addr, setAdd] = useState(creatorAddr);
+const BlockieWithAddress = forwardRef(({ creatorAddr, isCoreCreator }, ref) => {
+  const [addr, setAdd] = useState(creatorAddr);
 
-    const { width } = useWindowDimensions();
+  const { width } = useWindowDimensions();
 
-    useEffect(() => {
-      if (ref?.current.clientWidth <= 223 && creatorAddr === addr) {
-        setAdd(truncate(creatorAddr));
-      } else if (ref?.current.clientWidth > 223 && creatorAddr !== addr) {
-        setAdd(creatorAddr);
-      }
-    }, [ref, width, creatorAddr, addr]);
+  useEffect(() => {
+    if (ref?.current.clientWidth <= 223 && creatorAddr === addr) {
+      setAdd(truncate(creatorAddr));
+    } else if (ref?.current.clientWidth > 223 && creatorAddr !== addr) {
+      setAdd(creatorAddr);
+    }
+  }, [ref, width, creatorAddr, addr]);
 
-    return (
-      <div className="columns is-mobile m-0">
-        <div className="column is-narrow is-flex is-align-items-center p-0">
-          <Blockies
-            seed={creatorAddr}
-            size={6}
-            scale={4}
-            className="blockies"
-          />
-        </div>
-        <div className="column px-2 py-0 is-flex flex-1 is-align-items-center">
-          {addr}
-        </div>
-        {isCoreCreator && (
-          <div
-            className="column p-0 is-flex is-align-items-center is-justify-content-center-tablet subtitle is-size-7"
-            style={{ fontFamily: 'Roboto Mono' }}
-          >
-            Core
-          </div>
-        )}
+  return (
+    <div className="columns is-mobile m-0">
+      <div className="column is-narrow is-flex is-align-items-center p-0">
+        <Blockies seed={creatorAddr} size={6} scale={4} className="blockies" />
       </div>
-    );
-  }
-);
+      <div className="column px-2 py-0 is-flex flex-1 is-align-items-center">
+        {addr}
+      </div>
+      {isCoreCreator && (
+        <div
+          className="column p-0 is-flex is-align-items-center is-justify-content-center-tablet subtitle is-size-7"
+          style={{ fontFamily: 'Roboto Mono' }}
+        >
+          Core
+        </div>
+      )}
+    </div>
+  );
+});
 
 const InfoBlock = ({ title, content, component }) => {
   const containerRef = useRef();
@@ -68,7 +60,7 @@ const InfoBlock = ({ title, content, component }) => {
         }}
       >
         {content}
-        {component && React.cloneElement(component, { ref: containerRef })}
+        {component && cloneElement(component, { ref: containerRef })}
       </div>
     </div>
   );
@@ -331,7 +323,7 @@ const ProposalInformation = ({
                     text="Open Ipfs link"
                   >
                     <p className="mr-2">{`${ipfs.substring(0, 8)}`}</p>
-                    <LinkOut width="12" height="12" />
+                    <Svg name="LinkOut" width="12" height="12" />
                   </Tooltip>
                 </a>
               }
