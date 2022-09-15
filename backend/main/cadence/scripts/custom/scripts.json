@@ -2,7 +2,13 @@
   {
     "key": "nba-top-shot-pistons",
     "name": "NBA TopShot - Detroit Pistons",
-    "description": "Strategy based on NBA TopShot teamAtMoment == Detroit Pistons",
-    "src": "get_nba_topshot.cdc"
+    "description": "NBA TopShot moments with teamAtMoment == Detroit Pistons",
+    "src": "get_nba_topshot_pistons.cdc"
+  },
+  {
+    "key": "nba-top-shot-trailblazers",
+    "name": "NBA TopShot - Sacramento Kings",
+    "description": "NBA TopShot moments with teamAtMoment == Portland Trailblazers",
+    "src": "get_nba_topshot_trailblazers.cdc"
   }
 ]
