@@ -676,7 +676,6 @@ func (h *Helpers) updateCommunity(id int, payload models.UpdateCommunityRequestP
 	}
 
 	// validate is community creator
-	// TODO: update to validating address is admin
 	if err := c.CanUpdateCommunity(h.A.DB, payload.Signing_addr); err != nil {
 		log.Error().Err(err)
 		return models.Community{}, http.StatusForbidden, err
@@ -806,11 +805,13 @@ func (h *Helpers) createCommunityUser(payload models.CommunityUserPayload) (int,
 	}
 
 	if payload.Voucher != nil {
+		fmt.Println("Validating user via voucher.")
 		if err := h.validateUserViaVoucher(payload.Signing_addr, payload.Voucher); err != nil {
 			log.Error().Err(err)
 			return http.StatusForbidden, err
 		}
 	} else {
+		fmt.Printf("Validating user via composite signatures.")
 		if err := h.validateUser(payload.Signing_addr, payload.Timestamp, payload.Composite_signatures); err != nil {
 			log.Error().Err(err)
 			return http.StatusForbidden, err
@@ -991,6 +992,7 @@ func (h *Helpers) validateTimestamp(timestamp string, expiry int) error {
 }
 
 func (h *Helpers) validateUser(addr, timestamp string, compositeSignatures *[]shared.CompositeSignature) error {
+	fmt.Printf("timestamp: %v \n", timestamp)
 
 	if err := h.validateTimestamp(timestamp, 60); err != nil {
 		return err
