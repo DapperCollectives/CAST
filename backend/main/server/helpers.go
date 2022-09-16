@@ -103,7 +103,7 @@ func (h *Helpers) useStrategyFetchBalance(
 	balance, err := s.FetchBalance(emptyBalance, &p)
 	if err != nil {
 		log.Error().Err(err).Msgf("Error fetching balance for address %v.", v.Addr)
-		return models.VoteWithBalance{}, errors.New("Error fetching balance for address.")
+		return models.VoteWithBalance{}, errors.New("You do not have the required balance to vote.")
 	}
 
 	vb := models.VoteWithBalance{
