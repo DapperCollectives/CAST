@@ -271,8 +271,6 @@ hr
 	&:hover, &.is-active
 		background: $yellow
 		border-color: $black
-	&:hover .join-community-cta
-		opacity: 1
 	&.is-active:hover
 		.eye
 			display: none
@@ -294,6 +292,10 @@ hr
 		border-width: 10px 0 10px 10px
 		border-color: transparent transparent transparent $black
 		transform: rotate(90deg)
+@include desktop
+	.join-community-button:hover .join-community-cta
+		opacity: 1
+	
 @media (min-width: 769px) and (max-width: 820px)
 	.is-hidden-connect
 		display: none
