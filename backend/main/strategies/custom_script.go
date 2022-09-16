@@ -5,14 +5,13 @@ import (
 
 	"github.com/DapperCollectives/CAST/backend/main/models"
 	"github.com/DapperCollectives/CAST/backend/main/shared"
-	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/rs/zerolog/log"
 )
 
 type CustomScript struct {
-	s.StrategyStruct
-	SC s.SnapshotClient
-	DB *s.Database
+	shared.StrategyStruct
+	SC shared.SnapshotClient
+	DB *shared.Database
 }
 
 func (cs *CustomScript) FetchBalance(
@@ -95,16 +94,15 @@ func (cs *CustomScript) TallyVotes(
 
 	for _, vote := range votes {
 		if len(vote.NFTs) != 0 {
-			var allowedBalance float64
+			var voteWeight float64
 
-			if proposal.Max_weight != nil {
-				allowedBalance = proposal.EnforceMaxWeight(float64(len(vote.NFTs)))
-			} else {
-				allowedBalance = float64(len(vote.NFTs))
+			voteWeight, err := cs.GetVoteWeightForBalance(vote, proposal)
+			if err != nil {
+				return models.ProposalResults{}, err
 			}
 
-			r.Results[vote.Choice] += int(allowedBalance)
-			r.Results_float[vote.Choice] += allowedBalance
+			r.Results[vote.Choice] += int(voteWeight)
+			r.Results_float[vote.Choice] += voteWeight
 		}
 	}
 
@@ -120,6 +118,11 @@ func (cs *CustomScript) GetVoteWeightForBalance(
 		log.Error().Err(err).Msg("error in GetVoteWeightForBalance for Custom Script strategy")
 		return 0.00, err
 	}
+
+	if proposal.Max_weight != nil && float64(len(nftIds)) > *proposal.Max_weight {
+		return *proposal.Max_weight, nil
+	}
+
 	return float64(len(nftIds)), nil
 }
 
@@ -145,7 +148,7 @@ func (cs *CustomScript) RequiresSnapshot() bool {
 func (cs *CustomScript) InitStrategy(
 	f *shared.FlowAdapter,
 	db *shared.Database,
-	sc *s.SnapshotClient,
+	sc *shared.SnapshotClient,
 ) {
 	cs.FlowAdapter = f
 	cs.DB = db
