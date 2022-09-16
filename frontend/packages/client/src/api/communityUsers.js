@@ -4,7 +4,7 @@ import { checkResponse } from 'utils';
 export const addUserToCommunityUserApiRep = async ({
   communityId,
   addr,
-  hexTime,
+  timestamp,
   compositeSignatures,
   voucher,
   signingAddr,
@@ -22,7 +22,7 @@ export const addUserToCommunityUserApiRep = async ({
       addr,
       userType,
       signingAddr,
-      timestamp: hexTime,
+      timestamp,
       compositeSignatures,
       voucher,
     }),
