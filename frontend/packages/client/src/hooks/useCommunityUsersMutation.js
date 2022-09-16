@@ -16,7 +16,7 @@ export default function useCommunityUsersMutation({ communityId } = {}) {
     const {
       communityId,
       addr,
-      hexTime,
+      timestamp,
       compositeSignatures,
       voucher,
       signingAddr,
@@ -27,7 +27,7 @@ export default function useCommunityUsersMutation({ communityId } = {}) {
       return addUserToCommunityUserApiRep({
         communityId,
         addr,
-        timestamp: hexTime,
+        timestamp,
         compositeSignatures,
         voucher,
         userType,
@@ -38,7 +38,7 @@ export default function useCommunityUsersMutation({ communityId } = {}) {
       return deleteCommunityMemberApiReq({
         communityId,
         addr,
-        hexTime,
+        timestamp,
         compositeSignatures,
         voucher,
         userType,
