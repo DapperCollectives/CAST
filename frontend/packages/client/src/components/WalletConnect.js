@@ -95,21 +95,23 @@ const SignInOutButton = ({
             }
           >
             {loggedIn ? (
-              <div className="is-flex is-align-items-center flex-1 is-justify-content-space-around">
+              <div className="is-flex is-align-items-center flex-1">
                 <Blockies
                   seed={addr}
                   size={notMobile ? 6.5 : 5}
                   scale={4}
                   className="blockies"
                 />
-                <div className="is-flex">
+                <div className="is-flex flex-1 is-justify-content-flex-end">
                   <p className={addressStyle}>{truncateAddress(addr, 4, 4)}</p>
                 </div>
               </div>
             ) : (
               <>
-                <span>Connect</span>
-                <span className="is-hidden-mobile">&nbsp;Wallet</span>
+                <span className="has-text-weight-bold">Connect</span>
+                <span className="is-hidden-mobile has-text-weight-bold">
+                  &nbsp;Wallet
+                </span>
               </>
             )}
           </button>
