@@ -3,6 +3,7 @@ import { useState } from 'react';
 import Cropper from 'react-easy-crop';
 import { Svg } from '@cast/shared-components';
 import { ActionButton } from 'components';
+import Slider from './Slider';
 
 export default function ImageCropperModal({
   logoImage,
@@ -74,34 +75,16 @@ export default function ImageCropperModal({
               className="column is-flex is-justify-content-center is-align-items-center is-8 p-0 m-0 mb-2"
               style={{ minHeight: '48px' }}
             >
-              <div
-                className="is-flex cursor-pointer mx-1"
-                onClick={() =>
-                  setZoom((value) => (value === 1 ? value : value - 0.05))
-                }
-              >
-                <Svg name="RemoveLightFill" fill="#636363" />
-              </div>
-              <input
-                type="range"
-                className="slider is-fullwidth is-warning"
+              <Slider
                 min={1}
                 max={3}
                 step={0.05}
                 defaultValue="1"
                 value={zoom}
-                onChange={(e) => {
-                  setZoom(e.target.value);
+                onChange={(value) => {
+                  setZoom(value);
                 }}
               />
-              <div
-                className="is-flex cursor-pointer mx-1"
-                onClick={() =>
-                  setZoom((value) => (value === 3 ? value : value + 0.05))
-                }
-              >
-                <Svg name="PlusLightFill" fill="#636363" />
-              </div>
             </div>
             <div className="column m-0 p-0 is-flex is-12 is-align-iterms-center is-justify-content-center">
               <div className="is-flex flex-1 px-5">
