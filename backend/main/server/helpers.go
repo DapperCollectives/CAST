@@ -1027,11 +1027,12 @@ func (h *Helpers) validateUserViaVoucher(addr string, voucher *shared.Voucher) e
 }
 
 func (h *Helpers) validateUserWithRole(addr, timestamp string, compositeSignatures *[]shared.CompositeSignature, communityId int, role string) error {
+	//print out all the params
+	fmt.Printf("addr: %s, timestamp: %s, compositeSignatures: %v, communityId: %d, role: %s \n", addr, timestamp, compositeSignatures, communityId, role)
 	if err := h.validateTimestamp(timestamp, 60); err != nil {
 		return err
 	}
-	message := hex.EncodeToString([]byte(timestamp))
-	if err := h.validateUserSignature(addr, message, compositeSignatures); err != nil {
+	if err := h.validateUserSignature(addr, timestamp, compositeSignatures); err != nil {
 		return err
 	}
 	if err := models.EnsureRoleForCommunity(h.A.DB, addr, communityId, role); err != nil {

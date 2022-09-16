@@ -247,6 +247,7 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if payload.Voucher != nil {
+		fmt.Printf("Voucher is present")
 		if err := helpers.validateUserWithRoleViaVoucher(
 			payload.Signing_addr,
 			payload.Voucher,
@@ -256,6 +257,9 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
+		fmt.Printf("Voucher is not present \n")
+		fmt.Printf("payload is %+v \n", payload)
+
 		if err := helpers.validateUserWithRole(
 			payload.Signing_addr,
 			payload.Timestamp,
