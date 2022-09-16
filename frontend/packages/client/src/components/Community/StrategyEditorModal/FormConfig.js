@@ -51,7 +51,7 @@ const getCustomScriptSchema = () => {
       .string()
       .trim()
       .required('Please enter a minimum balance number')
-      .matches(/(^[0-9]+$)/, 'Proposal minimum balance be a number'),
+      .matches(/(^[0-9]+$)/, 'Proposal minimum balance must be a number'),
   });
 };
 
