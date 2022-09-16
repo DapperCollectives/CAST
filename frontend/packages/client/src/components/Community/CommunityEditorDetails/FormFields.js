@@ -36,7 +36,8 @@ export default function Form({
               <input
                 key={addrField.id} // important to include key with field's id
                 placeholder={label || `Enter ${addrType}`}
-                className={`border-light rounded-sm p-3 column is-full ${inputStyle}`}
+                style={{ width: '100%' }}
+                className={`border-light rounded-sm p-3 column is-fullwidth ${inputStyle}`}
                 {...register(`${listName}.${index}.addr`, {
                   disabled: isSubmitting,
                 })}
