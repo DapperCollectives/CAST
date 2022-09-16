@@ -148,6 +148,7 @@ func TestBalanceOfNFTsStrategy(t *testing.T) {
 		strategyName := "balance-of-nfts"
 
 		s := strategyMap[strategyName]
+		s.InitStrategy(otu.A.FlowAdapter, otu.A.DB, otu.A.SnapshotClient)
 		proposalWithChoices := models.NewProposalResults(proposalId, choices)
 		_results, err := s.TallyVotes(votes, proposalWithChoices, proposals[0])
 		if err != nil {

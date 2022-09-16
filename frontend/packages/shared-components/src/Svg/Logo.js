@@ -1,4 +1,4 @@
-const Logo = ({ width = '146', height = '34' }) => (
+const Logo = ({ width = '146', height = '33' }) => (
   <svg
     width={width}
     height={height}
