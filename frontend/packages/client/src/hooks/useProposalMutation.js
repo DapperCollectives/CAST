@@ -20,7 +20,6 @@ export default function useProposalMutation() {
   } = useMutation(
     async ({ communityId, id: proposalId, updatePayload }) => {
       const hexTime = Buffer.from(Date.now().toString()).toString('hex');
-      console.log('hexTime', hexTime);
 
       const [compositeSignatures, voucher] = await signMessageByWalletProvider(
         user?.services[0]?.uid,
