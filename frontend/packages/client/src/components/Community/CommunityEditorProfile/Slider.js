@@ -33,18 +33,20 @@ export default function Slider({ min, max, step, value, onChange } = {}) {
       >
         <Svg name="RemoveLightFill" fill="#636363" />
       </div>
-      <input
-        className="progress"
-        ref={inputRef}
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={(e) => {
-          onChange(e.target.value);
-        }}
-      />
+      <div className="is-flex flex-1 is-align-items-center ">
+        <input
+          className="progress"
+          ref={inputRef}
+          type="range"
+          min={min}
+          max={max}
+          step={step}
+          value={value}
+          onChange={(e) => {
+            onChange(e.target.value);
+          }}
+        />
+      </div>
       <div
         className="is-flex cursor-pointer mx-1"
         onClick={increaseValue(value)}
