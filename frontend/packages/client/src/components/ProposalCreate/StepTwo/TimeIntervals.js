@@ -28,6 +28,10 @@ const isTomorrow = (date) => {
   return date?.setHours(0, 0, 0, 0) === tomorrow.getTime();
 };
 
+// this function check if the user
+// is in the last hour of the day
+// to return the correct interval
+// otherwise returns all intervals
 const getIntervalForTomorrow = () => {
   const now = new Date();
   // In the last hour of the day
@@ -37,20 +41,30 @@ const getIntervalForTomorrow = () => {
   return 0;
 };
 
-export default function TimeIntervals({ date, time, setTime, type } = {}) {
-  const startDateIsToday = date ? isToday(date) : false;
+const getStartTimeIngerval = (startDateIsToday) => {
+  return startDateIsToday ? Date.now() : 0;
+};
+
+const getStartTimeIntervalWithDelay = (date, startDateIsToday) => {
+  if (startDateIsToday) {
+    return new Date(Date.now() + 60 * 60 * 1000);
+  }
 
   const startDateIsTomorrow = date ? isTomorrow(date) : false;
 
+  if (startDateIsTomorrow) {
+    return getIntervalForTomorrow();
+  }
+
+  return 0;
+};
+
+export default function TimeIntervals({ date, time, setTime, type } = {}) {
+  const startDateIsToday = date ? isToday(date) : false;
+
   const startTimeInterval = HAS_DELAY_ON_START_TIME
-    ? startDateIsToday
-      ? new Date(Date.now() + 60 * 60 * 1000)
-      : startDateIsTomorrow
-      ? getIntervalForTomorrow()
-      : 0
-    : startDateIsToday
-    ? Date.now()
-    : 0;
+    ? getStartTimeIntervalWithDelay(date, startDateIsToday)
+    : getStartTimeIngerval(startDateIsToday);
 
   const timeIntervals = getTimeIntervals(startTimeInterval);
 
