@@ -41,7 +41,7 @@ const getIntervalForTomorrow = () => {
   return 0;
 };
 
-const getStartTimeIngerval = (startDateIsToday) => {
+const getStartTimeInterval = (startDateIsToday) => {
   return startDateIsToday ? Date.now() : 0;
 };
 
@@ -64,7 +64,7 @@ export default function TimeIntervals({ date, time, setTime, type } = {}) {
 
   const startTimeInterval = HAS_DELAY_ON_START_TIME
     ? getStartTimeIntervalWithDelay(date, startDateIsToday)
-    : getStartTimeIngerval(startDateIsToday);
+    : getStartTimeInterval(startDateIsToday);
 
   const timeIntervals = getTimeIntervals(startTimeInterval);
 
