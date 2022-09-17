@@ -21,13 +21,35 @@ const isToday = (date) => {
   return date?.setHours(0, 0, 0, 0) === new Date().setHours(0, 0, 0, 0);
 };
 
+const isTomorrow = (date) => {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(0, 0, 0, 0);
+  return date?.setHours(0, 0, 0, 0) === tomorrow.getTime();
+};
+
+const getIntervalForTomorrow = () => {
+  const now = new Date();
+  // In the last hour of the day
+  if (now > new Date().setHours(23, 0, 0, 0)) {
+    return new Date().setHours(0, now.getMinutes(), 0, 0);
+  }
+  return 0;
+};
+
 export default function TimeIntervals({ date, time, setTime, type } = {}) {
   const startDateIsToday = date ? isToday(date) : false;
 
-  const startTimeInterval = startDateIsToday
-    ? HAS_DELAY_ON_START_TIME
+  const startDateIsTomorrow = date ? isTomorrow(date) : false;
+
+  const startTimeInterval = HAS_DELAY_ON_START_TIME
+    ? startDateIsToday
       ? new Date(Date.now() + 60 * 60 * 1000)
-      : Date.now()
+      : startDateIsTomorrow
+      ? getIntervalForTomorrow()
+      : 0
+    : startDateIsToday
+    ? Date.now()
     : 0;
 
   const timeIntervals = getTimeIntervals(startTimeInterval);
