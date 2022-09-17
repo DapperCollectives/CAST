@@ -34,7 +34,7 @@ export default function useVoteOnProposal() {
 
       return voteOnProposalApiReq({
         voteData,
-        hexMessage,
+        message: hexMessage,
         timestamp,
         compositeSignatures,
         voucher,

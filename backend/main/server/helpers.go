@@ -102,8 +102,8 @@ func (h *Helpers) useStrategyFetchBalance(
 
 	balance, err := s.FetchBalance(emptyBalance, &p)
 	if err != nil {
-		log.Error().Err(err).Msgf("Error fetching balance for address %v.", v.Addr)
-		return models.VoteWithBalance{}, errors.New("Error fetching balance for address.")
+		log.Error().Err(err).Msgf("User does not have the required balance %v.", v.Addr)
+		return models.VoteWithBalance{}, errors.New("You do not have the required balance to vote")
 	}
 
 	vb := models.VoteWithBalance{
@@ -394,14 +394,17 @@ func (h *Helpers) validateVote(p models.Proposal, v models.Vote) error {
 			return err
 		}
 
-		voteMessageToValidate := fmt.Sprintf("%s:%s:%s",
-			voucher.Arguments[0]["value"],
-			voucher.Arguments[1]["value"],
-			voucher.Arguments[2]["value"],
-		)
+		message := voucher.Arguments[0]["value"]
+
+		messageBytes, err := hex.DecodeString(message)
+		if err != nil {
+			log.Error().Err(err)
+			return err
+		}
+
 		// validate proper message format
 		//<proposalId>:<choice>:<timestamp>
-		if err := models.ValidateVoteMessage(voteMessageToValidate, p); err != nil {
+		if err := models.ValidateVoteMessage(string(messageBytes), p); err != nil {
 			log.Error().Err(err)
 			return err
 		}
@@ -1024,11 +1027,11 @@ func (h *Helpers) validateUserViaVoucher(addr string, voucher *shared.Voucher) e
 }
 
 func (h *Helpers) validateUserWithRole(addr, timestamp string, compositeSignatures *[]shared.CompositeSignature, communityId int, role string) error {
+	//print out all the params
 	if err := h.validateTimestamp(timestamp, 60); err != nil {
 		return err
 	}
-	message := hex.EncodeToString([]byte(timestamp))
-	if err := h.validateUserSignature(addr, message, compositeSignatures); err != nil {
+	if err := h.validateUserSignature(addr, timestamp, compositeSignatures); err != nil {
 		return err
 	}
 	if err := models.EnsureRoleForCommunity(h.A.DB, addr, communityId, role); err != nil {

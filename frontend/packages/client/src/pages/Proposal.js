@@ -308,7 +308,7 @@ export default function ProposalPage() {
             <footer className="modal-card-foot has-background-white pb-6">
               <div className="columns is-mobile p-0 m-0 flex-1 pr-2">
                 <button
-                  className="button column is-full p-0 is-uppercase"
+                  className="button column is-full p-0"
                   onClick={onCancelVote}
                 >
                   Cancel
@@ -316,7 +316,7 @@ export default function ProposalPage() {
               </div>
               <div className="columns is-mobile p-0 m-0 flex-1 pl-2">
                 <button
-                  className="button column is-full p-0 has-background-yellow is-uppercase vote-button transition-all"
+                  className="button column is-full p-0 has-background-yellow vote-button transition-all"
                   onClick={onVote}
                 >
                   Vote

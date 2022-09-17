@@ -86,7 +86,7 @@ export default function CommunityProposalsAndVoting({
       disableAddButton={updatingCommunity}
       callToAction={(st) => (
         <ActionButton
-          label="save"
+          label="Save"
           enabled={
             updatingCommunity
               ? false
