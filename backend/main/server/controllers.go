@@ -74,8 +74,8 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	votes, order, err := helpers.getPaginatedVotes(r, proposal)
-	votesWithWeights, err := helpers.useStrategyGetVotes(proposal, votes)
+	votes, order, _ := helpers.getPaginatedVotes(r, proposal)
+	votesWithWeights, _ := helpers.useStrategyGetVotes(proposal, votes)
 
 	response := shared.GetPaginatedResponseWithPayload(votesWithWeights, order)
 	respondWithJSON(w, http.StatusOK, response)

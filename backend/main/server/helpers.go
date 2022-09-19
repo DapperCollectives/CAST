@@ -73,7 +73,7 @@ func (h *Helpers) useStrategyGetVoteWeight(
 	p models.Proposal,
 	v *models.VoteWithBalance,
 ) (float64, error) {
-	s := strategyMap[*p.Strategy]
+	s := h.initStrategy(*p.Strategy)
 	if s == nil {
 		return 0, errors.New("Strategy not found.")
 	}
@@ -265,7 +265,7 @@ func (h *Helpers) processVotes(
 			}
 		}
 
-		s := strategyMap[*proposal.Strategy]
+		s := h.initStrategy(*proposal.Strategy)
 		if s == nil {
 			return nil, pageParams, errors.New("Strategy not found.")
 		}
