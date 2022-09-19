@@ -29,7 +29,7 @@ export default function useJoinCommunity() {
       return addUserToCommunityUserApiRep({
         communityId,
         addr,
-        hexTime,
+        timestamp: hexTime,
         compositeSignatures,
         voucher,
         userType: 'member',
@@ -72,7 +72,7 @@ export default function useJoinCommunity() {
       return deleteCommunityMemberApiReq({
         communityId,
         addr,
-        hexTime,
+        timestamp: hexTime,
         compositeSignatures,
         voucher,
         signingAddr: addr,
