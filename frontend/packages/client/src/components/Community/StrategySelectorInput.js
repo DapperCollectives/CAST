@@ -1,5 +1,4 @@
-import React from 'react';
-import { Bin } from 'components/Svg';
+import { Svg } from '@cast/shared-components';
 
 export default function StrategyInput({
   index,
@@ -14,7 +13,7 @@ export default function StrategyInput({
       style={{ position: 'relative' }}
     >
       <div
-        className="border-light rounded-sm p-3 column is-full small-text"
+        className="border-light rounded-sm p-3 pr-6 column is-full small-text"
         style={{
           width: '100%',
           lineHeight: 'normal',
@@ -39,7 +38,7 @@ export default function StrategyInput({
             className="cursor-pointer is-flex is-align-items-center"
             onClick={() => onDeleteStrategy(index)}
           >
-            <Bin />
+            <Svg name="Bin" />
           </div>
         )}
       </div>

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Controller } from 'react-hook-form';
 import FadeIn from 'components/FadeIn';
 import DraftjsEditor from './DraftjsEditor';

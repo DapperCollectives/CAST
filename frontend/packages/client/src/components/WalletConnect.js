@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Blockies from 'react-blockies';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { Web3Consumer } from '../contexts/Web3';
-import { Copy } from 'components/Svg';
+import { Web3Consumer } from 'contexts/Web3';
+import { Svg } from '@cast/shared-components';
 import { useMediaQuery, useOnClickOutside } from 'hooks';
 import { truncateAddress } from 'utils';
 import classnames from 'classnames';
@@ -91,25 +91,27 @@ const SignInOutButton = ({
                     ...(loggedIn ? { width: '147px' } : { width: '206px' }),
                     height: '40px',
                   }
-                : { width: '119px', height: '32px' }
+                : { width: '105px', height: '32px' }
             }
           >
             {loggedIn ? (
-              <div className="is-flex is-align-items-center flex-1 is-justify-content-space-around">
+              <div className="is-flex is-align-items-center flex-1">
                 <Blockies
                   seed={addr}
                   size={notMobile ? 6.5 : 5}
                   scale={4}
                   className="blockies"
                 />
-                <div className="is-flex">
+                <div className="is-flex flex-1 is-justify-content-flex-end">
                   <p className={addressStyle}>{truncateAddress(addr, 4, 4)}</p>
                 </div>
               </div>
             ) : (
               <>
-                <span>Connect</span>
-                <span className="is-hidden-mobile">&nbsp;Wallet</span>
+                <span className="has-text-weight-bold">Connect</span>
+                <span className="is-hidden-mobile has-text-weight-bold">
+                  &nbsp;Wallet
+                </span>
               </>
             )}
           </button>
@@ -120,7 +122,7 @@ const SignInOutButton = ({
           id="dropdown-menu"
           role="menu"
           ref={dropdownRef}
-          style={!notMobile ? { left: '-160px' } : { left: '-130px' }}
+          style={!notMobile ? { left: '-170px' } : { left: '-130px' }}
         >
           <div
             className="dropdown-content p-0 rounded"
@@ -150,7 +152,7 @@ const SignInOutButton = ({
                         className="is-flex is-align-items-center py-0 px-1"
                         style={{ height: '23px' }}
                       >
-                        <Copy />
+                        <Svg name="Copy" />
                       </div>
                     </div>
                   </div>

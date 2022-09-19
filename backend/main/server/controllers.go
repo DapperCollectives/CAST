@@ -133,9 +133,9 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	vote, err := helpers.createVote(r, proposal)
+	vote, httpStatus, err := helpers.createVote(r, proposal)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		respondWithError(w, httpStatus, err.Error())
 		return
 	}
 
@@ -359,14 +359,6 @@ func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	propThreshold, err := strconv.ParseFloat(*payload.Proposal_threshold, 64)
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Error Converting Proposal Threshold to Float.")
-	}
-	if propThreshold < 1 {
-		respondWithError(w, http.StatusBadRequest, "Proposal Threshold cannot be less than 1.")
-		return
-	}
 
 	c, httpStatus, err := helpers.createCommunity(payload)
 	if err != nil {
@@ -398,14 +390,6 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 			respondWithError(w, http.StatusBadRequest, err.Error())
 			return
 		}
-	}
-	propThreshold, err := strconv.ParseFloat(*payload.Proposal_threshold, 64)
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Error Converting Proposal Threshold to Float.")
-	}
-	if propThreshold < 1 {
-		respondWithError(w, http.StatusBadRequest, "Proposal Threshold cannot be less than 1.")
-		return
 	}
 
 	c, httpStatus, err := helpers.updateCommunity(id, payload)

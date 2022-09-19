@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { NavLink, withRouter } from 'react-router-dom';
+import { Svg } from '@cast/shared-components';
 import Label from './Label';
 import Sidenavbar from './SideNavbar';
-import { Logo } from './Svg';
 import WalletConnect from './WalletConnect';
 
 function Header(props) {
@@ -27,7 +27,12 @@ function Header(props) {
             <nav className="navbar is-transparent">
               <div className="navbar-brand">
                 <NavLink to="/" className="navbar-item p-0 mr-2">
-                  <Logo />
+                  <div className="is-hidden-tablet">
+                    <Svg name="Logo" width={100} />
+                  </div>
+                  <div className="is-hidden-mobile">
+                    <Svg name="Logo" />
+                  </div>
                 </NavLink>
                 <div className="is-flex is-align-items-center">
                   <Label
@@ -53,7 +58,7 @@ function Header(props) {
                   }}
                   className="navbar-item p-0 mr-6 is-hidden-mobile"
                 >
-                  <span className="navbar-item-hover transition-all has-text-weight-bold">
+                  <span className="navbar-item-hover transition-all has-text-weight-bold has-text-black">
                     About Us
                   </span>
                 </NavLink>
@@ -63,7 +68,7 @@ function Header(props) {
                   }}
                   className="navbar-item p-0 mr-6 is-hidden-mobile"
                 >
-                  <span className="navbar-item-hover transition-all has-text-weight-bold">
+                  <span className="navbar-item-hover transition-all has-text-weight-bold has-text-black">
                     Create a Community
                   </span>
                 </NavLink>

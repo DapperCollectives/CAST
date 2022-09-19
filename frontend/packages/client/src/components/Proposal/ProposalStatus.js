@@ -1,4 +1,3 @@
-import React from 'react';
 import { StatusLabel } from 'components';
 import { FilterValues } from 'const';
 import { parseDateFromServer } from 'utils';

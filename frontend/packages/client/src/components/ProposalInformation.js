@@ -1,11 +1,10 @@
 import { cloneElement, forwardRef, useEffect, useRef, useState } from 'react';
 import Blockies from 'react-blockies';
+import { Svg } from '@cast/shared-components';
 import { ResultsPanel } from 'components';
 import { useVotingResults, useWindowDimensions } from 'hooks';
 import useMediaQuery, { mediaMatchers } from 'hooks/useMediaQuery';
-import { parseDateFromServer } from 'utils';
-import { truncateAddress as truncate } from 'utils';
-import { LinkOut } from './Svg';
+import { parseDateFromServer, truncateAddress as truncate } from 'utils';
 import Tooltip from './Tooltip';
 
 const BlockieWithAddress = forwardRef(({ creatorAddr, isCoreCreator }, ref) => {
@@ -239,7 +238,7 @@ const ProposalInformation = ({
                     text="Open Ipfs link"
                   >
                     <p className="mr-2">{`${ipfs.substring(0, 8)}`}</p>
-                    <LinkOut width="12" height="12" />
+                    <Svg name="LinkOut" width="12" height="12" />
                   </Tooltip>
                 </a>
               }

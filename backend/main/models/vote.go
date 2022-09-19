@@ -27,8 +27,8 @@ type Vote struct {
 	Message              string                  `json:"message"`
 	Voucher              *shared.Voucher         `json:"voucher,omitempty"`
 	IsCancelled          bool                    `json:"isCancelled"`
-	IsEarly		 	 	 bool					 `json:"isEarly"`
-	IsWinning		 	 bool					 `json:"isWinning"`
+	IsEarly              bool                    `json:"isEarly"`
+	IsWinning            bool                    `json:"isWinning"`
 }
 
 type VoteWithBalance struct {
@@ -331,19 +331,19 @@ func getUsersNFTs(db *s.Database, votes []*VoteWithBalance) ([]*VoteWithBalance,
 }
 
 func GetUserNFTs(db *s.Database, vote *VoteWithBalance) ([]*NFT, error) {
-	var nftIds []*NFT
+	var ids []*NFT
 	sql := `select id from nfts
 	where proposal_id = $1 and owner_addr = $2
 	`
 
-	err := pgxscan.Select(db.Context, db.Conn, &nftIds, sql, vote.Proposal_id, vote.Addr)
+	err := pgxscan.Select(db.Context, db.Conn, &ids, sql, vote.Proposal_id, vote.Addr)
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		return nil, err
 	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
 		return []*NFT{}, nil
 	}
 
-	return nftIds, nil
+	return ids, nil
 }
 
 func CreateUserNFTRecord(db *s.Database, v *VoteWithBalance) error {

@@ -1,8 +1,20 @@
 [
   {
-    "key": "nba-top-shot-raptors",
-    "name": "NBA TopShot - Toronto Raptors",
-    "description": "Strategy based on NBA TopShot teamAtMoment == Toronto Raptors",
-    "src": "get_nba_topshot.cdc"
+    "key": "nba-top-shot-pistons",
+    "name": "NBA TopShot - Detroit Pistons",
+    "description": "Voter must hold at least one Detroit Pistons moment to vote",
+    "src": "get_nba_topshot_pistons.cdc"
+  },
+  {
+    "key": "nba-top-shot-kings",
+    "name": "NBA TopShot - Sacramento Kings",
+    "description": "Voter must hold at least one Sacramento Kings moment to vote",
+    "src": "get_nba_topshot_kings.cdc"
+  },
+  {
+    "key": "nba-top-shot-trailblazers",
+    "name": "NBA TopShot - Portland Trailblazers",
+    "description": "Voter must hold at least one Portland Trailblazers moment to vote",
+    "src": "get_nba_topshot_trailblazers.cdc"
   }
 ]

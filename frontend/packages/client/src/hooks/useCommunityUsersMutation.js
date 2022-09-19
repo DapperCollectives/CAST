@@ -16,7 +16,7 @@ export default function useCommunityUsersMutation({ communityId } = {}) {
     const {
       communityId,
       addr,
-      hexTime,
+      timestamp,
       compositeSignatures,
       voucher,
       signingAddr,
@@ -27,7 +27,7 @@ export default function useCommunityUsersMutation({ communityId } = {}) {
       return addUserToCommunityUserApiRep({
         communityId,
         addr,
-        timestamp: hexTime,
+        timestamp,
         compositeSignatures,
         voucher,
         userType,
@@ -38,7 +38,7 @@ export default function useCommunityUsersMutation({ communityId } = {}) {
       return deleteCommunityMemberApiReq({
         communityId,
         addr,
-        hexTime,
+        timestamp,
         compositeSignatures,
         voucher,
         userType,
@@ -80,11 +80,11 @@ export default function useCommunityUsersMutation({ communityId } = {}) {
   const addCommunityUsers = useCallback(
     async ({ userType, addrs, body }) => {
       return new Promise((resolve, reject) => {
-        addrs.forEach((addrToRemove) => {
+        addrs.forEach((addrToAdd) => {
           mutate(
             {
               communityId,
-              addr: addrToRemove,
+              addr: addrToAdd,
               userType,
               ...body,
               actionType: 'add',

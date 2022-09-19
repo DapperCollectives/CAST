@@ -102,8 +102,8 @@ func (h *Helpers) useStrategyFetchBalance(
 
 	balance, err := s.FetchBalance(emptyBalance, &p)
 	if err != nil {
-		log.Error().Err(err).Msgf("Error fetching balance for address %v.", v.Addr)
-		return models.VoteWithBalance{}, errors.New("Error fetching balance for address.")
+		log.Error().Err(err).Msgf("User does not have the required balance %v.", v.Addr)
+		return models.VoteWithBalance{}, errors.New("You do not have the required balance to vote")
 	}
 
 	vb := models.VoteWithBalance{
@@ -284,11 +284,11 @@ func (h *Helpers) processVotes(
 	return votesWithBalances, pageParams, nil
 }
 
-func (h *Helpers) createVote(r *http.Request, p models.Proposal) (*models.VoteWithBalance, error) {
+func (h *Helpers) createVote(r *http.Request, p models.Proposal) (*models.VoteWithBalance, int, error) {
 	var v models.Vote
 	if err := validatePayload(r.Body, &v); err != nil {
 		log.Error().Err(err).Msg("Invalid request payload.")
-		return nil, err
+		return nil, http.StatusBadRequest, err
 	}
 
 	v.Proposal_id = p.ID
@@ -297,38 +297,38 @@ func (h *Helpers) createVote(r *http.Request, p models.Proposal) (*models.VoteWi
 	existingVote := models.Vote{Proposal_id: v.Proposal_id, Addr: v.Addr}
 	if err := existingVote.GetVote(h.A.DB); err == nil {
 		log.Error().Msgf("Address %s has already voted for proposal %d.", v.Addr, v.Proposal_id)
-		return nil, errors.New("Address has already voted for this proposal.")
+		return nil, http.StatusForbidden, errors.New("Address has already voted for this proposal.")
 	}
 
 	// check that proposal is live
 	if os.Getenv("APP_ENV") != "DEV" {
 		if !p.IsLive() {
 			err := errors.New("User cannot vote on inactive proposal.")
-			return nil, err
+			return nil, http.StatusForbidden, err
 		}
 	}
 
 	if err := h.validateVote(p, v); err != nil {
-		return nil, err
+		return nil, http.StatusForbidden, err
 	}
 
 	v.Proposal_id = p.ID
 
 	s := h.initStrategy(*p.Strategy)
 	if s == nil {
-		return nil, errors.New("Proposal strategy not found.")
+		return nil, http.StatusInternalServerError, errors.New("Proposal strategy not found.")
 	}
 
 	vb, err := h.useStrategyFetchBalance(v, p, s)
 	if err != nil {
-		return nil, err
+		return nil, http.StatusInternalServerError, err
 	}
 
 	if err := h.insertVote(vb, p); err != nil {
-		return nil, err
+		return nil, http.StatusInternalServerError, err
 	}
 
-	return &vb, nil
+	return &vb, http.StatusOK, nil
 }
 
 func (h *Helpers) insertVote(v models.VoteWithBalance, p models.Proposal) error {
@@ -394,14 +394,17 @@ func (h *Helpers) validateVote(p models.Proposal, v models.Vote) error {
 			return err
 		}
 
-		voteMessageToValidate := fmt.Sprintf("%s:%s:%s",
-			voucher.Arguments[0]["value"],
-			voucher.Arguments[1]["value"],
-			voucher.Arguments[2]["value"],
-		)
+		message := voucher.Arguments[0]["value"]
+
+		messageBytes, err := hex.DecodeString(message)
+		if err != nil {
+			log.Error().Err(err)
+			return err
+		}
+
 		// validate proper message format
 		//<proposalId>:<choice>:<timestamp>
-		if err := models.ValidateVoteMessage(voteMessageToValidate, p); err != nil {
+		if err := models.ValidateVoteMessage(string(messageBytes), p); err != nil {
 			log.Error().Err(err)
 			return err
 		}
@@ -937,6 +940,7 @@ func (h *Helpers) validateUserSignature(addr string, message string, sigs *[]sha
 	if err := h.A.FlowAdapter.ValidateSignature(addr, message, sigs, "USER"); err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -987,9 +991,11 @@ func (h *Helpers) validateTimestamp(timestamp string, expiry int) error {
 }
 
 func (h *Helpers) validateUser(addr, timestamp string, compositeSignatures *[]shared.CompositeSignature) error {
+
 	if err := h.validateTimestamp(timestamp, 60); err != nil {
 		return err
 	}
+
 	if err := h.validateUserSignature(addr, timestamp, compositeSignatures); err != nil {
 		return err
 	}
@@ -1021,11 +1027,11 @@ func (h *Helpers) validateUserViaVoucher(addr string, voucher *shared.Voucher) e
 }
 
 func (h *Helpers) validateUserWithRole(addr, timestamp string, compositeSignatures *[]shared.CompositeSignature, communityId int, role string) error {
+	//print out all the params
 	if err := h.validateTimestamp(timestamp, 60); err != nil {
 		return err
 	}
-	message := hex.EncodeToString([]byte(timestamp))
-	if err := h.validateUserSignature(addr, message, compositeSignatures); err != nil {
+	if err := h.validateUserSignature(addr, timestamp, compositeSignatures); err != nil {
 		return err
 	}
 	if err := models.EnsureRoleForCommunity(h.A.DB, addr, communityId, role); err != nil {
