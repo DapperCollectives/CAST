@@ -78,6 +78,7 @@ const ProposalInformation = ({
   startTime = '',
   endTime = '',
   proposalId = '',
+  computedStatus,
   openStrategyModal = () => {},
 }) => {
   const dateFormatConf = {
@@ -90,9 +91,6 @@ const ProposalInformation = ({
   };
   // stores navbar height calculated after component is mounted
   const [navbarHeight, setNavbarHeight] = useState(0);
-
-  const isNotMobile = useMediaQuery();
-  const isTabletOnly = useMediaQuery(mediaMatchers.tabletOnly);
 
   useEffect(() => {
     setNavbarHeight(document.querySelector('header').offsetHeight);
@@ -194,9 +192,8 @@ const ProposalInformation = ({
         <div className="mb-5">
           <ResultsPanel
             results={votingResults?.results}
-            isMobileOnly={!isNotMobile}
-            isDesktopOnly={isNotMobile && !isTabletOnly}
-            isTabletOnly={isTabletOnly}
+            endTime={endTime}
+            computedStatus={computedStatus}
           />
         </div>
 

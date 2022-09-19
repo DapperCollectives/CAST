@@ -1,4 +1,7 @@
-import React from 'react';
+import { Svg } from '@cast/shared-components';
+import { StatusLabel } from 'components';
+import { FilterValues } from 'const';
+import { parseDateFromServer } from 'utils';
 
 const Results = ({ voteResults, status }) => {
   const showViewMore = false;
@@ -60,16 +63,50 @@ const Results = ({ voteResults, status }) => {
   );
 };
 
-export default function ResultPanel({
+export default function ResultsPanel({
   results = [],
-  isMobileOnly,
-  isDesktopOnly,
-  isTabletOnly,
+  endTime,
+  computedStatus,
 } = {}) {
+  const status = FilterValues[computedStatus] ?? FilterValues.closed;
+
+  <StatusLabel
+    margin="mr-3"
+    status={<b>Upcoming</b>}
+    color="has-background-orange"
+    className="smaller-text"
+  />;
+  const iconStatusMap = {
+    [FilterValues.active]: <Svg name="Active" />,
+  };
+
+  const { diffDuration } = parseDateFromServer(endTime);
+
+  const textDescriptionMap = {
+    [FilterValues.active]: `${diffDuration} remaining`,
+  };
+
+  console.log(status);
+  console.log(textDescriptionMap);
   return (
     <div
       className={`has-background-white-ter rounded p-1-mobile p-5-tablet p-5_5-desktop`}
     >
+      <div className="columns mb-5">
+        <div className="colum">
+          {' '}
+          <StatusLabel
+            margin="mr-3"
+            status={<b>Active</b>}
+            color="has-background-orange"
+            className="smaller-text"
+            rounder
+          />
+        </div>
+        <div className="colum">
+          {iconStatusMap[status]} {textDescriptionMap?.[status]}
+        </div>
+      </div>
       <p className="mb-5 has-text-weight-bold">Results</p>
       <Results voteResults={results} />
     </div>

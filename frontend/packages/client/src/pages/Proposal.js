@@ -514,6 +514,7 @@ export default function ProposalPage() {
                       ipfsUrl={proposal.ipfsUrl}
                       startTime={proposal.startTime}
                       endTime={proposal.endTime}
+                      computedStatus={proposal.computedStatus}
                       openStrategyModal={openStrategyModal}
                     />
                   </div>
@@ -566,6 +567,7 @@ export default function ProposalPage() {
                   ipfsUrl={proposal.ipfsUrl}
                   startTime={proposal.startTime}
                   endTime={proposal.endTime}
+                  computedStatus={proposal.computedStatus}
                   openStrategyModal={openStrategyModal}
                 />
               </div>
