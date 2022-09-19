@@ -28,7 +28,9 @@ export default function CommunityProposalsAndVoting({
     await Promise.all(
       updatePayload.map(async ({ name, contract }) => {
         try {
-          await isValidFlowAddress(contract.addr);
+          if (name !== 'custom-script') {
+            await isValidFlowAddress(contract.addr);
+          }
         } catch (error) {
           // This is to bypass error on local
           // emulator when keys field is not present
