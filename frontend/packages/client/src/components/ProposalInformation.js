@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { cloneElement, forwardRef, useEffect, useRef, useState } from 'react';
 import Blockies from 'react-blockies';
 import { ResultsPanel } from 'components';
 import { useVotingResults, useWindowDimensions } from 'hooks';
@@ -8,47 +8,40 @@ import { truncateAddress as truncate } from 'utils';
 import { LinkOut } from './Svg';
 import Tooltip from './Tooltip';
 
-const BlockieWithAddress = React.forwardRef(
-  ({ creatorAddr, isCoreCreator }, ref) => {
-    const [addr, setAdd] = useState(creatorAddr);
+const BlockieWithAddress = forwardRef(({ creatorAddr, isCoreCreator }, ref) => {
+  const [addr, setAdd] = useState(creatorAddr);
 
-    const { width } = useWindowDimensions();
+  const { width } = useWindowDimensions();
 
-    useEffect(() => {
-      if (ref?.current.clientWidth <= 223 && creatorAddr === addr) {
-        setAdd(truncate(creatorAddr));
-      } else if (ref?.current.clientWidth > 223 && creatorAddr !== addr) {
-        setAdd(creatorAddr);
-      }
-    }, [ref, width, creatorAddr, addr]);
+  useEffect(() => {
+    if (ref?.current.clientWidth <= 223 && creatorAddr === addr) {
+      setAdd(truncate(creatorAddr));
+    } else if (ref?.current.clientWidth > 223 && creatorAddr !== addr) {
+      setAdd(creatorAddr);
+    }
+  }, [ref, width, creatorAddr, addr]);
 
-    return (
-      <div className="columns is-mobile m-0">
-        <div className="column is-narrow is-flex is-align-items-center p-0">
-          <Blockies
-            seed={creatorAddr}
-            size={6}
-            scale={4}
-            className="blockies"
-          />
-        </div>
-        <div className="column px-2 py-0 is-flex flex-1 is-align-items-center">
-          {addr}
-        </div>
-        {isCoreCreator && (
-          <div
-            className="column p-0 is-flex is-align-items-center is-justify-content-center-tablet subtitle is-size-7"
-            style={{ fontFamily: 'Roboto Mono' }}
-          >
-            Core
-          </div>
-        )}
+  return (
+    <div className="columns is-mobile m-0">
+      <div className="column is-narrow is-flex is-align-items-center p-0">
+        <Blockies seed={creatorAddr} size={6} scale={4} className="blockies" />
       </div>
-    );
-  }
-);
+      <div className="column px-2 py-0 is-flex flex-1 is-align-items-center">
+        {addr}
+      </div>
+      {isCoreCreator && (
+        <div
+          className="column p-0 is-flex is-align-items-center is-justify-content-center-tablet subtitle is-size-7"
+          style={{ fontFamily: 'Roboto Mono' }}
+        >
+          Core
+        </div>
+      )}
+    </div>
+  );
+});
 
-const InfoBlock = ({ title, content, component }) => {
+const InfoBlock = ({ title, content, component, isLastElement = false }) => {
   const containerRef = useRef();
   // warn component consumer
   if (content && component) {
@@ -56,7 +49,9 @@ const InfoBlock = ({ title, content, component }) => {
   }
   return (
     <div
-      className="columns is-mobile p-0 m-0 mb-5 small-text"
+      className={`columns is-mobile p-0 m-0 small-text ${
+        isLastElement ? '' : 'mb-5'
+      }`}
       ref={containerRef}
     >
       <div className="column p-0 is-flex is-align-items-center flex-1 has-text-grey is-4 is-5-desktop">
@@ -69,31 +64,8 @@ const InfoBlock = ({ title, content, component }) => {
         }}
       >
         {content}
-        {component && React.cloneElement(component, { ref: containerRef })}
+        {component && cloneElement(component, { ref: containerRef })}
       </div>
-    </div>
-  );
-};
-
-const WrapperSpacingTop = ({
-  isMobileOnly,
-  isTabletOnly,
-  isDesktopOnly,
-  children,
-}) => {
-  let classNames = '';
-  if (isMobileOnly) {
-    classNames = 'px-1 py-1';
-  }
-  if (isTabletOnly) {
-    classNames = 'px-5 py-5';
-  }
-  if (isDesktopOnly) {
-    classNames = 'px-6 py-6';
-  }
-  return (
-    <div className={`has-background-white-ter rounded ${classNames}`}>
-      {children}
     </div>
   );
 };
@@ -216,7 +188,7 @@ const ProposalInformation = ({
   return (
     <div ref={parentRef}>
       <div
-        className={`${fixedStyle?.className || ''}`}
+        className={`${fixedStyle?.className ?? ''}`}
         ref={ref}
         style={fixedStyle?.style || {}}
       >
@@ -228,10 +200,9 @@ const ProposalInformation = ({
             isTabletOnly={isTabletOnly}
           />
         </div>
-        <WrapperSpacingTop
-          isMobileOnly={!isNotMobile}
-          isDesktopOnly={isNotMobile && !isTabletOnly}
-          isTabletOnly={isTabletOnly}
+
+        <div
+          className={`has-background-white-ter rounded p-1-mobile p-5-tablet p-5_5-desktop`}
         >
           <p className="mb-5">Information</p>
           <InfoBlock
@@ -287,8 +258,9 @@ const ProposalInformation = ({
               undefined,
               dateFormatConf
             )}
+            isLastElement
           />
-        </WrapperSpacingTop>
+        </div>
       </div>
     </div>
   );

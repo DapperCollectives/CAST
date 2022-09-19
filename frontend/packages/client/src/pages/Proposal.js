@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useModalContext } from 'contexts/NotificationModal';
@@ -32,7 +32,7 @@ import { getProposalType } from 'utils';
 
 function useQueryParams() {
   const { search } = useLocation();
-  return React.useMemo(() => {
+  return useMemo(() => {
     const params = new URLSearchParams(search);
     return {
       forceLedger: params.get('ledger') === 'true',
@@ -490,7 +490,21 @@ export default function ProposalPage() {
                 {visibleTab.summary && (
                   <div
                     className={`column is-full p-0 is-flex is-flex-direction-column`}
+                    style={{ position: 'relative' }}
                   >
+                    <div
+                      className="has-background-white-ter"
+                      style={{
+                        position: 'absolute',
+                        backgroundColor: 'blue',
+                        width: '100vw',
+                        overflow: 'hidden',
+                        left: '-1rem',
+                        zIndex: -1,
+                        height: '600px',
+                        bottom: '-21px',
+                      }}
+                    />
                     <ProposalInformation
                       proposalId={proposal.id}
                       creatorAddr={proposal.creatorAddr}
