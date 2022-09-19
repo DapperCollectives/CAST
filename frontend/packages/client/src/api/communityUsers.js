@@ -35,7 +35,7 @@ export const addUserToCommunityUserApiRep = async ({
 export const deleteCommunityMemberApiReq = async ({
   communityId,
   addr,
-  hexTime,
+  timestamp,
   compositeSignatures,
   voucher,
   userType = 'member',
@@ -53,7 +53,7 @@ export const deleteCommunityMemberApiReq = async ({
       addr,
       userType,
       signingAddr,
-      timestamp: hexTime,
+      timestamp,
       compositeSignatures,
       voucher,
     }),
