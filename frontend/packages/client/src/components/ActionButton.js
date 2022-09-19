@@ -8,7 +8,6 @@ export default function ActionButton({
   label = '',
   classNames,
   type,
-  isUppercase = true,
   roundedClass = 'rounded-sm',
   height = 48,
 } = {}) {
@@ -18,7 +17,6 @@ export default function ActionButton({
     'has-background-yellow',
     { 'is-enabled': enabled },
     { 'is-disabled': !enabled },
-    { 'is-uppercase': isUppercase },
     { [roundedClass]: !!roundedClass },
     { [classNames]: !!classNames }
   );
