@@ -376,8 +376,8 @@ hr
 .community-header-wrapper
 	background-color: #F2F2F2
 	width: 100%
-	height: 248px
-	max-height: 248px
+	height: 250px
+	max-height: 250px
 .community-logo-mobile
 	max-height: 85px
 	max-width: 85px
@@ -454,7 +454,7 @@ hr
 	.community-content
 		padding-top: 0
 	.community-header-wrapper
-		max-height: 152px
+		max-height: 150px
 	.community-header
 		flex-direction: column
 		min-height: 288px
@@ -821,3 +821,12 @@ input[type=range].slider::-ms-fill-lower
 input[type=range].slider::-ms-fill-upper
 	background: #fbd84d7a
 	border-radius: 10px
+
+@media screen and (min-width: 1408px)
+.container:not(.is-max-desktop):not(.is-max-widescreen) 
+	max-width: 1220px	
+
+@media (min-width: 1300px)	
+	.community-header-wrapper	
+		border-radius: 25px
+		background-size: contain !important

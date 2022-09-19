@@ -135,16 +135,16 @@ export default function ProfileForm({
       openModal(
         <ImageCropModal
           cropperFn={getCroppedImg({
-            dWidth: 1200,
-            dHeight: 200,
+            dWidth: 1300,
+            dHeight: 250,
             fileName: 'bannerImage',
           })}
-          aspect={144 / 25}
+          aspect={26 / 5}
           defaultCropArea={{
-            width: 600,
-            height: 104,
+            width: 660,
+            height: 125,
             x: 0,
-            y: 148,
+            y: 125,
           }}
           logoImage={bannerImage}
           onDone={(image) => {
