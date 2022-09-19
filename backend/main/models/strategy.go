@@ -34,5 +34,5 @@ func GetVotingStrategies(db *s.Database) ([]*VotingStrategy, error) {
 }
 
 func IsNFTStrategy(name string) bool {
-	return name == "balance-of-nfts" || name == "float-nfts"
+	return name == "balance-of-nfts" || name == "float-nfts" || name == "custom-script"
 }
