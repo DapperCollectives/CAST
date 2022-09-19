@@ -745,113 +745,79 @@ span[data-tooltip]
 	max-width: 400px !important	
 	max-height: unset !important	
 
-.progress
-	background: linear-gradient(to right, #FBD84D 0%, #FBD84D 0%, #fbd84d85 0%, #fbd84d85 100%)
-	// border: solid 2px #82CFD0
-	border-radius: 8px
-	height: 10px
-	// height: 25px 
+input[type=range]
+	-webkit-appearance: none // Hides the slider so that custom slider can be made 
+	width: 100% // Specific width is required for Firefox.
+	background: transparent //  Otherwise white in Chrome 
+
+input[type=range].slider::-webkit-slider-thumb
+	-webkit-appearance: none
+
+input[type=range].slider:focus
+	outline: none // Removes the blue border. You should probably do some kind of focus styling for accessibility reasons though.
+
+input[type=range].slider::-ms-track
 	width: 100%
-	outline: none
-	transition: background 450ms ease-in
-	-webkit-appearance: none
+	cursor: pointer
+	/* Hides the slider so custom styles can be added */
+	background: transparent
+	border-color: transparent
+	color: transparent
 
-
-.progress::-webkit-slider-thumb
-	height: 10px 
-	width: 10px 
-	border-radius: 50%
+// thumb styles
+input[type=range].slider::-webkit-slider-thumb 
 	-webkit-appearance: none
-	cursor: ew-resize
+	border: 1px solid #FBD84D
+	height: 19px
+	width: 19px
+	border-radius: 3px
 	background: #FBD84D
-	cursor: pointer 
-	z-index: 20
+	cursor: pointer
+	border-radius: 20px
+	margin-top: -4.5px // You need to specify a margin in Chrome, but in Firefox and IE it is automatic
 
-
-	
-.progress::-ms-fill-lower, progress::-ms-fill-upper 
-	background: #FBD84D 
-	border: 0px solid #F5F5F5 
-	border-radius: 100px 
-	box-shadow: 0px 0px 0px #000000 
-.progress::-ms-thumb 
-	margin-top: 1px 
-	box-shadow: 0px 0px 0px #000000 
-	border: 0px solid #FFFFFF 
-	height: 19px 
-	width: 19px 
-	border-radius: 19px 
-	background: #FBD84D 
+input[type=range].slider::-moz-range-thumb
+	border: 1px solid #FBD84D
+	height: 19px
+	width: 19px
+	border-radius: 20px
+	background: #FBD84D
 	cursor: pointer
 
-// input[type=range] 
-// 	height: 25px 
-// 	-webkit-appearance: none 
-// 	margin: 10px 0 
-// 	width: 100% 
-// 	&:focus 
-// 	outline: none 
+input[type=range].slider::-ms-thumb
+	height: 19px
+	width: 19px
+	border-radius: 20px
+	background: #FBD84D
+	cursor: pointer
 
-// 	&::-webkit-slider-runnable-track 
-// 		width: 100% 
-// 		height: 10px 
-// 		cursor: pointer 
-// 		animate: 0.2s 
-// 		// box-shadow: 0px 0px 0px #000000 
-// 		background: #FBD84D 
-// 		border-radius: 50px 
-// 		border: 0px solid #F5F5F5 
-// 	&::-webkit-slider-thumb 
-// 		// box-shadow: 0px 0px 0px #000000 
-// 		border: 0px solid #FFFFFF 
-// 		height: 19px 
-// 		width: 19px 
-// 		border-radius: 19px 
-// 		background: #FBD84D 
-// 		cursor: pointer 
-// 		-webkit-appearance: none 
-// 		margin-top: -4.5px 
-// 	&:focus 
-// 		&::-ms-fill-lower, &::-ms-fill-upper
-// 			background: #FBD84D 
-// 		&::-webkit-slider-runnable-track 
-// 			background: #FBD84D 
-// 	&::-moz-range-track 
-// 		width: 100% 
-// 		height: 10px 
-// 		cursor: pointer 
-// 		animate: 0.2s 
-// 		// box-shadow: 0px 0px 0px #000000 
-// 		background: #FBD84D 
-// 		border-radius: 50px 
-// 		border: 0px solid #F5F5F5 
-// 	&::-moz-range-thumb 
-// 		box-shadow: 0px 0px 0px #000000 
-// 		border: 0px solid #FFFFFF 
-// 		height: 19px 
-// 		width: 19px 
-// 		border-radius: 19px 
-// 		background: #FBD84D 
-// 		cursor: pointer 
-// 	&::-ms-track 
-// 		width: 100% 
-// 		height: 10px 
-// 		cursor: pointer 
-// 		animate: 0.2s 
-// 		background: transparent 
-// 		border-color: transparent 
-// 		color: transparent 
-// 	&::-ms-fill-lower, &::-ms-fill-upper 
-// 		background: #FBD84D 
-// 		border: 0px solid #F5F5F5 
-// 		border-radius: 100px 
-// 		box-shadow: 0px 0px 0px #000000 
-// 	&::-ms-thumb 
-// 		margin-top: 1px 
-// 		box-shadow: 0px 0px 0px #000000 
-// 		border: 0px solid #FFFFFF 
-// 		height: 19px 
-// 		width: 19px 
-// 		border-radius: 19px 
-// 		background: #FBD84D 
-// 		cursor: pointer
+input[type=range].slider::-webkit-slider-runnable-track
+	width: 100%
+	height: 10px
+	cursor: pointer
+	background: #fbd84d7a
+	border-radius: 10px
+
+input[type=range].slider::-moz-range-track
+	width: 100%
+	height: 10px
+	cursor: pointer
+	background: #fbd84d7a
+	border-radius: 10px
+
+input[type=range].slider::-ms-track
+	width: 100%
+	height: 10px
+	cursor: pointer
+	background: transparent
+	border-color: transparent
+	border-width: 10px 0
+	color: transparent
+
+input[type=range].slider::-ms-fill-lower
+	background: #fbd84d7a
+	border-radius: 10px
+
+input[type=range].slider::-ms-fill-upper
+	background: #fbd84d7a
+	border-radius: 10px
