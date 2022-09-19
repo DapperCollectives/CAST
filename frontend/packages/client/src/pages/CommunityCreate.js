@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { createElement, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useModalContext } from 'contexts/NotificationModal';
 import { useWebContext } from 'contexts/Web3';
@@ -10,7 +10,7 @@ import {
   StepThree,
   StepTwo,
 } from 'components/CommunityCreate';
-import useCommunity from 'hooks/useCommunity';
+import useCommunityMutation from 'hooks/useCommunityMutation';
 import { generateSlug } from 'utils';
 
 export default function CommunityCreate() {
@@ -23,20 +23,17 @@ export default function CommunityCreate() {
   const {
     createCommunity,
     data,
-    loading: creatingCommunity,
+    isLoading: creatingCommunity,
     error,
-  } = useCommunity({ initialLoading: false });
+  } = useCommunityMutation();
 
   const history = useHistory();
 
   const modalContext = useModalContext();
 
   useEffect(() => {
-    // if (data && data[0]?.id && isBlocking) {
-    //   setIsBlocking(false);
-    // }
-    if (data && data[0]?.id) {
-      history.push(`/community/${data[0].id}`);
+    if (data && data?.id) {
+      history.push(`/community/${data.id}`);
     }
   }, [data, history]);
 
@@ -91,7 +88,9 @@ export default function CommunityCreate() {
       'Contract Address': contractAddress ? [contractAddress] : [],
       'Admin List': addrAdmins,
       'Author List': addrAuthors,
-      Strategies: strategies.map(({ contract }) => contract.addr),
+      Strategies: strategies
+        .filter((st) => st.name !== 'custom-script')
+        .map(({ contract }) => contract.addr),
     };
 
     const validation = Object.entries(addressesToValidate);
@@ -119,7 +118,7 @@ export default function CommunityCreate() {
     // open modal if there are errors on addresses
     if (errorMessages.length) {
       modalContext.openModal(
-        React.createElement(Error, {
+        createElement(Error, {
           error: (
             <div className="mt-4">
               <p className="is-size-6">
@@ -129,7 +128,9 @@ export default function CommunityCreate() {
                 <ul>
                   {errorMessages.map((type, index) => (
                     <li key={`error-${index}`}>
-                      <p className="smaller-text mt-2 has-text-red">- {type}</p>
+                      <p className="smaller-text mt-2 has-text-danger">
+                        - {type}
+                      </p>
                     </li>
                   ))}
                 </ul>
@@ -143,7 +144,7 @@ export default function CommunityCreate() {
       return;
     }
 
-    const communityData = {
+    const communityPayload = {
       creatorAddr,
       ...fields,
       listAddrAdmins: addrAdmins,
@@ -151,7 +152,7 @@ export default function CommunityCreate() {
       slug: generateSlug(),
     };
 
-    await createCommunity(communityData);
+    await createCommunity(communityPayload);
   };
 
   const props = {

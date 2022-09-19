@@ -1,5 +1,5 @@
-import React from 'react';
-import { useForm } from 'react-hook-form';
+import { useEffect } from 'react';
+import { useForm, useWatch } from 'react-hook-form';
 import { useWebContext } from 'contexts/Web3';
 import { ActionButton } from 'components';
 import { ThresholdForm } from 'components/Community/ProposalThresholdEditor';
@@ -24,7 +24,7 @@ export default function StepThree({
 
   const { isValidFlowAddress } = useWebContext();
 
-  const { control, register, handleSubmit, formState } = useForm({
+  const { control, register, handleSubmit, formState, setFocus } = useForm({
     resolver: yupResolver(Schema(isValidFlowAddress)),
     defaultValues: {
       proposalThreshold,
@@ -42,6 +42,15 @@ export default function StepThree({
 
   const { isDirty, isSubmitting, errors, isValid } = formState;
 
+  const dropdownValue = useWatch({ control, name: 'contractType' });
+  const contractAddressValue = useWatch({ control, name: 'contractAddress' });
+
+  useEffect(() => {
+    if (dropdownValue && contractAddressValue === '') {
+      setFocus('contractAddress');
+    }
+  }, [dropdownValue, contractAddressValue, setFocus]);
+
   return (
     <ThresholdForm
       handleSubmit={handleSubmit(onSubmit)}
@@ -54,7 +63,7 @@ export default function StepThree({
           <div className="column is-12">
             <ActionButton
               type="submit"
-              label="Next: VOTING STRATEGIES"
+              label="Next: Voting Strategies"
               enabled={(isValid || isDirty) && !isSubmitting}
               classNames="vote-button transition-all has-background-yellow mt-5"
             />

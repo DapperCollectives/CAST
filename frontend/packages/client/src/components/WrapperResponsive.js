@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { useMediaQuery } from 'hooks';
 
 export default function WrapperResponsive({

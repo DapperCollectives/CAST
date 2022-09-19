@@ -1,4 +1,3 @@
-import React from 'react';
 import Dropdown from 'components/common/Dropdown';
 import Input from 'components/common/Input';
 import TextArea from 'components/common/TextArea';

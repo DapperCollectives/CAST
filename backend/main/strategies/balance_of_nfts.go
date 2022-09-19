@@ -3,14 +3,13 @@ package strategies
 import (
 	"github.com/DapperCollectives/CAST/backend/main/models"
 	"github.com/DapperCollectives/CAST/backend/main/shared"
-	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/rs/zerolog/log"
 )
 
 type BalanceOfNfts struct {
-	s.StrategyStruct
-	SC s.SnapshotClient
-	DB *s.Database
+	shared.StrategyStruct
+	SC shared.SnapshotClient
+	DB *shared.Database
 }
 
 func (b *BalanceOfNfts) FetchBalance(
@@ -47,7 +46,12 @@ func (b *BalanceOfNfts) queryNFTs(
 	strategy models.Strategy,
 	balance *models.Balance,
 ) error {
-	nftIds, err := b.FlowAdapter.GetNFTIds(balance.Addr, &strategy.Contract)
+	scriptPath := "./main/cadence/scripts/get_nfts_ids.cdc"
+	nftIds, err := b.FlowAdapter.GetNFTIds(
+		balance.Addr,
+		&strategy.Contract,
+		scriptPath,
+	)
 	if err != nil {
 		return err
 	}
@@ -82,16 +86,15 @@ func (b *BalanceOfNfts) TallyVotes(
 
 	for _, vote := range votes {
 		if len(vote.NFTs) != 0 {
-			var allowedBalance float64
+			var voteWeight float64
 
-			if proposal.Max_weight != nil {
-				allowedBalance = proposal.EnforceMaxWeight(float64(len(vote.NFTs)))
-			} else {
-				allowedBalance = float64(len(vote.NFTs))
+			voteWeight, err := b.GetVoteWeightForBalance(vote, proposal)
+			if err != nil {
+				return models.ProposalResults{}, err
 			}
 
-			r.Results[vote.Choice] += int(allowedBalance)
-			r.Results_float[vote.Choice] += allowedBalance
+			r.Results[vote.Choice] += int(voteWeight)
+			r.Results_float[vote.Choice] += voteWeight
 		}
 	}
 
@@ -104,15 +107,20 @@ func (b *BalanceOfNfts) GetVoteWeightForBalance(vote *models.VoteWithBalance, pr
 		log.Error().Err(err).Msg("error in GetVoteWeightForBalance for BalanceOfNFTs strategy")
 		return 0.00, err
 	}
+
+	if proposal.Max_weight != nil && float64(len(nftIds)) > *proposal.Max_weight {
+		return *proposal.Max_weight, nil
+	}
+
 	return float64(len(nftIds)), nil
 }
 
-func (s *BalanceOfNfts) GetVotes(
+func (b *BalanceOfNfts) GetVotes(
 	votes []*models.VoteWithBalance,
 	proposal *models.Proposal,
 ) ([]*models.VoteWithBalance, error) {
 	for _, vote := range votes {
-		weight, err := s.GetVoteWeightForBalance(vote, proposal)
+		weight, err := b.GetVoteWeightForBalance(vote, proposal)
 		if err != nil {
 			return nil, err
 		}
@@ -122,16 +130,16 @@ func (s *BalanceOfNfts) GetVotes(
 	return votes, nil
 }
 
-func (s *BalanceOfNfts) RequiresSnapshot() bool {
+func (b *BalanceOfNfts) RequiresSnapshot() bool {
 	return false
 }
 
-func (s *BalanceOfNfts) InitStrategy(
+func (b *BalanceOfNfts) InitStrategy(
 	f *shared.FlowAdapter,
 	db *shared.Database,
-	sc *s.SnapshotClient,
+	sc *shared.SnapshotClient,
 ) {
-	s.FlowAdapter = f
-	s.DB = db
-	s.SC = *sc
+	b.FlowAdapter = f
+	b.DB = db
+	b.SC = *sc
 }

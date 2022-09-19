@@ -1,11 +1,12 @@
-import React, { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useWebContext } from 'contexts/Web3';
 import { ActionButton } from 'components';
-import { useCommunityUsers } from 'hooks';
+import { useCommunityUsers, useCommunityUsersMutation } from 'hooks';
 import { UPDATE_COMMUNITY_TX } from 'const';
 import { yupResolver } from '@hookform/resolvers/yup';
+import isEqual from 'lodash/isEqual';
 import AddressForm from './AddressForm';
 import { AddressSchema } from './FormConfig';
 
@@ -24,17 +25,18 @@ export default function MembersEditor({
 
   const { notifyError } = useErrorHandlerContext();
 
-  const {
-    data: communityUsers,
-    loading: loadingUsers,
-    removeCommunityUsers,
-    addCommunityUsers,
-  } = useCommunityUsers({
+  const communityUsersPrev = useRef([]);
+
+  const { data: communityUsers, isLoading: loadingUsers } = useCommunityUsers({
     communityId,
     type: addrType.toLocaleLowerCase(),
     // if list goes up from 100 we need to add a fetch more button
     count: 100,
   });
+
+  const { removeCommunityUsers, addCommunityUsers } = useCommunityUsersMutation(
+    { communityId }
+  );
 
   const { register, control, handleSubmit, reset, formState } = useForm({
     mode: 'all',
@@ -59,12 +61,23 @@ export default function MembersEditor({
     name: 'addrList',
   });
 
-  // load from api existing addresses
+  // if endpoint returns new data then update list and keep a copy
   useEffect(() => {
-    if (communityUsers?.length > 0) {
+    if (
+      communityUsers?.length > 0 &&
+      !isEqual(communityUsers, communityUsersPrev.current)
+    ) {
       reset({ addrList: communityUsers.map((el) => ({ addr: el.addr })) });
+      communityUsersPrev.current = communityUsers;
     }
   }, [communityUsers, reset]);
+
+  // load from api existing addresses: runs on initial load
+  useEffect(() => {
+    if (communityUsers?.length > 0 && addrList.length === 0) {
+      reset({ addrList: communityUsers.map((el) => ({ addr: el.addr })) });
+    }
+  }, [communityUsers, reset, addrList]);
 
   const onSubmit = async (data) => {
     const { addrList } = data;
@@ -109,14 +122,14 @@ export default function MembersEditor({
       if (toRemove.length > 0) {
         await removeCommunityUsers({
           addrs: toRemove,
-          type: addrType.toLocaleLowerCase(),
+          userType: addrType.toLocaleLowerCase(),
           body,
         });
       }
       if (toAdd.length > 0) {
         await addCommunityUsers({
           addrs: toAdd,
-          type: addrType.toLocaleLowerCase(),
+          userType: addrType.toLocaleLowerCase(),
           body,
         });
       }
@@ -141,7 +154,7 @@ export default function MembersEditor({
       submitComponent={
         <ActionButton
           type="submit"
-          label="save"
+          label="Save"
           enabled={isDirty && !isSubmitting}
           loading={isSubmitting}
           classNames="vote-button transition-all has-background-yellow mt-5"

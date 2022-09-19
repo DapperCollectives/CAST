@@ -1,7 +1,7 @@
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
-import { checkResponse, getPaginationInfo } from 'utils';
+import { checkResponse, getPagination, getPlainData } from 'utils';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { PAGINATION_INITIAL_STATE } from '../reducers';
+import { PAGINATION_INITIAL_STATE } from 'reducers';
 
 export default function useCommunityMembers({
   communityId,
@@ -21,41 +21,30 @@ export default function useCommunityMembers({
       const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}/users?count=${count}&start=${start}`;
       try {
         const response = await fetch(url);
-        const members = await checkResponse(response);
-        return members;
+        return checkResponse(response);
       } catch (err) {
         throw err;
       }
     },
     {
-      getNextPageParam: (lastPage, pages) => {
+      getNextPageParam: (lastPage) => {
         const { next, start, count, totalRecords } = lastPage;
         return [start + count, count, totalRecords, next];
       },
       enabled: !!communityId,
+      onError: (error) => {
+        notifyError(error);
+      },
+      keepPreviousData: true,
     }
   );
-  if (isError) {
-    notifyError(error);
-  }
-
-  const [start = 0, count = countParam, totalRecords = 0, next = -1] =
-    data?.pageParam ?? getPaginationInfo(data?.pages);
 
   return {
     isLoading,
     isError,
-    data: data?.pages?.reduce(
-      (prev, current) => (current.data ? [...prev, ...current.data] : prev),
-      []
-    ),
+    data: getPlainData(data),
     error,
-    pagination: {
-      count,
-      next,
-      start,
-      totalRecords,
-    },
+    pagination: getPagination(data),
     fetchNextPage,
     queryKey: queryUniqueKey,
   };

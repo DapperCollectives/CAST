@@ -1,4 +1,4 @@
-import { Discord, Github, Instagram, Twitter, Website } from 'components/Svg';
+import { Svg } from '@cast/shared-components';
 import * as yup from 'yup';
 
 const LinksSchema = yup.object().shape({
@@ -50,27 +50,27 @@ const FormFieldsConfig = [
   {
     fieldName: 'websiteUrl',
     placeholder: 'https://www.community-site-name.com',
-    iconComponent: <Website width="16px" height="16px" />,
+    iconComponent: <Svg name="Website" width="16px" height="16px" />,
   },
   {
     fieldName: 'twitterUrl',
     placeholder: 'https://www.twitter.com/account',
-    iconComponent: <Twitter width="16px" height="16px" />,
+    iconComponent: <Svg name="Twitter" width="16px" height="16px" />,
   },
   {
     fieldName: 'githubUrl',
     placeholder: 'https://www.github.com/repository-name',
-    iconComponent: <Github width="16px" height="16px" />,
+    iconComponent: <Svg name="GitHub" width="16px" height="16px" />,
   },
   {
     fieldName: 'discordUrl',
     placeholder: 'https://www.discord.com/channel-name',
-    iconComponent: <Discord width="16px" height="16px" />,
+    iconComponent: <Svg name="Discord" width="16px" height="16px" />,
   },
   {
     fieldName: 'instagramUrl',
     placeholder: 'https://www.instagram.com/profile-name',
-    iconComponent: <Instagram width="16px" height="16px" />,
+    iconComponent: <Svg name="Instagram" width="16px" height="16px" />,
   },
 ];
 

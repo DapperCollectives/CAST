@@ -1,7 +1,9 @@
-import React, { useCallback, useState } from 'react';
+import { cloneElement, useCallback, useRef, useState } from 'react';
 import { Prompt } from 'react-router-dom';
+import { Svg } from '@cast/shared-components';
 import Loader from '../Loader';
-import { ArrowLeft, CheckMark } from '../Svg';
+import NextButton from './NexStepButton';
+import SubmitButton from './SubmitButton';
 
 function StepByStep({
   finalLabel,
@@ -11,6 +13,7 @@ function StepByStep({
   isSubmitting,
   submittingMessage,
   passNextToComp = false,
+  showActionButtonLeftPannel = false,
   passSubmitToComp = false,
   blockNavigationOut = false,
   blockNavigationText,
@@ -19,7 +22,7 @@ function StepByStep({
   const [showPreStep, setShowPreStep] = useState(!!preStep);
   const [isStepValid, setStepValid] = useState(false);
   const [stepsData, setStepsData] = useState({});
-  const refs = React.useRef();
+  const refs = useRef();
 
   const onStepAdvance = (direction = 'next') => {
     if (direction === 'next') {
@@ -98,7 +101,7 @@ function StepByStep({
     } else if (!showPreStep && currentStep > stepIdx) {
       return (
         <div className={`is-flex ${stepClasses.join(' ')}`} key={stepIdx}>
-          <CheckMark circleFill="#44C42F" />
+          <Svg name="CheckMark" circleFill="#44C42F" />
           {stepLabel ? <span className="ml-4">{stepLabel}</span> : divider}
         </div>
       );
@@ -122,12 +125,16 @@ function StepByStep({
 
   const child = showPreStep ? preStep : steps[currentStep].component;
 
+  const { useHookForms = false } = steps[currentStep];
+
+  const formId = useHookForms ? `form-Id-${currentStep}` : undefined;
+
   const getBackLabel = (isSubmitting) => (
     <div
       className="is-flex is-align-items-center has-text-grey cursor-pointer"
       onClick={!isSubmitting ? () => onStepAdvance('prev') : () => {}}
     >
-      <ArrowLeft />
+      <Svg name="ArrowLeft" />
       <span className="ml-4">Back</span>
     </div>
   );
@@ -139,31 +146,8 @@ function StepByStep({
     [onSubmit, stepsData]
   );
 
-  const getNextButton = () => (
-    <div className="my-6">
-      <div
-        className={`button is-block has-background-yellow rounded-sm py-2 px-4 has-text-centered ${
-          !isStepValid && 'is-disabled'
-        }`}
-        onClick={moveToNextStep}
-      >
-        Next
-      </div>
-    </div>
-  );
-
-  const getSubmitButton = (isSubmitting) => (
-    <div className="my-6">
-      <div
-        className={`button is-block has-background-yellow rounded-sm py-2 px-4 has-text-centered ${
-          (!isStepValid || isSubmitting) && 'is-disabled'
-        }`}
-        onClick={_onSubmit}
-      >
-        {finalLabel}
-      </div>
-    </div>
-  );
+  const showNextButton = !passNextToComp || showActionButtonLeftPannel;
+  const showSubmitButton = !passSubmitToComp || showActionButtonLeftPannel;
 
   return (
     <>
@@ -201,12 +185,22 @@ function StepByStep({
               {currentStep > 0 && getBackLabel(isSubmitting)}
             </div>
             <div>{steps.map((step, i) => getStepIcon(i, step.label))}</div>
-            {currentStep < steps.length - 1 &&
-              !passNextToComp &&
-              getNextButton()}
-            {currentStep === steps.length - 1 &&
-              !passSubmitToComp &&
-              getSubmitButton(isSubmitting)}
+            {currentStep < steps.length - 1 && showNextButton && (
+              <NextButton
+                formId={formId}
+                moveToNextStep={moveToNextStep}
+                disabled={!isStepValid}
+              />
+            )}
+            {currentStep === steps.length - 1 && showSubmitButton && (
+              <SubmitButton
+                formId={formId}
+                disabled={!isStepValid}
+                onSubmit={_onSubmit}
+                label={finalLabel}
+                isSubmitting={isSubmitting}
+              />
+            )}
           </div>
           {/* left panel mobile */}
           <div
@@ -237,7 +231,7 @@ function StepByStep({
             )}
 
             {!isSubmitting &&
-              React.cloneElement(child, {
+              cloneElement(child, {
                 onDataChange: (stepData) => {
                   setStepsData({
                     ...stepsData,
@@ -259,14 +253,25 @@ function StepByStep({
                   ? { onSubmit: _onSubmit }
                   : undefined),
                 ...(showPreStep ? { dismissPreStep } : undefined),
+                ...(useHookForms ? { formId } : undefined),
               })}
             <div className="is-hidden-tablet">
-              {currentStep < steps.length - 1 &&
-                !passNextToComp &&
-                getNextButton()}
-              {currentStep === steps.length - 1 &&
-                !passSubmitToComp &&
-                getSubmitButton(isSubmitting)}
+              {currentStep < steps.length - 1 && showNextButton && (
+                <NextButton
+                  formId={formId}
+                  moveToNextStep={moveToNextStep}
+                  disabled={!isStepValid}
+                />
+              )}
+              {currentStep === steps.length - 1 && showSubmitButton && (
+                <SubmitButton
+                  formId={formId}
+                  disabled={!isStepValid}
+                  onSubmit={_onSubmit}
+                  label={finalLabel}
+                  isSubmitting={isSubmitting}
+                />
+              )}
             </div>
           </div>
         </div>
