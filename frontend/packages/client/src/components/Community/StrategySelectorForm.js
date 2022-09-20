@@ -1,12 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import { createElement, useEffect, useState } from 'react';
 import { useModalContext } from 'contexts/NotificationModal';
-import { AddButton } from 'components';
-import { Error } from 'components';
+import { AddButton, Error } from 'components';
 import StrategySelectorInput from 'components/Community/StrategySelectorInput';
-import { useVotingStrategies } from 'hooks';
+import { useAddFungibleToken, useVotingStrategies } from 'hooks';
 import { kebabToString } from 'utils';
 import isEqual from 'lodash/isEqual';
 import StrategyEditorModal from './StrategyEditorModal';
+
+const getStrategyName = (strategies, strategy) => {
+  if (strategy.name === 'custom-script') {
+    const custom = strategies.find((st) => st.key === strategy.name);
+    const scriptName = custom.scripts.find(
+      (s) => s.key === strategy.contract.script
+    ).name;
+    return `${kebabToString(strategy.name)}: ${scriptName}`;
+  }
+  return kebabToString(strategy.name);
+};
 
 export default function StrategySelectorForm({
   existingStrategies = [],
@@ -28,8 +38,9 @@ export default function StrategySelectorForm({
     }
   }, [strategies, onStrategySelection, existingStrategies]);
 
-  const { data: allVotingStrategies, loading: loadingAllStrategies } =
+  const { data: allVotingStrategies, isLoading: loadingAllStrategies } =
     useVotingStrategies();
+  const { addFungibleToken } = useAddFungibleToken();
 
   const { openModal, closeModal } = useModalContext();
 
@@ -39,6 +50,13 @@ export default function StrategySelectorForm({
   );
 
   const addNewStrategy = (newStrategyInfo) => {
+    const { contract } = newStrategyInfo;
+    if (
+      newStrategyInfo.name === 'staked-token-weighted-default' ||
+      newStrategyInfo.name === 'token-weighted-default'
+    ) {
+      addFungibleToken(contract.addr, contract.name, contract.publicPath);
+    }
     setStrategies((state) => [...state, newStrategyInfo]);
     closeModal();
   };
@@ -61,7 +79,7 @@ export default function StrategySelectorForm({
     const strategy = strategies[index];
     if (activeStrategies.includes(strategy.name)) {
       openModal(
-        React.createElement(Error, {
+        createElement(Error, {
           error: (
             <div className="mt-4">
               <p className="is-size-6">
@@ -71,8 +89,8 @@ export default function StrategySelectorForm({
               <div className="is-flex is-align-items-center is-justify-content-center">
                 <ul>
                   <li>
-                    <p className="smaller-text mt-2 has-text-red">
-                      - {kebabToString(strategy.name)}
+                    <p className="smaller-text mt-2 has-text-danger">
+                      - {getStrategyName(allVotingStrategies, strategy)}
                     </p>
                   </li>
                 </ul>
@@ -115,7 +133,7 @@ export default function StrategySelectorForm({
         <StrategySelectorInput
           index={index}
           key={`strategy-${index}`}
-          commuVotStra={kebabToString(st.name)}
+          commuVotStra={getStrategyName(allVotingStrategies, st)}
           onDeleteStrategy={onDeleteStrategy}
           enableDelete={enableDelete}
         />

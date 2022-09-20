@@ -1,15 +1,23 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 import { WalletConnectModal } from 'components';
 import { useFclUser } from 'hooks';
 import { IS_LOCAL_DEV } from 'const';
+import { getCompositeSigs } from 'utils';
 import * as fcl from '@onflow/fcl';
+import * as t from '@onflow/types';
 import networks from 'networks';
 
 // create our app context
-export const Web3Context = React.createContext({});
+export const Web3Context = createContext({});
 
 export const useWebContext = () => {
-  const context = React.useContext(Web3Context);
+  const context = useContext(Web3Context);
   if (context === undefined) {
     throw new Error('`useWebContext` must be used within a `Web3Context`.');
   }
@@ -66,6 +74,8 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
     } = networks[network];
     const iconUrl = window.location.origin + '/logo.png';
 
+    // discovery.wallet.method config will be delayed
+    // untill user selects wallet to conect
     fcl.config({
       'app.detail.title': 'CAST',
       'app.detail.icon': iconUrl,
@@ -108,6 +118,17 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
             icon: '/images/blocto.png',
           },
         },
+        {
+          f_type: 'Service',
+          f_vsn: '1.0.0',
+          type: 'authn',
+          method: 'POP/RPC',
+          uid: 'dapper-wallet#authn',
+          provider: {
+            name: 'Dapper Wallet',
+            icon: '/images/dapper.svg',
+          },
+        },
       ]);
     }
   }, []);
@@ -138,6 +159,55 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
   const closeModal = () => {
     setOpenModal(false);
   };
+
+  /**
+   *
+   * @param {String} cadence - transaction code to be authorized by user
+   * @param {String} data - transaction argument, or message data
+   *  we want to validate on the backend
+   * @returns {Object} - voucher as JSON
+   */
+  const signMessageVoucher = async (cadence, data) => {
+    const voucher = await fcl.serialize([
+      fcl.transaction(cadence),
+      fcl.args([fcl.arg(data, t.String)]),
+      fcl.limit(999),
+      fcl.proposer(fcl.authz),
+      fcl.authorizations([fcl.authz]),
+      fcl.payer(fcl.authz),
+    ]);
+    return JSON.parse(voucher);
+  };
+
+  /**
+   *
+   * @param {String} walletProvider ID of the wallet service user is connected to
+   * @param {String} cadence transaction code to be authorized
+   * @param {String} data transaction argument, or message data to be validated on the backend
+   * @returns {[Array?, Object?]} first element is an array of composite signatures,
+   * second element is voucher JSON parsed into an Object.  If function is successful, one element will be null.  If it fails, both elements will be null.
+   */
+  const signMessageByWalletProvider = async (walletProvider, cadence, data) => {
+    try {
+      let voucher;
+      switch (walletProvider) {
+        case 'dapper#authn':
+          voucher = await signMessageVoucher(cadence, data);
+          return [null, voucher];
+        case 'fcl-ledger-authz':
+          voucher = await signMessageVoucher(cadence, data);
+          return [null, voucher];
+        default:
+          const _compositeSignatures = await fcl
+            .currentUser()
+            .signUserMessage(data);
+          return [getCompositeSigs(_compositeSignatures), null];
+      }
+    } catch (e) {
+      return [null, null];
+    }
+  };
+
   // use props as a way to pass configuration values
   const providerProps = {
     executeTransaction,
@@ -156,6 +226,8 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
     logOut,
     openWalletModal,
     isValidFlowAddress,
+    signMessageByWalletProvider,
+    signMessageVoucher,
     ...props,
   };
 

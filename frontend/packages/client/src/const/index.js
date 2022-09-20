@@ -11,6 +11,9 @@ export const COMMUNITY_NAME_MAX_LENGTH = 50;
 
 export const COMMUNITY_DESCRIPTION_MAX_LENGTH = 1000;
 
+export const HAS_DELAY_ON_START_TIME =
+  process.env.REACT_APP_APP_ENV?.toUpperCase() === 'PRODUCTION';
+
 export const FilterValues = {
   all: 'All',
   active: 'Active',
@@ -29,3 +32,66 @@ export const CommunityEditPageTabs = {
   proposalAndVoting: 'proposals-and-voting',
   votingStrategies: 'voting-strategies',
 };
+
+// Dapper Wallet Txs
+export const CREATE_COMMUNITY_TX = `
+transaction() {
+    prepare(acct: AuthAccount) {
+        // create community:
+        //
+        // this transaction does nothing and will not be run,
+        // it is only used to collect a signature.
+        //
+    }
+}
+`;
+export const CREATE_PROPOSAL_TX = `
+transaction() {
+    prepare(acct: AuthAccount) {
+        // create proposal:
+        //
+        // this transaction does nothing and will not be run,
+        // it is only used to collect a signature.
+        //
+    }
+}`;
+export const CAST_VOTE_TX = `
+transaction() {
+    prepare(acct: AuthAccount) {
+        // cast vote:
+        //
+        // this transaction does nothing and will not be run,
+        // it is only used to collect a signature.
+        //
+    }
+}`;
+export const UPDATE_COMMUNITY_TX = `
+transaction() {
+    prepare(acct: AuthAccount) {
+        // update community:
+        //
+        // this transaction does nothing and will not be run,
+        // it is only used to collect a signature.
+        //
+    }
+}`;
+export const UPDATE_PROPOSAL_TX = `
+transaction() {
+    prepare(acct: AuthAccount) {
+        // update proposal:
+        //
+        // this transaction does nothing and will not be run,
+        // it is only used to collect a signature.
+        //
+    }
+}`;
+export const UPDATE_MEMBERSHIP_TX = `
+transaction() {
+    prepare(acct: AuthAccount) {
+        // update community membership:
+        //
+        // this transaction does nothing and will not be run,
+        // it is only used to collect a signature.
+        //
+    }
+}`;

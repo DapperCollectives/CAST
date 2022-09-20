@@ -4,7 +4,6 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -26,8 +25,10 @@ type Vote struct {
 	Created_at           time.Time               `json:"createdAt,omitempty"`
 	Cid                  *string                 `json:"cid"`
 	Message              string                  `json:"message"`
-	TransactionId        string                  `json:"transactionId"`
-	IsCancelled		 	 bool					 `json:"isCancelled"`
+	Voucher              *shared.Voucher         `json:"voucher,omitempty"`
+	IsCancelled          bool                    `json:"isCancelled"`
+	IsEarly              bool                    `json:"isEarly"`
+	IsWinning            bool                    `json:"isWinning"`
 }
 
 type VoteWithBalance struct {
@@ -48,16 +49,17 @@ type NFT struct {
 	ID             interface{} `json:"id"`
 	Contract_addr  string      `json:"contract_addr"`
 	Created_at     time.Time   `json:"created_at"`
-	FLoat_event_id uint64      `json:"event_id,omitempty"`
+	Float_event_id uint64      `json:"event_id,omitempty"`
 }
 
 type VotingStreak struct {
-	Proposal_id uint64
-	Addr        string
+	Proposal_id  uint64
+	Addr         string
+	Is_cancelled bool
 }
 
 const (
-	timestampExpiry = 60
+	timestampExpiry     = 60
 	defaultStreakLength = 3
 )
 
@@ -259,18 +261,18 @@ func (v *Vote) CreateVote(db *s.Database) error {
 	isEarlyVote := v.Created_at.Before(proposal.Start_time.Add(time.Hour * time.Duration(defaultEarlyVoteLength)))
 
 	if isEarlyVote {
-		err = AddEarlyVoteAchievement(db, v, proposal)
+		err = AddEarlyVoteAchievement(db, v)
 		if err != nil {
 			return err
 		}
 	}
 
-	err = AddStreakAchievement(db, v, proposal)
-	return err
+	return nil
 }
 
-func (v *Vote) ValidateMessage(proposal Proposal) error {
-	vars := strings.Split(v.Message, ":")
+func ValidateVoteMessage(message string, proposal Proposal) error {
+	log.Info().Msgf("validating message: %s", message)
+	vars := strings.Split(message, ":")
 
 	// check proposal choices to see if choice is valid
 	encodedChoice := vars[1]
@@ -329,18 +331,19 @@ func getUsersNFTs(db *s.Database, votes []*VoteWithBalance) ([]*VoteWithBalance,
 }
 
 func GetUserNFTs(db *s.Database, vote *VoteWithBalance) ([]*NFT, error) {
-	var nftIds []*NFT
+	var ids []*NFT
 	sql := `select id from nfts
 	where proposal_id = $1 and owner_addr = $2
 	`
 
-	err := pgxscan.Select(db.Context, db.Conn, &nftIds, sql, vote.Proposal_id, vote.Addr)
+	err := pgxscan.Select(db.Context, db.Conn, &ids, sql, vote.Proposal_id, vote.Addr)
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		return nil, err
 	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
 		return []*NFT{}, nil
 	}
-	return nftIds, nil
+
+	return ids, nil
 }
 
 func CreateUserNFTRecord(db *s.Database, v *VoteWithBalance) error {
@@ -397,75 +400,17 @@ func getProposal(db *s.Database, proposalId int) (Proposal, error) {
 	return proposal, err
 }
 
-func AddEarlyVoteAchievement(db *s.Database, v *Vote, p Proposal) error {
+func AddEarlyVoteAchievement(db *s.Database, v *Vote) error {
+	_, err := db.Conn.Exec(db.Context, `UPDATE votes SET is_early = 'true' WHERE id = $1`, v.ID)
 
-	//Unique identifier ensuring there are no duplicate early vote achievements
-	earlyVoteDetails := fmt.Sprintf("%s:%s:%d:%d", EarlyVote, v.Addr, p.Community_id, v.Proposal_id)
-	err := db.Conn.QueryRow(db.Context,
-		`
-			INSERT INTO user_achievements(addr, achievement_type, community_id, proposals, details)
-			VALUES($1, $2, $3, $4, $5)
-			ON CONFLICT (details)
-			DO NOTHING
-			RETURNING id
-		`, v.Addr, EarlyVote, p.Community_id, []int{v.Proposal_id}, earlyVoteDetails).Scan(&v.ID)
-
-	if checkErrorIgnoreNoRows(err) {
-		return err
-	}
-
-	return nil
-}
-
-func AddStreakAchievement(db *s.Database, v *Vote, p Proposal) error {
-	var defaultStreakLength = 3
-
-	votingStreak, err := getUserVotingStreak(db, v.Addr, p.Community_id)
 	if err != nil {
 		return err
 	}
 
-	if len(votingStreak) >= defaultStreakLength {
-		var proposals []uint64
-		for i, vote := range votingStreak {
-			if vote.Addr != "" {
-				proposals = append(proposals, vote.Proposal_id)
-			}
-
-			if len(proposals) >= defaultStreakLength && (i == len(votingStreak)-1 || (i < len(votingStreak)-1 && votingStreak[i+1].Addr == "")) {
-				// ensure proposals always ordered to guarantee no duplicates
-				sort.Slice(proposals, func(i, j int) bool {
-					return proposals[i] < proposals[j]
-				})
-
-				//Unique identifier for current streak
-				currentStreakDetails := fmt.Sprintf("%s:%s:%d:%s", Streak, v.Addr, p.Community_id, strings.Trim(strings.Join(strings.Fields(fmt.Sprint(proposals)), ","), "[]"))
-
-				if len(proposals) == defaultStreakLength {
-					err = addDefaultStreak(db, vote.Addr, p.Community_id, proposals, currentStreakDetails)
-				} else {
-					err = addOrUpdateStreak(db, vote.Addr, p.Community_id, proposals, currentStreakDetails)
-				}
-
-				if checkErrorIgnoreNoRows(err) {
-					return err
-				} else {
-					err = nil
-				}
-
-				// streak inserted, reset to check for other streaks
-				proposals = nil
-			}
-			if v.Addr == "" {
-				proposals = nil
-			}
-		}
-	}
-
 	return nil
 }
 
-func AddWinningVoteAchievement(db *s.Database, votes []*VoteWithBalance, p ProposalResults, communityId int) error {
+func AddWinningVoteAchievement(db *s.Database, votes []*VoteWithBalance, p ProposalResults) error {
 	maxVotes := 0
 	winningChoice := ""
 	for k, v := range p.Results {
@@ -476,76 +421,68 @@ func AddWinningVoteAchievement(db *s.Database, votes []*VoteWithBalance, p Propo
 	}
 	for _, v := range votes {
 		if v.Choice == winningChoice {
-			details := fmt.Sprintf("%s:%s:%d:%d", WinningVote, v.Addr, communityId, v.Proposal_id)
-			err := db.Conn.QueryRow(db.Context,
-				`
-					INSERT INTO user_achievements(addr, achievement_type, community_id, proposals, details)
-					VALUES($1, $2, $3, $4, $5)
-					ON CONFLICT (details)
-					DO NOTHING
-					RETURNING id
-				`, v.Addr, WinningVote, communityId, []int{v.Proposal_id}, details).Scan(&v.ID)
-
-			if checkErrorIgnoreNoRows(err) {
-				// Row already exists, so we have previously calculated
-				// winning achievements for this proposal
-				return nil
-			} else if err != nil {
+			_, err := db.Conn.Exec(db.Context, `UPDATE votes SET is_winning = 'true' WHERE id = $1`, v.ID)
+			if err != nil {
 				return err
 			}
 		}
 	}
+
+	_, err := db.Conn.Exec(db.Context, `UPDATE proposals SET achievements_done = 'true' WHERE id = $1`, p.Proposal_id)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func getUserVotingStreak(db *s.Database, addr string, communityId int) ([]VotingStreak, error) {
+func getStreakAchievement(db *s.Database, addr string, communityId int) (int, error) {
+	streaks := 0
+	votes, err := getUserVotes(db, addr, communityId)
+	if err != nil {
+		return 0, err
+	}
+
+	if len(votes) >= defaultStreakLength {
+		var proposals []uint64
+		for i, vote := range votes {
+			// check if user voted on non-cancelled proposal
+			if vote.Addr != "" && !vote.Is_cancelled {
+				proposals = append(proposals, vote.Proposal_id)
+				// check if vote is last in a streak
+				if len(proposals) >= defaultStreakLength && (i == len(votes)-1 || (i < len(votes)-1 && votes[i+1].Addr == "")) {
+					streaks = streaks + 1
+
+					// reset proposals to check for other streaks
+					proposals = nil
+				}
+			} else {
+				// user did not vote on proposal, reset to look for new streak
+				proposals = nil
+			}
+		}
+	}
+
+	return streaks, nil
+}
+
+func getUserVotes(db *s.Database, addr string, communityId int) ([]VotingStreak, error) {
 	// Determine if this vote is part of a streak
 	// Proposals with the user address count as a vote for that proposal
 	// NULL means the user did not vote
 	sql := fmt.Sprintf(`
-		SELECT p.id as proposal_id, 
-		CASE WHEN v.addr is NULL THEN '' ELSE v.addr END as addr 
+		SELECT 
+			p.id as proposal_id, 
+			COALESCE(v.is_cancelled, 'false') as is_cancelled,
+			COALESCE(v.addr, '') as addr
 		FROM proposals p 
-    LEFT OUTER JOIN (
-        SELECT * FROM votes where addr = '%s'
-    ) v ON v.proposal_id = p.id 
-    where p.community_id = $1 
-    ORDER BY start_time ASC
-		`, addr)
+		LEFT OUTER JOIN (
+			SELECT * FROM votes where addr = '%s'
+		) v ON v.proposal_id = p.id 
+		where p.community_id = $1
+		ORDER BY start_time ASC
+	`, addr)
 	var votingStreak []VotingStreak
 	err := pgxscan.Select(db.Context, db.Conn, &votingStreak, sql, communityId)
 	return votingStreak, err
-}
-
-func addDefaultStreak(db *s.Database, addr string, communityId int, proposals []uint64, details string) error {
-	v := new(Vote)
-	sql := `
-						INSERT INTO user_achievements(addr, achievement_type, community_id, proposals, details)
-						VALUES($1, $2, $3, $4, $5)
-						ON CONFLICT (details)
-						DO NOTHING
-					`
-	return db.Conn.QueryRow(db.Context, sql, addr, Streak, communityId, proposals, details).Scan(&v.ID)
-}
-
-func addOrUpdateStreak(db *s.Database, addr string, communityId int, proposals []uint64, details string) error {
-	var id int
-	// If previous streak exists, then update with new streak details, or insert new streak
-	// e.g. If previous streak = 1,2,3 and current streak = 1,2,3,4 then update row with current streak details
-	previousStreakDetails := fmt.Sprintf("%s:%s:%d:%s", Streak, addr, communityId, strings.Trim(strings.Join(strings.Fields(fmt.Sprint(proposals[:len(proposals)-1])), ","), "[]"))
-	sql := `
-						INSERT INTO user_achievements(addr, achievement_type, community_id, proposals, details)
-						VALUES($1, $2, $3, $4, $5)
-						ON CONFLICT (details)
-						DO UPDATE SET proposals = $4, details = $6
-						RETURNING id
-					`
-	return db.Conn.QueryRow(db.Context, sql, addr, Streak, communityId, proposals, previousStreakDetails, details).Scan(&id)
-}
-
-func checkErrorIgnoreNoRows(err error) bool {
-	if err != nil && fmt.Sprintf("%s", err) != pgx.ErrNoRows.Error() {
-		return true
-	}
-	return false
 }

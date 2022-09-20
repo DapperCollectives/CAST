@@ -1,4 +1,3 @@
-import React from 'react';
 import Blockies from 'react-blockies';
 import { JoinCommunityButton } from 'components';
 import { useMediaQuery } from 'hooks';
@@ -12,7 +11,6 @@ export default function CommunityHeader({
   communityName,
   members,
   totalMembers,
-  setTotalMembers = () => {},
   onLeaveCommunity = () => {},
   onJoinCommunity = () => {},
 } = {}) {
@@ -20,14 +18,17 @@ export default function CommunityHeader({
 
   return (
     <div className="is-flex is-flex-direction-column">
-      <div
-        className="is-flex community-header-wrapper"
-        style={{
-          backgroundImage: bannerImgUrl ? `url(${bannerImgUrl})` : 'none',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      />
+      <div className="is-flex flex-1 is-justify-content-center pt-2-tablet">
+        <div
+          className="is-flex community-header-wrapper"
+          style={{
+            backgroundImage: bannerImgUrl ? `url(${bannerImgUrl})` : 'none',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            maxWidth: '1300px',
+          }}
+        />
+      </div>
       <div className="is-flex section py-0">
         <div className="container">
           <div
@@ -104,17 +105,12 @@ export default function CommunityHeader({
                   : null}
               </div>
             </div>
-            <div className="column is-3 pb-0-mobile pt-2-mobile is-flex is-justify-content-end">
+            <div className="column is-3 pb-0-mobile pt-2-mobile is-flex is-justify-content-end is-justify-content-start-mobile">
               <JoinCommunityButton
                 communityId={id}
-                setTotalMembers={setTotalMembers}
                 onLeaveCommunity={onLeaveCommunity}
                 onJoinCommunity={onJoinCommunity}
-                classNames="small-text pb-0-mobile px-0-mobile"
-                extraStyles={notMobile ? { maxWidth: '132px' } : {}}
-                buttonClassNames="py-5 py-4-mobile"
-                borderRadious="rounded-xl"
-                containerAlignment="is-align-items-flex-start"
+                size="large"
               />
             </div>
           </div>

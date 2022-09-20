@@ -1,50 +1,40 @@
-import { useErrorHandlerContext } from '../contexts/ErrorHandler';
-import { getCompositeSigs } from 'utils';
+import { useErrorHandlerContext } from 'contexts/ErrorHandler';
+import { useWebContext } from 'contexts/Web3';
+import { UPDATE_MEMBERSHIP_TX } from 'const';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+  addUserToCommunityUserApiRep,
+  deleteCommunityMemberApiReq,
+} from 'api/communityUsers';
 
 export default function useJoinCommunity() {
   const queryClient = useQueryClient();
   const { notifyError } = useErrorHandlerContext();
+  const { signMessageByWalletProvider } = useWebContext();
 
-  const { mutateAsync: createCommunityUserMutation } = useMutation(
-    async ({ communityId, user, injectedProvider }) => {
+  const { mutate: createCommunityUserMutation } = useMutation(
+    async ({ communityId, user }) => {
       const { addr } = user;
-      const { currentUser } = injectedProvider;
-      const { signUserMessage } = currentUser();
-      const timestamp = Date.now().toString();
-      const hexTime = Buffer.from(timestamp).toString('hex');
-      const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}/users`;
-      const _compositeSignatures = await signUserMessage(hexTime);
-      if (_compositeSignatures.indexOf('Declined:') > -1) {
-        return { success: false };
-      }
-      const compositeSignatures = getCompositeSigs(_compositeSignatures);
-      if (!compositeSignatures) {
-        return { error: 'No valid user signature found.' };
+      const hexTime = Buffer.from(Date.now().toString()).toString('hex');
+      const [compositeSignatures, voucher] = await signMessageByWalletProvider(
+        user?.services[0].uid,
+        UPDATE_MEMBERSHIP_TX,
+        hexTime
+      );
+
+      if (!compositeSignatures && !voucher) {
+        throw new Error('No valid user signature found.');
       }
 
-      try {
-        const fetchOptions = {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            communityId: parseInt(communityId),
-            addr,
-            userType: 'member',
-            signingAddr: addr,
-            timestamp,
-            compositeSignatures,
-          }),
-        };
-
-        const response = await fetch(url, fetchOptions);
-        const json = await response.json();
-        return { success: true, data: json };
-      } catch (err) {
-        notifyError(err, url);
-      }
+      return addUserToCommunityUserApiRep({
+        communityId,
+        addr,
+        timestamp: hexTime,
+        compositeSignatures,
+        voucher,
+        userType: 'member',
+        signingAddr: addr,
+      });
     },
     {
       onSuccess: async (_, variables) => {
@@ -58,48 +48,35 @@ export default function useJoinCommunity() {
           addr,
         ]);
       },
+      onError: (error) => {
+        notifyError(error);
+      },
     }
   );
 
-  const { mutateAsync: deleteUserFromCommunityMutation } = useMutation(
-    async ({ communityId, user, injectedProvider }) => {
+  const { mutate: deleteUserFromCommunityMutation } = useMutation(
+    async ({ communityId, user }) => {
       const { addr } = user;
-      const { currentUser } = injectedProvider;
-      const { signUserMessage } = currentUser();
-      const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/${communityId}/users/${addr}/member`;
-      const timestamp = Date.now().toString();
-      const hexTime = Buffer.from(timestamp).toString('hex');
-      const _compositeSignatures = await signUserMessage(hexTime);
-      if (_compositeSignatures.indexOf('Declined:') > -1) {
-        return { success: false };
-      }
-      const compositeSignatures = getCompositeSigs(_compositeSignatures);
-      if (!compositeSignatures) {
-        return { error: 'No valid user signature found.' };
+      const hexTime = Buffer.from(Date.now().toString()).toString('hex');
+
+      const [compositeSignatures, voucher] = await signMessageByWalletProvider(
+        user?.services[0].uid,
+        UPDATE_MEMBERSHIP_TX,
+        hexTime
+      );
+
+      if (!compositeSignatures && !voucher) {
+        throw new Error('No valid user signature found.');
       }
 
-      try {
-        const fetchOptions = {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            communityId: parseInt(communityId),
-            addr,
-            userType: 'member',
-            signingAddr: addr,
-            timestamp,
-            compositeSignatures,
-          }),
-        };
-
-        const response = await fetch(url, fetchOptions);
-        const json = await response.json();
-        return { success: true, data: json };
-      } catch (err) {
-        notifyError(err, url);
-      }
+      return deleteCommunityMemberApiReq({
+        communityId,
+        addr,
+        timestamp: hexTime,
+        compositeSignatures,
+        voucher,
+        signingAddr: addr,
+      });
     },
     {
       onSuccess: async (_, variables) => {
@@ -113,19 +90,16 @@ export default function useJoinCommunity() {
           addr,
         ]);
       },
+      onError: (error) => {
+        notifyError(error);
+      },
     }
   );
-
-  const createCommunityUser = async (props) => {
-    return createCommunityUserMutation(props);
-  };
-
-  const deleteUserFromCommunity = async (props) => {
-    return deleteUserFromCommunityMutation(props);
-  };
 
   return {
-    createCommunityUser,
-    deleteUserFromCommunity,
+    // adds user as member
+    createCommunityUser: createCommunityUserMutation,
+    // removes all roles from user
+    deleteUserFromCommunity: deleteUserFromCommunityMutation,
   };
 }

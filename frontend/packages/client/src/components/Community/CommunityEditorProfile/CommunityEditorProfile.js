@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { ActionButton } from 'components';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -37,8 +37,8 @@ export default function CommunityEditorProfile({
         communityName: name,
         communityDescription: body,
         communityCategory: category,
-        logo: logo ? { imageUrl: logo } : undefined,
-        banner: banner ? { imageUrl: banner } : undefined,
+        logo: logo ? { imageUrl: logo, cropped: true } : undefined,
+        banner: banner ? { imageUrl: banner, cropped: true } : undefined,
         communityTerms: terms,
       },
       resolver: yupResolver(ProfileSchema),
@@ -47,23 +47,12 @@ export default function CommunityEditorProfile({
   const logoField = useWatch({ control, name: 'logo' });
   const bannerField = useWatch({ control, name: 'banner' });
 
-  const { errors, isSubmitting, isSubmitSuccessful, isDirty, dirtyFields } =
-    formState;
+  const { errors, isSubmitting, isDirty, dirtyFields } = formState;
 
   // reset form after update with new props passed updated
   useEffect(() => {
-    if (isSubmitSuccessful) {
-      reset({
-        ...initialValues,
-        communityName: name,
-        communityDescription: body,
-        communityCategory: category,
-        logo: logo ? { imageUrl: logo } : undefined,
-        banner: banner ? { imageUrl: banner } : undefined,
-        communityTerms: terms,
-      });
-    }
-  }, [isSubmitSuccessful, name, body, category, logo, banner, terms, reset]);
+    reset({}, { keepValues: true, keepDirty: false });
+  }, [name, body, category, logo, banner, terms, reset]);
 
   const onSubmit = async (data) => {
     const fieldsToUpdate = Object.keys(dirtyFields);
@@ -103,7 +92,7 @@ export default function CommunityEditorProfile({
       submitComponent={
         <ActionButton
           type="submit"
-          label="save"
+          label="Save"
           enabled={isDirty && !isSubmitting}
           loading={isSubmitting}
           classNames="vote-button transition-all has-background-yellow mt-5"

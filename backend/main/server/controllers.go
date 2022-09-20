@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -53,8 +54,13 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if *proposal.Computed_status == "closed" {
-		models.AddWinningVoteAchievement(a.DB, votes, results, proposal.Community_id)
+	if *proposal.Computed_status == "closed" && !proposal.Achievements_done {
+		if err := models.AddWinningVoteAchievement(a.DB, votes, results); err != nil {
+			errMsg := "Error calculating winning votes"
+			log.Error().Err(err).Msg(errMsg)
+			respondWithError(w, http.StatusInternalServerError, errors.New(errMsg).Error())
+		}
+
 	}
 
 	respondWithJSON(w, http.StatusOK, results)
@@ -127,9 +133,9 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	vote, err := helpers.createVote(r, proposal)
+	vote, e := helpers.createVote(r, proposal)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		respondWithError(w, e.status, e.err.Error())
 		return
 	}
 
@@ -174,9 +180,9 @@ func (a *App) getProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c, httpStatus, err := helpers.fetchCommunity(p.Community_id)
-	if err != nil {
-		respondWithError(w, httpStatus, err.Error())
+	c, e := helpers.fetchCommunity(p.Community_id)
+	if e.err != nil {
+		respondWithError(w, e.status, e.err.Error())
 		return
 	}
 
@@ -210,9 +216,9 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	proposal, httpStatus, err := helpers.createProposal(communityId, p)
-	if err != nil {
-		respondWithError(w, httpStatus, err.Error())
+	proposal, e := helpers.createProposal(p)
+	if e.err != nil {
+		respondWithError(w, e.status, e.err.Error())
 		return
 	}
 
@@ -240,10 +246,25 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := helpers.validateUserWithRole(payload.Signing_addr, payload.Timestamp, payload.Composite_signatures, p.Community_id, "author"); err != nil {
-		log.Error().Err(err)
-		respondWithError(w, http.StatusForbidden, err.Error())
-		return
+	if payload.Voucher != nil {
+		if err := helpers.validateUserWithRoleViaVoucher(
+			payload.Signing_addr,
+			payload.Voucher,
+			p.Community_id,
+			"author"); err != nil {
+			respondWithError(w, http.StatusForbidden, err.Error())
+			return
+		}
+	} else {
+		if err := helpers.validateUserWithRole(
+			payload.Signing_addr,
+			payload.Timestamp,
+			payload.Composite_signatures,
+			p.Community_id,
+			"author"); err != nil {
+			respondWithError(w, http.StatusForbidden, err.Error())
+			return
+		}
 	}
 
 	p.Status = &payload.Status
@@ -262,7 +283,6 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 }
 
 // Communities
-
 func (a *App) getCommunities(w http.ResponseWriter, r *http.Request) {
 	pageParams := getPageParams(*r, 25)
 
@@ -278,18 +298,28 @@ func (a *App) getCommunities(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, response)
 }
 
+func (a *App) searchCommunities(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	results, err := helpers.searchCommunities(vars["query"])
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+	}
+
+	respondWithJSON(w, http.StatusOK, results)
+}
+
 func (a *App) getCommunity(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
-
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "Invalid Community ID.")
 		return
 	}
 
-	c, httpStatus, err := helpers.fetchCommunity(id)
-	if err != nil {
-		respondWithError(w, httpStatus, err.Error())
+	c, e := helpers.fetchCommunity(id)
+	if e.err != nil {
+		fmt.Printf("err: %v", err)
+		respondWithError(w, e.status, e.err.Error())
 		return
 	}
 
@@ -321,11 +351,13 @@ func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//Validate Contract Thresholds
-	err = validateContractThreshold(*payload.Strategies)
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, err.Error())
-		return
+	//Validate Strategies & Proposal Thresholds
+	if payload.Strategies != nil {
+		err = validateContractThreshold(*payload.Strategies)
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, err.Error())
+			return
+		}
 	}
 
 	c, httpStatus, err := helpers.createCommunity(payload)
@@ -360,9 +392,9 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	c, httpStatus, err := helpers.updateCommunity(id, payload)
-	if err != nil {
-		respondWithError(w, httpStatus, err.Error())
+	c, e := helpers.updateCommunity(id, payload)
+	if e.err != nil {
+		respondWithError(w, e.status, e.err.Error())
 		return
 	}
 
@@ -383,6 +415,14 @@ func validateConractThreshold(s []models.Strategy) error {
 // Voting Strategies
 func (a *App) getVotingStrategies(w http.ResponseWriter, r *http.Request) {
 	vs, err := models.GetVotingStrategies(a.DB)
+
+	// Add custom scripts for the custom-script strategy
+	for _, strategy := range vs {
+		if strategy.Key == "custom-script" {
+			strategy.Scripts = customScripts
+		}
+	}
+
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -576,6 +616,27 @@ func (a *App) getLatestSnapshot(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, snapshot)
 }
 
+func (a *App) addFungibleToken(w http.ResponseWriter, r *http.Request) {
+	payload := struct {
+		Addr string `json:"addr" validate:"required"`
+		Name string `json:"name" validate:"required"`
+		Path string `json:"path" validate:"required"`
+	}{}
+
+	if err := validatePayload(r.Body, &payload); err != nil {
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err := a.SnapshotClient.AddFungibleToken(payload.Addr, payload.Name, payload.Path)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, "OK")
+}
+
 ///////////
 // Users //
 ///////////
@@ -752,8 +813,9 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 func validatePayload(body io.ReadCloser, data interface{}) error {
 	decoder := json.NewDecoder(body)
 	if err := decoder.Decode(&data); err != nil {
-		log.Error().Err(err)
-		return errors.New("Invalid request payload.")
+		errMsg := "Invalid request payload."
+		log.Error().Err(err).Msg(errMsg)
+		return errors.New(errMsg)
 	}
 
 	defer body.Close()

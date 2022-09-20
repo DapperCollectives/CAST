@@ -21,6 +21,7 @@ env:
   backend_api: ${{ secrets.BACKEND_API }}
   tx_options: ${{ secrets.TX_OPTIONS }}
   github_token: ${{ secrets.GH_TOKEN }}
+  hotjar_site_id: ${{ secrets.HOTJAR_PROD_ID }}
 
 jobs:
 
@@ -68,7 +69,7 @@ jobs:
     - name: Build Docker image from release
       id: docker-from-release
       run: |
-        export TAG=$(curl -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ env.github_token }}" https://api.github.com/repos/DapperCollectives/CAST/releases/latest | jq -r '.tag_name')
+        export TAG=$(curl -H "Accept: application/vnd.github+json" https://api.github.com/repos/DapperCollectives/CAST/releases/latest | jq -r '.tag_name')
         cd backend && docker build . -t bruddev/cast-backend:$TAG && docker push bruddev/cast-backend:$TAG
 
 ## ARGO FROM HERE    
@@ -95,7 +96,7 @@ jobs:
       run: |
         curl -fL https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v4.5.5/kustomize_v4.5.5_linux_amd64.tar.gz| tar xz && \
         chmod +x kustomize
-        export TAG=$(curl -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ env.github_token }}" https://api.github.com/repos/DapperCollectives/CAST/releases/latest | jq -r '.tag_name')
+        export TAG=$(curl -H "Accept: application/vnd.github+json" https://api.github.com/repos/DapperCollectives/CAST/releases/latest | jq -r '.tag_name')
         cd ./argo/voting-tool-stage-prod/backend/environments/prod && kustomize edit set image bruddev/cast-backend:$TAG
         git config --global user.email "brunkins@brudfyi.com"
         git config --global user.name "Brunkins" 
@@ -125,8 +126,8 @@ jobs:
     - name: Build Docker image from release #TEST THIS
       id: docker-from-release
       run: |
-        export TAG=$(curl -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ env.github_token }}" https://api.github.com/repos/DapperCollectives/CAST/releases/latest | jq -r '.tag_name')
-        cd frontend && docker build . -t bruddev/cast-frontend:$TAG && docker push bruddev/cast-frontend:$TAG
+        export TAG=$(curl -H "Accept: application/vnd.github+json" https://api.github.com/repos/DapperCollectives/CAST/releases/latest | jq -r '.tag_name')
+        cd frontend && sed -i -e 's/REPLACE_HOTJAR_SITE_ID/${{ env.hotjar_site_id }}/g' Dockerfile && docker build . -t bruddev/cast-frontend:$TAG && docker push bruddev/cast-frontend:$TAG
 
 ## ARGO FROM HERE
 
@@ -152,7 +153,7 @@ jobs:
       run: |
         curl -fL https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize/v4.5.5/kustomize_v4.5.5_linux_amd64.tar.gz| tar xz && \
         chmod +x kustomize
-        export TAG=$(curl -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ env.github_token }}" https://api.github.com/repos/DapperCollectives/CAST/releases/latest | jq -r '.tag_name')
+        export TAG=$(curl -H "Accept: application/vnd.github+json" https://api.github.com/repos/DapperCollectives/CAST/releases/latest | jq -r '.tag_name')
         cd ./argo/voting-tool-stage-prod/frontend/environments/prod && kustomize edit set image bruddev/cast-frontend:$TAG
         git config --global user.email "brunkins@brudfyi.com"
         git config --global user.name "Brunkins" 

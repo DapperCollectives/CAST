@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useCommunityProposalsWithVotes, useMediaQuery } from '../hooks';
+import { useCommunityProposalsWithVotes, useMediaQuery } from 'hooks';
 import { FilterValues } from 'const';
 import CommunityProposalList from './CommunityProposalList';
 import DropDown from './Dropdown';
@@ -70,7 +70,7 @@ export default function CommunityProposals({ communityId = 1, admins } = {}) {
             <div className="column p-0 mt-2 pl-2">
               <Link to={`/community/${communityId}/proposal/create`}>
                 <div
-                  className="button rounded-sm is-uppercase is-flex small-text has-text-white has-background-black"
+                  className="button rounded-sm  is-flex small-text has-text-white has-background-black"
                   style={{ minHeight: '40px' }}
                 >
                   Create
@@ -85,7 +85,7 @@ export default function CommunityProposals({ communityId = 1, admins } = {}) {
             <div className="column p-0 is-10">
               <Link to={`/community/${communityId}/proposal/create`}>
                 <div
-                  className="button is-fullwidth rounded-sm is-uppercase is-flex small-text has-text-white has-background-black"
+                  className="button is-fullwidth rounded-sm is-flex small-text has-text-white has-background-black"
                   style={{ minHeight: '40px' }}
                 >
                   Create Proposal

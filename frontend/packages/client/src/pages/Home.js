@@ -1,9 +1,19 @@
-import React from 'react';
+import { useEffect } from 'react';
 import { useWebContext } from 'contexts/Web3';
-import { FadeIn, HomeFooter, HomeHeader, Loader } from 'components';
+import {
+  FadeIn,
+  HomeFooter,
+  HomeHeader,
+  Loader,
+  TooltipMessage,
+} from 'components';
 import CommunitiesPresenter from 'components/Community/CommunitiesPresenter';
-import useFeaturedCommunities from 'hooks/useFeaturedCommunities';
-import useUserCommunities from 'hooks/useUserCommunities';
+import {
+  useBrowserName,
+  useFeaturedCommunities,
+  useLocalStorage,
+  useUserCommunities,
+} from 'hooks';
 import classnames from 'classnames';
 
 export default function HomePage() {
@@ -39,30 +49,56 @@ export default function HomePage() {
     'pt-6-mobile pt-6-tablet pt-9-desktop': isMyCommunitiesVisible,
   });
 
+  const browserName = useBrowserName();
+  const [showToolTip, setValue] = useLocalStorage('dw-safary-tooltip', null);
+
+  useEffect(() => {
+    const isSafari = 'Apple Safari' === browserName;
+    if (isSafari && showToolTip === null) {
+      setValue(true);
+    }
+  }, [browserName, setValue, showToolTip]);
+
+  // if tooltips is present this will make paddin-top smaller
+  const classNames = classnames('section', {
+    'section-small': showToolTip,
+  });
+
   return (
-    <section className="section">
+    <>
+      {showToolTip && (
+        <TooltipMessage
+          className="my-6"
+          onClose={() => {
+            setValue(false);
+          }}
+        />
+      )}
       <HomeHeader />
-      {(loading || loadingFeaturedCommunities) && (
-        <div style={{ height: '50vh' }}>
-          <Loader fullHeight />
-        </div>
-      )}
-      {!(loading || loadingFeaturedCommunities) && (
-        <FadeIn>
-          {isMyCommunitiesVisible && (
+      <section className={classNames}>
+        {(loading || loadingFeaturedCommunities) && (
+          <div style={{ height: '50vh' }}>
+            <Loader fullHeight />
+          </div>
+        )}
+        {!(loading || loadingFeaturedCommunities) && (
+          <FadeIn>
+            {isMyCommunitiesVisible && (
+              <CommunitiesPresenter
+                title="My Communities"
+                communities={myUserCommunities}
+                hideJoin
+              />
+            )}
             <CommunitiesPresenter
-              title="My Communities"
-              communities={myUserCommunities}
+              classNames={classNamesFeatCommunities}
+              title="Featured Communities"
+              communities={featuredCommunities}
             />
-          )}
-          <CommunitiesPresenter
-            classNames={classNamesFeatCommunities}
-            title="Featured Communities"
-            communities={featuredCommunities}
-          />
-        </FadeIn>
-      )}
-      <HomeFooter />
-    </section>
+          </FadeIn>
+        )}
+        <HomeFooter />
+      </section>
+    </>
   );
 }

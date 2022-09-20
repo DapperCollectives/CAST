@@ -1,4 +1,3 @@
-import React from 'react';
 import Loader from 'components/Loader';
 import classnames from 'classnames';
 
@@ -9,19 +8,22 @@ export default function ActionButton({
   label = '',
   classNames,
   type,
+  roundedClass = 'rounded-sm',
+  height = 48,
 } = {}) {
   const clNames = classnames(
-    'button is-flex is-align-items-centered rounded-sm is-uppercase',
+    'button is-flex is-align-items-centered ',
     'm-0 p-0',
     'has-background-yellow',
     { 'is-enabled': enabled },
     { 'is-disabled': !enabled },
+    { [roundedClass]: !!roundedClass },
     { [classNames]: !!classNames }
   );
   return (
     <button
       type={type}
-      style={{ height: 48, width: '100%' }}
+      style={{ height, width: '100%' }}
       className={clNames}
       onClick={!enabled ? () => {} : onClick}
     >

@@ -1,6 +1,6 @@
-import React from 'react';
 import { WrapperResponsive } from 'components';
 import Checkbox from 'components/common/Checkbox';
+import Dropdown from 'components/common/Dropdown';
 import Form from 'components/common/Form';
 import Input from 'components/common/Input';
 
@@ -10,6 +10,7 @@ export default function ThresholdForm({
   submitComponent = null,
   errors = [],
   register = () => {},
+  control = () => {},
   isSubmitting = false,
 } = {}) {
   return (
@@ -32,6 +33,27 @@ export default function ThresholdForm({
             </p>
           </div>
         </div>
+        <Dropdown
+          label="Contract Type"
+          name="contractType"
+          margin="mt-4"
+          options={[
+            {
+              label: 'Default',
+              value: '',
+            },
+            {
+              label: 'NFT',
+              value: 'nft',
+            },
+            {
+              label: 'Fungible Token',
+              value: 'ft',
+            },
+          ]}
+          disabled={isSubmitting}
+          control={control}
+        />
         <Input
           placeholder="Contract Address"
           register={register}

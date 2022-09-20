@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Loader } from 'components';
-import { Bin, Upload } from 'components/Svg';
+import { Svg } from '@cast/shared-components';
+import { FadeIn, Loader } from 'components';
 import { useFileUploader } from 'hooks';
 import { MAX_FILE_SIZE } from 'const';
 
@@ -11,6 +11,13 @@ const IMAGE_STATUS = {
   uploaded: 'uploaded',
   deleted: 'deleted',
   toBeDeleted: 'to-be-deleted',
+};
+
+const initialState = {
+  imageUrl: null,
+  uploadStatus: null,
+  file: null,
+  text: '',
 };
 
 const UploadArea = ({ getRootProps, getInputProps, errorMessage }) => {
@@ -29,7 +36,7 @@ const UploadArea = ({ getRootProps, getInputProps, errorMessage }) => {
         {...getRootProps()}
       >
         <div className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center">
-          <Upload width="36" height="30" />
+          <Svg name="Upload" width="36" height="30" />
           <span className="smaller-text pt-3 pb-1">Drag and drop here </span>
           <span className="smaller-text py-1"> or </span>
           <span className="smaller-text py-1">
@@ -40,40 +47,35 @@ const UploadArea = ({ getRootProps, getInputProps, errorMessage }) => {
         </div>
       </div>
       {errorMessage && (
-        <p className="small-text pt-2 has-text-red">* {errorMessage}</p>
+        <p className="small-text pt-2 has-text-danger">* {errorMessage}</p>
       )}
     </>
   );
-};
-
-// initial state when no image has been uploaded
-const initialState = {
-  imageUrl: null,
-  uploadStatus: null,
-  file: null,
-  text: '',
 };
 
 export default function ImageChoiceUploader({
   onImageUpdate,
   image: imageParam,
   letterLabel,
+  error: errorParam,
 } = {}) {
   const [errorMessage, setErrorMessage] = useState(null);
   // existing image and component receives props
+
   const { imageUrl, text } = imageParam;
-  const existingImage = {
-    imageUrl,
-    uploadStatus: IMAGE_STATUS.uploaded,
+
+  const [image, setImage] = useState({
+    imageUrl: imageUrl === '' ? null : imageUrl,
+    uploadStatus: imageUrl === '' ? null : IMAGE_STATUS.uploaded,
     file: null,
     text,
-  };
+  });
 
-  const [image, setImage] = useState(
-    imageParam.imageUrl === '' ? initialState : existingImage
-  );
-
-  const { uploadFile, loading, error } = useFileUploader({
+  const {
+    uploadFile,
+    isLoading: loading,
+    error,
+  } = useFileUploader({
     useModalNotifications: false,
   });
 
@@ -177,16 +179,28 @@ export default function ImageChoiceUploader({
     onDrop,
     maxFiles: 1,
     accept: 'image/jpeg,image/png,image/gif',
+    useFsAccessApi: false,
   });
 
   return (
     <div>
       {!image.imageUrl && (
-        <UploadArea
-          getRootProps={getRootProps}
-          getInputProps={getInputProps}
-          errorMessage={errorMessage}
-        />
+        <>
+          <UploadArea
+            getRootProps={getRootProps}
+            getInputProps={getInputProps}
+            errorMessage={errorMessage}
+          />
+          {errorParam?.choiceImgUrl?.message && (
+            <FadeIn>
+              <div className="pl-1 pt-2">
+                <p className="smaller-text has-text-danger">
+                  {errorParam.choiceImgUrl.message}
+                </p>
+              </div>
+            </FadeIn>
+          )}
+        </>
       )}
       {(image?.uploadStatus === IMAGE_STATUS.notStarted ||
         image?.uploadStatus === IMAGE_STATUS.uploading) && (
@@ -233,7 +247,7 @@ export default function ImageChoiceUploader({
             }}
             onClick={onDeleteImage}
           >
-            <Bin />
+            <Svg name="Bin" />
           </div>
         </div>
       )}
@@ -252,6 +266,15 @@ export default function ImageChoiceUploader({
         }
         style={{ width: '100%' }}
       />
+      {errorParam?.value?.message && (
+        <FadeIn>
+          <div className="pl-1 pt-2">
+            <p className="smaller-text has-text-danger">
+              {errorParam.value.message}
+            </p>
+          </div>
+        </FadeIn>
+      )}
     </div>
   );
 }

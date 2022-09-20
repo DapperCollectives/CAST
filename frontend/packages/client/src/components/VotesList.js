@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
+import { Fragment, useEffect } from 'react';
 import Blockies from 'react-blockies';
+import { Svg } from '@cast/shared-components';
 import { useProposalVotes } from 'hooks';
 import millify from 'millify';
-import { AngleDown, AngleUp } from './Svg';
 
 const Core = () => (
   <div className="subtitle small-text p-2 rounded-sm has-background-white-ter has-text-black is-family-monospace">
@@ -18,7 +18,7 @@ const ShowMoreOrLess = ({ showMore, showLess, enableMore, enableLess }) => (
         className="button is-white has-text-grey small-text"
         onClick={showLess}
       >
-        <AngleUp />
+        <Svg name="AngleUp" />
         View less
       </button>
     )}
@@ -27,7 +27,7 @@ const ShowMoreOrLess = ({ showMore, showLess, enableMore, enableLess }) => (
         className="button is-white has-text-grey small-text"
         onClick={showMore}
       >
-        View more <AngleDown />
+        View more <Svg name="AngleDown" />
       </button>
     )}
   </>
@@ -35,10 +35,9 @@ const ShowMoreOrLess = ({ showMore, showLess, enableMore, enableLess }) => (
 
 const VotesList = ({ proposalId, castVote }) => {
   const {
-    getProposalVotes,
-    fetchMore,
+    fetchNextPage,
     resetResults,
-    loading: loadingVotes,
+    isLoading: loadingVotes,
     data: votes,
     pagination: { next, totalRecords: totalVotes },
   } = useProposalVotes({ proposalId, count: 10 });
@@ -49,10 +48,9 @@ const VotesList = ({ proposalId, castVote }) => {
     if (castVote) {
       (async () => {
         resetResults();
-        await getProposalVotes();
       })();
     }
-  }, [castVote, getProposalVotes, resetResults]);
+  }, [castVote, resetResults]);
 
   const scrollToBottom = () => {
     window.scrollTo({
@@ -65,13 +63,12 @@ const VotesList = ({ proposalId, castVote }) => {
 
   const showMore = async () => {
     if (next > 0) {
-      await fetchMore();
+      await fetchNextPage();
       scrollToBottom();
     }
   };
   const showLess = async () => {
-    resetResults();
-    await getProposalVotes();
+    await resetResults();
     scrollToBottom();
   };
 
@@ -97,7 +94,7 @@ const VotesList = ({ proposalId, castVote }) => {
           {votes &&
             votes.map((vote, i) => {
               return (
-                <React.Fragment key={`column-${i}`}>
+                <Fragment key={`column-${i}`}>
                   <div
                     className={`column is-8 py-1 px-0 is-flex is-align-items-center is-justify-content-start`}
                   >
@@ -121,7 +118,7 @@ const VotesList = ({ proposalId, castVote }) => {
                       <hr />
                     </div>
                   )}
-                </React.Fragment>
+                </Fragment>
               );
             })}
           {loadingVotes && next > 0 && (

@@ -8,9 +8,9 @@ export default function useUserRoleOnCommunity({
 } = {}) {
   const {
     data: communityUser,
-    loading,
+    isLoading,
     pagination,
-    fetchMore,
+    fetchNextPage,
   } = useUserCommunities({
     addr,
     count: 100,
@@ -18,12 +18,12 @@ export default function useUserRoleOnCommunity({
 
   useEffect(() => {
     async function getMore() {
-      await fetchMore();
+      await fetchNextPage();
     }
     if (pagination.next > 0) {
       getMore();
     }
-  }, [fetchMore, pagination.next]);
+  }, [fetchNextPage, pagination.next]);
 
   if (
     addr === null ||
@@ -36,7 +36,7 @@ export default function useUserRoleOnCommunity({
     return false;
   }
 
-  if (loading || roles.length === 0 || !communityId) {
+  if (isLoading || roles.length === 0 || !communityId) {
     return null;
   }
   if (pagination.next > 0) {

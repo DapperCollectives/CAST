@@ -1,4 +1,3 @@
-import React from 'react';
 import Dropdown from 'components/common/Dropdown';
 import Input from 'components/common/Input';
 import TextArea from 'components/common/TextArea';
@@ -31,11 +30,11 @@ export default function FormFields({
         classNames="text-area rounded-sm border-light p-3 column is-full mt-4"
       />
       <Dropdown
-        label="Category"
+        label="Community Type"
         name="communityCategory"
         margin="mt-4"
         options={(communityCategories ?? []).map((cat) => ({
-          label: cat.description,
+          label: cat.name,
           value: cat.key,
         }))}
         disabled={isSubmitting}

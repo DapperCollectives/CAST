@@ -1,5 +1,5 @@
 /* global plausible */
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useModalContext } from 'contexts/NotificationModal';
@@ -10,15 +10,14 @@ import {
   PropCreateStepThree,
   PropCreateStepTwo,
 } from 'components/ProposalCreate';
-import { useProposal } from 'hooks';
-import { customDraftToHTML, parseDateToServer } from 'utils';
+import { useProposalCreateMutation } from 'hooks';
+import { isStartTimeValid, parseDateToServer } from 'utils';
 
 export default function ProposalCreatePage() {
-  const { createProposal, data, loading, error } = useProposal();
+  const { createProposal, data, loading, error } = useProposalCreateMutation();
   const [modalError, setModalError] = useState(null);
   const {
     user: { addr: creatorAddr },
-    injectedProvider,
   } = useWebContext();
   const history = useHistory();
 
@@ -70,11 +69,21 @@ export default function ProposalCreatePage() {
       });
       return;
     }
-    const name = stepsData[0].title;
 
-    const currentContent = stepsData[0]?.description?.getCurrentContent();
+    const { strategy, minBalance, maxWeight, name, body } = stepsData[0];
 
-    const body = customDraftToHTML(currentContent);
+    const hasValidStartTime = isStartTimeValid(
+      stepsData[1].startTime,
+      stepsData[1].startDate
+    );
+
+    if (!hasValidStartTime) {
+      notifyError({
+        status: 'Invalid start time for proposal',
+        statusText: 'Please update start time on Set Date & Time step',
+      });
+      return;
+    }
 
     const startTime = parseDateToServer(
       stepsData[1].startDate,
@@ -91,8 +100,6 @@ export default function ProposalCreatePage() {
       choiceImgUrl: c?.choiceImgUrl ?? null,
     }));
 
-    const { strategy } = stepsData[0];
-
     const proposalData = {
       name,
       body,
@@ -100,12 +107,17 @@ export default function ProposalCreatePage() {
       creatorAddr,
       endTime,
       startTime,
-      strategy: strategy?.value,
+      strategy: strategy,
+      ...(minBalance !== ''
+        ? { minBalance: parseFloat(minBalance) }
+        : undefined),
+      ...(maxWeight !== '' ? { maxWeight: parseFloat(maxWeight) } : undefined),
       status: 'published',
       communityId,
+      achievementsDone: false,
     };
 
-    await createProposal(injectedProvider, proposalData);
+    await createProposal(proposalData);
     plausible('Proposal Created');
   };
 
@@ -117,24 +129,29 @@ export default function ProposalCreatePage() {
     blockNavigationOut: true && !data,
     blockNavigationText:
       'Proposal creation is not complete yet, are you sure you want to leave?',
+    passNextToComp: true,
+    passSubmitToComp: true,
+    showActionButtonLeftPannel: true,
     steps: [
       {
         label: 'Draft Proposal',
         description:
           'Some description of what you can write here that is useful.',
         component: <PropCreateStepOne />,
+        useHookForms: true,
       },
       {
         label: 'Set Date & Time',
         description:
           'Some description of what you can write here that is useful.',
-        component: <PropCreateStepTwo stepData={{ test: 'ok' }} />,
+        component: <PropCreateStepTwo />,
+        useHookForms: true,
       },
       {
         label: 'Preview Proposal',
         description:
           'Some description of what you can write here that is useful.',
-        component: <PropCreateStepThree stepData={{ test: 'ok' }} />,
+        component: <PropCreateStepThree />,
       },
     ],
   };

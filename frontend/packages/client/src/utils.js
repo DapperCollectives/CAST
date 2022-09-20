@@ -1,5 +1,7 @@
+import { HAS_DELAY_ON_START_TIME } from 'const';
 import { formatDistance } from 'date-fns';
 import { stateToHTML } from 'draft-js-export-html';
+import { stateFromHTML } from 'draft-js-import-html';
 import { customAlphabet } from 'nanoid';
 
 const nanoid = customAlphabet('1234567890abcdef', 10);
@@ -180,6 +182,16 @@ export const customDraftToHTML = (content) => {
   return stateToHTML(content, options);
 };
 
+export const customHTMLtoDraft = (html) => {
+  const options = {
+    customBlockFn: (element) => {
+      if (element.tagName === 'P' && element.className === 'image-caption') {
+        return { type: 'image-caption-block' };
+      }
+    },
+  };
+  return stateFromHTML(html, options);
+};
 export const isValidAddress = (addr) => /0[x,X][a-zA-Z0-9]{16}$/gim.test(addr);
 
 export const wait = async (milliSeconds = 5000) =>
@@ -198,7 +210,7 @@ export const kebabToString = (str = '') => {
   return updated.charAt(0).toUpperCase() + updated.slice(1);
 };
 
-export const getPaginationInfo = (pages) => {
+export const getPaginationFromPages = (pages) => {
   if (!pages) {
     return [];
   }
@@ -211,5 +223,103 @@ export const getPaginationInfo = (pages) => {
   ];
 };
 
+export const getPagination = (data, countParam) => {
+  const [start = 0, count = countParam, totalRecords = 0, next = -1] =
+    data?.pageParam ?? getPaginationFromPages(data?.pages);
+  return {
+    count,
+    next,
+    start,
+    totalRecords,
+  };
+};
+
+export const getPlainData = (data) => {
+  return data?.pages?.reduce(
+    (prev, current) => (current.data ? [...prev, ...current.data] : prev),
+    []
+  );
+};
 export const validateLength = (string, MaxLength) =>
   string?.length <= MaxLength;
+
+// validates if date made of startTime and startDate is 1 hour ahead of time
+export const isStartTimeValid = (startTime, startDate) => {
+  const dateNow = new Date();
+
+  const startDateAndTime = new Date(startDate);
+
+  startDateAndTime.setHours(startTime.getHours(), startTime.getMinutes());
+
+  const dif = (startDateAndTime - dateNow) / (60 * 60 * 1000);
+
+  return HAS_DELAY_ON_START_TIME ? dif > 1 : true;
+};
+
+export const formatTime = (date) => {
+  let hours = date.getHours();
+  let minutes = date.getMinutes();
+  const ampm = hours >= 12 ? 'pm' : 'am';
+  hours = hours % 12;
+  hours = hours ? hours : 12; // the hour '0' should be '12'
+  minutes = minutes < 10 ? '0' + minutes : minutes;
+  return hours + ':' + minutes + ' ' + ampm;
+};
+
+export const setDefaultValue = (field, fallbackValue) => {
+  if (field === undefined || field === '') {
+    return fallbackValue;
+  }
+  return field;
+};
+
+export function truncateAddress(str, initial = 3, tail = 10) {
+  return (
+    str.substr(0, initial) +
+    '...' +
+    str.substr((tail - str.length) * -1, str.length)
+  );
+}
+
+export const getCroppedImg =
+  ({ dWidth, dHeight, fileName }) =>
+  (sourceImage, croppedAreaPixels) => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) {
+      return null;
+    }
+    canvas.width = dWidth;
+    canvas.height = dHeight;
+    ctx.drawImage(
+      sourceImage,
+      croppedAreaPixels.x,
+      croppedAreaPixels.y,
+      croppedAreaPixels.width,
+      croppedAreaPixels.height,
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+    try {
+      return new Promise((resolve) => {
+        canvas.toBlob((file) => {
+          const blobImageNoType = file;
+          //A Blob() is almost a File() - it's just missing the two properties below
+          blobImageNoType.lastModifiedDate = new Date();
+          blobImageNoType.name = fileName;
+          const blobAsFile = blobImageNoType;
+          resolve({
+            file: blobAsFile, //
+            imageUrl: URL.createObjectURL(blobAsFile),
+          });
+        }, 'image/jpeg');
+      });
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  };

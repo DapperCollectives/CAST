@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/hex"
 	"errors"
 	"flag"
 	"fmt"
@@ -17,8 +18,19 @@ import (
 	"github.com/thoas/go-funk"
 )
 
+var allowedFileTypes = []string{"image/jpg", "image/jpeg", "image/png", "image/gif"}
+
+const (
+	maxFileSize = 5 * 1024 * 1024 // 5MB
+)
+
 type Helpers struct {
 	A *App
+}
+
+type errorStatus struct {
+	err error
+	status int
 }
 
 func (h *Helpers) Initialize(app *App) {
@@ -95,8 +107,8 @@ func (h *Helpers) useStrategyFetchBalance(
 
 	balance, err := s.FetchBalance(emptyBalance, &p)
 	if err != nil {
-		log.Error().Err(err).Msgf("Error fetching balance for address %v.", v.Addr)
-		return models.VoteWithBalance{}, errors.New("Error fetching balance for address.")
+		log.Error().Err(err).Msgf("User does not have the required balance %v.", v.Addr)
+		return models.VoteWithBalance{}, errors.New("You do not have the required balance to vote")
 	}
 
 	vb := models.VoteWithBalance{
@@ -247,7 +259,6 @@ func (h *Helpers) processVotes(
 	var votesWithBalances []*models.VoteWithBalance
 
 	for _, vote := range votes {
-
 		proposal := models.Proposal{ID: vote.Proposal_id}
 		if err := proposal.GetProposalById(h.A.DB); err != nil {
 			switch err.Error() {
@@ -278,11 +289,11 @@ func (h *Helpers) processVotes(
 	return votesWithBalances, pageParams, nil
 }
 
-func (h *Helpers) createVote(r *http.Request, p models.Proposal) (*models.VoteWithBalance, error) {
+func (h *Helpers) createVote(r *http.Request, p models.Proposal) (*models.VoteWithBalance, errorStatus) {
 	var v models.Vote
 	if err := validatePayload(r.Body, &v); err != nil {
 		log.Error().Err(err).Msg("Invalid request payload.")
-		return nil, err
+		return nil, errorStatus { err: err, status: http.StatusBadRequest }
 	}
 
 	v.Proposal_id = p.ID
@@ -291,38 +302,38 @@ func (h *Helpers) createVote(r *http.Request, p models.Proposal) (*models.VoteWi
 	existingVote := models.Vote{Proposal_id: v.Proposal_id, Addr: v.Addr}
 	if err := existingVote.GetVote(h.A.DB); err == nil {
 		log.Error().Msgf("Address %s has already voted for proposal %d.", v.Addr, v.Proposal_id)
-		return nil, errors.New("Address has already voted for this proposal.")
+		return nil, errorStatus { err: errors.New("Address has already voted for this proposal."), status: http.StatusForbidden }
 	}
 
 	// check that proposal is live
 	if os.Getenv("APP_ENV") != "DEV" {
 		if !p.IsLive() {
 			err := errors.New("User cannot vote on inactive proposal.")
-			return nil, err
+			return nil, errorStatus { err: err, status: http.StatusForbidden }
 		}
 	}
 
 	if err := h.validateVote(p, v); err != nil {
-		return nil, err
+		return nil, errorStatus { err: err, status: http.StatusForbidden }
 	}
 
 	v.Proposal_id = p.ID
 
 	s := h.initStrategy(*p.Strategy)
 	if s == nil {
-		return nil, errors.New("Proposal strategy not found.")
+		return nil, errorStatus { err: errors.New("Proposal strategy not found."), status: http.StatusInternalServerError }
 	}
 
 	vb, err := h.useStrategyFetchBalance(v, p, s)
 	if err != nil {
-		return nil, err
+		return nil, errorStatus { err: err, status: http.StatusInternalServerError }
 	}
 
 	if err := h.insertVote(vb, p); err != nil {
-		return nil, err
+		return nil, errorStatus { err: err, status: http.StatusInternalServerError }
 	}
 
-	return &vb, nil
+	return &vb, errorStatus { err: nil, status: http.StatusOK }
 }
 
 func (h *Helpers) insertVote(v models.VoteWithBalance, p models.Proposal) error {
@@ -339,7 +350,11 @@ func (h *Helpers) insertVote(v models.VoteWithBalance, p models.Proposal) error 
 		return errors.New(msg)
 	}
 
-	v.Cid, err = h.pinJSONToIpfs(p)
+	// Include voucher in vote data when pinning
+	ipfsVote := map[string]interface{}{
+		"vote": v,
+	}
+	v.Cid, err = h.pinJSONToIpfs(ipfsVote)
 	if err != nil {
 		msg := fmt.Sprintf("Error pinning proposal to IPFS.")
 		log.Error().Err(err).Msg(msg)
@@ -363,91 +378,150 @@ func (h *Helpers) validateVote(p models.Proposal, v models.Vote) error {
 		return errors.New(msg)
 	}
 
-	// validate proper message format
-	//<proposalId>:<choice>:<timestamp>
-	if err := v.ValidateMessage(p); err != nil && v.TransactionId == "" {
-		log.Error().Err(err)
-		return err
-	}
 	// validate choice exists on proposal
 	if err := v.ValidateChoice(p); err != nil {
 		log.Error().Err(err)
 		return err
 	}
-	// validate user signature
-	if err := h.A.FlowAdapter.UserSignatureValidate(v.Addr, v.Message, v.Composite_signatures, v.TransactionId); err != nil {
-		return err
+
+	// If voucher is present
+	if v.Voucher != nil {
+		// Transaction Signature validation
+		voucher := v.Voucher
+		authorizer := voucher.Authorizers[0]
+
+		v.Composite_signatures = shared.GetUserCompositeSignatureFromVoucher(voucher)
+
+		// Validate authorizer
+		if authorizer != v.Addr || authorizer != (*v.Composite_signatures)[0].Addr {
+			err := errors.New("authorizer address must match voter address and envelope signer")
+			log.Error().Err(err)
+			return err
+		}
+
+		message := voucher.Arguments[0]["value"]
+
+		messageBytes, err := hex.DecodeString(message)
+		if err != nil {
+			log.Error().Err(err)
+			return err
+		}
+
+		// validate proper message format
+		//<proposalId>:<choice>:<timestamp>
+		if err := models.ValidateVoteMessage(string(messageBytes), p); err != nil {
+			log.Error().Err(err)
+			return err
+		}
+
+		// re-build message & composite signatures for validation
+		// set v.Message as the encoded message, rather than the colon(:) delimited message above.
+		// we can do this because we can always recover the tx arguments that make up the
+		// colon delimited message by decoding this rlp encoded message
+		v.Message = shared.EncodeMessageFromVoucher(voucher)
+
+		if err := h.validateTxSignature(v.Addr, v.Message, v.Composite_signatures); err != nil {
+			return err
+		}
+	} else {
+		// validate proper message format
+		// hex decode before validating
+		decodedMessage, _ := hex.DecodeString(v.Message)
+		if err := models.ValidateVoteMessage(string(decodedMessage), p); err != nil {
+			log.Error().Err(err)
+			return err
+		}
+		if err := h.validateUserSignature(v.Addr, v.Message, v.Composite_signatures); err != nil {
+			return err
+		}
 	}
-	// validate user signature
-	// if err := h.A.FlowAdapter.UserTransactionValidate(v.Addr, v.Message, v.Composite_signatures, v.TransactionId, h.A.TxOptionsAddresses, p.Choices); err != nil {
-	// 	respondWithError(w, http.StatusBadRequest, err.Error())
-	// 	return
-	// }
+
 	return nil
 }
 
-func (h *Helpers) fetchCommunity(id int) (models.Community, int, error) {
+func (h *Helpers) fetchCommunity(id int) (models.Community, errorStatus) {
 	community := models.Community{ID: id}
 
 	if err := community.GetCommunity(h.A.DB); err != nil {
 		log.Error().Err(err)
 		switch err.Error() {
 		case pgx.ErrNoRows.Error():
-			return models.Community{}, http.StatusNotFound, errors.New("Community not found.")
+			return models.Community{}, errorStatus { err: errors.New("Community not found."), status: http.StatusNotFound }
 		default:
-			return models.Community{}, http.StatusInternalServerError, err
+			return models.Community{}, errorStatus { err: err, status: http.StatusInternalServerError }
 		}
 	}
 
-	return community, http.StatusOK, nil
+	return community, errorStatus { err: nil, status: http.StatusOK }
 }
 
-func (h *Helpers) createProposal(communityId int, p models.Proposal) (models.Proposal, int, error) {
-	if err := h.validateUser(p.Creator_addr, p.Timestamp, p.Composite_signatures); err != nil {
-		return models.Proposal{}, http.StatusForbidden, err
+func (h *Helpers) searchCommunities(query string) (interface{}, error) {
+	results, err := models.SearchForCommunity(h.A.DB, query)
+	if err != nil {
+		return []models.Community{}, err
 	}
 
-	community, httpStatus, err := h.fetchCommunity(communityId)
-	if err != nil {
-		return models.Proposal{}, httpStatus, err
+	return results, nil
+}
+
+func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorStatus) {
+	if p.Voucher != nil {
+		if err := h.validateUserViaVoucher(p.Creator_addr, p.Voucher); err != nil {
+			return models.Proposal{}, errorStatus{ err: err, status: http.StatusForbidden}
+		}
+	} else {
+		if err := h.validateUser(p.Creator_addr, p.Timestamp, p.Composite_signatures); err != nil {
+			return models.Proposal{}, errorStatus{ err: err, status: http.StatusForbidden}
+		}
+	}
+
+	community, e := h.fetchCommunity(p.Community_id)
+	if e.err != nil {
+		return models.Proposal{}, e
 	}
 
 	strategy, err := models.MatchStrategyByProposal(*community.Strategies, *p.Strategy)
 	if err != nil {
 		errMsg := "Community does not have this strategy available."
 		log.Error().Err(err).Msg(errMsg)
-		return models.Proposal{}, http.StatusInternalServerError, errors.New(errMsg)
+		return models.Proposal{}, errorStatus{ err: errors.New(errMsg), status: http.StatusInternalServerError }
 
 	}
-	p.Min_balance = strategy.Contract.Threshold
-	p.Max_weight = strategy.Contract.MaxWeight
+
+	// Set Min Balance/Max Weight to community defaults if not provided
+	if p.Min_balance == nil {
+		p.Min_balance = strategy.Contract.Threshold
+	}
+	if p.Max_weight == nil {
+		p.Max_weight = strategy.Contract.MaxWeight
+	}
 
 	if err := h.snapshot(&strategy, &p); err != nil {
-		return models.Proposal{}, http.StatusInternalServerError, err
+		return models.Proposal{}, errorStatus { err: err, status: http.StatusInternalServerError }
 	}
 
-	if err := h.enforceCommunityResitrictions(community, p, strategy); err != nil {
-		return models.Proposal{}, http.StatusForbidden, err
+	if err := h.enforceCommunityRestrictions(community, p, strategy); err != nil {
+		return models.Proposal{}, errorStatus { err: err, status: http.StatusForbidden }
 	}
 
 	if err := h.processSnapshotStatus(&strategy, &p); err != nil {
 		errMsg := "Error processing snapshot status."
 		log.Error().Err(err).Msg(errMsg)
-		return models.Proposal{}, http.StatusInternalServerError, errors.New(errMsg)
+		return models.Proposal{}, errorStatus { err: errors.New(errMsg), status: http.StatusInternalServerError }
 	}
 
 	p.Cid, err = h.pinJSONToIpfs(p)
 	if err != nil {
 		log.Error().Err(err).Msg("IPFS error: " + err.Error())
 		errMsg := "Error pinning JSON to IPFS."
-		return models.Proposal{}, http.StatusInternalServerError, errors.New(errMsg)
+		return models.Proposal{}, errorStatus { err: errors.New(errMsg), status: http.StatusInternalServerError }
 	}
 
 	validate := validator.New()
 	vErr := validate.Struct(p)
 	if vErr != nil {
 		log.Error().Err(vErr)
-		return models.Proposal{}, http.StatusBadRequest, errors.New("Invalid proposal.")
+		return models.Proposal{}, errorStatus { err: errors.New("Invalid proposal."), status: http.StatusBadRequest }
 	}
 
 	if os.Getenv("APP_ENV") == "PRODUCTION" {
@@ -457,13 +531,13 @@ func (h *Helpers) createProposal(communityId int, p models.Proposal) (models.Pro
 	}
 
 	if err := p.CreateProposal(h.A.DB); err != nil {
-		return models.Proposal{}, http.StatusInternalServerError, err
+		return models.Proposal{}, errorStatus { err: err, status: http.StatusInternalServerError }
 	}
 
-	return p, http.StatusCreated, nil
+	return p, errorStatus { err: nil, status: http.StatusCreated }
 }
 
-func (h *Helpers) enforceCommunityResitrictions(
+func (h *Helpers) enforceCommunityRestrictions(
 	c models.Community,
 	p models.Proposal,
 	s models.Strategy,
@@ -476,7 +550,21 @@ func (h *Helpers) enforceCommunityResitrictions(
 			return errors.New(errMsg)
 		}
 	} else {
-		hasBalance, err := h.processTokenThreshold(p.Creator_addr, s)
+		fmt.Println("Community does not require authors to submit proposals")
+
+		threshold, err := strconv.ParseFloat(*c.Proposal_threshold, 64)
+		if err != nil {
+			log.Error().Err(err).Msg("Invalid proposal threshold")
+			return errors.New("Invalid proposal threshold")
+		}
+
+		contract := shared.Contract{
+			Name:        c.Contract_name,
+			Addr:        c.Contract_addr,
+			Public_path: c.Public_path,
+			Threshold:   &threshold,
+		}
+		hasBalance, err := h.processTokenThreshold(p.Creator_addr, contract, *c.Contract_type)
 		if err != nil {
 			errMsg := "Error processing Token Threshold."
 			log.Error().Err(err).Msg(errMsg)
@@ -513,8 +601,15 @@ func (h *Helpers) snapshot(strategy *models.Strategy, p *models.Proposal) error 
 func (h *Helpers) createCommunity(payload models.CreateCommunityRequestPayload) (models.Community, int, error) {
 	c := payload.Community
 
-	if err := h.validateUser(c.Creator_addr, c.Timestamp, c.Composite_signatures); err != nil {
-		return models.Community{}, http.StatusForbidden, err
+	if c.Voucher != nil {
+		log.Info().Msgf("validate user via voucher %v \n", c.Voucher)
+		if err := h.validateUserViaVoucher(c.Creator_addr, c.Voucher); err != nil {
+			return models.Community{}, http.StatusForbidden, err
+		}
+	} else {
+		if err := h.validateUser(c.Creator_addr, c.Timestamp, c.Composite_signatures); err != nil {
+			return models.Community{}, http.StatusForbidden, err
+		}
 	}
 
 	cid, err := h.pinJSONToIpfs(c)
@@ -579,40 +674,55 @@ func (h *Helpers) processCommunityRoles(
 	return nil
 }
 
-func (h *Helpers) updateCommunity(id int, payload models.UpdateCommunityRequestPayload) (models.Community, int, error) {
-	c, httpStatus, err := h.fetchCommunity(id)
-	if err != nil {
-		return models.Community{}, httpStatus, err
+func (h *Helpers) updateCommunity(id int, payload models.UpdateCommunityRequestPayload) (models.Community, errorStatus) {
+	c, e := h.fetchCommunity(id)
+	if e.err != nil {
+		return models.Community{}, e
 	}
 
 	// validate is community creator
 	// TODO: update to validating address is admin
 	if err := c.CanUpdateCommunity(h.A.DB, payload.Signing_addr); err != nil {
 		log.Error().Err(err)
-		return models.Community{}, http.StatusForbidden, err
+		return models.Community{}, errorStatus { err: err, status: http.StatusForbidden }
 	}
 
-	if err := h.validateUser(payload.Signing_addr, payload.Timestamp, payload.Composite_signatures); err != nil {
-		log.Error().Err(err)
-		return models.Community{}, http.StatusForbidden, err
+	if payload.Voucher != nil {
+		if err := h.validateUserViaVoucher(payload.Signing_addr, payload.Voucher); err != nil {
+			log.Error().Err(err)
+			return models.Community{}, errorStatus { err: err, status: http.StatusForbidden }
+		}
+	} else {
+		if err := h.validateUser(payload.Signing_addr, payload.Timestamp, payload.Composite_signatures); err != nil {
+			log.Error().Err(err)
+			return models.Community{}, errorStatus { err: err, status: http.StatusForbidden }
+		}
 	}
 
 	if err := c.UpdateCommunity(h.A.DB, &payload); err != nil {
 		log.Error().Err(err)
-		return models.Community{}, http.StatusInternalServerError, err
+		return models.Community{}, errorStatus { err: err, status: http.StatusInternalServerError }
 	}
 
-	c, httpStatus, err = h.fetchCommunity(id)
-	if err != nil {
-		return models.Community{}, httpStatus, err
+	c, e = h.fetchCommunity(id)
+	if e.err != nil {
+		return models.Community{}, e
 	}
 
-	return c, http.StatusOK, nil
+	return c, errorStatus { err: nil, status: http.StatusOK }
 }
 
 func (h *Helpers) removeUserRole(payload models.CommunityUserPayload) (int, error) {
-	if err := h.validateUser(payload.Signing_addr, payload.Timestamp, payload.Composite_signatures); err != nil {
-		return http.StatusForbidden, err
+	if payload.Voucher != nil {
+		if err := h.validateUserViaVoucher(payload.Signing_addr, payload.Voucher); err != nil {
+			log.Error().Err(err)
+			return http.StatusForbidden, err
+		}
+	} else {
+		if err := h.validateUser(payload.Signing_addr, payload.Timestamp, payload.Composite_signatures); err != nil {
+			log.Error().Err(err)
+			return http.StatusForbidden, err
+		}
 	}
 
 	if payload.User_type == "member" {
@@ -677,14 +787,14 @@ func (h *Helpers) createCommunityUser(payload models.CommunityUserPayload) (int,
 	// validate user is allowed to create this user
 	if payload.User_type != "member" {
 		if payload.Signing_addr == payload.Addr {
-			CANNOT_GRANT_SELF_ERR := errors.New("Users cannot grant themselves a priviledged user_type.")
+			CANNOT_GRANT_SELF_ERR := errors.New("Users cannot grant themselves a privileged user_type.")
 			log.Error().Err(CANNOT_GRANT_SELF_ERR)
 			return http.StatusForbidden, CANNOT_GRANT_SELF_ERR
 		}
 		// If signing address is not user address, verify they have admin status in this community
 		var communityAdmin = models.CommunityUser{Community_id: payload.Community_id, Addr: payload.Signing_addr, User_type: "admin"}
 		if err := communityAdmin.GetCommunityUser(h.A.DB); err != nil {
-			USER_MUST_BE_ADMIN_ERR := errors.New("User must be community admin to grant priviledges.")
+			USER_MUST_BE_ADMIN_ERR := errors.New("User must be community admin to grant privileges.")
 			log.Error().Err(err).Msg("Database error.")
 			log.Error().Err(USER_MUST_BE_ADMIN_ERR)
 			return http.StatusForbidden, USER_MUST_BE_ADMIN_ERR
@@ -700,9 +810,16 @@ func (h *Helpers) createCommunityUser(payload models.CommunityUserPayload) (int,
 		return http.StatusForbidden, CANNOT_ADD_MEMBER_ERR
 	}
 
-	if err := h.validateUser(payload.Signing_addr, payload.Timestamp, payload.Composite_signatures); err != nil {
-		log.Error().Err(err)
-		return http.StatusForbidden, err
+	if payload.Voucher != nil {
+		if err := h.validateUserViaVoucher(payload.Signing_addr, payload.Voucher); err != nil {
+			log.Error().Err(err)
+			return http.StatusForbidden, err
+		}
+	} else {
+		if err := h.validateUser(payload.Signing_addr, payload.Timestamp, payload.Composite_signatures); err != nil {
+			log.Error().Err(err)
+			return http.StatusForbidden, err
+		}
 	}
 
 	// check that community user doesnt already exist
@@ -818,14 +935,28 @@ func (h *Helpers) createListForCommunity(payload models.ListPayload) (models.Lis
 	return l, http.StatusCreated, nil
 }
 
-func (h *Helpers) validateSignature(addr string, message string, sigs *[]shared.CompositeSignature) error {
+func (h *Helpers) validateUserSignature(addr string, message string, sigs *[]shared.CompositeSignature) error {
 	shouldValidateSignature := h.A.Config.Features["validateSigs"]
 
 	if !shouldValidateSignature {
 		return nil
 	}
 
-	if err := h.A.FlowAdapter.UserSignatureValidate(addr, message, sigs, ""); err != nil {
+	if err := h.A.FlowAdapter.ValidateSignature(addr, message, sigs, "USER"); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (h *Helpers) validateTxSignature(addr string, message string, sigs *[]shared.CompositeSignature) error {
+	shouldValidateSignature := h.A.Config.Features["validateSigs"]
+
+	if !shouldValidateSignature {
+		return nil
+	}
+
+	if err := h.A.FlowAdapter.ValidateSignature(addr, message, sigs, "TRANSACTION"); err != nil {
 		return err
 	}
 	return nil
@@ -865,10 +996,35 @@ func (h *Helpers) validateTimestamp(timestamp string, expiry int) error {
 }
 
 func (h *Helpers) validateUser(addr, timestamp string, compositeSignatures *[]shared.CompositeSignature) error {
+
 	if err := h.validateTimestamp(timestamp, 60); err != nil {
 		return err
 	}
-	if err := h.validateSignature(addr, timestamp, compositeSignatures); err != nil {
+
+	if err := h.validateUserSignature(addr, timestamp, compositeSignatures); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (h *Helpers) validateUserViaVoucher(addr string, voucher *shared.Voucher) error {
+	timestamp := voucher.Arguments[0]["value"]
+	if err := h.validateTimestamp(timestamp, 60); err != nil {
+		return err
+	}
+
+	compositeSignatures := shared.GetUserCompositeSignatureFromVoucher(voucher)
+	// Validate authorizer
+	authorizer := voucher.Authorizers[0]
+	if authorizer != addr || authorizer != (*compositeSignatures)[0].Addr {
+		err := errors.New("authorizer address must match voter address and envelope signer")
+		log.Error().Err(err)
+		return err
+	}
+	// validate signature using encoded transaction payload as message
+	message := shared.EncodeMessageFromVoucher(voucher)
+	if err := h.validateTxSignature(addr, message, compositeSignatures); err != nil {
 		return err
 	}
 
@@ -876,10 +1032,40 @@ func (h *Helpers) validateUser(addr, timestamp string, compositeSignatures *[]sh
 }
 
 func (h *Helpers) validateUserWithRole(addr, timestamp string, compositeSignatures *[]shared.CompositeSignature, communityId int, role string) error {
+	//print out all the params
 	if err := h.validateTimestamp(timestamp, 60); err != nil {
 		return err
 	}
-	if err := h.validateSignature(addr, timestamp, compositeSignatures); err != nil {
+	if err := h.validateUserSignature(addr, timestamp, compositeSignatures); err != nil {
+		return err
+	}
+	if err := models.EnsureRoleForCommunity(h.A.DB, addr, communityId, role); err != nil {
+		errMsg := fmt.Sprintf("Account %s is not an author for community %d.", addr, communityId)
+		log.Error().Err(err).Msg(errMsg)
+		return err
+	}
+
+	return nil
+}
+
+func (h *Helpers) validateUserWithRoleViaVoucher(addr string, voucher *shared.Voucher, communityId int, role string) error {
+	timestamp := voucher.Arguments[0]["value"]
+	if err := h.validateTimestamp(timestamp, 60); err != nil {
+		return err
+	}
+
+	compositeSignatures := shared.GetUserCompositeSignatureFromVoucher(voucher)
+	// Validate authorizer
+	authorizer := voucher.Authorizers[0]
+	if authorizer != addr || authorizer != (*compositeSignatures)[0].Addr {
+		err := errors.New("authorizer address must match voter address and envelope signer")
+		log.Error().Err(err)
+		return err
+	}
+
+	// validate signature using encoded transaction payload as message
+	message := shared.EncodeMessageFromVoucher(voucher)
+	if err := h.validateTxSignature(addr, message, compositeSignatures); err != nil {
 		return err
 	}
 	if err := models.EnsureRoleForCommunity(h.A.DB, addr, communityId, role); err != nil {
@@ -914,17 +1100,16 @@ func (h *Helpers) processSnapshotStatus(s *models.Strategy, p *models.Proposal) 
 
 }
 
-func (h *Helpers) processTokenThreshold(address string, s models.Strategy) (bool, error) {
+func (h *Helpers) processTokenThreshold(address string, c shared.Contract, contractType string) (bool, error) {
 	var scriptPath string
-	stratName := *s.Name
 
-	if models.IsNFTStrategy(stratName) {
+	if contractType == "nft" {
 		scriptPath = "./main/cadence/scripts/get_nfts_ids.cdc"
 	} else {
 		scriptPath = "./main/cadence/scripts/get_balance.cdc"
 	}
 
-	hasBalance, err := h.A.FlowAdapter.EnforceTokenThreshold(scriptPath, address, &s.Contract)
+	hasBalance, err := h.A.FlowAdapter.EnforceTokenThreshold(scriptPath, address, &c)
 	if err != nil {
 		return false, err
 	}
@@ -944,6 +1129,12 @@ func (h *Helpers) initStrategy(name string) Strategy {
 }
 
 func (h *Helpers) pinJSONToIpfs(data interface{}) (*string, error) {
+	shouldOverride := flag.Lookup("ipfs-override").Value.(flag.Getter).Get().(bool)
+	if shouldOverride {
+		dummyHash := "dummy-hash"
+		return &dummyHash, nil
+	}
+
 	pin, err := h.A.IpfsClient.PinJson(data)
 	if err != nil {
 		return nil, err
@@ -955,7 +1146,7 @@ func validateContractThreshold(s []models.Strategy) error {
 	for _, s := range s {
 		if s.Threshold != nil {
 			if *s.Threshold < 1 {
-				return errors.New("Contract Threshold Cannot Be < 1.")
+				return errors.New("Contract Threshold cannot be less than 1.")
 			}
 		}
 	}

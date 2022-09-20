@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
+import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useModalContext } from 'contexts/NotificationModal';
 import { useWebContext } from 'contexts/Web3';
+import { Svg } from '@cast/shared-components';
 import {
-  Error,
   Loader,
   Message,
   ProposalInformation,
@@ -18,11 +19,12 @@ import {
   ProposalStatus,
   VoteOptions,
 } from 'components/Proposal';
-import { ArrowLeft, Bin, CheckMark } from 'components/Svg';
 import {
   useMediaQuery,
   useProposal,
+  useProposalMutation,
   useUserRoleOnCommunity,
+  useVoteOnProposal,
   useVotingStrategies,
 } from 'hooks';
 import { FilterValues } from 'const';
@@ -30,7 +32,7 @@ import { getProposalType } from 'utils';
 
 function useQueryParams() {
   const { search } = useLocation();
-  return React.useMemo(() => {
+  return useMemo(() => {
     const params = new URLSearchParams(search);
     return {
       forceLedger: params.get('ledger') === 'true',
@@ -77,8 +79,9 @@ export default function ProposalPage() {
 
   const modalContext = useModalContext();
 
-  const { user, injectedProvider, isLedger, setWebContextConfig } =
-    useWebContext();
+  const { notifyError } = useErrorHandlerContext();
+
+  const { user, setWebContextConfig, openWalletModal } = useWebContext();
 
   // setting this manually for users that do not have a ledger device
   useEffect(() => {
@@ -90,18 +93,17 @@ export default function ProposalPage() {
   const { proposalId } = useParams();
 
   const {
-    getProposal,
-    voteOnProposal,
-    updateProposal,
-    loading,
+    isLoading: loading,
     data: proposal,
     error,
-  } = useProposal();
+  } = useProposal({ proposalId });
+  const { voteOnProposal } = useVoteOnProposal();
+  const { updateProposal } = useProposalMutation();
 
   // we need to get all strategies to obtain
   // description text to display on modal
   const {
-    loading: loadingStrategies,
+    isLoading: loadingStrategies,
     data: votingStrategies,
     error: strategiesError,
   } = useVotingStrategies();
@@ -126,12 +128,6 @@ export default function ProposalPage() {
       : {};
 
   useEffect(() => {
-    (async () => {
-      await getProposal(proposalId);
-    })();
-  }, [proposalId, getProposal]);
-
-  useEffect(() => {
     if (modalContext.isOpen && user?.addr && !voteError && !cancelProposal) {
       modalContext.closeModal();
     }
@@ -150,7 +146,11 @@ export default function ProposalPage() {
   };
 
   const onConfirmVote = () => {
-    setConfirmingVote(true);
+    if (user.loggedIn) {
+      setConfirmingVote(true);
+    } else {
+      openWalletModal();
+    }
   };
 
   const onCancelVote = () => {
@@ -173,13 +173,18 @@ export default function ProposalPage() {
     };
 
     const onCancelProposal = async () => {
-      const response = await updateProposal(injectedProvider, proposal, {
-        status: 'cancelled',
-        signingAddr: user?.addr,
-      });
-      if (response.error) {
+      try {
+        await updateProposal({
+          ...proposal,
+          updatePayload: {
+            status: 'cancelled',
+            signingAddr: user?.addr,
+          },
+        });
+      } catch (error) {
         return;
       }
+      // is no errors continue
       setCancelProposal(false);
       setCancelled(true);
     };
@@ -203,41 +208,24 @@ export default function ProposalPage() {
       return;
     }
 
-    const voteBody = {
+    const voteData = {
       choice: optionChosen,
       addr: user.addr,
     };
 
     setCastingVote(true);
-    const response = await voteOnProposal(
-      injectedProvider,
-      proposal,
-      voteBody,
-      isLedger
-    );
-    if (response?.error) {
-      setVoteError(response.error);
+    try {
+      await voteOnProposal({ proposal, voteData });
+    } catch (error) {
+      setVoteError(error);
       setConfirmingVote(false);
-      modalContext.openModal(
-        React.createElement(Error, {
-          error: (
-            <p className="has-text-red">
-              <b>{response.error}</b>
-            </p>
-          ),
-          errorTitle: 'Something went wrong with your vote.',
-        }),
-        {
-          classNameModalContent: 'rounded-sm',
-        }
-      );
+      notifyError(error);
       setCastingVote(false);
       return;
-    } else {
-      setCastingVote(false);
-      setConfirmingVote(false);
-      setCastVote(optionChosen);
     }
+    setCastingVote(false);
+    setConfirmingVote(false);
+    setCastVote(optionChosen);
   };
 
   const onConfirmCastVote = () => {
@@ -320,7 +308,7 @@ export default function ProposalPage() {
             <footer className="modal-card-foot has-background-white pb-6">
               <div className="columns is-mobile p-0 m-0 flex-1 pr-2">
                 <button
-                  className="button column is-full p-0 is-uppercase"
+                  className="button column is-full p-0"
                   onClick={onCancelVote}
                 >
                   Cancel
@@ -328,7 +316,7 @@ export default function ProposalPage() {
               </div>
               <div className="columns is-mobile p-0 m-0 flex-1 pl-2">
                 <button
-                  className="button column is-full p-0 has-background-yellow is-uppercase vote-button transition-all"
+                  className="button column is-full p-0 has-background-yellow vote-button transition-all"
                   onClick={onVote}
                 >
                   Vote
@@ -400,7 +388,7 @@ export default function ProposalPage() {
           >
             <Link to={`/community/${proposal.communityId}?tab=proposals`}>
               <span className="has-text-grey is-flex is-align-items-center back-button transition-all">
-                <ArrowLeft /> <span className="ml-3">Back</span>
+                <Svg name="ArrowLeft" /> <span className="ml-3">Back</span>
               </span>
             </Link>
           </WrapperResponsive>
@@ -409,7 +397,7 @@ export default function ProposalPage() {
               messageText={`You successfully voted for ${getVoteLabel(
                 castVote
               )}`}
-              icon={<CheckMark />}
+              icon={<Svg name="CheckMark" />}
             />
           )}
           {cancelled && (
@@ -427,7 +415,7 @@ export default function ProposalPage() {
                   onClick={onCancelProposal}
                 >
                   <div className="mr-2 is-flex is-align-items-center">
-                    <Bin />
+                    <Svg name="Bin" />
                   </div>
                   <div className="is-flex is-align-items-center is-hidden-mobile">
                     Cancel Proposal
@@ -441,7 +429,7 @@ export default function ProposalPage() {
             <div>
               <WrapperResponsive
                 as="h2"
-                classNames="title mt-5 is-4 has-text-back has-text-weight-normal"
+                classNames="title mt-5 is-4 has-text-black has-text-weight-normal"
                 extraStylesMobile={{ marginBottom: '30px' }}
               >
                 {proposal.name}
@@ -544,6 +532,7 @@ export default function ProposalPage() {
                 <VoteOptions
                   labelType="desktop"
                   readOnly={isClosed}
+                  loggedIn={user?.loggedIn}
                   addr={user?.addr}
                   proposal={proposal}
                   onOptionSelect={onOptionSelect}

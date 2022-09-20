@@ -53,9 +53,9 @@ type CompositeSignature struct {
 }
 
 type TimestampSignaturePayload struct {
-	Composite_signatures *[]CompositeSignature `json:"compositeSignatures" validate:"required"`
-	Signing_addr         string                `json:"signingAddr"         validate:"required"`
-	Timestamp            string                `json:"timestamp"           validate:"required"`
+	Composite_signatures *[]CompositeSignature `json:"compositeSignatures"`
+	Signing_addr         string                `json:"signingAddr"`
+	Timestamp            string                `json:"timestamp"`
 }
 
 // used in models/proposal.go
@@ -89,6 +89,13 @@ type FTBalanceResponse struct {
 	Proposal_id             int       `json:"proposal_id"`
 	NFTCount                int       `json:"nftCount"`
 	CreatedAt               time.Time `json:"createdAt"`
+}
+
+type CustomScript struct {
+	Key 		string `json:"key" validate:"required"`
+	Name 		string `json:"name" validate:"required"`
+	Description string `json:"description" validate:"required"`
+	Src 		string `json:"src" validate:"required"`
 }
 
 func (b *FTBalanceResponse) NewFTBalance() {

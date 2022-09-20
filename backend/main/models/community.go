@@ -35,15 +35,16 @@ type Community struct {
 	Slug                     *string     `json:"slug,omitempty"                  validate:"required"`
 	Is_featured              *bool       `json:"isFeatured,omitempty"`
 
-	Contract_name *string  `json:"contractName,omitempty"`
-	Contract_addr *string  `json:"contractAddr,omitempty"`
-	Public_path   *string  `json:"publicPath,omitempty"`
-	Threshold     *float64 `json:"threshold,omitempty"`
+	Contract_name *string `json:"contractName,omitempty"`
+	Contract_addr *string `json:"contractAddr,omitempty"`
+	Contract_type *string `json:"contractType,omitempty"`
+	Public_path   *string `json:"publicPath,omitempty"`
 
 	Timestamp            string                  `json:"timestamp"             validate:"required"`
-	Composite_signatures *[]s.CompositeSignature `json:"compositeSignatures"   validate:"required"`
+	Composite_signatures *[]s.CompositeSignature `json:"compositeSignatures"`
 	Creator_addr         string                  `json:"creatorAddr"           validate:"required"`
 	Signing_addr         *string                 `json:"signingAddr,omitempty"`
+	Voucher              *shared.Voucher         `json:"voucher,omitempty"`
 	Created_at           *time.Time              `json:"createdAt,omitempty"`
 	Cid                  *string                 `json:"cid,omitempty"`
 }
@@ -56,25 +57,28 @@ type CreateCommunityRequestPayload struct {
 }
 
 type UpdateCommunityRequestPayload struct {
-	Name                     *string     `json:"name,omitempty"`
-	Category                 *string     `json:"category,omitempty"`
-	Body                     *string     `json:"body,omitempty"`
-	Logo                     *string     `json:"logo,omitempty"`
-	Strategies               *[]Strategy `json:"strategies,omitempty"`
-	Strategy                 *string     `json:"strategy,omitempty"`
-	Banner_img_url           *string     `json:"bannerImgUrl,omitempty"`
-	Website_url              *string     `json:"websiteUrl,omitempty"`
-	Twitter_url              *string     `json:"twitterUrl,omitempty"`
-	Github_url               *string     `json:"githubUrl,omitempty"`
-	Discord_url              *string     `json:"discordUrl,omitempty"`
-	Instagram_url            *string     `json:"instagramUrl,omitempty"`
-	Terms_and_conditions_url *string     `json:"termsAndConditionsUrl,omitempty"`
-	Proposal_validation      *string     `json:"proposalValidation,omitempty"`
-	Proposal_threshold       *string     `json:"proposalThreshold,omitempty"`
+	Name                     *string         `json:"name,omitempty"`
+	Category                 *string         `json:"category,omitempty"`
+	Body                     *string         `json:"body,omitempty"`
+	Logo                     *string         `json:"logo,omitempty"`
+	Strategies               *[]Strategy     `json:"strategies,omitempty"`
+	Strategy                 *string         `json:"strategy,omitempty"`
+	Banner_img_url           *string         `json:"bannerImgUrl,omitempty"`
+	Website_url              *string         `json:"websiteUrl,omitempty"`
+	Twitter_url              *string         `json:"twitterUrl,omitempty"`
+	Github_url               *string         `json:"githubUrl,omitempty"`
+	Discord_url              *string         `json:"discordUrl,omitempty"`
+	Instagram_url            *string         `json:"instagramUrl,omitempty"`
+	Terms_and_conditions_url *string         `json:"termsAndConditionsUrl,omitempty"`
+	Proposal_validation      *string         `json:"proposalValidation,omitempty"`
+	Proposal_threshold       *string         `json:"proposalThreshold,omitempty"`
+	Only_authors_to_submit   *bool           `json:"onlyAuthorsToSubmit,omitempty"`
+	Voucher                  *shared.Voucher `json:"voucher,omitempty"`
 
 	//TODO dup fields in Community struct, make sub struct for both to use
 	Contract_name *string  `json:"contractName,omitempty"`
 	Contract_addr *string  `json:"contractAddr,omitempty"`
+	Contract_type *string  `json:"contractType,omitempty"`
 	Public_path   *string  `json:"publicPath,omitempty"`
 	Threshold     *float64 `json:"threshold,omitempty"`
 
@@ -182,23 +186,71 @@ func GetCommunitiesForHomePage(db *s.Database, params shared.PageParams) ([]*Com
 }
 
 func (c *Community) CreateCommunity(db *s.Database) error {
+
 	err := db.Conn.QueryRow(db.Context,
 		`
 	INSERT INTO communities(
-		name, category, logo, slug, strategies, strategy, banner_img_url, website_url, twitter_url, github_url, discord_url, instagram_url, terms_and_conditions_url, proposal_validation, proposal_threshold, body, cid, creator_addr, contract_name, contract_addr, public_path, threshold, only_authors_to_submit)
+		name, 
+		category, 
+		logo, 
+		slug, 
+		strategies, 
+		strategy, 
+		banner_img_url, 
+		website_url, 
+		twitter_url, 
+		github_url, 
+		discord_url, 
+		instagram_url, 
+		terms_and_conditions_url, 
+		proposal_validation, 
+		proposal_threshold, 
+		body, 
+		cid, 
+		creator_addr, 
+		contract_name, 
+		contract_addr, 
+		contract_type, 
+		public_path, 
+		only_authors_to_submit, 
+		voucher)
 	VALUES(
-		$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23
+		$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, 
+		$14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24
 	)
 	RETURNING id, created_at
-	`, c.Name, c.Category, c.Logo, c.Slug, c.Strategies, c.Strategy, c.Banner_img_url, c.Website_url, c.Twitter_url, c.Github_url, c.Discord_url, c.Instagram_url, c.Terms_and_conditions_url, c.Proposal_validation, c.Proposal_threshold, c.Body, c.Cid, c.Creator_addr, c.Contract_name, c.Contract_addr, c.Public_path, c.Threshold, c.Only_authors_to_submit).Scan(&c.ID, &c.Created_at)
+	`, c.Name,
+		c.Category,
+		c.Logo,
+		c.Slug,
+		c.Strategies,
+		c.Strategy,
+		c.Banner_img_url,
+		c.Website_url,
+		c.Twitter_url,
+		c.Github_url,
+		c.Discord_url,
+		c.Instagram_url,
+		c.Terms_and_conditions_url,
+		c.Proposal_validation,
+		c.Proposal_threshold,
+		c.Body,
+		c.Cid,
+		c.Creator_addr,
+		c.Contract_name,
+		c.Contract_addr,
+		c.Contract_type,
+		c.Public_path,
+		c.Only_authors_to_submit,
+		c.Voucher).
+		Scan(&c.ID, &c.Created_at)
 	return err
 }
 
 func (c *Community) UpdateCommunity(db *s.Database, p *UpdateCommunityRequestPayload) error {
 	_, err := db.Conn.Exec(
 		db.Context,
-		`
-	UPDATE communities
+		`UPDATE communities
 	SET name = COALESCE($1, name), 
 	body = COALESCE($2, body), 
 	logo = COALESCE($3, logo), 
@@ -216,9 +268,10 @@ func (c *Community) UpdateCommunity(db *s.Database, p *UpdateCommunityRequestPay
 	terms_and_conditions_url = COALESCE($15, terms_and_conditions_url),
 	contract_name = COALESCE($16, contract_name),
 	contract_addr = COALESCE($17, contract_addr),
-	public_path = COALESCE($18, public_path),
-	threshold = COALESCE($19, threshold)
-	WHERE id = $20
+	contract_type = COALESCE($18, contract_type),
+	public_path = COALESCE($19, public_path),
+	only_authors_to_submit = COALESCE($20, only_authors_to_submit)
+	WHERE id = $21
 	`,
 		p.Name,
 		p.Body,
@@ -237,8 +290,9 @@ func (c *Community) UpdateCommunity(db *s.Database, p *UpdateCommunityRequestPay
 		p.Terms_and_conditions_url,
 		p.Contract_name,
 		p.Contract_addr,
+		p.Contract_type,
 		p.Public_path,
-		p.Threshold,
+		p.Only_authors_to_submit,
 		c.ID,
 	)
 
@@ -252,6 +306,31 @@ func (c *Community) CanUpdateCommunity(db *s.Database, addr string) error {
 		return fmt.Errorf("address %s does not have permission to update community with ID %d", addr, c.ID)
 	}
 	return nil
+}
+
+func SearchForCommunity(db *s.Database, query string) ([]Community, error) {
+	var communities []Community
+	rows, err := db.Conn.Query(
+		db.Context,
+		`SELECT name FROM communities WHERE SIMILARITY(name, $1) > 0.1`,
+		query,
+	)
+	if err != nil {
+		return communities, fmt.Errorf("error searching for a community with the the param %s", query)
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var c Community
+		err = rows.Scan(&c.Name)
+		if err != nil {
+			return communities, fmt.Errorf("error scanning community row: %v", err)
+		}
+		communities = append(communities, c)
+	}
+
+	return communities, nil
 }
 
 func MatchStrategyByProposal(s []Strategy, strategyToMatch string) (Strategy, error) {

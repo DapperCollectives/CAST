@@ -1,4 +1,3 @@
-import React from 'react';
 import Blockies from 'react-blockies';
 import FadeIn from 'components/FadeIn';
 import classnames from 'classnames';

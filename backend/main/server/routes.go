@@ -13,6 +13,8 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/communities/{id:[0-9]+}", a.updateCommunity).Methods("PATCH", "OPTIONS")
 	a.Router.HandleFunc("/communities", a.createCommunity).Methods("POST", "OPTIONS")
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/strategies", a.getActiveStrategiesForCommunity).Methods("GET")
+	//Community Search
+	a.Router.HandleFunc("/communities/search/{query:[a-zA-Z0-9]+}", a.searchCommunities).Methods("GET")
 	// Proposals
 	a.Router.HandleFunc("/proposals/{id:[0-9]+}", a.getProposal).Methods("GET")
 	a.Router.HandleFunc("/proposals/{id:[0-9]+}", a.updateProposal).Methods("PUT", "OPTIONS")
@@ -52,6 +54,8 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/accounts/blocklist", a.getCommunityBlocklist).Methods("GET")
 	a.Router.HandleFunc("/accounts/{addr:0x[a-zA-Z0-9]{16}}/{blockHeight:[0-9]+}", a.getAccountAtBlockHeight).Methods("GET")
 
-	//this JSON for snapshotter api
+	// Snapshotter
 	a.Router.HandleFunc("/latest-snapshot", a.getLatestSnapshot).Methods("GET")
+	a.Router.HandleFunc("/add-fungible-token", a.addFungibleToken).Methods("POST", "OPTIONS")
+
 }
