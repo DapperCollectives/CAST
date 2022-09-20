@@ -35,10 +35,10 @@ const Sidenavbar = ({ showSidenav, closeSidenav }) => {
                     pathname: '/about',
                     state: { modal: true },
                   }}
-                  className="navbar-item pl-0 py-4 is-size-5"
+                  className="navbar-item pl-0 py-4 is-size-5 has-text-black"
                   onClick={closeSidenav}
                 >
-                  About
+                  About Us
                 </NavLink>
               </li>
               <li>
@@ -46,7 +46,7 @@ const Sidenavbar = ({ showSidenav, closeSidenav }) => {
                   to={{
                     pathname: '/community/create',
                   }}
-                  className="navbar-item pl-0 py-4 is-size-5"
+                  className="navbar-item pl-0 py-4 is-size-5 has-text-black"
                   onClick={closeSidenav}
                 >
                   Create a Community
@@ -57,7 +57,7 @@ const Sidenavbar = ({ showSidenav, closeSidenav }) => {
                   target="_blank"
                   rel="noreferrer noopener"
                   href="https://github.com/DapperCollectives/CAST"
-                  className="navbar-item pl-0 py-4 is-size-5"
+                  className="navbar-item pl-0 py-4 is-size-5 has-text-black"
                   onClick={closeSidenav}
                 >
                   <span className="mr-2">Codebase</span>
