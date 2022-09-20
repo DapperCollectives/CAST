@@ -13,7 +13,7 @@ export default function StrategyInput({
       style={{ position: 'relative' }}
     >
       <div
-        className="border-light rounded-sm p-3 column is-full small-text"
+        className="border-light rounded-sm p-3 pr-6 column is-full small-text"
         style={{
           width: '100%',
           lineHeight: 'normal',

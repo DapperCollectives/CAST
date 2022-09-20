@@ -73,14 +73,17 @@ export const createCommunityApiReq = async ({
       logo,
       bannerImgUrl,
       contractAddr: setDefaultValue(
-        payload?.contractAddr,
+        payload?.contractAddress,
         flowAddress.contractAddr
       ),
       contractName: setDefaultValue(
-        payload?.contractN,
+        payload?.contractName,
         flowAddress.contractName
       ),
-      publicPath: setDefaultValue(payload?.storageP, flowAddress.storagePath),
+      publicPath: setDefaultValue(
+        payload?.storagePath,
+        flowAddress.storagePath
+      ),
       proposalThreshold: setDefaultValue(payload?.proposalThreshold, '0'),
       contractType: setDefaultValue(payload?.contractType, 'ft'),
       strategies,
