@@ -2,7 +2,6 @@ package test_utils
 
 import (
 	"bytes"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -72,7 +71,7 @@ func (otu *OverflowTestUtils) GenerateBlockListPayload(signer string, list *mode
 		List: *list,
 	}
 	payload.Composite_signatures = compositeSigs
-	payload.Timestamp = hex.EncodeToString([]byte(timestamp))
+	payload.Timestamp = timestamp
 	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", signer))
 	payload.Signing_addr = fmt.Sprintf("0x%s", account.Address().String())
 
@@ -88,7 +87,7 @@ func (otu *OverflowTestUtils) GenerateUpdateListPayload(listId, communityId int,
 	payload.Addresses = []string{"0x04", "0x05"}
 	payload.Community_id = communityId
 	payload.Composite_signatures = signature
-	payload.Timestamp = hex.EncodeToString([]byte(timestamp))
+	payload.Timestamp = timestamp
 	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", signer))
 	payload.Signing_addr = fmt.Sprintf("0x%s", account.Address().String())
 

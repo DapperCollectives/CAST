@@ -371,6 +371,7 @@ func (h *Helpers) insertVote(v models.VoteWithBalance, p models.Proposal) error 
 }
 
 func (h *Helpers) validateVote(p models.Proposal, v models.Vote) error {
+
 	// validate the user is not on community's blocklist
 	if err := h.validateBlocklist(v.Addr, p.Community_id); err != nil {
 		log.Error().Err(err).Msgf(fmt.Sprintf("Address %v is on blocklist for community id %v.\n", v.Addr, p.Community_id))
@@ -426,11 +427,11 @@ func (h *Helpers) validateVote(p models.Proposal, v models.Vote) error {
 	} else {
 		// validate proper message format
 		// hex decode before validating
-		decodedMessage, _ := hex.DecodeString(v.Message)
-		if err := models.ValidateVoteMessage(string(decodedMessage), p); err != nil {
+		if err := models.ValidateVoteMessage(v.Message, p); err != nil {
 			log.Error().Err(err)
 			return err
 		}
+
 		if err := h.validateUserSignature(v.Addr, v.Message, v.Composite_signatures); err != nil {
 			return err
 		}
@@ -942,7 +943,8 @@ func (h *Helpers) validateUserSignature(addr string, message string, sigs *[]sha
 		return nil
 	}
 
-	if err := h.A.FlowAdapter.ValidateSignature(addr, message, sigs, "USER"); err != nil {
+	hexMessage := hex.EncodeToString([]byte(message))
+	if err := h.A.FlowAdapter.ValidateSignature(addr, hexMessage, sigs, "USER"); err != nil {
 		return err
 	}
 

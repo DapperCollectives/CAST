@@ -2,7 +2,6 @@ package test_utils
 
 import (
 	"bytes"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -97,7 +96,7 @@ func (otu *OverflowTestUtils) GenerateCancelProposalStruct(
 	compositeSignatures := otu.GenerateCompositeSignatures(signer, timestamp)
 	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", signer))
 	payload.Signing_addr = fmt.Sprintf("0x%s", account.Address().String())
-	payload.Timestamp = hex.EncodeToString([]byte(timestamp))
+	payload.Timestamp = timestamp
 	payload.Composite_signatures = compositeSignatures
 
 	return &payload
@@ -120,10 +119,9 @@ func (otu *OverflowTestUtils) GenerateClosedProposalStruct(
 
 func (otu *OverflowTestUtils) GenerateProposalPayload(signer string, proposal *models.Proposal) *models.Proposal {
 	timestamp := fmt.Sprint(time.Now().UnixNano() / int64(time.Millisecond))
-	hexTimestamp := hex.EncodeToString([]byte(fmt.Sprint(timestamp)))
 	compositeSignatures := otu.GenerateCompositeSignatures(signer, timestamp)
 
-	proposal.Timestamp = hexTimestamp
+	proposal.Timestamp = timestamp
 	proposal.Composite_signatures = compositeSignatures
 
 	return proposal
