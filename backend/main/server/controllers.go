@@ -359,6 +359,12 @@ func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	if payload.Proposal_threshold != nil && payload.Only_authors_to_submit != nil {
+		err = validateProposalThreshold(*payload.Proposal_threshold, *payload.Only_authors_to_submit)
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, err.Error())
+		}
+	}
 
 	c, httpStatus, err := helpers.createCommunity(payload)
 	if err != nil {
@@ -389,6 +395,12 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			respondWithError(w, http.StatusBadRequest, err.Error())
 			return
+		}
+	}
+	if payload.Proposal_threshold != nil && payload.Only_authors_to_submit != nil {
+		err = validateProposalThreshold(*payload.Proposal_threshold, *payload.Only_authors_to_submit)
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, err.Error())
 		}
 	}
 
