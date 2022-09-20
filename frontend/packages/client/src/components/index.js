@@ -46,4 +46,5 @@ export { default as Form } from './common/Form';
 export { default as Input } from './Input';
 export { default as TooltipMessage } from './TooltipMessage';
 export { default as FadeInOut } from './FadeInOut';
+export { default as Pill } from './Pill';
 export * from './Proposal';

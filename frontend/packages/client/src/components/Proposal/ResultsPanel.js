@@ -1,5 +1,5 @@
 import { Svg } from '@cast/shared-components';
-import { StatusLabel } from 'components';
+import { Pill } from 'components';
 import { FilterValues } from 'const';
 import { parseDateFromServer } from 'utils';
 
@@ -70,12 +70,6 @@ export default function ResultsPanel({
 } = {}) {
   const status = FilterValues[computedStatus] ?? FilterValues.closed;
 
-  <StatusLabel
-    margin="mr-3"
-    status={<b>Upcoming</b>}
-    color="has-background-orange"
-    className="smaller-text"
-  />;
   const iconStatusMap = {
     [FilterValues.active]: <Svg name="Active" />,
   };
@@ -92,18 +86,11 @@ export default function ResultsPanel({
     <div
       className={`has-background-white-ter rounded p-1-mobile p-5-tablet p-5_5-desktop`}
     >
-      <div className="columns mb-5">
-        <div className="colum">
-          {' '}
-          <StatusLabel
-            margin="mr-3"
-            status={<b>Active</b>}
-            color="has-background-orange"
-            className="smaller-text"
-            rounder
-          />
+      <div className="columns m-0 p-0">
+        <div className="column is-narrow">
+          <Pill status="Active" backgroundColorClass="has-background-warning" />
         </div>
-        <div className="colum">
+        <div className="column">
           {iconStatusMap[status]} {textDescriptionMap?.[status]}
         </div>
       </div>
