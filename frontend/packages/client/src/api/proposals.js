@@ -8,7 +8,9 @@ import { checkResponse } from 'utils';
 
 export const fetchProposalUserVotes = async ({ addr, proposalIds }) => {
   const response = await fetch(
-    `${API_BASE_URL}/votes/${addr}?proposalIds=[${proposalIds.join(',')}]`
+    `${API_BASE_URL}/votes/${addr}?proposalIds=[${
+      proposalIds ? proposalIds.join(',') : ''
+    }]`
   );
   return checkResponse(response);
 };
