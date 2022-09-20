@@ -2,13 +2,14 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"testing"
 
 	"github.com/DapperCollectives/CAST/backend/main/models"
 	"github.com/DapperCollectives/CAST/backend/main/shared"
-	"github.com/DapperCollectives/CAST/backend/main/test_utils"
-	utils "github.com/DapperCollectives/CAST/backend/main/test_utils"
+	"github.com/DapperCollectives/CAST/backend/tests/test_utils"
+	utils "github.com/DapperCollectives/CAST/backend/tests/test_utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -51,6 +52,8 @@ func TestCreateCommunity(t *testing.T) {
 	// Create Community
 	communityStruct := otu.GenerateCommunityStruct("account")
 	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
+
+	fmt.Printf("%+v\n", communityPayload)
 
 	response := otu.CreateCommunityAPI(communityPayload)
 	checkResponseCode(t, http.StatusCreated, response.Code)

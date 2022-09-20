@@ -133,9 +133,9 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	vote, httpStatus, err := helpers.createVote(r, proposal)
+	vote, e := helpers.createVote(r, proposal)
 	if err != nil {
-		respondWithError(w, httpStatus, err.Error())
+		respondWithError(w, e.status, e.err.Error())
 		return
 	}
 
@@ -180,9 +180,9 @@ func (a *App) getProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c, httpStatus, err := helpers.fetchCommunity(p.Community_id)
-	if err != nil {
-		respondWithError(w, httpStatus, err.Error())
+	c, e := helpers.fetchCommunity(p.Community_id)
+	if e.err != nil {
+		respondWithError(w, e.status, e.err.Error())
 		return
 	}
 
@@ -216,9 +216,9 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	proposal, httpStatus, err := helpers.createProposal(p)
-	if err != nil {
-		respondWithError(w, httpStatus, err.Error())
+	proposal, e := helpers.createProposal(p)
+	if e.err != nil {
+		respondWithError(w, e.status, e.err.Error())
 		return
 	}
 
@@ -300,7 +300,7 @@ func (a *App) getCommunities(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) searchCommunities(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	results, err := helpers.searchCommuntities(vars["query"])
+	results, err := helpers.searchCommunities(vars["query"])
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 	}
@@ -316,10 +316,10 @@ func (a *App) getCommunity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c, httpStatus, err := helpers.fetchCommunity(id)
-	if err != nil {
+	c, e := helpers.fetchCommunity(id)
+	if e.err != nil {
 		fmt.Printf("err: %v", err)
-		respondWithError(w, httpStatus, err.Error())
+		respondWithError(w, e.status, e.err.Error())
 		return
 	}
 
@@ -392,9 +392,9 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	c, httpStatus, err := helpers.updateCommunity(id, payload)
-	if err != nil {
-		respondWithError(w, httpStatus, err.Error())
+	c, e := helpers.updateCommunity(id, payload)
+	if e.err != nil {
+		respondWithError(w, e.status, e.err.Error())
 		return
 	}
 
