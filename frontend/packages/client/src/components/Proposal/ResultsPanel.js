@@ -6,18 +6,22 @@ import { parseDateFromServer } from 'utils';
 
 const Results = ({ voteResults, computedStatus }) => {
   // sort results array if proposal is closed or active
+
+  const sortedResults = useMemo(
+    () =>
+      Object.entries(voteResults).sort(([, valueA], [, valueB]) => {
+        return valueA >= valueB ? -1 : 1;
+      }),
+    [voteResults]
+  );
+
+  // get leader if proposal is closed or active
   let leadingOption;
   if (
     [FilterValues.closed, FilterValues.active].includes(
       FilterValues[computedStatus]
     )
   ) {
-    const sortedResults = Object.entries(voteResults).sort(
-      ([, valueA], [, valueB]) => {
-        return valueA >= valueB ? -1 : 1;
-      }
-    );
-    console.log('sortedResults', sortedResults);
     const [first] = sortedResults;
     leadingOption = first;
   }
