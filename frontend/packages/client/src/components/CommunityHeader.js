@@ -18,14 +18,17 @@ export default function CommunityHeader({
 
   return (
     <div className="is-flex is-flex-direction-column">
-      <div
-        className="is-flex community-header-wrapper"
-        style={{
-          backgroundImage: bannerImgUrl ? `url(${bannerImgUrl})` : 'none',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      />
+      <div className="is-flex flex-1 is-justify-content-center pt-2-tablet">
+        <div
+          className="is-flex community-header-wrapper"
+          style={{
+            backgroundImage: bannerImgUrl ? `url(${bannerImgUrl})` : 'none',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            maxWidth: '1300px',
+          }}
+        />
+      </div>
       <div className="is-flex section py-0">
         <div className="container">
           <div

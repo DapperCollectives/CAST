@@ -133,9 +133,9 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	vote, httpStatus, err := helpers.createVote(r, proposal)
+	vote, e := helpers.createVote(r, proposal)
 	if err != nil {
-		respondWithError(w, httpStatus, err.Error())
+		respondWithError(w, e.status, e.err.Error())
 		return
 	}
 
@@ -180,9 +180,9 @@ func (a *App) getProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c, httpStatus, err := helpers.fetchCommunity(p.Community_id)
-	if err != nil {
-		respondWithError(w, httpStatus, err.Error())
+	c, e := helpers.fetchCommunity(p.Community_id)
+	if e.err != nil {
+		respondWithError(w, e.status, e.err.Error())
 		return
 	}
 
@@ -216,9 +216,9 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	proposal, httpStatus, err := helpers.createProposal(p)
-	if err != nil {
-		respondWithError(w, httpStatus, err.Error())
+	proposal, e := helpers.createProposal(p)
+	if e.err != nil {
+		respondWithError(w, e.status, e.err.Error())
 		return
 	}
 
@@ -300,7 +300,7 @@ func (a *App) getCommunities(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) searchCommunities(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	results, err := helpers.searchCommuntities(vars["query"])
+	results, err := helpers.searchCommunities(vars["query"])
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 	}
@@ -316,10 +316,10 @@ func (a *App) getCommunity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c, httpStatus, err := helpers.fetchCommunity(id)
-	if err != nil {
+	c, e := helpers.fetchCommunity(id)
+	if e.err != nil {
 		fmt.Printf("err: %v", err)
-		respondWithError(w, httpStatus, err.Error())
+		respondWithError(w, e.status, e.err.Error())
 		return
 	}
 
@@ -359,6 +359,12 @@ func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	if payload.Proposal_threshold != nil && payload.Only_authors_to_submit != nil {
+		err = validateProposalThreshold(*payload.Proposal_threshold, *payload.Only_authors_to_submit)
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, err.Error())
+		}
+	}
 
 	c, httpStatus, err := helpers.createCommunity(payload)
 	if err != nil {
@@ -383,7 +389,7 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//Validate Strategies & Proposal Thresholds
+	//Validate Contract Thresholds
 	if payload.Strategies != nil {
 		err = validateContractThreshold(*payload.Strategies)
 		if err != nil {
@@ -391,14 +397,31 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	if payload.Proposal_threshold != nil && payload.Only_authors_to_submit != nil {
+		err = validateProposalThreshold(*payload.Proposal_threshold, *payload.Only_authors_to_submit)
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, err.Error())
+		}
+	}
 
-	c, httpStatus, err := helpers.updateCommunity(id, payload)
-	if err != nil {
-		respondWithError(w, httpStatus, err.Error())
+	c, e := helpers.updateCommunity(id, payload)
+	if e.err != nil {
+		respondWithError(w, e.status, e.err.Error())
 		return
 	}
 
 	respondWithJSON(w, http.StatusOK, c)
+}
+
+func validateConractThreshold(s []models.Strategy) error {
+	for _, s := range s {
+		if s.Threshold != nil {
+			if *s.Threshold < 1 {
+				return errors.New("Contract Threshold Cannot Be < 1.")
+			}
+		}
+	}
+	return nil
 }
 
 // Voting Strategies

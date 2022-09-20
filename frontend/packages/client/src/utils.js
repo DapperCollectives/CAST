@@ -280,3 +280,46 @@ export function truncateAddress(str, initial = 3, tail = 10) {
     str.substr((tail - str.length) * -1, str.length)
   );
 }
+
+export const getCroppedImg =
+  ({ dWidth, dHeight, fileName }) =>
+  (sourceImage, croppedAreaPixels) => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) {
+      return null;
+    }
+    canvas.width = dWidth;
+    canvas.height = dHeight;
+    ctx.drawImage(
+      sourceImage,
+      croppedAreaPixels.x,
+      croppedAreaPixels.y,
+      croppedAreaPixels.width,
+      croppedAreaPixels.height,
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+    try {
+      return new Promise((resolve) => {
+        canvas.toBlob((file) => {
+          const blobImageNoType = file;
+          //A Blob() is almost a File() - it's just missing the two properties below
+          blobImageNoType.lastModifiedDate = new Date();
+          blobImageNoType.name = fileName;
+          const blobAsFile = blobImageNoType;
+          resolve({
+            file: blobAsFile, //
+            imageUrl: URL.createObjectURL(blobAsFile),
+          });
+        }, 'image/jpeg');
+      });
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  };
