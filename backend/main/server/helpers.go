@@ -1152,3 +1152,14 @@ func validateContractThreshold(s []models.Strategy) error {
 	}
 	return nil
 }
+
+func validateProposalThreshold(threshold string, onlyAuthorsToSubmit bool) error {
+	propThreshold, err := strconv.ParseFloat(threshold, 64)
+	if err != nil {
+		return errors.New("Error Converting Proposal Threshold to Float.")
+	}
+	if !onlyAuthorsToSubmit && propThreshold < 1 {
+		return errors.New("Proposal Threshold cannot be less than 1.")
+	}
+	return nil
+}

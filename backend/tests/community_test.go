@@ -69,13 +69,26 @@ func TestCreateCommunity(t *testing.T) {
 	assert.NotNil(t, community.ID)
 }
 
-func TestCreateCommunityFail(t *testing.T) {
+func TestCreateCommunityFailStrategy(t *testing.T) {
 	// Prep
 	clearTable("communities")
 	clearTable("community_users")
 
 	// Create Community
-	communityStruct := otu.GenerateFailCommunityStruct("account")
+	communityStruct := otu.GenerateFailStrategyCommunityStruct("account")
+	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
+
+	response := otu.CreateCommunityAPI(communityPayload)
+	checkResponseCode(t, http.StatusBadRequest, response.Code)
+}
+
+func TestCreateCommunityFailThreshold(t *testing.T) {
+	// Prep
+	clearTable("communities")
+	clearTable("community_users")
+
+	// Create Community
+	communityStruct := otu.GenerateFailThresholdCommunityStruct("account")
 	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
 
 	response := otu.CreateCommunityAPI(communityPayload)

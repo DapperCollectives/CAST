@@ -359,6 +359,12 @@ func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	if payload.Proposal_threshold != nil && payload.Only_authors_to_submit != nil {
+		err = validateProposalThreshold(*payload.Proposal_threshold, *payload.Only_authors_to_submit)
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, err.Error())
+		}
+	}
 
 	c, httpStatus, err := helpers.createCommunity(payload)
 	if err != nil {
@@ -383,12 +389,18 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//Validate Strategies & Proposal Thresholds
+	//Validate Contract Thresholds
 	if payload.Strategies != nil {
 		err = validateContractThreshold(*payload.Strategies)
 		if err != nil {
 			respondWithError(w, http.StatusBadRequest, err.Error())
 			return
+		}
+	}
+	if payload.Proposal_threshold != nil && payload.Only_authors_to_submit != nil {
+		err = validateProposalThreshold(*payload.Proposal_threshold, *payload.Only_authors_to_submit)
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, err.Error())
 		}
 	}
 
@@ -399,6 +411,17 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondWithJSON(w, http.StatusOK, c)
+}
+
+func validateConractThreshold(s []models.Strategy) error {
+	for _, s := range s {
+		if s.Threshold != nil {
+			if *s.Threshold < 1 {
+				return errors.New("Contract Threshold Cannot Be < 1.")
+			}
+		}
+	}
+	return nil
 }
 
 // Voting Strategies
