@@ -1,8 +1,8 @@
 import { Svg } from '@cast/shared-components';
 
 export default function ErrorModal({
-  headerTitle = 'Error',
-  errorMessage = '',
+  title = 'Error',
+  message = '',
   onClose = () => {},
   // external link
   faqLink = null,
@@ -12,12 +12,12 @@ export default function ErrorModal({
     <div className="modal-error">
       <div className="modal-error-header">
         <Svg name="ErrorOutline" />
-        <p className="modal-error-title">{headerTitle}</p>
+        <p className="modal-error-title">{title}</p>
         <div className="is-flex cursor-pointer" onClick={onClose}>
           <Svg name="Close" width="18" heigth="18" />
         </div>
       </div>
-      <div className="modal-error-message">{errorMessage}</div>
+      <div className="modal-error-message">{message}</div>
       <div className="modal-error-footer">
         {!footerComponent ? (
           <>
