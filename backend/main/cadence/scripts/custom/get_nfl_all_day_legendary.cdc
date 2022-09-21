@@ -1,25 +1,17 @@
 import AllDay from 0xe4cf4bdc1751c65d 
 
-pub fun main(address: Address): [UInt64] {
+pub fun main(query: String): [UInt64] {
+    let editionIDs: [UInt64] = []
+    var id: UInt64 = 1
 
-    let account = getAccount(address)
+    while id < AllDay.nextEditionID {
+		var edition: AllDay.EditionData = AllDay.getEditionData(id: id)
 
-    let collectionRef = account.getCapability(/public/AllDayNFTCollection)
-                            .borrow<&{AllDay.MomentNFTCollectionPublic}>()!
-
-    let ids = collectionRef.getIDs()
-
-    let nftIds: [UInt64] = []
-
-    for id in ids {
-        let nft = collectionRef.borrowNFT(id: id)!
-        let view = nft.resolveView(Type<AllDay.AllDayMomentMetadataView>())!
-        let metadata = view as! AllDay.AllDayMomentMetadataView
-
-        if metadata.teamAtMoment == "Portland Trailblazers" {
-             nftIds.append(id)
-        }
+		if edition.tier == query {
+			editionIDs.append(edition.id)
+		}
+        id = id + 1
     }
-    
-    return nftIds
+
+    return editionIDs 
 }
