@@ -5,6 +5,7 @@ import { HashRouter as Router } from 'react-router-dom';
 import NotificationModalProvider from 'contexts/NotificationModal';
 import { Web3Provider } from 'contexts/Web3';
 import { ErrorHandler } from 'components';
+import { IS_PRODUCTION } from 'const';
 import Hotjar from '@hotjar/browser';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
@@ -36,7 +37,7 @@ function App() {
             </Router>
           </NotificationModalProvider>
         </Web3Provider>
-        <ReactQueryDevtools initialIsOpen={false} />
+        {!IS_PRODUCTION && <ReactQueryDevtools initialIsOpen={false} />}
       </QueryClientProvider>
     </ErrorBoundary>
   );
