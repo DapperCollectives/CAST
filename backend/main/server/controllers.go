@@ -134,7 +134,7 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	vote, e := helpers.createVote(r, proposal)
-	if err != nil {
+	if e.err != nil {
 		respondWithError(w, e.status, e.err.Error())
 		return
 	}
