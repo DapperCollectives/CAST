@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useModalContext } from 'contexts/NotificationModal';
@@ -438,6 +438,7 @@ export default function ProposalPage() {
                 <ul>
                   <li className={`${visibleTab.proposal ? 'is-active' : ''}`}>
                     <Tablink
+                      className="has-text-weight-bold"
                       linkText="Proposal"
                       onClick={setTab('proposal')}
                       isActive={visibleTab.proposal}
@@ -446,7 +447,8 @@ export default function ProposalPage() {
                   </li>
                   <li className={`${visibleTab.summary ? 'is-active' : ''}`}>
                     <Tablink
-                      linkText="Summary"
+                      className="has-text-weight-bold"
+                      linkText="Results & Details"
                       onClick={setTab('summary')}
                       isActive={visibleTab.summary}
                       onlyLink
@@ -502,7 +504,7 @@ export default function ProposalPage() {
                         left: '-1rem',
                         zIndex: -1,
                         height: '600px',
-                        bottom: '-21px',
+                        top: '-1.5rem',
                       }}
                     />
                     <ProposalInformation
@@ -515,6 +517,7 @@ export default function ProposalPage() {
                       startTime={proposal.startTime}
                       endTime={proposal.endTime}
                       computedStatus={proposal.computedStatus}
+                      communityId={proposal.communityId}
                       openStrategyModal={openStrategyModal}
                     />
                   </div>
@@ -568,6 +571,10 @@ export default function ProposalPage() {
                   startTime={proposal.startTime}
                   endTime={proposal.endTime}
                   computedStatus={proposal.computedStatus}
+                  communityId={proposal.communityId}
+                  proposalStrategy={proposal.strategy}
+                  proposalMaxWeight={proposal?.maxWeight}
+                  proposalMinBalance={proposal?.minBalance}
                   openStrategyModal={openStrategyModal}
                 />
               </div>
