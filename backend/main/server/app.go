@@ -127,10 +127,21 @@ func (a *App) Initialize() {
 
 	// Postgres
 	dbname := os.Getenv("DB_NAME")
+
+	// IPFS
+	flag.Bool("ipfs-override", false, "overrides ipfs call")
+
+	// TEST Env
 	if os.Getenv("APP_ENV") == "TEST" {
 		dbname = os.Getenv("TEST_DB_NAME")
+		flag.Bool("ipfs-override", true, "overrides ipfs call")
+	}
+	// DEV Env
+	if os.Getenv("APP_ENV") == "DEV" {
+		flag.Bool("ipfs-override", true, "overrides ipfs call")
 	}
 
+	// Postgres
 	a.ConnectDB(
 		os.Getenv("DB_USERNAME"),
 		os.Getenv("DB_PASSWORD"),
