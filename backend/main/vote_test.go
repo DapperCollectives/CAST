@@ -124,7 +124,7 @@ func TestCreateVote(t *testing.T) {
 		json.Unmarshal(response.Body.Bytes(), &createdVote)
 
 		// assert.Equal(t, "user1", createdVote.Addr)
-		assert.Equal(t, voteChoice, createdVote.Choice)
+		assert.Equal(t, voteChoice, createdVote.Choices[0])
 		assert.Equal(t, proposalId, createdVote.Proposal_id)
 		assert.Equal(t, 1, createdVote.ID)
 	})

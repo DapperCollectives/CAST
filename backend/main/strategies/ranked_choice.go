@@ -5,17 +5,17 @@ import (
 	"math"
 
 	"github.com/DapperCollectives/CAST/backend/main/models"
-	"github.com/DapperCollectives/CAST/backend/main/shared"
+	shared "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/rs/zerolog/log"
 )
 
-type StakedTokenWeightedDefault struct {
+type RankedChoice struct {
 	shared.StrategyStruct
 	SC shared.SnapshotClient
 	DB *shared.Database
 }
 
-func (s *StakedTokenWeightedDefault) FetchBalance(
+func (s *RankedChoice) FetchBalance(
 	b *models.Balance,
 	p *models.Proposal,
 ) (*models.Balance, error) {
@@ -35,6 +35,7 @@ func (s *StakedTokenWeightedDefault) FetchBalance(
 		log.Error().Err(err).Msg("Error calling snapshot client")
 		return nil, err
 	}
+
 	if err := b.CreateBalance(s.DB); err != nil {
 		log.Error().Err(err).Msg("Error creating balance in the database.")
 		return nil, err
@@ -43,7 +44,7 @@ func (s *StakedTokenWeightedDefault) FetchBalance(
 	return b, nil
 }
 
-func (s *StakedTokenWeightedDefault) FetchBalanceFromSnapshot(
+func (s *RankedChoice) FetchBalanceFromSnapshot(
 	strategy *models.Strategy,
 	b *models.Balance,
 ) error {
@@ -82,21 +83,33 @@ func (s *StakedTokenWeightedDefault) FetchBalanceFromSnapshot(
 
 	return nil
 }
-func (s *StakedTokenWeightedDefault) TallyVotes(
+
+func (s *RankedChoice) TallyVotes(
 	votes []*models.VoteWithBalance,
 	r *models.ProposalResults,
 	p *models.Proposal,
 ) (models.ProposalResults, error) {
-	var zero uint64 = 0
+
+	//TODO: Ranked Choice Algorithm goes here
+
+	// use a map of choices that contains a count
+	// while winner === false
+	// 		after counting all of the votes and updating the map with the voted on choices
+	// 		determine if there is a winner
+	//		if winner - break, return results
+	//		else
+	//			find lowest voted on choice
+	//			go through every vote again,
+	//			if choice was 1st on vote, cast next place choice choice
 
 	for _, vote := range votes {
-		if *vote.StakingBalance != zero {
+		if vote.PrimaryAccountBalance != nil {
 			var allowedBalance float64
 
 			if p.Max_weight != nil {
-				allowedBalance = p.EnforceMaxWeight(float64(*vote.StakingBalance))
+				allowedBalance = p.EnforceMaxWeight(float64(*vote.PrimaryAccountBalance))
 			} else {
-				allowedBalance = float64(*vote.StakingBalance)
+				allowedBalance = float64(*vote.PrimaryAccountBalance)
 			}
 
 			r.Results[vote.Choices[0]] += int(allowedBalance)
@@ -107,18 +120,18 @@ func (s *StakedTokenWeightedDefault) TallyVotes(
 	return *r, nil
 }
 
-func (s *StakedTokenWeightedDefault) GetVoteWeightForBalance(
+func (s *RankedChoice) GetVoteWeightForBalance(
 	vote *models.VoteWithBalance,
 	proposal *models.Proposal,
 ) (float64, error) {
 	var weight float64
-	var ERROR error = fmt.Errorf("no weight found, address: %s, strategy: %s", vote.Addr, *proposal.Strategy)
+	var ERROR error = fmt.Errorf("No weight found, address: %s, strategy: %s.", vote.Addr, *proposal.Strategy)
 
-	if vote.StakingBalance == nil {
+	if vote.PrimaryAccountBalance == nil {
 		return 0.00, nil
 	}
 
-	weight = float64(*vote.StakingBalance) * math.Pow(10, -8)
+	weight = float64(*vote.PrimaryAccountBalance) * math.Pow(10, -8)
 
 	switch {
 	case proposal.Max_weight != nil && weight > *proposal.Max_weight:
@@ -126,16 +139,16 @@ func (s *StakedTokenWeightedDefault) GetVoteWeightForBalance(
 		return weight, nil
 	case proposal.Max_weight != nil && weight < *proposal.Max_weight:
 		return weight, nil
-	case weight > 0.00:
-		return weight, nil
 	case weight == 0.00:
 		return 0.00, nil
+	case weight > 0.00:
+		return weight, nil
 	default:
 		return weight, ERROR
 	}
 }
 
-func (s *StakedTokenWeightedDefault) GetVotes(
+func (s *RankedChoice) GetVotes(
 	votes []*models.VoteWithBalance,
 	proposal *models.Proposal,
 ) ([]*models.VoteWithBalance, error) {
@@ -147,15 +160,14 @@ func (s *StakedTokenWeightedDefault) GetVotes(
 		}
 		vote.Weight = &weight
 	}
-
 	return votes, nil
 }
 
-func (s *StakedTokenWeightedDefault) RequiresSnapshot() bool {
+func (s *RankedChoice) RequiresSnapshot() bool {
 	return true
 }
 
-func (s *StakedTokenWeightedDefault) InitStrategy(
+func (s *RankedChoice) InitStrategy(
 	f *shared.FlowAdapter,
 	db *shared.Database,
 	sc *shared.SnapshotClient,

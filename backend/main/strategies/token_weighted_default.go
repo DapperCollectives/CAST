@@ -5,15 +5,14 @@ import (
 	"math"
 
 	"github.com/DapperCollectives/CAST/backend/main/models"
-	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	shared "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/rs/zerolog/log"
 )
 
 type TokenWeightedDefault struct {
-	s.StrategyStruct
-	SC s.SnapshotClient
-	DB *s.Database
+	shared.StrategyStruct
+	SC shared.SnapshotClient
+	DB *shared.Database
 }
 
 func (s *TokenWeightedDefault) FetchBalance(
@@ -101,8 +100,8 @@ func (s *TokenWeightedDefault) TallyVotes(
 				allowedBalance = float64(*vote.PrimaryAccountBalance)
 			}
 
-			r.Results[vote.Choice] += int(allowedBalance)
-			r.Results_float[vote.Choice] += allowedBalance * math.Pow(10, -8)
+			r.Results[vote.Choices[0]] += int(allowedBalance)
+			r.Results_float[vote.Choices[0]] += allowedBalance * math.Pow(10, -8)
 		}
 	}
 
@@ -159,7 +158,7 @@ func (s *TokenWeightedDefault) RequiresSnapshot() bool {
 func (s *TokenWeightedDefault) InitStrategy(
 	f *shared.FlowAdapter,
 	db *shared.Database,
-	sc *s.SnapshotClient,
+	sc *shared.SnapshotClient,
 ) {
 	s.FlowAdapter = f
 	s.DB = db

@@ -72,7 +72,10 @@ func (otu *OverflowTestUtils) GenerateValidVotePayload(accountName string, propo
 	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", accountName))
 	address := fmt.Sprintf("0x%s", account.Address().String())
 
-	vote := models.Vote{Proposal_id: proposalId, Addr: address, Choice: choice,
+	c := make([]string, 1)
+	c[0] = choice
+
+	vote := models.Vote{Proposal_id: proposalId, Addr: address, Choices: c,
 		Composite_signatures: compositeSignatures, Message: hexMessage}
 
 	return &vote
