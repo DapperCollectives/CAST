@@ -188,19 +188,20 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
    * second element is voucher JSON parsed into an Object.  If function is successful, one element will be null.  If it fails, both elements will be null.
    */
   const signMessageByWalletProvider = async (walletProvider, cadence, data) => {
+    const hexData = Buffer.from(data).toString('hex');
     try {
       let voucher;
       switch (walletProvider) {
         case 'dapper#authn':
-          voucher = await signMessageVoucher(cadence, data);
+          voucher = await signMessageVoucher(cadence, hexData);
           return [null, voucher];
         case 'fcl-ledger-authz':
-          voucher = await signMessageVoucher(cadence, data);
+          voucher = await signMessageVoucher(cadence, hexData);
           return [null, voucher];
         default:
           const _compositeSignatures = await fcl
             .currentUser()
-            .signUserMessage(data);
+            .signUserMessage(hexData);
           return [getCompositeSigs(_compositeSignatures), null];
       }
     } catch (e) {

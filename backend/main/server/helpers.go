@@ -78,7 +78,7 @@ func (h *Helpers) useStrategyGetVoteWeight(
 	p models.Proposal,
 	v *models.VoteWithBalance,
 ) (float64, error) {
-	s := strategyMap[*p.Strategy]
+	s := h.initStrategy(*p.Strategy)
 	if s == nil {
 		return 0, errors.New("Strategy not found.")
 	}
@@ -270,7 +270,7 @@ func (h *Helpers) processVotes(
 			}
 		}
 
-		s := strategyMap[*proposal.Strategy]
+		s := h.initStrategy(*proposal.Strategy)
 		if s == nil {
 			return nil, pageParams, errors.New("Strategy not found.")
 		}
@@ -371,6 +371,7 @@ func (h *Helpers) insertVote(v models.VoteWithBalance, p models.Proposal) error 
 }
 
 func (h *Helpers) validateVote(p models.Proposal, v models.Vote) error {
+
 	// validate the user is not on community's blocklist
 	if err := h.validateBlocklist(v.Addr, p.Community_id); err != nil {
 		log.Error().Err(err).Msgf(fmt.Sprintf("Address %v is on blocklist for community id %v.\n", v.Addr, p.Community_id))
@@ -426,11 +427,11 @@ func (h *Helpers) validateVote(p models.Proposal, v models.Vote) error {
 	} else {
 		// validate proper message format
 		// hex decode before validating
-		decodedMessage, _ := hex.DecodeString(v.Message)
-		if err := models.ValidateVoteMessage(string(decodedMessage), p); err != nil {
+		if err := models.ValidateVoteMessage(v.Message, p); err != nil {
 			log.Error().Err(err)
 			return err
 		}
+
 		if err := h.validateUserSignature(v.Addr, v.Message, v.Composite_signatures); err != nil {
 			return err
 		}
@@ -942,7 +943,8 @@ func (h *Helpers) validateUserSignature(addr string, message string, sigs *[]sha
 		return nil
 	}
 
-	if err := h.A.FlowAdapter.ValidateSignature(addr, message, sigs, "USER"); err != nil {
+	hexMessage := hex.EncodeToString([]byte(message))
+	if err := h.A.FlowAdapter.ValidateSignature(addr, hexMessage, sigs, "USER"); err != nil {
 		return err
 	}
 
@@ -1149,6 +1151,17 @@ func validateContractThreshold(s []models.Strategy) error {
 				return errors.New("Contract Threshold cannot be less than 1.")
 			}
 		}
+	}
+	return nil
+}
+
+func validateProposalThreshold(threshold string, onlyAuthorsToSubmit bool) error {
+	propThreshold, err := strconv.ParseFloat(threshold, 64)
+	if err != nil {
+		return errors.New("Error Converting Proposal Threshold to Float.")
+	}
+	if !onlyAuthorsToSubmit && propThreshold < 1 {
+		return errors.New("Proposal Threshold cannot be less than 1.")
 	}
 	return nil
 }

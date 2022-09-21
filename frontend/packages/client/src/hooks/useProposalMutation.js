@@ -19,12 +19,12 @@ export default function useProposalMutation() {
     error,
   } = useMutation(
     async ({ communityId, id: proposalId, updatePayload }) => {
-      const hexTime = Buffer.from(Date.now().toString()).toString('hex');
+      const timestamp = Date.now().toString();
 
       const [compositeSignatures, voucher] = await signMessageByWalletProvider(
         user?.services[0]?.uid,
         UPDATE_PROPOSAL_TX,
-        hexTime
+        timestamp
       );
 
       if (!compositeSignatures && !voucher) {
@@ -35,7 +35,7 @@ export default function useProposalMutation() {
         communityId,
         proposalId,
         updatePayload,
-        hexTime,
+        timestamp,
         compositeSignatures,
         voucher,
       });
