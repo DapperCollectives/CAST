@@ -7,7 +7,7 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { Error } from 'components';
+import { ErrorModal } from 'components';
 import { useModalContext } from './NotificationModal';
 
 const ErrorHandlerContext = createContext({});
@@ -27,30 +27,26 @@ const ErrorHandlerProvider = ({ children }) => {
 
   const [errorOpened, setErrorOpened] = useState(false);
 
-  const { openModal, isOpen } = useModalContext();
+  const { openModal, isOpen, closeModal } = useModalContext();
 
   const closeError = useCallback(() => {
     setError(null);
     setErrorOpened(false);
-  }, []);
+    closeModal();
+  }, [closeModal]);
 
   useEffect(() => {
     if (error !== null && !errorOpened) {
       openModal(
-        createElement(Error, {
-          error: (
-            <p className="has-text-danger p-3 has-text-justified">
-              <b>{error.statusText}</b>
-            </p>
-          ),
-          errorTitle:
-            typeof error.status === 'number'
-              ? `Error code: ${error.status}`
-              : error?.status,
+        createElement(ErrorModal, {
+          onClose: closeError,
+          message: error.statusText,
+          // depending on error.status we need to change errorTitle
         }),
         {
           onClose: closeError,
-          classNameModalContent: 'rounded-sm',
+          classNameModalContent: 'is-flex is-justify-content-center rounded-sm',
+          backgroundColor: ' ',
         }
       );
       setErrorOpened(true);
