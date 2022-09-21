@@ -20,12 +20,11 @@ export default function useVoteOnProposal() {
       const timestamp = Date.now();
       const hexChoice = Buffer.from(voteData.choice).toString('hex');
       const message = `${proposal.id}:${hexChoice}:${timestamp}`;
-      const hexMessage = Buffer.from(message).toString('hex');
 
       const [compositeSignatures, voucher] = await signMessageByWalletProvider(
         user?.services[0]?.uid,
         CAST_VOTE_TX,
-        hexMessage
+        message
       );
 
       if (!compositeSignatures && !voucher) {
@@ -34,7 +33,7 @@ export default function useVoteOnProposal() {
 
       return voteOnProposalApiReq({
         voteData,
-        message: hexMessage,
+        message,
         timestamp,
         compositeSignatures,
         voucher,
