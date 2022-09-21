@@ -128,16 +128,15 @@ func (a *App) Initialize() {
 	dbname := os.Getenv("DB_NAME")
 
 	// IPFS
-	flag.Bool("ipfs-override", false, "overrides ipfs call")
+	if os.Getenv("APP_ENV") == "TEST" || os.Getenv("APP_ENV") == "DEV" {
+		flag.Bool("ipfs-override", true, "overrides ipfs call")
+	} else {
+		flag.Bool("ipfs-override", false, "overrides ipfs call")
+	}
 
 	// TEST Env
 	if os.Getenv("APP_ENV") == "TEST" {
 		dbname = os.Getenv("TEST_DB_NAME")
-		flag.Bool("ipfs-override", true, "overrides ipfs call")
-	}
-	// DEV Env
-	if os.Getenv("APP_ENV") == "DEV" {
-		flag.Bool("ipfs-override", true, "overrides ipfs call")
 	}
 
 	// Postgres
