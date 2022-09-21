@@ -1,8 +1,7 @@
-import React from 'react';
+import { createElement } from 'react';
 import { useModalContext } from 'contexts/NotificationModal';
 import { useWebContext } from 'contexts/Web3';
-import { Error } from 'components';
-import ActionButton from 'components/ActionButton';
+import { ActionButton, Error } from 'components';
 import StrategySelectorForm from 'components/Community/StrategySelectorForm';
 import { kebabToString } from 'utils';
 import isEqual from 'lodash/isEqual';
@@ -29,7 +28,9 @@ export default function CommunityProposalsAndVoting({
     await Promise.all(
       updatePayload.map(async ({ name, contract }) => {
         try {
-          await isValidFlowAddress(contract.addr);
+          if (name !== 'custom-script') {
+            await isValidFlowAddress(contract.addr);
+          }
         } catch (error) {
           // This is to bypass error on local
           // emulator when keys field is not present
@@ -49,7 +50,7 @@ export default function CommunityProposalsAndVoting({
     // open modal if there are errors on addresses
     if (errorMessages.length) {
       modalContext.openModal(
-        React.createElement(Error, {
+        createElement(Error, {
           error: (
             <div className="mt-4">
               <p className="is-size-6">
@@ -59,7 +60,7 @@ export default function CommunityProposalsAndVoting({
                 <ul>
                   {errorMessages.map((type, index) => (
                     <li key={`error-${index}`}>
-                      <p className="smaller-text mt-2 has-text-red">
+                      <p className="smaller-text mt-2 has-text-danger">
                         - {kebabToString(type)}
                       </p>
                     </li>
@@ -87,7 +88,7 @@ export default function CommunityProposalsAndVoting({
       disableAddButton={updatingCommunity}
       callToAction={(st) => (
         <ActionButton
-          label="save"
+          label="Save"
           enabled={
             updatingCommunity
               ? false

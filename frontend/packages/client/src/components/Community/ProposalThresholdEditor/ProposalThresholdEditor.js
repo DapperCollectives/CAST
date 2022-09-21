@@ -1,4 +1,3 @@
-import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useWebContext } from 'contexts/Web3';
 import { ActionButton } from 'components';
@@ -148,7 +147,7 @@ export default function ProposalThresholdEditor({
           <div className="column is-12">
             <ActionButton
               type="submit"
-              label="save"
+              label="Save"
               enabled={isDirty && !isSubmitting}
               classNames="vote-button transition-all has-background-yellow mt-5"
             />

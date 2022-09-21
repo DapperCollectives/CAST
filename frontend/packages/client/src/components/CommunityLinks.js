@@ -1,6 +1,5 @@
-import React from 'react';
+import { Svg } from '@cast/shared-components';
 import { Title } from '.';
-import { Discord, Github, Instagram, Twitter, Website } from './Svg';
 
 export default function CommunityLinks({
   instagramUrl,
@@ -19,7 +18,7 @@ export default function CommunityLinks({
           rel="noreferrer noopenner"
           href={websiteUrl}
         >
-          <Website width="20px" height="20px" />{' '}
+          <Svg name="Website" width="20px" height="20px" />{' '}
           <span className="pl-2">Website</span>
         </a>
       )}
@@ -30,7 +29,7 @@ export default function CommunityLinks({
           rel="noreferrer noopenner"
           href={discordUrl}
         >
-          <Discord width="20px" height="23.3px" />
+          <Svg name="Discord" width="20px" height="23.3px" />
           <span className="pl-2">Discord</span>
         </a>
       )}
@@ -41,7 +40,7 @@ export default function CommunityLinks({
           rel="noreferrer noopenner"
           href={instagramUrl}
         >
-          <Instagram />
+          <Svg name="Instagram" />
           <span className="pl-2">Instagram</span>
         </a>
       )}
@@ -52,7 +51,7 @@ export default function CommunityLinks({
           rel="noreferrer noopenner"
           href={twitterUrl}
         >
-          <Twitter width="20px" height="23.3px" />
+          <Svg name="Twitter" width="20px" height="23.3px" />
           <span className="pl-2">Twitter</span>
         </a>
       )}
@@ -63,7 +62,7 @@ export default function CommunityLinks({
           rel="noreferrer noopenner"
           href={githubUrl}
         >
-          <Github width="20px" height="23.3px" />
+          <Svg name="GitHub" width="20px" height="23.3px" />
           <span className="pl-2">Github</span>
         </a>
       )}

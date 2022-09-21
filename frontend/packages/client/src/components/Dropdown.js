@@ -1,6 +1,6 @@
-import React, { forwardRef, useState } from 'react';
+import { forwardRef, useState } from 'react';
+import { Svg } from '@cast/shared-components';
 import classnames from 'classnames';
-import { CaretDown } from './Svg';
 
 const DropDown = forwardRef(
   (
@@ -26,7 +26,9 @@ const DropDown = forwardRef(
     const [isOpen, setIsOpen] = useState(false);
     const [innerValue, setInnerValue] = useState(defaultValue ?? { label });
 
-    const openCloseDropdown = () => {
+    const openCloseDropdown = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       setIsOpen((status) => !status);
     };
 
@@ -83,7 +85,7 @@ const DropDown = forwardRef(
               >
                 {innerValue?.label}
               </div>
-              <CaretDown className="has-text-black" />
+              <Svg name="CaretDown" className="has-text-black" />
             </div>
           </button>
         </div>

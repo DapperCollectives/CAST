@@ -9,12 +9,11 @@ export default function useCommunityActiveVotingStrategies(communityId) {
     async () => fetchActiveStrategies(communityId),
     {
       enabled: !!communityId,
+      onError: (error) => {
+        notifyError(error);
+      },
     }
   );
-
-  if (isError) {
-    notifyError(error);
-  }
 
   return {
     isLoading,

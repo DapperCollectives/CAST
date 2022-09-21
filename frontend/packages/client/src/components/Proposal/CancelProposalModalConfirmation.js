@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Loader } from 'components';
 
 const CancelProposalModalConfirmation = ({
@@ -61,7 +61,7 @@ const CancelProposalModalConfirmation = ({
       <footer className="modal-card-foot has-background-white py-5">
         <div className="columns is-flex p-0 m-0 flex-1 is-justify-content-end">
           <button
-            className={`button column is-4 is-flex-mobile is-6-mobile p-0 is-uppercase ${
+            className={`button column is-4 is-flex-mobile is-6-mobile p-0 ${
               isCancelling && 'is-disabled'
             }`}
             onClick={onDismiss}
@@ -69,7 +69,7 @@ const CancelProposalModalConfirmation = ({
             Dismiss
           </button>
           <button
-            className={`button column is-4 is-flex-mobile is-6-mobile p-0 has-background-yellow is-uppercase ${
+            className={`button column is-4 is-flex-mobile is-6-mobile p-0 has-background-yellow ${
               isCancelling && 'is-disabled'
             }`}
             onClick={_onCancelProposal}

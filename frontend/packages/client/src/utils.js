@@ -1,6 +1,7 @@
 import { HAS_DELAY_ON_START_TIME } from 'const';
 import { formatDistance } from 'date-fns';
 import { stateToHTML } from 'draft-js-export-html';
+import { stateFromHTML } from 'draft-js-import-html';
 import { customAlphabet } from 'nanoid';
 
 const nanoid = customAlphabet('1234567890abcdef', 10);
@@ -181,6 +182,16 @@ export const customDraftToHTML = (content) => {
   return stateToHTML(content, options);
 };
 
+export const customHTMLtoDraft = (html) => {
+  const options = {
+    customBlockFn: (element) => {
+      if (element.tagName === 'P' && element.className === 'image-caption') {
+        return { type: 'image-caption-block' };
+      }
+    },
+  };
+  return stateFromHTML(html, options);
+};
 export const isValidAddress = (addr) => /0[x,X][a-zA-Z0-9]{16}$/gim.test(addr);
 
 export const wait = async (milliSeconds = 5000) =>
@@ -199,7 +210,7 @@ export const kebabToString = (str = '') => {
   return updated.charAt(0).toUpperCase() + updated.slice(1);
 };
 
-export const getPaginationInfo = (pages) => {
+export const getPaginationFromPages = (pages) => {
   if (!pages) {
     return [];
   }
@@ -212,6 +223,23 @@ export const getPaginationInfo = (pages) => {
   ];
 };
 
+export const getPagination = (data, countParam) => {
+  const [start = 0, count = countParam, totalRecords = 0, next = -1] =
+    data?.pageParam ?? getPaginationFromPages(data?.pages);
+  return {
+    count,
+    next,
+    start,
+    totalRecords,
+  };
+};
+
+export const getPlainData = (data) => {
+  return data?.pages?.reduce(
+    (prev, current) => (current.data ? [...prev, ...current.data] : prev),
+    []
+  );
+};
 export const validateLength = (string, MaxLength) =>
   string?.length <= MaxLength;
 
@@ -227,3 +255,28 @@ export const isStartTimeValid = (startTime, startDate) => {
 
   return HAS_DELAY_ON_START_TIME ? dif > 1 : true;
 };
+
+export const formatTime = (date) => {
+  let hours = date.getHours();
+  let minutes = date.getMinutes();
+  const ampm = hours >= 12 ? 'pm' : 'am';
+  hours = hours % 12;
+  hours = hours ? hours : 12; // the hour '0' should be '12'
+  minutes = minutes < 10 ? '0' + minutes : minutes;
+  return hours + ':' + minutes + ' ' + ampm;
+};
+
+export const setDefaultValue = (field, fallbackValue) => {
+  if (field === undefined || field === '') {
+    return fallbackValue;
+  }
+  return field;
+};
+
+export function truncateAddress(str, initial = 3, tail = 10) {
+  return (
+    str.substr(0, initial) +
+    '...' +
+    str.substr((tail - str.length) * -1, str.length)
+  );
+}

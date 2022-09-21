@@ -27,8 +27,8 @@ const getSchema = (formFields, isValidFlowAddress) => {
     threshold: yup
       .string()
       .trim()
-      .required('Please enter a minimun balance number')
-      .matches(/(^[0-9]+$)/, 'Proposal minimun balance be a number'),
+      .required('Please enter a minimum balance number')
+      .matches(/(^[0-9]+$)/, 'Proposal minimum balance must be a number'),
     ...(includeEvent
       ? {
           floatEventId: yup
@@ -40,4 +40,19 @@ const getSchema = (formFields, isValidFlowAddress) => {
   });
 };
 
-export { getSchema };
+const getCustomScriptSchema = () => {
+  return yup.object().shape({
+    maxWeight: yup
+      .string()
+      .trim()
+      .required('Please enter a max weight number')
+      .matches(/(^[0-9]+$)/, 'Proposal max weight must be a number'),
+    threshold: yup
+      .string()
+      .trim()
+      .required('Please enter a minimum balance number')
+      .matches(/(^[0-9]+$)/, 'Proposal minimum balance must be a number'),
+  });
+};
+
+export { getSchema, getCustomScriptSchema };

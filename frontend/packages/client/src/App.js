@@ -1,4 +1,3 @@
-import React from 'react';
 import 'react-datepicker/dist/react-datepicker.css';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -6,12 +5,13 @@ import { HashRouter as Router } from 'react-router-dom';
 import NotificationModalProvider from 'contexts/NotificationModal';
 import { Web3Provider } from 'contexts/Web3';
 import { ErrorHandler } from 'components';
+import { IS_PRODUCTION } from 'const';
 import Hotjar from '@hotjar/browser';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import AppPages from 'pages';
+import Error from 'pages/Error';
 import './App.sass';
-import AppPages from './pages';
-import Error from './pages/Error';
 
 const hotjarVersion = 6;
 Hotjar.init(process.env.REACT_APP_HOTJAR_SITE_ID, hotjarVersion);
@@ -37,7 +37,7 @@ function App() {
             </Router>
           </NotificationModalProvider>
         </Web3Provider>
-        <ReactQueryDevtools initialIsOpen={false} />
+        {!IS_PRODUCTION && <ReactQueryDevtools initialIsOpen={false} />}
       </QueryClientProvider>
     </ErrorBoundary>
   );

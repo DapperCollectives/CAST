@@ -1,28 +1,30 @@
-import React, { useEffect } from 'react';
-import { getProposalType } from 'utils';
+import { useEffect } from 'react';
+import { useFieldArray } from 'react-hook-form';
 import ImageChoiceUploader from './ImageChoiceUploader';
 
-const ImageChoices = ({ choices = [], onChoiceChange, initChoices } = {}) => {
+const ImageChoices = ({ error, control } = {}) => {
+  const [errorOptOne, errorOptTwo] = Array.isArray(error) ? error : [];
+
+  const {
+    fields: choices,
+    update,
+    append,
+  } = useFieldArray({
+    control,
+    name: 'choices',
+    focusAppend: true,
+  });
+
   useEffect(() => {
-    if (getProposalType(choices) !== 'image') {
-      initChoices([
-        {
-          id: 1,
-          value: '',
-          choiceImgUrl: '',
-        },
-        {
-          id: 2,
-          value: '',
-          choiceImgUrl: '',
-        },
-      ]);
+    if (choices.length < 2) {
+      const size = 2 - choices.length;
+      const toAdd = new Array(size).fill({ value: '', choiceImgUrl: '' });
+      append(toAdd);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [choices, append]);
 
   const onImageUpdate = (index) => (image) => {
-    onChoiceChange({ value: image.text, choiceImgUrl: image.imageUrl }, index);
+    update(index, { value: image.text, choiceImgUrl: image.imageUrl });
   };
 
   const [choiceA, choiceB] = choices;
@@ -30,7 +32,7 @@ const ImageChoices = ({ choices = [], onChoiceChange, initChoices } = {}) => {
     <>
       <div className="columns flex-1">
         <div className="column pt-4">
-          <p className="smaller-text has-text-gray">
+          <p className="smaller-text has-text-grey">
             Accepted files: PNG, JPG, GIF
           </p>
         </div>
@@ -44,6 +46,7 @@ const ImageChoices = ({ choices = [], onChoiceChange, initChoices } = {}) => {
             }}
             letterLabel="A"
             onImageUpdate={onImageUpdate(0)}
+            error={errorOptOne}
           />
         </div>
         <div className="column">
@@ -54,6 +57,7 @@ const ImageChoices = ({ choices = [], onChoiceChange, initChoices } = {}) => {
             }}
             letterLabel="B"
             onImageUpdate={onImageUpdate(1)}
+            error={errorOptTwo}
           />
         </div>
       </div>

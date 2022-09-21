@@ -1,5 +1,3 @@
-import React from 'react';
-
 const StrategyModal = ({ isOpen, closeModal, strategy }) => {
   return (
     <div className={`modal ${isOpen ? 'is-active' : undefined}`}>

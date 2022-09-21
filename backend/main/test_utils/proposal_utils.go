@@ -97,7 +97,7 @@ func (otu *OverflowTestUtils) GenerateCancelProposalStruct(
 	compositeSignatures := otu.GenerateCompositeSignatures(signer, timestamp)
 	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", signer))
 	payload.Signing_addr = fmt.Sprintf("0x%s", account.Address().String())
-	payload.Timestamp = timestamp
+	payload.Timestamp = hex.EncodeToString([]byte(timestamp))
 	payload.Composite_signatures = compositeSignatures
 
 	return &payload

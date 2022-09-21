@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import { useWebContext } from 'contexts/Web3';
 import {
@@ -29,7 +29,7 @@ const CommunitySettingsButton = ({ communityId } = {}) => {
       <div className="column is-11">
         <Link to={`/community/${communityId}/edit`}>
           <div
-            className="button is-fullwidth rounded-sm is-uppercase is-flex small-text has-text-white has-background-black"
+            className="button is-fullwidth rounded-sm is-flex small-text has-text-white has-background-black"
             style={{ minHeight: '40px' }}
           >
             Community Settings
@@ -156,12 +156,12 @@ export default function Community() {
     roles: ['admin'],
   });
 
-  const { data: admins, reFetch: reFetchAdmins } = useCommunityUsers({
+  const { data: admins, queryKey: queryKeyAdmins } = useCommunityUsers({
     communityId,
     type: 'admin',
   });
 
-  const { data: authors, reFetch: reFetchAuthors } = useCommunityUsers({
+  const { data: authors, queryKey: queryKeyAuthors } = useCommunityUsers({
     communityId,
     type: 'author',
   });
@@ -171,11 +171,6 @@ export default function Community() {
     pagination: { totalRecords },
     queryKey,
   } = useCommunityMembers({ communityId, count: 18 });
-
-  const [totalMembers, setTotalMembers] = useState();
-  useEffect(() => {
-    setTotalMembers(totalRecords);
-  }, [totalRecords]);
 
   // these two fields should be coming from backend as configuration
   const showPulse = false;
@@ -223,10 +218,10 @@ export default function Community() {
     // if current user leaving community is admin or author
     // trigger update on admin and author list
     if (authors?.find((author) => author.addr === addr)) {
-      await reFetchAuthors();
+      await queryClient.invalidateQueries(queryKeyAuthors);
     }
     if (admins?.find((admin) => admin.addr === addr)) {
-      await reFetchAdmins();
+      await queryClient.invalidateQueries(queryKeyAdmins);
     }
 
     if (members?.find((member) => member.addr === addr)) {
@@ -255,6 +250,7 @@ export default function Community() {
     slug,
     id,
     name,
+    body,
   } = community ?? {};
 
   return (
@@ -266,9 +262,8 @@ export default function Community() {
         logo={logo}
         slug={slug}
         communityName={name}
-        totalMembers={totalMembers}
+        totalMembers={totalRecords}
         members={members?.slice(0, 6)}
-        setTotalMembers={setTotalMembers}
         onLeaveCommunity={onUserLeaveCommunity}
         onJoinCommunity={onUserJoinCommunity}
       />
@@ -304,7 +299,7 @@ export default function Community() {
                       <Tablink
                         ref={proposalRef}
                         linkText="Proposals"
-                        linkUrl={`/community/${community.id}?tab=proposals`}
+                        linkUrl={`/community/${id}?tab=proposals`}
                         isActive={activeTabMap['proposals']}
                         className="tab-community pb-4 px-2 mr-4"
                       />
@@ -317,7 +312,7 @@ export default function Community() {
                       <Tablink
                         ref={memberRef}
                         linkText="Members"
-                        linkUrl={`/community/${community.id}?tab=members`}
+                        linkUrl={`/community/${id}?tab=members`}
                         isActive={activeTabMap['members']}
                         className="tab-community pb-4 px-2 mx-4"
                       />
@@ -328,7 +323,7 @@ export default function Community() {
                       <Tablink
                         ref={aboutRef}
                         linkText="About"
-                        linkUrl={`/community/${community.id}?tab=about`}
+                        linkUrl={`/community/${id}?tab=about`}
                         isActive={activeTabMap['about']}
                         className="tab-community pb-4 px-2 ml-4"
                       />
@@ -343,7 +338,7 @@ export default function Community() {
                       showLeaderBoard && (
                         <LeaderBoard
                           onClickViewMore={onClickViewMore}
-                          communityId={community.id}
+                          communityId={id}
                         />
                       )
                     }
@@ -359,9 +354,7 @@ export default function Community() {
                     communityAbout={
                       <CommunityAbout
                         isMobile={!notMobile}
-                        textAbout={
-                          community?.about?.textAbout || community?.body
-                        }
+                        textAbout={body}
                         adminMembers={(admins ?? []).map((admin) => ({
                           name: admin.addr,
                         }))}
@@ -378,10 +371,7 @@ export default function Community() {
                   />
                 )}
                 {activeTabMap['proposals'] && (
-                  <CommunityProposals
-                    communityId={community.id}
-                    admins={admins ?? []}
-                  />
+                  <CommunityProposals communityId={id} admins={admins ?? []} />
                 )}
                 {activeTabMap['members'] && (
                   <MembersLayout
@@ -395,7 +385,7 @@ export default function Community() {
                       />
                     }
                     communityMemberList={
-                      <CommunityMemberList communityId={community.id} />
+                      <CommunityMemberList communityId={id} />
                     }
                   />
                 )}

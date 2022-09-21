@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { Svg } from '@cast/shared-components';
 import { Loader } from 'components';
-import { Bin, Upload } from 'components/Svg';
 import { useFileUploader, useMediaQuery } from 'hooks';
 import { MAX_PROPOSAL_IMAGE_FILE_SIZE } from 'const';
 
@@ -20,7 +20,11 @@ function ImageUploader({
   deleteImage,
   onUploadStared,
 }) {
-  const { uploadFile, loading, error } = useFileUploader({
+  const {
+    uploadFile,
+    isLoading: loading,
+    error,
+  } = useFileUploader({
     useModalNotifications: false,
   });
   useEffect(() => {
@@ -90,7 +94,7 @@ function ImageUploader({
       </div>
       <div className="column column is-flex is-align-items-center is-justify-content-flex-end p-0 is-1">
         <div className="cursor-pointer" onClick={() => deleteImage(imageKey)}>
-          <Bin />
+          <Svg name="Bin" />
         </div>
       </div>
     </>
@@ -118,7 +122,7 @@ const UploadArea = ({ getRootProps, getInputProps, enableUpload }) => {
     >
       {enableUpload && (
         <div className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center">
-          <Upload width="36" height="30" />
+          <Svg name="Upload" width="36" height="30" />
           <span className="smaller-text pt-3 pb-1">Drag and drop here </span>
           <span className="smaller-text py-1"> or </span>
           <span className="smaller-text py-1">
@@ -308,13 +312,13 @@ export default function UploadImageModal({
               </div>
             )}
             <div className="py-4">
-              <p className="smaller-text has-text-gray">
+              <p className="smaller-text has-text-grey">
                 Accepted files: PNG, JPG, GIF
               </p>
             </div>
             {errorMessage && (
               <div className="pb-4 transition-all">
-                <p className="smaller-text has-text-red">{errorMessage}</p>
+                <p className="smaller-text has-text-danger">{errorMessage}</p>
               </div>
             )}
             {/* For now this is a single input */}
