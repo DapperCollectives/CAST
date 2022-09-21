@@ -22,8 +22,10 @@ func (otu *OverflowTestUtils) GenerateListOfVotes(proposalId int, count int) []*
 		addr := "0x" + strconv.Itoa(i+1)
 		randomNumber := rand.Intn(2)
 		choice := choices[randomNumber]
+		c := make([]string, 1)
+		c[0] = choice
 		v := models.Vote{
-			Proposal_id: proposalId, Addr: addr, Choice: choice,
+			Proposal_id: proposalId, Addr: addr, Choices: c,
 		}
 
 		// Balance is 1 FLOW * index
@@ -49,8 +51,10 @@ func (otu *OverflowTestUtils) GenerateCheatVote(proposalId int, count int) *[]mo
 		addr := "0x" + strconv.Itoa(i)
 		randomNumber := rand.Intn(2)
 		choice := choices[randomNumber]
+		c := make([]string, 1)
+		c[0] = choice
 		v := models.Vote{
-			Proposal_id: proposalId, Addr: addr, Choice: choice,
+			Proposal_id: proposalId, Addr: addr, Choices: c,
 		}
 		// Balance is 1 FLOW * index
 		balance := 100000000 * (i + 1)
@@ -103,8 +107,10 @@ func (otu *OverflowTestUtils) GenerateListOfVotesWithNFTs(
 		addr := otu.ResolveUser(i + 1)
 		randomNumber := rand.Intn(2)
 		choice := choices[randomNumber]
+		c := make([]string, 1)
+		c[0] = choice
 		v := models.Vote{
-			Proposal_id: proposalId, Addr: addr, Choice: choice,
+			Proposal_id: proposalId, Addr: addr, Choices: c,
 		}
 
 		scriptPath := "./main/cadence/scripts/get_nfts_ids.cdc"
@@ -153,8 +159,10 @@ func (otu *OverflowTestUtils) GenerateSingleVoteWithNFT(
 	randomNumber := rand.Intn(2)
 	choices := []string{"a", "b"}
 	choice := choices[randomNumber]
+	c := make([]string, 1)
+	c[0] = choice
 	v := models.Vote{
-		Proposal_id: proposalId, Addr: addr, Choice: choice,
+		Proposal_id: proposalId, Addr: addr, Choices: c,
 	}
 
 	scriptPath := "./main/cadence/scripts/get_nfts_ids.cdc"

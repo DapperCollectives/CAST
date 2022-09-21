@@ -5,15 +5,14 @@ import (
 	"math"
 
 	"github.com/DapperCollectives/CAST/backend/main/models"
-	s "github.com/DapperCollectives/CAST/backend/main/shared"
-	shared "github.com/DapperCollectives/CAST/backend/main/shared"
+	"github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/rs/zerolog/log"
 )
 
 type TokenWeightedDefault struct {
-	s.StrategyStruct
-	DPS s.DpsAdapter
-	DB  *s.Database
+	shared.StrategyStruct
+	DPS shared.DpsAdapter
+	DB  *shared.Database
 }
 
 func (s *TokenWeightedDefault) FetchBalance(
@@ -92,8 +91,8 @@ func (s *TokenWeightedDefault) TallyVotes(
 				allowedBalance = float64(*vote.PrimaryAccountBalance)
 			}
 
-			r.Results[vote.Choice] += int(allowedBalance)
-			r.Results_float[vote.Choice] += allowedBalance * math.Pow(10, -8)
+			r.Results[vote.Choices[0]] += int(allowedBalance)
+			r.Results_float[vote.Choices[0]] += allowedBalance * math.Pow(10, -8)
 		}
 	}
 
@@ -144,11 +143,11 @@ func (s *TokenWeightedDefault) GetVotes(
 }
 
 func (s *TokenWeightedDefault) InitStrategy(
-	f *shared.FlowAdapter,
+	fa *shared.FlowAdapter,
 	db *shared.Database,
-	dps *s.DpsAdapter,
+	dps *shared.DpsAdapter,
 ) {
-	s.FlowAdapter = f
+	s.FlowAdapter = fa
 	s.DB = db
 	s.DPS = *dps
 }

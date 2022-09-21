@@ -93,8 +93,8 @@ func (b *BalanceOfNfts) TallyVotes(
 				return models.ProposalResults{}, err
 			}
 
-			r.Results[vote.Choice] += int(voteWeight)
-			r.Results_float[vote.Choice] += voteWeight
+			r.Results[vote.Choices[0]] += int(voteWeight)
+			r.Results_float[vote.Choices[0]] += voteWeight
 		}
 	}
 
