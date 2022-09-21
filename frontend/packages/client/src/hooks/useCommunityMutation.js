@@ -20,12 +20,11 @@ export default function useCommunityMutation() {
   } = useMutation(
     async ({ logo, banner, ...otherProps }) => {
       const timestamp = Date.now().toString();
-      const hexTime = Buffer.from(timestamp).toString('hex');
 
       const [compositeSignatures, voucher] = await signMessageByWalletProvider(
         user?.services[0].uid,
         CREATE_COMMUNITY_TX,
-        hexTime
+        timestamp
       );
 
       if (!compositeSignatures && !voucher) {
@@ -56,7 +55,7 @@ export default function useCommunityMutation() {
           logo: communityLogo?.fileUrl,
           bannerImgUrl: communityBanner?.fileUrl,
         },
-        timestamp: hexTime,
+        timestamp,
         compositeSignatures,
         voucher,
       });

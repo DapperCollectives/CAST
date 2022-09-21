@@ -377,8 +377,8 @@ hr
 .community-header-wrapper
 	background-color: #F2F2F2
 	width: 100%
-	height: 248px
-	max-height: 248px
+	height: 250px
+	max-height: 250px
 .community-logo-mobile
 	max-height: 85px
 	max-width: 85px
@@ -455,7 +455,7 @@ hr
 	.community-content
 		padding-top: 0
 	.community-header-wrapper
-		max-height: 152px
+		max-height: 150px
 	.community-header
 		flex-direction: column
 		min-height: 288px
@@ -746,3 +746,93 @@ span[data-tooltip]
 	right: 0
 .wallet-connect-content
 	z-index: 32
+
+.modal-content-image-crop
+	max-width: 400px !important	
+	max-height: unset !important	
+
+input[type=range]
+	-webkit-appearance: none // Hides the slider so that custom slider can be made 
+	width: 100% // Specific width is required for Firefox.
+	background: transparent //  Otherwise white in Chrome 
+
+input[type=range].slider::-webkit-slider-thumb
+	-webkit-appearance: none
+
+input[type=range].slider:focus
+	outline: none // Removes the blue border. You should probably do some kind of focus styling for accessibility reasons though.
+
+input[type=range].slider::-ms-track
+	width: 100%
+	cursor: pointer
+	/* Hides the slider so custom styles can be added */
+	background: transparent
+	border-color: transparent
+	color: transparent
+
+// thumb styles
+input[type=range].slider::-webkit-slider-thumb 
+	-webkit-appearance: none
+	border: 1px solid #FBD84D
+	height: 19px
+	width: 19px
+	border-radius: 3px
+	background: #FBD84D
+	cursor: pointer
+	border-radius: 20px
+	margin-top: -4.5px // You need to specify a margin in Chrome, but in Firefox and IE it is automatic
+
+input[type=range].slider::-moz-range-thumb
+	border: 1px solid #FBD84D
+	height: 19px
+	width: 19px
+	border-radius: 20px
+	background: #FBD84D
+	cursor: pointer
+
+input[type=range].slider::-ms-thumb
+	height: 19px
+	width: 19px
+	border-radius: 20px
+	background: #FBD84D
+	cursor: pointer
+
+input[type=range].slider::-webkit-slider-runnable-track
+	width: 100%
+	height: 10px
+	cursor: pointer
+	background: #fbd84d7a
+	border-radius: 10px
+
+input[type=range].slider::-moz-range-track
+	width: 100%
+	height: 10px
+	cursor: pointer
+	background: #fbd84d7a
+	border-radius: 10px
+
+input[type=range].slider::-ms-track
+	width: 100%
+	height: 10px
+	cursor: pointer
+	background: transparent
+	border-color: transparent
+	border-width: 10px 0
+	color: transparent
+
+input[type=range].slider::-ms-fill-lower
+	background: #fbd84d7a
+	border-radius: 10px
+
+input[type=range].slider::-ms-fill-upper
+	background: #fbd84d7a
+	border-radius: 10px
+
+@media screen and (min-width: 1408px)
+.container:not(.is-max-desktop):not(.is-max-widescreen) 
+	max-width: 1220px	
+
+@media (min-width: 1300px)	
+	.community-header-wrapper	
+		border-radius: 25px
+		background-size: contain !important

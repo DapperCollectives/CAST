@@ -34,6 +34,8 @@ export default {
         'LinkOut',
         'Logo',
         'Plus',
+        'PlusLightFill',
+        'RemoveLightFill',
         'Star',
         'Twitter',
         'Upload',
@@ -47,5 +49,5 @@ export default {
 const Template = (args) => <Svg {...args} />;
 export const Controls = Template.bind({});
 Controls.args = {
-  name: 'Eye',
+  name: 'Plus',
 };
