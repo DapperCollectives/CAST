@@ -51,7 +51,9 @@ const NotificationModalProvider = ({ children }) => {
       if (customModalConfig) {
         const { isErrorModal, onClose } = customModalConfig;
 
-        // save in a ref callback when mocal is closed
+        // save in a ref callback when modal is closed
+        // can't set it in state bc onClosed does
+        // not get the correct ref to the function
         onCloseCallbackRef.current = onClose;
 
         const newConfiguration = {

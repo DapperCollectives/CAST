@@ -17,10 +17,12 @@ const getErrorMessageWithContext = ({ statusText }) => {
   const errorArray = statusText.split('::');
 
   if (errorArray.length === 3 && internalErrorCodes.includes(errorArray[0])) {
-    const [, title, message] = errorArray;
+    const [code, title, message] = errorArray;
+    const showFAQ = ['ERR03', 'ERR04'].includes(code);
     return {
       title,
       message,
+      faqLink: showFAQ ? 'https://docs.cast.fyi' : undefined,
     };
   }
   return { message: statusText, title: 'Error' };
@@ -50,13 +52,13 @@ const ErrorHandlerProvider = ({ children }) => {
 
   useEffect(() => {
     if (error !== null && !errorOpened) {
-      const { message, title } = getErrorMessageWithContext(error);
+      const { message, title, faqLink } = getErrorMessageWithContext(error);
       openModal(
         createElement(ErrorModal, {
           onClose: closeModal,
           message,
           title,
-          // depending on error.status we need to change errorTitle
+          faqLink,
         }),
         {
           onClose: closeError,
