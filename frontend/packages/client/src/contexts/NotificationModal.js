@@ -45,7 +45,6 @@ const NotificationModalProvider = ({ children }) => {
     showCloseButton: true,
     classNameModalContent: '',
   });
-  console.log('modalConfig', modalConfig);
 
   const openModal = useCallback(
     (content, customModalConfig) => {
@@ -73,7 +72,7 @@ const NotificationModalProvider = ({ children }) => {
         };
         // compare configuration to avoid setting state with same object values
         if (!isEqual(modalConfig, newConfiguration)) {
-          setModalConfig(() => newConfiguration);
+          setModalConfig(newConfiguration);
         }
       }
       setContent(content);
