@@ -198,7 +198,6 @@ const CurrentUser = ({ web3, closeModal, expandToContainer = false } = {}) => {
   }
 
   return (
-    // <div className="card">
     <SignInOutButton
       user={user}
       injectedProvider={injectedProvider}
@@ -206,7 +205,6 @@ const CurrentUser = ({ web3, closeModal, expandToContainer = false } = {}) => {
       closeModal={closeModal}
       expandToContainer={expandToContainer}
     />
-    // </div>
   );
 };
 
