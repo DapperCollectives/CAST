@@ -14,6 +14,13 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const (
+	ERR01 = "ERR01::Error::There was an error trying to complete you request"
+	ERR02 = "ERR02::Error::We've encountered an error creating your community. Please return to the Community Settings step and try again."
+	ERR03 = "ERR03::Error Fetching Balance::While confirming your token balance, we've encountered an error connecting to the Flow Blockchain."
+	ERR04 = "ERR04::Insufficient Balalnce::In order to vote on this proposal, you must have a minimum of %d %s tokens."
+)
+
 func (a *App) health(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, "OK!!")
 }
@@ -28,7 +35,8 @@ func (a *App) upload(w http.ResponseWriter, r *http.Request) {
 
 	resp, err := helpers.uploadFile(r)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		log.Error().Err(err).Msg("Error uploading file.")
+		respondWithError(w, http.StatusInternalServerError, errors.New(ERR01).Error())
 		return
 	}
 
@@ -43,24 +51,22 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 	votes, err := models.GetAllVotesForProposal(a.DB, proposal.ID, *proposal.Strategy)
 	if err != nil {
 		log.Error().Err(err).Msg("Error getting votes for proposal.")
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		respondWithError(w, http.StatusInternalServerError, errors.New(ERR01).Error())
 		return
 	}
 
 	results, err := helpers.useStrategyTally(proposal, votes)
 	if err != nil {
 		log.Error().Err(err).Msg("Error tallying votes.")
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		respondWithError(w, http.StatusInternalServerError, errors.New(ERR01).Error())
 		return
 	}
 
 	if *proposal.Computed_status == "closed" && !proposal.Achievements_done {
 		if err := models.AddWinningVoteAchievement(a.DB, votes, results); err != nil {
-			errMsg := "Error calculating winning votes"
-			log.Error().Err(err).Msg(errMsg)
-			respondWithError(w, http.StatusInternalServerError, errors.New(errMsg).Error())
+			log.Error().Err(err).Msg("Error calculating winning votes")
+			respondWithError(w, http.StatusInternalServerError, errors.New(ERR01).Error())
 		}
-
 	}
 
 	respondWithJSON(w, http.StatusOK, results)
@@ -70,12 +76,24 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	proposal, err := helpers.fetchProposal(vars, "proposalId")
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID.")
+		log.Error().Err(err).Msg("Invalid Proposal ID.")
+		respondWithError(w, http.StatusBadRequest, errors.New(ERR01).Error())
 		return
 	}
 
-	votes, order, _ := helpers.getPaginatedVotes(r, proposal)
-	votesWithWeights, _ := helpers.useStrategyGetVotes(proposal, votes)
+	votes, order, err := helpers.getPaginatedVotes(r, proposal)
+	if err != nil {
+		log.Error().Err(err).Msg("error getting paginated votes")
+		respondWithError(w, http.StatusBadRequest, errors.New(ERR01).Error())
+		return
+	}
+
+	votesWithWeights, err := helpers.useStrategyGetVotes(proposal, votes)
+	if err != nil {
+		log.Error().Err(err).Msg("error calling useStrategyGetVotes")
+		respondWithError(w, http.StatusBadRequest, errors.New(ERR01).Error())
+		return
+	}
 
 	response := shared.GetPaginatedResponseWithPayload(votesWithWeights, order)
 	respondWithJSON(w, http.StatusOK, response)
@@ -87,13 +105,15 @@ func (a *App) getVoteForAddress(w http.ResponseWriter, r *http.Request) {
 
 	proposal, err := helpers.fetchProposal(vars, "proposalId")
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID.")
+		log.Error().Err(err).Msg("Invalid Proposal ID.")
+		respondWithError(w, http.StatusBadRequest, errors.New(ERR01).Error())
 		return
 	}
 
 	vote, err := helpers.processVote(addr, proposal)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		log.Error().Err(err).Msg("Error processing vote.")
+		respondWithError(w, http.StatusInternalServerError, errors.New(ERR01).Error())
 		return
 	}
 
@@ -108,7 +128,8 @@ func (a *App) getVotesForAddress(w http.ResponseWriter, r *http.Request) {
 
 	err := json.Unmarshal([]byte(r.FormValue("proposalIds")), &proposalIds)
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID.")
+		log.Error().Err(err).Msg("Error unmarshalling proposalIds")
+		respondWithError(w, http.StatusBadRequest, errors.New(ERR01).Error())
 		return
 	}
 
@@ -116,7 +137,8 @@ func (a *App) getVotesForAddress(w http.ResponseWriter, r *http.Request) {
 
 	votes, pageParams, err := helpers.processVotes(addr, proposalIds, pageParams)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		log.Error().Err(err).Msg("Error processing votes.")
+		respondWithError(w, http.StatusInternalServerError, errors.New(ERR01).Error())
 		return
 	}
 
@@ -129,12 +151,14 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 
 	proposal, err := helpers.fetchProposal(vars, "proposalId")
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID.")
+		log.Error().Err(err).Msg("Invalid Proposal ID.")
+		respondWithError(w, http.StatusBadRequest, errors.New(ERR01).Error())
 		return
 	}
 
 	vote, e := helpers.createVote(r, proposal)
 	if err != nil {
+		log.Error().Err(err).Msg("Error creating vote.")
 		respondWithError(w, e.status, e.err.Error())
 		return
 	}
