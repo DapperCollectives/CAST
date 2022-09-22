@@ -1,12 +1,14 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
+import { useModalContext } from 'contexts/NotificationModal';
 import { Svg } from '@cast/shared-components';
 import { Form, WrapperResponsive } from 'components';
 import { MAX_AVATAR_FILE_SIZE, MAX_FILE_SIZE } from 'const';
-import { getReducedImg } from 'utils';
+import { getCroppedImg } from 'utils';
 import classnames from 'classnames';
 import FormFields from './FormFields';
+import ImageCropModal from './ImageCropModal';
 
 export default function ProfileForm({
   submitComponent,
@@ -24,8 +26,9 @@ export default function ProfileForm({
 } = {}) {
   const { notifyError } = useErrorHandlerContext();
 
+  const { openModal, closeModal, isOpen } = useModalContext();
   const onDrop = useCallback(
-    (filename, dataKey, maxFileSize, maxWidth) => (acceptedFiles) => {
+    (filename, dataKey, maxFileSize) => (acceptedFiles) => {
       acceptedFiles.forEach((imageFile) => {
         // validate type
         if (
@@ -51,26 +54,13 @@ export default function ProfileForm({
 
         const img = new Image();
         img.onload = function (e) {
-          // reduce images if necessary before upload
-          if (e.target.width > maxWidth) {
-            getReducedImg(e.target, maxWidth, filename).then((result) => {
-              setValue(
-                dataKey,
-                {
-                  imageUrl: imageAsURL,
-                  file: result.imageFile,
-                },
-                { shouldValidate: true, shouldDirty: true }
-              );
-            });
-          } else {
-            setValue(
-              dataKey,
-              { imageUrl: imageAsURL, file: imageFile },
-              { shouldValidate: true, shouldDirty: true }
-            );
-          }
+          setValue(
+            dataKey,
+            { imageUrl: imageAsURL, file: e.target, cropped: false },
+            { shouldValidate: true, shouldDirty: true }
+          );
         };
+
         img.src = imageAsURL;
       });
     },
@@ -79,7 +69,7 @@ export default function ProfileForm({
 
   const { getRootProps: getLogoRootProps, getInputProps: getLogoInputProps } =
     useDropzone({
-      onDrop: onDrop('community_image', 'logo', MAX_AVATAR_FILE_SIZE, 150),
+      onDrop: onDrop('community_image', 'logo', MAX_AVATAR_FILE_SIZE),
       maxFiles: 1,
       accept: 'image/jpeg,image/png',
       useFsAccessApi: false,
@@ -89,7 +79,7 @@ export default function ProfileForm({
     getRootProps: getBannerRootProps,
     getInputProps: getBannerInputProps,
   } = useDropzone({
-    onDrop: onDrop('community_banner', 'banner', MAX_FILE_SIZE, 1200),
+    onDrop: onDrop('community_banner', 'banner', MAX_FILE_SIZE),
     maxFiles: 1,
     accept: 'image/jpeg,image/png',
     useFsAccessApi: false,
@@ -101,6 +91,82 @@ export default function ProfileForm({
       'border-dashed-dark': !bannerImage?.file && !bannerImage?.imageUrl,
     }
   );
+
+  useEffect(() => {
+    if (logoImage?.cropped === false && !isOpen) {
+      openModal(
+        <ImageCropModal
+          cropperFn={getCroppedImg({
+            dWidth: 150,
+            dHeight: 150,
+            fileName: 'logoImage',
+          })}
+          cropShape="round"
+          logoImage={logoImage}
+          defaultCropArea={{
+            width: 400,
+            height: 400,
+            x: 100,
+            y: 0,
+          }}
+          onDone={(image) => {
+            setValue(
+              'logo',
+              {
+                file: image.file,
+                imageUrl: image.imageUrl,
+                cropped: true,
+              },
+              { shouldValidate: true, shouldDirty: true }
+            );
+            closeModal();
+          }}
+        />,
+        {
+          classNameModalContent: 'rounded modal-content-image-crop',
+          showCloseButton: false,
+        }
+      );
+    }
+  }, [logoImage, openModal, closeModal, isOpen, setValue]);
+
+  useEffect(() => {
+    if (bannerImage?.cropped === false && !isOpen) {
+      openModal(
+        <ImageCropModal
+          cropperFn={getCroppedImg({
+            dWidth: 1300,
+            dHeight: 250,
+            fileName: 'bannerImage',
+          })}
+          aspect={26 / 5}
+          defaultCropArea={{
+            width: 660,
+            height: 125,
+            x: 0,
+            y: 125,
+          }}
+          logoImage={bannerImage}
+          onDone={(image) => {
+            setValue(
+              'banner',
+              {
+                file: image.file,
+                imageUrl: image.imageUrl,
+                cropped: true,
+              },
+              { shouldValidate: true, shouldDirty: true }
+            );
+            closeModal();
+          }}
+        />,
+        {
+          classNameModalContent: 'rounded modal-content-image-crop',
+          showCloseButton: false,
+        }
+      );
+    }
+  }, [bannerImage, openModal, closeModal, isOpen, setValue]);
 
   return (
     <WrapperResponsive
