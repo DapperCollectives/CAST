@@ -8,9 +8,23 @@ import {
   useState,
 } from 'react';
 import { ErrorModal } from 'components';
+import { internalErrorCodes } from 'const';
 import { useModalContext } from './NotificationModal';
 
 const ErrorHandlerContext = createContext({});
+
+const getErrorMessageWithContext = ({ statusText }) => {
+  const errorArray = statusText.split('::');
+
+  if (errorArray.length === 3 && internalErrorCodes.includes(errorArray[0])) {
+    const [, title, message] = errorArray;
+    return {
+      title,
+      message,
+    };
+  }
+  return { message: statusText, title: 'Error' };
+};
 
 export const useErrorHandlerContext = () => {
   const context = useContext(ErrorHandlerContext);
@@ -32,15 +46,16 @@ const ErrorHandlerProvider = ({ children }) => {
   const closeError = useCallback(() => {
     setError(null);
     setErrorOpened(false);
-    closeModal();
-  }, [closeModal]);
+  }, []);
 
   useEffect(() => {
     if (error !== null && !errorOpened) {
+      const { message, title } = getErrorMessageWithContext(error);
       openModal(
         createElement(ErrorModal, {
-          onClose: closeError,
-          message: error.statusText,
+          onClose: closeModal,
+          message,
+          title,
           // depending on error.status we need to change errorTitle
         }),
         {
@@ -51,7 +66,7 @@ const ErrorHandlerProvider = ({ children }) => {
       );
       setErrorOpened(true);
     }
-  }, [openModal, error, closeError, isOpen, errorOpened]);
+  }, [openModal, error, closeError, isOpen, errorOpened, closeModal]);
 
   /**
    * Hook to call modal error and show a message
@@ -60,7 +75,7 @@ const ErrorHandlerProvider = ({ children }) => {
    *    Error object with message that contains a string that will be parsed to get status and statusText
    * @param  {string} url indicates the url request that generated the error
    */
-  const notifyError = useCallback((err, url) => {
+  const notifyError = useCallback((err) => {
     try {
       const response = JSON.parse(err.message);
       if (typeof response === 'object') {
@@ -68,9 +83,8 @@ const ErrorHandlerProvider = ({ children }) => {
       }
     } catch (error) {
       setError({
-        status: err?.status ?? 500,
-        statusText: err?.statusText || `Server not available: ${err?.message}`,
-        url: url ?? '',
+        status: err?.status,
+        statusText: err?.statusText || `${err?.message}`,
       });
     }
   }, []);
