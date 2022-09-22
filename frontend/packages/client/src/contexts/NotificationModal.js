@@ -1,4 +1,11 @@
-import { createContext, useCallback, useContext, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useRef,
+  useState,
+} from 'react';
+import isEqual from 'lodash/isEqual';
 
 /**
  *
@@ -29,6 +36,7 @@ export const useModalContext = () => {
 };
 
 const NotificationModalProvider = ({ children }) => {
+  const onCloseCallbackRef = useRef(() => {});
   const [modal, setModal] = useState(false);
   const [content, setContent] = useState(null);
   const [modalConfig, setModalConfig] = useState({
@@ -36,14 +44,18 @@ const NotificationModalProvider = ({ children }) => {
     closeOnBackgroundClick: true,
     showCloseButton: true,
     classNameModalContent: '',
-    onClose: () => {},
   });
+  console.log('modalConfig', modalConfig);
 
   const openModal = useCallback(
     (content, customModalConfig) => {
       if (customModalConfig) {
-        const { isErrorModal } = customModalConfig;
-        setModalConfig(() => ({
+        const { isErrorModal, onClose } = customModalConfig;
+
+        // save in a ref callback when mocal is closed
+        onCloseCallbackRef.current = onClose;
+
+        const newConfiguration = {
           ...modalConfig,
           // set default values if modal is re-opened without configuration
           // this is when two components are using the modal with different configuration at the same time
@@ -58,7 +70,11 @@ const NotificationModalProvider = ({ children }) => {
                 backgroundColor: ' ',
               }
             : undefined),
-        }));
+        };
+        // compare configuration to avoid setting state with same object values
+        if (!isEqual(modalConfig, newConfiguration)) {
+          setModalConfig(() => newConfiguration);
+        }
       }
       setContent(content);
       setModal(true);
@@ -66,12 +82,15 @@ const NotificationModalProvider = ({ children }) => {
     [modalConfig]
   );
 
-  const closeModal = useCallback(() => {
+  const closeModal = useCallback(({ onCloseCallback } = {}) => {
     setModal(false);
     // this unmounts the component
     setContent(null);
-    modalConfig.onClose();
-  }, [modalConfig]);
+    // calling any callback set on open modal
+    onCloseCallbackRef.current && onCloseCallbackRef.current();
+    // calling any callback set on closeModal
+    onCloseCallback && onCloseCallback();
+  }, []);
 
   const { closeOnBackgroundClick } = modalConfig;
   const handleClickOnBackground = useCallback(() => {
