@@ -45,6 +45,7 @@ export default function JoinCommunityButton({
               }}
             />
           }
+          onClose={closeModal}
         />,
         { isErrorModal: true }
       );

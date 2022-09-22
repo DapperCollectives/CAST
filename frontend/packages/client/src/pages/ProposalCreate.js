@@ -53,6 +53,7 @@ export default function ProposalCreatePage() {
               }}
             />
           }
+          onClose={modalContext.closeModal}
         />,
         { isErrorModal: true }
       );

@@ -59,6 +59,7 @@ export default function CommunityCreate() {
               }}
             />
           }
+          onClose={modalContext.closeModal}
         />,
         { isErrorModal: true }
       );
