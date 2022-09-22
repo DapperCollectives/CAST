@@ -116,7 +116,6 @@ func (a *App) Initialize() {
 
 	// when running "make proposals" sets db to dev not test
 	arg := flag.String("db", "", "database type")
-	flag.Bool("ipfs-override", true, "overrides ipfs call")
 	flag.Int("port", 5001, "port")
 	flag.Int("amount", 4, "Amount of proposals to create")
 
@@ -127,10 +126,20 @@ func (a *App) Initialize() {
 
 	// Postgres
 	dbname := os.Getenv("DB_NAME")
+
+	// IPFS
+	if os.Getenv("APP_ENV") == "TEST" || os.Getenv("APP_ENV") == "DEV" {
+		flag.Bool("ipfs-override", true, "overrides ipfs call")
+	} else {
+		flag.Bool("ipfs-override", false, "overrides ipfs call")
+	}
+
+	// TEST Env
 	if os.Getenv("APP_ENV") == "TEST" {
 		dbname = os.Getenv("TEST_DB_NAME")
 	}
 
+	// Postgres
 	a.ConnectDB(
 		os.Getenv("DB_USERNAME"),
 		os.Getenv("DB_PASSWORD"),
