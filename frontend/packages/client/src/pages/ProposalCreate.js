@@ -4,7 +4,7 @@ import { useHistory, useParams } from 'react-router-dom';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useModalContext } from 'contexts/NotificationModal';
 import { useWebContext } from 'contexts/Web3';
-import { Error, StepByStep, WalletConnect } from 'components';
+import { ErrorModal, StepByStep, WalletConnect } from 'components';
 import {
   PropCreateStepOne,
   PropCreateStepThree,
@@ -43,19 +43,18 @@ export default function ProposalCreatePage() {
   const onSubmit = async (stepsData) => {
     if (!creatorAddr) {
       modalContext.openModal(
-        <Error
-          error={
-            <div className="mt-5">
-              <WalletConnect
-                closeModal={() => {
-                  modalContext.closeModal();
-                }}
-              />
-            </div>
+        <ErrorModal
+          message="Please connect a wallet to create a proposal."
+          title="Connect Wallet"
+          footerComponent={
+            <WalletConnect
+              closeModal={() => {
+                modalContext.closeModal();
+              }}
+            />
           }
-          errorTitle="Please connect a wallet to create a proposal."
         />,
-        { classNameModalContent: 'rounded-sm' }
+        { isErrorModal: true }
       );
       setModalError(true);
       return;

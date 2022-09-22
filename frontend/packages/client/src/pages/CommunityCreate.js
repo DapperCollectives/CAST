@@ -2,7 +2,7 @@ import { createElement, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useModalContext } from 'contexts/NotificationModal';
 import { useWebContext } from 'contexts/Web3';
-import { Error, StepByStep, WalletConnect } from 'components';
+import { ErrorModal, StepByStep, WalletConnect } from 'components';
 import {
   StartSteps,
   StepFour,
@@ -49,19 +49,18 @@ export default function CommunityCreate() {
     // opens modal and makes user to connect with wallet
     if (!creatorAddr) {
       modalContext.openModal(
-        <Error
-          error={
-            <div className="mt-5">
-              <WalletConnect
-                closeModal={() => {
-                  modalContext.closeModal();
-                }}
-              />
-            </div>
+        <ErrorModal
+          message="Please connect a wallet to create a community."
+          title="Connect Wallet"
+          footerComponent={
+            <WalletConnect
+              closeModal={() => {
+                modalContext.closeModal();
+              }}
+            />
           }
-          errorTitle="Please connect a wallet to create a community."
         />,
-        { classNameModalContent: 'rounded-sm' }
+        { isErrorModal: true }
       );
       setModalError(true);
       return;

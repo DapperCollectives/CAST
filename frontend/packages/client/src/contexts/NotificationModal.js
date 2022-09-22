@@ -42,6 +42,7 @@ const NotificationModalProvider = ({ children }) => {
   const openModal = useCallback(
     (content, customModalConfig) => {
       if (customModalConfig) {
+        const { isErrorModal } = customModalConfig;
         setModalConfig(() => ({
           ...modalConfig,
           // set default values if modal is re-opened without configuration
@@ -50,6 +51,13 @@ const NotificationModalProvider = ({ children }) => {
           showCloseButton: true,
           classNameModalContent: '',
           ...customModalConfig,
+          // only for error modals overwrite configuration to make it transparent and use ErrorModal component
+          ...(isErrorModal
+            ? {
+                classNameModalContent: 'is-flex is-justify-content-center',
+                backgroundColor: ' ',
+              }
+            : undefined),
         }));
       }
       setContent(content);

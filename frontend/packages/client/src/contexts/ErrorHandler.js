@@ -60,8 +60,7 @@ const ErrorHandlerProvider = ({ children }) => {
         }),
         {
           onClose: closeError,
-          classNameModalContent: 'is-flex is-justify-content-center rounded-sm',
-          backgroundColor: ' ',
+          isErrorModal: true,
         }
       );
       setErrorOpened(true);
