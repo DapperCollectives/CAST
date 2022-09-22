@@ -13,6 +13,7 @@ const SignInOutButton = ({
   openWalletModal,
   injectedProvider,
   closeModal,
+  expandToContainer,
 }) => {
   const notMobile = useMediaQuery();
 
@@ -72,7 +73,29 @@ const SignInOutButton = ({
   );
   const addressStyle = classnames('', { 'smaller-text': !notMobile });
 
-  return (
+  return !loggedIn ? (
+    <>
+      <button
+        onClick={connectWallet}
+        className={buttonClass}
+        style={
+          expandToContainer
+            ? { width: '100%', height: '48px' }
+            : notMobile
+            ? {
+                width: '206px',
+                height: '40px',
+              }
+            : { width: '105px', height: '32px' }
+        }
+      >
+        <span className="has-text-weight-bold">Connect</span>
+        <span className="is-hidden-mobile has-text-weight-bold">
+          &nbsp;Wallet
+        </span>
+      </button>
+    </>
+  ) : (
     <>
       <div className={dropdownBackground} />
       <div
@@ -83,37 +106,28 @@ const SignInOutButton = ({
       >
         <div className="dropdown-trigger is-flex is-justify-content-flex-end">
           <button
-            onClick={loggedIn ? openDropdown : connectWallet}
+            onClick={openDropdown}
             className={buttonClass}
             style={
               notMobile
                 ? {
-                    ...(loggedIn ? { width: '147px' } : { width: '206px' }),
+                    width: '147px',
                     height: '40px',
                   }
                 : { width: '105px', height: '32px' }
             }
           >
-            {loggedIn ? (
-              <div className="is-flex is-align-items-center flex-1">
-                <Blockies
-                  seed={addr}
-                  size={notMobile ? 6.5 : 5}
-                  scale={4}
-                  className="blockies"
-                />
-                <div className="is-flex flex-1 is-justify-content-flex-end">
-                  <p className={addressStyle}>{truncateAddress(addr, 4, 4)}</p>
-                </div>
+            <div className="is-flex is-align-items-center flex-1">
+              <Blockies
+                seed={addr}
+                size={notMobile ? 6.5 : 5}
+                scale={4}
+                className="blockies"
+              />
+              <div className="is-flex flex-1 is-justify-content-flex-end">
+                <p className={addressStyle}>{truncateAddress(addr, 4, 4)}</p>
               </div>
-            ) : (
-              <>
-                <span className="has-text-weight-bold">Connect</span>
-                <span className="is-hidden-mobile has-text-weight-bold">
-                  &nbsp;Wallet
-                </span>
-              </>
-            )}
+            </div>
           </button>
         </div>
 
@@ -177,21 +191,22 @@ const SignInOutButton = ({
   );
 };
 
-const CurrentUser = ({ web3, closeModal }) => {
+const CurrentUser = ({ web3, closeModal, expandToContainer = false } = {}) => {
   const { user, injectedProvider, openWalletModal } = web3;
   if (!user) {
     return null;
   }
 
   return (
-    <div className="card">
-      <SignInOutButton
-        user={user}
-        injectedProvider={injectedProvider}
-        openWalletModal={openWalletModal}
-        closeModal={closeModal}
-      />
-    </div>
+    // <div className="card">
+    <SignInOutButton
+      user={user}
+      injectedProvider={injectedProvider}
+      openWalletModal={openWalletModal}
+      closeModal={closeModal}
+      expandToContainer={expandToContainer}
+    />
+    // </div>
   );
 };
 
