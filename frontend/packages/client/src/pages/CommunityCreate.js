@@ -118,8 +118,8 @@ export default function CommunityCreate() {
     // open modal if there are errors on addresses
     if (errorMessages.length) {
       modalContext.openModal(
-        createElement(Error, {
-          error: (
+        createElement(ErrorModal, {
+          message: (
             <div className="mt-4">
               <p className="is-size-6">
                 Addresses used are not valid Flow addresses:
@@ -139,7 +139,7 @@ export default function CommunityCreate() {
           ),
           errorTitle: 'Flow Address Error',
         }),
-        { classNameModalContent: 'rounded-sm' }
+        { isErrorModal: true }
       );
       return;
     }
