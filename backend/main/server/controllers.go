@@ -172,7 +172,8 @@ func (a *App) getProposalsForCommunity(w http.ResponseWriter, r *http.Request) {
 	communityId, err := strconv.Atoi(vars["communityId"])
 
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Community ID.")
+		log.Error().Err(err).Msg("Invalid Community ID")
+		respondWithError(w, http.StatusBadRequest, errors.New(ERR01).Error())
 		return
 	}
 
@@ -186,7 +187,8 @@ func (a *App) getProposalsForCommunity(w http.ResponseWriter, r *http.Request) {
 		pageParams,
 	)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		log.Error().Err(err).Msg("Error getting proposals for community.")
+		respondWithError(w, http.StatusInternalServerError, errors.New(ERR01).Error())
 		return
 	}
 
@@ -200,24 +202,28 @@ func (a *App) getProposal(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	p, err := helpers.fetchProposal(vars, "id")
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID.")
+		log.Error().Err(err).Msg("Invalid Proposal ID.")
+		respondWithError(w, http.StatusBadRequest, errors.New(ERR01).Error())
 		return
 	}
 
 	c, e := helpers.fetchCommunity(p.Community_id)
 	if e.err != nil {
+		log.Error().Err(err).Msg("error fetching community")
 		respondWithError(w, e.status, e.err.Error())
 		return
 	}
 
 	strategy, err := models.MatchStrategyByProposal(*c.Strategies, *p.Strategy)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		log.Error().Err(err).Msg("error getting strategy by proposal")
+		respondWithError(w, http.StatusInternalServerError, errors.New(ERR01).Error())
 		return
 	}
 
 	if err := helpers.processSnapshotStatus(&strategy, &p); err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		log.Error().Err(err).Msg("error processing snapshot status")
+		respondWithError(w, http.StatusInternalServerError, errors.New(ERR01).Error())
 		return
 	}
 
@@ -228,6 +234,7 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	communityId, err := strconv.Atoi(vars["communityId"])
 	if err != nil {
+		log.Error().Err(err).Msg("Invalid Community ID")
 		respondWithError(w, http.StatusBadRequest, "Invalid Community ID.")
 		return
 	}
@@ -236,12 +243,14 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 	p.Community_id = communityId
 
 	if err := validatePayload(r.Body, &p); err != nil {
+		log.Error().Err(err).Msg("Error validating payload")
 		respondWithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	proposal, e := helpers.createProposal(p)
 	if e.err != nil {
+		log.Error().Err(err).Msg("Error creating proposal")
 		respondWithError(w, e.status, e.err.Error())
 		return
 	}
