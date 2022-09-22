@@ -177,7 +177,7 @@ const SignInOutButton = ({
   );
 };
 
-const CurrentUser = ({ web3, closeModal, expandContainer }) => {
+const CurrentUser = ({ web3, closeModal }) => {
   const { user, injectedProvider, openWalletModal } = web3;
   if (!user) {
     return null;
@@ -190,7 +190,6 @@ const CurrentUser = ({ web3, closeModal, expandContainer }) => {
         injectedProvider={injectedProvider}
         openWalletModal={openWalletModal}
         closeModal={closeModal}
-        expandContainer={expandContainer}
       />
     </div>
   );
