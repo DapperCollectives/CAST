@@ -7,7 +7,6 @@ export { default as ProposalInformation } from './ProposalInformation';
 export { default as StrategyModal } from './StrategyModal';
 export { default as StepByStep } from './StepByStep';
 export { default as StatusLabel } from './StatusLabel';
-export { default as Error } from './Error';
 export { default as ErrorHandler } from 'contexts/ErrorHandler';
 export { default as Loader } from './Loader';
 export { default as Dropdown } from './Dropdown';
