@@ -43,6 +43,7 @@ export default function JoinCommunityButton({
               closeModal={() => {
                 closeModal();
               }}
+              expandToContainer
             />
           }
           onClose={closeModal}

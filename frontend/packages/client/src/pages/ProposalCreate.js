@@ -51,6 +51,7 @@ export default function ProposalCreatePage() {
               closeModal={() => {
                 modalContext.closeModal();
               }}
+              expandToContainer
             />
           }
           onClose={modalContext.closeModal}

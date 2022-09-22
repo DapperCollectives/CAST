@@ -57,6 +57,7 @@ export default function CommunityCreate() {
               closeModal={() => {
                 modalContext.closeModal();
               }}
+              expandToContainer
             />
           }
           onClose={modalContext.closeModal}
