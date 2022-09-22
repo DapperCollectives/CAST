@@ -14,6 +14,11 @@ export const COMMUNITY_DESCRIPTION_MAX_LENGTH = 1000;
 export const HAS_DELAY_ON_START_TIME =
   process.env.REACT_APP_APP_ENV?.toUpperCase() === 'PRODUCTION';
 
+// These are custonm error codes handled between frontend and backend
+// besides handling typical http error codes we are
+// handling this codes for internal message detection and management
+export const internalErrorCodes = ['ERR04'];
+
 export const FilterValues = {
   all: 'All',
   active: 'Active',
