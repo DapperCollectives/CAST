@@ -73,7 +73,7 @@ function Header(props) {
                   </span>
                 </NavLink>
                 <span className="navbar-item p-0">
-                  <WalletConnect expandContainer />
+                  <WalletConnect />
                 </span>
               </div>
             </nav>
