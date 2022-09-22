@@ -35,14 +35,20 @@ function ImageUploader({
     // then start upload and update status
     if (image?.uploadStatus === IMAGE_STATUS.notStarted && !loading) {
       onUploadStared(imageKey);
-      upload(image).then((uploaded) => {
-        if (error) {
-          // delete image if upload failed
+      upload(image)
+        .then((uploaded) => {
+          if (error) {
+            // delete image if upload failed
+            deleteImage(imageKey);
+            return;
+          }
+          onUploaded(uploaded, imageKey);
+        })
+        .catch(() => {
+          console.log('Error uploading file');
           deleteImage(imageKey);
           return;
-        }
-        onUploaded(uploaded, imageKey);
-      });
+        });
     }
   }, [
     image,

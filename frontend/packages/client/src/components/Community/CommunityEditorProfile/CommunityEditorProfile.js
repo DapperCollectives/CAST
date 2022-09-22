@@ -69,12 +69,18 @@ export default function CommunityEditorProfile({
     // url needs to be sent to backend to update
     if (updates?.logo?.file) {
       setIsUpdatingImage(true);
-      const uploadImg = await uploadFile(data?.logo?.file);
+      const uploadImg = await uploadFile(data?.logo?.file).catch(() => {
+        console.log('Error uploading logo image');
+        return;
+      });
       updates.logo = uploadImg?.fileUrl ?? undefined;
     }
     if (updates?.bannerImgUrl?.file) {
       setIsUpdatingBanner(true);
-      const uploadBanner = await uploadFile(data?.banner?.file);
+      const uploadBanner = await uploadFile(data?.banner?.file).catch(() => {
+        console.log('Error uploading banner image');
+        return;
+      });
       updates.bannerImgUrl = uploadBanner?.fileUrl ?? undefined;
     }
 
