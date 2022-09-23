@@ -38,10 +38,17 @@ export const checkResponse = async (response) => {
   // (with the ok property of the response set to false if the response isn't in the range 200–299),
   // and it will only reject on network failure or if anything prevented the request from completing.
   if (!response.ok) {
-    const { status, statusText, url } = response;
-    const { error } = response.json ? await response.json() : {};
+    const { status, statusText } = response;
+    const { error, errorCode, heading } = response.json
+      ? await response.json()
+      : {};
     throw new Error(
-      JSON.stringify({ status, statusText: error || statusText, url })
+      JSON.stringify({
+        status,
+        message: error || statusText,
+        errorCode,
+        heading,
+      })
     );
   }
   return response.json();

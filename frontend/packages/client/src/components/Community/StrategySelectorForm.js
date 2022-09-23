@@ -1,6 +1,6 @@
 import { createElement, useEffect, useState } from 'react';
 import { useModalContext } from 'contexts/NotificationModal';
-import { AddButton, Error } from 'components';
+import { AddButton, ErrorModal } from 'components';
 import StrategySelectorInput from 'components/Community/StrategySelectorInput';
 import { useAddFungibleToken, useVotingStrategies } from 'hooks';
 import { kebabToString } from 'utils';
@@ -79,9 +79,9 @@ export default function StrategySelectorForm({
     const strategy = strategies[index];
     if (activeStrategies.includes(strategy.name)) {
       openModal(
-        createElement(Error, {
-          error: (
-            <div className="mt-4">
+        createElement(ErrorModal, {
+          message: (
+            <>
               <p className="is-size-6">
                 Selected strategy is currently used by a pending or active
                 proposal.
@@ -95,9 +95,9 @@ export default function StrategySelectorForm({
                   </li>
                 </ul>
               </div>
-            </div>
+            </>
           ),
-          errorTitle: 'Strategy In Use Error',
+          title: 'Strategy In Use Error',
         }),
         { classNameModalContent: 'rounded-sm' }
       );

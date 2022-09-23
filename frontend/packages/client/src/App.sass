@@ -377,8 +377,8 @@ hr
 .community-header-wrapper
 	background-color: #F2F2F2
 	width: 100%
-	height: 250px
-	max-height: 250px
+	height: 300px
+	max-height: 300px
 .community-logo-mobile
 	max-height: 85px
 	max-width: 85px
@@ -750,6 +750,8 @@ span[data-tooltip]
 .modal-content-image-crop
 	max-width: 400px !important	
 	max-height: unset !important	
+	&.banner-crop
+		max-width: 474px !important	
 
 input[type=range]
 	-webkit-appearance: none // Hides the slider so that custom slider can be made 
@@ -832,7 +834,42 @@ input[type=range].slider::-ms-fill-upper
 .container:not(.is-max-desktop):not(.is-max-widescreen) 
 	max-width: 1220px	
 
+@media (max-width: 1300px)	
+	.commmunity-header-container
+		padding-top: 0px
+
 @media (min-width: 1300px)	
+	.commmunity-header-container
+		padding-top: 1rem
 	.community-header-wrapper	
-		border-radius: 25px
+		border-radius: 16px
 		background-size: contain !important
+
+.modal-error
+	display: flex
+	flex-direction: column
+	width: 400px
+	border-radius: 16px
+	background-color: white
+	padding: 29px 24px 32px 24px
+	.modal-error-header
+		display: flex
+		flex-grow: 1
+		align-items: center
+		padding-bottom: 22px
+		border-bottom: 1px solid hsl(0deg, 0%, 71%)
+	.modal-error-title
+		display: flex
+		flex-grow: 1
+		font-weight: 500
+		font-size: 24px
+		line-height: 120%
+		padding: 0px 8px
+	.modal-error-message
+		display: flex
+		align-items: center
+		padding-top: 15px
+		color: $grey
+	.modal-error-footer
+		display: flex
+		padding-top: 24px	

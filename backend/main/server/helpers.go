@@ -28,11 +28,6 @@ type Helpers struct {
 	A *App
 }
 
-type errorStatus struct {
-	err error
-	status int
-}
-
 func (h *Helpers) Initialize(app *App) {
 	h.A = app
 }
@@ -101,14 +96,22 @@ func (h *Helpers) useStrategyFetchBalance(
 		Addr:        v.Addr,
 		Proposal_id: p.ID,
 	}
+
 	if p.Block_height != nil {
 		emptyBalance.BlockHeight = *p.Block_height
+	}
+
+	//get the community
+	c := models.Community{ID: p.Community_id}
+	if err := c.GetCommunityByProposalId(h.A.DB, p.ID); err != nil {
+		return models.VoteWithBalance{}, err
 	}
 
 	balance, err := s.FetchBalance(emptyBalance, &p)
 	if err != nil {
 		log.Error().Err(err).Msgf("User does not have the required balance %v.", v.Addr)
-		return models.VoteWithBalance{}, errors.New("You do not have the required balance to vote")
+
+		return models.VoteWithBalance{}, err
 	}
 
 	vb := models.VoteWithBalance{
@@ -289,11 +292,11 @@ func (h *Helpers) processVotes(
 	return votesWithBalances, pageParams, nil
 }
 
-func (h *Helpers) createVote(r *http.Request, p models.Proposal) (*models.VoteWithBalance, errorStatus) {
+func (h *Helpers) createVote(r *http.Request, p models.Proposal) (*models.VoteWithBalance, error) {
 	var v models.Vote
 	if err := validatePayload(r.Body, &v); err != nil {
 		log.Error().Err(err).Msg("Invalid request payload.")
-		return nil, errorStatus { err: err, status: http.StatusBadRequest }
+		return nil, err
 	}
 
 	v.Proposal_id = p.ID
@@ -302,38 +305,37 @@ func (h *Helpers) createVote(r *http.Request, p models.Proposal) (*models.VoteWi
 	existingVote := models.Vote{Proposal_id: v.Proposal_id, Addr: v.Addr}
 	if err := existingVote.GetVote(h.A.DB); err == nil {
 		log.Error().Msgf("Address %s has already voted for proposal %d.", v.Addr, v.Proposal_id)
-		return nil, errorStatus { err: errors.New("Address has already voted for this proposal."), status: http.StatusForbidden }
+		return nil, err
 	}
 
 	// check that proposal is live
 	if os.Getenv("APP_ENV") != "DEV" {
 		if !p.IsLive() {
-			err := errors.New("User cannot vote on inactive proposal.")
-			return nil, errorStatus { err: err, status: http.StatusForbidden }
+			return nil, errors.New("User cannot vote on inactive proposal.")
 		}
 	}
 
 	if err := h.validateVote(p, v); err != nil {
-		return nil, errorStatus { err: err, status: http.StatusForbidden }
+		return nil, err
 	}
 
 	v.Proposal_id = p.ID
 
 	s := h.initStrategy(*p.Strategy)
 	if s == nil {
-		return nil, errorStatus { err: errors.New("Proposal strategy not found."), status: http.StatusInternalServerError }
+		return nil, errors.New("Proposal strategy not found.")
 	}
 
-	vb, err := h.useStrategyFetchBalance(v, p, s)
+	voteWithBalance, err := h.useStrategyFetchBalance(v, p, s)
 	if err != nil {
-		return nil, errorStatus { err: err, status: http.StatusInternalServerError }
+		return nil, err
 	}
 
-	if err := h.insertVote(vb, p); err != nil {
-		return nil, errorStatus { err: err, status: http.StatusInternalServerError }
+	if err := h.insertVote(voteWithBalance, p); err != nil {
+		return nil, err
 	}
 
-	return &vb, errorStatus { err: nil, status: http.StatusOK }
+	return &voteWithBalance, nil
 }
 
 func (h *Helpers) insertVote(v models.VoteWithBalance, p models.Proposal) error {
@@ -440,20 +442,15 @@ func (h *Helpers) validateVote(p models.Proposal, v models.Vote) error {
 	return nil
 }
 
-func (h *Helpers) fetchCommunity(id int) (models.Community, errorStatus) {
+func (h *Helpers) fetchCommunity(id int) (models.Community, error) {
 	community := models.Community{ID: id}
 
 	if err := community.GetCommunity(h.A.DB); err != nil {
 		log.Error().Err(err)
-		switch err.Error() {
-		case pgx.ErrNoRows.Error():
-			return models.Community{}, errorStatus { err: errors.New("Community not found."), status: http.StatusNotFound }
-		default:
-			return models.Community{}, errorStatus { err: err, status: http.StatusInternalServerError }
-		}
+		return models.Community{}, err
 	}
 
-	return community, errorStatus { err: nil, status: http.StatusOK }
+	return community, nil
 }
 
 func (h *Helpers) searchCommunities(query string) (interface{}, error) {
@@ -465,27 +462,26 @@ func (h *Helpers) searchCommunities(query string) (interface{}, error) {
 	return results, nil
 }
 
-func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorStatus) {
+func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, error) {
 	if p.Voucher != nil {
 		if err := h.validateUserViaVoucher(p.Creator_addr, p.Voucher); err != nil {
-			return models.Proposal{}, errorStatus{ err: err, status: http.StatusForbidden}
+			return models.Proposal{}, err
 		}
 	} else {
 		if err := h.validateUser(p.Creator_addr, p.Timestamp, p.Composite_signatures); err != nil {
-			return models.Proposal{}, errorStatus{ err: err, status: http.StatusForbidden}
+			return models.Proposal{}, err
 		}
 	}
 
-	community, e := h.fetchCommunity(p.Community_id)
-	if e.err != nil {
-		return models.Proposal{}, e
+	community, err := h.fetchCommunity(p.Community_id)
+	if err != nil {
+		return models.Proposal{}, err
 	}
 
 	strategy, err := models.MatchStrategyByProposal(*community.Strategies, *p.Strategy)
 	if err != nil {
-		errMsg := "Community does not have this strategy available."
-		log.Error().Err(err).Msg(errMsg)
-		return models.Proposal{}, errorStatus{ err: errors.New(errMsg), status: http.StatusInternalServerError }
+		log.Error().Err(err).Msg("Community does not have this strategy available.")
+		return models.Proposal{}, err
 
 	}
 
@@ -498,31 +494,30 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorStatu
 	}
 
 	if err := h.snapshot(&strategy, &p); err != nil {
-		return models.Proposal{}, errorStatus { err: err, status: http.StatusInternalServerError }
+		return models.Proposal{}, err
 	}
 
 	if err := h.enforceCommunityRestrictions(community, p, strategy); err != nil {
-		return models.Proposal{}, errorStatus { err: err, status: http.StatusForbidden }
+		return models.Proposal{}, err
 	}
 
 	if err := h.processSnapshotStatus(&strategy, &p); err != nil {
 		errMsg := "Error processing snapshot status."
 		log.Error().Err(err).Msg(errMsg)
-		return models.Proposal{}, errorStatus { err: errors.New(errMsg), status: http.StatusInternalServerError }
+		return models.Proposal{}, err
 	}
 
 	p.Cid, err = h.pinJSONToIpfs(p)
 	if err != nil {
 		log.Error().Err(err).Msg("IPFS error: " + err.Error())
-		errMsg := "Error pinning JSON to IPFS."
-		return models.Proposal{}, errorStatus { err: errors.New(errMsg), status: http.StatusInternalServerError }
+		return models.Proposal{}, err
 	}
 
 	validate := validator.New()
 	vErr := validate.Struct(p)
 	if vErr != nil {
 		log.Error().Err(vErr)
-		return models.Proposal{}, errorStatus { err: errors.New("Invalid proposal."), status: http.StatusBadRequest }
+		return models.Proposal{}, err
 	}
 
 	if os.Getenv("APP_ENV") == "PRODUCTION" {
@@ -532,10 +527,10 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorStatu
 	}
 
 	if err := p.CreateProposal(h.A.DB); err != nil {
-		return models.Proposal{}, errorStatus { err: err, status: http.StatusInternalServerError }
+		return models.Proposal{}, err
 	}
 
-	return p, errorStatus { err: nil, status: http.StatusCreated }
+	return p, nil
 }
 
 func (h *Helpers) enforceCommunityRestrictions(
@@ -599,49 +594,45 @@ func (h *Helpers) snapshot(strategy *models.Strategy, p *models.Proposal) error 
 	return nil
 }
 
-func (h *Helpers) createCommunity(payload models.CreateCommunityRequestPayload) (models.Community, int, error) {
+func (h *Helpers) createCommunity(payload models.CreateCommunityRequestPayload) (models.Community, error) {
 	c := payload.Community
 
 	if c.Voucher != nil {
 		log.Info().Msgf("validate user via voucher %v \n", c.Voucher)
 		if err := h.validateUserViaVoucher(c.Creator_addr, c.Voucher); err != nil {
-			return models.Community{}, http.StatusForbidden, err
+			return models.Community{}, err
 		}
 	} else {
 		if err := h.validateUser(c.Creator_addr, c.Timestamp, c.Composite_signatures); err != nil {
-			return models.Community{}, http.StatusForbidden, err
+			return models.Community{}, err
 		}
 	}
 
 	cid, err := h.pinJSONToIpfs(c)
 	if err != nil {
-		errMsg := "Error pinning JSON to IPFS."
-		log.Error().Err(err).Msg(errMsg)
-		return models.Community{}, http.StatusInternalServerError, errors.New(errMsg)
+		log.Error().Err(err).Msg("Error pinning JSON to IPFS.")
+		return models.Community{}, err
 	}
 	c.Cid = cid
 
 	validate := validator.New()
 	vErr := validate.Struct(c)
 	if vErr != nil {
-		errMsg := "Invalid community."
-		log.Error().Err(vErr).Msg(errMsg)
-		return models.Community{}, http.StatusBadRequest, errors.New(errMsg)
+		log.Error().Err(vErr).Msg("Invalid community.")
+		return models.Community{}, err
 	}
 
 	if err := c.CreateCommunity(h.A.DB); err != nil {
-		errMsg := "Database error creating community."
-		log.Error().Err(err).Msg(errMsg)
-		return models.Community{}, http.StatusInternalServerError, errors.New(errMsg)
+		log.Error().Err(err).Msg("Database error creating community.")
+		return models.Community{}, err
 	}
 
 	if err := h.processCommunityRoles(&c, &payload); err != nil {
-		errMsg := "Error processing community roles."
-		log.Error().Err(err).Msg(errMsg)
-		return models.Community{}, http.StatusInternalServerError, errors.New(errMsg)
+		log.Error().Err(err).Msg("Error processing community roles.")
+		return models.Community{}, err
 	}
 
-	return c, http.StatusCreated, nil
+	return c, nil
 }
 
 func (h *Helpers) processCommunityRoles(
@@ -675,42 +666,42 @@ func (h *Helpers) processCommunityRoles(
 	return nil
 }
 
-func (h *Helpers) updateCommunity(id int, payload models.UpdateCommunityRequestPayload) (models.Community, errorStatus) {
-	c, e := h.fetchCommunity(id)
-	if e.err != nil {
-		return models.Community{}, e
+func (h *Helpers) updateCommunity(id int, payload models.UpdateCommunityRequestPayload) (models.Community, error) {
+	c, err := h.fetchCommunity(id)
+	if err != nil {
+		return models.Community{}, err
 	}
 
 	// validate is community creator
 	// TODO: update to validating address is admin
 	if err := c.CanUpdateCommunity(h.A.DB, payload.Signing_addr); err != nil {
 		log.Error().Err(err)
-		return models.Community{}, errorStatus { err: err, status: http.StatusForbidden }
+		return models.Community{}, err
 	}
 
 	if payload.Voucher != nil {
 		if err := h.validateUserViaVoucher(payload.Signing_addr, payload.Voucher); err != nil {
 			log.Error().Err(err)
-			return models.Community{}, errorStatus { err: err, status: http.StatusForbidden }
+			return models.Community{}, err
 		}
 	} else {
 		if err := h.validateUser(payload.Signing_addr, payload.Timestamp, payload.Composite_signatures); err != nil {
 			log.Error().Err(err)
-			return models.Community{}, errorStatus { err: err, status: http.StatusForbidden }
+			return models.Community{}, err
 		}
 	}
 
 	if err := c.UpdateCommunity(h.A.DB, &payload); err != nil {
 		log.Error().Err(err)
-		return models.Community{}, errorStatus { err: err, status: http.StatusInternalServerError }
+		return models.Community{}, err
 	}
 
-	c, e = h.fetchCommunity(id)
-	if e.err != nil {
-		return models.Community{}, e
+	c, err = h.fetchCommunity(id)
+	if err != nil {
+		return models.Community{}, err
 	}
 
-	return c, errorStatus { err: nil, status: http.StatusOK }
+	return c, nil
 }
 
 func (h *Helpers) removeUserRole(payload models.CommunityUserPayload) (int, error) {

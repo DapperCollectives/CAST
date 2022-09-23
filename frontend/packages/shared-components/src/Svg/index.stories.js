@@ -25,6 +25,7 @@ export default {
         'Copy',
         'Discord',
         'Eye',
+        'ErrorOutline',
         'GitHub',
         'HideEye',
         'Image',
@@ -49,5 +50,5 @@ export default {
 const Template = (args) => <Svg {...args} />;
 export const Controls = Template.bind({});
 Controls.args = {
-  name: 'Plus',
+  name: 'ErrorOutline',
 };
