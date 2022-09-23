@@ -7,10 +7,24 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { Error } from 'components';
+import { ErrorModal } from 'components';
 import { useModalContext } from './NotificationModal';
 
 const ErrorHandlerContext = createContext({});
+
+const getErrorMessageWithContext = ({ message, errorCode, heading }) => {
+  if (errorCode && heading) {
+    // These errors require to show FAQs link
+    const showFAQ = ['ERR_1003', 'ERR_1004'].includes(errorCode);
+    return {
+      heading,
+      message,
+      faqLink: showFAQ ? 'https://docs.cast.fyi' : undefined,
+    };
+  }
+  // defafult to error message
+  return { message, heading: 'Error' };
+};
 
 export const useErrorHandlerContext = () => {
   const context = useContext(ErrorHandlerContext);
@@ -27,7 +41,7 @@ const ErrorHandlerProvider = ({ children }) => {
 
   const [errorOpened, setErrorOpened] = useState(false);
 
-  const { openModal, isOpen } = useModalContext();
+  const { openModal, isOpen, closeModal } = useModalContext();
 
   const closeError = useCallback(() => {
     setError(null);
@@ -36,35 +50,31 @@ const ErrorHandlerProvider = ({ children }) => {
 
   useEffect(() => {
     if (error !== null && !errorOpened) {
+      const { message, heading, faqLink } = getErrorMessageWithContext(error);
       openModal(
-        createElement(Error, {
-          error: (
-            <p className="has-text-danger p-3 has-text-justified">
-              <b>{error.statusText}</b>
-            </p>
-          ),
-          errorTitle:
-            typeof error.status === 'number'
-              ? `Error code: ${error.status}`
-              : error?.status,
+        createElement(ErrorModal, {
+          onClose: closeModal,
+          message,
+          title: heading,
+          faqLink,
         }),
         {
           onClose: closeError,
-          classNameModalContent: 'rounded-sm',
+          isErrorModal: true,
         }
       );
       setErrorOpened(true);
     }
-  }, [openModal, error, closeError, isOpen, errorOpened]);
+  }, [openModal, error, closeError, isOpen, errorOpened, closeModal]);
 
   /**
    * Hook to call modal error and show a message
    * @param  {Object | Error} err
-   *    Object { status: number | string, statusText: string } or
+   *    Object { status: number | string, message: string, header: string, errorCode: string } or
    *    Error object with message that contains a string that will be parsed to get status and statusText
    * @param  {string} url indicates the url request that generated the error
    */
-  const notifyError = useCallback((err, url) => {
+  const notifyError = useCallback((err) => {
     try {
       const response = JSON.parse(err.message);
       if (typeof response === 'object') {
@@ -72,9 +82,8 @@ const ErrorHandlerProvider = ({ children }) => {
       }
     } catch (error) {
       setError({
-        status: err?.status ?? 500,
-        statusText: err?.statusText || `Server not available: ${err?.message}`,
-        url: url ?? '',
+        status: err?.status,
+        message: err?.statusText || `${err?.message}`,
       });
     }
   }, []);

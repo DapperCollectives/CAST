@@ -65,8 +65,6 @@ export default function ProposalPage() {
   const [confirmingVote, setConfirmingVote] = useState(false);
   const [castingVote, setCastingVote] = useState(false);
   const [castVote, setCastVote] = useState(null);
-  const [voteError, setVoteError] = useState(null);
-  const [cancelProposal, setCancelProposal] = useState(null);
   const [cancelled, setCancelled] = useState(false);
   const [visibleTab, setVisibleTab] = useState({
     proposal: true,
@@ -127,12 +125,6 @@ export default function ProposalPage() {
         }
       : {};
 
-  useEffect(() => {
-    if (modalContext.isOpen && user?.addr && !voteError && !cancelProposal) {
-      modalContext.closeModal();
-    }
-  }, [modalContext, user, voteError, cancelProposal]);
-
   const openStrategyModal = () => {
     setIsStrategyModalOpen(true);
   };
@@ -165,10 +157,8 @@ export default function ProposalPage() {
     if (!proposal) {
       return;
     }
-    setCancelProposal(true);
 
     const onDismiss = () => {
-      setCancelProposal(false);
       modalContext.closeModal();
     };
 
@@ -185,7 +175,6 @@ export default function ProposalPage() {
         return;
       }
       // is no errors continue
-      setCancelProposal(false);
       setCancelled(true);
     };
     modalContext.openModal(
@@ -217,7 +206,6 @@ export default function ProposalPage() {
     try {
       await voteOnProposal({ proposal, voteData });
     } catch (error) {
-      setVoteError(error);
       setConfirmingVote(false);
       notifyError(error);
       setCastingVote(false);
