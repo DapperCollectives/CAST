@@ -39,14 +39,14 @@ export const checkResponse = async (response) => {
   // and it will only reject on network failure or if anything prevented the request from completing.
   if (!response.ok) {
     const { status, statusText } = response;
-    const { error, modalCode, heading } = response.json
+    const { error, errorCode, heading } = response.json
       ? await response.json()
       : {};
     throw new Error(
       JSON.stringify({
         status,
         message: error || statusText,
-        modalCode,
+        errorCode,
         heading,
       })
     );

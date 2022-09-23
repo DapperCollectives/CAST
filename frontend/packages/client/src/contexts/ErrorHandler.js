@@ -12,10 +12,10 @@ import { useModalContext } from './NotificationModal';
 
 const ErrorHandlerContext = createContext({});
 
-const getErrorMessageWithContext = ({ message, modalCode, heading }) => {
-  if (modalCode && heading) {
+const getErrorMessageWithContext = ({ message, errorCode, heading }) => {
+  if (errorCode && heading) {
     // These errors require to show FAQs link
-    const showFAQ = ['ERR_1003', 'ERR_1004'].includes(modalCode);
+    const showFAQ = ['ERR_1003', 'ERR_1004'].includes(errorCode);
     return {
       heading,
       message,
@@ -70,7 +70,7 @@ const ErrorHandlerProvider = ({ children }) => {
   /**
    * Hook to call modal error and show a message
    * @param  {Object | Error} err
-   *    Object { status: number | string, message: string, header: string, modalCode: string } or
+   *    Object { status: number | string, message: string, header: string, errorCode: string } or
    *    Error object with message that contains a string that will be parsed to get status and statusText
    * @param  {string} url indicates the url request that generated the error
    */
