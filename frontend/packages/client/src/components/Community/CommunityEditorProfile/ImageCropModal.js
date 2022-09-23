@@ -5,7 +5,7 @@ import { Svg } from '@cast/shared-components';
 import { ActionButton } from 'components';
 import Slider from './Slider';
 
-export default function ImageCropperModal({
+export default function ImageCropModal({
   logoImage,
   onDone,
   cropShape,
