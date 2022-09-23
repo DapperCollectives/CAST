@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -56,6 +57,20 @@ var (
 		errorCode:  "ERR_1005",
 		message:    "Forbidden",
 		details:    "You are not authorized to perform this action.",
+	}
+
+	errCreateProposal = errorResponse{
+		statusCode: http.StatusForbidden,
+		errorCode:  "ERR_1006",
+		message:    "Error",
+		details:    "There was an error trying to create your proposal",
+	}
+
+	errUpdateCommunity = errorResponse{
+		statusCode: http.StatusForbidden,
+		errorCode:  "ERR_1007",
+		message:    "Error",
+		details:    "There was an error trying to update your community",
 	}
 )
 
@@ -194,7 +209,7 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	vote, _ := helpers.createVote(r, proposal)
+	vote, err := helpers.createVote(r, proposal)
 	if err != nil {
 		log.Error().Err(err).Msg("Error creating vote.")
 		respondWithError(w, errInsufficientBalance)
@@ -245,8 +260,8 @@ func (a *App) getProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c, e := helpers.fetchCommunity(p.Community_id)
-	if e.err != nil {
+	c, err := helpers.fetchCommunity(p.Community_id)
+	if err != nil {
 		log.Error().Err(err).Msg("error fetching community")
 		respondWithError(w, errIncompleteRequest)
 		return
@@ -286,8 +301,8 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	proposal, e := helpers.createProposal(p)
-	if e.err != nil {
+	proposal, err := helpers.createProposal(p)
+	if err != nil {
 		log.Error().Err(err).Msg("Error creating proposal")
 		respondWithError(w, errIncompleteRequest)
 		return
@@ -397,8 +412,8 @@ func (a *App) getCommunity(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c, e := helpers.fetchCommunity(id)
-	if e.err != nil {
+	c, err := helpers.fetchCommunity(id)
+	if err != nil {
 		log.Error().Err(err).Msg("Error fetching community")
 		respondWithError(w, errIncompleteRequest)
 		return
@@ -451,7 +466,7 @@ func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	c, _, err = helpers.createCommunity(payload)
+	c, err = helpers.createCommunity(payload)
 	if err != nil {
 		log.Error().Err(err).Msg("Error creating community")
 		respondWithError(w, errIncompleteRequest)
@@ -486,6 +501,8 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	fmt.Println("HERE")
+	fmt.Println(*payload.Proposal_threshold)
 	if payload.Proposal_threshold != nil && payload.Only_authors_to_submit != nil {
 		err = validateProposalThreshold(*payload.Proposal_threshold, *payload.Only_authors_to_submit)
 		if err != nil {
@@ -494,8 +511,8 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	c, e := helpers.updateCommunity(id, payload)
-	if e.err != nil {
+	c, err := helpers.updateCommunity(id, payload)
+	if err != nil {
 		log.Error().Err(err).Msg("Error updating community")
 		respondWithError(w, errIncompleteRequest)
 		return
