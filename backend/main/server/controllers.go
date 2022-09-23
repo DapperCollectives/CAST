@@ -15,47 +15,47 @@ import (
 
 type errorResponse struct {
 	statusCode int
-	modalCode  string
-	heading    string
+	errorCode  string
 	message    string
+	details    string
 }
 
 var (
 	errIncompleteRequest = errorResponse{
 		statusCode: http.StatusBadRequest,
-		modalCode:  "ERR_1001",
-		heading:    "Error",
-		message:    "There was an error trying to complete your request",
+		errorCode:  "ERR_1001",
+		message:    "Error",
+		details:    "There was an error trying to complete your request",
 	}
 
 	errCreateCommunity = errorResponse{
 		statusCode: http.StatusBadRequest,
-		modalCode:  "ERR_1002",
-		heading:    "Error",
-		message:    "There was an error trying to create your community",
+		errorCode:  "ERR_1002",
+		message:    "Error",
+		details:    "There was an error trying to create your community",
 	}
 
 	errFetchingBalance = errorResponse{
 		statusCode: http.StatusBadRequest,
-		modalCode:  "ERR_1003",
-		heading:    "Error Fetching Balance",
-		message: `While confirming your balance, we've encountered an error
+		errorCode:  "ERR_1003",
+		message:    "Error Fetching Balance",
+		details: `While confirming your balance, we've encountered an error
 							connecting to the Flow Blockchain.`,
 	}
 
 	errInsufficientBalance = errorResponse{
 		statusCode: http.StatusUnauthorized,
-		modalCode:  "ERR_1004",
-		heading:    "Insufficient Balance",
-		message: `In order to vote on this proposal you must have a minimum 
+		errorCode:  "ERR_1004",
+		message:    "Insufficient Balance",
+		details: `In order to vote on this proposal you must have a minimum 
 							balance of %d %s tokens in your wallet.`,
 	}
 
 	errForbidden = errorResponse{
 		statusCode: http.StatusForbidden,
-		modalCode:  "ERR_1005",
-		heading:    "Forbidden",
-		message:    "You are not authorized to perform this action.",
+		errorCode:  "ERR_1005",
+		message:    "Forbidden",
+		details:    "You are not authorized to perform this action.",
 	}
 )
 
@@ -944,9 +944,9 @@ func (a *App) removeUserRole(w http.ResponseWriter, r *http.Request) {
 
 func respondWithError(w http.ResponseWriter, err errorResponse) {
 	respondWithJSON(w, err.statusCode, map[string]string{
-		"modalCode": err.modalCode,
-		"heading":   err.heading,
-		"error":     err.message,
+		"errorCode": err.errorCode,
+		"message": err.message,
+		"details":  err.details,
 	})
 }
 
