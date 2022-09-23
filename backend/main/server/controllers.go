@@ -708,11 +708,11 @@ func (a *App) getAccountAtBlockHeight(w http.ResponseWriter, r *http.Request) {
 	}
 
 	flowToken := "FlowToken"
-	defaultFlowContract := s.Contract{
+	defaultFlowContract := shared.Contract{
 		Name: &flowToken,
 	}
 
-	b := s.FTBalanceResponse{}
+	b := shared.FTBalanceResponse{}
 	if err = a.SnapshotClient.GetAddressBalanceAtBlockHeight(addr, blockHeight, &b, &defaultFlowContract); err != nil {
 		log.Error().Err(err).Msgf("Error getting account %s at blockheight %d.", addr, blockHeight)
 		respondWithError(w, errFetchingBalance)
