@@ -35,8 +35,7 @@ export default function ProfileForm({
           !['image/png', 'image/jpeg', 'image/jpg'].includes(imageFile.type)
         ) {
           notifyError({
-            status: 'Image type not supported',
-            statusText: 'Please upload a .png or .jpeg file type extension',
+            message: 'Please upload a .png or .jpeg file type extension',
           });
           return;
         }
@@ -45,8 +44,7 @@ export default function ProfileForm({
           const sizeLimit =
             maxFileSize === MAX_AVATAR_FILE_SIZE ? '2MB' : '5MB';
           notifyError({
-            status: 'Image file size not allowed',
-            statusText: `The selected file exceeds the ${sizeLimit} limit.`,
+            message: `The selected file exceeds the ${sizeLimit} limit.`,
           });
           return;
         }

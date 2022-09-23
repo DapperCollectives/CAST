@@ -8,24 +8,22 @@ import {
   useState,
 } from 'react';
 import { ErrorModal } from 'components';
-import { internalErrorCodes } from 'const';
 import { useModalContext } from './NotificationModal';
 
 const ErrorHandlerContext = createContext({});
 
-const getErrorMessageWithContext = ({ statusText }) => {
-  const errorArray = statusText.split('::');
-
-  if (errorArray.length === 3 && internalErrorCodes.includes(errorArray[0])) {
-    const [code, title, message] = errorArray;
-    const showFAQ = ['ERR03', 'ERR04'].includes(code);
+const getErrorMessageWithContext = ({ message, modalCode, heading }) => {
+  if (modalCode && heading) {
+    // These errors require to show FAQs link
+    const showFAQ = ['ERR_1003', 'ERR_1004'].includes(modalCode);
     return {
-      title,
+      heading,
       message,
       faqLink: showFAQ ? 'https://docs.cast.fyi' : undefined,
     };
   }
-  return { message: statusText, title: 'Error' };
+  // defafult to error message
+  return { message, heading: 'Error' };
 };
 
 export const useErrorHandlerContext = () => {
@@ -52,12 +50,12 @@ const ErrorHandlerProvider = ({ children }) => {
 
   useEffect(() => {
     if (error !== null && !errorOpened) {
-      const { message, title, faqLink } = getErrorMessageWithContext(error);
+      const { message, heading, faqLink } = getErrorMessageWithContext(error);
       openModal(
         createElement(ErrorModal, {
           onClose: closeModal,
           message,
-          title,
+          title: heading,
           faqLink,
         }),
         {
@@ -72,7 +70,7 @@ const ErrorHandlerProvider = ({ children }) => {
   /**
    * Hook to call modal error and show a message
    * @param  {Object | Error} err
-   *    Object { status: number | string, statusText: string } or
+   *    Object { status: number | string, message: string, header: string, modalCode: string } or
    *    Error object with message that contains a string that will be parsed to get status and statusText
    * @param  {string} url indicates the url request that generated the error
    */
@@ -85,7 +83,7 @@ const ErrorHandlerProvider = ({ children }) => {
     } catch (error) {
       setError({
         status: err?.status,
-        statusText: err?.statusText || `${err?.message}`,
+        message: err?.statusText || `${err?.message}`,
       });
     }
   }, []);

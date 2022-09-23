@@ -96,8 +96,7 @@ export default function MembersEditor({
       notifyError(
         {
           message: JSON.stringify({
-            status: '401',
-            statusText: `No valid user signature found.`,
+            message: `No valid user signature found.`,
           }),
         },
         ''

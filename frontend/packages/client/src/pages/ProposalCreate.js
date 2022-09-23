@@ -65,8 +65,7 @@ export default function ProposalCreatePage() {
     if (!communityId) {
       notifyError({
         status: 'No community information provided',
-        statusText:
-          'Please restart the proposal creation from the community page',
+        message: 'Please restart the proposal creation from the community page',
       });
       return;
     }
@@ -81,7 +80,7 @@ export default function ProposalCreatePage() {
     if (!hasValidStartTime) {
       notifyError({
         status: 'Invalid start time for proposal',
-        statusText: 'Please update start time on Set Date & Time step',
+        message: 'Please update start time on Set Date & Time step',
       });
       return;
     }
