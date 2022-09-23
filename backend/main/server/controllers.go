@@ -133,7 +133,7 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := s.GetPaginatedResponseWithPayload(votesWithWeights, order)
+	response := shared.GetPaginatedResponseWithPayload(votesWithWeights, order)
 	respondWithJSON(w, http.StatusOK, response)
 }
 
@@ -180,7 +180,7 @@ func (a *App) getVotesForAddress(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := s.GetPaginatedResponseWithPayload(votes, pageParams)
+	response := shared.GetPaginatedResponseWithPayload(votes, pageParams)
 	respondWithJSON(w, http.StatusOK, response)
 }
 
@@ -232,7 +232,7 @@ func (a *App) getProposalsForCommunity(w http.ResponseWriter, r *http.Request) {
 
 	pageParams.TotalRecords = totalRecords
 
-	response := s.GetPaginatedResponseWithPayload(proposals, pageParams)
+	response := shared.GetPaginatedResponseWithPayload(proposals, pageParams)
 	respondWithJSON(w, http.StatusOK, response)
 }
 
@@ -372,7 +372,7 @@ func (a *App) getCommunities(w http.ResponseWriter, r *http.Request) {
 	}
 
 	pageParams.TotalRecords = totalRecords
-	response := s.GetPaginatedResponseWithPayload(communities, pageParams)
+	response := shared.GetPaginatedResponseWithPayload(communities, pageParams)
 
 	respondWithJSON(w, http.StatusOK, response)
 }
@@ -419,7 +419,7 @@ func (a *App) getCommunitiesForHomePage(w http.ResponseWriter, r *http.Request) 
 
 	pageParams.TotalRecords = totalRecords
 
-	response := s.GetPaginatedResponseWithPayload(communities, pageParams)
+	response := shared.GetPaginatedResponseWithPayload(communities, pageParams)
 	respondWithJSON(w, http.StatusOK, response)
 }
 
@@ -818,7 +818,7 @@ func (a *App) getCommunityUsers(w http.ResponseWriter, r *http.Request) {
 
 	pageParams.TotalRecords = totalRecords
 
-	response := s.GetPaginatedResponseWithPayload(users, pageParams)
+	response := shared.GetPaginatedResponseWithPayload(users, pageParams)
 	respondWithJSON(w, http.StatusOK, response)
 
 }
@@ -854,7 +854,7 @@ func (a *App) getCommunityUsersByType(w http.ResponseWriter, r *http.Request) {
 	}
 	pageParams.TotalRecords = totalRecords
 
-	response := s.GetPaginatedResponseWithPayload(users, pageParams)
+	response := shared.GetPaginatedResponseWithPayload(users, pageParams)
 	respondWithJSON(w, http.StatusOK, response)
 }
 
@@ -879,7 +879,7 @@ func (a *App) getCommunityLeaderboard(w http.ResponseWriter, r *http.Request) {
 	}
 	pageParams.TotalRecords = totalRecords
 
-	response := s.GetPaginatedResponseWithPayload(leaderboard.Users, pageParams)
+	response := shared.GetPaginatedResponseWithPayload(leaderboard.Users, pageParams)
 	response.Data = leaderboard
 
 	respondWithJSON(w, http.StatusOK, response)
@@ -899,7 +899,7 @@ func (a *App) getUserCommunities(w http.ResponseWriter, r *http.Request) {
 	}
 
 	pageParams.TotalRecords = totalRecords
-	response := s.GetPaginatedResponseWithPayload(communities, pageParams)
+	response := shared.GetPaginatedResponseWithPayload(communities, pageParams)
 
 	respondWithJSON(w, http.StatusOK, response)
 
@@ -970,7 +970,7 @@ func validatePayload(body io.ReadCloser, data interface{}) error {
 	return nil
 }
 
-func getPageParams(r http.Request, defaultCount int) s.PageParams {
+func getPageParams(r http.Request, defaultCount int) shared.PageParams {
 	s, _ := strconv.Atoi(r.FormValue("start"))
 	c, _ := strconv.Atoi(r.FormValue("count"))
 	o := r.FormValue("order")
