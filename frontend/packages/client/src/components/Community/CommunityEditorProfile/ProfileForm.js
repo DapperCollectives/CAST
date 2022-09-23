@@ -136,15 +136,15 @@ export default function ProfileForm({
         <ImageCropModal
           cropperFn={getCroppedImg({
             dWidth: 1300,
-            dHeight: 250,
+            dHeight: 300,
             fileName: 'bannerImage',
           })}
-          aspect={26 / 5}
+          aspect={13 / 3}
           defaultCropArea={{
             width: 660,
-            height: 125,
+            height: 130,
             x: 0,
-            y: 125,
+            y: 130,
           }}
           logoImage={bannerImage}
           onDone={(image) => {
@@ -266,7 +266,7 @@ export default function ProfileForm({
                 <Svg name="Upload" />
                 <span className="smaller-text">Community Banner Image</span>
                 <span className="smaller-text">
-                  JPG or PNG 200px X 1200px recommended
+                  JPG or PNG 1300px X 300px recommended
                 </span>
                 <input {...getBannerInputProps()} />
               </>
