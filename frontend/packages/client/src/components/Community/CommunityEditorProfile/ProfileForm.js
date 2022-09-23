@@ -89,7 +89,7 @@ export default function ProfileForm({
   });
 
   const imageDropClasses = classnames(
-    'is-flex is-flex-direction-column is-align-items-center is-justify-content-center cursor-pointer rounded-lg',
+    'is-flex is-flex-direction-column is-align-items-center is-justify-content-center cursor-pointer rounded',
     {
       'border-dashed-dark': !bannerImage?.file && !bannerImage?.imageUrl,
     }
@@ -164,7 +164,7 @@ export default function ProfileForm({
           }}
         />,
         {
-          classNameModalContent: 'rounded modal-content-image-crop',
+          classNameModalContent: 'rounded modal-content-image-crop banner-crop',
           showCloseButton: false,
         }
       );

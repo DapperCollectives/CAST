@@ -36,7 +36,7 @@ export default function ImageCropModal({
   return (
     <div
       className="modal-card has-background-white m-0 p-0 full-height"
-      style={{ minHeight: '610px', maxWidth: '400px' }}
+      style={{ minHeight: '610px', width: '100%' }}
     >
       <header
         className="modal-card-head has-background-white columns is-mobile m-0 px-5 pt-4"
