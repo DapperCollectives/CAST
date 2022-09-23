@@ -116,14 +116,7 @@ func (h *Helpers) useStrategyFetchBalance(
 	if err != nil {
 		log.Error().Err(err).Msgf("User does not have the required balance %v.", v.Addr)
 
-		errMsg := fmt.Sprintf(
-			`ERR04::Insufficient Balalnce::
-			In order to vote ont this proposal you must have 
-			a minimum balance of %d %s tokens in your wallet`,
-			p.Min_balance, *c.Contract_name,
-		)
-
-		return models.VoteWithBalance{}, errors.New(errMsg)
+		return models.VoteWithBalance{}, err
 	}
 
 	vb := models.VoteWithBalance{
