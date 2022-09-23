@@ -14,6 +14,7 @@ const ProposalCreate = lazy(() => import('./ProposalCreate'));
 const Community = lazy(() => import('./Community'));
 const CommunityEditor = lazy(() => import('./CommunityEditor'));
 const CommunityCreate = lazy(() => import('./CommunityCreate'));
+const BrowseCommunities = lazy(() => import('./BrowseCommunities'));
 
 export default function AppPages() {
   return (
@@ -29,6 +30,9 @@ export default function AppPages() {
             <Route exact path="/about" component={About} />
             <Route exact path="/privacy-policy" component={PrivacyPolicy} />
             <Route exact path="/terms-of-service" component={TermsOfService} />
+            <Route exact path="/browse-communities">
+              <BrowseCommunities />
+            </Route>
             <Route exact path="/community/create">
               <CommunityCreate />
             </Route>
