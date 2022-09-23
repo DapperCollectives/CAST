@@ -76,8 +76,11 @@ export default function CommunityProposalsAndVoting({
       return;
     }
 
+    // onError hook from react-query will handle error
     await updateCommunity({
       strategies: updatePayload,
+    }).catch(() => {
+      return;
     });
   };
 

@@ -30,7 +30,10 @@ export default function CommunityEditorLinks(props = {}) {
     formState;
 
   const onSubmit = async (data) => {
-    await updateCommunity(data);
+    // onError hook from react-query will handle error
+    await updateCommunity(data).catch(() => {
+      return;
+    });
   };
 
   // this triggers updating the form after

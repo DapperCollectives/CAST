@@ -86,11 +86,14 @@ export default function CommunityEditorProfile({
 
     // updated fields
     if (Object.keys(updates).length > 0) {
-      await updateCommunity(updates);
+      // onError hook from react-query will handle error
+      await updateCommunity(updates).catch(() => {
+        return;
+      });
     }
     // call if value as true
     !isUpdatingImage && setIsUpdatingImage(false);
-    !isUpdatingBanner && setIsUpdatingBanner(false);
+    !isUpdatingBanner && setIsUpdatingImage(false);
   };
 
   return (
