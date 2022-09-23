@@ -12,18 +12,18 @@ import { useModalContext } from './NotificationModal';
 
 const ErrorHandlerContext = createContext({});
 
-const getErrorMessageWithContext = ({ message, errorCode, heading }) => {
-  if (errorCode && heading) {
+const getErrorMessageWithContext = ({ message, errorCode, details }) => {
+  if (errorCode && details) {
     // These errors require to show FAQs link
     const showFAQ = ['ERR_1003', 'ERR_1004'].includes(errorCode);
     return {
-      heading,
       message,
+      details,
       faqLink: showFAQ ? 'https://docs.cast.fyi' : undefined,
     };
   }
-  // defafult to error message
-  return { message, heading: 'Error' };
+  // defafult to error message and use Error as title
+  return { details: message, message: 'Error' };
 };
 
 export const useErrorHandlerContext = () => {
@@ -50,12 +50,12 @@ const ErrorHandlerProvider = ({ children }) => {
 
   useEffect(() => {
     if (error !== null && !errorOpened) {
-      const { message, heading, faqLink } = getErrorMessageWithContext(error);
+      const { message, details, faqLink } = getErrorMessageWithContext(error);
       openModal(
         createElement(ErrorModal, {
           onClose: closeModal,
-          message,
-          title: heading,
+          message: details,
+          title: message,
           faqLink,
         }),
         {
