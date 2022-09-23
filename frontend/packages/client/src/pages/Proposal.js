@@ -426,6 +426,7 @@ export default function ProposalPage() {
                 <ul>
                   <li className={`${visibleTab.proposal ? 'is-active' : ''}`}>
                     <Tablink
+                      className="has-text-weight-bold"
                       linkText="Proposal"
                       onClick={setTab('proposal')}
                       isActive={visibleTab.proposal}
@@ -434,7 +435,8 @@ export default function ProposalPage() {
                   </li>
                   <li className={`${visibleTab.summary ? 'is-active' : ''}`}>
                     <Tablink
-                      linkText="Summary"
+                      className="has-text-weight-bold"
+                      linkText="Results & Details"
                       onClick={setTab('summary')}
                       isActive={visibleTab.summary}
                       onlyLink
@@ -478,7 +480,21 @@ export default function ProposalPage() {
                 {visibleTab.summary && (
                   <div
                     className={`column is-full p-0 is-flex is-flex-direction-column`}
+                    style={{ position: 'relative' }}
                   >
+                    <div
+                      className="has-background-white-ter"
+                      style={{
+                        position: 'absolute',
+                        backgroundColor: 'blue',
+                        width: '100vw',
+                        overflow: 'hidden',
+                        left: '-1rem',
+                        zIndex: -1,
+                        height: '600px',
+                        top: '-1.5rem',
+                      }}
+                    />
                     <ProposalInformation
                       proposalId={proposal.id}
                       creatorAddr={proposal.creatorAddr}
@@ -488,6 +504,8 @@ export default function ProposalPage() {
                       ipfsUrl={proposal.ipfsUrl}
                       startTime={proposal.startTime}
                       endTime={proposal.endTime}
+                      computedStatus={proposal.computedStatus}
+                      communityId={proposal.communityId}
                       openStrategyModal={openStrategyModal}
                     />
                   </div>
@@ -540,8 +558,12 @@ export default function ProposalPage() {
                   ipfsUrl={proposal.ipfsUrl}
                   startTime={proposal.startTime}
                   endTime={proposal.endTime}
+                  computedStatus={proposal.computedStatus}
+                  communityId={proposal.communityId}
+                  proposalStrategy={proposal.strategy}
+                  proposalMaxWeight={proposal?.maxWeight}
+                  proposalMinBalance={proposal?.minBalance}
                   openStrategyModal={openStrategyModal}
-                  className="has-background-white-ter"
                 />
               </div>
             </div>

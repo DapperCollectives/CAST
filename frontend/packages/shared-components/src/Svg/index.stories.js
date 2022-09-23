@@ -20,6 +20,7 @@ export default {
         'CaretDown',
         'CheckCircle',
         'CheckMark',
+        'CheckOutlined',
         'Close',
         'Copy',
         'Discord',
