@@ -1,9 +1,10 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useModalContext } from 'contexts/NotificationModal';
 import { Svg } from '@cast/shared-components';
 import { Form, WrapperResponsive } from 'components';
+import { useWindowDimensions } from 'hooks';
 import { MAX_AVATAR_FILE_SIZE, MAX_FILE_SIZE } from 'const';
 import { getCroppedImg } from 'utils';
 import classnames from 'classnames';
@@ -25,7 +26,9 @@ export default function ProfileForm({
   isUpdatingBanner = false,
 } = {}) {
   const { notifyError } = useErrorHandlerContext();
-
+  const imageContainerRef = useRef();
+  const [bannerHeight, setBannerHeight] = useState(200);
+  const { width } = useWindowDimensions();
   const { openModal, closeModal, isOpen } = useModalContext();
   const onDrop = useCallback(
     (filename, dataKey, maxFileSize) => (acceptedFiles) => {
@@ -86,7 +89,7 @@ export default function ProfileForm({
   });
 
   const imageDropClasses = classnames(
-    'is-flex is-flex-direction-column is-align-items-center is-justify-content-center cursor-pointer rounded-lg',
+    'is-flex is-flex-direction-column is-align-items-center is-justify-content-center cursor-pointer rounded',
     {
       'border-dashed-dark': !bannerImage?.file && !bannerImage?.imageUrl,
     }
@@ -136,15 +139,15 @@ export default function ProfileForm({
         <ImageCropModal
           cropperFn={getCroppedImg({
             dWidth: 1300,
-            dHeight: 250,
+            dHeight: 300,
             fileName: 'bannerImage',
           })}
-          aspect={26 / 5}
+          aspect={13 / 3}
           defaultCropArea={{
             width: 660,
-            height: 125,
+            height: 130,
             x: 0,
-            y: 125,
+            y: 130,
           }}
           logoImage={bannerImage}
           onDone={(image) => {
@@ -161,13 +164,28 @@ export default function ProfileForm({
           }}
         />,
         {
-          classNameModalContent: 'rounded modal-content-image-crop',
+          classNameModalContent: 'rounded modal-content-image-crop banner-crop',
           showCloseButton: false,
         }
       );
     }
   }, [bannerImage, openModal, closeModal, isOpen, setValue]);
 
+  const { current: imageBannerContainer } = imageContainerRef;
+
+  // based on image banner container width adjust height dynamically to match 13/3 ratio
+  useEffect(() => {
+    setBannerHeight(
+      // on mobile set 150px as min height
+      width <= 768
+        ? 150
+        : // on higher that mobile set height based on image width keeping ratio
+        imageBannerContainer?.offsetWidth
+        ? parseInt((imageBannerContainer?.offsetWidth * 3) / 13)
+        : // default to 200 untill ref loads
+          200
+    );
+  }, [imageBannerContainer, width]);
   return (
     <WrapperResponsive
       classNames="border-light rounded-lg columns is-flex-direction-column is-mobile m-0"
@@ -255,10 +273,13 @@ export default function ProfileForm({
         </div>
       </div>
       <div className="columns">
-        <div className="column is-12">
+        <div className="column is-12" ref={imageContainerRef}>
           <div
             className={imageDropClasses}
-            style={{ minHeight: 200 }}
+            // adjust height based on width
+            style={{
+              minHeight: `${bannerHeight}px`,
+            }}
             {...getBannerRootProps()}
           >
             {!isUpdatingBanner && !bannerImage?.imageUrl && (
@@ -266,7 +287,7 @@ export default function ProfileForm({
                 <Svg name="Upload" />
                 <span className="smaller-text">Community Banner Image</span>
                 <span className="smaller-text">
-                  JPG or PNG 200px X 1200px recommended
+                  JPG or PNG 1300px X 300px recommended
                 </span>
                 <input {...getBannerInputProps()} />
               </>
