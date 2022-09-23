@@ -69,6 +69,7 @@ const NotificationModalProvider = ({ children }) => {
             ? {
                 classNameModalContent: 'is-flex is-justify-content-center',
                 backgroundColor: ' ',
+                showCloseButton: false,
               }
             : undefined),
         };
