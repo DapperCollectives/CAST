@@ -176,9 +176,14 @@ export default function ProfileForm({
   // based on image banner container width adjust height dynamically to match 13/3 ratio
   useEffect(() => {
     setBannerHeight(
-      imageBannerContainer?.offsetWidth
+      // on mobile set 150px as min height
+      width <= 768
+        ? 150
+        : // on higher that mobile set height based on image width keeping ratio
+        imageBannerContainer?.offsetWidth
         ? parseInt((imageBannerContainer?.offsetWidth * 3) / 13)
-        : 200
+        : // default to 200 untill ref loads
+          200
     );
   }, [imageBannerContainer, width]);
   return (
