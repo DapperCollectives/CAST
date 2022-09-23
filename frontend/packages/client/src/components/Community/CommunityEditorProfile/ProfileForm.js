@@ -1,9 +1,10 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useModalContext } from 'contexts/NotificationModal';
 import { Svg } from '@cast/shared-components';
 import { Form, WrapperResponsive } from 'components';
+import { useWindowDimensions } from 'hooks';
 import { MAX_AVATAR_FILE_SIZE, MAX_FILE_SIZE } from 'const';
 import { getCroppedImg } from 'utils';
 import classnames from 'classnames';
@@ -25,7 +26,9 @@ export default function ProfileForm({
   isUpdatingBanner = false,
 } = {}) {
   const { notifyError } = useErrorHandlerContext();
-
+  const imageContainerRef = useRef();
+  const [bannerHeight, setBannerHeight] = useState(200);
+  const { width } = useWindowDimensions();
   const { openModal, closeModal, isOpen } = useModalContext();
   const onDrop = useCallback(
     (filename, dataKey, maxFileSize) => (acceptedFiles) => {
@@ -168,6 +171,16 @@ export default function ProfileForm({
     }
   }, [bannerImage, openModal, closeModal, isOpen, setValue]);
 
+  const { current: imageBannerContainer } = imageContainerRef;
+
+  // based on image banner container width adjust height dynamically to match 13/3 ratio
+  useEffect(() => {
+    setBannerHeight(
+      imageBannerContainer?.offsetWidth
+        ? parseInt((imageBannerContainer?.offsetWidth * 3) / 13)
+        : 200
+    );
+  }, [imageBannerContainer, width]);
   return (
     <WrapperResponsive
       classNames="border-light rounded-lg columns is-flex-direction-column is-mobile m-0"
@@ -255,10 +268,13 @@ export default function ProfileForm({
         </div>
       </div>
       <div className="columns">
-        <div className="column is-12">
+        <div className="column is-12" ref={imageContainerRef}>
           <div
             className={imageDropClasses}
-            style={{ minHeight: 200 }}
+            // adjust height based on width
+            style={{
+              minHeight: `${bannerHeight}px`,
+            }}
             {...getBannerRootProps()}
           >
             {!isUpdatingBanner && !bannerImage?.imageUrl && (
