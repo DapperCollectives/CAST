@@ -3,7 +3,6 @@ package server
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -399,8 +398,13 @@ func (a *App) searchCommunities(w http.ResponseWriter, r *http.Request) {
 		log.Error().Err(err).Msg("Error searching communities")
 		respondWithError(w, errIncompleteRequest)
 	}
+	pageParams := getPageParams(*r, 25)
 
-	respondWithJSON(w, http.StatusOK, results)
+	totalRecords := results.(int)
+	pageParams.TotalRecords = totalRecords
+
+	response := shared.GetPaginatedResponseWithPayload(results, pageParams)
+	respondWithJSON(w, http.StatusOK, response)
 }
 
 func (a *App) getCommunity(w http.ResponseWriter, r *http.Request) {
@@ -501,8 +505,7 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	fmt.Println("HERE")
-	fmt.Println(*payload.Proposal_threshold)
+
 	if payload.Proposal_threshold != nil && payload.Only_authors_to_submit != nil {
 		err = validateProposalThreshold(*payload.Proposal_threshold, *payload.Only_authors_to_submit)
 		if err != nil {
