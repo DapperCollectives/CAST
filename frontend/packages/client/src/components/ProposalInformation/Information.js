@@ -81,10 +81,10 @@ export default function Information({
             href={'https://flowscan.org/'}
             rel="noopener noreferrer"
             target="_blank"
-            className="button is-text p-0 small-text"
+            className="is-underlined has-text-grey p-0 small-text"
             style={{ height: '2rem !important' }}
           >
-            <p className="mr-2">{`$${tokenName?.toUpperCase()}`}</p>
+            <span className="mr-2">{`$${tokenName?.toUpperCase()}`}</span>
             <Svg name="LinkOut" width="12" height="12" />
           </a>
         }
@@ -129,7 +129,7 @@ export default function Information({
               href={ipfsUrl}
               rel="noopener noreferrer"
               target="_blank"
-              className="button is-text p-0 small-text"
+              className="is-underlined has-text-grey is-text p-0 small-text"
               style={{ height: '2rem !important' }}
             >
               <Tooltip
