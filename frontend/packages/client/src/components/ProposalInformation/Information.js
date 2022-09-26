@@ -6,6 +6,8 @@ import AvatarBloquies from './AvatarBloquies';
 import BlockieWithAddress from './BlockieWithAddress';
 import InfoBlock from './InfoBlock';
 
+const isVisible = (value) => Boolean(value && value !== '' && value !== 0);
+
 const dateFormatConf = {
   day: 'numeric',
   hour: 'numeric',
@@ -79,21 +81,21 @@ export default function Information({
             href={'https://flowscan.org/'}
             rel="noopener noreferrer"
             target="_blank"
-            className="button is-text p-0 small-text"
+            className="is-underlined has-text-grey p-0 small-text"
             style={{ height: '2rem !important' }}
           >
-            <p className="mr-2">{`$${tokenName?.toUpperCase()}`}</p>
+            <span className="mr-2">{`$${tokenName?.toUpperCase()}`}</span>
             <Svg name="LinkOut" width="12" height="12" />
           </a>
         }
       />
-      {maxWeight && maxWeight !== '' && (
+      {isVisible(maxWeight) && (
         <InfoBlock
           title={'Max tokens'}
           component={<span className="has-text-grey">{maxWeight}</span>}
         />
       )}
-      {minBalance && minBalance !== '' && (
+      {isVisible(minBalance) && (
         <InfoBlock
           title={'Min tokens'}
           component={<span className="has-text-grey">{minBalance}</span>}
@@ -131,7 +133,7 @@ export default function Information({
               href={ipfsUrl}
               rel="noopener noreferrer"
               target="_blank"
-              className="button is-text p-0 small-text"
+              className="is-underlined has-text-grey is-text p-0 small-text"
               style={{ height: '2rem !important' }}
             >
               <Tooltip
