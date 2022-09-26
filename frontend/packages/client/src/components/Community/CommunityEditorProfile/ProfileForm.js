@@ -38,7 +38,7 @@ export default function ProfileForm({
           !['image/png', 'image/jpeg', 'image/jpg'].includes(imageFile.type)
         ) {
           notifyError({
-            message: 'Please upload a .png or .jpeg file type extension',
+            details: 'Please upload a .png or .jpeg file type extension',
           });
           return;
         }
@@ -47,7 +47,7 @@ export default function ProfileForm({
           const sizeLimit =
             maxFileSize === MAX_AVATAR_FILE_SIZE ? '2MB' : '5MB';
           notifyError({
-            message: `The selected file exceeds the ${sizeLimit} limit.`,
+            details: `The selected file exceeds the ${sizeLimit} limit.`,
           });
           return;
         }
