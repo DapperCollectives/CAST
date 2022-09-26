@@ -76,8 +76,10 @@ export const getCompositeSigs = (sigArr) => {
   if (sigArr[0]?.signature?.signature) {
     return [sigArr[0].signature];
   }
-
-  if (isError(sigArr)) {
+  if (
+    isError(sigArr) ||
+    (typeof sigArr === 'string' && sigArr.includes('Declined'))
+  ) {
     return null;
   }
   return sigArr;
