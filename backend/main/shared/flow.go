@@ -40,13 +40,14 @@ type FlowConfig struct {
 }
 
 type Contract struct {
-	Name           *string  `json:"name,omitempty"`
-	Addr           *string  `json:"addr,omitempty"`
-	Public_path    *string  `json:"publicPath,omitempty"`
+	Name           *string `json:"name,omitempty"`
+	Addr           *string `json:"addr,omitempty"`
+	Public_path    *string `json:"publicPath,omitempty"`
 	Threshold      *float64 `json:"threshold,omitempty,string"`
 	MaxWeight      *float64 `json:"maxWeight,omitempty,string"`
-	Float_event_id *uint64  `json:"floatEventId,omitempty,string"`
-	Script         *string  `json:"script,omitempty"`
+	Float_event_id *uint64 `json:"floatEventId,omitempty,string"`
+	Script         *string `json:"script,omitempty"`
+	TallyMethod	   *string `json:"tallyMethod,omitempty"`
 }
 
 var (

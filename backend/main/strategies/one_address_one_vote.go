@@ -43,7 +43,7 @@ func (s *OneAddressOneVote) TallyVotes(
 ) (models.ProposalResults, error) {
 
 	for _, vote := range votes {
-		r.Results[vote.Choice]++
+		r.Results[vote.Choices[0]]++
 	}
 
 	return *r, nil
