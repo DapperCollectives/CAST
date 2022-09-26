@@ -198,7 +198,7 @@ export default function ProposalPage() {
     }
 
     const voteData = {
-      choice: optionChosen,
+      choices: [optionChosen],
       addr: user.addr,
     };
 

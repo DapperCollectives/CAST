@@ -18,6 +18,8 @@ require (
 	github.com/stretchr/testify v1.8.0
 	github.com/thoas/go-funk v0.9.2
 	google.golang.org/grpc v1.49.0
+	golang.org/x/exp v0.0.0-20220706164943-b4a6d9510983
+	gotest.tools v2.2.0+incompatible
 )
 
 require (

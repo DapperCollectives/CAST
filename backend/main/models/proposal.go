@@ -41,6 +41,7 @@ type Proposal struct {
 	Snapshot_status      *string                 `json:"snapshotStatus,omitempty"`
 	Voucher              *shared.Voucher         `json:"voucher,omitempty"`
 	Achievements_done	 bool					 `json:"achievementsDone"`
+	TallyMethod			 string				     `json:"tallyMethod"`
 }
 
 type UpdateProposalRequestPayload struct {

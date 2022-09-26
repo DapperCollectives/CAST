@@ -305,8 +305,10 @@ func ValidateVoteMessage(message string, proposal Proposal) error {
 }
 
 func (v *Vote) ValidateChoice(proposal Proposal) error {
+	fmt.Println("Here")
 	validChoice := false
 	for _, choice := range proposal.Choices {
+		fmt.Println(v.Choices)
 		if choice.Choice_text == v.Choices[0] {
 			validChoice = true
 			break
@@ -315,6 +317,7 @@ func (v *Vote) ValidateChoice(proposal Proposal) error {
 	if !validChoice {
 		return errors.New("invalid choice for proposal")
 	}
+	fmt.Println("Here 2")
 	return nil
 }
 

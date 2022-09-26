@@ -108,7 +108,7 @@ func (a *App) upload(w http.ResponseWriter, r *http.Request) {
 // Votes
 func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	proposal, err := helpers.fetchProposal(vars, "proposalId")
+	proposal, _ := helpers.fetchProposal(vars, "proposalId")
 
 	votes, err := models.GetAllVotesForProposal(a.DB, proposal.ID, *proposal.Strategy)
 	if err != nil {
@@ -209,8 +209,14 @@ func (a *App) getVotesForAddress(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
+	var vote models.Vote
+	if err := validatePayload(r.Body, &vote); err != nil {
+		log.Error().Err(err).Msg("Error validating payload")
+		respondWithError(w, errIncompleteRequest)
+		return
+	}
+	
 	vars := mux.Vars(r)
-
 	proposal, err := helpers.fetchProposal(vars, "proposalId")
 	if err != nil {
 		log.Error().Err(err).Msg("Invalid Proposal ID.")
@@ -218,14 +224,14 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	vote, err := helpers.createVote(r, proposal)
+	voteWithBalance, err := helpers.createVote(r, proposal)
 	if err != nil {
 		log.Error().Err(err).Msg("Error creating vote.")
 		respondWithError(w, errInsufficientBalance)
 		return
 	}
 
-	respondWithJSON(w, http.StatusCreated, vote)
+	respondWithJSON(w, http.StatusCreated, voteWithBalance)
 }
 
 // Proposals
