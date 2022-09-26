@@ -51,7 +51,7 @@ export default function Results({ voteResults, computedStatus } = {}) {
 
   return (
     <>
-      <p className="mb-5 has-text-weight-bold">Results</p>
+      <p className="mb-5 medium-text has-text-weight-bold">Results</p>
       {options.map((option, index) => {
         const percentage =
           totalVotes === 0 || voteResults[option] === 0
@@ -70,10 +70,10 @@ export default function Results({ voteResults, computedStatus } = {}) {
             style={isLastOne ? {} : { marginBottom: '2.5rem' }}
           >
             <div className="columns is-mobile mb-2">
-              <div className="column small-text has-text-grey has-text-left word-break">
+              <div className="column pb-0 mb-0 small-text has-text-grey has-text-left word-break">
                 {optionText}
               </div>
-              <div className="column is-3 is-flex is-justify-content-flex-end small-text has-text-grey">
+              <div className="column pb-0 mb-0 is-3 is-flex is-justify-content-flex-end small-text has-text-grey">
                 {`${percentage}%`}
               </div>
             </div>
