@@ -6,6 +6,8 @@ import AvatarBloquies from './AvatarBloquies';
 import BlockieWithAddress from './BlockieWithAddress';
 import InfoBlock from './InfoBlock';
 
+const isVisible = (value) => Boolean(value && value !== '' && value !== 0);
+
 const dateFormatConf = {
   day: 'numeric',
   hour: 'numeric',
@@ -87,13 +89,13 @@ export default function Information({
           </a>
         }
       />
-      {maxWeight && maxWeight !== '' && (
+      {isVisible(maxWeight) && (
         <InfoBlock
           title={'Max tokens'}
           component={<span className="has-text-grey">{maxWeight}</span>}
         />
       )}
-      {minBalance && minBalance !== '' && (
+      {isVisible(minBalance) && (
         <InfoBlock
           title={'Min tokens'}
           component={<span className="has-text-grey">{minBalance}</span>}
