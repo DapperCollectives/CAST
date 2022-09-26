@@ -2,6 +2,7 @@ import { HAS_DELAY_ON_START_TIME } from 'const';
 import { formatDistance } from 'date-fns';
 import { stateToHTML } from 'draft-js-export-html';
 import { stateFromHTML } from 'draft-js-import-html';
+import isError from 'lodash/isError';
 import { customAlphabet } from 'nanoid';
 
 const nanoid = customAlphabet('1234567890abcdef', 10);
@@ -76,7 +77,7 @@ export const getCompositeSigs = (sigArr) => {
     return [sigArr[0].signature];
   }
 
-  if (typeof sigArr === 'string' && sigArr.includes('Declined:')) {
+  if (isError(sigArr)) {
     return null;
   }
   return sigArr;
