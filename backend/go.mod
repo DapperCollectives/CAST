@@ -17,7 +17,9 @@ require (
 	github.com/rs/zerolog v1.26.1
 	github.com/stretchr/testify v1.8.0
 	github.com/thoas/go-funk v0.9.2
+	golang.org/x/exp v0.0.0-20220706164943-b4a6d9510983
 	google.golang.org/grpc v1.45.0
+	gotest.tools v2.2.0+incompatible
 )
 
 require (
@@ -131,7 +133,6 @@ require (
 	go.opencensus.io v0.23.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4 // indirect
-	golang.org/x/exp v0.0.0-20220706164943-b4a6d9510983 // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3 // indirect
 	golang.org/x/net v0.0.0-20220607020251-c690dde0001d // indirect
 	golang.org/x/oauth2 v0.0.0-20220223155221-ee480838109b // indirect
