@@ -36,7 +36,7 @@ export default function Information({
     <div
       className={`has-background-white-ter rounded p-1-mobile p-5-tablet p-5_5-desktop`}
     >
-      <p className="mb-5 has-text-weight-bold">Proposal Details</p>
+      <p className="mb-5 medium-text has-text-weight-bold">Proposal Details</p>
       <InfoBlock
         title="Community"
         component={
@@ -47,7 +47,7 @@ export default function Information({
               logo={communityLogo}
             />
             <Link to={`/community/${communityId}`}>
-              <p className="small-text px-2 is-underlined has-text-grey">
+              <p className="small-text pl-2 is-underlined has-text-grey">
                 {communityName}
               </p>
             </Link>
@@ -68,9 +68,7 @@ export default function Information({
         title="Voting strategy"
         component={
           <div className="is-flex" onClick={openStrategyModal}>
-            <div className="pr-2 cursor-pointer has-text-grey">
-              {strategyName}
-            </div>
+            <div className="cursor-pointer has-text-grey">{strategyName}</div>
           </div>
         }
       />
@@ -89,14 +87,18 @@ export default function Information({
           </a>
         }
       />
-      <InfoBlock
-        title={'Max tokens'}
-        component={<span className="has-text-grey">{maxWeight}</span>}
-      />
-      <InfoBlock
-        title={'Min tokens'}
-        component={<span className="has-text-grey">{minBalance}</span>}
-      />
+      {maxWeight && maxWeight !== '' && (
+        <InfoBlock
+          title={'Max tokens'}
+          component={<span className="has-text-grey">{maxWeight}</span>}
+        />
+      )}
+      {minBalance && minBalance !== '' && (
+        <InfoBlock
+          title={'Min tokens'}
+          component={<span className="has-text-grey">{minBalance}</span>}
+        />
+      )}
 
       <InfoBlock
         title={'Start date'}
