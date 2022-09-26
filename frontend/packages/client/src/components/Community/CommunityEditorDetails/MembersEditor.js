@@ -93,15 +93,7 @@ export default function MembersEditor({
     );
     // No valid user signature found.
     if (!compositeSignatures && !voucher) {
-      notifyError(
-        {
-          message: JSON.stringify({
-            message: `No valid user signature found.`,
-          }),
-        },
-        ''
-      );
-      return;
+      throw new Error('No valid user signature found.');
     }
 
     const body = {
@@ -133,15 +125,9 @@ export default function MembersEditor({
         });
       }
     } catch (err) {
-      notifyError(
-        {
-          message: JSON.stringify({
-            status: '401',
-            statusText: `Something went wrong adding/removing ${addrType} list`,
-          }),
-        },
-        ''
-      );
+      notifyError({
+        details: `Something went wrong adding/removing ${addrType} list`,
+      });
       return;
     }
     // if all updates when well: reset values on form with updated values
