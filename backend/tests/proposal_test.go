@@ -38,11 +38,11 @@ func TestGetProposal(t *testing.T) {
 
 		response := otu.GetProposalByIdAPI(communityId, 420)
 
-		CheckResponseCode(t, http.StatusBadRequest, response.Code)
+		CheckResponseCode(t, http.StatusForbidden, response.Code)
 
 		var m map[string]string
 		json.Unmarshal(response.Body.Bytes(), &m)
-		assert.Equal(t, "Invalid Proposal ID.", m["error"])
+		assert.Equal(t, "ERR_1001", m["errorCode"])
 	})
 
 	t.Run("Should fetch existing proposal by ID", func(t *testing.T) {
@@ -91,7 +91,7 @@ func TestCreateProposal(t *testing.T) {
 		var m map[string]interface{}
 		json.Unmarshal(response.Body.Bytes(), &m)
 
-		assert.Equal(t, "invalid signature", m["error"])
+		assert.Equal(t, "ERR_1001", m["errorCode"])
 	})
 
 	t.Run("Should throw an error if timestamp is more than 60 seconds", func(t *testing.T) {
@@ -109,8 +109,7 @@ func TestCreateProposal(t *testing.T) {
 
 		var m map[string]interface{}
 		json.Unmarshal(response.Body.Bytes(), &m)
-
-		assert.Equal(t, "Timestamp on request has expired.", m["error"])
+		assert.Equal(t, "ERR_1001", m["errorCode"])
 	})
 }
 

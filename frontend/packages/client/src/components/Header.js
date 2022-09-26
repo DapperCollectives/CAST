@@ -56,7 +56,7 @@ function Header(props) {
                     pathname: '/about',
                     state: { modal: true },
                   }}
-                  className="navbar-item p-0 mr-6 is-hidden-mobile"
+                  className="navbar-item p-0 mr-5 is-hidden-mobile"
                 >
                   <span className="navbar-item-hover transition-all has-text-weight-bold has-text-black">
                     About Us
@@ -64,16 +64,27 @@ function Header(props) {
                 </NavLink>
                 <NavLink
                   to={{
+                    pathname: '/browse-communities',
+                    state: { modal: true },
+                  }}
+                  className="navbar-item p-0 mr-5 is-hidden-mobile"
+                >
+                  <span className="navbar-item-hover transition-all has-text-weight-bold has-text-black">
+                    Browse
+                  </span>
+                </NavLink>
+                <NavLink
+                  to={{
                     pathname: '/community/create',
                   }}
-                  className="navbar-item p-0 mr-6 is-hidden-mobile"
+                  className="navbar-item p-0 mr-5 is-hidden-mobile"
                 >
                   <span className="navbar-item-hover transition-all has-text-weight-bold has-text-black">
                     Create a Community
                   </span>
                 </NavLink>
                 <span className="navbar-item p-0">
-                  <WalletConnect expandContainer />
+                  <WalletConnect />
                 </span>
               </div>
             </nav>

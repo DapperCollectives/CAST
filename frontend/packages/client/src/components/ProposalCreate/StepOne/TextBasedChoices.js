@@ -35,7 +35,7 @@ const TextBasedChoices = ({
     if (
       choices.length === 2 &&
       choices[1].value === '' &&
-      error?.message === 'Please add a choice, minimun amout is two'
+      error?.message === 'Please add a choice, minimum amout is two'
     ) {
       clearErrors('choices');
     }
