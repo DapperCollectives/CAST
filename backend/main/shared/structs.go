@@ -92,10 +92,10 @@ type FTBalanceResponse struct {
 }
 
 type CustomScript struct {
-	Key 		string `json:"key" validate:"required"`
-	Name 		string `json:"name" validate:"required"`
+	Key         string `json:"key" validate:"required"`
+	Name        string `json:"name" validate:"required"`
 	Description string `json:"description" validate:"required"`
-	Src 		string `json:"src" validate:"required"`
+	Src         string `json:"src" validate:"required"`
 }
 
 func (b *FTBalanceResponse) NewFTBalance() {
