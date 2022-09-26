@@ -14,7 +14,7 @@ import { useModalContext } from './NotificationModal';
 const ErrorHandlerContext = createContext({});
 
 const getErrorMessageWithContext = (error) => {
-  const { message, errorCode, details } = error ?? {};
+  const { message = 'Error', errorCode, details } = error ?? {};
 
   if (errorCode && details) {
     // These errors require to show FAQs link
