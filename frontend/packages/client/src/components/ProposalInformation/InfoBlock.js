@@ -9,7 +9,7 @@ const InfoBlock = ({ title, content, component, isLastElement = false }) => {
   return (
     <div
       className={`columns is-mobile p-0 m-0 small-text ${
-        isLastElement ? '' : 'mb-5'
+        isLastElement ? '' : 'mb-4'
       }`}
       ref={containerRef}
     >

@@ -18,7 +18,7 @@ const BlockieWithAddress = forwardRef(({ creatorAddr }, ref) => {
   }, [ref, width, creatorAddr, addr]);
 
   return (
-    <div className="columns is-mobile m-0 mr-2">
+    <div className="columns is-mobile m-0">
       <div className="column is-narrow is-flex is-align-items-center p-0 pr-2">
         <Blockies seed={creatorAddr} size={10} scale={2} className="blockies" />
       </div>
