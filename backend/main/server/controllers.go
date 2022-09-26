@@ -304,8 +304,13 @@ func (a *App) searchCommunities(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 	}
+	pageParams := getPageParams(*r, 25)
 
-	respondWithJSON(w, http.StatusOK, results)
+	totalRecords := results.(int)
+	pageParams.TotalRecords = totalRecords
+
+	response := shared.GetPaginatedResponseWithPayload(results, pageParams)
+	respondWithJSON(w, http.StatusOK, response)
 }
 
 func (a *App) getCommunity(w http.ResponseWriter, r *http.Request) {
