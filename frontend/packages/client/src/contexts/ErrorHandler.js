@@ -41,7 +41,7 @@ export const useErrorHandlerContext = () => {
 
 const ErrorHandlerProvider = ({ children }) => {
   const [error, setError] = useState(null);
-  console.log('error is', error);
+
   const [errorOpened, setErrorOpened] = useState(false);
 
   const { openModal, isOpen, closeModal } = useModalContext();

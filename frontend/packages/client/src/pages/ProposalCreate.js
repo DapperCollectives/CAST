@@ -61,6 +61,7 @@ export default function ProposalCreatePage() {
       setModalError(true);
       return;
     }
+
     if (!communityId) {
       notifyError({
         message: 'Missing information',

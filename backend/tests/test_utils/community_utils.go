@@ -66,6 +66,7 @@ var (
 	onlyAuthors    = true
 	notOnlyAuthors = false
 	thresholdZero  = "0"
+	thresholdOne   = "1"
 
 	threshold = 0.000069
 
@@ -208,6 +209,7 @@ var (
 		Strategies:               &updatedStrategies,
 		Terms_and_conditions_url: &termsAndConditions,
 		Only_authors_to_submit:   &notOnlyAuthors,
+		Proposal_threshold:       &thresholdOne,
 	}
 )
 
