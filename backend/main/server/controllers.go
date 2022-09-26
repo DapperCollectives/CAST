@@ -3,7 +3,6 @@ package server
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -506,8 +505,7 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	fmt.Println("HERE")
-	fmt.Println(*payload.Proposal_threshold)
+
 	if payload.Proposal_threshold != nil && payload.Only_authors_to_submit != nil {
 		err = validateProposalThreshold(*payload.Proposal_threshold, *payload.Only_authors_to_submit)
 		if err != nil {
