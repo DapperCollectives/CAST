@@ -86,9 +86,9 @@ func (s *TokenWeightedDefault) FetchBalanceFromSnapshot(
 
 func (s *TokenWeightedDefault) TallyVotes(
 	votes []*models.VoteWithBalance,
-	r *models.ProposalResults,
 	p *models.Proposal,
 ) (models.ProposalResults, error) {
+	r := models.NewProposalResults(p.ID, p.Choices)
 
 	for _, vote := range votes {
 		if vote.PrimaryAccountBalance != nil {

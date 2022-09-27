@@ -88,21 +88,16 @@ func (cs *CustomScript) queryNFTs(
 
 func (cs *CustomScript) TallyVotes(
 	votes []*models.VoteWithBalance,
-	r *models.ProposalResults,
 	proposal *models.Proposal,
 ) (models.ProposalResults, error) {
+	r := models.NewProposalResults(proposal.ID, proposal.Choices)
 
-	for _, vote := range votes {
-		if len(vote.NFTs) != 0 {
-			var voteWeight float64
-
-			voteWeight, err := cs.GetVoteWeightForBalance(vote, proposal)
-			if err != nil {
-				return models.ProposalResults{}, err
-			}
-
-			r.Results[vote.Choices[0]] += int(voteWeight)
-			r.Results_float[vote.Choices[0]] += voteWeight
+	if proposal.TallyMethod == "ranked-choice" {
+		RankedChoice(votes, r, proposal, true)
+	} else {
+		err := SingleChoiceNFT(votes, r, proposal, cs.GetVoteWeightForBalance)
+		if err != nil {
+			return models.ProposalResults{}, err
 		}
 	}
 
