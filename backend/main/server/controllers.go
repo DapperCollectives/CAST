@@ -224,7 +224,7 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	voteWithBalance, err := helpers.createVote(r, proposal)
+	voteWithBalance, err := helpers.createVote(vote, proposal)
 	if err != nil {
 		log.Error().Err(err).Msg("Error creating vote.")
 		respondWithError(w, errInsufficientBalance)

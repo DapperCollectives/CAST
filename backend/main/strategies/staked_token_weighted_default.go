@@ -76,10 +76,10 @@ func (s *StakedTokenWeightedDefault) FetchBalanceFromSnapshot(
 }
 func (s *StakedTokenWeightedDefault) TallyVotes(
 	votes []*models.VoteWithBalance,
-	r *models.ProposalResults,
 	p *models.Proposal,
 ) (models.ProposalResults, error) {
 	var zero uint64 = 0
+	r := models.NewProposalResults(p.ID, p.Choices)
 
 	for _, vote := range votes {
 		if *vote.StakingBalance != zero {

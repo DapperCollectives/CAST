@@ -42,8 +42,7 @@ func (h *Helpers) useStrategyTally(
 		return models.ProposalResults{}, errors.New("Strategy not found.")
 	}
 
-	proposalInitialized := models.NewProposalResults(p.ID, p.Choices)
-	results, err := s.TallyVotes(v, proposalInitialized, &p)
+	results, err := s.TallyVotes(v, &p)
 	if err != nil {
 		return models.ProposalResults{}, err
 	}
@@ -292,13 +291,7 @@ func (h *Helpers) processVotes(
 	return votesWithBalances, pageParams, nil
 }
 
-func (h *Helpers) createVote(r *http.Request, p models.Proposal) (*models.VoteWithBalance, error) {
-	var v models.Vote
-	if err := validatePayload(r.Body, &v); err != nil {
-		log.Error().Err(err).Msg("Invalid request payload.")
-		return nil, err
-	}
-
+func (h *Helpers) createVote(v models.Vote, p models.Proposal) (*models.VoteWithBalance, error) {
 	v.Proposal_id = p.ID
 
 	// validate user hasn't already voted
