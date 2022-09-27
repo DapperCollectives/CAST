@@ -15,14 +15,14 @@ export default function ResultsPanel({
   const pillForStatus = useMemo(
     () => ({
       [FilterValues.active]: (
-        <Pill status="Active" backgroundColorClass="has-background-warning" />
+        <Pill text="Active" backgroundColorClass="has-background-warning" />
       ),
       [FilterValues.pending]: (
-        <Pill status="Upcoming" backgroundColorClass="has-background-orange" />
+        <Pill text="Upcoming" backgroundColorClass="has-background-orange" />
       ),
       [FilterValues.closed]: (
         <Pill
-          status={
+          text={
             <span>
               Complete <Svg name="CheckOutlined" />
             </span>
@@ -31,7 +31,7 @@ export default function ResultsPanel({
         />
       ),
       [FilterValues.cancelled]: (
-        <Pill status="Canceled" backgroundColorClass="has-background-danger" />
+        <Pill text="Canceled" backgroundColorClass="has-background-danger" />
       ),
     }),
     []
