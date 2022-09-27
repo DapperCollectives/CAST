@@ -11,6 +11,7 @@ const CommunitiesPresenter = ({
   elementsPerRow = 2,
   communities = [],
   hideJoin = false,
+  titleClasses = '',
 } = {}) => {
   // used to get column size based on number of elements
   // per row
@@ -35,7 +36,9 @@ const CommunitiesPresenter = ({
 
   return (
     <div className={containerClasses}>
-      <h1 className="is-uppercase has-text-weight-bold communities mb-5">
+      <h1
+        className={`is-uppercase has-text-weight-bold communities mb-5 ${titleClasses}`}
+      >
         {title}
       </h1>
       <div className="columns is-multiline">
