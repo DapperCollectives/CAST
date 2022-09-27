@@ -21,76 +21,81 @@ export default function useCommunitySearch({
     async ({ pageParam = initialPageParam, queryKey }) => {
       const [start, count] = pageParam;
       const searchText = queryKey[1];
-      // const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/search/${searchText}?count=${count}&start=${start}`;
-      const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/search/${searchText}`;
+      const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/search/${searchText}?count=${count}&start=${start}`;
 
       const response = await fetch(url);
       return checkResponse(response);
-      return {
-        data: [
-          {
-            id: 1,
-            name: 'Flow',
-            body: 'Vote on Flow Validators',
-            logo: 'https://gateway.pinata.cloud/ipfs/QmZBsiJPi6ZWiqPjcftVCYqdgU81i2oBrNmw3XXE1Q3zg7',
-            category: 'dao',
-          },
-          {
-            id: 8,
-            name: 'Dapper Collectives',
-            category: 'dao',
-            logo: 'https://gateway.pinata.cloud/ipfs/QmZBsiJPi6ZWiqPjcftVCYqdgU81i2oBrNmw3XXE1Q3zg7',
-            body: 'Build better, together.',
-            slug: '8af17484ca',
-          },
-          {
-            id: 28,
-            name: 'test community',
-            category: 'dao',
-            logo: 'https://dappercollectives.mypinata.cloud/ipfs/QmZrVBCn8Ta7ALn93U5zGGexpLhN9JoSg1BSCjKwb9zjVj',
+      // return {
+      //   categories: [
+      //     { text: 'All', amount: 22 },
+      //     { text: 'DAO', amount: 3 },
+      //     { text: 'Creator', amount: 4 },
+      //     { text: 'NFT', amount: 8 },
+      //     { text: 'Collector', amount: 0 },
+      //   ],
+      //   data: [
+      //     {
+      //       id: 1,
+      //       name: 'Flow',
+      //       body: 'Vote on Flow Validators',
+      //       logo: 'https://gateway.pinata.cloud/ipfs/QmZBsiJPi6ZWiqPjcftVCYqdgU81i2oBrNmw3XXE1Q3zg7',
+      //       category: 'dao',
+      //     },
+      //     {
+      //       id: 8,
+      //       name: 'Dapper Collectives',
+      //       category: 'dao',
+      //       logo: 'https://gateway.pinata.cloud/ipfs/QmZBsiJPi6ZWiqPjcftVCYqdgU81i2oBrNmw3XXE1Q3zg7',
+      //       body: 'Build better, together.',
+      //       slug: '8af17484ca',
+      //     },
+      //     {
+      //       id: 28,
+      //       name: 'test community',
+      //       category: 'dao',
+      //       logo: 'https://dappercollectives.mypinata.cloud/ipfs/QmZrVBCn8Ta7ALn93U5zGGexpLhN9JoSg1BSCjKwb9zjVj',
 
-            slug: 'bcd906ef4c',
-          },
-          {
-            id: 23,
-            name: 'erer',
-            category: 'dao',
-            logo: 'https://dappercollectives.mypinata.cloud/ipfs/QmZrVBCn8Ta7ALn93U5zGGexpLhN9JoSg1BSCjKwb9zjVj',
-            body: 'erer',
-          },
-          {
-            id: 39,
-            name: 'CommunityD',
-            category: 'dao',
-            slug: '96fae5cb46',
-          },
-          {
-            id: 68,
-            name: 'test for voting proposals',
-            category: 'dao',
-            body: 'ss',
-            slug: '5980ce5a08',
-            contractName: 'FlowToken',
-          },
-          {
-            id: 32,
-            name: 'Community For Testing - updated',
-            category: 'dao',
-            logo: 'https://dappercollectives.mypinata.cloud/ipfs/QmPrki3jEHoYfrKQd3FWZcBvHUGXYc2R16yuPmTW2ULUxU',
-          },
-        ],
-        start: 0,
-        count: 23,
-        totalRecords: 23,
-        next: -1,
-      };
+      //       slug: 'bcd906ef4c',
+      //     },
+      //     {
+      //       id: 23,
+      //       name: 'erer',
+      //       category: 'dao',
+      //       logo: 'https://dappercollectives.mypinata.cloud/ipfs/QmZrVBCn8Ta7ALn93U5zGGexpLhN9JoSg1BSCjKwb9zjVj',
+      //       body: 'erer',
+      //     },
+      //     {
+      //       id: 39,
+      //       name: 'CommunityD',
+      //       category: 'dao',
+      //       slug: '96fae5cb46',
+      //     },
+      //     {
+      //       id: 68,
+      //       name: 'test for voting proposals',
+      //       category: 'dao',
+      //       body: 'ss',
+      //       slug: '5980ce5a08',
+      //       contractName: 'FlowToken',
+      //     },
+      //     {
+      //       id: 32,
+      //       name: 'Community For Testing - updated',
+      //       category: 'dao',
+      //       logo: 'https://dappercollectives.mypinata.cloud/ipfs/QmPrki3jEHoYfrKQd3FWZcBvHUGXYc2R16yuPmTW2ULUxU',
+      //     },
+      //   ],
+      //   start: 0,
+      //   count: 10,
+      //   totalRecords: 8,
+      //   next: -1,
+      // };
     },
     {
       getNextPageParam: (lastPage) => {
         const { next, start, count, totalRecords } = lastPage;
         return [start + count, count, totalRecords, next];
       },
-      enabled: searchText !== '',
       onError: (error) => {
         notifyError(error);
       },
