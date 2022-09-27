@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Svg } from '@cast/shared-components';
-import { Pill } from 'components';
+import { StatusPill } from 'components';
 import { FilterValues } from 'const';
 import { parseDateFromServer } from 'utils';
 import Results from './Results';
@@ -15,14 +15,20 @@ export default function ResultsPanel({
   const pillForStatus = useMemo(
     () => ({
       [FilterValues.active]: (
-        <Pill text="Active" backgroundColorClass="has-background-warning" />
+        <StatusPill
+          status="Active"
+          backgroundColorClass="has-background-warning"
+        />
       ),
       [FilterValues.pending]: (
-        <Pill text="Upcoming" backgroundColorClass="has-background-orange" />
+        <StatusPill
+          status="Upcoming"
+          backgroundColorClass="has-background-orange"
+        />
       ),
       [FilterValues.closed]: (
-        <Pill
-          text={
+        <StatusPill
+          status={
             <span>
               Complete <Svg name="CheckOutlined" />
             </span>
@@ -31,7 +37,10 @@ export default function ResultsPanel({
         />
       ),
       [FilterValues.cancelled]: (
-        <Pill text="Canceled" backgroundColorClass="has-background-danger" />
+        <StatusPill
+          status="Canceled"
+          backgroundColorClass="has-background-danger"
+        />
       ),
     }),
     []
