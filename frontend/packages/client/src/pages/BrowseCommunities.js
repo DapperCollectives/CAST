@@ -2,29 +2,7 @@ import { useState } from 'react';
 import { Svg } from '@cast/shared-components';
 import { FadeIn, FilterPill, Loader } from 'components';
 import CommunitiesPresenter from 'components/Community/CommunitiesPresenter';
-import { useCommunitySearch, useDebounce, useFeaturedCommunities } from 'hooks';
-
-// fake results to adjust presentation
-const CommunityResult = [
-  {
-    id: 1,
-    name: 'Flow 1',
-    body: 'Vote on Flow Validators',
-    isMember: true,
-  },
-  {
-    id: 2,
-    name: 'Flow 2',
-    body: 'Vote on Flow Validators',
-    isMember: false,
-  },
-  {
-    id: 3,
-    name: 'Flow 3',
-    body: 'Vote on Flow Validators',
-    isMember: true,
-  },
-];
+import { useCommunitySearch, useDebounce } from 'hooks';
 
 const pills = [
   { text: 'All', amount: 22, selected: true },
@@ -35,24 +13,20 @@ const pills = [
 ];
 
 export default function BrowseCommunities() {
-  const [filters, setFilters] = useState({});
   const [searchText, setSearchText] = useState('');
-  const debounced = useDebounce(searchText, 500);
-  const { isLoading: loadingFeaturedCommunities, data: featuredCommunities } =
-    useFeaturedCommunities();
-  console.log('value debounced is ', debounced);
+
+  const debounced = useDebounce(searchText, 1000);
+
   const {
     isLoading: isLoadingSearch,
-    data,
+    data: communityResult,
     fetchNextPage,
     error,
   } = useCommunitySearch({
-    searchText,
+    searchText: debounced,
   });
-  console.log(data);
-  console.log('isLoadingSearch', isLoadingSearch);
 
-  const showFeatureCommunities = searchText === '';
+  console.log(communityResult);
   return (
     <>
       <div className="search-container has-background-light-grey">
@@ -101,26 +75,21 @@ export default function BrowseCommunities() {
           </div>
         </section>
       </div>
-      {(isLoadingSearch || loadingFeaturedCommunities) && (
-        <div style={{ height: '50vh' }}>
-          <Loader fullHeight />
-        </div>
-      )}
+
       <section className="section">
         <div className="container">
-          {!showFeatureCommunities && (
+          {isLoadingSearch ? (
             <FadeIn>
-              <CommunitiesPresenter
-                title="Communities"
-                communities={CommunityResult}
-              />
+              <div style={{ height: '50vh' }}>
+                <Loader fullHeight />
+              </div>
             </FadeIn>
-          )}
-          {!showFeatureCommunities && (
+          ) : (
             <FadeIn>
               <CommunitiesPresenter
-                title="Featured Communities"
-                communities={featuredCommunities}
+                titleClasses="is-size-3"
+                title="Communities"
+                communities={communityResult}
               />
             </FadeIn>
           )}
