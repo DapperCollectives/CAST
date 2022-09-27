@@ -399,9 +399,7 @@ func (a *App) searchCommunities(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, errIncompleteRequest)
 	}
 	pageParams := getPageParams(*r, 25)
-
-	totalRecords := results.(int)
-	pageParams.TotalRecords = totalRecords
+	pageParams.TotalRecords = len(results)
 
 	response := shared.GetPaginatedResponseWithPayload(results, pageParams)
 	respondWithJSON(w, http.StatusOK, response)
@@ -965,8 +963,8 @@ func (a *App) removeUserRole(w http.ResponseWriter, r *http.Request) {
 func respondWithError(w http.ResponseWriter, err errorResponse) {
 	respondWithJSON(w, err.statusCode, map[string]string{
 		"errorCode": err.errorCode,
-		"message": err.message,
-		"details":  err.details,
+		"message":   err.message,
+		"details":   err.details,
 	})
 }
 
