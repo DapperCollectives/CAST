@@ -24,7 +24,7 @@ export default function useCommunitySearch({
       const filters = queryKey[2];
       const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/search/${searchText}?filters=${filters}count=${count}&start=${start}`;
 
-      // use 
+      // use \default when search is for all
       const response = await fetch(url);
       // return checkResponse(response);
       return {
