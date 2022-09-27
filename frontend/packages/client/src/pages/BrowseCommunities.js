@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { Svg } from '@cast/shared-components';
-import { FadeIn, Pill } from 'components';
+import { FadeIn, FilterPill, Loader } from 'components';
 import CommunitiesPresenter from 'components/Community/CommunitiesPresenter';
+import { useCommunitySearch, useDebounce, useFeaturedCommunities } from 'hooks';
 
 // fake results to adjust presentation
 const CommunityResult = [
@@ -32,13 +34,25 @@ const pills = [
   { text: 'Collector', amount: 0 },
 ];
 
-const pillContent = (text, amount) => (
-  <p>
-    <span className="has-text-weight-bold">{text}</span> {amount}
-  </p>
-);
-
 export default function BrowseCommunities() {
+  const [filters, setFilters] = useState({});
+  const [searchText, setSearchText] = useState('');
+  const debounced = useDebounce(searchText, 500);
+  const { isLoading: loadingFeaturedCommunities, data: featuredCommunities } =
+    useFeaturedCommunities();
+  console.log('value debounced is ', debounced);
+  const {
+    isLoading: isLoadingSearch,
+    data,
+    fetchNextPage,
+    error,
+  } = useCommunitySearch({
+    searchText,
+  });
+  console.log(data);
+  console.log('isLoadingSearch', isLoadingSearch);
+
+  const showFeatureCommunities = searchText === '';
   return (
     <>
       <div className="search-container has-background-light-grey">
@@ -52,6 +66,8 @@ export default function BrowseCommunities() {
                 placeholder="Search communities by name or description"
                 className="border-light rounded-sm pr-3 py-3 column"
                 style={{ paddingLeft: '40px' }}
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
               />
               <div
                 style={{
@@ -71,35 +87,43 @@ export default function BrowseCommunities() {
               style={{ marginLeft: '-8px' }}
             >
               {pills.map((pill, index) => (
-                <Pill
+                <FilterPill
                   key={`pill-${index}`}
                   onClick={() => {
                     console.log('I was clicked');
                   }}
-                  text={pillContent(pill.text, pill.amount)}
-                  backgroundColorClass={
-                    pill.selected ? 'has-background-black' : ''
-                  }
-                  padding="px-4 py-2"
-                  fontSize=""
-                  fontWeight=""
-                  classNames={`mx-2 mt-2 ${
-                    pill.selected ? '' : 'has-text-black pill-border'
-                  }`}
+                  text={pill.text}
+                  amount={pill.amount}
+                  selected={pill.selected}
                 />
               ))}
             </div>
           </div>
         </section>
       </div>
+      {(isLoadingSearch || loadingFeaturedCommunities) && (
+        <div style={{ height: '50vh' }}>
+          <Loader fullHeight />
+        </div>
+      )}
       <section className="section">
         <div className="container">
-          <FadeIn>
-            <CommunitiesPresenter
-              title="Communities"
-              communities={CommunityResult}
-            />
-          </FadeIn>
+          {!showFeatureCommunities && (
+            <FadeIn>
+              <CommunitiesPresenter
+                title="Communities"
+                communities={CommunityResult}
+              />
+            </FadeIn>
+          )}
+          {!showFeatureCommunities && (
+            <FadeIn>
+              <CommunitiesPresenter
+                title="Featured Communities"
+                communities={featuredCommunities}
+              />
+            </FadeIn>
+          )}
         </div>
       </section>
     </>
