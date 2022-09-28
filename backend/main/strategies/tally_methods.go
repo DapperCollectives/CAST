@@ -5,7 +5,6 @@ import (
 	"sort"
 
 	"github.com/DapperCollectives/CAST/backend/main/models"
-	"github.com/rs/zerolog/log"
 	"golang.org/x/exp/slices"
 )
 
@@ -42,7 +41,6 @@ func RankedChoice(
 				r.Results_float[vote.Choices[firstRank]] += 1
 			}
 		}
-		log.Debug().Msgf("%v", tallyMap)
 
 		// Create an array from the tally map for sorting.
 		tallyArray := make([]TallyStruct, len(tallyMap))
