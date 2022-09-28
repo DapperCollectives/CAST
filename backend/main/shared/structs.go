@@ -60,6 +60,7 @@ type TimestampSignaturePayload struct {
 
 // used in models/proposal.go
 type Choice struct {
+	ID             *uint   `json:"id,omitempty"`
 	Choice_text    string  `json:"choiceText"`
 	Choice_img_url *string `json:"choiceImgUrl"`
 }

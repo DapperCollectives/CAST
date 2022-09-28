@@ -11,6 +11,13 @@ import (
 	"gotest.tools/assert"
 )
 
+var VoteChoiceToId = map[string]string{
+	"a": "0",
+	"b": "1",
+	"c": "2",
+	"d": "3",
+}
+
 func TestRankedChoiceVoting(t *testing.T) {
 
 	fmt.Println("HERE")
@@ -18,12 +25,14 @@ func TestRankedChoiceVoting(t *testing.T) {
 	c := strings.Fields("a b c d")
 	choices := make([]shared.Choice, 4)
 	for i := 0; i < len(c); i += 1 {
+		id := uint(i)
+		choices[i].ID = &id
 		choices[i].Choice_text = c[i]
 	}
 	computedStatus := "closed"
 	proposal := &models.Proposal{
-		Choices: choices,
-		TallyMethod: "ranked-choice",
+		Choices:         choices,
+		TallyMethod:     "ranked-choice",
 		Computed_status: &computedStatus,
 	}
 
@@ -105,50 +114,50 @@ func TestRankedChoiceVoting(t *testing.T) {
 		"a:4 b:2 c:0 d:0",
 	)
 
-    subTests := []struct {
-        name           string
-        votes 		   []*models.VoteWithBalance
-		proposal 	   *models.Proposal
-		expected 		*models.ProposalResults
-    }{
-        {
-            name: "First Round Winner",
-            proposal: proposal,
-			votes: t1Votes,
+	subTests := []struct {
+		name     string
+		votes    []*models.VoteWithBalance
+		proposal *models.Proposal
+		expected *models.ProposalResults
+	}{
+		{
+			name:     "First Round Winner",
+			proposal: proposal,
+			votes:    t1Votes,
 			expected: t1Results,
-        },
+		},
 		{
-            name: "Fourth Round Winner",
-            proposal: proposal,
-			votes: t2Votes,
+			name:     "Fourth Round Winner",
+			proposal: proposal,
+			votes:    t2Votes,
 			expected: t2Results,
-        },
+		},
 		{
-            name: "Split Vote",
-            proposal: proposal,
-			votes: t3Votes,
+			name:     "Split Vote",
+			proposal: proposal,
+			votes:    t3Votes,
 			expected: t3Results,
-        },
+		},
 		{
-            name: "Larger Vote",
-            proposal: proposal,
-			votes: t4Votes,
+			name:     "Larger Vote",
+			proposal: proposal,
+			votes:    t4Votes,
 			expected: t4Results,
-        },
+		},
 		{
-            name: "Choices with No Votes",
-            proposal: proposal,
-			votes: t5Votes,
+			name:     "Choices with No Votes",
+			proposal: proposal,
+			votes:    t5Votes,
 			expected: t5Results,
-        },
-    }
-    for _, subTest := range subTests {
-        t.Run(subTest.name, func(t *testing.T) {
+		},
+	}
+	for _, subTest := range subTests {
+		t.Run(subTest.name, func(t *testing.T) {
 			results := createProposalResults(subTest.proposal)
 			RankedChoice(subTest.votes, results, subTest.proposal, true)
 			assert.DeepEqual(t, subTest.expected.Results, results.Results)
-        })
-    }
+		})
+	}
 }
 
 func TestSingleChoiceVoting(t *testing.T) {
@@ -160,8 +169,8 @@ func TestSingleChoiceVoting(t *testing.T) {
 	}
 	computedStatus := "closed"
 	proposal := &models.Proposal{
-		Choices: choices,
-		TallyMethod: "single-choice",
+		Choices:         choices,
+		TallyMethod:     "single-choice",
 		Computed_status: &computedStatus,
 	}
 
@@ -189,35 +198,35 @@ func TestSingleChoiceVoting(t *testing.T) {
 		"a:1 b:2 c:1 d:1",
 	)
 
-    subTests := []struct {
-        name           string
-        votes 		   []*models.VoteWithBalance
-		proposal 	   *models.Proposal
+	subTests := []struct {
+		name     string
+		votes    []*models.VoteWithBalance
+		proposal *models.Proposal
 		expected *models.ProposalResults
-    }{
-        {
-            name: "One Choice",
-            proposal: proposal,
-			votes: t1Votes,
-			expected: t1Results,
-        },
+	}{
 		{
-            name: "Random Voting Pattern",
-            proposal: proposal,
-			votes: t2Votes,
+			name:     "One Choice",
+			proposal: proposal,
+			votes:    t1Votes,
+			expected: t1Results,
+		},
+		{
+			name:     "Random Voting Pattern",
+			proposal: proposal,
+			votes:    t2Votes,
 			expected: t2Results,
-        },
-    }
-    for _, subTest := range subTests {
-        t.Run(subTest.name, func(t *testing.T) {
-			mockGetVoteWeight := func (vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error) {
+		},
+	}
+	for _, subTest := range subTests {
+		t.Run(subTest.name, func(t *testing.T) {
+			mockGetVoteWeight := func(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error) {
 				return 1.0, nil
 			}
 			results := createProposalResults(subTest.proposal)
 			SingleChoiceNFT(subTest.votes, results, subTest.proposal, mockGetVoteWeight)
 			assert.DeepEqual(t, subTest.expected.Results, results.Results)
-        })
-    }
+		})
+	}
 }
 
 func createVote(choices string) *models.VoteWithBalance {
@@ -227,8 +236,13 @@ func createVote(choices string) *models.VoteWithBalance {
 	mockNFTs := make([]*models.NFT, 1)
 	mockNFTs[0] = mockNFT
 
+	var choiceIds []string
+	for _, choice := range strings.Fields(choices) {
+		choiceIds = append(choiceIds, VoteChoiceToId[choice])
+	}
+
 	vote := models.Vote{
-		Choices: strings.Fields(choices),
+		Choices: choiceIds,
 	}
 
 	return &models.VoteWithBalance{
@@ -239,7 +253,7 @@ func createVote(choices string) *models.VoteWithBalance {
 
 func createProposalResults(p *models.Proposal) *models.ProposalResults {
 	pr := models.ProposalResults{
-		Results: make(map[string]int),
+		Results:       make(map[string]int),
 		Results_float: make(map[string]float64),
 	}
 
@@ -262,4 +276,3 @@ func updateProposalResults(r *models.ProposalResults, results string) *models.Pr
 
 	return r
 }
-

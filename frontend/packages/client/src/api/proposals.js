@@ -28,7 +28,7 @@ export const fetchProposal = async ({ proposalId }) => {
     ...proposal,
     choices: sortedProposalChoices.map((choice) => ({
       label: choice.choiceText,
-      value: choice.choiceText,
+      value: choice.id,
       choiceImgUrl: choice.choiceImgUrl,
     })),
     ipfs: proposal.cid,
