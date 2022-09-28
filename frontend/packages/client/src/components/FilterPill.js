@@ -17,7 +17,7 @@ export default function FilterPill({
   );
 
   return (
-    <div className="is-flex" onClick={onClick}>
+    <div className="is-flex" onClick={() => onClick(text)}>
       <div className={className}>
         <p>
           <span className="has-text-weight-bold">{text}</span> {amount}
