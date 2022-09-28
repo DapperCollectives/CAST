@@ -16,7 +16,10 @@ export default function BrowseCommunities() {
     isFetchingNextPage,
     data: communityResult,
   } = useCommunitySearch({
-    searchText: debounced === '' ? 'default' : debounced,
+    // NOTE:
+    // Backend returns feature communities when search text is "defaultFeatured"
+    // this is why on empty search text we use feature communities
+    searchText: debounced === '' ? 'defaultFeatured' : debounced,
     // do not send filtes when all is selected
     ...(selectedPills.includes('all') ? undefined : { filters: selectedPills }),
   });
@@ -25,10 +28,30 @@ export default function BrowseCommunities() {
 
   // first load
   useEffect(() => {
-    if (!pills.length && filters) {
+    if (!pills.length && filters.length) {
       setPills(filters);
     }
   }, [filters, pills]);
+
+  const addOrRemovePillFilter = (val) => {
+    const value = val.toLowerCase();
+    if (value === 'all') {
+      setSelectedPills(['all']);
+      return;
+    }
+    // using sort to the query can be cached by react-query faster
+    // remove if it's included
+    if (selectedPills.includes(value)) {
+      const newValues = selectedPills.filter((el) => el !== value).sort();
+      // if after removing none is there set all again
+      setSelectedPills(newValues.length === 0 ? ['all'] : newValues);
+      return;
+    }
+    // add
+    setSelectedPills((prev) =>
+      [...prev.filter((val) => val !== 'all'), value].sort()
+    );
+  };
 
   return (
     <>
@@ -63,17 +86,21 @@ export default function BrowseCommunities() {
               className="is-flex is-flex-wrap-wrap mt-5"
               style={{ marginLeft: '-8px' }}
             >
-              {pills.map((pill, index) => (
-                <FilterPill
-                  key={`pill-${index}`}
-                  onClick={() => {
-                    setSelectedPills([pill.text?.toLowerCase()]);
-                  }}
-                  text={pill.text}
-                  amount={pill.amount}
-                  selected={selectedPills.includes(pill.text?.toLowerCase())}
-                />
-              ))}
+              {pills.length > 0 && (
+                <FadeIn>
+                  {pills.map((pill, index) => (
+                    <FilterPill
+                      key={`pill-${index}`}
+                      onClick={addOrRemovePillFilter}
+                      text={pill.text}
+                      amount={pill.amount}
+                      selected={selectedPills.includes(
+                        pill.text?.toLowerCase()
+                      )}
+                    />
+                  ))}
+                </FadeIn>
+              )}
             </div>
           </div>
         </section>

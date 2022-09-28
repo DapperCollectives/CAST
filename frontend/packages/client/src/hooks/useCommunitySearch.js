@@ -60,13 +60,14 @@ const mockedData = [
 ];
 
 export const getPlainDataCustom = (data) => {
-  console.log(data);
-  const mergeddata = data?.pages?.reduce(
-    (prev, current) =>
-      current.data.results ? [...prev, ...current.data.results] : prev,
+  const results = data?.pages?.reduce(
+    (prev, current) => (current.data ? [...prev, ...current.data] : prev),
     []
   );
-  return { filters: data?.pages?.[0].data?.filters, results: mergeddata };
+
+  const [{ filters = [] } = {}] = data?.pages ?? [];
+
+  return { filters, results };
 };
 
 export default function useCommunitySearch({
@@ -92,36 +93,32 @@ export default function useCommunitySearch({
         const searchText = queryKey[1];
         const filters = queryKey[2];
 
-        console.log(queryKey);
-        const queryParams = queryString.stringify({
-          filters,
-          start,
-          count,
-        });
-
-        console.log(queryParams);
+        const queryParams = queryString.stringify(
+          {
+            filters: filters,
+            start,
+            count,
+          },
+          { arrayFormat: 'comma' }
+        );
 
         const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/search/${searchText}?${queryParams}`;
 
         // use \default when search is for all
         const response = await fetch(url);
-        const resp = await checkResponse(response);
+        return checkResponse(response);
 
-        await wait(2000);
-        return {
-          ...resp,
-          data: {
-            // results: resp.data,
-            results: mockedData,
-            filters: [
-              { text: 'All', amount: 22 },
-              { text: 'DAO', amount: 3 },
-              { text: 'Creator', amount: 4 },
-              { text: 'NFT', amount: 8 },
-              { text: 'Collector', amount: 0 },
-            ],
-          },
-        };
+        // return {
+        //   ...resp,
+        //   filters: [
+        //     { text: 'All', amount: 22 },
+        //     { text: 'DAO', amount: 3 },
+        //     { text: 'Creator', amount: 4 },
+        //     { text: 'NFT', amount: 8 },
+        //     { text: 'Collector', amount: 0 },
+        //   ],
+        //   data: mockedData,
+        // };
       },
       {
         getNextPageParam: (lastPage) => {
