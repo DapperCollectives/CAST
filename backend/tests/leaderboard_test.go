@@ -9,7 +9,6 @@ import (
 
 	"github.com/DapperCollectives/CAST/backend/main/models"
 	"github.com/DapperCollectives/CAST/backend/tests/test_utils"
-	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -42,8 +41,6 @@ func TestGetLeaderboardCurrentUser(t *testing.T) {
 
 	var p2 test_utils.PaginatedResponseWithLeaderboardUser
 	json.Unmarshal(response.Body.Bytes(), &p2)
-
-	log.Info().Msgf("%v", p2)
 
 	assert.Equal(t, vote.Addr, p2.Data.CurrentUser.Addr)
 }
