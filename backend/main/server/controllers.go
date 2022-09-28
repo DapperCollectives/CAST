@@ -402,13 +402,13 @@ func (a *App) searchCommunities(w http.ResponseWriter, r *http.Request) {
 	pageParams := getPageParams(*r, 25)
 	pageParams.TotalRecords = len(results)
 
-	appendedResults, err := helpers.appendFiltersToResponse(filters, results)
+	paginatedResults := shared.GetPaginatedResponseWithPayload(results, pageParams)
+	response, err := helpers.appendFiltersToResponse(filters, paginatedResults)
 	if err != nil {
 		log.Error().Err(err).Msg("Error appending filters to response")
 		respondWithError(w, errIncompleteRequest)
 	}
 
-	response := shared.GetPaginatedResponseWithPayload(appendedResults, pageParams)
 	respondWithJSON(w, http.StatusOK, response)
 }
 
