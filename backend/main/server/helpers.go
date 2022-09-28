@@ -455,7 +455,7 @@ func (h *Helpers) fetchCommunity(id int) (models.Community, error) {
 }
 
 func (h *Helpers) searchCommunities(query string, pageParams shared.PageParams) ([]*models.Community, error) {
-	if query == "featured" {
+	if query == "defaultFeatured" {
 		results, _, err := models.GetCommunitiesForHomePage(h.A.DB, pageParams)
 		if err != nil {
 			log.Error().Err(err)
