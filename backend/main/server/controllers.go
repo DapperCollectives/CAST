@@ -71,6 +71,13 @@ var (
 		message:    "Error",
 		details:    "There was an error trying to update your community",
 	}
+
+	errStrategyNotFound = errorResponse{
+		statusCode: http.StatusNotFound,
+		errorCode:  "ERR_1008",
+		message:    "Strategy Not Found",
+		details:    "The strategy name you are trying to use no longer exists.",
+	}
 )
 
 func (a *App) health(w http.ResponseWriter, r *http.Request) {
@@ -300,10 +307,10 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	proposal, err := helpers.createProposal(p)
+	proposal, errResponse := helpers.createProposal(p)
 	if err != nil {
 		log.Error().Err(err).Msg("Error creating proposal")
-		respondWithError(w, errIncompleteRequest)
+		respondWithError(w, errResponse)
 		return
 	}
 
