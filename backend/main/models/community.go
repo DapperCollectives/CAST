@@ -312,7 +312,7 @@ func SearchForCommunity(db *s.Database, query string) ([]Community, error) {
 	var communities []Community
 	rows, err := db.Conn.Query(
 		db.Context,
-		`SELECT name FROM communities WHERE SIMILARITY(name, $1) > 0.1`,
+		`SELECT * FROM communities WHERE SIMILARITY(name, $1) > 0.1`,
 		query,
 	)
 	if err != nil {
