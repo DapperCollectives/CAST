@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { checkResponse, getPagination, wait } from 'utils';
+import { debounce } from 'utils';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import queryString from 'query-string';
 import { PAGINATION_INITIAL_STATE } from 'reducers';
@@ -58,6 +60,7 @@ const mockedData = [
 ];
 
 export const getPlainDataCustom = (data) => {
+  console.log(data);
   const mergeddata = data?.pages?.reduce(
     (prev, current) =>
       current.data.results ? [...prev, ...current.data.results] : prev,
@@ -81,62 +84,93 @@ export default function useCommunitySearch({
     filters,
   ];
 
-  const { isLoading, isError, data, error, fetchNextPage } = useInfiniteQuery(
-    queryUniqueKey,
-    async ({ pageParam = initialPageParam, queryKey }) => {
-      const [start, count] = pageParam;
-      const searchText = queryKey[1];
-      const filters = queryKey[2];
+  const { isLoading, isError, data, error, fetchNextPage, isFetchingNextPage } =
+    useInfiniteQuery(
+      queryUniqueKey,
+      async ({ pageParam = initialPageParam, queryKey }) => {
+        const [start, count] = pageParam;
+        const searchText = queryKey[1];
+        const filters = queryKey[2];
 
-      console.log(queryKey);
-      const queryParams = queryString.stringify({
-        filters,
-        start,
-        count,
-      });
+        console.log(queryKey);
+        const queryParams = queryString.stringify({
+          filters,
+          start,
+          count,
+        });
 
-      console.log(queryParams);
+        console.log(queryParams);
 
-      const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/search/${searchText}?${queryParams}`;
+        const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/search/${searchText}?${queryParams}`;
 
-      // use \default when search is for all
-      const response = await fetch(url);
-      const resp = await checkResponse(response);
+        // use \default when search is for all
+        const response = await fetch(url);
+        const resp = await checkResponse(response);
 
-      await wait(2000);
-      return {
-        ...resp,
-        data: {
-          // results: resp.data,
-          results: mockedData,
-          filters: [
-            { text: 'All', amount: 22 },
-            { text: 'DAO', amount: 3 },
-            { text: 'Creator', amount: 4 },
-            { text: 'NFT', amount: 8 },
-            { text: 'Collector', amount: 0 },
-          ],
+        await wait(2000);
+        return {
+          ...resp,
+          data: {
+            // results: resp.data,
+            results: mockedData,
+            filters: [
+              { text: 'All', amount: 22 },
+              { text: 'DAO', amount: 3 },
+              { text: 'Creator', amount: 4 },
+              { text: 'NFT', amount: 8 },
+              { text: 'Collector', amount: 0 },
+            ],
+          },
+        };
+      },
+      {
+        getNextPageParam: (lastPage) => {
+          const { next, start, count, totalRecords } = lastPage;
+          return [start + count, count, totalRecords, next];
         },
-      };
-    },
-    {
-      getNextPageParam: (lastPage) => {
-        const { next, start, count, totalRecords } = lastPage;
-        return [start + count, count, totalRecords, next];
-      },
-      onError: (error) => {
-        notifyError(error);
-      },
-    }
-  );
+        onError: (error) => {
+          notifyError(error);
+        },
+      }
+    );
+
+  const pagination = getPagination(data);
+  const hasMore = pagination.next > 0;
+
+  // handles scrolling and fetching more data
+  useEffect(() => {
+    document.hasMore = hasMore;
+    document.isLoading = isLoading || isFetchingNextPage;
+    document.fetchNextPage = fetchNextPage;
+  }, [hasMore, isLoading, isFetchingNextPage, fetchNextPage]);
+
+  function pullDataFromApi() {
+    return debounce(() => {
+      if (
+        document.documentElement.scrollHeight <=
+        window.pageYOffset + window.innerHeight
+      ) {
+        if (document.hasMore && !document.isLoading) {
+          console.log('is fetching more ');
+          document.fetchNextPage();
+        }
+      }
+    }, 500);
+  }
+
+  useEffect(() => {
+    document.addEventListener('scroll', pullDataFromApi());
+    return () => document.removeEventListener('scroll', pullDataFromApi());
+  }, []);
 
   return {
     isLoading,
     isError,
     data: getPlainDataCustom(data),
     error,
-    pagination: getPagination(data),
+    pagination,
     fetchNextPage,
     queryKey: queryUniqueKey,
+    isFetchingNextPage,
   };
 }
