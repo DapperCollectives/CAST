@@ -312,18 +312,18 @@ func SearchForCommunity(db *s.Database, query string) ([]Community, error) {
 	var communities []Community
 	rows, err := db.Conn.Query(
 		db.Context,
-		`SELECT * FROM communities WHERE SIMILARITY(name, $1) > 0.1`,
+		`SELECT id, name, body, logo, category FROM communities WHERE SIMILARITY(name, $1) > 0.1`,
 		query,
 	)
 	if err != nil {
-		return communities, fmt.Errorf("error searching for a community with the the param %s", query)
+		return communities, fmt.Errorf("error searching for a community with the the query %s", query)
 	}
 
 	defer rows.Close()
 
 	for rows.Next() {
 		var c Community
-		err = rows.Scan(&c.Name)
+		err = rows.Scan(&c.ID, &c.Name, &c.Body, &c.Logo, &c.Category)
 		if err != nil {
 			return communities, fmt.Errorf("error scanning community row: %v", err)
 		}

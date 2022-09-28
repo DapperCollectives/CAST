@@ -455,6 +455,7 @@ func (h *Helpers) fetchCommunity(id int) (models.Community, error) {
 
 func (h *Helpers) searchCommunities(query string) ([]models.Community, error) {
 	results, err := models.SearchForCommunity(h.A.DB, query)
+	fmt.Printf("results: %v \n", results)
 	if err != nil {
 		return []models.Community{}, err
 	}
