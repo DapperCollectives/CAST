@@ -13,9 +13,8 @@ export default function BrowseCommunities() {
 
   const {
     isLoading: isLoadingSearch,
+    isFetchingNextPage,
     data: communityResult,
-    fetchNextPage,
-    error,
   } = useCommunitySearch({
     searchText: debounced === '' ? 'default' : debounced,
     // do not send filtes when all is selected
@@ -82,20 +81,27 @@ export default function BrowseCommunities() {
 
       <section className="section">
         <div className="container">
-          {isLoadingSearch ? (
+          {isLoadingSearch && !communitiesResult ? (
             <FadeIn>
               <div style={{ height: '50vh' }}>
                 <Loader fullHeight />
               </div>
             </FadeIn>
           ) : (
-            <FadeIn>
-              <CommunitiesPresenter
-                titleClasses="is-size-3"
-                title="Communities"
-                communities={communitiesResult}
-              />
-            </FadeIn>
+            <>
+              <FadeIn>
+                <CommunitiesPresenter
+                  titleClasses="is-size-3"
+                  title="Communities"
+                  communities={communitiesResult}
+                />
+              </FadeIn>
+              {isFetchingNextPage && communitiesResult?.length > 0 && (
+                <div className="mt-6">
+                  <Loader size={18} fullHeight />
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>
