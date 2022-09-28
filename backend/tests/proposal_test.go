@@ -37,12 +37,14 @@ func TestGetProposal(t *testing.T) {
 	t.Run("Should throw an error if proposal with ID doesnt exist", func(t *testing.T) {
 
 		response := otu.GetProposalByIdAPI(communityId, 420)
+		fmt.Printf("Response: %s", response.Body)
 
 		CheckResponseCode(t, http.StatusForbidden, response.Code)
 
-		var m map[string]string
-		json.Unmarshal(response.Body.Bytes(), &m)
-		assert.Equal(t, "ERR_1001", m["errorCode"])
+		var e errorResponse
+		json.Unmarshal(response.Body.Bytes(), &e)
+		fmt.Printf("Error: %v", e)
+		assert.Equal(t, errIncompleteRequest, e)
 	})
 
 	t.Run("Should fetch existing proposal by ID", func(t *testing.T) {
@@ -160,6 +162,8 @@ func TestUpdateProposal(t *testing.T) {
 		var p models.Proposal
 		json.Unmarshal(response.Body.Bytes(), &p)
 
+		fmt.Printf("Proposal ID: %d", p.ID)
+
 		// Get proposal after create
 		response = otu.GetProposalByIdAPI(communityId, p.ID)
 		var created models.Proposal
@@ -168,6 +172,7 @@ func TestUpdateProposal(t *testing.T) {
 		assert.Equal(t, "active", *created.Computed_status)
 
 		cancelPayload := otu.GenerateCancelProposalStruct(authorName, communityId)
+		fmt.Printf("Cancel payload: %v", cancelPayload)
 		response = otu.UpdateProposalAPI(p.ID, cancelPayload)
 		checkResponseCode(t, http.StatusOK, response.Code)
 

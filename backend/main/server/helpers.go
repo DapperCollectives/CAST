@@ -463,7 +463,8 @@ func (h *Helpers) searchCommunities(query string) ([]models.Community, error) {
 }
 
 func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorResponse) {
-	if err := h.validateStrategyName(p.Name); err != nil {
+	if err := h.validateStrategyName(*p.Strategy); err != nil {
+		fmt.Printf("Error validating strategy name: %v \n", err)
 		return models.Proposal{}, errStrategyNotFound
 	}
 
@@ -545,11 +546,11 @@ func (h *Helpers) validateStrategyName(name string) error {
 		if name == k {
 			return nil
 		} else {
-			return errors.New("Stategy name no longer exists.")
+			continue
 		}
 	}
 
-	return nil
+	return errors.New("Strategy not found.")
 }
 
 func (h *Helpers) enforceCommunityRestrictions(
