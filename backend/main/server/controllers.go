@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -403,7 +404,9 @@ func (a *App) searchCommunities(w http.ResponseWriter, r *http.Request) {
 
 	pageParams.TotalRecords = len(results)
 
-	filters := vars["filters"]
+	filters := r.FormValue("filters")
+	fmt.Printf("filters: %s", filters)
+
 	paginatedResults := shared.GetPaginatedResponseWithPayload(results, pageParams)
 	response, err := helpers.appendFiltersToResponse(filters, paginatedResults)
 	if err != nil {
