@@ -1,19 +1,13 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Svg } from '@cast/shared-components';
 import { FadeIn, FilterPill, Loader } from 'components';
 import CommunitiesPresenter from 'components/Community/CommunitiesPresenter';
 import { useCommunitySearch, useDebounce } from 'hooks';
 
-const pills = [
-  { text: 'All', amount: 22, selected: true },
-  { text: 'DAO', amount: 3 },
-  { text: 'Creator', amount: 4 },
-  { text: 'NFT', amount: 8 },
-  { text: 'Collector', amount: 0 },
-];
-
 export default function BrowseCommunities() {
   const [searchText, setSearchText] = useState('');
+  const [pills, setPills] = useState([]);
+  const [selectedPills, setSelectedPills] = useState(['all']);
 
   const debounced = useDebounce(searchText, 1000);
 
@@ -23,10 +17,20 @@ export default function BrowseCommunities() {
     fetchNextPage,
     error,
   } = useCommunitySearch({
-    searchText: debounced,
+    searchText: debounced === '' ? 'default' : debounced,
+    // do not send filtes when all is selected
+    ...(selectedPills.includes('all') ? undefined : { filters: selectedPills }),
   });
 
-  console.log(communityResult);
+  const { filters, results: communitiesResult } = communityResult;
+
+  // first load
+  useEffect(() => {
+    if (!pills.length && filters) {
+      setPills(filters);
+    }
+  }, [filters, pills]);
+
   return (
     <>
       <div className="search-container has-background-light-grey">
@@ -64,11 +68,11 @@ export default function BrowseCommunities() {
                 <FilterPill
                   key={`pill-${index}`}
                   onClick={() => {
-                    console.log('I was clicked');
+                    setSelectedPills([pill.text?.toLowerCase()]);
                   }}
                   text={pill.text}
                   amount={pill.amount}
-                  selected={pill.selected}
+                  selected={selectedPills.includes(pill.text?.toLowerCase())}
                 />
               ))}
             </div>
@@ -89,7 +93,7 @@ export default function BrowseCommunities() {
               <CommunitiesPresenter
                 titleClasses="is-size-3"
                 title="Communities"
-                communities={communityResult}
+                communities={communitiesResult}
               />
             </FadeIn>
           )}
