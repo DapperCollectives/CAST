@@ -393,15 +393,17 @@ func (a *App) getCommunities(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) searchCommunities(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	results, err := helpers.searchCommunities(vars["query"])
+
+	pageParams := getPageParams(*r, 25)
+	results, err := helpers.searchCommunities(vars["query"], pageParams)
 	if err != nil {
 		log.Error().Err(err).Msg("Error searching communities")
 		respondWithError(w, errIncompleteRequest)
 	}
-	filters := vars["filters"]
-	pageParams := getPageParams(*r, 25)
+
 	pageParams.TotalRecords = len(results)
 
+	filters := vars["filters"]
 	paginatedResults := shared.GetPaginatedResponseWithPayload(results, pageParams)
 	response, err := helpers.appendFiltersToResponse(filters, paginatedResults)
 	if err != nil {

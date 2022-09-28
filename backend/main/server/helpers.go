@@ -454,14 +454,24 @@ func (h *Helpers) fetchCommunity(id int) (models.Community, error) {
 	return community, nil
 }
 
-func (h *Helpers) searchCommunities(query string) ([]models.Community, error) {
-	results, err := models.SearchForCommunity(h.A.DB, query)
-	fmt.Printf("results: %v \n", results)
-	if err != nil {
-		return []models.Community{}, err
-	}
+func (h *Helpers) searchCommunities(query string, pageParams shared.PageParams) ([]*models.Community, error) {
+	if query == "featured" {
+		results, _, err := models.GetCommunitiesForHomePage(h.A.DB, pageParams)
+		if err != nil {
+			log.Error().Err(err)
+			return nil, err
+		}
 
-	return results, nil
+		return results, nil
+	} else {
+		fmt.Printf("searching for communities with query: %s \n", query)
+		results, err := models.SearchForCommunity(h.A.DB, query)
+		if err != nil {
+			return []*models.Community{}, err
+		}
+
+		return results, nil
+	}
 }
 
 func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, error) {

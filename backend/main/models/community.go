@@ -308,8 +308,8 @@ func (c *Community) CanUpdateCommunity(db *s.Database, addr string) error {
 	return nil
 }
 
-func SearchForCommunity(db *s.Database, query string) ([]Community, error) {
-	var communities []Community
+func SearchForCommunity(db *s.Database, query string) ([]*Community, error) {
+	var communities []*Community
 	rows, err := db.Conn.Query(
 		db.Context,
 		`SELECT id, name, body, logo, category FROM communities WHERE SIMILARITY(name, $1) > 0.1`,
@@ -327,7 +327,7 @@ func SearchForCommunity(db *s.Database, query string) ([]Community, error) {
 		if err != nil {
 			return communities, fmt.Errorf("error scanning community row: %v", err)
 		}
-		communities = append(communities, c)
+		communities = append(communities, &c)
 	}
 
 	return communities, nil
