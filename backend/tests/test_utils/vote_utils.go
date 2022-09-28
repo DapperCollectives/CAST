@@ -2,7 +2,6 @@ package test_utils
 
 import (
 	"bytes"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -63,16 +62,16 @@ func (otu *OverflowTestUtils) CreateVoteAPI(proposalId int, payload *models.Vote
 	return otu.ExecuteRequest(req)
 }
 
-func (otu *OverflowTestUtils) GenerateValidVotePayload(accountName string, proposalId int, choice string) *models.Vote {
+func (otu *OverflowTestUtils) GenerateValidVotePayload(accountName string, proposalId int, choiceId int) *models.Vote {
 	timestamp := time.Now().UnixNano() / int64(time.Millisecond)
-	hexChoice := hex.EncodeToString([]byte(choice))
-	message := strconv.Itoa(proposalId) + ":" + hexChoice + ":" + fmt.Sprint(timestamp)
+	choiceIdStr := fmt.Sprintf("%d", choiceId)
+	message := strconv.Itoa(proposalId) + ":" + choiceIdStr + ":" + fmt.Sprint(timestamp)
 	compositeSignatures := otu.GenerateCompositeSignatures(accountName, message)
 	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", accountName))
 	address := fmt.Sprintf("0x%s", account.Address().String())
 
 	c := make([]string, 1)
-	c[0] = choice
+	c[0] = choiceIdStr
 
 	vote := models.Vote{Proposal_id: proposalId, Addr: address, Choices: c,
 		Composite_signatures: compositeSignatures, Message: message}

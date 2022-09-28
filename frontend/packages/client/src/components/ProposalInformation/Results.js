@@ -1,7 +1,13 @@
 import { useMemo } from 'react';
 import { FilterValues } from 'const';
 
-export default function Results({ voteResults, computedStatus } = {}) {
+export default function Results({
+  proposalChoices,
+  voteResults,
+  computedStatus,
+} = {}) {
+  console.log('results.js');
+
   // sort results array if proposal is closed or active
 
   const sortedResults = useMemo(
@@ -58,8 +64,13 @@ export default function Results({ voteResults, computedStatus } = {}) {
             ? 0
             : ((100 * voteResults[option]) / totalVotes).toFixed(2);
 
-        const optionText =
-          option.length > 120 ? `${option.substring(0, 120)}...` : option;
+        const optionText = proposalChoices.find(
+          (c) => c.value === Number(option)
+        ).label;
+        const optionTextTrunc =
+          optionText.length > 120
+            ? `${optionText.substring(0, 120)}...`
+            : optionText;
 
         const isLastOne = options.length === index + 1;
         const isLeaderOption = leadingOption && leadingOption[0] === option;
@@ -71,7 +82,7 @@ export default function Results({ voteResults, computedStatus } = {}) {
           >
             <div className="columns is-mobile mb-2">
               <div className="column pb-0 mb-0 small-text has-text-grey has-text-left word-break">
-                {optionText}
+                {optionTextTrunc}
               </div>
               <div className="column pb-0 mb-0 is-3 is-flex is-justify-content-flex-end small-text has-text-grey">
                 {`${percentage}%`}

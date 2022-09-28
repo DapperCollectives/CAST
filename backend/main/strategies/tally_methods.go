@@ -1,20 +1,22 @@
 package strategies
 
 import (
+	"fmt"
 	"sort"
 
 	"github.com/DapperCollectives/CAST/backend/main/models"
+	"github.com/rs/zerolog/log"
 	"golang.org/x/exp/slices"
 )
 
 type TallyStruct struct {
 	choice string
-	votes int
+	votes  int
 }
 
 func RankedChoice(
-	votes []*models.VoteWithBalance, 
-	r *models.ProposalResults, 
+	votes []*models.VoteWithBalance,
+	r *models.ProposalResults,
 	proposal *models.Proposal,
 	isNFT bool,
 ) {
@@ -22,13 +24,14 @@ func RankedChoice(
 
 	// Put choices into a map for tallying.
 	tallyMap := make(map[string]int)
-	for i := 0; i < len(proposal.Choices); i += 1 {
-		tallyMap[proposal.Choices[i].Choice_text] = 0
+	for i := range proposal.Choices {
+		choiceKey := fmt.Sprintf("%d", *proposal.Choices[i].ID)
+		tallyMap[choiceKey] = 0
 	}
 
 	for {
 		totalVotes := 0
-		
+
 		for _, vote := range votes {
 			includeVote := (isNFT && len(vote.NFTs) != 0) || !isNFT
 			exhaustedVote := len(vote.Choices) == 0
@@ -39,14 +42,15 @@ func RankedChoice(
 				r.Results_float[vote.Choices[firstRank]] += 1
 			}
 		}
+		log.Debug().Msgf("%v", tallyMap)
 
 		// Create an array from the tally map for sorting.
 		tallyArray := make([]TallyStruct, len(tallyMap))
 		i := 0
 		for key, value := range tallyMap {
 			tallyArray[i] = TallyStruct{
-				choice: key, 
-				votes: value,
+				choice: key,
+				votes:  value,
 			}
 			i++
 		}
@@ -58,25 +62,27 @@ func RankedChoice(
 
 		// Check for a winner: highest scored choice is a majority of the votes
 		// or is the last choice remaining in the event of a split.
-		if(tallyArray[0].votes > totalVotes / 2 || len(tallyArray) == 1) {
+		if tallyArray[0].votes > totalVotes/2 || len(tallyArray) == 1 {
 			break
 		}
 
 		// Last place is the end of the sorted array.
-		lastPlace := tallyArray[len(tallyArray) - 1].choice
+		lastPlace := tallyArray[len(tallyArray)-1].choice
 
 		// Remove the last place choice from the tally map.
 		delete(tallyMap, lastPlace)
 
 		// Remove the last place choice from votes.
 		for _, vote := range votes {
-			i := slices.IndexFunc(vote.Choices, func(s string) bool { return s == lastPlace })
+			i := slices.IndexFunc(vote.Choices, func(s string) bool {
+				return s == lastPlace
+			})
 			if i >= 0 {
 				vote.Choices = append(vote.Choices[:i], vote.Choices[i+1:]...)
 			}
 		}
 
-		//Reset score for next round of tallying.
+		// Reset score for next round of tallying.
 		for _, t := range tallyArray {
 			tallyMap[t.choice] = 0
 			r.Results[t.choice] = 0
@@ -86,11 +92,16 @@ func RankedChoice(
 }
 
 func SingleChoiceNFT(
-	votes []*models.VoteWithBalance, 
-	r *models.ProposalResults, 
+	votes []*models.VoteWithBalance,
+	r *models.ProposalResults,
 	proposal *models.Proposal,
-	getVoteWeight func (vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error),
+	getVoteWeight func(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error),
 ) error {
+	for i := 0; i < len(proposal.Choices); i += 1 {
+		choiceKey := fmt.Sprintf("%d", *proposal.Choices[i].ID)
+		r.Results[choiceKey] = 0
+		r.Results_float[choiceKey] = 0
+	}
 	for _, vote := range votes {
 		if len(vote.NFTs) != 0 {
 			var voteWeight float64
