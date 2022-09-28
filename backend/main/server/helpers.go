@@ -2,12 +2,14 @@ package server
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/DapperCollectives/CAST/backend/main/models"
@@ -1134,6 +1136,34 @@ func (h *Helpers) pinJSONToIpfs(data interface{}) (*string, error) {
 		return nil, err
 	}
 	return &pin.IpfsHash, nil
+}
+
+func (h *Helpers) appendFiltersToResponse(
+	filterParams string,
+	results []models.Community,
+) (interface{}, error) {
+	var filters []shared.SearchFilter
+	filterParamsSlice := strings.Split(filterParams, ",")
+
+	for _, filterParam := range filterParamsSlice {
+		filter := shared.SearchFilter{}
+		err := json.Unmarshal([]byte(filterParam), &filter)
+		if err != nil {
+			log.Error().Err(err).Msg("Error unmarshalling filter")
+			return nil, err
+		}
+		filters = append(filters, filter)
+	}
+
+	appendedResponse := struct {
+		Filters []shared.SearchFilter `json:"filters"`
+		Results []models.Community    `json:"results"`
+	}{
+		Filters: filters,
+		Results: results,
+	}
+
+	return appendedResponse, nil
 }
 
 func validateContractThreshold(s []models.Strategy) error {

@@ -398,10 +398,17 @@ func (a *App) searchCommunities(w http.ResponseWriter, r *http.Request) {
 		log.Error().Err(err).Msg("Error searching communities")
 		respondWithError(w, errIncompleteRequest)
 	}
+	filters := vars["filters"]
 	pageParams := getPageParams(*r, 25)
 	pageParams.TotalRecords = len(results)
 
-	response := shared.GetPaginatedResponseWithPayload(results, pageParams)
+	appendedResults, err := helpers.appendFiltersToResponse(filters, results)
+	if err != nil {
+		log.Error().Err(err).Msg("Error appending filters to response")
+		respondWithError(w, errIncompleteRequest)
+	}
+
+	response := shared.GetPaginatedResponseWithPayload(appendedResults, pageParams)
 	respondWithJSON(w, http.StatusOK, response)
 }
 
