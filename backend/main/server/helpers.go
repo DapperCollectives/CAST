@@ -486,7 +486,6 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorRespo
 	if err != nil {
 		log.Error().Err(err).Msg("Community does not have this strategy available.")
 		return models.Proposal{}, errIncompleteRequest
-
 	}
 
 	// Set Min Balance/Max Weight to community defaults if not provided
