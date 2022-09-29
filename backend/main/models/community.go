@@ -18,7 +18,7 @@ type Community struct {
 	ID                       int         `json:"id,omitempty"`
 	Name                     string      `json:"name,omitempty"`
 	Category                 *string     `json:"category,omitempty"              validate:"required"`
-	CategoryCount            *int        `json:"categorycount,omitempty"`
+	Category_count           *int        `json:"categoryCount,omitempty"`
 	Logo                     *string     `json:"logo,omitempty"`
 	Body                     *string     `json:"body,omitempty"`
 	Strategies               *[]Strategy `json:"strategies,omitempty"`
@@ -117,7 +117,7 @@ const HOMEPAGE_SQL = `
 `
 
 const DEFAULT_SEARCH_SQL = `
-	SELECT id, name, body, logo, cs.category, c.count as categoryCount
+	SELECT id, name, body, logo, cs.category, c.count as category_count
 		FROM communities cs
     LEFT JOIN (
 		SELECT category, COUNT(*)
@@ -373,7 +373,7 @@ func SearchForCommunity(db *s.Database, query string) ([]*Community, error) {
 
 	for rows.Next() {
 		var c Community
-		err = rows.Scan(&c.ID, &c.Name, &c.Body, &c.Logo, &c.Category, &c.CategoryCount)
+		err = rows.Scan(&c.ID, &c.Name, &c.Body, &c.Logo, &c.Category, &c.Category_count)
 		if err != nil {
 			return communities, fmt.Errorf("error scanning community row: %v", err)
 		}

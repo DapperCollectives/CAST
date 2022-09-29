@@ -491,7 +491,7 @@ func (h *Helpers) categoryCountToMap(results []*models.Community) map[string]int
 	var categoryCount = make(map[string]int)
 	for _, community := range results {
 		if community.Category != nil {
-			categoryCount[*community.Category] = *community.CategoryCount
+			categoryCount[*community.Category] = *community.Category_count
 		}
 	}
 
