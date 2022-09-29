@@ -13,6 +13,8 @@ import (
 
 func TestRankedChoiceVoting(t *testing.T) {
 
+	fmt.Println("HERE")
+
 	c := strings.Fields("a b c d")
 	choices := make([]shared.Choice, 4)
 	for i := 0; i < len(c); i += 1 {
@@ -25,6 +27,7 @@ func TestRankedChoiceVoting(t *testing.T) {
 		Computed_status: &computedStatus,
 	}
 
+	// First Round Winner
 	t1Votes := make([]*models.VoteWithBalance, 5)
 	t1Votes[0] = createVote("a b c d")
 	t1Votes[1] = createVote("a b d c")
@@ -37,6 +40,7 @@ func TestRankedChoiceVoting(t *testing.T) {
 		"a:5 b:0 c:0 d:0",
 	)
 
+	// Fourth Round Winner
 	t2Votes := make([]*models.VoteWithBalance, 5)
 	t2Votes[0] = createVote("a b c d")
 	t2Votes[1] = createVote("a b d c")
@@ -49,6 +53,7 @@ func TestRankedChoiceVoting(t *testing.T) {
 		"a:3 b:0 c:0 d:0",
 	)
 
+	// Split Vote
 	t3Votes := make([]*models.VoteWithBalance, 4)
 	t3Votes[0] = createVote("a")
 	t3Votes[1] = createVote("a")
@@ -60,6 +65,7 @@ func TestRankedChoiceVoting(t *testing.T) {
 		"a:2 b:0 c:0 d:0",
 	)
 
+	// Larger Vote
 	t4Votes := make([]*models.VoteWithBalance, 18)
 	t4Votes[0] = createVote("a c d")
 	t4Votes[1] = createVote("a c d")
@@ -85,6 +91,7 @@ func TestRankedChoiceVoting(t *testing.T) {
 		"a:8 b:7 c:0 d:0",
 	)
 
+	// Choices with No votes
 	t5Votes := make([]*models.VoteWithBalance, 6)
 	t5Votes[0] = createVote("a b")
 	t5Votes[1] = createVote("b a")
@@ -105,7 +112,7 @@ func TestRankedChoiceVoting(t *testing.T) {
 		expected 		*models.ProposalResults
     }{
         {
-            name: "Single Winner",
+            name: "First Round Winner",
             proposal: proposal,
 			votes: t1Votes,
 			expected: t1Results,
@@ -158,25 +165,27 @@ func TestSingleChoiceVoting(t *testing.T) {
 		Computed_status: &computedStatus,
 	}
 
-	oneChoiceVoteVotes := make([]*models.VoteWithBalance, 3)
-	oneChoiceVoteVotes[0] = createVote("a")
-	oneChoiceVoteVotes[1] = createVote("a")
-	oneChoiceVoteVotes[2] = createVote("a")
-	expectedOneChoiceVoteVotesResults := createProposalResults(proposal)
+	// One choice
+	t1Votes := make([]*models.VoteWithBalance, 3)
+	t1Votes[0] = createVote("a")
+	t1Votes[1] = createVote("a")
+	t1Votes[2] = createVote("a")
+	t1Results := createProposalResults(proposal)
 	updateProposalResults(
-		expectedOneChoiceVoteVotesResults,
+		t1Results,
 		"a:3 b:0 c:0 d:0",
 	)
 
-	randomVotes := make([]*models.VoteWithBalance, 5)
-	randomVotes[0] = createVote("a")
-	randomVotes[1] = createVote("b")
-	randomVotes[2] = createVote("b")
-	randomVotes[3] = createVote("c")
-	randomVotes[4] = createVote("d")
-	expectedRandomVotesResults := createProposalResults(proposal)
+	// Random voting pattern
+	t2Votes := make([]*models.VoteWithBalance, 5)
+	t2Votes[0] = createVote("a")
+	t2Votes[1] = createVote("b")
+	t2Votes[2] = createVote("b")
+	t2Votes[3] = createVote("c")
+	t2Votes[4] = createVote("d")
+	t2Results := createProposalResults(proposal)
 	updateProposalResults(
-		expectedRandomVotesResults,
+		t2Results,
 		"a:1 b:2 c:1 d:1",
 	)
 
@@ -189,14 +198,14 @@ func TestSingleChoiceVoting(t *testing.T) {
         {
             name: "One Choice",
             proposal: proposal,
-			votes: oneChoiceVoteVotes,
-			expected: expectedOneChoiceVoteVotesResults,
+			votes: t1Votes,
+			expected: t1Results,
         },
 		{
             name: "Random Voting Pattern",
             proposal: proposal,
-			votes: randomVotes,
-			expected: expectedRandomVotesResults,
+			votes: t2Votes,
+			expected: t2Results,
         },
     }
     for _, subTest := range subTests {
@@ -206,7 +215,7 @@ func TestSingleChoiceVoting(t *testing.T) {
 			}
 			results := createProposalResults(subTest.proposal)
 			SingleChoiceNFT(subTest.votes, results, subTest.proposal, mockGetVoteWeight)
-			assert.Equal(t, 1, 1)
+			assert.DeepEqual(t, subTest.expected.Results, results.Results)
         })
     }
 }
@@ -252,14 +261,5 @@ func updateProposalResults(r *models.ProposalResults, results string) *models.Pr
 	}
 
 	return r
-}
-
-func convertResultsToString(r map[string]int) string {
-	str := ""
-	for key, value := range r {
-		str = fmt.Sprintf("%s %s:%d", str, key, value)
-	}
-	str = strings.Trim(str, " ")
-	return str
 }
 
