@@ -86,7 +86,7 @@ const SignInOutButton = ({
                 width: '159px',
                 height: '40px',
               }
-            : { width: '105px', height: '32px' }
+            : { width: '121px', height: '32px' }
         }
       >
         <span className="has-text-weight-bold">Connect</span>
@@ -114,7 +114,7 @@ const SignInOutButton = ({
                     width: '147px',
                     height: '40px',
                   }
-                : { width: '105px', height: '32px' }
+                : { width: '121px', height: '32px' }
             }
           >
             <div className="is-flex is-align-items-center flex-1">
@@ -136,7 +136,7 @@ const SignInOutButton = ({
           id="dropdown-menu"
           role="menu"
           ref={dropdownRef}
-          style={!notMobile ? { left: '-170px' } : { left: '-130px' }}
+          style={!notMobile ? { left: '-155px' } : { left: '-130px' }}
         >
           <div
             className="dropdown-content p-0 rounded"
