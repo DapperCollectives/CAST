@@ -26,20 +26,6 @@ function Header(props) {
           <div className="container header-spacing">
             <nav className="navbar is-transparent">
               <div className="navbar-brand">
-                <NavLink to="/" className="navbar-item p-0 mr-2">
-                  <div className="is-hidden-tablet">
-                    <Svg name="Logo" width={100} />
-                  </div>
-                  <div className="is-hidden-mobile">
-                    <Svg name="Logo" />
-                  </div>
-                </NavLink>
-                <div className="is-flex is-align-items-center">
-                  <Label
-                    labelText="Beta"
-                    classNames="has-text-weight-bold smallest-text is-uppercase"
-                  />
-                </div>
                 <span
                   role="button"
                   className="navbar-burger mr-2"
@@ -49,6 +35,21 @@ function Header(props) {
                   <span />
                   <span />
                 </span>
+                <NavLink to="/" className="navbar-item p-0 mr-2">
+                  <div className="is-hidden-tablet is-flex">
+                    <Svg name="Logo" width={104} height={24} />
+                  </div>
+                  <div className="is-hidden-mobile">
+                    <Svg name="Logo" />
+                  </div>
+                </NavLink>
+                <div className="is-flex is-align-items-center pb-2-tablet">
+                  <Label
+                    padding="py-1 px-3"
+                    labelText="Beta"
+                    classNames="has-text-weight-bold smallest-text is-uppercase"
+                  />
+                </div>
               </div>
               <div className="navbar-end">
                 <NavLink
