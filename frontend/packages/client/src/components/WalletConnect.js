@@ -71,7 +71,7 @@ const SignInOutButton = ({
     { 'is-primary': !loggedIn },
     { 'px-2': !notMobile }
   );
-  const addressStyle = classnames('', { 'smaller-text': !notMobile });
+  const addressStyle = classnames('', { 'small-text': !notMobile });
 
   return !loggedIn ? (
     <>
@@ -125,7 +125,7 @@ const SignInOutButton = ({
                   scale={4}
                   className="blockies"
                 />
-                <div className="is-flex flex-1 is-justify-content-flex-end">
+                <div className="is-flex flex-1 is-justify-content-flex-end pr-1-mobile">
                   <p className={addressStyle}>{truncateAddress(addr, 4, 4)}</p>
                 </div>
               </div>
