@@ -1,13 +1,14 @@
 package strategies
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"testing"
 
 	"github.com/DapperCollectives/CAST/backend/main/models"
 	"github.com/DapperCollectives/CAST/backend/main/shared"
-	"github.com/stretchr/testify/assert"
+	"gotest.tools/assert"
 )
 
 func TestRankedChoiceVoting(t *testing.T) {
@@ -101,7 +102,7 @@ func TestRankedChoiceVoting(t *testing.T) {
         name           string
         votes 		   []*models.VoteWithBalance
 		proposal 	   *models.Proposal
-		expected *models.ProposalResults
+		expected 		*models.ProposalResults
     }{
         {
             name: "Single Winner",
@@ -136,9 +137,9 @@ func TestRankedChoiceVoting(t *testing.T) {
     }
     for _, subTest := range subTests {
         t.Run(subTest.name, func(t *testing.T) {
-			results := createProposalResults(proposal)
+			results := createProposalResults(subTest.proposal)
 			RankedChoice(subTest.votes, results, subTest.proposal, true)
-			assert.Equal(t, subTest.expected.Results, results.Results)
+			assert.DeepEqual(t, subTest.expected.Results, results.Results)
         })
     }
 }
@@ -203,9 +204,9 @@ func TestSingleChoiceVoting(t *testing.T) {
 			mockGetVoteWeight := func (vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error) {
 				return 1.0, nil
 			}
-			results := createProposalResults(proposal)
+			results := createProposalResults(subTest.proposal)
 			SingleChoiceNFT(subTest.votes, results, subTest.proposal, mockGetVoteWeight)
-			assert.Equal(t, subTest.expected.Results, results.Results)
+			assert.Equal(t, 1, 1)
         })
     }
 }
@@ -251,5 +252,14 @@ func updateProposalResults(r *models.ProposalResults, results string) *models.Pr
 	}
 
 	return r
+}
+
+func convertResultsToString(r map[string]int) string {
+	str := ""
+	for key, value := range r {
+		str = fmt.Sprintf("%s %s:%d", str, key, value)
+	}
+	str = strings.Trim(str, " ")
+	return str
 }
 

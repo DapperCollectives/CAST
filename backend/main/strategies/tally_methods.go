@@ -62,11 +62,20 @@ func RankedChoice(
 			break
 		}
 
+		//Reset score for next round of tallying.
+		for _, t := range tallyArray {
+			tallyMap[t.choice] = 0
+			r.Results[t.choice] = 0
+			r.Results_float[t.choice] = 0
+		}
+
 		// Last place is the end of the sorted array.
 		lastPlace := tallyArray[len(tallyArray) - 1].choice
 
+				
 		// Remove the last place choice from the tally map.
 		delete(tallyMap, lastPlace)
+
 
 		// Remove the last place choice from votes.
 		for _, vote := range votes {
@@ -76,12 +85,6 @@ func RankedChoice(
 			}
 		}
 
-		//Reset score for next round of tallying.
-		for _, t := range tallyArray {
-			tallyMap[t.choice] = 0
-			r.Results[t.choice] = 0
-			r.Results_float[t.choice] = 0
-		}
 	}
 }
 
