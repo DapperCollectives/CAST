@@ -82,7 +82,9 @@ func RankedChoice(
 
 		// Reset score for next round of tallying.
 		for _, t := range tallyArray {
-			tallyMap[t.choice] = 0
+			if t.choice != lastPlace {
+				tallyMap[t.choice] = 0
+			}
 			r.Results[t.choice] = 0
 			r.Results_float[t.choice] = 0
 		}
