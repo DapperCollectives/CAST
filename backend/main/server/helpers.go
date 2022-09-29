@@ -474,6 +474,15 @@ func (h *Helpers) searchCommunities(query string, pageParams shared.PageParams) 
 	}
 }
 
+func (h *Helpers) getCategoryCount(results []*models.Community) []interface{} {
+	var resultsWithCount []interface{}
+	for _, community := range results {
+		resultsWithCount = append(resultsWithCount, community)
+	}
+
+	return resultsWithCount
+}
+
 func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, error) {
 	if p.Voucher != nil {
 		if err := h.validateUserViaVoucher(p.Creator_addr, p.Voucher); err != nil {
