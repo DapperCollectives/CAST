@@ -17,7 +17,7 @@ export default function HomeHeader() {
 
   return (
     <div
-      className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center py-7 has-background-light-grey"
+      className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center py-5-mobile py-7 has-background-light-grey"
       style={{
         position: 'relative',
         zIndex: 0, // needed for stars to show up
