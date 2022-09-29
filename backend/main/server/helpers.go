@@ -454,24 +454,42 @@ func (h *Helpers) fetchCommunity(id int) (models.Community, error) {
 	return community, nil
 }
 
-func (h *Helpers) searchCommunities(query string, pageParams shared.PageParams) ([]*models.Community, error) {
+func (h *Helpers) searchCommunities(
+	query string,
+	pageParams shared.PageParams,
+) (
+	[]*models.Community,
+	map[string]int,
+	error,
+) {
 	if query == "defaultFeatured" {
 		results, _, err := models.GetCommunitiesForHomePage(h.A.DB, pageParams)
 		if err != nil {
 			log.Error().Err(err)
-			return nil, err
+			return nil, nil, err
 		}
 
-		return results, nil
+		return results, nil, nil
 	} else {
-		fmt.Printf("searching for communities with query: %s \n", query)
 		results, err := models.SearchForCommunity(h.A.DB, query)
 		if err != nil {
-			return []*models.Community{}, err
+			return []*models.Community{}, nil, err
 		}
 
-		return results, nil
+		categories := h.categoryCountToMap(results)
+		return results, categories, nil
 	}
+}
+
+func (h *Helpers) categoryCountToMap(results []*models.Community) map[string]int {
+	var categoryCount = make(map[string]int)
+	for _, community := range results {
+		if community.Category != nil {
+			categoryCount[*community.Category] = *community.CategoryCount
+		}
+	}
+
+	return categoryCount
 }
 
 func (h *Helpers) getCategoryCount(results []*models.Community) []interface{} {
@@ -1159,14 +1177,16 @@ func (h *Helpers) pinJSONToIpfs(data interface{}) (*string, error) {
 func (h *Helpers) appendFiltersToResponse(
 	filterParams string,
 	results *shared.PaginatedResponse,
+	categoryCount map[string]int,
 ) (interface{}, error) {
 	var filters []shared.SearchFilter
+
 	filterParamsSlice := strings.Split(filterParams, ",")
 
 	for _, filterParam := range filterParamsSlice {
 		filter := shared.SearchFilter{
 			Text:   filterParam,
-			Amount: 42,
+			Amount: categoryCount[filterParam],
 		}
 		filters = append(filters, filter)
 	}

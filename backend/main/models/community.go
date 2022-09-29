@@ -318,11 +318,11 @@ func SearchForCommunity(db *s.Database, query string) ([]*Community, error) {
 			LEFT JOIN (
 				SELECT category, COUNT(*)
 				FROM communities
-				WHERE SIMILARITY(name, 'rich') > 0.1
+				WHERE SIMILARITY(name, $1) > 0.1
 				GROUP BY category
 				) c
 			on c.category = cs.category
-			WHERE SIMILARITY(name, 'rich') > 0.1`,
+			WHERE SIMILARITY(name, $1) > 0.1`,
 		query,
 	)
 	if err != nil {
@@ -333,7 +333,7 @@ func SearchForCommunity(db *s.Database, query string) ([]*Community, error) {
 
 	for rows.Next() {
 		var c Community
-		err = rows.Scan(&c.ID, &c.Name, &c.Body, &c.Logo, &c.Category)
+		err = rows.Scan(&c.ID, &c.Name, &c.Body, &c.Logo, &c.Category, &c.CategoryCount)
 		if err != nil {
 			return communities, fmt.Errorf("error scanning community row: %v", err)
 		}

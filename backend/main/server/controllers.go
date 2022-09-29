@@ -3,7 +3,6 @@ package server
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -396,19 +395,20 @@ func (a *App) searchCommunities(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
 	pageParams := getPageParams(*r, 25)
-	results, err := helpers.searchCommunities(vars["query"], pageParams)
+	results, categories, err := helpers.searchCommunities(vars["query"], pageParams)
 	if err != nil {
 		log.Error().Err(err).Msg("Error searching communities")
 		respondWithError(w, errIncompleteRequest)
 	}
-
 	pageParams.TotalRecords = len(results)
-
 	filters := r.FormValue("filters")
-	fmt.Printf("filters: %s", filters)
 
 	paginatedResults := shared.GetPaginatedResponseWithPayload(results, pageParams)
-	response, err := helpers.appendFiltersToResponse(filters, paginatedResults)
+	response, err := helpers.appendFiltersToResponse(
+		filters,
+		paginatedResults,
+		categories,
+	)
 	if err != nil {
 		log.Error().Err(err).Msg("Error appending filters to response")
 		respondWithError(w, errIncompleteRequest)
