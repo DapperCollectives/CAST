@@ -75,7 +75,6 @@ func RankedChoice(
 		for _, vote := range votes {
 			vote.Choices = removeChoice(vote.Choices, lastPlace)
 		}
-
 	}
 }
 

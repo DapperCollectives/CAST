@@ -46,7 +46,7 @@ func TestRankedChoiceVoting(t *testing.T) {
 	t1Results := createProposalResults(proposal)
 	updateProposalResults(
 		t1Results,
-		"a:5 b:0 c:0 d:0",
+		"0:5 1:0 2:0 3:0",
 	)
 
 	// Fourth Round Winner
@@ -59,7 +59,7 @@ func TestRankedChoiceVoting(t *testing.T) {
 	t2Results := createProposalResults(proposal)
 	updateProposalResults(
 		t2Results,
-		"a:3 b:0 c:0 d:0",
+		"0:3 1:0 2:0 3:0",
 	)
 
 	// Split Vote
@@ -71,7 +71,7 @@ func TestRankedChoiceVoting(t *testing.T) {
 	t3Results := createProposalResults(proposal)
 	updateProposalResults(
 		t3Results,
-		"a:2 b:0 c:0 d:0",
+		"0:2 1:0 2:0 3:0",
 	)
 
 	// Larger Vote
@@ -97,7 +97,7 @@ func TestRankedChoiceVoting(t *testing.T) {
 	t4Results := createProposalResults(proposal)
 	updateProposalResults(
 		t4Results,
-		"a:8 b:7 c:0 d:0",
+		"0:8 1:7 2:0 3:0",
 	)
 
 	// Choices with No votes
@@ -111,7 +111,7 @@ func TestRankedChoiceVoting(t *testing.T) {
 	t5Results := createProposalResults(proposal)
 	updateProposalResults(
 		t5Results,
-		"a:4 b:2 c:0 d:0",
+		"0:4 1:2 2:0 3:0",
 	)
 
 	subTests := []struct {
@@ -258,8 +258,9 @@ func createProposalResults(p *models.Proposal) *models.ProposalResults {
 	}
 
 	for _, choice := range p.Choices {
-		pr.Results[choice.Choice_text] = 0
-		pr.Results_float[choice.Choice_text] = 0.0
+		id := fmt.Sprintf("%d", *choice.ID)
+		pr.Results[id] = 0
+		pr.Results_float[id] = 0.0
 	}
 
 	return &pr
