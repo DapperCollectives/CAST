@@ -83,7 +83,7 @@ const SignInOutButton = ({
             ? { width: '100%', height: '48px' }
             : notMobile
             ? {
-                width: '206px',
+                width: '159px',
                 height: '40px',
               }
             : { width: '105px', height: '32px' }

@@ -36,14 +36,14 @@ function Header(props) {
                   <span />
                 </span>
                 <NavLink to="/" className="navbar-item p-0 mr-2">
-                  <div className="is-hidden-tablet is-flex">
+                  <div className="is-hidden-tablet is-flex is-align-items-center">
                     <Svg name="Logo" width={104} height={24} />
                   </div>
-                  <div className="is-hidden-mobile">
+                  <div className="is-hidden-mobile is-flex is-align-items-center">
                     <Svg name="Logo" />
                   </div>
                 </NavLink>
-                <div className="is-flex is-align-items-center pb-2-tablet">
+                <div className="is-flex is-align-items-center pb-1-tablet">
                   <Label
                     padding="py-1 px-3"
                     labelText="Beta"
