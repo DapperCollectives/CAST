@@ -463,7 +463,13 @@ func (h *Helpers) searchCommunities(
 	error,
 ) {
 	if query == "defaultFeatured" {
-		results, _, err := models.GetCommunitiesForHomePage(h.A.DB, pageParams)
+		isSearch := true
+
+		results, _, err := models.GetDefaultCommunities(
+			h.A.DB,
+			pageParams,
+			isSearch,
+		)
 		if err != nil {
 			log.Error().Err(err)
 			return nil, nil, err

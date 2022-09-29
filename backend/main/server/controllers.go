@@ -438,8 +438,13 @@ func (a *App) getCommunity(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) getCommunitiesForHomePage(w http.ResponseWriter, r *http.Request) {
 	pageParams := getPageParams(*r, 25)
+	isSearch := false
 
-	communities, totalRecords, err := models.GetCommunitiesForHomePage(a.DB, pageParams)
+	communities, totalRecords, err := models.GetDefaultCommunities(
+		a.DB,
+		pageParams,
+		isSearch,
+	)
 	if err != nil {
 		log.Error().Err(err).Msg("Error fetching communities for home page")
 		respondWithError(w, errIncompleteRequest)

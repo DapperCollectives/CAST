@@ -18,7 +18,7 @@ type Community struct {
 	ID                       int         `json:"id,omitempty"`
 	Name                     string      `json:"name,omitempty"`
 	Category                 *string     `json:"category,omitempty"              validate:"required"`
-	CategoryCount            *int        `json:"categoryCount,omitempty"`
+	CategoryCount            *int        `json:"categorycount,omitempty"`
 	Logo                     *string     `json:"logo,omitempty"`
 	Body                     *string     `json:"body,omitempty"`
 	Strategies               *[]Strategy `json:"strategies,omitempty"`
@@ -97,6 +97,54 @@ type CommunityType struct {
 	Description string `json:"description,omitempty"`
 }
 
+const HOMEPAGE_SQL = `
+		SELECT * FROM communities WHERE (discord_url IS NOT NULL
+		AND twitter_url IS NOT NULL
+  	AND id IN (
+    	SELECT community_id
+    	FROM community_users
+    	GROUP BY community_id
+    	HAVING COUNT(*) > 500
+  	)
+  	AND id IN (
+    	SELECT community_id FROM proposals
+    	WHERE status = 'published' AND end_time < (NOW() AT TIME ZONE 'UTC')
+    	GROUP BY community_id
+    	HAVING COUNT(*) >= 2
+  	))
+		OR is_featured = 'true'
+		LIMIT $1 OFFSET $2
+`
+
+const DEFAULT_SEARCH_SQL = `
+	SELECT id, name, body, logo, cs.category, c.count as categoryCount
+		FROM communities cs
+    LEFT JOIN (
+		SELECT category, COUNT(*)
+		FROM communities 
+		WHERE SIMILARITY(name, '$1') > 0.1 
+		GROUP BY category
+	) c
+    on c.category = cs.category
+    WHERE (discord_url IS NOT NULL
+		AND twitter_url IS NOT NULL
+  	AND id IN (
+    	SELECT community_id
+    	FROM community_users
+    	GROUP BY community_id
+    	HAVING COUNT(*) > 500
+  	)
+  	AND id IN (
+    	SELECT community_id
+    	FROM proposals
+    	WHERE status = 'published' AND end_time < (NOW() AT TIME ZONE 'UTC')
+    	GROUP BY community_id
+    	HAVING COUNT(*) >= 2
+  	))
+	OR is_featured = 'true'
+		LIMIT $1 OFFSET $2
+`
+
 func GetCommunityTypes(db *s.Database) ([]*CommunityType, error) {
 	var communityTypes []*CommunityType
 	err := pgxscan.Select(db.Context, db.Conn, &communityTypes,
@@ -146,31 +194,23 @@ func (c *Community) GetCommunityByProposalId(db *s.Database, proposalId int) err
 		proposalId)
 }
 
-func GetCommunitiesForHomePage(db *s.Database, params shared.PageParams) ([]*Community, int, error) {
+func GetDefaultCommunities(db *s.Database, params shared.PageParams, isSearch bool) ([]*Community, int, error) {
+	var sql string
+	if !isSearch {
+		sql = HOMEPAGE_SQL
+	} else {
+		sql = DEFAULT_SEARCH_SQL
+	}
 	var communities []*Community
 
-	err := pgxscan.Select(db.Context, db.Conn, &communities,
-		`
-		SELECT
-  	*
-		FROM communities WHERE (discord_url IS NOT NULL
-		AND twitter_url IS NOT NULL
-  	AND id IN (
-    	SELECT community_id
-    	FROM community_users
-    	GROUP BY community_id
-    	HAVING COUNT(*) > 500
-  	)
-  	AND id IN (
-    	SELECT community_id
-    	FROM proposals
-    	WHERE status = 'published' AND end_time < (NOW() AT TIME ZONE 'UTC')
-    	GROUP BY community_id
-    	HAVING COUNT(*) >= 2
-  	))
-	OR is_featured = 'true'
-		LIMIT $1 OFFSET $2
-		`, params.Count, params.Start)
+	err := pgxscan.Select(
+		db.Context,
+		db.Conn,
+		&communities,
+		sql,
+		params.Count,
+		params.Start,
+	)
 
 	// If we get pgx.ErrNoRows, just return an empty array
 	// and obfuscate error
