@@ -43,7 +43,7 @@ function Header(props) {
                     <Svg name="Logo" />
                   </div>
                 </NavLink>
-                <div className="is-flex is-align-items-center pb-1-tablet">
+                <div className="is-flex is-align-items-center">
                   <Label
                     padding="py-1 px-3"
                     labelText="Beta"
