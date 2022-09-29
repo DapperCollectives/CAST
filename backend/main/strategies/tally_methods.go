@@ -10,22 +10,22 @@ import (
 
 type TallyStruct struct {
 	choice string
-	votes int
+	votes  int
 }
 
 func RankedChoice(
-	votes []*models.VoteWithBalance, 
-	r *models.ProposalResults, 
+	votes []*models.VoteWithBalance,
+	r *models.ProposalResults,
 	proposal *models.Proposal,
 	isNFT bool,
 ) {
-	fmt.Println("here")
 	firstRank := 0
 
 	// Put choices into a map for tallying.
 	tallyMap := make(map[string]int)
-	for i := 0; i < len(proposal.Choices); i += 1 {
-		tallyMap[proposal.Choices[i].Choice_text] = 0
+	for i := range proposal.Choices {
+		choiceKey := fmt.Sprintf("%d", *proposal.Choices[i].ID)
+		tallyMap[choiceKey] = 0
 	}
 
 	for {
@@ -53,7 +53,7 @@ func RankedChoice(
 
 		// Check for a winner: highest scored choice is a majority of the votes
 		// or is the last choice remaining in the event of a split.
-		if(tallyArray[0].votes > totalVotes / 2 || len(tallyArray) == 1) {
+		if tallyArray[0].votes > totalVotes/2 || len(tallyArray) == 1 {
 			break
 		}
 
@@ -65,7 +65,7 @@ func RankedChoice(
 		}
 
 		// Last place is the end of the sorted array.
-		lastPlace := tallyArray[len(tallyArray) - 1].choice
+		lastPlace := tallyArray[len(tallyArray)-1].choice
 
 		// Remove the last place choice from the tally map.
 		delete(tallyMap, lastPlace)
@@ -79,11 +79,16 @@ func RankedChoice(
 }
 
 func SingleChoiceNFT(
-	votes []*models.VoteWithBalance, 
-	r *models.ProposalResults, 
+	votes []*models.VoteWithBalance,
+	r *models.ProposalResults,
 	proposal *models.Proposal,
-	getVoteWeight func (vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error),
+	getVoteWeight func(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error),
 ) error {
+	for i := 0; i < len(proposal.Choices); i += 1 {
+		choiceKey := fmt.Sprintf("%d", *proposal.Choices[i].ID)
+		r.Results[choiceKey] = 0
+		r.Results_float[choiceKey] = 0
+	}
 	for _, vote := range votes {
 		if len(vote.NFTs) != 0 {
 			var voteWeight float64

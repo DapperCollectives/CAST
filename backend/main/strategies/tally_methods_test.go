@@ -11,19 +11,26 @@ import (
 	"gotest.tools/assert"
 )
 
-func TestRankedChoiceVoting(t *testing.T) {
+var VoteChoiceToId = map[string]string{
+	"a": "0",
+	"b": "1",
+	"c": "2",
+	"d": "3",
+}
 
-	fmt.Println("HERE")
+func TestRankedChoiceVoting(t *testing.T) {
 
 	c := strings.Fields("a b c d")
 	choices := make([]shared.Choice, 4)
 	for i := 0; i < len(c); i += 1 {
+		id := uint(i)
+		choices[i].ID = &id
 		choices[i].Choice_text = c[i]
 	}
 	computedStatus := "closed"
 	proposal := &models.Proposal{
-		Choices: choices,
-		TallyMethod: "ranked-choice",
+		Choices:         choices,
+		TallyMethod:     "ranked-choice",
 		Computed_status: &computedStatus,
 	}
 
@@ -37,7 +44,7 @@ func TestRankedChoiceVoting(t *testing.T) {
 	t1Results := createProposalResults(proposal)
 	updateProposalResults(
 		t1Results,
-		"a:5 b:0 c:0 d:0",
+		"0:5 1:0 2:0 3:0",
 	)
 
 	// Fourth Round Winner
@@ -50,7 +57,7 @@ func TestRankedChoiceVoting(t *testing.T) {
 	t2Results := createProposalResults(proposal)
 	updateProposalResults(
 		t2Results,
-		"a:3 b:0 c:0 d:0",
+		"0:3 1:0 2:0 3:0",
 	)
 
 	// Split Vote
@@ -62,7 +69,7 @@ func TestRankedChoiceVoting(t *testing.T) {
 	t3Results := createProposalResults(proposal)
 	updateProposalResults(
 		t3Results,
-		"a:2 b:0 c:0 d:0",
+		"0:2 1:0 2:0 3:0",
 	)
 
 	// Larger Vote
@@ -88,7 +95,7 @@ func TestRankedChoiceVoting(t *testing.T) {
 	t4Results := createProposalResults(proposal)
 	updateProposalResults(
 		t4Results,
-		"a:8 b:7 c:0 d:0",
+		"0:8 1:7 2:0 3:0",
 	)
 
 	// Choices with No votes
@@ -102,7 +109,7 @@ func TestRankedChoiceVoting(t *testing.T) {
 	t5Results := createProposalResults(proposal)
 	updateProposalResults(
 		t5Results,
-		"a:4 b:2 c:0 d:0",
+		"0:4 1:2 2:0 3:0",
 	)
 
     subTests := []struct {
@@ -116,29 +123,29 @@ func TestRankedChoiceVoting(t *testing.T) {
             proposal: proposal,
 			votes: t1Votes,
 			expected: t1Results,
-        },
+		},
 		{
-            name: "Fourth Round Winner",
-            proposal: proposal,
-			votes: t2Votes,
+			name:     "Fourth Round Winner",
+			proposal: proposal,
+			votes:    t2Votes,
 			expected: t2Results,
-        },
+		},
 		{
-            name: "Split Vote",
-            proposal: proposal,
-			votes: t3Votes,
+			name:     "Split Vote",
+			proposal: proposal,
+			votes:    t3Votes,
 			expected: t3Results,
-        },
+		},
 		{
-            name: "Larger Vote",
-            proposal: proposal,
-			votes: t4Votes,
+			name:     "Larger Vote",
+			proposal: proposal,
+			votes:    t4Votes,
 			expected: t4Results,
-        },
+		},
 		{
-            name: "Choices with No Votes",
-            proposal: proposal,
-			votes: t5Votes,
+			name:     "Choices with No Votes",
+			proposal: proposal,
+			votes:    t5Votes,
 			expected: t5Results,
         },
     }
@@ -156,12 +163,14 @@ func TestSingleChoiceVoting(t *testing.T) {
 	c := strings.Fields("a b c d")
 	choices := make([]shared.Choice, 4)
 	for i := 0; i < len(c); i += 1 {
+		id := uint(i)
+		choices[i].ID = &id
 		choices[i].Choice_text = c[i]
 	}
 	computedStatus := "closed"
 	proposal := &models.Proposal{
-		Choices: choices,
-		TallyMethod: "single-choice",
+		Choices:         choices,
+		TallyMethod:     "single-choice",
 		Computed_status: &computedStatus,
 	}
 
@@ -173,7 +182,7 @@ func TestSingleChoiceVoting(t *testing.T) {
 	t1Results := createProposalResults(proposal)
 	updateProposalResults(
 		t1Results,
-		"a:3 b:0 c:0 d:0",
+		"0:3 1:0 2:0 3:0",
 	)
 
 	// Random voting pattern
@@ -186,13 +195,13 @@ func TestSingleChoiceVoting(t *testing.T) {
 	t2Results := createProposalResults(proposal)
 	updateProposalResults(
 		t2Results,
-		"a:1 b:2 c:1 d:1",
+		"0:1 1:2 2:1 3:1",
 	)
 
-    subTests := []struct {
-        name           string
-        votes 		   []*models.VoteWithBalance
-		proposal 	   *models.Proposal
+	subTests := []struct {
+		name     string
+		votes    []*models.VoteWithBalance
+		proposal *models.Proposal
 		expected *models.ProposalResults
     }{
         {
@@ -227,8 +236,13 @@ func createVote(choices string) *models.VoteWithBalance {
 	mockNFTs := make([]*models.NFT, 1)
 	mockNFTs[0] = mockNFT
 
+	var choiceIds []string
+	for _, choice := range strings.Fields(choices) {
+		choiceIds = append(choiceIds, VoteChoiceToId[choice])
+	}
+
 	vote := models.Vote{
-		Choices: strings.Fields(choices),
+		Choices: choiceIds,
 	}
 
 	return &models.VoteWithBalance{
@@ -239,13 +253,14 @@ func createVote(choices string) *models.VoteWithBalance {
 
 func createProposalResults(p *models.Proposal) *models.ProposalResults {
 	pr := models.ProposalResults{
-		Results: make(map[string]int),
+		Results:       make(map[string]int),
 		Results_float: make(map[string]float64),
 	}
 
 	for _, choice := range p.Choices {
-		pr.Results[choice.Choice_text] = 0
-		pr.Results_float[choice.Choice_text] = 0.0
+		id := fmt.Sprintf("%d", *choice.ID)
+		pr.Results[id] = 0
+		pr.Results_float[id] = 0.0
 	}
 
 	return &pr
@@ -262,4 +277,3 @@ func updateProposalResults(r *models.ProposalResults, results string) *models.Pr
 
 	return r
 }
-
