@@ -1,6 +1,7 @@
 package strategies
 
 import (
+	"fmt"
 	"sort"
 
 	"github.com/DapperCollectives/CAST/backend/main/models"
@@ -18,6 +19,7 @@ func RankedChoice(
 	proposal *models.Proposal,
 	isNFT bool,
 ) {
+	fmt.Println("here")
 	firstRank := 0
 
 	// Put choices into a map for tallying.
@@ -29,6 +31,7 @@ func RankedChoice(
 	for {
 		totalVotes := 0
 		
+		// Count votes.
 		for _, vote := range votes {
 			includeVote := (isNFT && len(vote.NFTs) != 0) || !isNFT
 			exhaustedVote := len(vote.Choices) == 0
@@ -41,15 +44,7 @@ func RankedChoice(
 		}
 
 		// Create an array from the tally map for sorting.
-		tallyArray := make([]TallyStruct, len(tallyMap))
-		i := 0
-		for key, value := range tallyMap {
-			tallyArray[i] = TallyStruct{
-				choice: key, 
-				votes: value,
-			}
-			i++
-		}
+		tallyArray := createArray(tallyMap)
 
 		// Sort tallied votes from highest to lowest
 		sort.Slice(tallyArray, func(i, j int) bool {
@@ -72,17 +67,12 @@ func RankedChoice(
 		// Last place is the end of the sorted array.
 		lastPlace := tallyArray[len(tallyArray) - 1].choice
 
-				
 		// Remove the last place choice from the tally map.
 		delete(tallyMap, lastPlace)
 
-
 		// Remove the last place choice from votes.
 		for _, vote := range votes {
-			i := slices.IndexFunc(vote.Choices, func(s string) bool { return s == lastPlace })
-			if i >= 0 {
-				vote.Choices = append(vote.Choices[:i], vote.Choices[i+1:]...)
-			}
+			vote.Choices = removeChoice(vote.Choices, lastPlace)
 		}
 
 	}
@@ -109,4 +99,26 @@ func SingleChoiceNFT(
 	}
 
 	return nil
+}
+
+func removeChoice(choices []string, choice string) []string {
+	i := slices.IndexFunc(choices, func(s string) bool { return s == choice })
+	if i >= 0 {
+		choices = append(choices[:i], choices[i+1:]...)
+	}
+
+	return choices
+}
+
+func createArray(tallyMap map[string]int) []TallyStruct {
+	tallyArray := make([]TallyStruct, len(tallyMap))
+	i := 0
+	for key, value := range tallyMap {
+		tallyArray[i] = TallyStruct{
+			choice: key, 
+			votes: value,
+		}
+		i++
+	}
+	return tallyArray
 }
