@@ -69,22 +69,33 @@ export default function CommunityEditorProfile({
     // url needs to be sent to backend to update
     if (updates?.logo?.file) {
       setIsUpdatingImage(true);
-      const uploadImg = await uploadFile(data?.logo?.file);
+      // onError hook from react-query will handle error
+      const uploadImg = await uploadFile(data?.logo?.file).catch(() => {
+        console.error('Error uploading logo image');
+        return;
+      });
       updates.logo = uploadImg?.fileUrl ?? undefined;
     }
     if (updates?.bannerImgUrl?.file) {
       setIsUpdatingBanner(true);
-      const uploadBanner = await uploadFile(data?.banner?.file);
+      // onError hook from react-query will handle error
+      const uploadBanner = await uploadFile(data?.banner?.file).catch(() => {
+        console.error('Error uploading banner image');
+        return;
+      });
       updates.bannerImgUrl = uploadBanner?.fileUrl ?? undefined;
     }
 
     // updated fields
     if (Object.keys(updates).length > 0) {
-      await updateCommunity(updates);
+      // onError hook from react-query will handle error
+      await updateCommunity(updates).catch(() => {
+        return;
+      });
     }
     // call if value as true
-    !isUpdatingImage && setIsUpdatingImage(false);
-    !isUpdatingBanner && setIsUpdatingBanner(false);
+    isUpdatingImage && setIsUpdatingImage(false);
+    isUpdatingBanner && setIsUpdatingBanner(false);
   };
 
   return (

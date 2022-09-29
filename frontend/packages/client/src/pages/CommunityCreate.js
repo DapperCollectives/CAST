@@ -2,7 +2,7 @@ import { createElement, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useModalContext } from 'contexts/NotificationModal';
 import { useWebContext } from 'contexts/Web3';
-import { Error, StepByStep, WalletConnect } from 'components';
+import { ErrorModal, StepByStep, WalletConnect } from 'components';
 import {
   StartSteps,
   StepFour,
@@ -49,19 +49,20 @@ export default function CommunityCreate() {
     // opens modal and makes user to connect with wallet
     if (!creatorAddr) {
       modalContext.openModal(
-        <Error
-          error={
-            <div className="mt-5">
-              <WalletConnect
-                closeModal={() => {
-                  modalContext.closeModal();
-                }}
-              />
-            </div>
+        <ErrorModal
+          message="Please connect a wallet to create a community."
+          title="Connect Wallet"
+          footerComponent={
+            <WalletConnect
+              closeModal={() => {
+                modalContext.closeModal();
+              }}
+              expandToContainer
+            />
           }
-          errorTitle="Please connect a wallet to create a community."
+          onClose={modalContext.closeModal}
         />,
-        { classNameModalContent: 'rounded-sm' }
+        { isErrorModal: true }
       );
       setModalError(true);
       return;
@@ -118,8 +119,8 @@ export default function CommunityCreate() {
     // open modal if there are errors on addresses
     if (errorMessages.length) {
       modalContext.openModal(
-        createElement(Error, {
-          error: (
+        createElement(ErrorModal, {
+          message: (
             <div className="mt-4">
               <p className="is-size-6">
                 Addresses used are not valid Flow addresses:
@@ -139,7 +140,7 @@ export default function CommunityCreate() {
           ),
           errorTitle: 'Flow Address Error',
         }),
-        { classNameModalContent: 'rounded-sm' }
+        { isErrorModal: true }
       );
       return;
     }

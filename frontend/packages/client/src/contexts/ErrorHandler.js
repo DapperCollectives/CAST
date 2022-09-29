@@ -7,10 +7,27 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { Error } from 'components';
+import { ErrorModal } from 'components';
+import isError from 'lodash/isError';
 import { useModalContext } from './NotificationModal';
 
 const ErrorHandlerContext = createContext({});
+
+const getErrorMessageWithContext = (error) => {
+  const { message = 'Error', errorCode, details } = error ?? {};
+
+  if (errorCode && details) {
+    // These errors require to show FAQs link
+    const showFAQ = ['ERR_1003', 'ERR_1004'].includes(errorCode);
+    return {
+      message,
+      details,
+      faqLink: showFAQ ? 'https://docs.cast.fyi' : undefined,
+    };
+  }
+  // defafult to error message and use Error as title
+  return { message, details };
+};
 
 export const useErrorHandlerContext = () => {
   const context = useContext(ErrorHandlerContext);
@@ -27,7 +44,7 @@ const ErrorHandlerProvider = ({ children }) => {
 
   const [errorOpened, setErrorOpened] = useState(false);
 
-  const { openModal, isOpen } = useModalContext();
+  const { openModal, isOpen, closeModal } = useModalContext();
 
   const closeError = useCallback(() => {
     setError(null);
@@ -36,45 +53,48 @@ const ErrorHandlerProvider = ({ children }) => {
 
   useEffect(() => {
     if (error !== null && !errorOpened) {
+      const { message, details, faqLink } = getErrorMessageWithContext(error);
       openModal(
-        createElement(Error, {
-          error: (
-            <p className="has-text-danger p-3 has-text-justified">
-              <b>{error.statusText}</b>
-            </p>
-          ),
-          errorTitle:
-            typeof error.status === 'number'
-              ? `Error code: ${error.status}`
-              : error?.status,
+        createElement(ErrorModal, {
+          onClose: closeModal,
+          message: details,
+          title: message,
+          faqLink,
         }),
         {
           onClose: closeError,
-          classNameModalContent: 'rounded-sm',
+          isErrorModal: true,
         }
       );
       setErrorOpened(true);
     }
-  }, [openModal, error, closeError, isOpen, errorOpened]);
+  }, [openModal, error, closeError, isOpen, errorOpened, closeModal]);
 
   /**
    * Hook to call modal error and show a message
    * @param  {Object | Error} err
-   *    Object { status: number | string, statusText: string } or
-   *    Error object with message that contains a string that will be parsed to get status and statusText
+   *    Object { message: string, details: string, errorCode: string } or
+   *    Error object: message that contains a string that will be parsed to get message, details and errorCode
    * @param  {string} url indicates the url request that generated the error
    */
-  const notifyError = useCallback((err, url) => {
+  const notifyError = useCallback((err) => {
+    // regular object
+    if (!isError(err)) {
+      setError(err);
+      return;
+    }
+
+    // failed from checkResponse err.message has details from failure
     try {
       const response = JSON.parse(err.message);
       if (typeof response === 'object') {
         setError(response);
       }
     } catch (error) {
+      // failed on any other case 'err' has a plain error message
       setError({
-        status: err?.status ?? 500,
-        statusText: err?.statusText || `Server not available: ${err?.message}`,
-        url: url ?? '',
+        message: `Error`,
+        details: err?.message,
       });
     }
   }, []);

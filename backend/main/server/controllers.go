@@ -3,7 +3,6 @@ package server
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -14,6 +13,66 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+type errorResponse struct {
+	statusCode int
+	errorCode  string
+	message    string
+	details    string
+}
+
+var (
+	errIncompleteRequest = errorResponse{
+		statusCode: http.StatusBadRequest,
+		errorCode:  "ERR_1001",
+		message:    "Error",
+		details:    "There was an error trying to complete your request",
+	}
+
+	errCreateCommunity = errorResponse{
+		statusCode: http.StatusBadRequest,
+		errorCode:  "ERR_1002",
+		message:    "Error",
+		details:    "There was an error trying to create your community",
+	}
+
+	errFetchingBalance = errorResponse{
+		statusCode: http.StatusBadRequest,
+		errorCode:  "ERR_1003",
+		message:    "Error Fetching Balance",
+		details: `While confirming your balance, we've encountered an error
+							connecting to the Flow Blockchain.`,
+	}
+
+	errInsufficientBalance = errorResponse{
+		statusCode: http.StatusUnauthorized,
+		errorCode:  "ERR_1004",
+		message:    "Insufficient Balance",
+		details: `In order to vote on this proposal you must have a minimum 
+							balance of %d %s tokens in your wallet.`,
+	}
+
+	errForbidden = errorResponse{
+		statusCode: http.StatusForbidden,
+		errorCode:  "ERR_1005",
+		message:    "Forbidden",
+		details:    "You are not authorized to perform this action.",
+	}
+
+	errCreateProposal = errorResponse{
+		statusCode: http.StatusForbidden,
+		errorCode:  "ERR_1006",
+		message:    "Error",
+		details:    "There was an error trying to create your proposal",
+	}
+
+	errUpdateCommunity = errorResponse{
+		statusCode: http.StatusForbidden,
+		errorCode:  "ERR_1007",
+		message:    "Error",
+		details:    "There was an error trying to update your community",
+	}
+)
+
 func (a *App) health(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, "OK!!")
 }
@@ -22,13 +81,14 @@ func (a *App) upload(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, maxFileSize)
 	if err := r.ParseMultipartForm(maxFileSize); err != nil {
 		log.Error().Err(err).Msgf("File cannot be larger than max file size of %v.\n", maxFileSize)
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
 	resp, err := helpers.uploadFile(r)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		log.Error().Err(err).Msg("Error uploading file.")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
@@ -43,24 +103,22 @@ func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 	votes, err := models.GetAllVotesForProposal(a.DB, proposal.ID, *proposal.Strategy)
 	if err != nil {
 		log.Error().Err(err).Msg("Error getting votes for proposal.")
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
 	results, err := helpers.useStrategyTally(proposal, votes)
 	if err != nil {
 		log.Error().Err(err).Msg("Error tallying votes.")
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
 	if *proposal.Computed_status == "closed" && !proposal.Achievements_done {
 		if err := models.AddWinningVoteAchievement(a.DB, votes, results); err != nil {
-			errMsg := "Error calculating winning votes"
-			log.Error().Err(err).Msg(errMsg)
-			respondWithError(w, http.StatusInternalServerError, errors.New(errMsg).Error())
+			log.Error().Err(err).Msg("Error calculating winning votes")
+			respondWithError(w, errIncompleteRequest)
 		}
-
 	}
 
 	respondWithJSON(w, http.StatusOK, results)
@@ -70,12 +128,24 @@ func (a *App) getVotesForProposal(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	proposal, err := helpers.fetchProposal(vars, "proposalId")
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID.")
+		log.Error().Err(err).Msg("Invalid Proposal ID.")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
-	votes, order, _ := helpers.getPaginatedVotes(r, proposal)
-	votesWithWeights, _ := helpers.useStrategyGetVotes(proposal, votes)
+	votes, order, err := helpers.getPaginatedVotes(r, proposal)
+	if err != nil {
+		log.Error().Err(err).Msg("error getting paginated votes")
+		respondWithError(w, errIncompleteRequest)
+		return
+	}
+
+	votesWithWeights, err := helpers.useStrategyGetVotes(proposal, votes)
+	if err != nil {
+		log.Error().Err(err).Msg("error calling useStrategyGetVotes")
+		respondWithError(w, errIncompleteRequest)
+		return
+	}
 
 	response := shared.GetPaginatedResponseWithPayload(votesWithWeights, order)
 	respondWithJSON(w, http.StatusOK, response)
@@ -87,13 +157,15 @@ func (a *App) getVoteForAddress(w http.ResponseWriter, r *http.Request) {
 
 	proposal, err := helpers.fetchProposal(vars, "proposalId")
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID.")
+		log.Error().Err(err).Msg("Invalid Proposal ID.")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
 	vote, err := helpers.processVote(addr, proposal)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		log.Error().Err(err).Msg("Error processing vote.")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
@@ -108,7 +180,8 @@ func (a *App) getVotesForAddress(w http.ResponseWriter, r *http.Request) {
 
 	err := json.Unmarshal([]byte(r.FormValue("proposalIds")), &proposalIds)
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID.")
+		log.Error().Err(err).Msg("Error unmarshalling proposalIds")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
@@ -116,7 +189,8 @@ func (a *App) getVotesForAddress(w http.ResponseWriter, r *http.Request) {
 
 	votes, pageParams, err := helpers.processVotes(addr, proposalIds, pageParams)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		log.Error().Err(err).Msg("Error processing votes.")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
@@ -129,13 +203,15 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 
 	proposal, err := helpers.fetchProposal(vars, "proposalId")
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID.")
+		log.Error().Err(err).Msg("Invalid Proposal ID.")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
-	vote, e := helpers.createVote(r, proposal)
+	vote, err := helpers.createVote(r, proposal)
 	if err != nil {
-		respondWithError(w, e.status, e.err.Error())
+		log.Error().Err(err).Msg("Error creating vote.")
+		respondWithError(w, errInsufficientBalance)
 		return
 	}
 
@@ -148,7 +224,8 @@ func (a *App) getProposalsForCommunity(w http.ResponseWriter, r *http.Request) {
 	communityId, err := strconv.Atoi(vars["communityId"])
 
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Community ID.")
+		log.Error().Err(err).Msg("Invalid Community ID")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
@@ -162,7 +239,8 @@ func (a *App) getProposalsForCommunity(w http.ResponseWriter, r *http.Request) {
 		pageParams,
 	)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		log.Error().Err(err).Msg("Error getting proposals for community.")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
@@ -176,24 +254,28 @@ func (a *App) getProposal(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	p, err := helpers.fetchProposal(vars, "id")
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID.")
+		log.Error().Err(err).Msg("Invalid Proposal ID.")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
-	c, e := helpers.fetchCommunity(p.Community_id)
-	if e.err != nil {
-		respondWithError(w, e.status, e.err.Error())
+	c, err := helpers.fetchCommunity(p.Community_id)
+	if err != nil {
+		log.Error().Err(err).Msg("error fetching community")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
 	strategy, err := models.MatchStrategyByProposal(*c.Strategies, *p.Strategy)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		log.Error().Err(err).Msg("error getting strategy by proposal")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
 	if err := helpers.processSnapshotStatus(&strategy, &p); err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		log.Error().Err(err).Msg("error processing snapshot status")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
@@ -204,7 +286,8 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	communityId, err := strconv.Atoi(vars["communityId"])
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Community ID.")
+		log.Error().Err(err).Msg("Invalid Community ID")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
@@ -212,13 +295,15 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 	p.Community_id = communityId
 
 	if err := validatePayload(r.Body, &p); err != nil {
-		respondWithError(w, http.StatusBadRequest, err.Error())
+		log.Error().Err(err).Msg("Error validating payload")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
-	proposal, e := helpers.createProposal(p)
-	if e.err != nil {
-		respondWithError(w, e.status, e.err.Error())
+	proposal, err := helpers.createProposal(p)
+	if err != nil {
+		log.Error().Err(err).Msg("Error creating proposal")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
@@ -229,20 +314,23 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	p, err := helpers.fetchProposal(vars, "id")
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Proposal ID.")
+		log.Error().Err(err).Msg("Invalid Proposal ID.")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
 	var payload models.UpdateProposalRequestPayload
 	if err := validatePayload(r.Body, &payload); err != nil {
-		respondWithError(w, http.StatusBadRequest, err.Error())
+		log.Error().Err(err).Msg("Error validating payload")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
 	// Check that status update is valid
 	// For now we are assuming proposals are creating with status 'published' and may be cancelled.
 	if payload.Status != "cancelled" {
-		respondWithError(w, http.StatusBadRequest, "You may only change a proposal's status to 'cancelled'.")
+		log.Error().Err(err).Msg("Invalid status update")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
@@ -252,7 +340,8 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 			payload.Voucher,
 			p.Community_id,
 			"author"); err != nil {
-			respondWithError(w, http.StatusForbidden, err.Error())
+			log.Error().Err(err).Msg("Error validating user with role via voucher")
+			respondWithError(w, errForbidden)
 			return
 		}
 	} else {
@@ -262,7 +351,8 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 			payload.Composite_signatures,
 			p.Community_id,
 			"author"); err != nil {
-			respondWithError(w, http.StatusForbidden, err.Error())
+			log.Error().Err(err).Msg("Error validating user with role")
+			respondWithError(w, errForbidden)
 			return
 		}
 	}
@@ -270,12 +360,14 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 	p.Status = &payload.Status
 	p.Cid, err = helpers.pinJSONToIpfs(p)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		log.Error().Err(err).Msg("Error pinning proposal to IPFS")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
 	if err := p.UpdateProposal(a.DB); err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		log.Error().Err(err).Msg("Error updating proposal")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
@@ -288,7 +380,8 @@ func (a *App) getCommunities(w http.ResponseWriter, r *http.Request) {
 
 	communities, totalRecords, err := models.GetCommunities(a.DB, pageParams)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		log.Error().Err(err).Msg("Error fetching communities")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
@@ -302,24 +395,31 @@ func (a *App) searchCommunities(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	results, err := helpers.searchCommunities(vars["query"])
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		log.Error().Err(err).Msg("Error searching communities")
+		respondWithError(w, errIncompleteRequest)
 	}
+	pageParams := getPageParams(*r, 25)
 
-	respondWithJSON(w, http.StatusOK, results)
+	totalRecords := results.(int)
+	pageParams.TotalRecords = totalRecords
+
+	response := shared.GetPaginatedResponseWithPayload(results, pageParams)
+	respondWithJSON(w, http.StatusOK, response)
 }
 
 func (a *App) getCommunity(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Community ID.")
+		log.Error().Err(err).Msg("Invalid Community ID")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
-	c, e := helpers.fetchCommunity(id)
-	if e.err != nil {
-		fmt.Printf("err: %v", err)
-		respondWithError(w, e.status, e.err.Error())
+	c, err := helpers.fetchCommunity(id)
+	if err != nil {
+		log.Error().Err(err).Msg("Error fetching community")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
@@ -331,7 +431,8 @@ func (a *App) getCommunitiesForHomePage(w http.ResponseWriter, r *http.Request) 
 
 	communities, totalRecords, err := models.GetCommunitiesForHomePage(a.DB, pageParams)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		log.Error().Err(err).Msg("Error fetching communities for home page")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
@@ -347,7 +448,8 @@ func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 	var payload models.CreateCommunityRequestPayload
 
 	if err := validatePayload(r.Body, &payload); err != nil {
-		respondWithError(w, http.StatusBadRequest, err.Error())
+		log.Error().Err(err).Msg("Error validating payload")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
@@ -355,20 +457,23 @@ func (a *App) createCommunity(w http.ResponseWriter, r *http.Request) {
 	if payload.Strategies != nil {
 		err = validateContractThreshold(*payload.Strategies)
 		if err != nil {
-			respondWithError(w, http.StatusBadRequest, err.Error())
+			log.Error().Err(err).Msg("Error validating contract threshold")
+			respondWithError(w, errIncompleteRequest)
 			return
 		}
 	}
 	if payload.Proposal_threshold != nil && payload.Only_authors_to_submit != nil {
 		err = validateProposalThreshold(*payload.Proposal_threshold, *payload.Only_authors_to_submit)
 		if err != nil {
-			respondWithError(w, http.StatusBadRequest, err.Error())
+			log.Error().Err(err).Msg("Error validating proposal threshold")
+			respondWithError(w, errIncompleteRequest)
 		}
 	}
 
-	c, httpStatus, err := helpers.createCommunity(payload)
+	c, err = helpers.createCommunity(payload)
 	if err != nil {
-		respondWithError(w, httpStatus, err.Error())
+		log.Error().Err(err).Msg("Error creating community")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
@@ -379,13 +484,15 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid community ID.")
+		log.Error().Err(err).Msg("Invalid Community ID")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 	var payload models.UpdateCommunityRequestPayload
 
 	if err := validatePayload(r.Body, &payload); err != nil {
-		respondWithError(w, http.StatusBadRequest, err.Error())
+		log.Error().Err(err).Msg("Error validating payload")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
@@ -393,20 +500,24 @@ func (a *App) updateCommunity(w http.ResponseWriter, r *http.Request) {
 	if payload.Strategies != nil {
 		err = validateContractThreshold(*payload.Strategies)
 		if err != nil {
-			respondWithError(w, http.StatusBadRequest, err.Error())
+			log.Error().Err(err).Msg("Error validating contract threshold")
+			respondWithError(w, errIncompleteRequest)
 			return
 		}
 	}
+
 	if payload.Proposal_threshold != nil && payload.Only_authors_to_submit != nil {
 		err = validateProposalThreshold(*payload.Proposal_threshold, *payload.Only_authors_to_submit)
 		if err != nil {
-			respondWithError(w, http.StatusBadRequest, err.Error())
+			log.Error().Err(err).Msg("Error validating proposal threshold")
+			respondWithError(w, errIncompleteRequest)
 		}
 	}
 
-	c, e := helpers.updateCommunity(id, payload)
-	if e.err != nil {
-		respondWithError(w, e.status, e.err.Error())
+	c, err := helpers.updateCommunity(id, payload)
+	if err != nil {
+		log.Error().Err(err).Msg("Error updating community")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
@@ -436,18 +547,22 @@ func (a *App) getVotingStrategies(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		log.Error().Err(err).Msg("Error fetching voting strategies")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
+
 	respondWithJSON(w, http.StatusOK, vs)
 }
 
 func (a *App) getCommunityCategories(w http.ResponseWriter, r *http.Request) {
 	vs, err := models.GetCommunityTypes(a.DB)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		log.Error().Err(err).Msg("Error fetching community categories")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
+
 	respondWithJSON(w, http.StatusOK, vs)
 }
 
@@ -456,13 +571,15 @@ func (a *App) getActiveStrategiesForCommunity(w http.ResponseWriter, r *http.Req
 	communityId, err := strconv.Atoi(vars["communityId"])
 
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Community ID.")
+		log.Error().Err(err).Msg("Invalid Community ID")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
 	strategies, err := models.GetActiveStrategiesForCommunity(a.DB, communityId)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		log.Error().Err(err).Msg("Error fetching active strategies for community")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
@@ -476,15 +593,16 @@ func (a *App) getActiveStrategiesForCommunity(w http.ResponseWriter, r *http.Req
 func (a *App) getListsForCommunity(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	communityId, err := strconv.Atoi(vars["communityId"])
-
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Community ID.")
+		log.Error().Err(err).Msg("Invalid Community ID")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
 	lists, err := models.GetListsForCommunity(a.DB, communityId)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		log.Error().Err(err).Msg("Error getting lists for community")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
@@ -496,13 +614,15 @@ func (a *App) getList(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(vars["id"])
 
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Community ID.")
+		log.Error().Err(err).Msg("Invalid List ID")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 	list := models.List{ID: id}
 
 	if err = list.GetListById(a.DB); err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		log.Error().Err(err).Msg("Error getting list")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
@@ -513,7 +633,8 @@ func (a *App) createListForCommunity(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	communityId, err := strconv.Atoi(vars["communityId"])
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Community ID.")
+		log.Error().Err(err).Msg("Invalid Community ID")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
@@ -521,13 +642,16 @@ func (a *App) createListForCommunity(w http.ResponseWriter, r *http.Request) {
 	payload.Community_id = communityId
 
 	if err := validatePayload(r.Body, &payload); err != nil {
-		respondWithError(w, http.StatusBadRequest, err.Error())
+		log.Error().Err(err).Msg("Error validating payload")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
 	l, httpStatus, err := helpers.createListForCommunity(payload)
 	if err != nil {
-		respondWithError(w, httpStatus, err.Error())
+		log.Error().Err(err).Msg("Error creating list for community")
+		errIncompleteRequest.statusCode = httpStatus
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
@@ -538,19 +662,23 @@ func (a *App) addAddressesToList(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid list ID.")
+		log.Error().Err(err).Msg("Invalid List ID")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
 	payload := models.ListUpdatePayload{}
 	if err := validatePayload(r.Body, &payload); err != nil {
-		respondWithError(w, http.StatusBadRequest, err.Error())
+		log.Error().Err(err).Msg("Error validating payload")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
 	httpStatus, err := helpers.updateAddressesInList(id, payload, "add")
 	if err != nil {
-		respondWithError(w, httpStatus, err.Error())
+		log.Error().Err(err).Msg("Error adding addresses to list")
+		errIncompleteRequest.statusCode = httpStatus
+		respondWithError(w, errCreateCommunity)
 		return
 	}
 
@@ -561,19 +689,23 @@ func (a *App) removeAddressesFromList(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid list ID.")
+		log.Error().Err(err).Msg("Invalid List ID")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
 	payload := models.ListUpdatePayload{}
 	if err := validatePayload(r.Body, &payload); err != nil {
-		respondWithError(w, http.StatusBadRequest, err.Error())
+		log.Error().Err(err).Msg("Error validating payload")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
 	httpStatus, err := helpers.updateAddressesInList(id, payload, "remove")
 	if err != nil {
-		respondWithError(w, httpStatus, err.Error())
+		log.Error().Err(err).Msg("Error removing addresses from list")
+		errIncompleteRequest.statusCode = httpStatus
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
@@ -591,7 +723,7 @@ func (a *App) getAccountAtBlockHeight(w http.ResponseWriter, r *http.Request) {
 	blockHeight, err := strconv.ParseUint(vars["blockHeight"], 10, 64)
 	if err != nil {
 		log.Error().Err(err).Msg("Error parsing blockHeight param.")
-		respondWithError(w, http.StatusBadRequest, err.Error())
+		respondWithError(w, errFetchingBalance)
 		return
 	}
 
@@ -603,7 +735,7 @@ func (a *App) getAccountAtBlockHeight(w http.ResponseWriter, r *http.Request) {
 	b := shared.FTBalanceResponse{}
 	if err = a.SnapshotClient.GetAddressBalanceAtBlockHeight(addr, blockHeight, &b, &defaultFlowContract); err != nil {
 		log.Error().Err(err).Msgf("Error getting account %s at blockheight %d.", addr, blockHeight)
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		respondWithError(w, errFetchingBalance)
 		return
 	}
 
@@ -621,7 +753,8 @@ func (a *App) getCommunityBlocklist(w http.ResponseWriter, r *http.Request) {
 func (a *App) getLatestSnapshot(w http.ResponseWriter, r *http.Request) {
 	snapshot, err := a.SnapshotClient.GetLatestFlowSnapshot()
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		log.Error().Err(err).Msg("Error getting latest snapshot")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
@@ -636,13 +769,15 @@ func (a *App) addFungibleToken(w http.ResponseWriter, r *http.Request) {
 	}{}
 
 	if err := validatePayload(r.Body, &payload); err != nil {
-		respondWithError(w, http.StatusBadRequest, err.Error())
+		log.Error().Err(err).Msg("Error validating payload")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
 	err := a.SnapshotClient.AddFungibleToken(payload.Addr, payload.Name, payload.Path)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		log.Error().Err(err).Msg("Error adding fungible token")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
@@ -657,7 +792,8 @@ func (a *App) createCommunityUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	communityId, err := strconv.Atoi(vars["communityId"])
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Community ID.")
+		log.Error().Err(err).Msg("Invalid Community ID")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
@@ -665,13 +801,16 @@ func (a *App) createCommunityUser(w http.ResponseWriter, r *http.Request) {
 	payload.Community_id = communityId
 
 	if err := validatePayload(r.Body, &payload); err != nil {
-		respondWithError(w, http.StatusBadRequest, err.Error())
+		log.Error().Err(err).Msg("Error validating payload")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
 	httpStatus, err := helpers.createCommunityUser(payload)
 	if err != nil {
-		respondWithError(w, httpStatus, err.Error())
+		log.Error().Err(err).Msg("Error creating community user")
+		errCreateCommunity.statusCode = httpStatus
+		respondWithError(w, errCreateCommunity)
 		return
 	}
 
@@ -683,7 +822,8 @@ func (a *App) getCommunityUsers(w http.ResponseWriter, r *http.Request) {
 	communityId, err := strconv.Atoi(vars["communityId"])
 
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Community ID.")
+		log.Error().Err(err).Msg("Invalid Community ID")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
@@ -691,7 +831,8 @@ func (a *App) getCommunityUsers(w http.ResponseWriter, r *http.Request) {
 
 	users, totalRecords, err := models.GetUsersForCommunity(a.DB, communityId, pageParams)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		log.Error().Err(err).Msg("Error getting community users")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
@@ -707,13 +848,15 @@ func (a *App) getCommunityUsersByType(w http.ResponseWriter, r *http.Request) {
 	communityId, err := strconv.Atoi(vars["communityId"])
 
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Community ID.")
+		log.Error().Err(err).Msg("Invalid Community ID")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
 	userType := vars["userType"]
 	if !models.EnsureValidRole(userType) {
-		respondWithError(w, http.StatusBadRequest, "Invalid userType.")
+		log.Error().Err(err).Msg("Invalid User Type")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
@@ -725,7 +868,8 @@ func (a *App) getCommunityUsersByType(w http.ResponseWriter, r *http.Request) {
 		pageParams,
 	)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		log.Error().Err(err).Msg("Error getting community users")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 	pageParams.TotalRecords = totalRecords
@@ -739,7 +883,8 @@ func (a *App) getCommunityLeaderboard(w http.ResponseWriter, r *http.Request) {
 	communityId, err := strconv.Atoi(vars["communityId"])
 
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Community ID")
+		log.Error().Err(err).Msg("Invalid Community ID")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
@@ -748,13 +893,15 @@ func (a *App) getCommunityLeaderboard(w http.ResponseWriter, r *http.Request) {
 
 	leaderboard, totalRecords, err := models.GetCommunityLeaderboard(a.DB, communityId, addr, pageParams)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		log.Error().Err(err).Msg("Error getting community leaderboard")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 	pageParams.TotalRecords = totalRecords
 
 	response := shared.GetPaginatedResponseWithPayload(leaderboard.Users, pageParams)
 	response.Data = leaderboard
+
 	respondWithJSON(w, http.StatusOK, response)
 }
 
@@ -766,13 +913,14 @@ func (a *App) getUserCommunities(w http.ResponseWriter, r *http.Request) {
 
 	communities, totalRecords, err := models.GetCommunitiesForUser(a.DB, addr, pageParams)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
+		log.Error().Err(err).Msg("Error getting user communities")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
 	pageParams.TotalRecords = totalRecords
-
 	response := shared.GetPaginatedResponseWithPayload(communities, pageParams)
+
 	respondWithJSON(w, http.StatusOK, response)
 
 }
@@ -784,7 +932,8 @@ func (a *App) removeUserRole(w http.ResponseWriter, r *http.Request) {
 	communityId, err := strconv.Atoi(vars["communityId"])
 
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid Community ID.")
+		log.Error().Err(err).Msg("Invalid Community ID")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
@@ -794,13 +943,15 @@ func (a *App) removeUserRole(w http.ResponseWriter, r *http.Request) {
 	payload.User_type = userType
 
 	if err := validatePayload(r.Body, &payload); err != nil {
-		respondWithError(w, http.StatusBadRequest, err.Error())
+		log.Error().Err(err).Msg("Error validating payload")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
-	httpStatus, err := helpers.removeUserRole(payload)
+	_, err = helpers.removeUserRole(payload)
 	if err != nil {
-		respondWithError(w, httpStatus, err.Error())
+		log.Error().Err(err).Msg("Error removing user role")
+		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
@@ -811,8 +962,12 @@ func (a *App) removeUserRole(w http.ResponseWriter, r *http.Request) {
 // HELPERS //
 /////////////
 
-func respondWithError(w http.ResponseWriter, code int, message string) {
-	respondWithJSON(w, code, map[string]string{"error": message})
+func respondWithError(w http.ResponseWriter, err errorResponse) {
+	respondWithJSON(w, err.statusCode, map[string]string{
+		"errorCode": err.errorCode,
+		"message": err.message,
+		"details":  err.details,
+	})
 }
 
 func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
