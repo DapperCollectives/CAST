@@ -18,6 +18,7 @@ type Community struct {
 	ID                       int         `json:"id,omitempty"`
 	Name                     string      `json:"name,omitempty"`
 	Category                 *string     `json:"category,omitempty"              validate:"required"`
+	CategoryCount            *int        `json:"categoryCount,omitempty"`
 	Logo                     *string     `json:"logo,omitempty"`
 	Body                     *string     `json:"body,omitempty"`
 	Strategies               *[]Strategy `json:"strategies,omitempty"`
