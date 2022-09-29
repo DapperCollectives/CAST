@@ -13,6 +13,7 @@ const SignInOutButton = ({
   openWalletModal,
   injectedProvider,
   closeModal,
+  expandToContainer,
 }) => {
   const notMobile = useMediaQuery();
 
@@ -72,7 +73,29 @@ const SignInOutButton = ({
   );
   const addressStyle = classnames('', { 'smaller-text': !notMobile });
 
-  return (
+  return !loggedIn ? (
+    <>
+      <button
+        onClick={connectWallet}
+        className={buttonClass}
+        style={
+          expandToContainer
+            ? { width: '100%', height: '48px' }
+            : notMobile
+            ? {
+                width: '159px',
+                height: '40px',
+              }
+            : { width: '105px', height: '32px' }
+        }
+      >
+        <span className="has-text-weight-bold">Connect</span>
+        <span className="is-hidden-mobile has-text-weight-bold">
+          &nbsp;Wallet
+        </span>
+      </button>
+    </>
+  ) : (
     <>
       <div className={dropdownBackground} />
       <div
