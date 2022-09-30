@@ -12,6 +12,7 @@ export default function JoinCommunityButton({
   onLeaveCommunity = async () => {},
   onJoinCommunity = async () => {},
   size = 'small',
+  hasTooltip = false,
 }) {
   const [isModalErrorOpened, setIsModalErrorOpened] = useState(false);
   const { createCommunityUser, deleteUserFromCommunity } = useJoinCommunity();
@@ -109,7 +110,7 @@ export default function JoinCommunityButton({
       >
         <Svg name="Eye" />
         <Svg name="HideEye" />
-        {!isMember && (
+        {!isMember && hasTooltip && (
           <span className="join-community-cta py-2 px-4 rounded-lg has-text-white has-background-black smaller-text">
             Watch this community
           </span>
