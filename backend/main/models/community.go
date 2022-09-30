@@ -198,7 +198,7 @@ const INSERT_COMMUNITY_SQL = `
 	RETURNING id, created_at
 `
 const UPDATE_COMMUNITY_SQL = `
-UPDATE communities
+	UPDATE communities
 	SET name = COALESCE($1, name), 
 	body = COALESCE($2, body), 
 	logo = COALESCE($3, logo), 
