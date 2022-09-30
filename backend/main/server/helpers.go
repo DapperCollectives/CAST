@@ -1192,11 +1192,19 @@ func (h *Helpers) appendFiltersToResponse(
 	categoryCount map[string]int,
 ) (interface{}, error) {
 	var filters []shared.SearchFilter
+	var CATEGORIES = []string{
+		"dao",
+		"social",
+		"protocol",
+		"creator",
+		"nft",
+		"collector",
+	}
 
-	for key, count := range categoryCount {
+	for _, category := range CATEGORIES {
 		filters = append(filters, shared.SearchFilter{
-			Text:   key,
-			Amount: count,
+			Text:   category,
+			Amount: categoryCount[category],
 		})
 	}
 
