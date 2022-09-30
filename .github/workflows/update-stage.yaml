@@ -138,7 +138,7 @@ jobs:
         BACKEND: ${{ env.backend_api }}
         TX: ${{ env.tx_options }}
       run: | 
-        cd frontend && sed -i -e 's/REPLACE_HOTJAR_SITE_ID/${{ env.hotjar_site_id }}/g' Dockerfile.stage && sed -i -e 's/REPLACE_SENTRY_URL/${{ env.sentry_url }}/g' Dockerfile.stage && docker build -f Dockerfile.stage . -t bruddev/cast-stage:$TAG-fe
+        cd frontend && sed -i -e 's/REPLACE_HOTJAR_SITE_ID/${{ env.hotjar_site_id }}/g' Dockerfile.stage && sed -i -e 's|REPLACE_SENTRY_URL|${{ env.sentry_url }}|g' Dockerfile.stage && docker build -f Dockerfile.stage . -t bruddev/cast-stage:$TAG-fe
         docker push bruddev/cast-stage:$TAG-fe
 
 ## ARGO FROM HERE
