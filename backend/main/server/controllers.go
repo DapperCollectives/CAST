@@ -78,6 +78,8 @@ var (
 		message:    "Strategy Not Found",
 		details:    "The strategy name you are trying to use no longer exists.",
 	}
+
+	nilErr = errorResponse{}
 )
 
 func (a *App) health(w http.ResponseWriter, r *http.Request) {
@@ -308,7 +310,7 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	proposal, errResponse := helpers.createProposal(p)
-	if err != nil {
+	if errResponse != nilErr {
 		log.Error().Err(err).Msg("Error creating proposal")
 		respondWithError(w, errResponse)
 		return
@@ -334,7 +336,8 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check that status update is valid
-	// For now we are assuming proposals are creating with status 'published' and may be cancelled.
+	// For now we are assuming proposals are creating with
+	// status 'published' and may be cancelled.
 	if payload.Status != "cancelled" {
 		log.Error().Err(err).Msg("Invalid status update")
 		respondWithError(w, errIncompleteRequest)
