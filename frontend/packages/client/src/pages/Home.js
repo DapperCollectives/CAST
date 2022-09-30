@@ -26,6 +26,8 @@ export default function HomePage() {
     initialLoading: false,
   });
 
+  const isUserWalletConnected = !!addr;
+
   const { isLoading: loadingFeaturedCommunities, data: featuredCommunities } =
     useFeaturedCommunities();
 
@@ -74,7 +76,7 @@ export default function HomePage() {
           }}
         />
       )}
-      <HomeHeader />
+      {!isUserWalletConnected && <HomeHeader />}
       <section className={classNames}>
         {(loading || loadingFeaturedCommunities) && (
           <div style={{ height: '50vh' }}>
