@@ -477,6 +477,7 @@ func (h *Helpers) searchCommunities(
 		}
 
 		categories := h.categoryCountToMap(results)
+
 		return results, categories, nil
 	} else {
 		filtersSlice := strings.Split(filters, ",")
@@ -500,6 +501,10 @@ func (h *Helpers) categoryCountToMap(results []*models.Community) map[string]int
 		if community.Category != nil {
 			categoryCount[*community.Category] = *community.Category_count
 		}
+	}
+
+	for key, value := range categoryCount {
+		fmt.Printf("Key: %s, Value: %d ", key, value)
 	}
 
 	return categoryCount
@@ -1189,7 +1194,7 @@ func (h *Helpers) pinJSONToIpfs(data interface{}) (*string, error) {
 
 func (h *Helpers) appendFiltersToResponse(
 	results *shared.PaginatedResponse,
-	categoryCount map[string]int,
+	count map[string]int,
 ) (interface{}, error) {
 	var filters []shared.SearchFilter
 	var CATEGORIES = []string{
@@ -1204,7 +1209,7 @@ func (h *Helpers) appendFiltersToResponse(
 	for _, category := range CATEGORIES {
 		filters = append(filters, shared.SearchFilter{
 			Text:   category,
-			Amount: categoryCount[category],
+			Amount: count[category],
 		})
 	}
 
