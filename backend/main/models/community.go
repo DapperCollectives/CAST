@@ -121,34 +121,11 @@ const DEFAULT_SEARCH_SQL = `
     LEFT JOIN (
 		SELECT category, COUNT(*)
 		FROM communities 
-		WHERE SIMILARITY(name, '$1') > 0.1 
 		GROUP BY category
 	) c
     on c.category = cs.category
     WHERE (discord_url IS NOT NULL
-		AND twitter_url IS NOT NULLUPDATE communities
-	SET name = COALESCE($1, name), 
-	body = COALESCE($2, body), 
-	logo = COALESCE($3, logo), 
-	strategies = COALESCE($4, strategies), 
-	strategy = COALESCE($5, strategy),
-	banner_img_url = COALESCE($6, banner_img_url),
-	website_url = COALESCE($7, website_url),
-	twitter_url = COALESCE($8, twitter_url),
-	github_url = COALESCE($9, github_url),
-	discord_url = COALESCE($10, discord_url),
-	instagram_url = COALESCE($11, instagram_url),
-	proposal_validation = COALESCE($12, proposal_validation),
-	proposal_threshold = COALESCE($13, proposal_threshold),
-	category = COALESCE($14, category),
-	terms_and_conditions_url = COALESCE($15, terms_and_conditions_url),
-	contract_name = COALESCE($16, contract_name),
-	contract_addr = COALESCE($17, contract_addr),
-	contract_type = COALESCE($18, contract_type),
-	public_path = COALESCE($19, public_path),
-	only_authors_to_submit = COALESCE($20, only_authors_to_submit)
-	WHERE id = $21
-
+		AND twitter_url IS NOT NULL
   	AND id IN (
     	SELECT community_id
     	FROM community_users
@@ -284,11 +261,31 @@ func (c *Community) GetCommunityByProposalId(db *s.Database, proposalId int) err
 
 func GetDefaultCommunities(db *s.Database, params shared.PageParams, isSearch bool) ([]*Community, int, error) {
 	var sql string
+
 	if !isSearch {
 		sql = HOMEPAGE_SQL
 	} else {
 		sql = DEFAULT_SEARCH_SQL
+		rows, err := db.Conn.Query(
+			db.Context,
+			sql,
+			params.Count,
+			params.Start,
+		)
+		if err != nil {
+			return nil, 0, err
+		}
+
+		defer rows.Close()
+		communities, err := scanSearchResults(rows)
+		if err != nil {
+			return nil, 0, err
+		}
+
+		return communities, len(communities), nil
+
 	}
+
 	var communities []*Community
 
 	err := pgxscan.Select(
@@ -386,31 +383,25 @@ func (c *Community) CanUpdateCommunity(db *s.Database, addr string) error {
 }
 
 func SearchForCommunity(db *s.Database, query string, filters []string) ([]*Community, error) {
-
 	sql, err := constructDynamicSql(query, filters)
 	if err != nil {
 		return nil, err
 	}
 
-	var communities []*Community
 	rows, err := db.Conn.Query(
 		db.Context,
 		sql,
 		query,
 	)
 	if err != nil {
-		return communities, fmt.Errorf("error searching for a community with the the query %s", query)
+		return []*Community{}, fmt.Errorf("error searching for a community with the the query %s", query)
 	}
 
 	defer rows.Close()
 
-	for rows.Next() {
-		var c Community
-		err = rows.Scan(&c.ID, &c.Name, &c.Body, &c.Logo, &c.Category, &c.Category_count)
-		if err != nil {
-			return communities, fmt.Errorf("error scanning community row: %v", err)
-		}
-		communities = append(communities, &c)
+	communities, err := scanSearchResults(rows)
+	if err != nil {
+		return []*Community{}, fmt.Errorf("error scanning search results for the query %s", query)
 	}
 
 	return communities, nil
@@ -433,6 +424,19 @@ func constructDynamicSql(query string, filters []string) (string, error) {
 	}
 
 	return sql, nil
+}
+
+func scanSearchResults(rows pgx.Rows) ([]*Community, error) {
+	var communities []*Community
+	for rows.Next() {
+		var c Community
+		err := rows.Scan(&c.ID, &c.Name, &c.Body, &c.Logo, &c.Category, &c.Category_count)
+		if err != nil {
+			return communities, fmt.Errorf("error scanning community row: %v", err)
+		}
+		communities = append(communities, &c)
+	}
+	return communities, nil
 }
 
 func MatchStrategyByProposal(s []Strategy, strategyToMatch string) (Strategy, error) {
