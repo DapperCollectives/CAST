@@ -409,11 +409,7 @@ func (a *App) searchCommunities(w http.ResponseWriter, r *http.Request) {
 	pageParams.TotalRecords = len(results)
 
 	paginatedResults := shared.GetPaginatedResponseWithPayload(results, pageParams)
-	response, err := helpers.appendFiltersToResponse(
-		filters,
-		paginatedResults,
-		categories,
-	)
+	response, err := helpers.appendFiltersToResponse(paginatedResults, categories)
 	if err != nil {
 		log.Error().Err(err).Msg("Error appending filters to response")
 		respondWithError(w, errIncompleteRequest)

@@ -463,7 +463,6 @@ func (h *Helpers) searchCommunities(
 	map[string]int,
 	error,
 ) {
-
 	if query == "defaultFeatured" {
 		isSearch := true
 
@@ -477,7 +476,8 @@ func (h *Helpers) searchCommunities(
 			return nil, nil, err
 		}
 
-		return results, nil, nil
+		categories := h.categoryCountToMap(results)
+		return results, categories, nil
 	} else {
 		filtersSlice := strings.Split(filters, ",")
 		results, err := models.SearchForCommunity(
@@ -1188,20 +1188,16 @@ func (h *Helpers) pinJSONToIpfs(data interface{}) (*string, error) {
 }
 
 func (h *Helpers) appendFiltersToResponse(
-	filterParams string,
 	results *shared.PaginatedResponse,
 	categoryCount map[string]int,
 ) (interface{}, error) {
 	var filters []shared.SearchFilter
 
-	filterParamsSlice := strings.Split(filterParams, ",")
-
-	for _, filterParam := range filterParamsSlice {
-		filter := shared.SearchFilter{
-			Text:   filterParam,
-			Amount: categoryCount[filterParam],
-		}
-		filters = append(filters, filter)
+	for key, count := range categoryCount {
+		filters = append(filters, shared.SearchFilter{
+			Text:   key,
+			Amount: count,
+		})
 	}
 
 	appendedResponse := struct {
