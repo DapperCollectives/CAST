@@ -464,10 +464,6 @@ func (h *Helpers) searchCommunities(
 	error,
 ) {
 
-	if filters == "" {
-		filters = "#UNFILTERED"
-	}
-
 	if query == "defaultFeatured" {
 		isSearch := true
 

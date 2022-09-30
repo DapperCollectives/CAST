@@ -409,7 +409,7 @@ func SearchForCommunity(db *s.Database, query string, filters []string) ([]*Comm
 
 func constructDynamicSql(query string, filters []string) (string, error) {
 	var sql string
-	if filters[0] != "#UNFILTERED" {
+	if len(filters) == 0 {
 		sql = SEARCH_COMMUNITIES_SQL + " AND ("
 		for i, filter := range filters {
 			if i == 0 {
