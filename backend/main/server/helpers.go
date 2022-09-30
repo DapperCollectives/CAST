@@ -503,10 +503,6 @@ func (h *Helpers) categoryCountToMap(results []*models.Community) map[string]int
 		}
 	}
 
-	for key, value := range categoryCount {
-		fmt.Printf("Key: %s, Value: %d ", key, value)
-	}
-
 	return categoryCount
 }
 
