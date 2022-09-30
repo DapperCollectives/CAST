@@ -456,6 +456,7 @@ func (h *Helpers) fetchCommunity(id int) (models.Community, error) {
 
 func (h *Helpers) searchCommunities(
 	query string,
+	filters string,
 	pageParams shared.PageParams,
 ) (
 	[]*models.Community,
@@ -477,7 +478,12 @@ func (h *Helpers) searchCommunities(
 
 		return results, nil, nil
 	} else {
-		results, err := models.SearchForCommunity(h.A.DB, query)
+		filtersSlice := strings.Split(filters, ",")
+		results, err := models.SearchForCommunity(
+			h.A.DB,
+			query,
+			filtersSlice,
+		)
 		if err != nil {
 			return []*models.Community{}, nil, err
 		}

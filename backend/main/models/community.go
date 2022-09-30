@@ -115,7 +115,6 @@ const HOMEPAGE_SQL = `
 		OR is_featured = 'true'
 		LIMIT $1 OFFSET $2
 `
-
 const DEFAULT_SEARCH_SQL = `
 	SELECT id, name, body, logo, cs.category, c.count as category_count
 		FROM communities cs
@@ -127,7 +126,29 @@ const DEFAULT_SEARCH_SQL = `
 	) c
     on c.category = cs.category
     WHERE (discord_url IS NOT NULL
-		AND twitter_url IS NOT NULL
+		AND twitter_url IS NOT NULLUPDATE communities
+	SET name = COALESCE($1, name), 
+	body = COALESCE($2, body), 
+	logo = COALESCE($3, logo), 
+	strategies = COALESCE($4, strategies), 
+	strategy = COALESCE($5, strategy),
+	banner_img_url = COALESCE($6, banner_img_url),
+	website_url = COALESCE($7, website_url),
+	twitter_url = COALESCE($8, twitter_url),
+	github_url = COALESCE($9, github_url),
+	discord_url = COALESCE($10, discord_url),
+	instagram_url = COALESCE($11, instagram_url),
+	proposal_validation = COALESCE($12, proposal_validation),
+	proposal_threshold = COALESCE($13, proposal_threshold),
+	category = COALESCE($14, category),
+	terms_and_conditions_url = COALESCE($15, terms_and_conditions_url),
+	contract_name = COALESCE($16, contract_name),
+	contract_addr = COALESCE($17, contract_addr),
+	contract_type = COALESCE($18, contract_type),
+	public_path = COALESCE($19, public_path),
+	only_authors_to_submit = COALESCE($20, only_authors_to_submit)
+	WHERE id = $21
+
   	AND id IN (
     	SELECT community_id
     	FROM community_users
@@ -143,6 +164,73 @@ const DEFAULT_SEARCH_SQL = `
   	))
 	OR is_featured = 'true'
 		LIMIT $1 OFFSET $2
+`
+const INSERT_COMMUNITY_SQL = `
+	INSERT INTO communities(
+		name, 
+		category, 
+		logo, 
+		slug, 
+		strategies, 
+		strategy, 
+		banner_img_url, 
+		website_url, 
+		twitter_url, 
+		github_url, 
+		discord_url, 
+		instagram_url, 
+		terms_and_conditions_url, 
+		proposal_validation, 
+		proposal_threshold, 
+		body, 
+		cid, 
+		creator_addr, 
+		contract_name, 
+		contract_addr, 
+		contract_type, 
+		public_path, 
+		only_authors_to_submit, 
+		voucher)
+	VALUES(
+		$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, 
+		$14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24
+	)
+	RETURNING id, created_at
+`
+const UPDATE_COMMUNITY_SQL = `
+UPDATE communities
+	SET name = COALESCE($1, name), 
+	body = COALESCE($2, body), 
+	logo = COALESCE($3, logo), 
+	strategies = COALESCE($4, strategies), 
+	strategy = COALESCE($5, strategy),
+	banner_img_url = COALESCE($6, banner_img_url),
+	website_url = COALESCE($7, website_url),
+	twitter_url = COALESCE($8, twitter_url),
+	github_url = COALESCE($9, github_url),
+	discord_url = COALESCE($10, discord_url),
+	instagram_url = COALESCE($11, instagram_url),
+	proposal_validation = COALESCE($12, proposal_validation),
+	proposal_threshold = COALESCE($13, proposal_threshold),
+	category = COALESCE($14, category),
+	terms_and_conditions_url = COALESCE($15, terms_and_conditions_url),
+	contract_name = COALESCE($16, contract_name),
+	contract_addr = COALESCE($17, contract_addr),
+	contract_type = COALESCE($18, contract_type),
+	public_path = COALESCE($19, public_path),
+	only_authors_to_submit = COALESCE($20, only_authors_to_submit)
+	WHERE id = $21
+`
+const SEARCH_COMMUNITIES_SQL = `
+	SELECT id, name, body, logo, cs.category, c.count as categoryCount 
+	FROM communities cs 
+	LEFT JOIN (
+		SELECT category, COUNT(*) 
+		FROM communities 
+		WHERE SIMILARITY(name, $1) > 0.1 GROUP BY category
+		) 
+	c on c.category = cs.category 
+	WHERE SIMILARITY(name, $1) > 0.1
 `
 
 func GetCommunityTypes(db *s.Database) ([]*CommunityType, error) {
@@ -229,38 +317,8 @@ func GetDefaultCommunities(db *s.Database, params shared.PageParams, isSearch bo
 func (c *Community) CreateCommunity(db *s.Database) error {
 
 	err := db.Conn.QueryRow(db.Context,
-		`
-	INSERT INTO communities(
-		name, 
-		category, 
-		logo, 
-		slug, 
-		strategies, 
-		strategy, 
-		banner_img_url, 
-		website_url, 
-		twitter_url, 
-		github_url, 
-		discord_url, 
-		instagram_url, 
-		terms_and_conditions_url, 
-		proposal_validation, 
-		proposal_threshold, 
-		body, 
-		cid, 
-		creator_addr, 
-		contract_name, 
-		contract_addr, 
-		contract_type, 
-		public_path, 
-		only_authors_to_submit, 
-		voucher)
-	VALUES(
-		$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, 
-		$14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24
-	)
-	RETURNING id, created_at
-	`, c.Name,
+		INSERT_COMMUNITY_SQL,
+		c.Name,
 		c.Category,
 		c.Logo,
 		c.Slug,
@@ -291,29 +349,7 @@ func (c *Community) CreateCommunity(db *s.Database) error {
 func (c *Community) UpdateCommunity(db *s.Database, p *UpdateCommunityRequestPayload) error {
 	_, err := db.Conn.Exec(
 		db.Context,
-		`UPDATE communities
-	SET name = COALESCE($1, name), 
-	body = COALESCE($2, body), 
-	logo = COALESCE($3, logo), 
-	strategies = COALESCE($4, strategies), 
-	strategy = COALESCE($5, strategy),
-	banner_img_url = COALESCE($6, banner_img_url),
-	website_url = COALESCE($7, website_url),
-	twitter_url = COALESCE($8, twitter_url),
-	github_url = COALESCE($9, github_url),
-	discord_url = COALESCE($10, discord_url),
-	instagram_url = COALESCE($11, instagram_url),
-	proposal_validation = COALESCE($12, proposal_validation),
-	proposal_threshold = COALESCE($13, proposal_threshold),
-	category = COALESCE($14, category),
-	terms_and_conditions_url = COALESCE($15, terms_and_conditions_url),
-	contract_name = COALESCE($16, contract_name),
-	contract_addr = COALESCE($17, contract_addr),
-	contract_type = COALESCE($18, contract_type),
-	public_path = COALESCE($19, public_path),
-	only_authors_to_submit = COALESCE($20, only_authors_to_submit)
-	WHERE id = $21
-	`,
+		UPDATE_COMMUNITY_SQL,
 		p.Name,
 		p.Body,
 		p.Logo,
@@ -349,20 +385,17 @@ func (c *Community) CanUpdateCommunity(db *s.Database, addr string) error {
 	return nil
 }
 
-func SearchForCommunity(db *s.Database, query string) ([]*Community, error) {
+func SearchForCommunity(db *s.Database, query string, filters []string) ([]*Community, error) {
+
+	sql, err := constructDynamicSql(query, filters)
+	if err != nil {
+		return nil, err
+	}
+
 	var communities []*Community
 	rows, err := db.Conn.Query(
 		db.Context,
-		`SELECT id, name, body, logo, cs.category, c.count as categoryCount
-			FROM communities cs
-			LEFT JOIN (
-				SELECT category, COUNT(*)
-				FROM communities
-				WHERE SIMILARITY(name, $1) > 0.1
-				GROUP BY category
-				) c
-			on c.category = cs.category
-			WHERE SIMILARITY(name, $1) > 0.1`,
+		sql,
 		query,
 	)
 	if err != nil {
@@ -381,6 +414,25 @@ func SearchForCommunity(db *s.Database, query string) ([]*Community, error) {
 	}
 
 	return communities, nil
+}
+
+func constructDynamicSql(query string, filters []string) (string, error) {
+	var sql string
+	if len(filters) > 0 {
+		sql = SEARCH_COMMUNITIES_SQL + " AND ("
+		for i, filter := range filters {
+			if i == 0 {
+				sql += fmt.Sprintf("cs.category = '%s'", filter)
+			} else {
+				sql += fmt.Sprintf(" OR cs.category = '%s'", filter)
+			}
+		}
+		sql += ")"
+	} else {
+		sql = SEARCH_COMMUNITIES_SQL
+	}
+
+	return sql, nil
 }
 
 func MatchStrategyByProposal(s []Strategy, strategyToMatch string) (Strategy, error) {
