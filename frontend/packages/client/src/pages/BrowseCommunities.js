@@ -28,10 +28,8 @@ export default function BrowseCommunities() {
 
   // first load
   useEffect(() => {
-    if (!pills.length && filters.length) {
-      setPills(filters);
-    }
-  }, [filters, pills]);
+    setPills(filters);
+  }, [filters]);
 
   const addOrRemovePillFilter = (val) => {
     const value = val.toLowerCase();
