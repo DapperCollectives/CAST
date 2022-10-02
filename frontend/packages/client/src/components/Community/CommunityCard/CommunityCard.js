@@ -1,45 +1,25 @@
 import Blockies from 'react-blockies';
 import { Link } from 'react-router-dom';
+import { StatusPill } from 'components';
 import { useMediaQuery } from 'hooks';
-import classNames from 'classnames';
-import JoinCommunityButton from './JoinCommunityButton';
+import JoinCommunityButton from '../JoinCommunityButton';
+import NameAndBody from './NameAndBody';
 
 /**
  * CommunityCard will group communities on a row bases,
  * will use elementsPerRow to determine how many communities to render per row
  */
 
-const NameAndBody = ({ name, body, isMobile }) => {
-  const containerClass = classNames(
-    'column is-flex is-flex-direction-column is-justyfy-content-flex-start',
-    { 'is-12': isMobile }
-  );
-  const nameClass = classNames(
-    'is-size-4 is-size-5-mobile is-4 line-clamp-2 has-text-weight-bold',
-    { 'mb-2': !isMobile },
-    { 'mb-1': isMobile }
-  );
-  const bodyClass = classNames('has-text-grey line-clamp-2', {
-    'small-text': isMobile,
-  });
-
-  return (
-    <div className={containerClass}>
-      <div className={nameClass}>{name}</div>
-      <p
-        className={bodyClass}
-        style={{
-          lineHeight: '1.5em',
-          maxHeight: '3rem',
-        }}
-      >
-        {body}
-      </p>
-    </div>
-  );
-};
-
-const CommunityCard = ({ logo, name, body, id, slug, hideJoin }) => {
+const CommunityCard = ({
+  logo,
+  name,
+  body,
+  id,
+  slug,
+  hideJoin,
+  pActive = 1,
+  pPending = 1,
+} = {}) => {
   const isNotMobile = useMediaQuery();
   const avatarSize = isNotMobile
     ? {
@@ -80,17 +60,21 @@ const CommunityCard = ({ logo, name, body, id, slug, hideJoin }) => {
             )}
           </div>
           {isNotMobile && <NameAndBody name={name} body={body} />}
-          {!hideJoin && (
-            <div
-              className={`column is-flex is-align-items-flex-start${
-                isNotMobile
-                  ? ' is-narrow'
-                  : ' flex-1 is-justify-content-flex-end'
-              } `}
-            >
+
+          <div
+            className={`column is-flex is-align-items-flex-start${
+              isNotMobile ? ' is-narrow' : ' flex-1 is-justify-content-flex-end'
+            } `}
+          >
+            {!hideJoin ? (
               <JoinCommunityButton communityId={id} />
-            </div>
-          )}
+            ) : (
+              <div>
+                <StatusPill label="active" />
+              </div>
+            )}
+          </div>
+
           {!isNotMobile && <NameAndBody name={name} body={body} isMobile />}
         </div>
       </div>
