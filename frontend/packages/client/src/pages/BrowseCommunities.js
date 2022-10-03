@@ -5,10 +5,25 @@ import { FadeIn, FilterPill, Loader } from 'components';
 import CommunitiesPresenter from 'components/Community/CommunitiesPresenter';
 import { useCommunitySearch, useDebounce, useQueryParams } from 'hooks';
 
+const updateText = (text, isDefaultSearch) => {
+  if (text === 'all' && isDefaultSearch) {
+    return 'Featured';
+  }
+  if (text === 'dao') {
+    return 'DAO';
+  }
+  if (text === 'nft') {
+    return 'NFT';
+  }
+
+  return text.charAt(0).toUpperCase() + text.substring(1, text.length);
+};
 export default function BrowseCommunities() {
   const history = useHistory();
 
-  const { search: routerSearch } = history;
+  const {
+    location: { search: routerSearch },
+  } = history;
 
   const { search, filters: filtersUrl } = useQueryParams({
     search: 'search',
@@ -41,7 +56,7 @@ export default function BrowseCommunities() {
     }).toString();
     // update url browser with search and filters to it is keep for navigation back and forth
     if (routerSearch !== searchTextParam) {
-      history.push(`/browse-communities?${queryUrlParams}`);
+      history.replace(`/browse-communities?${queryUrlParams}`);
     }
   }, [routerSearch, searchTextParam, filtersUrl, history, selectedPills]);
 
@@ -64,13 +79,15 @@ export default function BrowseCommunities() {
   // first load
   useEffect(() => {
     if (filters?.length !== 0) {
+      // sort pills
+      filters.sort((a, b) => (a.text > b.text ? 1 : -1));
       setPills(filters);
     }
   }, [filters, error]);
 
   const addOrRemovePillFilter = (val) => {
     const value = val.toLowerCase();
-    if (value === 'all') {
+    if (value === 'all' || value === 'featured') {
       setSelectedPills(['all']);
       return;
     }
@@ -127,7 +144,7 @@ export default function BrowseCommunities() {
                     <FilterPill
                       key={`pill-${index}`}
                       onClick={addOrRemovePillFilter}
-                      text={pill.text}
+                      text={updateText(pill.text, searchTextParam)}
                       amount={pill.amount}
                       selected={selectedPills.includes(
                         pill.text?.toLowerCase()
