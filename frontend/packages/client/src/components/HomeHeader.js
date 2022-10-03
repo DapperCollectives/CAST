@@ -5,7 +5,7 @@ const stars = [
   { topPer: 0, leftPer: 0, width: '31px', height: '31px', start: 100 },
   { topPer: 0.42, leftPer: 0.18, width: '20px', height: '20px', start: 1000 },
   { topPer: 0.1, leftPer: 0.45, width: '31px', height: '31px', start: 700 },
-  { topPer: 0.1, leftPer: 0.99, width: '31px', height: '31px', start: 1100 },
+  { topPer: 0.1, leftPer: 0.96, width: '31px', height: '31px', start: 1100 },
   { topPer: 0.35, leftPer: 0.7, width: '31px', height: '31px', start: 1100 },
   { topPer: 0.92, leftPer: 0.67, width: '25px', height: '25px', start: 500 },
 ];
