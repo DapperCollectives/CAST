@@ -462,27 +462,31 @@ func (h *Helpers) searchCommunities(query string) ([]models.Community, error) {
 	return results, nil
 }
 
-func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, error) {
+func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorResponse) {
+	if err := h.validateStrategyName(*p.Strategy); err != nil {
+		fmt.Printf("Error validating strategy name: %v \n", err)
+		return models.Proposal{}, errStrategyNotFound
+	}
+
 	if p.Voucher != nil {
 		if err := h.validateUserViaVoucher(p.Creator_addr, p.Voucher); err != nil {
-			return models.Proposal{}, err
+			return models.Proposal{}, errForbidden
 		}
 	} else {
 		if err := h.validateUser(p.Creator_addr, p.Timestamp, p.Composite_signatures); err != nil {
-			return models.Proposal{}, err
+			return models.Proposal{}, errForbidden
 		}
 	}
 
 	community, err := h.fetchCommunity(p.Community_id)
 	if err != nil {
-		return models.Proposal{}, err
+		return models.Proposal{}, errIncompleteRequest
 	}
 
 	strategy, err := models.MatchStrategyByProposal(*community.Strategies, *p.Strategy)
 	if err != nil {
 		log.Error().Err(err).Msg("Community does not have this strategy available.")
-		return models.Proposal{}, err
-
+		return models.Proposal{}, errIncompleteRequest
 	}
 
 	// Set Min Balance/Max Weight to community defaults if not provided
@@ -494,30 +498,30 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, error) {
 	}
 
 	if err := h.snapshot(&strategy, &p); err != nil {
-		return models.Proposal{}, err
+		return models.Proposal{}, errIncompleteRequest
 	}
 
 	if err := h.enforceCommunityRestrictions(community, p, strategy); err != nil {
-		return models.Proposal{}, err
+		return models.Proposal{}, errIncompleteRequest
 	}
 
 	if err := h.processSnapshotStatus(&strategy, &p); err != nil {
 		errMsg := "Error processing snapshot status."
 		log.Error().Err(err).Msg(errMsg)
-		return models.Proposal{}, err
+		return models.Proposal{}, errIncompleteRequest
 	}
 
 	p.Cid, err = h.pinJSONToIpfs(p)
 	if err != nil {
 		log.Error().Err(err).Msg("IPFS error: " + err.Error())
-		return models.Proposal{}, err
+		return models.Proposal{}, errIncompleteRequest
 	}
 
 	validate := validator.New()
 	vErr := validate.Struct(p)
 	if vErr != nil {
 		log.Error().Err(vErr)
-		return models.Proposal{}, err
+		return models.Proposal{}, errIncompleteRequest
 	}
 
 	if os.Getenv("APP_ENV") == "PRODUCTION" {
@@ -527,10 +531,26 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, error) {
 	}
 
 	if err := p.CreateProposal(h.A.DB); err != nil {
-		return models.Proposal{}, err
+		return models.Proposal{}, errIncompleteRequest
 	}
 
-	return p, nil
+	return p, errorResponse{}
+}
+
+func (h *Helpers) validateStrategyName(name string) error {
+	if name == "" {
+		return errors.New("Strategy name is required.")
+	}
+
+	for k, _ := range strategyMap {
+		if name == k {
+			return nil
+		} else {
+			continue
+		}
+	}
+
+	return errors.New("Strategy not found.")
 }
 
 func (h *Helpers) enforceCommunityRestrictions(

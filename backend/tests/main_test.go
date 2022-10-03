@@ -22,6 +22,73 @@ var otu *utils.OverflowTestUtils
 
 const ServiceAddress = "0xf8d6e0586b0a20c7"
 
+type errorResponse struct {
+	statusCode int
+	errorCode  string
+	message    string
+	details    string
+}
+
+var (
+	errIncompleteRequest = errorResponse{
+		statusCode: http.StatusBadRequest,
+		errorCode:  "ERR_1001",
+		message:    "Error",
+		details:    "There was an error trying to complete your request",
+	}
+
+	errCreateCommunity = errorResponse{
+		statusCode: http.StatusBadRequest,
+		errorCode:  "ERR_1002",
+		message:    "Error",
+		details:    "There was an error trying to create your community",
+	}
+
+	errFetchingBalance = errorResponse{
+		statusCode: http.StatusBadRequest,
+		errorCode:  "ERR_1003",
+		message:    "Error Fetching Balance",
+		details: `While confirming your balance, we've encountered an error
+							connecting to the Flow Blockchain.`,
+	}
+
+	errInsufficientBalance = errorResponse{
+		statusCode: http.StatusUnauthorized,
+		errorCode:  "ERR_1004",
+		message:    "Insufficient Balance",
+		details: `In order to vote on this proposal you must have a minimum 
+							balance of %d %s tokens in your wallet.`,
+	}
+
+	errForbidden = errorResponse{
+		statusCode: http.StatusForbidden,
+		errorCode:  "ERR_1005",
+		message:    "Forbidden",
+		details:    "You are not authorized to perform this action.",
+	}
+
+	errCreateProposal = errorResponse{
+		statusCode: http.StatusForbidden,
+		errorCode:  "ERR_1006",
+		message:    "Error",
+		details:    "There was an error trying to create your proposal",
+	}
+
+	errUpdateCommunity = errorResponse{
+		statusCode: http.StatusForbidden,
+		errorCode:  "ERR_1007",
+		message:    "Error",
+		details:    "There was an error trying to update your community",
+	}
+
+	errStrategyNotFound = errorResponse{
+		statusCode: http.StatusNotFound,
+		errorCode:  "ERR_1008",
+		message:    "Strategy Not Found",
+		details:    "The strategy name you are trying to use no longer exists.",
+	}
+)
+
 func TestMain(m *testing.M) {
 	var err error
 
