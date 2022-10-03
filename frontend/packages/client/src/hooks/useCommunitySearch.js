@@ -3,7 +3,6 @@ import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { checkResponse, getPagination } from 'utils';
 import { debounce } from 'utils';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import queryString from 'query-string';
 import { PAGINATION_INITIAL_STATE } from 'reducers';
 
 const getPaginationFromPagesCustom = (pages) => {
@@ -53,14 +52,11 @@ export default function useCommunitySearch({
         const searchText = queryKey[1];
         const filters = queryKey[2];
 
-        const queryParams = queryString.stringify(
-          {
-            filters: filters,
-            start,
-            count,
-          },
-          { arrayFormat: 'comma' }
-        );
+        const queryParams = new URLSearchParams({
+          ...(filters ? { filters: filters } : undefined),
+          start,
+          count,
+        }).toString();
 
         const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/search/${searchText}?${queryParams}`;
 

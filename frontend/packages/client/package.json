@@ -28,7 +28,6 @@
     "millify": "^4.0.0",
     "nanoid": "^3.3.4",
     "prettier": "^2.7.1",
-    "query-string": "^7.1.1",
     "react": "^17.0.2",
     "react-blockies": "^1.4.1",
     "react-copy-to-clipboard": "^5.1.0",

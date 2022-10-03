@@ -80,13 +80,13 @@ export default function BrowseCommunities() {
                 <Svg name="Search" />
               </div>
             </div>
-            <div
-              className="is-flex is-flex-wrap-wrap mt-5"
-              style={{ marginLeft: '-8px' }}
-            >
-              {pills.length > 0 && (
-                <FadeIn>
-                  {pills.map((pill, index) => (
+            <FadeIn>
+              <div
+                className="is-flex is-flex-wrap-wrap mt-5"
+                style={{ marginLeft: '-8px' }}
+              >
+                {pills.length > 0 &&
+                  pills.map((pill, index) => (
                     <FilterPill
                       key={`pill-${index}`}
                       onClick={addOrRemovePillFilter}
@@ -97,9 +97,8 @@ export default function BrowseCommunities() {
                       )}
                     />
                   ))}
-                </FadeIn>
-              )}
-            </div>
+              </div>
+            </FadeIn>
           </div>
         </section>
       </div>
