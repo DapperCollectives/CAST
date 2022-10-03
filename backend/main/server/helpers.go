@@ -1194,6 +1194,7 @@ func (h *Helpers) appendFiltersToResponse(
 ) (interface{}, error) {
 	var filters []shared.SearchFilter
 	var CATEGORIES = []string{
+		"all",
 		"dao",
 		"social",
 		"protocol",
@@ -1202,12 +1203,22 @@ func (h *Helpers) appendFiltersToResponse(
 		"collector",
 	}
 
+	var totalCount int
 	for _, category := range CATEGORIES {
+		if category == "all" {
+			continue
+		}
 		filters = append(filters, shared.SearchFilter{
 			Text:   category,
 			Amount: count[category],
 		})
+		totalCount += count[category]
 	}
+
+	filters = append(filters, shared.SearchFilter{
+		Text:   "all",
+		Amount: totalCount,
+	})
 
 	appendedResponse := struct {
 		Filters []shared.SearchFilter    `json:"filters"`
