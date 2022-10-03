@@ -78,7 +78,10 @@ const CommunityCard = ({ logo, name, body, id, slug, hideJoin }) => {
                 className="is-flex is-align-items-center mr-2"
                 style={{ maxWidth: 40 }}
               >
-                <JoinCommunityButton communityId={id} />
+                <JoinCommunityButton
+                  communityId={id}
+                  hasTooltip={isNotMobile}
+                />
               </div>
             )}
           </div>
