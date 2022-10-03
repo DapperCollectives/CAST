@@ -124,22 +124,8 @@ const DEFAULT_SEARCH_SQL = `
 		GROUP BY category
 	) c
     on c.category = cs.category
-    WHERE (discord_url IS NOT NULL
-		AND twitter_url IS NOT NULL
-  	AND id IN (
-    	SELECT community_id
-    	FROM community_users
-    	GROUP BY community_id
-    	HAVING COUNT(*) > 500
-  	)
-  	AND id IN (
-    	SELECT community_id
-    	FROM proposals
-    	WHERE status = 'published' AND end_time < (NOW() AT TIME ZONE 'UTC')
-    	GROUP BY community_id
-    	HAVING COUNT(*) >= 2
-  	))
-	OR is_featured = 'true'
+    WHERE is_featured = 'true'
+		AND cs.category IS NOT NULL
 		LIMIT $1 OFFSET $2
 `
 const INSERT_COMMUNITY_SQL = `
