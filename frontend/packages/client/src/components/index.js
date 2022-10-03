@@ -21,6 +21,7 @@ export { default as JoinCommunityButton } from './Community/JoinCommunityButton'
 export { CommunityEditorProfile } from './Community/CommunityEditorProfile';
 export { CommunityEditorLinks } from './Community/CommunityEditorLinks';
 export { CommunityEditorDetails } from './Community/CommunityEditorDetails';
+export { CommunityCard } from './Community/CommunityCard';
 export { default as CommunityPropsAndVoting } from './Community/CommunityPropsAndVoting';
 export { ProposalThresholdEditor } from './Community/ProposalThresholdEditor';
 export { default as AddButton } from './AddButton';
@@ -46,5 +47,6 @@ export { default as Input } from './Input';
 export { default as TooltipMessage } from './TooltipMessage';
 export { default as FadeInOut } from './FadeInOut';
 export { default as ErrorModal } from './ErrorModal';
-export { default as Pill } from './Pill';
+export { default as StatusPill } from './StatusPill';
+export { default as BrowseCommunityButton } from './BrowseCommunityButton';
 export * from './Proposal';
