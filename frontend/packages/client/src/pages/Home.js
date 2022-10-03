@@ -66,7 +66,7 @@ export default function HomePage() {
           }}
         />
       )}
-      <HomeHeader hide={isUserWalletConnected} />
+      <HomeHeader isVisible={!isUserWalletConnected} />
       {showLoader && (
         <div style={{ height: '50vh' }}>
           <Loader fullHeight />

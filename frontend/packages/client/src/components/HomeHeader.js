@@ -10,12 +10,12 @@ const stars = [
   { topPer: 0.92, leftPer: 0.67, width: '25px', height: '25px', start: 500 },
 ];
 
-export default function HomeHeader({ hide = false } = {}) {
+export default function HomeHeader({ isVisible = true } = {}) {
   const { addToArrayOfRefes, starArray, parentRef } = useStarAnimation({
     stars,
   });
 
-  if (hide) {
+  if (!isVisible) {
     return null;
   }
   return (
