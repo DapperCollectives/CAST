@@ -1,35 +1,72 @@
 import { useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { Svg } from '@cast/shared-components';
 import { FadeIn, FilterPill, Loader } from 'components';
 import CommunitiesPresenter from 'components/Community/CommunitiesPresenter';
-import { useCommunitySearch, useDebounce } from 'hooks';
+import { useCommunitySearch, useDebounce, useQueryParams } from 'hooks';
 
 export default function BrowseCommunities() {
-  const [searchText, setSearchText] = useState('');
-  const [pills, setPills] = useState([]);
-  const [selectedPills, setSelectedPills] = useState(['all']);
+  const history = useHistory();
 
-  const debounced = useDebounce(searchText, 1000);
+  const { search: routerSearch } = history;
+
+  const { search, filters: filtersUrl } = useQueryParams({
+    search: 'search',
+    filters: 'filters',
+  });
+
+  const [searchText, setSearchText] = useState(search ? search : '');
+
+  const [pills, setPills] = useState([]);
+
+  const [selectedPills, setSelectedPills] = useState(
+    filtersUrl ? filtersUrl.split(',') : ['all']
+  );
+
+  const debouncedSearchText = useDebounce(searchText, 1000);
+
+  const searchTextParam =
+    debouncedSearchText === '' ? 'defaultFeatured' : debouncedSearchText;
+
+  // this effect handles browser URL writing
+  useEffect(() => {
+    // url will be clean with defaultFeatured is used and when filtere all is selected
+    const queryUrlParams = new URLSearchParams({
+      ...(searchTextParam !== 'defaultFeatured'
+        ? { search: searchTextParam }
+        : undefined),
+      ...(selectedPills.includes('all')
+        ? undefined
+        : { filters: selectedPills }),
+    }).toString();
+    // update url browser with search and filters to it is keep for navigation back and forth
+    if (routerSearch !== searchTextParam) {
+      history.push(`/browse-communities?${queryUrlParams}`);
+    }
+  }, [routerSearch, searchTextParam, filtersUrl, history, selectedPills]);
 
   const {
     isLoading: isLoadingSearch,
     isFetchingNextPage,
     data: communityResult,
+    error,
   } = useCommunitySearch({
     // NOTE:
     // Backend returns feature communities when search text is "defaultFeatured"
     // this is why on empty search text we use feature communities
-    searchText: debounced === '' ? 'defaultFeatured' : debounced,
+    searchText: searchTextParam,
     // do not send filtes when all is selected
     ...(selectedPills.includes('all') ? undefined : { filters: selectedPills }),
   });
 
-  const { filters, results: communitiesResult } = communityResult;
+  const { filters, results: communitiesResult = [] } = communityResult;
 
   // first load
   useEffect(() => {
-    setPills(filters);
-  }, [filters]);
+    if (filters?.length !== 0) {
+      setPills(filters);
+    }
+  }, [filters, error]);
 
   const addOrRemovePillFilter = (val) => {
     const value = val.toLowerCase();
@@ -114,11 +151,17 @@ export default function BrowseCommunities() {
           ) : (
             <>
               <FadeIn>
-                <CommunitiesPresenter
-                  titleClasses="is-size-3"
-                  title="Communities"
-                  communities={communitiesResult}
-                />
+                {communitiesResult?.length > 0 ? (
+                  <CommunitiesPresenter
+                    titleClasses="is-size-3"
+                    title="Communities"
+                    communities={communitiesResult}
+                  />
+                ) : (
+                  <p className="is-size-3 has-text-weight-bold p-3-mobile">
+                    No communities were found.
+                  </p>
+                )}
               </FadeIn>
               {isFetchingNextPage && communitiesResult?.length > 0 && (
                 <div className="mt-6">
