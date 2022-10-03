@@ -40,12 +40,6 @@ export default function HomePage() {
         isComingSoon: datum.isComingSoon || false,
       }));
 
-  // Remove duplicates from array
-  myUserCommunities = myUserCommunities.filter(
-    (value, index, self) =>
-      index === self.findIndex((t) => t.name === value.name)
-  );
-
   const isMyCommunitiesVisible = myUserCommunities.length > 0;
 
   const classNamesFeatCommunities = classnames('', {
