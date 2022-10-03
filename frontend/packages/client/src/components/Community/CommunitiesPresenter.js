@@ -29,7 +29,7 @@ const CommunitiesPresenter = ({
     }
   }
 
-  const containerClasses = classnames('container', {
+  const containerClasses = classnames({
     [classNames]: !!classNames,
   });
 
