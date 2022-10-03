@@ -5,7 +5,6 @@ export default function StatusPill({
   classNames,
   backgroundColorClass,
   textColorClass = 'has-text-white',
-  outlined = false,
 }) {
   const className = classnames(
     'px-2 py-1 rounded-lg smallest-text has-text-weight-bold',

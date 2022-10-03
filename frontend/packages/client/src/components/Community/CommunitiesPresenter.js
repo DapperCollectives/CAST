@@ -1,5 +1,5 @@
+import { CommunityCard } from 'components';
 import classnames from 'classnames';
-import CommunityCard from './CommunityCard';
 
 /**
  * CommunitiesPresenter will group communities on a row bases,
@@ -30,7 +30,7 @@ const CommunitiesPresenter = ({
     }
   }
 
-  const containerClasses = classnames('container', {
+  const containerClasses = classnames({
     [classNames]: !!classNames,
   });
 

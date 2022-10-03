@@ -16,6 +16,9 @@ function Header(props) {
     setShowSidenav(false);
   };
 
+  const classNamesLinks =
+    'navbar-item p-0 mr-6-desktop mr-5-tablet is-hidden-mobile';
+
   return (
     <>
       <header
@@ -57,7 +60,7 @@ function Header(props) {
                     pathname: '/about',
                     state: { modal: true },
                   }}
-                  className="navbar-item p-0 mr-5 is-hidden-mobile"
+                  className={classNamesLinks}
                 >
                   <span className="navbar-item-hover transition-all has-text-weight-bold has-text-black">
                     About Us
@@ -68,7 +71,7 @@ function Header(props) {
                     pathname: '/browse-communities',
                     state: { modal: true },
                   }}
-                  className="navbar-item p-0 mr-5 is-hidden-mobile"
+                  className={classNamesLinks}
                 >
                   <span className="navbar-item-hover transition-all has-text-weight-bold has-text-black">
                     Browse
@@ -78,7 +81,7 @@ function Header(props) {
                   to={{
                     pathname: '/community/create',
                   }}
-                  className="navbar-item p-0 mr-5 is-hidden-mobile"
+                  className={classNamesLinks}
                 >
                   <span className="navbar-item-hover transition-all has-text-weight-bold has-text-black">
                     Create a Community
