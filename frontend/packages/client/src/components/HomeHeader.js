@@ -10,11 +10,14 @@ const stars = [
   { topPer: 0.92, leftPer: 0.67, width: '25px', height: '25px', start: 500 },
 ];
 
-export default function HomeHeader() {
+export default function HomeHeader({ hide = false } = {}) {
   const { addToArrayOfRefes, starArray, parentRef } = useStarAnimation({
     stars,
   });
 
+  if (hide) {
+    return null;
+  }
   return (
     <div
       className="is-flex is-flex-direction-column is-align-items-center is-justify-content-center py-5-mobile py-7 has-background-light-grey"
