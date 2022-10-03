@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useLocation, useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useModalContext } from 'contexts/NotificationModal';
 import { useWebContext } from 'contexts/Web3';
@@ -16,6 +16,7 @@ import {
 } from 'components';
 import {
   CancelProposalModalConfirmation,
+  HeaderNavigation,
   ProposalStatus,
   VoteOptions,
 } from 'components/Proposal';
@@ -369,17 +370,10 @@ export default function ProposalPage() {
       />
       <section className="section">
         <div className="container">
-          <WrapperResponsive
-            classNames="is-flex"
-            extraClasses="mb-6"
-            extraClassesMobile="mb-3"
-          >
-            <Link to={`/community/${proposal.communityId}?tab=proposals`}>
-              <span className="has-text-grey is-flex is-align-items-center back-button transition-all">
-                <Svg name="ArrowLeft" /> <span className="ml-3">Back</span>
-              </span>
-            </Link>
-          </WrapperResponsive>
+          <HeaderNavigation
+            communityId={proposal.communityId}
+            proposalId={proposal.id}
+          />
           {castVote && (
             <Message
               messageText={`You successfully voted for ${getVoteLabel(
