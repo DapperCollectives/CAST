@@ -48,4 +48,5 @@ export { default as TooltipMessage } from './TooltipMessage';
 export { default as FadeInOut } from './FadeInOut';
 export { default as ErrorModal } from './ErrorModal';
 export { default as StatusPill } from './StatusPill';
+export { default as BrowseCommunityButton } from './BrowseCommunityButton';
 export * from './Proposal';
