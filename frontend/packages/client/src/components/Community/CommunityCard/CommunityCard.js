@@ -1,9 +1,9 @@
 import Blockies from 'react-blockies';
 import { Link } from 'react-router-dom';
-import { StatusPill } from 'components';
 import { useMediaQuery } from 'hooks';
 import JoinCommunityButton from '../JoinCommunityButton';
 import NameAndBody from './NameAndBody';
+import PillsWithStatus from './PillsWithStatus';
 
 /**
  * CommunityCard will group communities on a row bases,
@@ -17,8 +17,8 @@ const CommunityCard = ({
   id,
   slug,
   hideJoin,
-  pActive = 1,
-  pPending = 1,
+  pActive,
+  pPending,
 } = {}) => {
   const isNotMobile = useMediaQuery();
   const avatarSize = isNotMobile
@@ -28,19 +28,16 @@ const CommunityCard = ({
         columnStyle: { maxHeight: '120px' },
       }
     : {
-        logo: { width: 48, height: 48 },
-        blockie: { size: 10, scale: 4.8 },
-        columnStyle: { maxHeight: '72px' },
+        logo: { width: 60, height: 60 },
+        blockie: { size: 10, scale: 6 },
+        columnStyle: { maxHeight: '85px' },
       };
 
   return (
     <Link to={`/community/${id}?tab=proposals`} style={{ color: 'inherit' }}>
       <div className="is-flex is-flex-grow-1 rounded-lg border-light p-5 p-4-mobile is-flex-direction-column transition-all community-card">
         <div className="columns is-multiline is-flex-grow-1 is-mobile">
-          <div
-            className="column is-narrow pr-2-mobile"
-            style={avatarSize.columnStyle}
-          >
+          <div className="column is-narrow" style={avatarSize.columnStyle}>
             {logo ? (
               <div
                 className="border-light rounded-full"
@@ -62,16 +59,16 @@ const CommunityCard = ({
           {isNotMobile && <NameAndBody name={name} body={body} />}
 
           <div
-            className={`column is-flex is-align-items-flex-start${
-              isNotMobile ? ' is-narrow' : ' flex-1 is-justify-content-flex-end'
+            className={`column is-flex is-flex-direction-column${
+              isNotMobile
+                ? ' is-narrow'
+                : ' flex-1 is-align-items-flex-end is-justify-content-flex-start'
             } `}
           >
             {!hideJoin ? (
               <JoinCommunityButton communityId={id} />
             ) : (
-              <div>
-                <StatusPill label="active" />
-              </div>
+              <PillsWithStatus pActive={pActive} pPending={pPending} />
             )}
           </div>
 
