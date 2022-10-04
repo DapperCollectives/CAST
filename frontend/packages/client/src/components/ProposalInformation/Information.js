@@ -1,9 +1,8 @@
-import { Link } from 'react-router-dom';
 import { Svg } from '@cast/shared-components';
 import { parseDateFromServer } from 'utils';
 import Tooltip from '../Tooltip';
-import AvatarBloquies from './AvatarBloquies';
 import BlockieWithAddress from './BlockieWithAddress';
+import CommunityName from './CommunityName';
 import InfoBlock from './InfoBlock';
 
 const isVisible = (value) => Boolean(value && value !== '' && value !== 0);
@@ -41,20 +40,7 @@ export default function Information({
       <p className="mb-5 medium-text has-text-weight-bold">Proposal Details</p>
       <InfoBlock
         title="Community"
-        component={
-          <div className="is-flex">
-            <AvatarBloquies
-              slug={communitySlug}
-              id={communityId}
-              logo={communityLogo}
-            />
-            <Link to={`/community/${communityId}`}>
-              <p className="small-text pl-2 is-underlined has-text-grey">
-                {communityName}
-              </p>
-            </Link>
-          </div>
-        }
+        component={<CommunityName communityId={communityId} />}
       />
 
       <InfoBlock
