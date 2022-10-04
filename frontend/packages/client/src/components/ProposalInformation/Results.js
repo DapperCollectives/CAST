@@ -6,8 +6,6 @@ export default function Results({
   voteResults,
   computedStatus,
 } = {}) {
-  console.log('results.js');
-
   // sort results array if proposal is closed or active
 
   const sortedResults = useMemo(
@@ -64,9 +62,9 @@ export default function Results({
             ? 0
             : ((100 * voteResults[option]) / totalVotes).toFixed(2);
 
-        const optionText = proposalChoices.find(
-          (c) => c.value === Number(option)
-        ).label;
+        const optionText = proposalChoices.find((c) => {
+          return c.value === Number(option);
+        }).label;
         const optionTextTrunc =
           optionText.length > 120
             ? `${optionText.substring(0, 120)}...`

@@ -63,7 +63,13 @@ export const createProposalApiReq = async ({
   };
 
   const response = await fetch(url, fetchOptions);
-  return checkResponse(response);
+  const proposal = await checkResponse(response);
+  proposal.choices = proposal.choices.map((choice) => ({
+    label: choice.choiceText,
+    value: choice.id,
+    choiceImgUrl: choice.choiceImgUrl,
+  }));
+  return proposal;
 };
 
 export const updateProposalApiReq = async ({
