@@ -8,7 +8,7 @@ const HeaderNavigation = ({ communityId, proposalId } = {}) => {
 
   return (
     <div
-      className="is-flex mb-6 mb-3-mobile"
+      className="is-flex mb-5 mb-3-mobile"
       style={{ justifyContent: 'space-between' }}
     >
       <BackButton isMobile={!notMobile} communityId={communityId} />
