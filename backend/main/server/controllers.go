@@ -431,15 +431,27 @@ func (a *App) getCommunities(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) searchCommunities(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	results, err := helpers.searchCommunities(vars["query"])
+
+	pageParams := getPageParams(*r, 25)
+	filters := r.FormValue("filters")
+
+	results, categories, err := helpers.searchCommunities(
+		vars["query"],
+		filters,
+		pageParams,
+	)
 	if err != nil {
 		log.Error().Err(err).Msg("Error searching communities")
 		respondWithError(w, errIncompleteRequest)
 	}
-	pageParams := getPageParams(*r, 25)
 	pageParams.TotalRecords = len(results)
+	paginatedResults := shared.GetPaginatedResponseWithPayload(results, pageParams)
+	response, err := helpers.appendFiltersToResponse(paginatedResults, categories)
+	if err != nil {
+		log.Error().Err(err).Msg("Error appending filters to response")
+		respondWithError(w, errIncompleteRequest)
+	}
 
-	response := shared.GetPaginatedResponseWithPayload(results, pageParams)
 	respondWithJSON(w, http.StatusOK, response)
 }
 
@@ -464,8 +476,13 @@ func (a *App) getCommunity(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) getCommunitiesForHomePage(w http.ResponseWriter, r *http.Request) {
 	pageParams := getPageParams(*r, 25)
+	isSearch := false
 
-	communities, totalRecords, err := models.GetCommunitiesForHomePage(a.DB, pageParams)
+	communities, totalRecords, err := models.GetDefaultCommunities(
+		a.DB,
+		pageParams,
+		isSearch,
+	)
 	if err != nil {
 		log.Error().Err(err).Msg("Error fetching communities for home page")
 		respondWithError(w, errIncompleteRequest)
