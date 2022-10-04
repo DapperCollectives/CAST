@@ -38,10 +38,9 @@ func TestGetNonExistentCommunity(t *testing.T) {
 	response := otu.GetCommunityAPI(420)
 	checkResponseCode(t, http.StatusBadRequest, response.Code)
 
-	var m map[string]string
-	json.Unmarshal(response.Body.Bytes(), &m)
-
-	assert.Equal(t, "ERR_1001", m["errorCode"])
+	var e errorResponse
+	json.Unmarshal(response.Body.Bytes(), &e)
+	assert.Equal(t, errIncompleteRequest, e)
 }
 
 func TestCreateCommunity(t *testing.T) {
@@ -259,7 +258,6 @@ func TestUpdateCommunity(t *testing.T) {
 
 	response = otu.UpdateCommunityAPI(oldCommunity.ID, payload)
 	checkResponseCode(t, http.StatusOK, response.Code)
-	fmt.Println(response.Code)
 
 	// Get community again for assertions
 	response = otu.GetCommunityAPI(oldCommunity.ID)

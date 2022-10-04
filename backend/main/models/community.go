@@ -308,6 +308,15 @@ func (c *Community) CanUpdateCommunity(db *s.Database, addr string) error {
 	return nil
 }
 
+func (c *Community) GetStrategy(name string) (Strategy, error) {
+	for _, s := range *c.Strategies {
+		if *s.Name == name {
+			return s, nil
+		}
+	}
+	return Strategy{}, fmt.Errorf("Strategy %s does not exist on community", name)
+}
+
 func SearchForCommunity(db *s.Database, query string) ([]Community, error) {
 	var communities []Community
 	rows, err := db.Conn.Query(
@@ -341,5 +350,5 @@ func MatchStrategyByProposal(s []Strategy, strategyToMatch string) (Strategy, er
 			return match, nil
 		}
 	}
-	return match, fmt.Errorf("Community does not have strategy avaliable")
+	return match, fmt.Errorf("Community does not have strategy available")
 }
