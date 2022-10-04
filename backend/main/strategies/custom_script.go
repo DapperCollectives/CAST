@@ -10,8 +10,8 @@ import (
 
 type CustomScript struct {
 	shared.StrategyStruct
-	SC shared.SnapshotClient
-	DB *shared.Database
+	DPS shared.DpsAdapter
+	DB  *shared.Database
 }
 
 func (cs *CustomScript) FetchBalance(
@@ -141,16 +141,12 @@ func (cs *CustomScript) GetVotes(
 	return votes, nil
 }
 
-func (cs *CustomScript) RequiresSnapshot() bool {
-	return false
-}
-
 func (cs *CustomScript) InitStrategy(
-	f *shared.FlowAdapter,
+	fa *shared.FlowAdapter,
 	db *shared.Database,
-	sc *shared.SnapshotClient,
+	dps *shared.DpsAdapter,
 ) {
-	cs.FlowAdapter = f
+	cs.FlowAdapter = fa
 	cs.DB = db
-	cs.SC = *sc
+	cs.DPS = *dps
 }
