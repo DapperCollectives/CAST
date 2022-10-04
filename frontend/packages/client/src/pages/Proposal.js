@@ -92,11 +92,12 @@ export default function ProposalPage() {
     }
   }, [forceLedger, setWebContextConfig]);
 
-  const { current } = descriptionRef;
-
   useEffect(() => {
-    console.log('descriptiont ref', current);
-  }, [current]);
+    const { current } = descriptionRef;
+    if (current?.clientHeight < 300) {
+      setIsCollaped(false);
+    }
+  }, [descriptionRef]);
 
   const { proposalId } = useParams();
 
@@ -567,7 +568,7 @@ export default function ProposalPage() {
                     />
                     {isCollaped && (
                       <>
-                        <fade />
+                        <div className="fade-proposal-description" />
                         <div className="is-flex flex-1 is-justify-content-center">
                           <div
                             className="button rounded-xl is-flex has-text-weight-bold has-background-white px-6"
