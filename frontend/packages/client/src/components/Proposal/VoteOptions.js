@@ -31,7 +31,7 @@ const TextBasedOptions = ({
         {choices.map((opt, i) => (
           <Wrapper
             key={`proposal-option-${i}`}
-            classNames="has-background-white border-light option-vote transition-all rounded-sm py-5 px-4 has-text-justified word-break"
+            classNames="has-background-white border-light option-vote transition-all rounded py-5 px-4 has-text-justified word-break"
             extraClasses={choices?.length !== i + 1 ? 'mb-5' : {}}
             extraStylesMobile={
               choices?.length !== i + 1 ? { marginBottom: '14px' } : {}
@@ -62,7 +62,7 @@ const TextBasedOptions = ({
         >
           <button
             style={{ height: 48, width: '100%' }}
-            className={`button vote-button transition-all is-flex has-background-yellow rounded-sm is-${
+            className={`button vote-button transition-all is-flex has-background-yellow rounded-xl is-${
               currentOption && !readOnly ? 'enabled' : 'disabled'
             }`}
             onClick={readOnly ? () => {} : onConfirmVote}
@@ -268,7 +268,7 @@ const VoteOptions = ({
     );
 
   const canVote = isActive && (hasntVoted || !loggedIn);
-  const voteClasses = `vote-options border-light rounded-sm mb-6 ${
+  const voteClasses = `vote-options border-light rounded mb-6 ${
     !canVote && 'is-disabled'
   } ${!hasntVoted && 'is-voted'}`;
 
@@ -300,6 +300,10 @@ const VoteOptions = ({
     onConfirmVote();
   };
 
+  console.log('previousVote', previousVote);
+  console.log('currentOption', currentOption);
+  console.log('castVote', castVote);
+
   return (
     <div className={voteClasses}>
       <Wrapper
@@ -311,8 +315,14 @@ const VoteOptions = ({
         extraClasses="px-6 pt-6 pb-6"
         extraClassesMobile="px-4 pt-6 pb-6"
       >
-        <h3 className={`is-size-5 `} style={{ lineHeight: '24px' }}>
-          Cast your vote
+        <h3
+          className={`is-size-5 has-text-weight-bold`}
+          style={{ lineHeight: '24px' }}
+        >
+          {!castVote && <>Cast your vote</>}
+          {castVote && !!currentOption && (
+            <>You successfully voted on this proposal!</>
+          )}
         </h3>
       </Wrapper>
       {!isImageChoice && (
