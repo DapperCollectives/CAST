@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useModalContext } from 'contexts/NotificationModal';
@@ -73,6 +73,7 @@ export default function ProposalPage() {
     summary: false,
   });
   const [isCollaped, setIsCollaped] = useState(true);
+  const descriptionRef = useRef();
   const [isStrategyModalOpen, setIsStrategyModalOpen] = useState(false);
 
   // setting this manually for users that do not have a ledger device
@@ -90,6 +91,12 @@ export default function ProposalPage() {
       setWebContextConfig({ forceLedger: true });
     }
   }, [forceLedger, setWebContextConfig]);
+
+  const { current } = descriptionRef;
+
+  useEffect(() => {
+    console.log('descriptiont ref', current);
+  }, [current]);
 
   const { proposalId } = useParams();
 
@@ -548,6 +555,7 @@ export default function ProposalPage() {
                       dangerouslySetInnerHTML={{
                         __html: htmlBody,
                       }}
+                      ref={descriptionRef}
                       style={
                         isCollaped
                           ? {
