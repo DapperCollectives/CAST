@@ -1,14 +1,16 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Link, useLocation, useParams } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useParams } from 'react-router-dom';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useModalContext } from 'contexts/NotificationModal';
 import { useWebContext } from 'contexts/Web3';
 import { Svg } from '@cast/shared-components';
 import {
+  CommunityName,
   Loader,
   Message,
   ProposalInformation,
   StrategyModal,
+  StyledStatusPill,
   Tablink,
   VotesList,
   WalletConnect,
@@ -16,7 +18,7 @@ import {
 } from 'components';
 import {
   CancelProposalModalConfirmation,
-  ProposalStatus,
+  HeaderNavigation,
   VoteOptions,
 } from 'components/Proposal';
 import {
@@ -70,6 +72,8 @@ export default function ProposalPage() {
     proposal: true,
     summary: false,
   });
+  const [isCollaped, setIsCollaped] = useState(true);
+  const descriptionRef = useRef();
   const [isStrategyModalOpen, setIsStrategyModalOpen] = useState(false);
 
   // setting this manually for users that do not have a ledger device
@@ -87,6 +91,13 @@ export default function ProposalPage() {
       setWebContextConfig({ forceLedger: true });
     }
   }, [forceLedger, setWebContextConfig]);
+
+  useEffect(() => {
+    const { current } = descriptionRef;
+    if (current?.clientHeight < 300) {
+      setIsCollaped(false);
+    }
+  }, [descriptionRef]);
 
   const { proposalId } = useParams();
 
@@ -369,17 +380,10 @@ export default function ProposalPage() {
       />
       <section className="section">
         <div className="container">
-          <WrapperResponsive
-            classNames="is-flex"
-            extraClasses="mb-6"
-            extraClassesMobile="mb-3"
-          >
-            <Link to={`/community/${proposal.communityId}?tab=proposals`}>
-              <span className="has-text-grey is-flex is-align-items-center back-button transition-all">
-                <Svg name="ArrowLeft" /> <span className="ml-3">Back</span>
-              </span>
-            </Link>
-          </WrapperResponsive>
+          <HeaderNavigation
+            communityId={proposal.communityId}
+            proposalId={proposal.id}
+          />
           {castVote && (
             <Message
               messageText={`You successfully voted for ${getVoteLabel(
@@ -391,37 +395,27 @@ export default function ProposalPage() {
           {cancelled && (
             <Message messageText={`This proposal has been cancelled`} />
           )}
-          <div className="is-flex is-justify-content-space-between column is-7 px-0">
-            <ProposalStatus
-              proposal={proposal}
-              className="is-flex is-align-items-center smaller-text"
-            />
-            {showCancelButton && canCancelProposal && (
-              <div className="is-flex is-align-items-center">
-                <button
-                  className="button is-white has-text-grey small-text"
-                  onClick={onCancelProposal}
-                >
-                  <div className="mr-2 is-flex is-align-items-center">
-                    <Svg name="Bin" />
-                  </div>
-                  <div className="is-flex is-align-items-center is-hidden-mobile">
-                    Cancel Proposal
-                  </div>
-                </button>
-              </div>
-            )}
-          </div>
           {/* Mobile version for tabs */}
           {!isNotMobile && (
             <div>
               <WrapperResponsive
                 as="h2"
-                classNames="title mt-5 is-4 has-text-black has-text-weight-normal"
-                extraStylesMobile={{ marginBottom: '30px' }}
+                classNames="title my-5 is-4 has-text-black has-text-weight-normal"
               >
                 {proposal.name}
               </WrapperResponsive>
+              <div
+                className="is-flex is-align-items-center"
+                style={{ marginBottom: '35px' }}
+              >
+                <CommunityName
+                  communityId={proposal.communityId}
+                  classNames="mr-3"
+                />
+                <StyledStatusPill
+                  status={FilterValues[proposal.computedStatus]}
+                />
+              </div>
               <div className="tabs is-medium">
                 <ul>
                   <li className={`${visibleTab.proposal ? 'is-active' : ''}`}>
@@ -519,14 +513,74 @@ export default function ProposalPage() {
               <div
                 className={`column is-7 p-0 is-flex is-flex-direction-column`}
               >
-                <h1 className="title mt-5 is-3">{proposal.name}</h1>
+                <h1 className="title is-3 mb-0">{proposal.name}</h1>
+                <div className="is-flex is-justify-content-space-between column px-0">
+                  <div className="is-flex is-align-items-center">
+                    <CommunityName
+                      communityId={proposal.communityId}
+                      classNames="mr-3"
+                    />
+                    <StyledStatusPill
+                      status={FilterValues[proposal.computedStatus]}
+                    />
+                  </div>
+                  {showCancelButton && canCancelProposal && (
+                    <div className="is-flex is-align-items-center">
+                      <button
+                        className="button is-white has-text-grey small-text"
+                        onClick={onCancelProposal}
+                      >
+                        <div className="mr-2 is-flex is-align-items-center">
+                          <Svg name="Bin" />
+                        </div>
+                        <div className="is-flex is-align-items-center is-hidden-mobile">
+                          Cancel Proposal
+                        </div>
+                      </button>
+                    </div>
+                  )}
+                </div>
+
                 {proposal.body && (
                   <div
-                    className="mt-6 mb-6 proposal-copy transition-all content"
-                    dangerouslySetInnerHTML={{
-                      __html: htmlBody,
-                    }}
-                  />
+                    style={
+                      isCollaped
+                        ? { position: 'relative', marginBottom: '80px' }
+                        : {}
+                    }
+                  >
+                    <div
+                      className={`mt-5 ${
+                        !isCollaped ? 'mb-6 ' : ''
+                      }proposal-copy transition-all content`}
+                      dangerouslySetInnerHTML={{
+                        __html: htmlBody,
+                      }}
+                      ref={descriptionRef}
+                      style={
+                        isCollaped
+                          ? {
+                              maxHeight: '300px',
+                              overflow: 'hidden',
+                            }
+                          : {}
+                      }
+                    />
+                    {isCollaped && (
+                      <>
+                        <div className="fade-proposal-description" />
+                        <div className="is-flex flex-1 is-justify-content-center">
+                          <div
+                            className="button rounded-xl is-flex has-text-weight-bold has-background-white px-6"
+                            style={{ minHeight: '48px', position: 'absolute' }}
+                            onClick={() => setIsCollaped(false)}
+                          >
+                            View Full Proposal
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 )}
                 {proposal.strategy === 'bpt' && (
                   <div className="mt-6 mb-6 has-background-white-ter has-text-grey p-5 rounded-sm">

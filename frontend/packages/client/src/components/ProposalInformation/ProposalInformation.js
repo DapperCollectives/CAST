@@ -47,12 +47,7 @@ const ProposalInformation = ({
   const { data: votingResults } = useVotingResults(proposalId);
 
   const { data: community } = useCommunityDetails(communityId);
-  const {
-    name: communityName,
-    logo: communityLogo,
-    slug: communitySlug,
-    strategies: commnunityStrategies,
-  } = community ?? {};
+  const { strategies: commnunityStrategies } = community ?? {};
 
   // Find contract information on community
   const contract =
@@ -160,9 +155,6 @@ const ProposalInformation = ({
           ipfsUrl={ipfsUrl}
           startTime={startTime}
           endTime={endTime}
-          communityName={communityName}
-          communityLogo={communityLogo}
-          communitySlug={communitySlug}
           communityId={communityId}
           tokenName={tokenName}
           maxWeight={maxWeight}
