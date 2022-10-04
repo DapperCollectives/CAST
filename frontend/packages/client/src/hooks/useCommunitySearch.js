@@ -19,13 +19,14 @@ const getPaginationFromPagesCustom = (pages) => {
   ];
 };
 
-export const getPlainDataCustom = (data) => {
-  const results = data?.pages?.reduce(
+export const getPlainDataCustom = (data = {}) => {
+  const { pages = [] } = data;
+  const results = pages?.reduce(
     (prev, current) =>
-      current.results.data ? [...prev, ...current.results.data] : prev,
+      current?.results?.data ? [...prev, ...current.results.data] : prev,
     []
   );
-  const [{ filters = [] } = {}] = data?.pages ?? [];
+  const [{ filters = [] } = {}] = pages ?? [];
   return { filters, results };
 };
 
