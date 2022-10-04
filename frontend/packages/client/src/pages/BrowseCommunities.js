@@ -74,6 +74,7 @@ export default function BrowseCommunities() {
     ...(selectedPills.includes('all') ? undefined : { filters: selectedPills }),
   });
 
+  console.log('searchTextParam', searchTextParam);
   const { filters, results: communitiesResult = [] } = communityResult;
 
   // first load
@@ -144,7 +145,10 @@ export default function BrowseCommunities() {
                     <FilterPill
                       key={`pill-${index}`}
                       onClick={addOrRemovePillFilter}
-                      text={updateText(pill.text, searchTextParam)}
+                      text={updateText(
+                        pill.text,
+                        searchTextParam === 'defaultFeatured'
+                      )}
                       amount={pill.amount}
                       selected={selectedPills.includes(
                         pill.text?.toLowerCase()
