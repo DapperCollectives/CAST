@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useModalContext } from 'contexts/NotificationModal';
@@ -73,6 +73,7 @@ export default function ProposalPage() {
     summary: false,
   });
   const [isCollaped, setIsCollaped] = useState(true);
+  const descriptionRef = useRef();
   const [isStrategyModalOpen, setIsStrategyModalOpen] = useState(false);
 
   // setting this manually for users that do not have a ledger device
@@ -90,6 +91,13 @@ export default function ProposalPage() {
       setWebContextConfig({ forceLedger: true });
     }
   }, [forceLedger, setWebContextConfig]);
+
+  useEffect(() => {
+    const { current } = descriptionRef;
+    if (current?.clientHeight < 300) {
+      setIsCollaped(false);
+    }
+  }, [descriptionRef]);
 
   const { proposalId } = useParams();
 
@@ -548,6 +556,7 @@ export default function ProposalPage() {
                       dangerouslySetInnerHTML={{
                         __html: htmlBody,
                       }}
+                      ref={descriptionRef}
                       style={
                         isCollaped
                           ? {
@@ -559,7 +568,7 @@ export default function ProposalPage() {
                     />
                     {isCollaped && (
                       <>
-                        <fade />
+                        <div className="fade-proposal-description" />
                         <div className="is-flex flex-1 is-justify-content-center">
                           <div
                             className="button rounded-xl is-flex has-text-weight-bold has-background-white px-6"

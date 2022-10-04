@@ -25,7 +25,7 @@ function Header(props) {
         id="navbar"
         className={`${props.location.pathname} has-background-white is-block navbar is-fixed-top`}
       >
-        <div className="px-4 divider">
+        <div className="px-6-desktop px-5-tablet px-4-mobile divider">
           <div className="container header-spacing">
             <nav className="navbar is-transparent">
               <div className="navbar-brand">

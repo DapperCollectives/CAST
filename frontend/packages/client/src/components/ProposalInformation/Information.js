@@ -25,9 +25,6 @@ export default function Information({
   startTime,
   endTime,
   ipfsUrl,
-  communityName,
-  communityLogo,
-  communitySlug,
   communityId,
   tokenName,
   maxWeight,
@@ -40,7 +37,11 @@ export default function Information({
       <p className="mb-5 medium-text has-text-weight-bold">Proposal Details</p>
       <InfoBlock
         title="Community"
-        component={<CommunityName communityId={communityId} />}
+        component={
+          <>
+            <CommunityName communityId={communityId} />
+          </>
+        }
       />
 
       <InfoBlock
