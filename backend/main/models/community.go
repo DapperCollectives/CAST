@@ -384,12 +384,13 @@ func SearchForCommunity(db *s.Database, query string, filters []string) ([]*Comm
 	if err != nil {
 		return nil, err
 	}
-
+	
 	rows, err := db.Conn.Query(
 		db.Context,
 		sql,
 		query,
 	)
+
 	if err != nil {
 		return []*Community{}, fmt.Errorf("error searching for a community with the the query %s", query)
 	}
@@ -406,7 +407,7 @@ func SearchForCommunity(db *s.Database, query string, filters []string) ([]*Comm
 
 func constructDynamicSql(query string, filters []string) (string, error) {
 	var sql string
-	if len(filters) == 0 {
+	if filters[0] != "" {
 		sql = SEARCH_COMMUNITIES_SQL + " AND ("
 		for i, filter := range filters {
 			if i == 0 {

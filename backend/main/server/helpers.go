@@ -486,6 +486,7 @@ func (h *Helpers) searchCommunities(
 			pageParams,
 			isSearch,
 		)
+
 		if err != nil {
 			log.Error().Err(err)
 			return nil, nil, err
@@ -504,7 +505,7 @@ func (h *Helpers) searchCommunities(
 		if err != nil {
 			return []*models.Community{}, nil, err
 		}
-
+		
 		categories := h.categoryCountToMap(results)
 		return results, categories, nil
 	}
