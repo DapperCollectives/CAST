@@ -3,7 +3,7 @@ export { default as Transactions } from './Transactions';
 export { default as WalletConnect } from './WalletConnect';
 export { default as Message } from './Message';
 export { default as VotesList } from './VotesList';
-export { ProposalInformation, CommunityName, CommunityName } from './ProposalInformation';
+export { ProposalInformation, CommunityName } from './ProposalInformation';
 export { default as StrategyModal } from './StrategyModal';
 export { default as StepByStep } from './StepByStep';
 export { default as StatusLabel } from './StatusLabel';
