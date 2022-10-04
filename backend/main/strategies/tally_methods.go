@@ -19,7 +19,6 @@ func RankedChoice(
 	proposal *models.Proposal,
 	isNFT bool,
 ) {
-	fmt.Println("here")
 	firstRank := 0
 
 	// Put choices into a map for tallying.

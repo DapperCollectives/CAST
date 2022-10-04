@@ -19,9 +19,6 @@ var VoteChoiceToId = map[string]string{
 }
 
 func TestRankedChoiceVoting(t *testing.T) {
-
-	fmt.Println("HERE")
-
 	c := strings.Fields("a b c d")
 	choices := make([]shared.Choice, 4)
 	for i := 0; i < len(c); i += 1 {
@@ -165,6 +162,8 @@ func TestSingleChoiceVoting(t *testing.T) {
 	c := strings.Fields("a b c d")
 	choices := make([]shared.Choice, 4)
 	for i := 0; i < len(c); i += 1 {
+		id := uint(i)
+		choices[i].ID = &id
 		choices[i].Choice_text = c[i]
 	}
 	computedStatus := "closed"
@@ -182,7 +181,7 @@ func TestSingleChoiceVoting(t *testing.T) {
 	t1Results := createProposalResults(proposal)
 	updateProposalResults(
 		t1Results,
-		"a:3 b:0 c:0 d:0",
+		"0:3 1:0 2:0 3:0",
 	)
 
 	// Random voting pattern
@@ -195,7 +194,7 @@ func TestSingleChoiceVoting(t *testing.T) {
 	t2Results := createProposalResults(proposal)
 	updateProposalResults(
 		t2Results,
-		"a:1 b:2 c:1 d:1",
+		"0:1 1:2 2:1 3:1",
 	)
 
 	subTests := []struct {
