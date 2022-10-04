@@ -446,7 +446,7 @@ func (h *Helpers) fetchCommunity(id int) (models.Community, error) {
 	return community, nil
 }
 
-func (h *Helpers) searchCommunities(query string) (interface{}, error) {
+func (h *Helpers) searchCommunities(query string) ([]models.Community, error) {
 	results, err := models.SearchForCommunity(h.A.DB, query)
 	if err != nil {
 		return []models.Community{}, err
