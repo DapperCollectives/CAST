@@ -37,6 +37,7 @@ export default {
         'Plus',
         'PlusLightFill',
         'RemoveLightFill',
+        'Search',
         'Star',
         'Twitter',
         'Upload',

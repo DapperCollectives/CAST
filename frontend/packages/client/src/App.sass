@@ -871,6 +871,31 @@ input[type=range].slider::-ms-fill-upper
 	.modal-error-footer
 		display: flex
 		padding-top: 24px	
+
+.search-container
+	min-height: 214px
+.search-input
+	width: 480px		
+.pill-border
+	border: 2px solid
+.pill-border-disabled
+	border: 2px solid #BFBFBF
+	color: #BFBFBF !important
+.has-border-success
+	border-color: $success
+.has-border-danger
+	border-color: $danger
+.has-border-yellow
+	border-color: $yellow
+.has-border-orange
+	border-color: $orange
+
+@include mobile	
+	.search-container
+		min-height: 249px
+	.search-input
+		width: 100%	
+
 .fade-proposal-description 
 	position: absolute
 	bottom: 1.5rem
