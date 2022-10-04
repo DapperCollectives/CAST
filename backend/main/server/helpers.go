@@ -115,7 +115,7 @@ func (h *Helpers) useStrategyFetchBalance(
 	if err != nil {
 		log.Error().Err(err).Msgf("User does not have the required balance %v.", v.Addr)
 		errResponse := errInsufficientBalance
-		errResponse.Details = fmt.Sprintf(errResponse.Details, strategy.Threshold, strategy.Name)
+		errResponse.Details = fmt.Sprintf(errResponse.Details, *strategy.Threshold, *strategy.Contract.Name)
 		return models.VoteWithBalance{}, errResponse
 	}
 
@@ -335,6 +335,7 @@ func (h *Helpers) createVote(r *http.Request, p models.Proposal) (*models.VoteWi
 
 	voteWithBalance, errResponse := h.useStrategyFetchBalance(v, p, s)
 	if errResponse != nilErr {
+		fmt.Println(errResponse)
 		return nil, errResponse
 	}
 
@@ -365,7 +366,7 @@ func (h *Helpers) insertVote(v models.VoteWithBalance, p models.Proposal) errorR
 	if err = p.ValidateBalance(weight); err != nil {
 		log.Error().Err(err).Msg("Account balance is too low to vote on this proposal.")
 		errResponse := errInsufficientBalance
-		errResponse.Details = fmt.Sprintf(errResponse.Details, strategy.Threshold, strategy.Name)
+		errResponse.Details = fmt.Sprintf(errResponse.Details, *strategy.Threshold, *strategy.Contract.Name)
 		return errResponse
 	}
 

@@ -57,7 +57,7 @@ var (
 		ErrorCode:  "ERR_1004",
 		Message:    "Insufficient Balance",
 		Details: `In order to vote on this proposal you must have a minimum 
-							balance of %d %s tokens in your wallet.`,
+							balance of %f %s tokens in your wallet.`,
 	}
 
 	errForbidden = errorResponse{

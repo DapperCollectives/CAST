@@ -48,7 +48,7 @@ var (
 		ErrorCode:  "ERR_1004",
 		Message:    "Insufficient Balance",
 		Details: `In order to vote on this proposal you must have a minimum 
-							balance of %d %s tokens in your wallet.`,
+							balance of %f %s tokens in your wallet.`,
 	}
 
 	errForbidden = errorResponse{
@@ -248,7 +248,7 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 	vote, errResponse := helpers.createVote(r, proposal)
 	if errResponse != nilErr {
 		log.Error().Err(err).Msg("Error creating vote.")
-		respondWithError(w, errInsufficientBalance)
+		respondWithError(w, errResponse)
 		return
 	}
 
