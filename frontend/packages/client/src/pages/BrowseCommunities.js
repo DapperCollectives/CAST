@@ -4,6 +4,7 @@ import { Svg } from '@cast/shared-components';
 import { FadeIn, FilterPill, Loader } from 'components';
 import CommunitiesPresenter from 'components/Community/CommunitiesPresenter';
 import { useCommunitySearch, useDebounce, useQueryParams } from 'hooks';
+import SectionContainer from 'layout/SectionContainer';
 
 const updateText = (text, isDefaultSearch) => {
   if (text === 'all' && isDefaultSearch) {
@@ -74,7 +75,6 @@ export default function BrowseCommunities() {
     ...(selectedPills.includes('all') ? undefined : { filters: selectedPills }),
   });
 
-  console.log('searchTextParam', searchTextParam);
   const { filters, results: communitiesResult = [] } = communityResult;
 
   // first load
@@ -161,38 +161,36 @@ export default function BrowseCommunities() {
         </section>
       </div>
 
-      <section className="section">
-        <div className="container">
-          {isLoadingSearch && !communitiesResult ? (
+      <SectionContainer>
+        {isLoadingSearch && !communitiesResult ? (
+          <FadeIn>
+            <div style={{ height: '50vh' }}>
+              <Loader fullHeight />
+            </div>
+          </FadeIn>
+        ) : (
+          <>
             <FadeIn>
-              <div style={{ height: '50vh' }}>
-                <Loader fullHeight />
-              </div>
-            </FadeIn>
-          ) : (
-            <>
-              <FadeIn>
-                {communitiesResult?.length > 0 ? (
-                  <CommunitiesPresenter
-                    titleClasses="is-size-3"
-                    title="Communities"
-                    communities={communitiesResult}
-                  />
-                ) : (
-                  <p className="is-size-3 has-text-weight-bold p-3-mobile">
-                    No communities were found.
-                  </p>
-                )}
-              </FadeIn>
-              {isFetchingNextPage && communitiesResult?.length > 0 && (
-                <div className="mt-6">
-                  <Loader size={18} fullHeight />
-                </div>
+              {communitiesResult?.length > 0 ? (
+                <CommunitiesPresenter
+                  titleClasses="is-size-3"
+                  title="Communities"
+                  communities={communitiesResult}
+                />
+              ) : (
+                <p className="is-size-3 has-text-weight-bold p-3-mobile">
+                  No communities were found.
+                </p>
               )}
-            </>
-          )}
-        </div>
-      </section>
+            </FadeIn>
+            {isFetchingNextPage && communitiesResult?.length > 0 && (
+              <div className="mt-6">
+                <Loader size={18} fullHeight />
+              </div>
+            )}
+          </>
+        )}
+      </SectionContainer>
     </>
   );
 }
