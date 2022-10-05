@@ -1,5 +1,4 @@
 import { WrapperResponsive as Wrapper } from 'components';
-import Checked from 'assets/checked-vote.svg';
 
 const TextBasedOptions = ({
   choices,
@@ -13,10 +12,6 @@ const TextBasedOptions = ({
   const _onOptionSelect = (event) => {
     onOptionSelect(event?.target?.value);
   };
-
-  const showVotedCheck = (value) =>
-    String(currentOption) === String(value) &&
-    String(previousVote) === String(value);
 
   return (
     <>
@@ -41,7 +36,6 @@ const TextBasedOptions = ({
                 className={`mr-3`}
                 onChange={_onOptionSelect}
                 checked={currentOption === String(opt.value)}
-                style={{ backgroundImage: `url(${Checked})` }}
               />
               <span />
               <div className="has-text-black" style={{ lineHeight: '22.4px' }}>
