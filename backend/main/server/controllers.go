@@ -14,63 +14,100 @@ import (
 )
 
 type errorResponse struct {
-	statusCode int
-	errorCode  string
-	message    string
-	details    string
+	StatusCode int		`json:"statusCode,string"`
+	ErrorCode  string	`json:"errorCode"`
+	Message    string	`json:"message"`
+	Details    string	`json:"details"`
 }
 
 var (
 	errIncompleteRequest = errorResponse{
-		statusCode: http.StatusBadRequest,
-		errorCode:  "ERR_1001",
-		message:    "Error",
-		details:    "There was an error trying to complete your request",
+		StatusCode: http.StatusBadRequest,
+		ErrorCode:  "ERR_1001",
+		Message:    "Error",
+		Details:    "There was an error trying to complete your request",
 	}
 
 	errCreateCommunity = errorResponse{
-		statusCode: http.StatusBadRequest,
-		errorCode:  "ERR_1002",
-		message:    "Error",
-		details:    "There was an error trying to create your community",
+		StatusCode: http.StatusBadRequest,
+		ErrorCode:  "ERR_1002",
+		Message:    "Error",
+		Details:    "There was an error trying to create your community",
 	}
 
 	errFetchingBalance = errorResponse{
-		statusCode: http.StatusBadRequest,
-		errorCode:  "ERR_1003",
-		message:    "Error Fetching Balance",
-		details: `While confirming your balance, we've encountered an error
+		StatusCode: http.StatusBadRequest,
+		ErrorCode:  "ERR_1003",
+		Message:    "Error Fetching Balance",
+		Details: `While confirming your balance, we've encountered an error
 							connecting to the Flow Blockchain.`,
 	}
 
 	errInsufficientBalance = errorResponse{
-		statusCode: http.StatusUnauthorized,
-		errorCode:  "ERR_1004",
-		message:    "Insufficient Balance",
-		details: `In order to vote on this proposal you must have a minimum 
-							balance of %d %s tokens in your wallet.`,
+		StatusCode: http.StatusUnauthorized,
+		ErrorCode:  "ERR_1004",
+		Message:    "Insufficient Balance",
+		Details: `In order to vote on this proposal you must have a minimum 
+							balance of %f %s tokens in your wallet.`,
 	}
 
 	errForbidden = errorResponse{
-		statusCode: http.StatusForbidden,
-		errorCode:  "ERR_1005",
-		message:    "Forbidden",
-		details:    "You are not authorized to perform this action.",
+		StatusCode: http.StatusForbidden,
+		ErrorCode:  "ERR_1005",
+		Message:    "Forbidden",
+		Details:    "You are not authorized to perform this action.",
 	}
 
 	errCreateProposal = errorResponse{
-		statusCode: http.StatusForbidden,
-		errorCode:  "ERR_1006",
-		message:    "Error",
-		details:    "There was an error trying to create your proposal",
+		StatusCode: http.StatusForbidden,
+		ErrorCode:  "ERR_1006",
+		Message:    "Error",
+		Details:    "There was an error trying to create your proposal",
 	}
 
 	errUpdateCommunity = errorResponse{
-		statusCode: http.StatusForbidden,
-		errorCode:  "ERR_1007",
-		message:    "Error",
-		details:    "There was an error trying to update your community",
+		StatusCode: http.StatusForbidden,
+		ErrorCode:  "ERR_1007",
+		Message:    "Error",
+		Details:    "There was an error trying to update your community",
 	}
+
+	errStrategyNotFound = errorResponse{
+		StatusCode: http.StatusNotFound,
+		ErrorCode:  "ERR_1008",
+		Message:    "Strategy Not Found",
+		Details:    "The strategy name you are trying to use no longer exists.",
+	}
+
+	errAlreadyVoted = errorResponse{
+		StatusCode: http.StatusBadRequest,
+		ErrorCode:  "ERR_1009",
+		Message:    "Error",
+		Details:    "Address %s has already voted for proposal %d.",
+	}
+
+	errInactiveProposal = errorResponse{
+		StatusCode: http.StatusBadRequest,
+		ErrorCode:  "ERR_1010",
+		Message:    "Error",
+		Details:    "Cannot vote on an inactive proposal.",
+	}
+
+	errGetCommunity = errorResponse{
+		StatusCode: http.StatusInternalServerError,
+		ErrorCode:  "ERR_1011",
+		Message:    "Error",
+		Details:    "There was an error retrieving the community.",
+	}
+
+	errCreateVote = errorResponse{
+		StatusCode: http.StatusInternalServerError,
+		ErrorCode:  "ERR_1012",
+		Message:    "Error",
+		Details:    "There was an error creating the vote.",
+	}
+
+	nilErr = errorResponse{}
 )
 
 // Payload Structs
@@ -224,10 +261,10 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	voteWithBalance, err := helpers.createVote(vote, proposal)
-	if err != nil {
+	voteWithBalance, errResponse := helpers.createVote(vote, proposal)
+	if errResponse != nilErr {
 		log.Error().Err(err).Msg("Error creating vote.")
-		respondWithError(w, errInsufficientBalance)
+		respondWithError(w, errResponse)
 		return
 	}
 
@@ -296,10 +333,10 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	proposal, err := helpers.createProposal(p)
-	if err != nil {
+	proposal, errResponse := helpers.createProposal(p)
+	if errResponse != nilErr {
 		log.Error().Err(err).Msg("Error creating proposal")
-		respondWithError(w, errIncompleteRequest)
+		respondWithError(w, errResponse)
 		return
 	}
 
@@ -323,7 +360,8 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check that status update is valid
-	// For now we are assuming proposals are creating with status 'published' and may be cancelled.
+	// For now we are assuming proposals are creating with
+	// status 'published' and may be cancelled.
 	if payload.Status != "cancelled" {
 		log.Error().Err(err).Msg("Invalid status update")
 		respondWithError(w, errIncompleteRequest)
@@ -644,7 +682,7 @@ func (a *App) createListForCommunity(w http.ResponseWriter, r *http.Request) {
 	l, httpStatus, err := helpers.createListForCommunity(payload)
 	if err != nil {
 		log.Error().Err(err).Msg("Error creating list for community")
-		errIncompleteRequest.statusCode = httpStatus
+		errIncompleteRequest.StatusCode = httpStatus
 		respondWithError(w, errIncompleteRequest)
 		return
 	}
@@ -671,7 +709,7 @@ func (a *App) addAddressesToList(w http.ResponseWriter, r *http.Request) {
 	httpStatus, err := helpers.updateAddressesInList(id, payload, "add")
 	if err != nil {
 		log.Error().Err(err).Msg("Error adding addresses to list")
-		errIncompleteRequest.statusCode = httpStatus
+		errIncompleteRequest.StatusCode = httpStatus
 		respondWithError(w, errCreateCommunity)
 		return
 	}
@@ -698,7 +736,7 @@ func (a *App) removeAddressesFromList(w http.ResponseWriter, r *http.Request) {
 	httpStatus, err := helpers.updateAddressesInList(id, payload, "remove")
 	if err != nil {
 		log.Error().Err(err).Msg("Error removing addresses from list")
-		errIncompleteRequest.statusCode = httpStatus
+		errIncompleteRequest.StatusCode = httpStatus
 		respondWithError(w, errIncompleteRequest)
 		return
 	}
@@ -743,7 +781,7 @@ func (a *App) createCommunityUser(w http.ResponseWriter, r *http.Request) {
 	httpStatus, err := helpers.createCommunityUser(payload)
 	if err != nil {
 		log.Error().Err(err).Msg("Error creating community user")
-		errCreateCommunity.statusCode = httpStatus
+		errCreateCommunity.StatusCode = httpStatus
 		respondWithError(w, errCreateCommunity)
 		return
 	}
@@ -801,6 +839,7 @@ func (a *App) getCommunityUsersByType(w http.ResponseWriter, r *http.Request) {
 		userType,
 		pageParams,
 	)
+
 	if err != nil {
 		log.Error().Err(err).Msg("Error getting community users")
 		respondWithError(w, errIncompleteRequest)
@@ -912,10 +951,11 @@ func (a *App) getBalanceAtBlockheight(w http.ResponseWriter, r *http.Request) {
 /////////////
 
 func respondWithError(w http.ResponseWriter, err errorResponse) {
-	respondWithJSON(w, err.statusCode, map[string]string{
-		"errorCode": err.errorCode,
-		"message":   err.message,
-		"details":   err.details,
+	respondWithJSON(w, err.StatusCode, map[string]string{
+		"statusCode": strconv.Itoa(err.StatusCode),
+		"errorCode": err.ErrorCode,
+		"message":   err.Message,
+		"details":   err.Details,
 	})
 }
 

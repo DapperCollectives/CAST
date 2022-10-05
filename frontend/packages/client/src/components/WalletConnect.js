@@ -83,10 +83,10 @@ const SignInOutButton = ({
             ? { width: '100%', height: '48px' }
             : notMobile
             ? {
-                width: '206px',
+                width: '159px',
                 height: '40px',
               }
-            : { width: '105px', height: '32px' }
+            : { width: '121px', height: '32px' }
         }
       >
         <span className="has-text-weight-bold">Connect</span>
@@ -124,7 +124,7 @@ const SignInOutButton = ({
                 scale={4}
                 className="blockies"
               />
-              <div className="is-flex flex-1 is-justify-content-flex-end">
+              <div className="is-flex flex-1 is-justify-content-flex-end pr-1-mobile">
                 <p className={addressStyle}>{truncateAddress(addr, 4, 4)}</p>
               </div>
             </div>

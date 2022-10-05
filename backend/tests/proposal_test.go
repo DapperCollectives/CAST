@@ -40,9 +40,12 @@ func TestGetProposal(t *testing.T) {
 
 		CheckResponseCode(t, http.StatusForbidden, response.Code)
 
-		var m map[string]string
-		json.Unmarshal(response.Body.Bytes(), &m)
-		assert.Equal(t, "ERR_1001", m["errorCode"])
+		expectedErr := errIncompleteRequest
+		expectedErr.StatusCode = http.StatusForbidden
+
+		var e errorResponse
+		json.Unmarshal(response.Body.Bytes(), &e)
+		assert.Equal(t, expectedErr, e)
 	})
 
 	t.Run("Should fetch existing proposal by ID", func(t *testing.T) {
@@ -88,10 +91,12 @@ func TestCreateProposal(t *testing.T) {
 
 		CheckResponseCode(t, http.StatusForbidden, response.Code)
 
-		var m map[string]interface{}
-		json.Unmarshal(response.Body.Bytes(), &m)
+		expectedErr := errForbidden
+		expectedErr.StatusCode = http.StatusForbidden
 
-		assert.Equal(t, "ERR_1001", m["errorCode"])
+		var e errorResponse
+		json.Unmarshal(response.Body.Bytes(), &e)
+		assert.Equal(t, expectedErr, e)
 	})
 
 	t.Run("Should throw an error if timestamp is more than 60 seconds", func(t *testing.T) {
@@ -107,9 +112,12 @@ func TestCreateProposal(t *testing.T) {
 
 		CheckResponseCode(t, http.StatusForbidden, response.Code)
 
-		var m map[string]interface{}
-		json.Unmarshal(response.Body.Bytes(), &m)
-		assert.Equal(t, "ERR_1001", m["errorCode"])
+		expectedErr := errForbidden
+		expectedErr.StatusCode = http.StatusForbidden
+
+		var e errorResponse
+		json.Unmarshal(response.Body.Bytes(), &e)
+		assert.Equal(t, expectedErr, e)
 	})
 }
 
