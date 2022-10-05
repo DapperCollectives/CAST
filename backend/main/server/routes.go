@@ -52,6 +52,5 @@ func (a *App) initializeRoutes() {
 	// Utilities
 	a.Router.HandleFunc("/accounts/admin", a.getAdminList).Methods("GET")
 	a.Router.HandleFunc("/accounts/blocklist", a.getCommunityBlocklist).Methods("GET")
-	a.Router.HandleFunc("/accounts/{addr:0x[a-zA-Z0-9]{16}}/{blockHeight:[0-9]+}", a.getAccountAtBlockHeight).Methods("GET")
 
 }

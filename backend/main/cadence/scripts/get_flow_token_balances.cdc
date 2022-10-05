@@ -1,9 +1,9 @@
-import FlowStorageFees from 0xe467b9dd11fa00df
-import FungibleToken from 0xf233dcee88fe0abe
-import FlowToken from 0x1654653399040a61
-import FlowIDTableStaking from 0x8624b52f9ddcd04a
-import LockedTokens from 0x8d0e87b65159ae63
-import FlowStakingCollection from 0x8d0e87b65159ae63
+import FlowStorageFees from "FLOW_STORAGE_FEES"
+import FungibleToken from "FUNGIBLE_TOKEN_ADDRESS"
+import FlowToken from "FLOW_TOKEN_ADDRESS"
+import FlowIDTableStaking from "FLOW_ID_TABLE_STAKING"
+import LockedTokens from "LOCKED_TOKENS"
+import FlowStakingCollection from "FLOW_STAKING_COLLECTION"
 
 // This script gets the TOTAL number of FLOW an account owns, across unlocked, locked, and staking.
 
@@ -122,47 +122,44 @@ pub fun getStakesAndDelegations(_ account: PublicAccount) : {String:UFix64} {
 pub fun main(address: Address): [AnyStruct] {
         var info: AccountInfo = AccountInfo()
 
-        let account = getAccount(address)
+    // If the account is an unlocked account, lets collect its balances
+    if account.getLinkTarget(/public/lockedFlowTokenReceiver) == nil {
+        info.hasVault = true
 
-        // If the account is an unlocked account, lets collect its balances
-        if account.getLinkTarget(/public/lockedFlowTokenReceiver) == nil {
-            info.hasVault = true
-
-            if account.storageUsed > 0 as UInt64 {
-                // Get the primary/normal account balance (unlocked tokens)
-                if let vaultRef = account.getCapability(/public/flowTokenBalance)
-                    .borrow<&FlowToken.Vault{FungibleToken.Balance}>(){
-                    info.primaryAcctBalance = vaultRef.balance
-                }
-                // Accounts 0xf8ded0f117ba2462 and 0x3112dbb9973ff3ad have the same locked account 0x1cb9692c064024bd and the same stake id.
-                // This is expected, this was made manually. 0xf8ded0f117ba2462 has all keys revoked, and is safe to skip.
-                if account.address != 0xf8ded0f117ba2462 {
-
-                    let lockedAccountInfoCap = account
-                        .getCapability<&LockedTokens.TokenHolder{LockedTokens.LockedAccountInfo}>(
-                            LockedTokens.LockedAccountInfoPublicPath)
-
-                    // Get secondary/locked account address and balance
-                    if let lockedAccountInfoRef = lockedAccountInfoCap.borrow() {
-                        info.secondaryAddress = lockedAccountInfoRef.getLockedAccountAddress() as Address?
-                        // `+ FlowStorageFees.minimumStorageReservation` is due to https://github.com/onflow/flow-core-contracts/blob/6fcd492d16186e5615d2e6589bc5b7ebce41f548/contracts/LockedTokens.cdc#L308
-                        info.secondaryAcctBalance = lockedAccountInfoRef.getLockedAccountBalance() + FlowStorageFees.minimumStorageReservation
-                    }
-                
-                    // Get stakes and delegations of the account and secondary/locked account
-                    let stakes = getStakesAndDelegations(account)
-
-                    var stakeKey = ""
-                    for key in stakes.keys {
-                        let value = stakes[key]!
-                        stakeKey = stakeKey.concat(key).concat(", ")
-                        info.stakedBalance = info.stakedBalance + value
-                    }
-                    info.stakes = stakeKey
-                }
-            } else {
-                info.hasVault = false
+        if account.storageUsed > 0 as UInt64 {
+            // Get the primary/normal account balance (unlocked tokens)
+            if let vaultRef = account.getCapability(/public/flowTokenBalance)
+                .borrow<&FlowToken.Vault{FungibleToken.Balance}>(){
+                info.primaryAcctBalance = vaultRef.balance
             }
+            // Accounts 0xf8ded0f117ba2462 and 0x3112dbb9973ff3ad have the same locked account 0x1cb9692c064024bd and the same stake id.
+            // This is expected, this was made manually. 0xf8ded0f117ba2462 has all keys revoked, and is safe to skip.
+            if account.address != 0xf8ded0f117ba2462 {
+
+                let lockedAccountInfoCap = account
+                    .getCapability<&LockedTokens.TokenHolder{LockedTokens.LockedAccountInfo}>(
+                        LockedTokens.LockedAccountInfoPublicPath)
+
+                // Get secondary/locked account address and balance
+                if let lockedAccountInfoRef = lockedAccountInfoCap.borrow() {
+                    info.secondaryAddress = lockedAccountInfoRef.getLockedAccountAddress() as Address?
+                    // `+ FlowStorageFees.minimumStorageReservation` is due to https://github.com/onflow/flow-core-contracts/blob/6fcd492d16186e5615d2e6589bc5b7ebce41f548/contracts/LockedTokens.cdc#L308
+                    info.secondaryAcctBalance = lockedAccountInfoRef.getLockedAccountBalance() + FlowStorageFees.minimumStorageReservation
+                }
+            
+                // Get stakes and delegations of the account and secondary/locked account
+                let stakes = getStakesAndDelegations(account)
+
+                var stakeKey = ""
+                for key in stakes.keys {
+                    let value = stakes[key]!
+                    stakeKey = stakeKey.concat(key).concat(", ")
+                    info.stakedBalance = info.stakedBalance + value
+                }
+                info.stakes = stakeKey
+            }
+        } else {
+            info.hasVault = false
         }
 
     return [info.primaryAcctBalance, info.secondaryAcctBalance, info.stakedBalance]

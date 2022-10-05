@@ -45,6 +45,7 @@ type App struct {
 	DB          *shared.Database
 	IpfsClient  *shared.IpfsClient
 	FlowAdapter *shared.FlowAdapter
+	DpsAdapter  *shared.DpsAdapter
 
 	TxOptionsAddresses []string
 	Env                string
@@ -54,12 +55,11 @@ type App struct {
 }
 
 type Strategy interface {
-	TallyVotes(votes []*models.VoteWithBalance, p *models.ProposalResults, proposal *models.Proposal) (models.ProposalResults, error)
+	TallyVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) (models.ProposalResults, error)
 	GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error)
 	GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error)
 	InitStrategy(f *shared.FlowAdapter, db *shared.Database)
 	FetchBalance(b *models.Balance, p *models.Proposal) (*models.Balance, error)
-	RequiresSnapshot() bool
 }
 
 var strategyMap = map[string]Strategy{

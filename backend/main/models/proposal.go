@@ -123,6 +123,12 @@ func (p *Proposal) GetProposalById(db *s.Database) error {
 }
 
 func (p *Proposal) CreateProposal(db *s.Database) error {
+	// Assign IDs to choices
+	for i := range p.Choices {
+		choiceID := uint(i)
+		p.Choices[i].ID = &choiceID
+	}
+
 	err := db.Conn.QueryRow(db.Context,
 		`
 	INSERT INTO proposals(community_id, 

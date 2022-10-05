@@ -110,6 +110,16 @@ var (
 	nilErr = errorResponse{}
 )
 
+// Payload Structs
+
+type GetBalanceAtBlockheightPayload struct {
+	Address     string           `json:"address"`
+	Blockheight uint64           `json:"blockheight"`
+	Contract    *shared.Contract `json:"contract,omitempty"`
+}
+
+// Route controller functions
+
 func (a *App) health(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, "OK!!")
 }
@@ -135,7 +145,7 @@ func (a *App) upload(w http.ResponseWriter, r *http.Request) {
 // Votes
 func (a *App) getResultsForProposal(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	proposal, err := helpers.fetchProposal(vars, "proposalId")
+	proposal, _ := helpers.fetchProposal(vars, "proposalId")
 
 	votes, err := models.GetAllVotesForProposal(a.DB, proposal.ID, *proposal.Strategy)
 	if err != nil {
@@ -236,8 +246,14 @@ func (a *App) getVotesForAddress(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
+	var vote models.Vote
+	if err := validatePayload(r.Body, &vote); err != nil {
+		log.Error().Err(err).Msg("Error validating payload")
+		respondWithError(w, errIncompleteRequest)
+		return
+	}
+	
 	vars := mux.Vars(r)
-
 	proposal, err := helpers.fetchProposal(vars, "proposalId")
 	if err != nil {
 		log.Error().Err(err).Msg("Invalid Proposal ID.")
@@ -252,7 +268,7 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondWithJSON(w, http.StatusCreated, vote)
+	respondWithJSON(w, http.StatusCreated, voteWithBalance)
 }
 
 // Proposals
@@ -976,6 +992,21 @@ func (a *App) removeUserRole(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondWithJSON(w, http.StatusOK, "OK")
+}
+
+func (a *App) getBalanceAtBlockheight(w http.ResponseWriter, r *http.Request) {
+	var payload GetBalanceAtBlockheightPayload
+	if err := validatePayload(r.Body, &payload); err != nil {
+		respondWithError(w, errIncompleteRequest)
+	}
+
+	result, err := a.DpsAdapter.GetBalanceAtBlockheight(payload.Address, payload.Blockheight, payload.Contract)
+	if err != nil {
+		log.Error().Err(err).Msg("error fetching balance at blockheight")
+		respondWithError(w, errFetchingBalance)
+	}
+
+	respondWithJSON(w, http.StatusOK, result)
 }
 
 /////////////

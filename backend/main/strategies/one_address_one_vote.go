@@ -37,12 +37,12 @@ func (s *OneAddressOneVote) FetchBalance(
 
 func (s *OneAddressOneVote) TallyVotes(
 	votes []*models.VoteWithBalance,
-	r *models.ProposalResults,
 	proposal *models.Proposal,
 ) (models.ProposalResults, error) {
+	r := models.NewProposalResults(proposal.ID, proposal.Choices)
 
 	for _, vote := range votes {
-		r.Results[vote.Choice]++
+		r.Results[vote.Choices[0]]++
 	}
 
 	return *r, nil
@@ -77,10 +77,6 @@ func (s *OneAddressOneVote) GetVotes(
 	}
 
 	return votes, nil
-}
-
-func (s *OneAddressOneVote) RequiresSnapshot() bool {
-	return false
 }
 
 func (s *OneAddressOneVote) InitStrategy(

@@ -79,21 +79,16 @@ func (b *BalanceOfNfts) queryNFTs(
 
 func (b *BalanceOfNfts) TallyVotes(
 	votes []*models.VoteWithBalance,
-	r *models.ProposalResults,
 	proposal *models.Proposal,
 ) (models.ProposalResults, error) {
+	r := models.NewProposalResults(proposal.ID, proposal.Choices)
 
-	for _, vote := range votes {
-		if len(vote.NFTs) != 0 {
-			var voteWeight float64
-
-			voteWeight, err := b.GetVoteWeightForBalance(vote, proposal)
-			if err != nil {
-				return models.ProposalResults{}, err
-			}
-
-			r.Results[vote.Choice] += int(voteWeight)
-			r.Results_float[vote.Choice] += voteWeight
+	if proposal.TallyMethod == "ranked-choice" {
+		RankedChoice(votes, r, proposal, true)
+	} else {
+		err := SingleChoiceNFT(votes, r, proposal, b.GetVoteWeightForBalance)
+		if err != nil {
+			return models.ProposalResults{}, err
 		}
 	}
 
@@ -129,12 +124,8 @@ func (b *BalanceOfNfts) GetVotes(
 	return votes, nil
 }
 
-func (b *BalanceOfNfts) RequiresSnapshot() bool {
-	return false
-}
-
-func (b *BalanceOfNfts) InitStrategy(
-	f *shared.FlowAdapter,
+func (s *BalanceOfNfts) InitStrategy(
+	fa *shared.FlowAdapter,
 	db *shared.Database,
 ) {
 	b.FlowAdapter = f

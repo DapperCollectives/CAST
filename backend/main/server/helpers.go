@@ -44,8 +44,7 @@ func (h *Helpers) useStrategyTally(
 		return models.ProposalResults{}, errors.New("Strategy not found.")
 	}
 
-	proposalInitialized := models.NewProposalResults(p.ID, p.Choices)
-	results, err := s.TallyVotes(v, proposalInitialized, &p)
+	results, err := s.TallyVotes(v, &p)
 	if err != nil {
 		return models.ProposalResults{}, err
 	}
@@ -566,6 +565,7 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorRespo
 	if err := h.enforceCommunityRestrictions(community, p, strategy); err != nil {
 		return models.Proposal{}, errIncompleteRequest
 	}
+	p.Block_height = &blockheight
 
 	p.Cid, err = h.pinJSONToIpfs(p)
 	if err != nil {

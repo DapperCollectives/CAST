@@ -5,8 +5,7 @@ import (
 	"math"
 
 	"github.com/DapperCollectives/CAST/backend/main/models"
-	s "github.com/DapperCollectives/CAST/backend/main/shared"
-	shared "github.com/DapperCollectives/CAST/backend/main/shared"
+	"github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/rs/zerolog/log"
 )
 
@@ -50,7 +49,16 @@ func (s *TokenWeightedDefault) FetchBalanceFromSnapshot(
 ) error {
 
 	var ftBalance = &shared.FTBalanceResponse{}
-	ftBalance.NewFTBalance()
+	var err error
+	ftBalance, err = s.DPS.GetBalanceAtBlockheight(
+		b.Addr,
+		b.BlockHeight,
+		&strategy.Contract,
+	)
+	if err != nil {
+		log.Error().Err(err).Msg("Error fetching balance from DPS")
+		return err
+	}
 
 	if *strategy.Contract.Name == "FlowToken" {
 		if err := s.FlowAdapter.GetAddressBalanceAtBlockHeight(
@@ -86,9 +94,9 @@ func (s *TokenWeightedDefault) FetchBalanceFromSnapshot(
 
 func (s *TokenWeightedDefault) TallyVotes(
 	votes []*models.VoteWithBalance,
-	r *models.ProposalResults,
 	p *models.Proposal,
 ) (models.ProposalResults, error) {
+	r := models.NewProposalResults(p.ID, p.Choices)
 
 	for _, vote := range votes {
 		if vote.PrimaryAccountBalance != nil {
@@ -100,8 +108,8 @@ func (s *TokenWeightedDefault) TallyVotes(
 				allowedBalance = float64(*vote.PrimaryAccountBalance)
 			}
 
-			r.Results[vote.Choice] += int(allowedBalance)
-			r.Results_float[vote.Choice] += allowedBalance * math.Pow(10, -8)
+			r.Results[vote.Choices[0]] += int(allowedBalance)
+			r.Results_float[vote.Choices[0]] += allowedBalance * math.Pow(10, -8)
 		}
 	}
 
@@ -151,14 +159,10 @@ func (s *TokenWeightedDefault) GetVotes(
 	return votes, nil
 }
 
-func (s *TokenWeightedDefault) RequiresSnapshot() bool {
-	return true
-}
-
 func (s *TokenWeightedDefault) InitStrategy(
-	f *shared.FlowAdapter,
+	fa *shared.FlowAdapter,
 	db *shared.Database,
 ) {
-	s.FlowAdapter = f
+	s.FlowAdapter = fa
 	s.DB = db
 }

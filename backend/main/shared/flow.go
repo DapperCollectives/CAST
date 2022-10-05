@@ -38,28 +38,39 @@ type FlowContract struct {
 }
 
 type FlowConfig struct {
-	Contracts map[string]FlowContract `json:"contracts"`
-	Networks  map[string]string       `json:"networks"`
+	Contracts   map[string]FlowContract `json:"contracts"`
+	Networks    map[string]string       `json:"networks"`
+	DpsNetworks map[string]string       `json:"networksDps"`
 }
 
 type Contract struct {
-	Name           *string  `json:"name,omitempty"`
-	Addr           *string  `json:"addr,omitempty"`
-	Public_path    *string  `json:"publicPath,omitempty"`
+	Name           *string `json:"name,omitempty"`
+	Addr           *string `json:"addr,omitempty"`
+	Public_path    *string `json:"publicPath,omitempty"`
 	Threshold      *float64 `json:"threshold,omitempty,string"`
 	MaxWeight      *float64 `json:"maxWeight,omitempty,string"`
-	Float_event_id *uint64  `json:"floatEventId,omitempty,string"`
-	Script         *string  `json:"script,omitempty"`
+	Float_event_id *uint64 `json:"floatEventId,omitempty,string"`
+	Script         *string `json:"script,omitempty"`
+	TallyMethod	   *string `json:"tallyMethod,omitempty"`
 }
 
 var (
-	placeholderTokenName            = regexp.MustCompile(`"[^"\s]*TOKEN_NAME"`)
+	// Custom
+	placeholderTokenName            = regexp.MustCompile(`"[^"]*TOKEN_NAME"`)
 	placeholderTokenAddr            = regexp.MustCompile(`"[^"\s]*TOKEN_ADDRESS"`)
-	placeholderFungibleTokenAddr    = regexp.MustCompile(`"[^"\s]*FUNGIBLE_TOKEN_ADDRESS"`)
-	placeholderNonFungibleTokenAddr = regexp.MustCompile(`"[^"\s]*NON_FUNGIBLE_TOKEN_ADDRESS"`)
-	placeholderMetadataViewsAddr    = regexp.MustCompile(`"[^"\s]*METADATA_VIEWS_ADDRESS"`)
+	placeholderTokenBalancePath     = regexp.MustCompile(`"[^"\s]*TOKEN_BALANCE_PATH"`)
 	placeholderCollectionPublicPath = regexp.MustCompile(`"[^"\s]*COLLECTION_PUBLIC_PATH"`)
-	placeholderTopshotAddr          = regexp.MustCompile(`"[^"\s]*TOPSHOT_ADDRESS"`)
+
+	// Static
+	placeholderFungibleTokenAddr     = regexp.MustCompile(`"[^"]*FUNGIBLE_TOKEN_ADDRESS"`)
+	placeholderNonFungibleTokenAddr  = regexp.MustCompile(`"[^"]*NON_FUNGIBLE_TOKEN_ADDRESS"`)
+	placeholderMetadataViewsAddr     = regexp.MustCompile(`"[^"\s]*METADATA_VIEWS_ADDRESS"`)
+	placeholderFlowTokenAddr         = regexp.MustCompile(`"[^"\s]*FLOW_TOKEN_ADDRESS"`)
+	placeholderFlowStorageFeesAddr   = regexp.MustCompile(`"[^"\s]*FLOW_STORAGE_FEES"`)
+	placeholderFlowIdTableStaking    = regexp.MustCompile(`"[^"\s]*FLOW_ID_TABLE_STAKING"`)
+	placeholderFlowStakingCollection = regexp.MustCompile(`"[^"\s]*FLOW_STAKING_COLLECTION"`)
+	placeholderLockedTokens          = regexp.MustCompile(`"[^"\s]*LOCKED_TOKENS"`)
+	placeholderTopshotAddr           = regexp.MustCompile(`"[^"\s]*TOPSHOT_ADDRESS"`)
 )
 
 func NewFlowClient(flowEnv string, customScriptsMap map[string]CustomScript) *FlowAdapter {
@@ -118,12 +129,12 @@ func (fa *FlowAdapter) GetAccountAtBlockHeight(addr string, blockheight uint64) 
 	return fa.Client.GetAccountAtBlockHeight(fa.Context, hexAddr, blockheight)
 }
 
-func (fa *FlowAdapter) GetCurrentBlockHeight() (int, error) {
+func (fa *FlowAdapter) GetCurrentBlockHeight() (uint64, error) {
 	block, err := fa.Client.GetLatestBlock(fa.Context, true)
 	if err != nil {
 		return 0, err
 	}
-	return int(block.Height), nil
+	return block.Height, nil
 }
 
 func (fa *FlowAdapter) GetAddressBalanceAtBlockHeight(addr string, blockHeight uint64, balanceResponse *FTBalanceResponse, contract *Contract) error {
@@ -234,14 +245,16 @@ func (fa *FlowAdapter) EnforceTokenThreshold(scriptPath, creatorAddr string, c *
 
 	var cadenceValue cadence.Value
 
+	// Set script contract addresses & paths
+	script := fa.Config.InsertCoreContractAddresses(string(_script))
+	script = fa.Config.InsertTokenContract(script, c)
+
 	if scriptPath == "./main/cadence/scripts/get_nfts_ids.cdc" {
-		isFungible := false
-		script = fa.ReplaceContractPlaceholders(string(script[:]), c, isFungible)
 
 		//call the non-fungible token script to verify balance
 		cadenceValue, err = fa.Client.ExecuteScriptAtLatestBlock(
 			fa.Context,
-			script,
+			[]byte(script),
 			[]cadence.Value{
 				cadenceAddress,
 			})
@@ -255,13 +268,10 @@ func (fa *FlowAdapter) EnforceTokenThreshold(scriptPath, creatorAddr string, c *
 		balance = float64(len(nftIds))
 
 	} else {
-		isFungible := true
-		script = fa.ReplaceContractPlaceholders(string(script[:]), c, isFungible)
-
 		//call the fungible-token script to verify balance
 		cadenceValue, err = fa.Client.ExecuteScriptAtLatestBlock(
 			fa.Context,
-			script,
+			[]byte(script),
 			[]cadence.Value{
 				cadencePath,
 				cadenceAddress,
@@ -336,7 +346,7 @@ func (fa *FlowAdapter) GetFTBalance(address string, blockHeight uint64, contract
 	flowAddress := flow.HexToAddress(address)
 	cadenceAddress := cadence.NewAddress(flowAddress)
 
-	script, err := ioutil.ReadFile("./main/cadence/scripts/get_balance.cdc")
+	_script, err := ioutil.ReadFile("./main/cadence/scripts/get_balance.cdc")
 	if err != nil {
 		log.Error().Err(err).Msgf("Error reading cadence script file.")
 		return 0, err
@@ -377,17 +387,21 @@ func (fa *FlowAdapter) GetNFTIds(voterAddr string, c *Contract, path string) ([]
 	flowAddress := flow.HexToAddress(voterAddr)
 	cadenceAddress := cadence.NewAddress(flowAddress)
 
-	script, err := ioutil.ReadFile(path)
+	_script, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Error().Err(err).Msgf("Error reading cadence script file.")
 		return nil, err
 	}
 
-	script = fa.ReplaceContractPlaceholders(string(script[:]), c, false)
+	// Set script contract addresses & paths
+	script := fa.Config.InsertCoreContractAddresses(string(_script))
+	script = fa.Config.InsertTokenContract(script, c)
+
+	log.Info().Msgf("SCRIPT: %s\n", script)
 
 	cadenceValue, err := fa.Client.ExecuteScriptAtLatestBlock(
 		fa.Context,
-		script,
+		[]byte(script),
 		[]cadence.Value{
 			cadenceAddress,
 		},
@@ -408,17 +422,19 @@ func (fa *FlowAdapter) GetFloatNFTIds(voterAddr string, c *Contract) ([]interfac
 	cadenceAddress := cadence.NewAddress(flowAddress)
 	cadenceUInt64 := cadence.NewUInt64(*c.Float_event_id)
 
-	script, err := ioutil.ReadFile("./main/cadence/float/scripts/get_float_ids.cdc")
+	_script, err := ioutil.ReadFile("./main/cadence/float/scripts/get_float_ids.cdc")
 	if err != nil {
 		log.Error().Err(err).Msgf("Error reading cadence script file.")
 		return nil, err
 	}
 
-	script = fa.ReplaceContractPlaceholders(string(script[:]), c, false)
+	// Set script contract addresses & paths
+	script := fa.Config.InsertCoreContractAddresses(string(_script))
+	script = fa.Config.InsertTokenContract(script, c)
 
 	cadenceValue, err := fa.Client.ExecuteScriptAtLatestBlock(
 		fa.Context,
-		script,
+		[]byte(script),
 		[]cadence.Value{
 			cadenceAddress,
 			cadenceUInt64,
@@ -439,17 +455,19 @@ func (fa *FlowAdapter) CheckIfUserHasEvent(voterAddr string, c *Contract) (bool,
 	cadenceAddress := cadence.NewAddress(flowAddress)
 	cadenceUInt64 := cadence.NewUInt64(*c.Float_event_id)
 
-	script, err := ioutil.ReadFile("./main/cadence/float/scripts/owns_specific_float.cdc")
+	_script, err := ioutil.ReadFile("./main/cadence/float/scripts/owns_specific_float.cdc")
 	if err != nil {
 		log.Error().Err(err).Msgf("Error reading cadence script file.")
 		return false, err
 	}
 
-	script = fa.ReplaceContractPlaceholders(string(script[:]), c, false)
+	// Set script contract addresses & paths
+	script := fa.Config.InsertCoreContractAddresses(string(_script))
+	script = fa.Config.InsertTokenContract(script, c)
 
 	cadenceValue, err := fa.Client.ExecuteScriptAtLatestBlock(
 		fa.Context,
-		script,
+		[]byte(script),
 		[]cadence.Value{
 			cadenceAddress,
 			cadenceUInt64,
@@ -476,17 +494,19 @@ func (fa *FlowAdapter) GetEventNFT(voterAddr string, c *Contract) (interface{}, 
 	cadenceAddress := cadence.NewAddress(flowAddress)
 	cadenceUInt64 := cadence.NewUInt64(*c.Float_event_id)
 
-	script, err := ioutil.ReadFile("./main/cadence/float/scripts/get_specific_float.cdc")
+	_script, err := ioutil.ReadFile("./main/cadence/float/scripts/get_specific_float.cdc")
 	if err != nil {
 		log.Error().Err(err).Msgf("Error reading cadence script file.")
 		return nil, err
 	}
 
-	script = fa.ReplaceContractPlaceholders(string(script[:]), c, false)
+	// Set script contract addresses & paths
+	script := fa.Config.InsertCoreContractAddresses(string(_script))
+	script = fa.Config.InsertTokenContract(script, c)
 
 	cadenceValue, err := fa.Client.ExecuteScriptAtLatestBlock(
 		fa.Context,
-		script,
+		[]byte(script),
 		[]cadence.Value{
 			cadenceAddress,
 			cadenceUInt64,
@@ -501,32 +521,25 @@ func (fa *FlowAdapter) GetEventNFT(voterAddr string, c *Contract) (interface{}, 
 	return value, nil
 }
 
-func (fa *FlowAdapter) ReplaceContractPlaceholders(code string, c *Contract, isFungible bool) []byte {
-	var (
-		fungibleTokenAddr    string
-		nonFungibleTokenAddr string
-		metadataViewsAddr    string
-		topshotAddr          string
-	)
+func (config *FlowConfig) InsertCoreContractAddresses(code string) string {
+	code = placeholderNonFungibleTokenAddr.ReplaceAllString(code, config.Contracts["NonFungibleToken"].Aliases[os.Getenv("FLOW_ENV")])
+	code = placeholderFungibleTokenAddr.ReplaceAllString(code, config.Contracts["FungibleToken"].Aliases[os.Getenv("FLOW_ENV")])
+	code = placeholderMetadataViewsAddr.ReplaceAllString(code, config.Contracts["MetadataViews"].Aliases[os.Getenv("FLOW_ENV")])
+	code = placeholderFlowTokenAddr.ReplaceAllString(code, config.Contracts["FlowToken"].Aliases[os.Getenv("FLOW_ENV")])
+	code = placeholderFlowStorageFeesAddr.ReplaceAllString(code, config.Contracts["FlowStorageFees"].Aliases[os.Getenv("FLOW_ENV")])
+	code = placeholderFlowIdTableStaking.ReplaceAllString(code, config.Contracts["FlowIDTableStaking"].Aliases[os.Getenv("FLOW_ENV")])
+	code = placeholderFlowStakingCollection.ReplaceAllString(code, config.Contracts["FlowStakingCollection"].Aliases[os.Getenv("FLOW_ENV")])
+	code = placeholderLockedTokens.ReplaceAllString(code, config.Contracts["LockedTokens"].Aliases[os.Getenv("FLOW_ENV")])
+	code = placeholderTopshotAddr.ReplaceAllString(code, config.Contracts["TopShot"].Aliases[os.Getenv("FLOW_ENV")])
+	return code
+}
 
-	nonFungibleTokenAddr = fa.Config.Contracts["NonFungibleToken"].Aliases[os.Getenv("FLOW_ENV")]
-	fungibleTokenAddr = fa.Config.Contracts["FungibleToken"].Aliases[os.Getenv("FLOW_ENV")]
-	metadataViewsAddr = fa.Config.Contracts["MetadataViews"].Aliases[os.Getenv("FLOW_ENV")]
-	topshotAddr = fa.Config.Contracts["TopShot"].Aliases[os.Getenv("FLOW_ENV")]
-
-	if isFungible {
-		code = placeholderFungibleTokenAddr.ReplaceAllString(code, fungibleTokenAddr)
-	} else {
-		code = placeholderCollectionPublicPath.ReplaceAllString(code, *c.Public_path)
-		code = placeholderNonFungibleTokenAddr.ReplaceAllString(code, nonFungibleTokenAddr)
-	}
-
-	code = placeholderMetadataViewsAddr.ReplaceAllString(code, metadataViewsAddr)
+func (config *FlowConfig) InsertTokenContract(code string, c *Contract) string {
 	code = placeholderTokenName.ReplaceAllString(code, *c.Name)
 	code = placeholderTokenAddr.ReplaceAllString(code, *c.Addr)
-	code = placeholderTopshotAddr.ReplaceAllString(code, topshotAddr)
-
-	return []byte(code)
+	code = placeholderTokenBalancePath.ReplaceAllString(code, *c.Public_path)
+	code = placeholderCollectionPublicPath.ReplaceAllString(code, *c.Public_path)
+	return code
 }
 
 func WaitForSeal(
