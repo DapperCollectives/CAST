@@ -300,10 +300,6 @@ const VoteOptions = ({
     onConfirmVote();
   };
 
-  console.log('previousVote', previousVote);
-  console.log('currentOption', currentOption);
-  console.log('castVote', castVote);
-
   return (
     <div className={voteClasses}>
       <Wrapper

@@ -49,6 +49,7 @@ export { default as FadeInOut } from './FadeInOut';
 export {
   Error as ErrorModal,
   VoteConfirmation as VoteConfirmationModal,
+  CastingVote as CastingVoteModal,
   Modal,
 } from './modals';
 export { default as StatusPill } from './StatusPill';

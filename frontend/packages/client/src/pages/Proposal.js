@@ -5,14 +5,15 @@ import { useModalContext } from 'contexts/NotificationModal';
 import { useWebContext } from 'contexts/Web3';
 import { Svg } from '@cast/shared-components';
 import {
+  CastingVoteModal,
   CommunityName,
   Loader,
   Message,
-  Modal,
   ProposalInformation,
   StrategyModal,
   StyledStatusPill,
   Tablink,
+  VoteConfirmationModal,
   VotesList,
   WalletConnect,
   WrapperResponsive,
@@ -284,61 +285,19 @@ export default function ProposalPage() {
         <div className="modal is-active">
           <div className="modal-background"></div>
           <div className="modal-content is-flex is-justify-content-center">
-            <Modal>
-              <Modal.Header title="Confirm Vote" onClose={onCancelVote} />
-              <Modal.BodyContainer>
-                <section className="modal-card-body has-background-white-ter">
-                  <div className="px-4">
-                    <p>Are you sure this is your final vote?</p>
-                    <p className="has-text-grey mb-4">
-                      This action cannot be undone.
-                    </p>
-                    <div className="py-4 px-5 rounded-sm has-background-white">
-                      {getVoteLabel(optionChosen)}
-                    </div>
-                  </div>
-                </section>
-              </Modal.BodyContainer>
-              <Modal.FooterContainer>
-                <>
-                  <div className="columns is-mobile p-0 m-0 flex-1 pr-2">
-                    <button
-                      className="button column is-full p-0 rounded-xl"
-                      onClick={onCancelVote}
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                  <div className="columns is-mobile p-0 m-0 flex-1 pl-2">
-                    <button
-                      className="button column is-full rounded-xl p-0 has-background-yellow vote-button transition-all"
-                      onClick={onVote}
-                    >
-                      Vote
-                    </button>
-                  </div>
-                </>
-              </Modal.FooterContainer>
-            </Modal>
+            <VoteConfirmationModal
+              onCancelVote={onCancelVote}
+              onVote={onVote}
+              voteLabel={getVoteLabel(optionChosen)}
+            />
           </div>
         </div>
       )}
       {confirmingVote && castingVote && !castVote && (
         <div className="modal is-active">
           <div className="modal-background"></div>
-          <div
-            className="modal-card has-background-white"
-            style={{ maxWidth: maxModalWidth }}
-          >
-            <section
-              className="modal-card-body p-6 has-text-centered"
-              style={{
-                margin: '150px 0',
-              }}
-            >
-              <Loader className="mb-4" />
-              <p className="has-text-grey">Casting your vote...</p>
-            </section>
+          <div className="modal-content is-flex is-justify-content-center">
+            <CastingVoteModal />
           </div>
         </div>
       )}
