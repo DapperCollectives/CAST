@@ -138,7 +138,7 @@ func TestGetLeaderboardWithWinningVote(t *testing.T) {
 	communityId := otu.AddCommunities(1)[0]
 	winningVoteBonus := 1
 
-	proposalId := otu.GenerateWinningVoteAchievement(communityId, "one-address-one-vote")
+	proposalId := otu.GenerateWinningVoteAchievement(communityId, "token-weighted-default")
 	otu.UpdateProposalEndTime(proposalId, time.Now().UTC())
 	otu.GetProposalResultsAPI(proposalId)
 

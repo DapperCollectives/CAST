@@ -30,21 +30,25 @@ export default function WalletConnectModal({
   const listOfServices = useMemo(
     () =>
       sortBy(
-        services.map((service) => ({
-          connectToService: () => {
-            if (service.uid !== 'Lilico') {
-              fcl.config().put('discovery.wallet.method', service.method);
-            }
-            injectedProvider.authenticate(
-              !IS_LOCAL_DEV ? { service } : undefined
-            );
-            closeModal();
-          },
-          icon: IS_LOCAL_DEV
-            ? getWalletIcon(service.provider)
-            : service.provider.icon,
-          name: service.provider.name,
-        })),
+        services
+          .filter((service) => service.uid !== 'nufi#authn')
+          .map((service) => {
+            return {
+              connectToService: () => {
+                if (service.uid !== 'Lilico') {
+                  fcl.config().put('discovery.wallet.method', service.method);
+                }
+                injectedProvider.authenticate(
+                  !IS_LOCAL_DEV ? { service } : undefined
+                );
+                closeModal();
+              },
+              icon: IS_LOCAL_DEV
+                ? getWalletIcon(service.provider)
+                : service.provider.icon,
+              name: service.provider.name,
+            };
+          }),
         (service) => service.name
       ),
     [services, closeModal, injectedProvider]

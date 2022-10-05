@@ -16,30 +16,19 @@ function Header(props) {
     setShowSidenav(false);
   };
 
+  const classNamesLinks =
+    'navbar-item p-0 mr-6-desktop mr-5-tablet is-hidden-mobile';
+
   return (
     <>
       <header
         id="navbar"
         className={`${props.location.pathname} has-background-white is-block navbar is-fixed-top`}
       >
-        <div className="px-4 divider">
+        <div className="px-6-desktop px-5-tablet px-4-mobile divider">
           <div className="container header-spacing">
             <nav className="navbar is-transparent">
               <div className="navbar-brand">
-                <NavLink to="/" className="navbar-item p-0 mr-2">
-                  <div className="is-hidden-tablet">
-                    <Svg name="Logo" width={100} />
-                  </div>
-                  <div className="is-hidden-mobile">
-                    <Svg name="Logo" />
-                  </div>
-                </NavLink>
-                <div className="is-flex is-align-items-center">
-                  <Label
-                    labelText="Beta"
-                    classNames="has-text-weight-bold smallest-text is-uppercase"
-                  />
-                </div>
                 <span
                   role="button"
                   className="navbar-burger mr-2"
@@ -49,6 +38,21 @@ function Header(props) {
                   <span />
                   <span />
                 </span>
+                <NavLink to="/" className="navbar-item p-0 mr-2">
+                  <div className="is-hidden-tablet is-flex is-align-items-center">
+                    <Svg name="Logo" width={104} height={24} />
+                  </div>
+                  <div className="is-hidden-mobile is-flex is-align-items-center">
+                    <Svg name="Logo" />
+                  </div>
+                </NavLink>
+                <div className="is-flex is-align-items-center">
+                  <Label
+                    padding="py-1 px-3"
+                    labelText="Beta"
+                    classNames="has-text-weight-bold smallest-text is-uppercase"
+                  />
+                </div>
               </div>
               <div className="navbar-end">
                 <NavLink
@@ -56,7 +60,7 @@ function Header(props) {
                     pathname: '/about',
                     state: { modal: true },
                   }}
-                  className="navbar-item p-0 mr-5 is-hidden-mobile"
+                  className={classNamesLinks}
                 >
                   <span className="navbar-item-hover transition-all has-text-weight-bold has-text-black">
                     About Us
@@ -67,7 +71,7 @@ function Header(props) {
                     pathname: '/browse-communities',
                     state: { modal: true },
                   }}
-                  className="navbar-item p-0 mr-5 is-hidden-mobile"
+                  className={classNamesLinks}
                 >
                   <span className="navbar-item-hover transition-all has-text-weight-bold has-text-black">
                     Browse
@@ -77,7 +81,7 @@ function Header(props) {
                   to={{
                     pathname: '/community/create',
                   }}
-                  className="navbar-item p-0 mr-5 is-hidden-mobile"
+                  className={classNamesLinks}
                 >
                   <span className="navbar-item-hover transition-all has-text-weight-bold has-text-black">
                     Create a Community
