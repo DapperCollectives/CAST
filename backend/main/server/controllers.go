@@ -430,13 +430,12 @@ func (a *App) getCommunities(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) searchCommunities(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-
 	pageParams := getPageParams(*r, 25)
 	filters := r.FormValue("filters")
+	searchText := r.FormValue("text")
 
 	results, categories, err := helpers.searchCommunities(
-		vars["query"],
+		searchText,
 		filters,
 		pageParams,
 	)

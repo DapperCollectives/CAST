@@ -470,7 +470,7 @@ func (h *Helpers) fetchCommunity(id int) (models.Community, error) {
 }
 
 func (h *Helpers) searchCommunities(
-	query string,
+	searchText string,
 	filters string,
 	pageParams shared.PageParams,
 ) (
@@ -478,7 +478,7 @@ func (h *Helpers) searchCommunities(
 	map[string]int,
 	error,
 ) {
-	if query == "defaultFeatured" {
+	if searchText == "" {
 		isSearch := true
 
 		results, _, err := models.GetDefaultCommunities(
@@ -496,16 +496,17 @@ func (h *Helpers) searchCommunities(
 
 		return results, categories, nil
 	} else {
+		fmt.Println(filters)
 		filtersSlice := strings.Split(filters, ",")
 		results, err := models.SearchForCommunity(
 			h.A.DB,
-			query,
+			searchText,
 			filtersSlice,
 		)
 		if err != nil {
 			return []*models.Community{}, nil, err
 		}
-		
+
 		categories := h.categoryCountToMap(results)
 		return results, categories, nil
 	}
