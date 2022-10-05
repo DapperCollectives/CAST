@@ -198,8 +198,7 @@ export default function ProposalPage() {
         proposalName={proposal.name}
       />,
       {
-        showCloseButton: false,
-        classNameModalContent: 'rounded-sm',
+        isErrorModal: true,
       }
     );
   };
@@ -274,20 +273,6 @@ export default function ProposalPage() {
     /target="_self"/g,
     'target="_blank" rel="noopener noreferrer"'
   );
-  console.log('_______');
-  console.log('confirmingVote ==> ', confirmingVote);
-  console.log('castingVote ==> ', castingVote);
-  console.log('castVote ==> ', castVote);
-  console.log('vote confirmation modal ===>', confirmingVote && !castingVote);
-  console.log(
-    'casting vote modal ==> ',
-    confirmingVote && castingVote && !castVote
-  );
-  console.log(
-    'Confirmation you voted modal==> ',
-    confirmingVote && castingVote && castVote
-  );
-  console.log('_______');
 
   return (
     <>

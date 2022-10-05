@@ -51,6 +51,7 @@ export {
   VoteConfirmation as VoteConfirmationModal,
   CastingVote as CastingVoteModal,
   VoteConfirmed as VoteConfirmedModal,
+  CancelProposal as CancelProposalModal,
   Modal,
 } from './modals';
 export { default as StatusPill } from './StatusPill';
