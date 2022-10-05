@@ -53,7 +53,7 @@ export {
   VoteConfirmed as VoteConfirmedModal,
   CancelProposal as CancelProposalModal,
   Modal,
-} from './modals';
+} from './modals-2';
 export { default as StatusPill } from './StatusPill';
 export { default as StyledStatusPill } from './StyledStatusPill';
 export { default as FilterPill } from './FilterPill';
