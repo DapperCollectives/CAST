@@ -6,6 +6,7 @@ import (
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/google/uuid"
+	"github.com/onflow/cadence"
 	"github.com/rs/zerolog/log"
 )
 
@@ -49,5 +50,13 @@ func (b *Balance) CreateBalance(db *s.Database) error {
 		return err
 	}
 
+	return nil
+}
+
+func CreateFungibleTokenBalanceFromCadence(value cadence.Value) error {
+	return nil
+}
+
+func CreateFlowTokenBalanceFromCadence(value cadence.Value) error {
 	return nil
 }

@@ -42,8 +42,7 @@ func (h *Helpers) useStrategyTally(
 		return models.ProposalResults{}, errors.New("Strategy not found.")
 	}
 
-	proposalInitialized := models.NewProposalResults(p.ID, p.Choices)
-	results, err := s.TallyVotes(v, proposalInitialized, &p)
+	results, err := s.TallyVotes(v, &p)
 	if err != nil {
 		return models.ProposalResults{}, err
 	}
@@ -292,13 +291,7 @@ func (h *Helpers) processVotes(
 	return votesWithBalances, pageParams, nil
 }
 
-func (h *Helpers) createVote(r *http.Request, p models.Proposal) (*models.VoteWithBalance, error) {
-	var v models.Vote
-	if err := validatePayload(r.Body, &v); err != nil {
-		log.Error().Err(err).Msg("Invalid request payload.")
-		return nil, err
-	}
-
+func (h *Helpers) createVote(v models.Vote, p models.Proposal) (*models.VoteWithBalance, error) {
 	v.Proposal_id = p.ID
 
 	// validate user hasn't already voted
@@ -482,7 +475,6 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, error) {
 	if err != nil {
 		log.Error().Err(err).Msg("Community does not have this strategy available.")
 		return models.Proposal{}, err
-
 	}
 
 	// Set Min Balance/Max Weight to community defaults if not provided
@@ -493,19 +485,18 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, error) {
 		p.Max_weight = strategy.Contract.MaxWeight
 	}
 
-	if err := h.snapshot(&strategy, &p); err != nil {
-		return models.Proposal{}, err
-	}
-
 	if err := h.enforceCommunityRestrictions(community, p, strategy); err != nil {
 		return models.Proposal{}, err
 	}
 
-	if err := h.processSnapshotStatus(&strategy, &p); err != nil {
-		errMsg := "Error processing snapshot status."
+	// Set Blockheight to latest sealed
+	blockheight, err := h.A.FlowAdapter.GetCurrentBlockHeight()
+	if err != nil {
+		errMsg := "couldn't fetch current blockheight"
 		log.Error().Err(err).Msg(errMsg)
-		return models.Proposal{}, err
+		return models.Proposal{}, errors.New(errMsg)
 	}
+	p.Block_height = &blockheight
 
 	p.Cid, err = h.pinJSONToIpfs(p)
 	if err != nil {
@@ -517,13 +508,7 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, error) {
 	vErr := validate.Struct(p)
 	if vErr != nil {
 		log.Error().Err(vErr)
-		return models.Proposal{}, err
-	}
-
-	if os.Getenv("APP_ENV") == "PRODUCTION" {
-		if strategy.Contract.Name != nil && p.Start_time.Before(time.Now().UTC().Add(time.Hour)) {
-			p.Start_time = time.Now().UTC().Add(time.Hour)
-		}
+		return models.Proposal{}, errors.New("invalid proposal")
 	}
 
 	if err := p.CreateProposal(h.A.DB); err != nil {
@@ -572,23 +557,6 @@ func (h *Helpers) enforceCommunityRestrictions(
 			log.Error().Err(err).Msg(errMsg)
 			return errors.New(errMsg)
 		}
-	}
-
-	return nil
-}
-
-func (h *Helpers) snapshot(strategy *models.Strategy, p *models.Proposal) error {
-	s := h.initStrategy(*strategy.Name)
-
-	//var snapshotResponse *shared.SnapshotResponse
-	if s.RequiresSnapshot() {
-		snapshotResponse, err := h.A.SnapshotClient.TakeSnapshot(strategy.Contract)
-		if err != nil {
-			errMsg := "Error taking snapshot."
-			return errors.New(errMsg)
-		}
-		p.Block_height = &snapshotResponse.Data.BlockHeight
-		p.Snapshot_status = &snapshotResponse.Data.Status
 	}
 
 	return nil
@@ -1070,29 +1038,6 @@ func (h *Helpers) validateUserWithRoleViaVoucher(addr string, voucher *shared.Vo
 	return nil
 }
 
-func (h *Helpers) processSnapshotStatus(s *models.Strategy, p *models.Proposal) error {
-	var processing = "processing"
-
-	if s.Contract.Name != nil && p.Snapshot_status == &processing {
-		snapshotResponse, err := h.A.SnapshotClient.
-			GetSnapshotStatusAtBlockHeight(
-				s.Contract,
-				*p.Block_height,
-			)
-		if err != nil {
-			return err
-		}
-
-		p.Snapshot_status = &snapshotResponse.Data.Status
-
-		if err := p.UpdateSnapshotStatus(h.A.DB); err != nil {
-			return err
-		}
-	}
-	return nil
-
-}
-
 func (h *Helpers) processTokenThreshold(address string, c shared.Contract, contractType string) (bool, error) {
 	var scriptPath string
 
@@ -1116,7 +1061,7 @@ func (h *Helpers) initStrategy(name string) Strategy {
 		return nil
 	}
 
-	s.InitStrategy(h.A.FlowAdapter, h.A.DB, h.A.SnapshotClient)
+	s.InitStrategy(h.A.FlowAdapter, h.A.DB, h.A.DpsAdapter)
 
 	return s
 }

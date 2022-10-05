@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"testing"
 
@@ -52,8 +51,6 @@ func TestCreateCommunity(t *testing.T) {
 	// Create Community
 	communityStruct := otu.GenerateCommunityStruct("account")
 	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
-
-	fmt.Printf("%+v\n", communityPayload)
 
 	response := otu.CreateCommunityAPI(communityPayload)
 	checkResponseCode(t, http.StatusCreated, response.Code)
@@ -174,9 +171,17 @@ func TestCommunityAuthorRoles(t *testing.T) {
 	var p test_utils.PaginatedResponseWithUserType
 	json.Unmarshal(response.Body.Bytes(), &p)
 
-	assert.Equal(t, false, p.Data[0].Is_admin)
-	assert.Equal(t, true, p.Data[0].Is_author)
-	assert.Equal(t, true, p.Data[0].Is_member)
+	// Make sure we check the correct community_user
+	account, _ := otu.O.State.Accounts().ByName("emulator-user1")
+	address := "0x" + account.Address().String()
+	for _, user := range p.Data {
+		if user.Addr == address {
+			assert.Equal(t, false, user.Is_admin)
+			assert.Equal(t, true, user.Is_author)
+			assert.Equal(t, true, user.Is_member)
+		}
+	}
+
 }
 
 func TestGetCommunityAPI(t *testing.T) {
@@ -259,7 +264,6 @@ func TestUpdateCommunity(t *testing.T) {
 
 	response = otu.UpdateCommunityAPI(oldCommunity.ID, payload)
 	checkResponseCode(t, http.StatusOK, response.Code)
-	fmt.Println(response.Code)
 
 	// Get community again for assertions
 	response = otu.GetCommunityAPI(oldCommunity.ID)
