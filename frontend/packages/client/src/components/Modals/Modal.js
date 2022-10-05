@@ -6,6 +6,16 @@ export default function Modal({ children }) {
   return <div className="c-modal">{children}</div>;
 }
 
+Modal.Header = ({ title, onClose }) => {
+  return (
+    <div className="c-modal-header spacing-header">
+      <p className="c-modal-title">{title}</p>
+      <div className="is-flex cursor-pointer" onClick={onClose}>
+        <Svg name="Close" width="18" heigth="18" />
+      </div>
+    </div>
+  );
+};
 Modal.ErrorHeader = ({ title, onClose }) => {
   return (
     <div className="c-modal-header spacing-header">
@@ -18,8 +28,11 @@ Modal.ErrorHeader = ({ title, onClose }) => {
   );
 };
 
-Modal.MessageBody = ({ message }) => {
+Modal.BodyMessage = ({ message }) => {
   return <div className="c-modal-message spacing-message">{message}</div>;
+};
+Modal.BodyContainer = ({ children }) => {
+  return <div className="c-modal-message">{children}</div>;
 };
 
 Modal.FooterContainer = ({ children }) => {

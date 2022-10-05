@@ -8,6 +8,7 @@ import {
   CommunityName,
   Loader,
   Message,
+  Modal,
   ProposalInformation,
   StrategyModal,
   StyledStatusPill,
@@ -278,50 +279,47 @@ export default function ProposalPage() {
 
   return (
     <>
+      {/* TODO: port this to use modal provider */}
       {confirmingVote && !castingVote && (
         <div className="modal is-active">
           <div className="modal-background"></div>
-          <div className="modal-card" style={{ maxWidth: maxModalWidth }}>
-            <header className="modal-card-head is-flex-direction-column has-background-white columns is-mobile m-0">
-              <div
-                className="column is-full has-text-right is-size-2 p-0 leading-tight cursor-pointer"
-                onClick={onCancelVote}
-              >
-                &times;
-              </div>
-              <div className="column is-full has-text-left px-4">
-                <p className="modal-card-title">Confirm Vote</p>
-              </div>
-            </header>
-            <section className="modal-card-body has-background-white-ter">
-              <div className="px-4">
-                <p>Are you sure this is your final vote?</p>
-                <p className="has-text-grey mb-4">
-                  This action cannot be undone.
-                </p>
-                <div className="py-4 px-5 rounded-sm has-background-white">
-                  {getVoteLabel(optionChosen)}
-                </div>
-              </div>
-            </section>
-            <footer className="modal-card-foot has-background-white pb-6">
-              <div className="columns is-mobile p-0 m-0 flex-1 pr-2">
-                <button
-                  className="button column is-full p-0"
-                  onClick={onCancelVote}
-                >
-                  Cancel
-                </button>
-              </div>
-              <div className="columns is-mobile p-0 m-0 flex-1 pl-2">
-                <button
-                  className="button column is-full p-0 has-background-yellow vote-button transition-all"
-                  onClick={onVote}
-                >
-                  Vote
-                </button>
-              </div>
-            </footer>
+          <div className="modal-content is-flex is-justify-content-center">
+            <Modal>
+              <Modal.Header title="Confirm Vote" onClose={onCancelVote} />
+              <Modal.BodyContainer>
+                <section className="modal-card-body has-background-white-ter">
+                  <div className="px-4">
+                    <p>Are you sure this is your final vote?</p>
+                    <p className="has-text-grey mb-4">
+                      This action cannot be undone.
+                    </p>
+                    <div className="py-4 px-5 rounded-sm has-background-white">
+                      {getVoteLabel(optionChosen)}
+                    </div>
+                  </div>
+                </section>
+              </Modal.BodyContainer>
+              <Modal.FooterContainer>
+                <>
+                  <div className="columns is-mobile p-0 m-0 flex-1 pr-2">
+                    <button
+                      className="button column is-full p-0 rounded-xl"
+                      onClick={onCancelVote}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                  <div className="columns is-mobile p-0 m-0 flex-1 pl-2">
+                    <button
+                      className="button column is-full rounded-xl p-0 has-background-yellow vote-button transition-all"
+                      onClick={onVote}
+                    >
+                      Vote
+                    </button>
+                  </div>
+                </>
+              </Modal.FooterContainer>
+            </Modal>
           </div>
         </div>
       )}

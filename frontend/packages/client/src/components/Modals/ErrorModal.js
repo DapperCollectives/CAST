@@ -11,7 +11,7 @@ export default function ErrorModal({
   return (
     <Modal>
       <Modal.ErrorHeader title={title} onClose={onClose} />
-      <Modal.MessageBody message={message} />
+      <Modal.BodyMessage message={message} />
       {footerComponent ? (
         <Modal.FooterContainer>{footerComponent}</Modal.FooterContainer>
       ) : (
