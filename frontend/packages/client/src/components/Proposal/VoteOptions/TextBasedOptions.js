@@ -1,4 +1,5 @@
 import { WrapperResponsive as Wrapper } from 'components';
+import Checked from 'assets/checked-vote.svg';
 
 const TextBasedOptions = ({
   choices,
@@ -37,9 +38,10 @@ const TextBasedOptions = ({
                 type="radio"
                 name={`${labelType}-${opt.value}`}
                 value={opt.value}
-                className={`mr-3 ${showVotedCheck(opt.value) && 'is-chosen'}`}
+                className={`mr-3`}
                 onChange={_onOptionSelect}
                 checked={currentOption === String(opt.value)}
+                style={{ backgroundImage: `url(${Checked})` }}
               />
               <span />
               <div className="has-text-black" style={{ lineHeight: '22.4px' }}>
