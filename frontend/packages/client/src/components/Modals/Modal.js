@@ -1,4 +1,5 @@
 import { Svg } from '@cast/shared-components';
+import classnames from 'classnames';
 
 // Building blocks for different modals used in the app
 
@@ -39,14 +40,19 @@ Modal.FooterContainer = ({ children }) => {
   return <div className="c-modal-footer spacing-footer">{children}</div>;
 };
 
-Modal.FooterCloseButton = ({ onClose }) => {
+Modal.FooterButton = ({ onClick, text = 'Close', classNames = '' }) => {
+  const color = classNames.includes('has-background-')
+    ? 'has-text-black'
+    : 'has-background-black has-text-white';
+
+  const className = classnames(
+    'button is-fullwidth rounded-lg is-flex has-text-weight-bold px-5',
+    { [color]: !!color },
+    { [classNames]: !!classNames }
+  );
   return (
-    <div
-      className="button is-fullwidth rounded-lg is-flex has-text-weight-bold has-text-white has-background-black px-5"
-      style={{ minHeight: '40px' }}
-      onClick={onClose}
-    >
-      Close
+    <div className={className} style={{ minHeight: '40px' }} onClick={onClick}>
+      {text}
     </div>
   );
 };
@@ -62,7 +68,7 @@ Modal.FotterWithFAQ = ({ faqLink, onClose }) => {
       >
         Read FAQ
       </a>
-      <Modal.FooterCloseButton onClose={onClose} />
+      <Modal.FooterButton onClick={onClose} />
     </>
   );
 };

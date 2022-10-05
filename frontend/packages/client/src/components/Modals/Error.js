@@ -19,7 +19,7 @@ export default function ErrorModal({
           {faqLink ? (
             <Modal.FotterWithFAQ faqLink={faqLink} onClose={onClose} />
           ) : (
-            <Modal.FooterCloseButton onClose={onClose} />
+            <Modal.FooterButton onClick={onClose} />
           )}
         </Modal.FooterContainer>
       )}
