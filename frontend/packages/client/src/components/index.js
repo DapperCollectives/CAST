@@ -50,6 +50,7 @@ export {
   Error as ErrorModal,
   VoteConfirmation as VoteConfirmationModal,
   CastingVote as CastingVoteModal,
+  VoteConfirmed as VoteConfirmedModal,
   Modal,
 } from './modals';
 export { default as StatusPill } from './StatusPill';

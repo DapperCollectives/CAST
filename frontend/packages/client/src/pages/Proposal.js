@@ -14,6 +14,7 @@ import {
   StyledStatusPill,
   Tablink,
   VoteConfirmationModal,
+  VoteConfirmedModal,
   VotesList,
   WalletConnect,
   WrapperResponsive,
@@ -220,12 +221,10 @@ export default function ProposalPage() {
       await voteOnProposal({ proposal, voteData });
     } catch (error) {
       setConfirmingVote(false);
-      notifyError(error);
       setCastingVote(false);
+      notifyError(error);
       return;
     }
-    setCastingVote(false);
-    setConfirmingVote(false);
     setCastVote(optionChosen);
   };
 
@@ -240,8 +239,6 @@ export default function ProposalPage() {
     );
     return match?.label;
   };
-
-  const maxModalWidth = 400;
 
   const showCancelButton = ![
     FilterValues.cancelled.toLocaleLowerCase(),
@@ -277,6 +274,20 @@ export default function ProposalPage() {
     /target="_self"/g,
     'target="_blank" rel="noopener noreferrer"'
   );
+  console.log('_______');
+  console.log('confirmingVote ==> ', confirmingVote);
+  console.log('castingVote ==> ', castingVote);
+  console.log('castVote ==> ', castVote);
+  console.log('vote confirmation modal ===>', confirmingVote && !castingVote);
+  console.log(
+    'casting vote modal ==> ',
+    confirmingVote && castingVote && !castVote
+  );
+  console.log(
+    'Confirmation you voted modal==> ',
+    confirmingVote && castingVote && castVote
+  );
+  console.log('_______');
 
   return (
     <>
@@ -304,29 +315,8 @@ export default function ProposalPage() {
       {confirmingVote && castingVote && castVote && (
         <div className="modal is-active">
           <div className="modal-background"></div>
-          <div className="modal-card" style={{ maxWidth: maxModalWidth }}>
-            <header className="modal-card-head is-flex-direction-column has-background-white columns is-mobile m-0">
-              <div
-                className="column is-full has-text-right is-size-2 p-0 leading-tight cursor-pointer"
-                onClick={onConfirmCastVote}
-              >
-                &times;
-              </div>
-              <div className="column is-full has-text-left px-4">
-                <p className="modal-card-title">Your voting was successful!</p>
-              </div>
-            </header>
-            <section className="modal-card-body">
-              <p className="px-4 has-text-grey">You voted for this proposal</p>
-            </section>
-            <footer className="modal-card-foot">
-              <button
-                className="button column is-full has-background-yellow is-uppercase"
-                onClick={onConfirmCastVote}
-              >
-                Got it
-              </button>
-            </footer>
+          <div className="modal-content is-flex is-justify-content-center">
+            <VoteConfirmedModal onConfirmCastVote={onConfirmCastVote} />
           </div>
         </div>
       )}
@@ -341,14 +331,6 @@ export default function ProposalPage() {
             communityId={proposal.communityId}
             proposalId={proposal.id}
           />
-          {castVote && (
-            <Message
-              messageText={`You successfully voted for ${getVoteLabel(
-                castVote
-              )}`}
-              icon={<Svg name="CheckMark" />}
-            />
-          )}
           {cancelled && (
             <Message messageText={`This proposal has been cancelled`} />
           )}
