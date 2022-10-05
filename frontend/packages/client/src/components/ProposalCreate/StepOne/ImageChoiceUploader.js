@@ -71,13 +71,7 @@ export default function ImageChoiceUploader({
     text,
   });
 
-  const {
-    uploadFile,
-    isLoading: loading,
-    error,
-  } = useFileUploader({
-    useModalNotifications: false,
-  });
+  const { uploadFile, isLoading: loading, error } = useFileUploader();
 
   const onDeleteImage = () => {
     setImage((state) => ({
@@ -127,21 +121,29 @@ export default function ImageChoiceUploader({
         ...state,
         uploadStatus: IMAGE_STATUS.uploading,
       }));
-      upload(image).then((uploaded) => {
-        if (error) {
-          // delete image if upload failed, but keep text
+      upload(image)
+        .then((uploaded) => {
+          if (error) {
+            // delete image if upload failed, but keep text
+            setImage((state) => ({
+              ...initialState,
+              text: state.text,
+            }));
+            return;
+          }
+          setImage((state) => ({
+            ...state,
+            imageUrl: uploaded.fileUrl,
+            uploadStatus: IMAGE_STATUS.uploaded,
+          }));
+        })
+        .catch(() => {
           setImage((state) => ({
             ...initialState,
             text: state.text,
           }));
-          return;
-        }
-        setImage((state) => ({
-          ...state,
-          imageUrl: uploaded.fileUrl,
-          uploadStatus: IMAGE_STATUS.uploaded,
-        }));
-      });
+          console.log('Error uploading image choice');
+        });
     }
   }, [image, loading, error, uploadFile]);
 

@@ -28,7 +28,7 @@ export const fetchProposal = async ({ proposalId }) => {
     ...proposal,
     choices: sortedProposalChoices.map((choice) => ({
       label: choice.choiceText,
-      value: choice.choiceText,
+      value: choice.id,
       choiceImgUrl: choice.choiceImgUrl,
     })),
     ipfs: proposal.cid,
@@ -63,7 +63,13 @@ export const createProposalApiReq = async ({
   };
 
   const response = await fetch(url, fetchOptions);
-  return checkResponse(response);
+  const proposal = await checkResponse(response);
+  proposal.choices = proposal.choices.map((choice) => ({
+    label: choice.choiceText,
+    value: choice.id,
+    choiceImgUrl: choice.choiceImgUrl,
+  }));
+  return proposal;
 };
 
 export const updateProposalApiReq = async ({

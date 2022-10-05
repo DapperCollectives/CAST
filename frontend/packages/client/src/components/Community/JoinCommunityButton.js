@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useModalContext } from 'contexts/NotificationModal';
 import { useWebContext } from 'contexts/Web3';
 import { Svg } from '@cast/shared-components';
-import { Error, WalletConnect } from 'components';
+import { ErrorModal, WalletConnect } from 'components';
 import { useJoinCommunity, useUserRoleOnCommunity } from 'hooks';
 import classnames from 'classnames';
 
@@ -36,19 +36,20 @@ export default function JoinCommunityButton({
     event.stopPropagation();
     if (!user?.addr) {
       openModal(
-        <Error
-          error={
-            <div className="mt-5">
-              <WalletConnect
-                closeModal={() => {
-                  closeModal();
-                }}
-              />
-            </div>
+        <ErrorModal
+          message="In order to join a community, you must first connect your Flow wallet."
+          title="Connect Wallet"
+          footerComponent={
+            <WalletConnect
+              closeModal={() => {
+                closeModal();
+              }}
+              expandToContainer
+            />
           }
-          errorTitle="Please connect a wallet."
+          onClose={closeModal}
         />,
-        { classNameModalContent: 'rounded-sm' }
+        { isErrorModal: true }
       );
       setIsModalErrorOpened(true);
       return;
