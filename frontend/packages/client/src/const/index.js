@@ -98,3 +98,7 @@ transaction() {
         //
     }
 }`;
+
+export const FRONTEND_URL = `${IS_PRODUCTION ? 'https://' : 'http://'}${
+  process.env.REACT_APP_FRONTEND_URL
+}`;

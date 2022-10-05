@@ -28,3 +28,5 @@ export { default as useBrowserName } from './useBrowserName';
 export { default as useLocalStorage } from './useLocalStorage';
 export { default as useOnClickOutside } from './useOnOutsideClick';
 export { default as useFeaturedCommunities } from './useFeaturedCommunities';
+export { default as useCommunitySearch } from './useCommunitySearch';
+export { default as useDebounce } from './useDebounce';

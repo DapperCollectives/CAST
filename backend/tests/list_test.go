@@ -78,9 +78,12 @@ func TestCreateList(t *testing.T) {
 		response := otu.CreateListAPI(payload)
 		checkResponseCode(t, http.StatusForbidden, response.Code)
 
-		var m map[string]interface{}
-		json.Unmarshal(response.Body.Bytes(), &m)
-		assert.Equal(t, "ERR_1001", m["errorCode"])
+		expectedErr := errIncompleteRequest
+		expectedErr.StatusCode = http.StatusForbidden
+
+		var e errorResponse
+		json.Unmarshal(response.Body.Bytes(), &e)
+		assert.Equal(t, expectedErr, e)
 	})
 
 	t.Run("Should throw an error if timestamp is expired", func(t *testing.T) {
@@ -97,9 +100,13 @@ func TestCreateList(t *testing.T) {
 
 		checkResponseCode(t, http.StatusForbidden, response.Code)
 
-		var m map[string]interface{}
-		json.Unmarshal(response.Body.Bytes(), &m)
-		assert.Equal(t, "ERR_1001", m["errorCode"])
+		var e errorResponse
+		json.Unmarshal(response.Body.Bytes(), &e)
+
+		expectedErr := errIncompleteRequest
+		expectedErr.StatusCode = http.StatusForbidden
+
+		assert.Equal(t, expectedErr, e)
 	})
 }
 

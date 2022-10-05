@@ -94,8 +94,8 @@ export default function CommunityEditorProfile({
       });
     }
     // call if value as true
-    isUpdatingImage && setIsUpdatingImage(false);
-    isUpdatingBanner && setIsUpdatingBanner(false);
+    setIsUpdatingImage(false);
+    setIsUpdatingBanner(false);
   };
 
   return (

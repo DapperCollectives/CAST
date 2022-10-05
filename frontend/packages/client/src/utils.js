@@ -233,9 +233,13 @@ export const getPaginationFromPages = (pages) => {
   ];
 };
 
-export const getPagination = (data, countParam) => {
+export const getPagination = (
+  data,
+  countParam,
+  getPaginationFromPagesFn = getPaginationFromPages
+) => {
   const [start = 0, count = countParam, totalRecords = 0, next = -1] =
-    data?.pageParam ?? getPaginationFromPages(data?.pages);
+    data?.pageParam ?? getPaginationFromPagesFn(data?.pages);
   return {
     count,
     next,
