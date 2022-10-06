@@ -91,7 +91,7 @@ type UpdateCommunityRequestPayload struct {
 type CanUserCreateProposalResponse struct {
 	shared.Contract
 	Balance       *float64 `json:"balance,omitempty"`
-	HasPermission bool
+	HasPermission bool     `json:"hasPermission"`
 }
 
 type Strategy struct {

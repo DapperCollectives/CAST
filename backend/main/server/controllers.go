@@ -962,24 +962,24 @@ func (a *App) canUserCreateProposal(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, errGetCommunity)
 	}
 
-	threshold, err := strconv.ParseFloat(*community.Proposal_threshold, 64)
-	if err != nil {
-		log.Error().Err(err).Msg("Invalid proposal threshold")
-	}
-
 	response := models.CanUserCreateProposalResponse{}
 
-	// Get Contract
-	contract := shared.Contract{
-		Name:        community.Contract_name,
-		Addr:        community.Contract_addr,
-		Public_path: community.Public_path,
-		Threshold:   &threshold,
-	}
-	response.Contract = contract
-
-	// Get balance if community has proposal threshold rule
 	if !*community.Only_authors_to_submit {
+		threshold, err := strconv.ParseFloat(*community.Proposal_threshold, 64)
+		if err != nil {
+			log.Error().Err(err).Msg("Invalid proposal threshold")
+		}
+
+		// Get Contract
+		contract := shared.Contract{
+			Name:        community.Contract_name,
+			Addr:        community.Contract_addr,
+			Public_path: community.Public_path,
+			Threshold:   &threshold,
+		}
+		response.Contract = contract
+
+		// Get balance if community has proposal threshold rule
 		balance, _ := a.FlowAdapter.GetBalanceOfTokens(addr, &contract, *community.Contract_type)
 		response.Balance = balance
 	}
