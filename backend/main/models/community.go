@@ -446,7 +446,7 @@ func SearchForCommunity(db *s.Database, query string, filters []string, params s
 	if err != nil {
 		return nil, 0, err
 	}
-	
+
 	rows, err := db.Conn.Query(
 		db.Context,
 		sql,
@@ -503,9 +503,9 @@ func GetCategoryCount(db *s.Database, search string) (map[string]int, error) {
 
 	categoryCount := make(map[string]int)
 	for rows.Next() {
-		results := struct{
+		results := struct {
 			Category string
-			Count int
+			Count    int
 		}{}
 		err := rows.Scan(&results.Category, &results.Count)
 		if err != nil {
