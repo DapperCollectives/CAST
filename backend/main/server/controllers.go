@@ -480,6 +480,7 @@ func (a *App) getCommunitiesForHomePage(w http.ResponseWriter, r *http.Request) 
 	communities, totalRecords, err := models.GetDefaultCommunities(
 		a.DB,
 		pageParams,
+		[]string{},
 		isSearch,
 	)
 	if err != nil {

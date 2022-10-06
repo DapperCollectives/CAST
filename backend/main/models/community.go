@@ -120,7 +120,6 @@ const DEFAULT_SEARCH_SQL = `
 		FROM communities
     WHERE is_featured = 'true'
 		AND category IS NOT NULL
-		LIMIT $1 OFFSET $2
 `
 const INSERT_COMMUNITY_SQL = `
 	INSERT INTO communities(
@@ -250,7 +249,7 @@ func (c *Community) GetCommunityByProposalId(db *s.Database, proposalId int) err
 		proposalId)
 }
 
-func GetDefaultCommunities(db *s.Database, params shared.PageParams, isSearch bool) ([]*Community, int, error) {
+func GetDefaultCommunities(db *s.Database, params shared.PageParams, filters []string, isSearch bool) ([]*Community, int, error) {
 	var sql string
 
 	var totalRecords int
@@ -281,7 +280,11 @@ func GetDefaultCommunities(db *s.Database, params shared.PageParams, isSearch bo
 
 		return communities, totalRecords, nil
 	} else {
-		sql = DEFAULT_SEARCH_SQL
+		sql, err := addFiltersToSql(DEFAULT_SEARCH_SQL, "", filters)
+		if err != nil {
+			return nil, 0, err
+		}
+
 		rows, err := db.Conn.Query(
 			db.Context,
 			sql,
@@ -297,29 +300,6 @@ func GetDefaultCommunities(db *s.Database, params shared.PageParams, isSearch bo
 		communities, err := scanSearchResults(rows)
 		if err != nil {
 			return nil, 0, err
-		}
-
-		categoryRows, err := db.Conn.Query(
-			db.Context,
-			COUNT_CATEGORIES_DEFAULT_SQL,
-		)
-
-		// If we get pgx.ErrNoRows, just return an empty array
-		// and obfuscate error
-		if err != nil && err.Error() != pgx.ErrNoRows.Error() {
-			return nil, 0, err
-		} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
-			return []*Community{}, 0, nil
-		}
-
-		err = scanCategoryCount(categoryRows, communities)
-
-		// If we get pgx.ErrNoRows, just return an empty array
-		// and obfuscate error
-		if err != nil && err.Error() != pgx.ErrNoRows.Error() {
-			return nil, 0, err
-		} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
-			return []*Community{}, 0, nil
 		}
 
 		return communities, totalRecords, nil
@@ -407,7 +387,7 @@ func (c *Community) GetStrategy(name string) (Strategy, error) {
 }
 
 func SearchForCommunity(db *s.Database, query string, filters []string, params shared.PageParams) ([]*Community, int, error) {
-	sql, err := constructDynamicSql(query, filters)
+	sql, err := addFiltersToSql(SEARCH_COMMUNITIES_SQL, query, filters)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -431,29 +411,6 @@ func SearchForCommunity(db *s.Database, query string, filters []string, params s
 		return []*Community{}, 0, fmt.Errorf("error scanning search results for the query %s", query)
 	}
 
-	categoryRows, err := db.Conn.Query(
-		db.Context,
-		COUNT_CATEGORIES_DEFAULT_SQL,
-	)
-
-	// If we get pgx.ErrNoRows, just return an empty array
-	// and obfuscate error
-	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
-		return nil, 0, err
-	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
-		return []*Community{}, 0, nil
-	}
-
-	err = scanCategoryCount(categoryRows, communities)
-
-	// If we get pgx.ErrNoRows, just return an empty array
-	// and obfuscate error
-	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
-		return nil, 0, err
-	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
-		return []*Community{}, 0, nil
-	}
-
 	// Get total number of communities
 	var totalRecords int
 	countSql := `SELECT COUNT(*) FROM communities`
@@ -462,10 +419,53 @@ func SearchForCommunity(db *s.Database, query string, filters []string, params s
 	return communities, totalRecords, nil
 }
 
-func constructDynamicSql(query string, filters []string) (string, error) {
+func GetCategoryCount(db *s.Database, search string) (map[string]int, error) {
+	var rows pgx.Rows
+	var err error
+
+	if search == "" {
+		rows, err = db.Conn.Query(
+			db.Context,
+			COUNT_CATEGORIES_DEFAULT_SQL,
+		)
+	} else {
+		rows, err = db.Conn.Query(
+			db.Context,
+			COUNT_CATEGORIES_SEARCH_SQL,
+			search,
+		)
+	}
+
+	// If we get pgx.ErrNoRows, just return an empty array
+	// and obfuscate error
+	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
+		return nil, err
+	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
+		return make(map[string]int), nil
+	}
+
+	defer rows.Close()
+
+	categoryCount := make(map[string]int)
+	for rows.Next() {
+		results := struct{
+			Category string
+			Count int
+		}{}
+		err := rows.Scan(&results.Category, &results.Count)
+		if err != nil {
+			return make(map[string]int), fmt.Errorf("error scanning community row: %v", err)
+		}
+		categoryCount[results.Category] = results.Count
+	}
+
+	return categoryCount, nil
+}
+
+func addFiltersToSql(query, search string, filters []string) (string, error) {
 	var sql string
 	if filters[0] != "" {
-		sql = SEARCH_COMMUNITIES_SQL + " AND ("
+		sql = query + " AND ("
 		for i, filter := range filters {
 			if i == 0 {
 				sql += fmt.Sprintf("category = '%s'", filter)
@@ -475,10 +475,14 @@ func constructDynamicSql(query string, filters []string) (string, error) {
 		}
 		sql += ")"
 	} else {
-		sql = SEARCH_COMMUNITIES_SQL
+		sql = query
 	}
 
-	sql = sql + " LIMIT $2 OFFSET $3"
+	if search != "" {
+		sql = sql + " LIMIT $2 OFFSET $3"
+	} else {
+		sql = sql + " LIMIT $1 OFFSET $2"
+	}
 
 	return sql, nil
 }
@@ -494,23 +498,6 @@ func scanSearchResults(rows pgx.Rows) ([]*Community, error) {
 		communities = append(communities, &c)
 	}
 	return communities, nil
-}
-
-func scanCategoryCount(rows pgx.Rows, communities []*Community) error {
-	for rows.Next() {
-		var category string
-		var count int
-		err := rows.Scan(&category, &count)
-		if err != nil {
-			return fmt.Errorf("error scanning community row: %v", err)
-		}
-		for _, c := range communities {
-			if *c.Category == category {
-				c.Category_count = &count
-			}
-		} 
-	}
-	return nil
 }
 
 func MatchStrategyByProposal(s []Strategy, strategyToMatch string) (Strategy, error) {

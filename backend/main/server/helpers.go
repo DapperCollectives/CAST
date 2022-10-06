@@ -479,12 +479,14 @@ func (h *Helpers) searchCommunities(
 	int,
 	error,
 ) {
+	filtersSlice := strings.Split(filters, ",")
 	if searchText == "" {
 		isSearch := true
 
 		results, totalRecords, err := models.GetDefaultCommunities(
 			h.A.DB,
 			pageParams,
+			filtersSlice,
 			isSearch,
 		)
 
@@ -493,11 +495,13 @@ func (h *Helpers) searchCommunities(
 			return nil, nil, 0, err
 		}
 
-		categories := h.categoryCountToMap(results)
+		categoryCount, err := models.GetCategoryCount(h.A.DB, searchText)
+		if err != nil {
+			return []*models.Community{}, nil, 0, err
+		}
 
-		return results, categories, totalRecords, nil
+		return results, categoryCount, totalRecords, nil
 	} else {
-		filtersSlice := strings.Split(filters, ",")
 		results, totalRecords, err := models.SearchForCommunity(
 			h.A.DB,
 			searchText,
@@ -508,8 +512,12 @@ func (h *Helpers) searchCommunities(
 			return []*models.Community{}, nil, 0, err
 		}
 
-		categories := h.categoryCountToMap(results)
-		return results, categories, totalRecords, nil
+		categoryCount, err := models.GetCategoryCount(h.A.DB, searchText)
+		if err != nil {
+			return []*models.Community{}, nil, 0, err
+		}
+
+		return results, categoryCount, totalRecords, nil
 	}
 }
 
@@ -522,15 +530,6 @@ func (h *Helpers) categoryCountToMap(results []*models.Community) map[string]int
 	}
 
 	return categoryCount
-}
-
-func (h *Helpers) getCategoryCount(results []*models.Community) []interface{} {
-	var resultsWithCount []interface{}
-	for _, community := range results {
-		resultsWithCount = append(resultsWithCount, community)
-	}
-
-	return resultsWithCount
 }
 
 func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorResponse) {
