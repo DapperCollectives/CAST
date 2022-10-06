@@ -72,15 +72,6 @@ func TestGetCommunityUsers(t *testing.T) {
 		assert.Equal(t, true, p.Data[0].Is_author)
 		assert.Equal(t, true, p.Data[0].Is_member)
 	})
-
-	t.Run("CanUserCreateProposal API Call should return true for community author where community is configured to accept proposals from authors", func(t *testing.T) {
-		response = otu.GetCanUserCreateProposalAPI(community.ID, "0xf8d6e0586b0a20c7")
-		checkResponseCode(t, http.StatusOK, response.Code)
-		var canCreateProposal bool
-		json.Unmarshal(response.Body.Bytes(), &canCreateProposal)
-
-		assert.True(t, canCreateProposal)
-	})
 }
 
 func TestGetCommunityUsersByType(t *testing.T) {

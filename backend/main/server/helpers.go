@@ -561,49 +561,6 @@ func (h *Helpers) validateStrategyName(name string) error {
 	return errors.New("Strategy not found.")
 }
 
-func (h *Helpers) enforceCommunityRestrictions(
-	c models.Community,
-	address string,
-) error {
-
-	if *c.Only_authors_to_submit {
-		if err := models.EnsureRoleForCommunity(h.A.DB, address, c.ID, "author"); err != nil {
-			errMsg := fmt.Sprintf("Account %s is not an author for community %d.", address, c.ID)
-			log.Error().Err(err).Msg(errMsg)
-			return errors.New(errMsg)
-		}
-	} else {
-		fmt.Println("Community does not require authors to submit proposals")
-
-		threshold, err := strconv.ParseFloat(*c.Proposal_threshold, 64)
-		if err != nil {
-			log.Error().Err(err).Msg("Invalid proposal threshold")
-			return errors.New("Invalid proposal threshold")
-		}
-
-		contract := shared.Contract{
-			Name:        c.Contract_name,
-			Addr:        c.Contract_addr,
-			Public_path: c.Public_path,
-			Threshold:   &threshold,
-		}
-		hasBalance, err := h.A.FlowAdapter.EnforceTokenThreshold(address, &contract, *c.Contract_type)
-		if err != nil {
-			errMsg := "Error processing Token Threshold."
-			log.Error().Err(err).Msg(errMsg)
-			return errors.New(errMsg)
-		}
-
-		if !hasBalance {
-			errMsg := "Insufficient token balance to create proposal."
-			log.Error().Err(err).Msg(errMsg)
-			return errors.New(errMsg)
-		}
-	}
-
-	return nil
-}
-
 func (h *Helpers) createCommunity(payload models.CreateCommunityRequestPayload) (models.Community, error) {
 	c := payload.Community
 

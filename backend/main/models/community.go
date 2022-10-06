@@ -88,6 +88,12 @@ type UpdateCommunityRequestPayload struct {
 	s.TimestampSignaturePayload
 }
 
+type CanUserCreateProposalResponse struct {
+	shared.Contract
+	Balance       *float64 `json:"balance,omitempty"`
+	HasPermission bool
+}
+
 type Strategy struct {
 	Name            *string `json:"name,omitempty"`
 	shared.Contract `json:"contract,omitempty"`
@@ -340,14 +346,15 @@ func (c *Community) CanUserCreateProposal(db *s.Database, fa *s.FlowAdapter, add
 		Public_path: c.Public_path,
 		Threshold:   &threshold,
 	}
-	hasBalance, err := fa.EnforceTokenThreshold(address, &contract, *c.Contract_type)
+	balance, err := fa.GetBalanceOfTokens(address, &contract, *c.Contract_type)
 	if err != nil {
 		errMsg := "Error processing Token Threshold."
 		log.Error().Err(err).Msg(errMsg)
 		return errors.New(errMsg)
 	}
 
-	if !hasBalance {
+	//check if balance is greater than threshold
+	if *balance < threshold {
 		errMsg := "Insufficient token balance to create proposal."
 		log.Error().Err(err).Msg(errMsg)
 		return errors.New(errMsg)

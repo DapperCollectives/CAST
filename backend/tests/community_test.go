@@ -285,10 +285,12 @@ func TestCanUserCreateProposalForCommunityOnlyAuthors(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")
 	var _true = true
+	var contractType = "ft"
 
 	// Create Community
 	communityStruct := otu.GenerateCommunityStruct("account")
 	communityStruct.Only_authors_to_submit = &_true
+	communityStruct.Contract_type = &contractType
 	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
 
 	response := otu.CreateCommunityAPI(communityPayload)
@@ -311,10 +313,10 @@ func TestCanUserCreateProposalForCommunityOnlyAuthors(t *testing.T) {
 		address := "0x" + account.Address().String()
 		response = otu.GetCanUserCreateProposalAPI(community.ID, address)
 		checkResponseCode(t, http.StatusOK, response.Code)
-		var canCreateProposal bool
-		json.Unmarshal(response.Body.Bytes(), &canCreateProposal)
+		var responsePayload models.CanUserCreateProposalResponse
+		json.Unmarshal(response.Body.Bytes(), &responsePayload)
 
-		assert.True(t, canCreateProposal)
+		assert.True(t, responsePayload.HasPermission)
 
 	})
 
@@ -332,10 +334,10 @@ func TestCanUserCreateProposalForCommunityOnlyAuthors(t *testing.T) {
 		address := "0x" + account.Address().String()
 		response = otu.GetCanUserCreateProposalAPI(community.ID, address)
 		checkResponseCode(t, http.StatusOK, response.Code)
-		var canCreateProposal bool
-		json.Unmarshal(response.Body.Bytes(), &canCreateProposal)
+		var responsePayload models.CanUserCreateProposalResponse
+		json.Unmarshal(response.Body.Bytes(), &responsePayload)
 
-		assert.True(t, canCreateProposal)
+		assert.True(t, responsePayload.HasPermission)
 
 	})
 
@@ -353,10 +355,10 @@ func TestCanUserCreateProposalForCommunityOnlyAuthors(t *testing.T) {
 		address := "0x" + account.Address().String()
 		response = otu.GetCanUserCreateProposalAPI(community.ID, address)
 		checkResponseCode(t, http.StatusOK, response.Code)
-		var canCreateProposal bool
-		json.Unmarshal(response.Body.Bytes(), &canCreateProposal)
+		var responsePayload models.CanUserCreateProposalResponse
+		json.Unmarshal(response.Body.Bytes(), &responsePayload)
 
-		assert.False(t, canCreateProposal)
+		assert.False(t, responsePayload.HasPermission)
 
 	})
 }
@@ -401,10 +403,10 @@ func TestCanUserCreateProposalForCommunityTokenThreshold(t *testing.T) {
 		address := "0x" + account.Address().String()
 		response = otu.GetCanUserCreateProposalAPI(community.ID, address)
 		checkResponseCode(t, http.StatusOK, response.Code)
-		var canCreateProposal bool
-		json.Unmarshal(response.Body.Bytes(), &canCreateProposal)
+		var responsePayload models.CanUserCreateProposalResponse
+		json.Unmarshal(response.Body.Bytes(), &responsePayload)
 
-		assert.True(t, canCreateProposal)
+		assert.True(t, responsePayload.HasPermission)
 
 	})
 
@@ -422,10 +424,10 @@ func TestCanUserCreateProposalForCommunityTokenThreshold(t *testing.T) {
 		address := "0x" + account.Address().String()
 		response = otu.GetCanUserCreateProposalAPI(community.ID, address)
 		checkResponseCode(t, http.StatusOK, response.Code)
-		var canCreateProposal bool
-		json.Unmarshal(response.Body.Bytes(), &canCreateProposal)
+		var responsePayload models.CanUserCreateProposalResponse
+		json.Unmarshal(response.Body.Bytes(), &responsePayload)
 
-		assert.False(t, canCreateProposal)
+		assert.False(t, responsePayload.HasPermission)
 
 	})
 
@@ -457,13 +459,11 @@ func TestCanUserCreateProposalForCommunityTokenThreshold(t *testing.T) {
 
 		// Check if user can create community
 		response = otu.GetCanUserCreateProposalAPI(community.ID, address)
-		checkResponseCode(t, http.StatusOK, response.Code)
-		json.Unmarshal(response.Body.Bytes(), &canCreateProposal)
+		var responsePayload models.CanUserCreateProposalResponse
+		json.Unmarshal(response.Body.Bytes(), &responsePayload)
 
-		assert.True(t, canCreateProposal)
-
+		assert.True(t, responsePayload.HasPermission)
 	})
-
 }
 
 // func TestUpdateStrategies(t *testing.T) {
