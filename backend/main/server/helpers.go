@@ -502,6 +502,7 @@ func (h *Helpers) searchCommunities(
 			h.A.DB,
 			searchText,
 			filtersSlice,
+			pageParams,
 		)
 		if err != nil {
 			return []*models.Community{}, nil, 0, err

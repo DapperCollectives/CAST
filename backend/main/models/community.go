@@ -379,7 +379,7 @@ func (c *Community) GetStrategy(name string) (Strategy, error) {
 	return Strategy{}, fmt.Errorf("Strategy %s does not exist on community", name)
 }
 
-func SearchForCommunity(db *s.Database, query string, filters []string) ([]*Community, int, error) {
+func SearchForCommunity(db *s.Database, query string, filters []string, params shared.PageParams) ([]*Community, int, error) {
 	sql, err := constructDynamicSql(query, filters)
 	if err != nil {
 		return nil, 0, err
@@ -389,6 +389,8 @@ func SearchForCommunity(db *s.Database, query string, filters []string) ([]*Comm
 		db.Context,
 		sql,
 		query,
+		params.Count,
+		params.Start,
 	)
 
 	if err != nil {
@@ -425,6 +427,8 @@ func constructDynamicSql(query string, filters []string) (string, error) {
 	} else {
 		sql = SEARCH_COMMUNITIES_SQL
 	}
+
+	sql = sql + " LIMIT $2 OFFSET $3"
 
 	return sql, nil
 }

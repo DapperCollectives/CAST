@@ -131,7 +131,7 @@ const NotificationModalProvider = ({ children }) => {
               className="modal-close is-large"
               aria-label="close"
               onClick={closeModal}
-            ></button>
+            />
           )}
         </div>
         {children}
