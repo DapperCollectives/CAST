@@ -67,7 +67,7 @@ export default function useCommunitySearch({
       },
       {
         getNextPageParam: (lastPage) => {
-          const { next, start, count, totalRecords } = lastPage;
+          const { next, start, count, totalRecords } = lastPage?.results ?? {};
           return [start + count, count, totalRecords, next];
         },
         onError: (error) => {

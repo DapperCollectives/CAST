@@ -202,6 +202,113 @@ func TestGetCommunitiesForHomepageAPI(t *testing.T) {
 	assert.Equal(t, 1, len(p.Data))
 }
 
+func TestSearchForCommunities(t *testing.T) {
+	clearTable("communities")
+	clearTable("community_users")
+	communityIds := otu.AddCommunities(25)
+	otu.MakeFeaturedCommunity(communityIds[0])
+	otu.MakeFeaturedCommunity(communityIds[1])
+	otu.MakeFeaturedCommunity(communityIds[2])
+	otu.MakeFeaturedCommunity(communityIds[3])
+	otu.MakeFeaturedCommunity(communityIds[4])
+
+	t.Run("Default Search for Featured Communities", func(t *testing.T) {
+		response := otu.GetSearchCommunitiesAPI()
+
+		checkResponseCode(t, http.StatusOK, response.Code)
+
+		//Parse the response
+		var p test_utils.PaginatedResponseWithCommunity
+		json.Unmarshal(response.Body.Bytes(), &p)
+
+		assert.Equal(t, 5, len(p.Data))
+	})
+
+	t.Run("Default Search with filter", func(t *testing.T) {
+		response := otu.GetSearchCommunitiesAPI()
+
+		checkResponseCode(t, http.StatusOK, response.Code)
+
+		//Parse the response
+		// var p test_utils.PaginatedResponseWithCommunity
+		// json.Unmarshal(response.Body.Bytes(), &p)
+
+		// assert.Equal(t, 5, len(p.Data))
+	})
+
+	t.Run("Limit Default Search", func(t *testing.T) {
+		response := otu.GetSearchCommunitiesAPI()
+
+		checkResponseCode(t, http.StatusOK, response.Code)
+
+		//Parse the response
+		// var p test_utils.PaginatedResponseWithCommunity
+		// json.Unmarshal(response.Body.Bytes(), &p)
+
+		// assert.Equal(t, 5, len(p.Data))
+	})
+
+	t.Run("Limit Default Search with filter", func(t *testing.T) {
+		response := otu.GetSearchCommunitiesAPI()
+
+		checkResponseCode(t, http.StatusOK, response.Code)
+
+		//Parse the response
+		// var p test_utils.PaginatedResponseWithCommunity
+		// json.Unmarshal(response.Body.Bytes(), &p)
+
+		// assert.Equal(t, 5, len(p.Data))
+	})
+
+	t.Run("Search with text", func(t *testing.T) {
+		response := otu.GetSearchCommunitiesAPI()
+
+		checkResponseCode(t, http.StatusOK, response.Code)
+
+		//Parse the response
+		// var p test_utils.PaginatedResponseWithCommunity
+		// json.Unmarshal(response.Body.Bytes(), &p)
+
+		// assert.Equal(t, 5, len(p.Data))
+	})
+
+	t.Run("Search with text and filter", func(t *testing.T) {
+		response := otu.GetSearchCommunitiesAPI()
+
+		checkResponseCode(t, http.StatusOK, response.Code)
+
+		//Parse the response
+		// var p test_utils.PaginatedResponseWithCommunity
+		// json.Unmarshal(response.Body.Bytes(), &p)
+
+		// assert.Equal(t, 5, len(p.Data))
+	})
+
+	t.Run("Limit Search with text", func(t *testing.T) {
+		response := otu.GetSearchCommunitiesAPI()
+
+		checkResponseCode(t, http.StatusOK, response.Code)
+
+		//Parse the response
+		// var p test_utils.PaginatedResponseWithCommunity
+		// json.Unmarshal(response.Body.Bytes(), &p)
+
+		// assert.Equal(t, 5, len(p.Data))
+	})
+
+	t.Run("Limit Search with text and filter", func(t *testing.T) {
+		response := otu.GetSearchCommunitiesAPI()
+
+		checkResponseCode(t, http.StatusOK, response.Code)
+
+		//Parse the response
+		// var p test_utils.PaginatedResponseWithCommunity
+		// json.Unmarshal(response.Body.Bytes(), &p)
+
+		// assert.Equal(t, 5, len(p.Data))
+	})
+}
+
 func TestGetCommunityActiveStrategies(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")
