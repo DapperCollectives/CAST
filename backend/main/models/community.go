@@ -250,6 +250,10 @@ func (c *Community) GetCommunityByProposalId(db *s.Database, proposalId int) err
 func GetDefaultCommunities(db *s.Database, params shared.PageParams, isSearch bool) ([]*Community, int, error) {
 	var sql string
 
+	var totalRecords int
+	countSql := `SELECT COUNT(*) FROM communities`
+	db.Conn.QueryRow(db.Context, countSql).Scan(&totalRecords)
+
 	if !isSearch {
 		sql = HOMEPAGE_SQL
 
@@ -272,10 +276,6 @@ func GetDefaultCommunities(db *s.Database, params shared.PageParams, isSearch bo
 			return []*Community{}, 0, nil
 		}
 
-		var totalRecords int
-		countSql := `SELECT COUNT(*) FROM communities`
-		db.Conn.QueryRow(db.Context, countSql).Scan(&totalRecords)
-
 		return communities, totalRecords, nil
 	} else {
 		sql = DEFAULT_SEARCH_SQL
@@ -295,7 +295,7 @@ func GetDefaultCommunities(db *s.Database, params shared.PageParams, isSearch bo
 			return nil, 0, err
 		}
 
-		return communities, len(communities), nil
+		return communities, totalRecords, nil
 	}
 }
 
@@ -379,10 +379,10 @@ func (c *Community) GetStrategy(name string) (Strategy, error) {
 	return Strategy{}, fmt.Errorf("Strategy %s does not exist on community", name)
 }
 
-func SearchForCommunity(db *s.Database, query string, filters []string) ([]*Community, error) {
+func SearchForCommunity(db *s.Database, query string, filters []string) ([]*Community, int, error) {
 	sql, err := constructDynamicSql(query, filters)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	
 	rows, err := db.Conn.Query(
@@ -392,17 +392,22 @@ func SearchForCommunity(db *s.Database, query string, filters []string) ([]*Comm
 	)
 
 	if err != nil {
-		return []*Community{}, fmt.Errorf("error searching for a community with the the query %s", query)
+		return []*Community{}, 0, fmt.Errorf("error searching for a community with the the query %s", query)
 	}
 
 	defer rows.Close()
 
 	communities, err := scanSearchResults(rows)
 	if err != nil {
-		return []*Community{}, fmt.Errorf("error scanning search results for the query %s", query)
+		return []*Community{}, 0, fmt.Errorf("error scanning search results for the query %s", query)
 	}
 
-	return communities, nil
+	// Get total number of communities
+	var totalRecords int
+	countSql := `SELECT COUNT(*) FROM communities`
+	_ = db.Conn.QueryRow(db.Context, countSql).Scan(&totalRecords)
+
+	return communities, totalRecords, nil
 }
 
 func constructDynamicSql(query string, filters []string) (string, error) {

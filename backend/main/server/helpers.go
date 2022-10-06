@@ -476,12 +476,13 @@ func (h *Helpers) searchCommunities(
 ) (
 	[]*models.Community,
 	map[string]int,
+	int,
 	error,
 ) {
 	if searchText == "" {
 		isSearch := true
 
-		results, _, err := models.GetDefaultCommunities(
+		results, totalRecords, err := models.GetDefaultCommunities(
 			h.A.DB,
 			pageParams,
 			isSearch,
@@ -489,26 +490,25 @@ func (h *Helpers) searchCommunities(
 
 		if err != nil {
 			log.Error().Err(err)
-			return nil, nil, err
+			return nil, nil, 0, err
 		}
 
 		categories := h.categoryCountToMap(results)
 
-		return results, categories, nil
+		return results, categories, totalRecords, nil
 	} else {
-		fmt.Println(filters)
 		filtersSlice := strings.Split(filters, ",")
-		results, err := models.SearchForCommunity(
+		results, totalRecords, err := models.SearchForCommunity(
 			h.A.DB,
 			searchText,
 			filtersSlice,
 		)
 		if err != nil {
-			return []*models.Community{}, nil, err
+			return []*models.Community{}, nil, 0, err
 		}
 
 		categories := h.categoryCountToMap(results)
-		return results, categories, nil
+		return results, categories, totalRecords, nil
 	}
 }
 

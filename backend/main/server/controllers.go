@@ -434,7 +434,7 @@ func (a *App) searchCommunities(w http.ResponseWriter, r *http.Request) {
 	filters := r.FormValue("filters")
 	searchText := r.FormValue("text")
 
-	results, categories, err := helpers.searchCommunities(
+	results, categories, totalRecords, err := helpers.searchCommunities(
 		searchText,
 		filters,
 		pageParams,
@@ -443,7 +443,7 @@ func (a *App) searchCommunities(w http.ResponseWriter, r *http.Request) {
 		log.Error().Err(err).Msg("Error searching communities")
 		respondWithError(w, errIncompleteRequest)
 	}
-	pageParams.TotalRecords = len(results)
+	pageParams.TotalRecords = totalRecords
 	paginatedResults := shared.GetPaginatedResponseWithPayload(results, pageParams)
 	response, err := helpers.appendFiltersToResponse(paginatedResults, categories)
 	if err != nil {
