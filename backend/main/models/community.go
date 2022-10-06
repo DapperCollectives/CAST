@@ -5,13 +5,16 @@ package models
 /////////////////
 
 import (
+	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/DapperCollectives/CAST/backend/main/shared"
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/jackc/pgx/v4"
+	"github.com/rs/zerolog/log"
 )
 
 type Community struct {
@@ -305,6 +308,43 @@ func (c *Community) CanUpdateCommunity(db *s.Database, addr string) error {
 	if err := admin.GetCommunityUser(db); err != nil {
 		return fmt.Errorf("address %s does not have permission to update community with ID %d", addr, c.ID)
 	}
+	return nil
+}
+
+func (c *Community) CanUserCreateProposal(db *s.Database, fa *s.FlowAdapter, address string) error {
+	if *c.Only_authors_to_submit {
+		if err := EnsureRoleForCommunity(db, address, c.ID, "author"); err != nil {
+			errMsg := fmt.Sprintf("Account %s is not an author for community %d.", address, c.ID)
+			log.Error().Err(err).Msg(errMsg)
+			return errors.New(errMsg)
+		}
+	} else {
+		threshold, err := strconv.ParseFloat(*c.Proposal_threshold, 64)
+		if err != nil {
+			log.Error().Err(err).Msg("Invalid proposal threshold")
+			return errors.New("Invalid proposal threshold")
+		}
+
+		contract := shared.Contract{
+			Name:        c.Contract_name,
+			Addr:        c.Contract_addr,
+			Public_path: c.Public_path,
+			Threshold:   &threshold,
+		}
+		hasBalance, err := fa.EnforceTokenThreshold(address, &contract, *c.Contract_type)
+		if err != nil {
+			errMsg := "Error processing Token Threshold."
+			log.Error().Err(err).Msg(errMsg)
+			return errors.New(errMsg)
+		}
+
+		if !hasBalance {
+			errMsg := "Insufficient token balance to create proposal."
+			log.Error().Err(err).Msg(errMsg)
+			return errors.New(errMsg)
+		}
+	}
+
 	return nil
 }
 

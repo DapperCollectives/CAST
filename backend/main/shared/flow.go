@@ -41,14 +41,14 @@ type FlowConfig struct {
 }
 
 type Contract struct {
-	Name           *string `json:"name,omitempty"`
-	Addr           *string `json:"addr,omitempty"`
-	Public_path    *string `json:"publicPath,omitempty"`
+	Name           *string  `json:"name,omitempty"`
+	Addr           *string  `json:"addr,omitempty"`
+	Public_path    *string  `json:"publicPath,omitempty"`
 	Threshold      *float64 `json:"threshold,omitempty,string"`
 	MaxWeight      *float64 `json:"maxWeight,omitempty,string"`
-	Float_event_id *uint64 `json:"floatEventId,omitempty,string"`
-	Script         *string `json:"script,omitempty"`
-	TallyMethod	   *string `json:"tallyMethod,omitempty"`
+	Float_event_id *uint64  `json:"floatEventId,omitempty,string"`
+	Script         *string  `json:"script,omitempty"`
+	TallyMethod    *string  `json:"tallyMethod,omitempty"`
 }
 
 var (
@@ -186,7 +186,14 @@ func (fa *FlowAdapter) ValidateSignature(address, message string, sigs *[]Compos
 
 }
 
-func (fa *FlowAdapter) EnforceTokenThreshold(scriptPath, creatorAddr string, c *Contract) (bool, error) {
+func (fa *FlowAdapter) EnforceTokenThreshold(creatorAddr string, c *Contract, contractType string) (bool, error) {
+
+	var scriptPath string
+	if contractType == "nft" {
+		scriptPath = "./main/cadence/scripts/get_nfts_ids.cdc"
+	} else {
+		scriptPath = "./main/cadence/scripts/get_balance.cdc"
+	}
 
 	var balance float64
 	flowAddress := flow.HexToAddress(creatorAddr)

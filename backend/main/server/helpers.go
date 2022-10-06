@@ -506,7 +506,7 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorRespo
 		p.Max_weight = strategy.Contract.MaxWeight
 	}
 
-	if err := h.enforceCommunityRestrictions(community, p, strategy); err != nil {
+	if err := community.CanUserCreateProposal(h.A.DB, h.A.FlowAdapter, p.Creator_addr); err != nil {
 		return models.Proposal{}, errIncompleteRequest
 	}
 
@@ -563,13 +563,12 @@ func (h *Helpers) validateStrategyName(name string) error {
 
 func (h *Helpers) enforceCommunityRestrictions(
 	c models.Community,
-	p models.Proposal,
-	s models.Strategy,
+	address string,
 ) error {
 
 	if *c.Only_authors_to_submit {
-		if err := models.EnsureRoleForCommunity(h.A.DB, p.Creator_addr, c.ID, "author"); err != nil {
-			errMsg := fmt.Sprintf("Account %s is not an author for community %d.", p.Creator_addr, p.Community_id)
+		if err := models.EnsureRoleForCommunity(h.A.DB, address, c.ID, "author"); err != nil {
+			errMsg := fmt.Sprintf("Account %s is not an author for community %d.", address, c.ID)
 			log.Error().Err(err).Msg(errMsg)
 			return errors.New(errMsg)
 		}
@@ -588,7 +587,7 @@ func (h *Helpers) enforceCommunityRestrictions(
 			Public_path: c.Public_path,
 			Threshold:   &threshold,
 		}
-		hasBalance, err := h.processTokenThreshold(p.Creator_addr, contract, *c.Contract_type)
+		hasBalance, err := h.A.FlowAdapter.EnforceTokenThreshold(address, &contract, *c.Contract_type)
 		if err != nil {
 			errMsg := "Error processing Token Threshold."
 			log.Error().Err(err).Msg(errMsg)
@@ -1079,23 +1078,6 @@ func (h *Helpers) validateUserWithRoleViaVoucher(addr string, voucher *shared.Vo
 	}
 
 	return nil
-}
-
-func (h *Helpers) processTokenThreshold(address string, c shared.Contract, contractType string) (bool, error) {
-	var scriptPath string
-
-	if contractType == "nft" {
-		scriptPath = "./main/cadence/scripts/get_nfts_ids.cdc"
-	} else {
-		scriptPath = "./main/cadence/scripts/get_balance.cdc"
-	}
-
-	hasBalance, err := h.A.FlowAdapter.EnforceTokenThreshold(scriptPath, address, &c)
-	if err != nil {
-		return false, err
-	}
-
-	return hasBalance, nil
 }
 
 func (h *Helpers) initStrategy(name string) Strategy {
