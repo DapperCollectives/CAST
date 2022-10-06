@@ -6,6 +6,7 @@ import { parseDateFromServer } from 'utils';
 import Results from './Results';
 
 export default function ResultsPanel({
+  proposalChoices = [],
   results = [],
   endTime,
   computedStatus,
@@ -74,7 +75,11 @@ export default function ResultsPanel({
           </span>
         </div>
       </div>
-      <Results voteResults={results} computedStatus={computedStatus} />
+      <Results
+        proposalChoices={proposalChoices}
+        voteResults={results}
+        computedStatus={computedStatus}
+      />
     </div>
   );
 }

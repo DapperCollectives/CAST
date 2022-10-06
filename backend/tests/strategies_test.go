@@ -14,12 +14,11 @@ import (
 )
 
 type Strategy interface {
-	TallyVotes(votes []*models.VoteWithBalance, p *models.ProposalResults, proposal *models.Proposal) (models.ProposalResults, error)
+	TallyVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) (models.ProposalResults, error)
 	GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error)
 	GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error)
-	InitStrategy(f *shared.FlowAdapter, db *shared.Database, sc *shared.SnapshotClient)
+	InitStrategy(f *shared.FlowAdapter, db *shared.Database, dps *shared.DpsAdapter)
 	FetchBalance(b *models.Balance, p *models.Proposal) (*models.Balance, error)
-	RequiresSnapshot() bool
 }
 
 var strategyMap = map[string]Strategy{
@@ -42,7 +41,6 @@ func TestTokenWeightedDefaultStrategy(t *testing.T) {
 	votes := otu.GenerateListOfVotes(proposalIds[0], 10)
 	proposalId := proposalIds[0]
 	proposalIdTwo := proposalIds[1]
-	choices := proposals[0].Choices
 
 	err := otu.AddDummyVotesAndBalances(votes)
 	if err != nil {
@@ -54,8 +52,7 @@ func TestTokenWeightedDefaultStrategy(t *testing.T) {
 		strategyName := "token-weighted-default"
 
 		s := strategyMap[strategyName]
-		proposalWithChoices := models.NewProposalResults(proposalId, choices)
-		_results, err := s.TallyVotes(votes, proposalWithChoices, proposals[0])
+		_results, err := s.TallyVotes(votes, proposals[0])
 		if err != nil {
 			t.Errorf("Error tallying votes: %v", err)
 		}
@@ -130,7 +127,6 @@ func TestBalanceOfNFTsStrategy(t *testing.T) {
 	communityId, community := otu.AddCommunitiesWithNFTContract(1, "user1")
 	proposalIds, proposals := otu.AddProposalsForStrategy(communityId[0], "balance-of-nfts", 1)
 	proposalId := proposalIds[0]
-	choices := proposals[0].Choices
 
 	var contract = &shared.Contract{
 		Name:        community.Contract_name,
@@ -148,9 +144,8 @@ func TestBalanceOfNFTsStrategy(t *testing.T) {
 		strategyName := "balance-of-nfts"
 
 		s := strategyMap[strategyName]
-		s.InitStrategy(otu.A.FlowAdapter, otu.A.DB, otu.A.SnapshotClient)
-		proposalWithChoices := models.NewProposalResults(proposalId, choices)
-		_results, err := s.TallyVotes(votes, proposalWithChoices, proposals[0])
+		s.InitStrategy(otu.A.FlowAdapter, otu.A.DB, otu.A.DpsAdapter)
+		_results, err := s.TallyVotes(votes, proposals[0])
 		if err != nil {
 			t.Errorf("Error tallying votes: %v", err)
 		}
@@ -238,7 +233,6 @@ func TestStakedTokenWeightedDefaultStrategy(t *testing.T) {
 	proposalIds, proposals := otu.AddProposalsForStrategy(communityId, "staked-token-weighted-default", 2)
 	proposalIdTwo := proposalIds[1]
 	proposalId := proposalIds[0]
-	choices := proposals[0].Choices
 	votes := otu.GenerateListOfVotes(proposalId, 10)
 	otu.AddDummyVotesAndBalances(votes)
 
@@ -247,8 +241,7 @@ func TestStakedTokenWeightedDefaultStrategy(t *testing.T) {
 		strategyName := "staked-token-weighted-default"
 
 		s := strategyMap[strategyName]
-		proposalWithChoices := models.NewProposalResults(proposalId, choices)
-		_results, err := s.TallyVotes(votes, proposalWithChoices, proposals[0])
+		_results, err := s.TallyVotes(votes, proposals[0])
 		if err != nil {
 			t.Errorf("Error tallying votes: %v", err)
 		}
