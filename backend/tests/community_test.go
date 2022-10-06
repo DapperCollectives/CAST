@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"testing"
 
@@ -278,6 +279,191 @@ func TestUpdateCommunity(t *testing.T) {
 	assert.Equal(t, *utils.UpdatedCommunity.Github_url, *updatedCommunity.Github_url)
 	assert.Equal(t, *utils.UpdatedCommunity.Discord_url, *updatedCommunity.Discord_url)
 	assert.Equal(t, *utils.UpdatedCommunity.Instagram_url, *updatedCommunity.Instagram_url)
+}
+
+func TestCanUserCreateProposalForCommunityOnlyAuthors(t *testing.T) {
+	clearTable("communities")
+	clearTable("community_users")
+	var _true = true
+
+	// Create Community
+	communityStruct := otu.GenerateCommunityStruct("account")
+	communityStruct.Only_authors_to_submit = &_true
+	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
+
+	response := otu.CreateCommunityAPI(communityPayload)
+
+	var community models.Community
+	json.Unmarshal(response.Body.Bytes(), &community)
+
+	// Authors can create proposal
+	t.Run("Authors should be able to create proposals", func(t *testing.T) {
+		// Generate author user
+		userName := "user1"
+		userStruct := otu.GenerateCommunityUserStruct(userName, "author")
+		userPayload := otu.GenerateCommunityUserPayload("account", userStruct)
+
+		response = otu.CreateCommunityUserAPI(community.ID, userPayload)
+		checkResponseCode(t, http.StatusCreated, response.Code)
+
+		// Check if user can create community
+		account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", userName))
+		address := "0x" + account.Address().String()
+		response = otu.GetCanUserCreateProposalAPI(community.ID, address)
+		checkResponseCode(t, http.StatusOK, response.Code)
+		var canCreateProposal bool
+		json.Unmarshal(response.Body.Bytes(), &canCreateProposal)
+
+		assert.True(t, canCreateProposal)
+
+	})
+
+	t.Run("Admins should be able to create proposals", func(t *testing.T) {
+		// Generate admin user
+		userName := "user2"
+		userStruct := otu.GenerateCommunityUserStruct(userName, "admin")
+		userPayload := otu.GenerateCommunityUserPayload("account", userStruct)
+
+		response = otu.CreateCommunityUserAPI(community.ID, userPayload)
+		checkResponseCode(t, http.StatusCreated, response.Code)
+
+		// Check if user can create proposal
+		account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", userName))
+		address := "0x" + account.Address().String()
+		response = otu.GetCanUserCreateProposalAPI(community.ID, address)
+		checkResponseCode(t, http.StatusOK, response.Code)
+		var canCreateProposal bool
+		json.Unmarshal(response.Body.Bytes(), &canCreateProposal)
+
+		assert.True(t, canCreateProposal)
+
+	})
+
+	t.Run("Members should not be able to create proposals if community is configured to Only_authors_to_submit", func(t *testing.T) {
+		// Generate member user
+		userName := "user3"
+		userStruct := otu.GenerateCommunityUserStruct(userName, "member")
+		userPayload := otu.GenerateCommunityUserPayload(userName, userStruct)
+
+		response = otu.CreateCommunityUserAPI(community.ID, userPayload)
+		checkResponseCode(t, http.StatusCreated, response.Code)
+
+		// Check if user can create community
+		account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", userName))
+		address := "0x" + account.Address().String()
+		response = otu.GetCanUserCreateProposalAPI(community.ID, address)
+		checkResponseCode(t, http.StatusOK, response.Code)
+		var canCreateProposal bool
+		json.Unmarshal(response.Body.Bytes(), &canCreateProposal)
+
+		assert.False(t, canCreateProposal)
+
+	})
+}
+
+func TestCanUserCreateProposalForCommunityTokenThreshold(t *testing.T) {
+	clearTable("communities")
+	clearTable("community_users")
+	var _false = false
+
+	// Create Community
+	communityStruct := otu.GenerateCommunityStruct("account")
+	communityStruct.Only_authors_to_submit = &_false
+	threshold := "10"
+	contractName := "FlowToken"
+	contractAddr := "0x0ae53cb6e3f42a79"
+	contractType := "ft"
+	publicPath := "flowTokenBalance"
+	communityStruct.Proposal_threshold = &threshold
+	communityStruct.Contract_addr = &contractAddr
+	communityStruct.Contract_name = &contractName
+	communityStruct.Public_path = &publicPath
+	communityStruct.Contract_type = &contractType
+	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
+
+	response := otu.CreateCommunityAPI(communityPayload)
+
+	var community models.Community
+	json.Unmarshal(response.Body.Bytes(), &community)
+
+	// Authors can create proposal
+	t.Run("Authors should be able to create proposals", func(t *testing.T) {
+		// Generate author user
+		userName := "user1"
+		userStruct := otu.GenerateCommunityUserStruct(userName, "author")
+		userPayload := otu.GenerateCommunityUserPayload("account", userStruct)
+
+		response = otu.CreateCommunityUserAPI(community.ID, userPayload)
+		checkResponseCode(t, http.StatusCreated, response.Code)
+
+		// Check if user can create community
+		account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", userName))
+		address := "0x" + account.Address().String()
+		response = otu.GetCanUserCreateProposalAPI(community.ID, address)
+		checkResponseCode(t, http.StatusOK, response.Code)
+		var canCreateProposal bool
+		json.Unmarshal(response.Body.Bytes(), &canCreateProposal)
+
+		assert.True(t, canCreateProposal)
+
+	})
+
+	t.Run("Non-authors should not be able to create proposals if they don't have enough tokens", func(t *testing.T) {
+		// Generate member user
+		userName := "user2"
+		userStruct := otu.GenerateCommunityUserStruct(userName, "member")
+		userPayload := otu.GenerateCommunityUserPayload(userName, userStruct)
+
+		response = otu.CreateCommunityUserAPI(community.ID, userPayload)
+		checkResponseCode(t, http.StatusCreated, response.Code)
+
+		// Check if user can create community
+		account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", userName))
+		address := "0x" + account.Address().String()
+		response = otu.GetCanUserCreateProposalAPI(community.ID, address)
+		checkResponseCode(t, http.StatusOK, response.Code)
+		var canCreateProposal bool
+		json.Unmarshal(response.Body.Bytes(), &canCreateProposal)
+
+		assert.False(t, canCreateProposal)
+
+	})
+
+	t.Run("Non-authors should be able to create proposals if they do have enough tokens", func(t *testing.T) {
+		// Generate member user
+		userName := "user3"
+		userStruct := otu.GenerateCommunityUserStruct(userName, "member")
+		userPayload := otu.GenerateCommunityUserPayload(userName, userStruct)
+
+		response = otu.CreateCommunityUserAPI(community.ID, userPayload)
+		checkResponseCode(t, http.StatusCreated, response.Code)
+
+		// Give user 5 flow tokens
+		var amount float64 = 5.0
+		otu.TransferFlowTokens("account", userName, amount)
+
+		// Check if user can create community
+		account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", userName))
+		address := "0x" + account.Address().String()
+		response = otu.GetCanUserCreateProposalAPI(community.ID, address)
+		checkResponseCode(t, http.StatusOK, response.Code)
+		var canCreateProposal bool
+		json.Unmarshal(response.Body.Bytes(), &canCreateProposal)
+
+		assert.False(t, canCreateProposal)
+
+		// Give user 5 more flow tokens to meet minimum threshold
+		otu.TransferFlowTokens("account", userName, amount)
+
+		// Check if user can create community
+		response = otu.GetCanUserCreateProposalAPI(community.ID, address)
+		checkResponseCode(t, http.StatusOK, response.Code)
+		json.Unmarshal(response.Body.Bytes(), &canCreateProposal)
+
+		assert.True(t, canCreateProposal)
+
+	})
+
 }
 
 // func TestUpdateStrategies(t *testing.T) {
