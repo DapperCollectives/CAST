@@ -27,7 +27,7 @@ export default function BrowseCommunities() {
   } = history;
 
   const { search, filters: filtersUrl } = useQueryParams({
-    search: 'search',
+    text: 'text',
     filters: 'filters',
   });
 
@@ -64,7 +64,7 @@ export default function BrowseCommunities() {
     error,
   } = useCommunitySearch({
     searchText: searchTextParam,
-    // do not send files when all is selected
+    // do not send filters when all is selected
     ...(selectedPills.includes('all') ? undefined : { filters: selectedPills }),
   });
 
