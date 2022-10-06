@@ -8,6 +8,7 @@ import Results from './Results';
 export default function ResultsPanel({
   results = [],
   endTime,
+  startTime,
   computedStatus,
 } = {}) {
   const status = FilterValues[computedStatus] ?? FilterValues.closed;
@@ -50,7 +51,9 @@ export default function ResultsPanel({
     [FilterValues.active]: <Svg name="Active" />,
   };
 
-  const { diffDuration } = parseDateFromServer(endTime);
+  const { diffDuration } = parseDateFromServer(
+    status === FilterValues.pending ? startTime : endTime
+  );
 
   const textDescriptionMap = {
     [FilterValues.active]: `${diffDuration} remaining`,
