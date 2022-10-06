@@ -112,7 +112,7 @@ export default function ProposalPage() {
     'target="_blank" rel="noopener noreferrer"'
   );
 
-  // this hooks calculates if body should be collapsed
+  // this hook calculates if body should be collapsed
   useEffect(() => {
     const { current } = descriptionRef;
     if (current?.clientHeight < 300) {
