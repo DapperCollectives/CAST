@@ -5,6 +5,7 @@ import { useModalContext } from 'contexts/NotificationModal';
 import { useWebContext } from 'contexts/Web3';
 import { Svg } from '@cast/shared-components';
 import {
+  CastingVoteModal,
   CommunityName,
   Loader,
   Message,
@@ -12,6 +13,8 @@ import {
   StrategyModal,
   StyledStatusPill,
   Tablink,
+  VoteConfirmationModal,
+  VoteConfirmedModal,
   VotesList,
   WalletConnect,
   WrapperResponsive,
@@ -195,8 +198,7 @@ export default function ProposalPage() {
         proposalName={proposal.name}
       />,
       {
-        showCloseButton: false,
-        classNameModalContent: 'rounded-sm',
+        isErrorModal: true,
       }
     );
   };
@@ -218,12 +220,10 @@ export default function ProposalPage() {
       await voteOnProposal({ proposal, voteData });
     } catch (error) {
       setConfirmingVote(false);
-      notifyError(error);
       setCastingVote(false);
+      notifyError(error);
       return;
     }
-    setCastingVote(false);
-    setConfirmingVote(false);
     setCastVote(optionChosen);
   };
 
@@ -238,8 +238,6 @@ export default function ProposalPage() {
     );
     return match?.label;
   };
-
-  const maxModalWidth = 400;
 
   const showCancelButton = ![
     FilterValues.cancelled.toLocaleLowerCase(),
@@ -278,98 +276,32 @@ export default function ProposalPage() {
 
   return (
     <>
+      {/* TODO: port this to use modal provider */}
       {confirmingVote && !castingVote && (
         <div className="modal is-active">
           <div className="modal-background"></div>
-          <div className="modal-card" style={{ maxWidth: maxModalWidth }}>
-            <header className="modal-card-head is-flex-direction-column has-background-white columns is-mobile m-0">
-              <div
-                className="column is-full has-text-right is-size-2 p-0 leading-tight cursor-pointer"
-                onClick={onCancelVote}
-              >
-                &times;
-              </div>
-              <div className="column is-full has-text-left px-4">
-                <p className="modal-card-title">Confirm Vote</p>
-              </div>
-            </header>
-            <section className="modal-card-body has-background-white-ter">
-              <div className="px-4">
-                <p>Are you sure this is your final vote?</p>
-                <p className="has-text-grey mb-4">
-                  This action cannot be undone.
-                </p>
-                <div className="py-4 px-5 rounded-sm has-background-white">
-                  {getVoteLabel(optionChosen)}
-                </div>
-              </div>
-            </section>
-            <footer className="modal-card-foot has-background-white pb-6">
-              <div className="columns is-mobile p-0 m-0 flex-1 pr-2">
-                <button
-                  className="button column is-full p-0"
-                  onClick={onCancelVote}
-                >
-                  Cancel
-                </button>
-              </div>
-              <div className="columns is-mobile p-0 m-0 flex-1 pl-2">
-                <button
-                  className="button column is-full p-0 has-background-yellow vote-button transition-all"
-                  onClick={onVote}
-                >
-                  Vote
-                </button>
-              </div>
-            </footer>
+          <div className="modal-content is-flex is-justify-content-center">
+            <VoteConfirmationModal
+              onCancelVote={onCancelVote}
+              onVote={onVote}
+              voteLabel={getVoteLabel(optionChosen)}
+            />
           </div>
         </div>
       )}
       {confirmingVote && castingVote && !castVote && (
         <div className="modal is-active">
           <div className="modal-background"></div>
-          <div
-            className="modal-card has-background-white"
-            style={{ maxWidth: maxModalWidth }}
-          >
-            <section
-              className="modal-card-body p-6 has-text-centered"
-              style={{
-                margin: '150px 0',
-              }}
-            >
-              <Loader className="mb-4" />
-              <p className="has-text-grey">Casting your vote...</p>
-            </section>
+          <div className="modal-content is-flex is-justify-content-center">
+            <CastingVoteModal />
           </div>
         </div>
       )}
       {confirmingVote && castingVote && castVote && (
         <div className="modal is-active">
           <div className="modal-background"></div>
-          <div className="modal-card" style={{ maxWidth: maxModalWidth }}>
-            <header className="modal-card-head is-flex-direction-column has-background-white columns is-mobile m-0">
-              <div
-                className="column is-full has-text-right is-size-2 p-0 leading-tight cursor-pointer"
-                onClick={onConfirmCastVote}
-              >
-                &times;
-              </div>
-              <div className="column is-full has-text-left px-4">
-                <p className="modal-card-title">Your voting was successful!</p>
-              </div>
-            </header>
-            <section className="modal-card-body">
-              <p className="px-4 has-text-grey">You voted for this proposal</p>
-            </section>
-            <footer className="modal-card-foot">
-              <button
-                className="button column is-full has-background-yellow is-uppercase"
-                onClick={onConfirmCastVote}
-              >
-                Got it
-              </button>
-            </footer>
+          <div className="modal-content is-flex is-justify-content-center">
+            <VoteConfirmedModal onConfirmCastVote={onConfirmCastVote} />
           </div>
         </div>
       )}
@@ -384,14 +316,6 @@ export default function ProposalPage() {
             communityId={proposal.communityId}
             proposalId={proposal.id}
           />
-          {castVote && (
-            <Message
-              messageText={`You successfully voted for ${getVoteLabel(
-                castVote
-              )}`}
-              icon={<Svg name="CheckMark" />}
-            />
-          )}
           {cancelled && (
             <Message messageText={`This proposal has been cancelled`} />
           )}
