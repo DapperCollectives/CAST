@@ -1,16 +1,42 @@
 import { Svg } from '@cast/shared-components';
 import { useMediaQuery } from 'hooks';
+import classnames from 'classnames';
 import NextButton from './NexStepButton';
 import SubmitButton from './SubmitButton';
 
-const getStepIcon = ({
+const StepNumber = ({ stepIdx, status }) => {
+  // status can be active - pending - done
+  if (status === 'done') {
+    return <Svg name="CheckMark" circleFill="#44C42F" />;
+  }
+
+  const classNames = classnames(
+    'rounded-full has-text-black is-flex is-align-items-center is-justify-content-center',
+    { 'has-background-yellow': status === 'active' },
+    { 'border-light': status === 'pending' }
+  );
+  return (
+    <div
+      className={classNames}
+      style={{
+        width: 30,
+        height: 30,
+      }}
+    >
+      <b>{stepIdx + 1}</b>
+    </div>
+  );
+};
+
+const StepLabelAndIcon = ({
   stepIdx,
   stepLabel,
   showPreStep,
   currentStep,
   stepsSize,
+  isMobile,
 }) => {
-  const stepClasses = [];
+  const stepClasses = isMobile ? [] : ['mb-4'];
   let divider = null;
   if (!stepLabel && stepIdx < stepsSize - 1) {
     stepClasses.push('mr-2');
@@ -27,54 +53,36 @@ const getStepIcon = ({
     );
   }
   if (stepLabel) {
-    stepClasses.push('mb-6 is-align-items-center');
+    stepClasses.push('is-align-items-center');
   }
 
   if (!showPreStep && stepIdx === currentStep) {
     return (
       <div className={`is-flex ${stepClasses.join(' ')}`} key={stepIdx}>
-        <div
-          className="rounded-full has-text-black has-background-yellow is-flex
-              is-align-items-center is-justify-content-center"
-          style={{
-            width: 30,
-            height: 30,
-          }}
-        >
-          <b>{stepIdx + 1}</b>
-        </div>
+        <StepNumber stepIdx={stepIdx} status="active" />
         {stepLabel ? <b className="ml-4">{stepLabel}</b> : divider}
       </div>
     );
   } else if (!showPreStep && currentStep > stepIdx) {
     return (
       <div className={`is-flex ${stepClasses.join(' ')}`} key={stepIdx}>
-        <Svg name="CheckMark" circleFill="#44C42F" />
+        <StepNumber stepIdx={stepIdx} status="done" />
         {stepLabel ? <span className="ml-4">{stepLabel}</span> : divider}
       </div>
     );
   } else {
     return (
       <div className={`is-flex ${stepClasses.join(' ')}`} key={stepIdx}>
-        <div
-          className="rounded-full border-light is-flex is-align-items-center is-justify-content-center"
-          style={{
-            width: 30,
-            height: 30,
-          }}
-        >
-          {stepIdx + 1}
-        </div>
+        <StepNumber stepIdx={stepIdx} status="pending" />
         {stepLabel ? <span className="ml-4">{stepLabel}</span> : divider}
       </div>
     );
   }
 };
 
-const getBackLabel = ({ isSubmitting, onClick }) => (
+const BackButton = ({ isSubmitting, onClick }) => (
   <div
     className="is-flex is-align-items-center has-text-grey cursor-pointer"
-    // onClick={!isSubmitting ? () => onStepAdvance('prev') : () => {}}
     onClick={!isSubmitting ? onClick : () => {}}
   >
     <Svg name="ArrowLeft" />
@@ -107,10 +115,18 @@ export default function LeftPannel({
       >
         <div className="is-flex is-justify-content-space-between is-align-items-center">
           <div style={{ minHeight: 24 }}>
-            {currentStep > 0 && getBackLabel(isSubmitting)}
+            {currentStep > 0 && <BackButton isSubmitting={isSubmitting} />}
           </div>
           <div className="is-flex">
-            {steps.map((step, i) => getStepIcon(i, null))}
+            {steps.map((step, i) => (
+              <StepLabelAndIcon
+                stepIdx={i}
+                stepsSize={steps.length}
+                showPreStep={showPreStep}
+                currentStep={currentStep}
+                isMobile
+              />
+            ))}
           </div>
         </div>
       </div>
@@ -120,28 +136,28 @@ export default function LeftPannel({
   return (
     <div
       style={{
-        paddingTop: '3rem',
         paddingRight: '5rem',
         minWidth: 326,
         position: 'fixed',
         minHeight: '100%',
       }}
-      className="has-background-white-ter pl-4 is-hidden-mobile"
+      className="has-background-white-ter pl-4 is-hidden-mobile is-flex is-flex-direction-column is-justify-content-center"
     >
       <div className="mb-6" style={{ minHeight: 24 }}>
-        {currentStep > 0 &&
-          getBackLabel({ isSubmitting, onClick: moveBackStep })}
+        {currentStep > 0 && (
+          <BackButton isSubmitting={isSubmitting} onClick={moveBackStep} />
+        )}
       </div>
       <div>
-        {steps.map((step, i) =>
-          getStepIcon({
-            stepIdx: i,
-            stepLabel: step.label,
-            stepsSize: steps.length,
-            showPreStep,
-            currentStep,
-          })
-        )}
+        {steps.map((step, i) => (
+          <StepLabelAndIcon
+            stepIdx={i}
+            stepLabel={step.label}
+            stepsSize={steps.length}
+            showPreStep={showPreStep}
+            currentStep={currentStep}
+          />
+        ))}
       </div>
       {currentStep < steps.length - 1 && showNextButton && (
         <NextButton
