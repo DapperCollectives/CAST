@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useWebContext } from 'contexts/Web3';
 import {
   FadeIn,
@@ -97,6 +98,18 @@ export default function HomePage() {
               title="Featured Communities"
               communities={featuredCommunities}
             />
+            <div className="container mt-5">
+              <div className="is-flex flex-1">
+                <Link to={`/browse-communities`}>
+                  <div
+                    className="button is-fullwidth rounded-lg is-flex has-text-weight-bold has-background-white px-5"
+                    style={{ height: '48px', maxWidth: '220px' }}
+                  >
+                    Browse All Communities
+                  </div>
+                </Link>
+              </div>
+            </div>
           </FadeIn>
         )}
         <HomeFooter />

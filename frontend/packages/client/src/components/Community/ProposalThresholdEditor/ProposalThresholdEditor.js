@@ -128,8 +128,12 @@ export default function ProposalThresholdEditor({
     // if user leaves all fields empty and onlyAuthorsToSubmitProposals === true
     // the it adds Flow contract information
     const payload = checkIfNeedsDefaultValues(data);
-    await updateCommunity(payload);
-
+    try {
+      // onError hook from react-query will handle error
+      await updateCommunity(payload);
+    } catch (error) {
+      return;
+    }
     reset(data, { keepDirty: false });
   };
 
