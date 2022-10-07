@@ -46,9 +46,9 @@ const VoteOptions = ({
 
   const canVote = isActive && (hasntVoted || !loggedIn);
 
-  const voteClasses = `vote-options border-light rounded mb-6 ${
-    !canVote && 'is-disabled'
-  } ${!hasntVoted && 'is-voted'}`;
+  const voteClasses = `vote-options border-light rounded mb-6${
+    !hasntVoted ? ' is-voted' : ''
+  }`;
 
   let previousVote = castVote;
   let currentOption = optionChosen;
@@ -61,6 +61,7 @@ const VoteOptions = ({
     previousVote = voteOption;
     currentOption = voteOption;
   }
+
   const { choices } = proposal;
 
   const isImageChoice = useMemo(
@@ -74,6 +75,16 @@ const VoteOptions = ({
     onOptionSelect(value);
     onConfirmVote();
   };
+  const userVoted = currentOption !== null && currentOption === previousVote;
+
+  // const inviteToVote =
+  //   !(currentOption !== null && currentOption === previousVote) && !isClosed;
+
+  const headerStatus = userVoted
+    ? 'user-voted'
+    : isClosed
+    ? 'is-closed'
+    : 'invite-to-vote';
 
   return (
     <div className={voteClasses}>
@@ -86,20 +97,16 @@ const VoteOptions = ({
         extraClasses="px-6 pt-6 pb-6"
         extraClassesMobile="px-4 pt-6 pb-6"
       >
-        <VoteHeader
-          isClosed={isClosed}
-          previousVote={previousVote}
-          currentOption={currentOption}
-        />
+        <VoteHeader status={headerStatus} />
       </Wrapper>
       {!isImageChoice && (
         <TextBasedOptions
           choices={choices}
           currentOption={currentOption}
-          previousVote={previousVote}
+          hideVoteButton={previousVote || isClosed}
           labelType={labelType}
           onOptionSelect={readOnly ? () => {} : onOptionSelect}
-          readOnly={readOnly}
+          readOnly={readOnly || !canVote}
           onConfirmVote={onConfirmVote}
         />
       )}
@@ -108,8 +115,7 @@ const VoteOptions = ({
           choiceA={choiceA}
           choiceB={choiceB}
           currentOption={currentOption}
-          previousVote={previousVote}
-          readOnly={readOnly}
+          readOnly={readOnly || !canVote}
           confirmAndVote={confirmAndVoteImage}
         />
       )}
