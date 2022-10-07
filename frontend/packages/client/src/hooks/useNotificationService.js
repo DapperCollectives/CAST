@@ -45,13 +45,8 @@ export default function useNotificationService() {
       //here we call api
       setNotificationSettings((prevState) => ({
         ...prevState,
-<<<<<<< HEAD
         communitySubscription: {
           ...prevState.communitySubscription,
-=======
-        communityNotifications: {
-          ...prevState.communityNotifications,
->>>>>>> 49ba5a1618b92fa950a5267f993f6db067ccf4f1
           [communityId]: false,
         },
       }));
@@ -65,13 +60,8 @@ export default function useNotificationService() {
       //here we call api
       setNotificationSettings((prevState) => ({
         ...prevState,
-<<<<<<< HEAD
         communitySubscription: {
           ...prevState.communitySubscription,
-=======
-        communityNotifications: {
-          ...prevState.communityNotifications,
->>>>>>> 49ba5a1618b92fa950a5267f993f6db067ccf4f1
           [communityId]: true,
         },
       }));
@@ -105,11 +95,8 @@ export default function useNotificationService() {
   };
   return {
     notificationSettings,
-<<<<<<< HEAD
     setUserID,
     setUserEmail,
-=======
->>>>>>> 49ba5a1618b92fa950a5267f993f6db067ccf4f1
     getUserSettings,
     unsubscribeCommunityNotifications,
     subscribeCommunity,
