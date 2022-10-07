@@ -404,9 +404,9 @@ func (c *Community) CanUserCreateProposal(db *s.Database, fa *s.FlowAdapter, add
 
 	// If only authors can submit and user is not an author
 	if *c.Only_authors_to_submit && !response.IsAuthor {
-		reason := fmt.Sprintf("Account %s is not an author for community %d.", address, c.ID)
-		response.Reason = reason
+		response.Reason = fmt.Sprintf("Account %s is not an author for community %d.", address, c.ID)
 		response.HasPermission = false
+		return response
 	}
 
 	// If we can use token threshold
@@ -415,6 +415,7 @@ func (c *Community) CanUserCreateProposal(db *s.Database, fa *s.FlowAdapter, add
 		if err != nil {
 			err = fmt.Errorf("invalid proposal threshold for community %d", c.ID)
 			response.Error = err
+			return response
 		}
 
 		// Get Contract
@@ -434,8 +435,10 @@ func (c *Community) CanUserCreateProposal(db *s.Database, fa *s.FlowAdapter, add
 		if *balance < threshold {
 			reason := "Insufficient token balance to create proposal."
 			response.Reason = reason
+			return response
 		} else {
 			response.HasPermission = true
+			return response
 		}
 	}
 
