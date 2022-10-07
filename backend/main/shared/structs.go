@@ -44,6 +44,11 @@ type PageParams struct {
 	TotalRecords int
 }
 
+type SearchFilter struct {
+	Text   string `json:"text"`
+	Amount int    `json:"amount"`
+}
+
 type CompositeSignature struct {
 	Addr      string  `json:"addr"`
 	Key_id    uint    `json:"keyId"`
