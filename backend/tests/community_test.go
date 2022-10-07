@@ -359,7 +359,7 @@ func TestCanUserCreateProposalForCommunityOnlyAuthors(t *testing.T) {
 		json.Unmarshal(response.Body.Bytes(), &responsePayload)
 
 		assert.False(t, responsePayload.HasPermission)
-		assert.Contains(t, "is not an author for community", responsePayload.Reason)
+		assert.Contains(t, responsePayload.Reason, "is not an author for community")
 
 	})
 }
