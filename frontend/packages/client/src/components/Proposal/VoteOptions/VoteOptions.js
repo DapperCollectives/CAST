@@ -75,10 +75,8 @@ const VoteOptions = ({
     onOptionSelect(value);
     onConfirmVote();
   };
-  const userVoted = currentOption !== null && currentOption === previousVote;
 
-  // const inviteToVote =
-  //   !(currentOption !== null && currentOption === previousVote) && !isClosed;
+  const userVoted = currentOption !== null && currentOption === previousVote;
 
   const headerStatus = userVoted
     ? 'user-voted'
