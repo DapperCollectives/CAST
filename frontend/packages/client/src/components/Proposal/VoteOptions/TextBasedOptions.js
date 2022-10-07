@@ -21,8 +21,8 @@ const TextBasedOptions = ({
         styles={
           hideVoteButton
             ? {
-                'border-bottom-right-radius': '16px',
-                'border-bottom-left-radius': '16px',
+                borderBottomRightRadius: '16px',
+                borderBottomLeftRadius: '16px',
               }
             : {}
         }
