@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"testing"
 
@@ -51,8 +50,6 @@ func TestCreateCommunity(t *testing.T) {
 	// Create Community
 	communityStruct := otu.GenerateCommunityStruct("account")
 	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
-
-	fmt.Printf("%+v\n", communityPayload)
 
 	response := otu.CreateCommunityAPI(communityPayload)
 	checkResponseCode(t, http.StatusCreated, response.Code)

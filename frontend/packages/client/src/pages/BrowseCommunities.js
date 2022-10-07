@@ -27,7 +27,7 @@ export default function BrowseCommunities() {
   } = history;
 
   const { search, filters: filtersUrl } = useQueryParams({
-    search: 'search',
+    text: 'text',
     filters: 'filters',
   });
 
@@ -41,16 +41,12 @@ export default function BrowseCommunities() {
 
   const debouncedSearchText = useDebounce(searchText, 1000);
 
-  const searchTextParam =
-    debouncedSearchText === '' ? 'defaultFeatured' : debouncedSearchText;
+  const searchTextParam = debouncedSearchText;
 
   // this effect handles browser URL writing
   useEffect(() => {
-    // url will be clean with defaultFeatured is used and when filtere all is selected
     const queryUrlParams = new URLSearchParams({
-      ...(searchTextParam !== 'defaultFeatured'
-        ? { search: searchTextParam }
-        : undefined),
+      ...(searchTextParam ? { text: searchTextParam } : undefined),
       ...(selectedPills.includes('all')
         ? undefined
         : { filters: selectedPills }),
@@ -67,11 +63,8 @@ export default function BrowseCommunities() {
     data: communityResult,
     error,
   } = useCommunitySearch({
-    // NOTE:
-    // Backend returns feature communities when search text is "defaultFeatured"
-    // this is why on empty search text we use feature communities
     searchText: searchTextParam,
-    // do not send filtes when all is selected
+    // do not send filters when all is selected
     ...(selectedPills.includes('all') ? undefined : { filters: selectedPills }),
   });
 
@@ -145,10 +138,7 @@ export default function BrowseCommunities() {
                     <FilterPill
                       key={`pill-${index}`}
                       onClick={addOrRemovePillFilter}
-                      text={updateText(
-                        pill.text,
-                        searchTextParam === 'defaultFeatured'
-                      )}
+                      text={updateText(pill.text, searchTextParam === '')}
                       amount={pill.amount}
                       selected={selectedPills.includes(
                         pill.text?.toLowerCase()
