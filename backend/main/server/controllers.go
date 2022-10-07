@@ -909,6 +909,7 @@ func (a *App) getCommunityUsersByType(w http.ResponseWriter, r *http.Request) {
 		userType,
 		pageParams,
 	)
+
 	if err != nil {
 		log.Error().Err(err).Msg("Error getting community users")
 		respondWithError(w, errIncompleteRequest)

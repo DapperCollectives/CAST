@@ -26,6 +26,8 @@ var strategyMap = map[string]Strategy{
 	"staked-token-weighted-default": &strategies.StakedTokenWeightedDefault{},
 	"one-address-one-vote":          &strategies.OneAddressOneVote{},
 	"balance-of-nfts":               &strategies.BalanceOfNfts{},
+	"float-nfts":                    &strategies.FloatNFTs{},
+	"custom-script":                 &strategies.CustomScript{},
 }
 
 /* Token Weighted Default */
