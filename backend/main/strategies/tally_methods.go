@@ -21,6 +21,10 @@ func RankedChoice(
 ) {
 	firstRank := 0
 
+	// Create a copy of the votes so the original votes slice is not changed.
+	tmpVotes := make([]*models.VoteWithBalance, len(votes))
+	copy(tmpVotes, votes)
+
 	// Put choices into a map for tallying.
 	tallyMap := make(map[string]int)
 	for i := range proposal.Choices {
@@ -32,7 +36,7 @@ func RankedChoice(
 		totalVotes := 0
 
 		// Count votes.
-		for _, vote := range votes {
+		for _, vote := range tmpVotes {
 			includeVote := (isNFT && len(vote.NFTs) != 0) || !isNFT
 			exhaustedVote := len(vote.Choices) == 0
 			if includeVote && !exhaustedVote {
@@ -82,7 +86,7 @@ func SingleChoiceNFT(
 	r *models.ProposalResults,
 	proposal *models.Proposal,
 	getVoteWeight func(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error),
-) error {
+) error {	
 	for i := 0; i < len(proposal.Choices); i += 1 {
 		choiceKey := fmt.Sprintf("%d", *proposal.Choices[i].ID)
 		r.Results[choiceKey] = 0

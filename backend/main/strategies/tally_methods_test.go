@@ -228,6 +228,38 @@ func TestSingleChoiceVoting(t *testing.T) {
 	}
 }
 
+// Ranked Choice Voting will mutate the votes as choices are eliminated.
+// Ensure that the original votes are not mutated.
+func TestVotesNotMutated(t *testing.T) {
+	c := strings.Fields("a b c d")
+	choices := make([]shared.Choice, 4)
+	for i := 0; i < len(c); i += 1 {
+		id := uint(i)
+		choices[i].ID = &id
+		choices[i].Choice_text = c[i]
+	}
+	computedStatus := "closed"
+	proposal := &models.Proposal{
+		Choices:         choices,
+		TallyMethod:     "ranked-choice",
+		Computed_status: &computedStatus,
+	}
+
+	votes := make([]*models.VoteWithBalance, 5)
+	votes[0] = createVote("a b c d")
+	votes[1] = createVote("a b d c")
+	votes[2] = createVote("b c a")
+	votes[3] = createVote("b")
+	votes[4] = createVote("c")
+	results := createProposalResults(proposal)
+
+	expectedVotes := make([]*models.VoteWithBalance, len(votes))
+	copy(expectedVotes, votes)
+
+	RankedChoice(votes, results, proposal, true)
+	assert.DeepEqual(t, expectedVotes, votes)
+}
+
 func createVote(choices string) *models.VoteWithBalance {
 	mockNFT := &models.NFT{
 		ID: 12345678,
