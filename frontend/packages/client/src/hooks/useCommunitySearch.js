@@ -98,7 +98,6 @@ export default function useCommunitySearch({
         window.pageYOffset + window.innerHeight
       ) {
         if (document.hasMore && !document.isLoading) {
-          console.log('is fetching more ');
           document.fetchNextPage();
         }
       }

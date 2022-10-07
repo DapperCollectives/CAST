@@ -258,11 +258,6 @@ export default function ProposalPage() {
       summary: tab === 'summary',
     });
   };
-
-  // calculate what to show in vote options
-  const isClosed =
-    proposal?.computedStatus === FilterValues.closed.toLocaleLowerCase();
-
   if (error) {
     return null;
   }
@@ -385,7 +380,6 @@ export default function ProposalPage() {
                     )}
                     <VoteOptions
                       labelType="mobile"
-                      readOnly={isClosed}
                       addr={user?.addr}
                       proposal={proposal}
                       optionChosen={optionChosen}
@@ -516,7 +510,6 @@ export default function ProposalPage() {
                 )}
                 <VoteOptions
                   labelType="desktop"
-                  readOnly={isClosed}
                   loggedIn={user?.loggedIn}
                   addr={user?.addr}
                   proposal={proposal}
