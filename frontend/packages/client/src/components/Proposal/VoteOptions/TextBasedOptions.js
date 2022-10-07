@@ -3,11 +3,11 @@ import { WrapperResponsive as Wrapper } from 'components';
 const TextBasedOptions = ({
   choices,
   currentOption,
-  previousVote,
   labelType,
   onOptionSelect,
   readOnly,
   onConfirmVote,
+  hideVoteButton,
 }) => {
   const _onOptionSelect = (event) => {
     onOptionSelect(event?.target?.value);
@@ -18,6 +18,14 @@ const TextBasedOptions = ({
       <Wrapper
         extraClasses="has-background-white-ter p-6"
         extraClassesMobile="has-background-white-ter p-4"
+        styles={
+          hideVoteButton
+            ? {
+                'border-bottom-right-radius': '16px',
+                'border-bottom-left-radius': '16px',
+              }
+            : {}
+        }
       >
         {choices.map((opt, i) => (
           <Wrapper
@@ -36,6 +44,7 @@ const TextBasedOptions = ({
                 className={`mr-3`}
                 onChange={_onOptionSelect}
                 checked={currentOption === String(opt.value)}
+                disabled={readOnly}
               />
               <span />
               <div className="has-text-black" style={{ lineHeight: '22.4px' }}>
@@ -45,7 +54,7 @@ const TextBasedOptions = ({
           </Wrapper>
         ))}
       </Wrapper>
-      {!previousVote && (
+      {!hideVoteButton && (
         <Wrapper
           classNames="py-5"
           extraClasses="px-6"
