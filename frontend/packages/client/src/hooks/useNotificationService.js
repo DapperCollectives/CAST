@@ -1,11 +1,5 @@
 import { useState } from 'react';
 
-const GET_USER_SETTINGS_RESPONSE = {
-  email: '',
-  communitySubscription: [],
-  isUnsubscribedFromCommunityUpdates: false,
-};
-
 export default function useNotificationService() {
   const [notificationSettings, setNotificationSettings] = useState({
     walletId: '',
@@ -40,7 +34,7 @@ export default function useNotificationService() {
   const getUserSettings = async () => {
     try {
       //here we call api
-      setNotificationSettings(GET_USER_SETTINGS_RESPONSE);
+      setNotificationSettings();
     } catch {
       throw new Error('cannot get user settings');
     }
