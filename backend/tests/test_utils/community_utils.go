@@ -320,6 +320,12 @@ func (otu *OverflowTestUtils) GetCommunitiesForHomepageAPI() *httptest.ResponseR
 	return response
 }
 
+func (otu *OverflowTestUtils) GetSearchCommunitiesAPI() *httptest.ResponseRecorder {
+	req, _ := http.NewRequest("GET", "/communities/search", nil)
+	response := otu.ExecuteRequest(req)
+	return response
+}
+
 func (otu *OverflowTestUtils) GetCommunityLeaderboardAPI(id int) *httptest.ResponseRecorder {
 	req, _ := http.NewRequest("GET", "/communities/"+strconv.Itoa(id)+"/leaderboard", nil)
 	response := otu.ExecuteRequest(req)

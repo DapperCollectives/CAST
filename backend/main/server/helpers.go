@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/DapperCollectives/CAST/backend/main/models"
@@ -328,7 +329,6 @@ func (h *Helpers) createVote(v models.Vote, p models.Proposal) (*models.VoteWith
 
 	voteWithBalance, errResponse := h.useStrategyFetchBalance(v, p, s)
 	if errResponse != nilErr {
-		fmt.Println(errResponse)
 		return nil, errResponse
 	}
 
@@ -462,13 +462,67 @@ func (h *Helpers) fetchCommunity(id int) (models.Community, error) {
 	return community, nil
 }
 
-func (h *Helpers) searchCommunities(query string) ([]models.Community, error) {
-	results, err := models.SearchForCommunity(h.A.DB, query)
-	if err != nil {
-		return []models.Community{}, err
+func (h *Helpers) searchCommunities(
+	searchText string,
+	filters string,
+	pageParams shared.PageParams,
+) (
+	[]*models.Community,
+	map[string]int,
+	int,
+	error,
+) {
+	filtersSlice := strings.Split(filters, ",")
+	if searchText == "" {
+		isSearch := true
+
+		results, totalRecords, err := models.GetDefaultCommunities(
+			h.A.DB,
+			pageParams,
+			filtersSlice,
+			isSearch,
+		)
+
+		if err != nil {
+			log.Error().Err(err)
+			return nil, nil, 0, err
+		}
+
+		categoryCount, err := models.GetCategoryCount(h.A.DB, searchText)
+		if err != nil {
+			return []*models.Community{}, nil, 0, err
+		}
+
+		return results, categoryCount, totalRecords, nil
+	} else {
+		results, totalRecords, err := models.SearchForCommunity(
+			h.A.DB,
+			searchText,
+			filtersSlice,
+			pageParams,
+		)
+		if err != nil {
+			return []*models.Community{}, nil, 0, err
+		}
+
+		categoryCount, err := models.GetCategoryCount(h.A.DB, searchText)
+		if err != nil {
+			return []*models.Community{}, nil, 0, err
+		}
+
+		return results, categoryCount, totalRecords, nil
+	}
+}
+
+func (h *Helpers) categoryCountToMap(results []*models.Community) map[string]int {
+	var categoryCount = make(map[string]int)
+	for _, community := range results {
+		if community.Category != nil {
+			categoryCount[*community.Category] = *community.Category_count
+		}
 	}
 
-	return results, nil
+	return categoryCount
 }
 
 func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorResponse) {
@@ -1121,6 +1175,49 @@ func (h *Helpers) pinJSONToIpfs(data interface{}) (*string, error) {
 		return nil, err
 	}
 	return &pin.IpfsHash, nil
+}
+
+func (h *Helpers) appendFiltersToResponse(
+	results *shared.PaginatedResponse,
+	count map[string]int,
+) (interface{}, error) {
+	var filters []shared.SearchFilter
+	var CATEGORIES = []string{
+		"all",
+		"dao",
+		"social",
+		"protocol",
+		"creator",
+		"nft",
+		"collector",
+	}
+
+	var totalCount int
+	for _, category := range CATEGORIES {
+		if category == "all" {
+			continue
+		}
+		filters = append(filters, shared.SearchFilter{
+			Text:   category,
+			Amount: count[category],
+		})
+		totalCount += count[category]
+	}
+
+	filters = append(filters, shared.SearchFilter{
+		Text:   "all",
+		Amount: totalCount,
+	})
+
+	appendedResponse := struct {
+		Filters []shared.SearchFilter    `json:"filters"`
+		Results shared.PaginatedResponse `json:"results"`
+	}{
+		Filters: filters,
+		Results: *results,
+	}
+
+	return appendedResponse, nil
 }
 
 func validateContractThreshold(s []models.Strategy) error {

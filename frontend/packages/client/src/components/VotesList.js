@@ -73,7 +73,7 @@ const VotesList = ({ proposalId, castVote }) => {
   };
 
   return (
-    <div className="border-light rounded-sm">
+    <div className="border-light rounded">
       <div className="pt-6 px-6 pb-5 is-hidden-mobile">
         <span className="is-size-5">
           Votes{' '}
