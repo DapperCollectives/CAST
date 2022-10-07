@@ -86,20 +86,24 @@ export default function CommunityProposalsAndVoting({
       existingStrategies={communityVotingStrategies}
       activeStrategies={activeStrategies}
       disableAddButton={updatingCommunity}
-      callToAction={(st) => (
-        <ActionButton
-          label="Save"
-          enabled={
-            updatingCommunity
-              ? false
-              : // or check if list has changed to enable saving
-                !isEqual(st, communityVotingStrategies)
-          }
-          onClick={() => saveDataToBackend(st)}
-          loading={updatingCommunity}
-          classNames="mt-5"
-        />
-      )}
+      enableDelUniqueItem
+      callToAction={(st) => {
+        return (
+          <ActionButton
+            label="Save"
+            enabled={
+              updatingCommunity
+                ? false
+                : // or check if list has changed to enable saving
+                  // save will be enabled when lists with objecrs are different
+                  !isEqual(st, communityVotingStrategies) && st.length > 0
+            }
+            onClick={() => saveDataToBackend(st)}
+            loading={updatingCommunity}
+            classNames="mt-5"
+          />
+        );
+      }}
     />
   );
 }
