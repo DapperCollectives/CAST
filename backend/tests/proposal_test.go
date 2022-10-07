@@ -4,11 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/DapperCollectives/CAST/backend/main/models"
 	"github.com/DapperCollectives/CAST/backend/main/shared"
+	utils "github.com/DapperCollectives/CAST/backend/tests/test_utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -253,5 +255,83 @@ func TestCreateManyProposals(t *testing.T) {
 			assert.Equal(t, "pending", *created.Computed_status)
 		}
 	})
+}
 
+func TestGetProposalsByStatus(t *testing.T) {
+	clearTable("communities")
+	clearTable("community_users")
+	clearTable("proposals")
+
+	// Create a community
+	authorName := "account"
+	communityId := otu.AddCommunitiesWithUsers(1, authorName)[0]
+
+	var pendingProposal models.Proposal
+	var activeProposal models.Proposal
+	var cancelledProposal models.Proposal
+	var closedProposal models.Proposal
+
+	var idToStatus = map[int]string{}
+
+	t.Run("Fetching a proposal by ID should return the corrected computed status", func(t *testing.T) {
+		pendingProposal = *otu.CreatePendingProposal(authorName, communityId)
+		assert.Equal(t, "pending", *pendingProposal.Computed_status)
+
+		activeProposal = *otu.CreateActiveProposal(authorName, communityId)
+		assert.Equal(t, "active", *activeProposal.Computed_status)
+
+		cancelledProposal = *otu.CreateCancelledProposal(authorName, communityId)
+		assert.Equal(t, "cancelled", *cancelledProposal.Computed_status)
+
+		closedProposal = *otu.CreateClosedProposal(authorName, communityId)
+		assert.Equal(t, "closed", *closedProposal.Computed_status)
+
+		// Assign IDs
+		idToStatus[pendingProposal.ID] = *pendingProposal.Computed_status
+		idToStatus[activeProposal.ID] = *activeProposal.Computed_status
+		idToStatus[cancelledProposal.ID] = *cancelledProposal.Computed_status
+		idToStatus[closedProposal.ID] = *closedProposal.Computed_status
+
+	})
+
+	t.Run("Get proposals endpoint should accept single status filters correctly", func(t *testing.T) {
+		statuses := []string{"pending", "active", "cancelled", "closed"}
+
+		for _, status := range statuses {
+			response := otu.GetProposalsForCommunityQueryParamsAPI(communityId, "order=asc&status="+status)
+
+			var proposalsResponse utils.PaginatedResponseWithProposal
+			json.Unmarshal(response.Body.Bytes(), &proposalsResponse)
+
+			expectedStatus := idToStatus[proposalsResponse.Data[0].ID]
+
+			assert.Equal(t, 1, proposalsResponse.Count)
+			assert.Equal(t, expectedStatus, *proposalsResponse.Data[0].Computed_status)
+		}
+	})
+
+	t.Run("Get proposals endpoint should accept combination of statuses filter correctly", func(t *testing.T) {
+		combinations := [][]string{
+			{"pending", "active"},
+			{"cancelled", "closed"},
+			{"pending", "active", "cancelled", "closed"},
+		}
+
+		for _, statuses := range combinations {
+			response := otu.GetProposalsForCommunityQueryParamsAPI(communityId, "order=asc&status="+strings.Join(statuses, ","))
+
+			var proposalsResponse utils.PaginatedResponseWithProposal
+			json.Unmarshal(response.Body.Bytes(), &proposalsResponse)
+
+			// Assert correct number of proposals are returned.
+			// We know we created one proposal for each status.
+			assert.Equal(t, len(statuses), proposalsResponse.Count)
+
+			// Check each proposal ID has correct status
+			for _, proposal := range proposalsResponse.Data {
+				expectedStatus := idToStatus[proposal.ID]
+				assert.Equal(t, expectedStatus, *proposal.Computed_status)
+			}
+		}
+	})
 }

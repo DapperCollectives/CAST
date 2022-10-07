@@ -63,7 +63,7 @@ var computedStatusSQL = `
 func GetProposalsForCommunity(
 	db *s.Database,
 	communityId int,
-	status string,
+	statuses []string,
 	params shared.PageParams,
 ) ([]*Proposal, int, error) {
 	var proposals []*Proposal
@@ -71,28 +71,11 @@ func GetProposalsForCommunity(
 
 	// Get Proposals
 	sql := fmt.Sprintf(`SELECT *, %s FROM proposals WHERE community_id = $3`, computedStatusSQL)
-	statusFilter := ""
 
-	// Generate SQL based on computed status
-	// status: { pending | active | closed | cancelled }
-	switch status {
-	case "pending":
-		statusFilter = ` AND status = 'published' AND start_time > (now() at time zone 'utc')`
-	case "active":
-		statusFilter = ` AND status = 'published' AND start_time < (now() at time zone 'utc') AND end_time > (now() at time zone 'utc')`
-	case "closed":
-		statusFilter = ` AND status = 'published' AND end_time < (now() at time zone 'utc')`
-	case "cancelled":
-		statusFilter = ` AND status = 'cancelled'`
-	case "terminated":
-		statusFilter = ` AND (status = 'cancelled' OR (status = 'published' AND end_time < (now() at time zone 'utc')))`
-	case "inprogress":
-		statusFilter = ` AND status = 'published' AND end_time > (now() at time zone 'utc')`
-	}
-
+	statusesFilterSql := generateStatusesFilterSQL(statuses)
 	orderBySql := fmt.Sprintf(` ORDER BY created_at %s`, params.Order)
 	limitOffsetSql := ` LIMIT $1 OFFSET $2`
-	sql = sql + statusFilter + orderBySql + limitOffsetSql
+	sql = sql + statusesFilterSql + orderBySql + limitOffsetSql
 
 	err = pgxscan.Select(db.Context, db.Conn, &proposals, sql, params.Count, params.Start, communityId)
 
@@ -106,7 +89,7 @@ func GetProposalsForCommunity(
 
 	// Get total number of proposals
 	var totalRecords int
-	countSql := `SELECT COUNT(*) FROM proposals WHERE community_id = $1` + statusFilter
+	countSql := `SELECT COUNT(*) FROM proposals WHERE community_id = $1` + statusesFilterSql
 	_ = db.Conn.QueryRow(db.Context, countSql, communityId).Scan(&totalRecords)
 
 	return proposals, totalRecords, nil
@@ -305,4 +288,38 @@ func handleCancelledProposal(db *s.Database, proposalId int) error {
 	}
 
 	return nil
+}
+
+func generateStatusesFilterSQL(statuses []string) string {
+	statusesFilter := ""
+	statusFilterStrings := []string{}
+
+	// Generate SQL based on computed status
+	if len(statuses) > 0 {
+		for _, status := range statuses {
+			// status: { pending | active | closed | cancelled }
+			var statusFilter = ""
+			switch status {
+			case "pending":
+				statusFilter = ` (status = 'published' AND start_time > (now() at time zone 'utc'))`
+			case "active":
+				statusFilter = ` (status = 'published' AND start_time < (now() at time zone 'utc') AND end_time > (now() at time zone 'utc'))`
+			case "closed":
+				statusFilter = ` (status = 'published' AND end_time < (now() at time zone 'utc'))`
+			case "cancelled":
+				statusFilter = ` (status = 'cancelled')`
+			case "terminated":
+				statusFilter = ` (status = 'cancelled' OR (status = 'published' AND end_time < (now() at time zone 'utc')))`
+			case "inprogress":
+				statusFilter = ` (status = 'published' AND end_time > (now() at time zone 'utc'))`
+			}
+			if len(statusFilter) > 0 {
+				statusFilterStrings = append(statusFilterStrings, statusFilter)
+			}
+		}
+		if len(statusFilterStrings) > 0 {
+			statusesFilter = fmt.Sprintf(" AND (%s)", strings.Join(statusFilterStrings, " OR "))
+		}
+	}
+	return statusesFilter
 }
