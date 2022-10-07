@@ -15,10 +15,10 @@ import (
 )
 
 type errorResponse struct {
-	StatusCode int		`json:"statusCode,string"`
-	ErrorCode  string	`json:"errorCode"`
-	Message    string	`json:"message"`
-	Details    string	`json:"details"`
+	StatusCode int    `json:"statusCode,string"`
+	ErrorCode  string `json:"errorCode"`
+	Message    string `json:"message"`
+	Details    string `json:"details"`
 }
 
 var (
@@ -432,16 +432,27 @@ func (a *App) getCommunities(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) searchCommunities(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	results, err := helpers.searchCommunities(vars["query"])
+	pageParams := getPageParams(*r, 25)
+	filters := r.FormValue("filters")
+	searchText := r.FormValue("text")
+
+	results, categories, totalRecords, err := helpers.searchCommunities(
+		searchText,
+		filters,
+		pageParams,
+	)
 	if err != nil {
 		log.Error().Err(err).Msg("Error searching communities")
 		respondWithError(w, errIncompleteRequest)
 	}
-	pageParams := getPageParams(*r, 25)
-	pageParams.TotalRecords = len(results)
+	pageParams.TotalRecords = totalRecords
+	paginatedResults := shared.GetPaginatedResponseWithPayload(results, pageParams)
+	response, err := helpers.appendFiltersToResponse(paginatedResults, categories)
+	if err != nil {
+		log.Error().Err(err).Msg("Error appending filters to response")
+		respondWithError(w, errIncompleteRequest)
+	}
 
-	response := shared.GetPaginatedResponseWithPayload(results, pageParams)
 	respondWithJSON(w, http.StatusOK, response)
 }
 
@@ -466,8 +477,14 @@ func (a *App) getCommunity(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) getCommunitiesForHomePage(w http.ResponseWriter, r *http.Request) {
 	pageParams := getPageParams(*r, 25)
+	isSearch := false
 
-	communities, totalRecords, err := models.GetCommunitiesForHomePage(a.DB, pageParams)
+	communities, totalRecords, err := models.GetDefaultCommunities(
+		a.DB,
+		pageParams,
+		[]string{},
+		isSearch,
+	)
 	if err != nil {
 		log.Error().Err(err).Msg("Error fetching communities for home page")
 		respondWithError(w, errIncompleteRequest)
@@ -951,6 +968,55 @@ func (a *App) getBalanceAtBlockheight(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, result)
 }
 
+func (a *App) canUserCreateProposal(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	communityId, err := strconv.Atoi(vars["communityId"])
+	addr := vars["addr"]
+	if err != nil {
+		log.Error().Err(err).Msg("Invalid Community ID")
+		respondWithError(w, errIncompleteRequest)
+		return
+	}
+
+	// Fetch community to check user's power to create proposals against
+	community, err := helpers.fetchCommunity(communityId)
+	if err != nil {
+		log.Error().Err(err).Msg(errGetCommunity.Message)
+		respondWithError(w, errGetCommunity)
+	}
+
+	response := models.CanUserCreateProposalResponse{}
+
+	if !*community.Only_authors_to_submit {
+		threshold, err := strconv.ParseFloat(*community.Proposal_threshold, 64)
+		if err != nil {
+			log.Error().Err(err).Msg("Invalid proposal threshold")
+		}
+
+		// Get Contract
+		contract := shared.Contract{
+			Name:        community.Contract_name,
+			Addr:        community.Contract_addr,
+			Public_path: community.Public_path,
+			Threshold:   &threshold,
+		}
+		response.Contract = contract
+
+		// Get balance if community has proposal threshold rule
+		balance, _ := a.FlowAdapter.GetBalanceOfTokens(addr, &contract, *community.Contract_type)
+		response.Balance = balance
+	}
+
+	// Check if user can create proposal for community
+	if err := community.CanUserCreateProposal(a.DB, a.FlowAdapter, addr); err != nil {
+		response.HasPermission = false
+	} else {
+		response.HasPermission = true
+	}
+
+	respondWithJSON(w, http.StatusOK, response)
+}
+
 /////////////
 // HELPERS //
 /////////////
@@ -958,9 +1024,9 @@ func (a *App) getBalanceAtBlockheight(w http.ResponseWriter, r *http.Request) {
 func respondWithError(w http.ResponseWriter, err errorResponse) {
 	respondWithJSON(w, err.StatusCode, map[string]string{
 		"statusCode": strconv.Itoa(err.StatusCode),
-		"errorCode": err.ErrorCode,
-		"message":   err.Message,
-		"details":   err.Details,
+		"errorCode":  err.ErrorCode,
+		"message":    err.Message,
+		"details":    err.Details,
 	})
 }
 

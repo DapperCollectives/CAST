@@ -227,7 +227,6 @@ func (otu *OverflowTestUtils) GenerateCommunityPayload(signer string, payload *m
 	signingAddr := fmt.Sprintf("0x%s", account.Address().String())
 	timestamp := fmt.Sprint(time.Now().UnixNano() / int64(time.Millisecond))
 	compositeSignatures := otu.GenerateCompositeSignatures(signer, timestamp)
-	threshold := "0"
 
 	payload.Timestamp = timestamp
 	payload.Composite_signatures = compositeSignatures
@@ -235,7 +234,6 @@ func (otu *OverflowTestUtils) GenerateCommunityPayload(signer string, payload *m
 	if payload.Strategies == nil {
 		payload.Strategies = &strategies
 	}
-	payload.Proposal_threshold = &threshold
 
 	return payload
 }
@@ -324,6 +322,12 @@ func (otu *OverflowTestUtils) GetCommunityAPI(id int) *httptest.ResponseRecorder
 
 func (otu *OverflowTestUtils) GetCommunitiesForHomepageAPI() *httptest.ResponseRecorder {
 	req, _ := http.NewRequest("GET", "/communities-for-homepage", nil)
+	response := otu.ExecuteRequest(req)
+	return response
+}
+
+func (otu *OverflowTestUtils) GetSearchCommunitiesAPI() *httptest.ResponseRecorder {
+	req, _ := http.NewRequest("GET", "/communities/search", nil)
 	response := otu.ExecuteRequest(req)
 	return response
 }

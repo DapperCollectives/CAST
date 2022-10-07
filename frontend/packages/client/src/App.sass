@@ -843,32 +843,38 @@ input[type=range].slider::-ms-fill-upper
 		border-radius: 16px
 		background-size: contain !important
 
-.modal-error
+.c-modal
 	display: flex
 	flex-direction: column
 	width: 400px
 	border-radius: 16px
 	background-color: white
-	padding: 29px 24px 32px 24px
-	.modal-error-header
+	.spacing-header
+		padding: 29px 24px 0px 24px
+	.spacing-message
+		padding-right: 24px
+		padding-left: 24px
+		padding-top: 15px
+	.spacing-footer
+		padding: 0px 24px 32px 24px		
+	.c-modal-header
 		display: flex
 		flex-grow: 1
 		align-items: center
 		padding-bottom: 22px
 		border-bottom: 1px solid hsl(0deg, 0%, 71%)
-	.modal-error-title
+	.c-modal-title
 		display: flex
 		flex-grow: 1
 		font-weight: 500
 		font-size: 24px
 		line-height: 120%
 		padding: 0px 8px
-	.modal-error-message
+	.c-modal-message
 		display: flex
 		align-items: center
-		padding-top: 15px
 		color: $grey
-	.modal-error-footer
+	.c-modal-footer
 		display: flex
 		padding-top: 24px	
 
