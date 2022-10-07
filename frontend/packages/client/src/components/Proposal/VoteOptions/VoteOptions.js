@@ -17,7 +17,6 @@ const VoteOptions = ({
   onConfirmVote,
   loggedIn,
   addr,
-  readOnly = false,
 }) => {
   const { diffFromNow: endDiff } = parseDateFromServer(proposal.endTime);
   const { diffFromNow: startDiff } = parseDateFromServer(proposal.startTime);
@@ -103,8 +102,8 @@ const VoteOptions = ({
           currentOption={currentOption}
           hideVoteButton={previousVote || isClosed}
           labelType={labelType}
-          onOptionSelect={readOnly ? () => {} : onOptionSelect}
-          readOnly={readOnly || !canVote}
+          onOptionSelect={isClosed ? () => {} : onOptionSelect}
+          readOnly={isClosed || !canVote}
           onConfirmVote={onConfirmVote}
         />
       )}
@@ -113,7 +112,7 @@ const VoteOptions = ({
           choiceA={choiceA}
           choiceB={choiceB}
           currentOption={currentOption}
-          readOnly={readOnly || !canVote}
+          readOnly={isClosed || !canVote}
           confirmAndVote={confirmAndVoteImage}
         />
       )}
