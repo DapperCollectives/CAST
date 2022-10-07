@@ -5,7 +5,9 @@ package models
 /////////////////
 
 import (
+	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/DapperCollectives/CAST/backend/main/shared"
@@ -87,6 +89,12 @@ type UpdateCommunityRequestPayload struct {
 	Threshold     *float64 `json:"threshold,omitempty"`
 
 	s.TimestampSignaturePayload
+}
+
+type CanUserCreateProposalResponse struct {
+	shared.Contract
+	Balance       *float64 `json:"balance,omitempty"`
+	HasPermission bool     `json:"hasPermission"`
 }
 
 type Strategy struct {
@@ -402,6 +410,52 @@ func (c *Community) CanUpdateCommunity(db *s.Database, addr string) error {
 	if err := admin.GetCommunityUser(db); err != nil {
 		return fmt.Errorf("address %s does not have permission to update community with ID %d", addr, c.ID)
 	}
+	return nil
+}
+
+func (c *Community) CanUserCreateProposal(db *s.Database, fa *s.FlowAdapter, address string) error {
+	var isAuthor = true
+	var errMsg string
+
+	// Check if user is an author
+	if err := EnsureRoleForCommunity(db, address, c.ID, "author"); err != nil {
+		isAuthor = false
+		errMsg = fmt.Sprintf("Account %s is not an author for community %d.", address, c.ID)
+		log.Error().Err(err).Msg(errMsg)
+	} else { // return successfully if user is an author, regardless of Only_authors_to_submit
+		return nil
+	}
+
+	// If only authors can submit
+	if *c.Only_authors_to_submit && !isAuthor {
+		return errors.New(errMsg)
+	}
+	threshold, err := strconv.ParseFloat(*c.Proposal_threshold, 64)
+	if err != nil {
+		log.Error().Err(err).Msg("Invalid proposal threshold")
+		return errors.New("Invalid proposal threshold")
+	}
+
+	contract := shared.Contract{
+		Name:        c.Contract_name,
+		Addr:        c.Contract_addr,
+		Public_path: c.Public_path,
+		Threshold:   &threshold,
+	}
+	balance, err := fa.GetBalanceOfTokens(address, &contract, *c.Contract_type)
+	if err != nil {
+		errMsg := "Error processing Token Threshold."
+		log.Error().Err(err).Msg(errMsg)
+		return errors.New(errMsg)
+	}
+
+	//check if balance is greater than threshold
+	if *balance < threshold {
+		errMsg := "Insufficient token balance to create proposal."
+		log.Error().Err(err).Msg(errMsg)
+		return errors.New(errMsg)
+	}
+
 	return nil
 }
 

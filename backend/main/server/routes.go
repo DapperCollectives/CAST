@@ -49,6 +49,7 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users/{addr:0x[a-zA-Z0-9]{16}}/{userType:[a-zA-Z]+}", a.removeUserRole).
 		Methods("DELETE", "OPTIONS")
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/leaderboard", a.getCommunityLeaderboard).Methods("GET")
+	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/can-user-create-proposal/{addr:0x[a-zA-Z0-9]+}", a.canUserCreateProposal).Methods("GET")
 	// Utilities
 	a.Router.HandleFunc("/accounts/admin", a.getAdminList).Methods("GET")
 	a.Router.HandleFunc("/accounts/blocklist", a.getCommunityBlocklist).Methods("GET")

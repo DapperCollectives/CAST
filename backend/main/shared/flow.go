@@ -44,14 +44,14 @@ type FlowConfig struct {
 }
 
 type Contract struct {
-	Name           *string `json:"name,omitempty"`
-	Addr           *string `json:"addr,omitempty"`
-	Public_path    *string `json:"publicPath,omitempty"`
+	Name           *string  `json:"name,omitempty"`
+	Addr           *string  `json:"addr,omitempty"`
+	Public_path    *string  `json:"publicPath,omitempty"`
 	Threshold      *float64 `json:"threshold,omitempty,string"`
 	MaxWeight      *float64 `json:"maxWeight,omitempty,string"`
-	Float_event_id *uint64 `json:"floatEventId,omitempty,string"`
-	Script         *string `json:"script,omitempty"`
-	TallyMethod	   *string `json:"tallyMethod,omitempty"`
+	Float_event_id *uint64  `json:"floatEventId,omitempty,string"`
+	Script         *string  `json:"script,omitempty"`
+	TallyMethod    *string  `json:"tallyMethod,omitempty"`
 }
 
 var (
@@ -230,7 +230,14 @@ func (fa *FlowAdapter) ValidateSignature(address, message string, sigs *[]Compos
 
 }
 
-func (fa *FlowAdapter) EnforceTokenThreshold(scriptPath, creatorAddr string, c *Contract) (bool, error) {
+func (fa *FlowAdapter) GetBalanceOfTokens(creatorAddr string, c *Contract, contractType string) (*float64, error) {
+
+	var scriptPath string
+	if contractType == "nft" {
+		scriptPath = "./main/cadence/scripts/get_nfts_ids.cdc"
+	} else {
+		scriptPath = "./main/cadence/scripts/get_balance.cdc"
+	}
 
 	var balance float64
 	flowAddress := flow.HexToAddress(creatorAddr)
@@ -240,7 +247,7 @@ func (fa *FlowAdapter) EnforceTokenThreshold(scriptPath, creatorAddr string, c *
 	script, err := ioutil.ReadFile(scriptPath)
 	if err != nil {
 		log.Error().Err(err).Msgf("Error reading cadence script file.")
-		return false, err
+		return nil, err
 	}
 
 	var cadenceValue cadence.Value
@@ -260,7 +267,7 @@ func (fa *FlowAdapter) EnforceTokenThreshold(scriptPath, creatorAddr string, c *
 			})
 		if err != nil {
 			log.Error().Err(err).Msg("Error executing Non-Fungible-Token script.")
-			return false, err
+			return nil, err
 		}
 		value := CadenceValueToInterface(cadenceValue)
 
@@ -276,6 +283,10 @@ func (fa *FlowAdapter) EnforceTokenThreshold(scriptPath, creatorAddr string, c *
 				cadencePath,
 				cadenceAddress,
 			})
+
+		// If script fails, its probably because the vault/collection doenst exist.
+		// Return 0 balance.
+		var zero float64 = 0.0
 		if err != nil {
 			log.Error().Err(err).Msg("Error executing Fungible-Token Script.")
 			return false, err
@@ -285,16 +296,11 @@ func (fa *FlowAdapter) EnforceTokenThreshold(scriptPath, creatorAddr string, c *
 		balance, err = strconv.ParseFloat(value.(string), 64)
 		if err != nil {
 			log.Error().Err(err).Msg("Error converting cadence value to float.")
-			return false, err
+			return &zero, err
 		}
 	}
 
-	//check if balance is greater than threshold
-	if balance < *c.Threshold {
-		return false, nil
-	}
-
-	return true, nil
+	return &balance, nil
 }
 
 func (fa *FlowAdapter) GetFlowBalance(address string, blockHeight uint64) ([]float64, error) {
