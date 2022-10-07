@@ -232,6 +232,15 @@ func (otu *OverflowTestUtils) SetupAccountForFlow(account string) {
 		RunPrintEventsFull()
 }
 
+func (otu *OverflowTestUtils) TransferFlowTokens(from string, to string, amount float64) {
+	otu.O.TransactionFromFile("send_flow").
+		SignProposeAndPayAs(from).
+		Args(otu.O.Arguments().
+			UFix64(amount).
+			Account(to)).
+		Run()
+}
+
 func (otu *OverflowTestUtils) MintNFT(p shared.MintParams) {
 	otu.O.TransactionFromFile("mint_nft").
 		SignProposeAndPayAsService().

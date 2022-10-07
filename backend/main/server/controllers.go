@@ -14,10 +14,10 @@ import (
 )
 
 type errorResponse struct {
-	StatusCode int		`json:"statusCode,string"`
-	ErrorCode  string	`json:"errorCode"`
-	Message    string	`json:"message"`
-	Details    string	`json:"details"`
+	StatusCode int    `json:"statusCode,string"`
+	ErrorCode  string `json:"errorCode"`
+	Message    string `json:"message"`
+	Details    string `json:"details"`
 }
 
 var (
@@ -252,7 +252,7 @@ func (a *App) createVoteForProposal(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, errIncompleteRequest)
 		return
 	}
-	
+
 	vars := mux.Vars(r)
 	proposal, err := helpers.fetchProposal(vars, "proposalId")
 	if err != nil {
@@ -962,6 +962,55 @@ func (a *App) getBalanceAtBlockheight(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, result)
 }
 
+func (a *App) canUserCreateProposal(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	communityId, err := strconv.Atoi(vars["communityId"])
+	addr := vars["addr"]
+	if err != nil {
+		log.Error().Err(err).Msg("Invalid Community ID")
+		respondWithError(w, errIncompleteRequest)
+		return
+	}
+
+	// Fetch community to check user's power to create proposals against
+	community, err := helpers.fetchCommunity(communityId)
+	if err != nil {
+		log.Error().Err(err).Msg(errGetCommunity.Message)
+		respondWithError(w, errGetCommunity)
+	}
+
+	response := models.CanUserCreateProposalResponse{}
+
+	if !*community.Only_authors_to_submit {
+		threshold, err := strconv.ParseFloat(*community.Proposal_threshold, 64)
+		if err != nil {
+			log.Error().Err(err).Msg("Invalid proposal threshold")
+		}
+
+		// Get Contract
+		contract := shared.Contract{
+			Name:        community.Contract_name,
+			Addr:        community.Contract_addr,
+			Public_path: community.Public_path,
+			Threshold:   &threshold,
+		}
+		response.Contract = contract
+
+		// Get balance if community has proposal threshold rule
+		balance, _ := a.FlowAdapter.GetBalanceOfTokens(addr, &contract, *community.Contract_type)
+		response.Balance = balance
+	}
+
+	// Check if user can create proposal for community
+	if err := community.CanUserCreateProposal(a.DB, a.FlowAdapter, addr); err != nil {
+		response.HasPermission = false
+	} else {
+		response.HasPermission = true
+	}
+
+	respondWithJSON(w, http.StatusOK, response)
+}
+
 /////////////
 // HELPERS //
 /////////////
@@ -969,9 +1018,9 @@ func (a *App) getBalanceAtBlockheight(w http.ResponseWriter, r *http.Request) {
 func respondWithError(w http.ResponseWriter, err errorResponse) {
 	respondWithJSON(w, err.StatusCode, map[string]string{
 		"statusCode": strconv.Itoa(err.StatusCode),
-		"errorCode": err.ErrorCode,
-		"message":   err.Message,
-		"details":   err.Details,
+		"errorCode":  err.ErrorCode,
+		"message":    err.Message,
+		"details":    err.Details,
 	})
 }
 
