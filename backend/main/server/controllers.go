@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/DapperCollectives/CAST/backend/main/models"
 	"github.com/DapperCollectives/CAST/backend/main/shared"
@@ -289,12 +290,17 @@ func (a *App) getProposalsForCommunity(w http.ResponseWriter, r *http.Request) {
 	}
 
 	pageParams := getPageParams(*r, 25)
-	status := r.FormValue("status")
+	statusParam := r.FormValue("status")
+
+	var statuses = []string{}
+	if len(statusParam) > 0 {
+		statuses = strings.Split(statusParam, ",")
+	}
 
 	proposals, totalRecords, err := models.GetProposalsForCommunity(
 		a.DB,
 		communityId,
-		status,
+		statuses,
 		pageParams,
 	)
 	if err != nil {
@@ -862,6 +868,7 @@ func (a *App) getCommunityUsersByType(w http.ResponseWriter, r *http.Request) {
 		userType,
 		pageParams,
 	)
+
 	if err != nil {
 		log.Error().Err(err).Msg("Error getting community users")
 		respondWithError(w, errIncompleteRequest)
