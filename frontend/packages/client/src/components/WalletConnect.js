@@ -69,7 +69,8 @@ const SignInOutButton = ({
 
   useEffect(() => {
     setUserID(addr);
-  }, [addr, setUserID]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [addr]);
 
   const dropdownBackground = classnames('', {
     'wallet-connect-background': dropDownClass && !notMobile,
