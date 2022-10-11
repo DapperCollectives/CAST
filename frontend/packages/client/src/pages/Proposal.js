@@ -95,13 +95,6 @@ export default function ProposalPage() {
     }
   }, [forceLedger, setWebContextConfig]);
 
-  useEffect(() => {
-    const { current } = descriptionRef;
-    if (current?.clientHeight < 300) {
-      setIsCollaped(false);
-    }
-  }, [descriptionRef]);
-
   const { proposalId } = useParams();
 
   const {
@@ -111,6 +104,21 @@ export default function ProposalPage() {
   } = useProposal({ proposalId });
   const { voteOnProposal } = useVoteOnProposal();
   const { updateProposal } = useProposalMutation();
+
+  // this is for existing proposals that have the target="_self" from the db
+  // bc we want all links to open in new tabs
+  const htmlBody = proposal?.body?.replace(
+    /target="_self"/g,
+    'target="_blank" rel="noopener noreferrer"'
+  );
+
+  // this hook calculates if body should be collapsed
+  useEffect(() => {
+    const { current } = descriptionRef;
+    if (current?.clientHeight < 300) {
+      setIsCollaped(false);
+    }
+  }, [descriptionRef, htmlBody]);
 
   // we need to get all strategies to obtain
   // description text to display on modal
@@ -250,11 +258,6 @@ export default function ProposalPage() {
       summary: tab === 'summary',
     });
   };
-
-  // calculate what to show in vote options
-  const isClosed =
-    proposal?.computedStatus === FilterValues.closed.toLocaleLowerCase();
-
   if (error) {
     return null;
   }
@@ -266,13 +269,6 @@ export default function ProposalPage() {
       </section>
     );
   }
-
-  // this is for existing proposals that have the target="_self" from the db
-  // bc we want all links to open in new tabs
-  const htmlBody = proposal?.body?.replace(
-    /target="_self"/g,
-    'target="_blank" rel="noopener noreferrer"'
-  );
 
   return (
     <>
@@ -384,7 +380,6 @@ export default function ProposalPage() {
                     )}
                     <VoteOptions
                       labelType="mobile"
-                      readOnly={isClosed}
                       addr={user?.addr}
                       proposal={proposal}
                       optionChosen={optionChosen}
@@ -516,7 +511,6 @@ export default function ProposalPage() {
                 )}
                 <VoteOptions
                   labelType="desktop"
-                  readOnly={isClosed}
                   loggedIn={user?.loggedIn}
                   addr={user?.addr}
                   proposal={proposal}

@@ -7,29 +7,13 @@ const Wrapper = ({ children }) => (
   </h3>
 );
 
-export default function VoteHeader({ currentOption, previousVote, isClosed }) {
-  if (currentOption !== null && currentOption === previousVote) {
-    return (
-      <Wrapper>
-        <>You successfully voted on this proposal!</>
-      </Wrapper>
-    );
-  }
-  if (
-    !(currentOption !== null && currentOption === previousVote) &&
-    !isClosed
-  ) {
-    return (
-      <Wrapper>
-        <>Cast your vote</>
-      </Wrapper>
-    );
-  }
-  if (isClosed) {
-    return (
-      <Wrapper>
-        <>Voting has ended on this proposal.</>
-      </Wrapper>
-    );
-  }
+export default function VoteHeader({ status }) {
+  // Status: user-voted, invite-to-vote, is-closed
+  const message = {
+    'user-voted': <>You successfully voted on this proposal!</>,
+    'invite-to-vote': <>Cast your vote</>,
+    'is-closed': <>Voting has ended on this proposal.</>,
+  };
+
+  return <Wrapper>{message[status] ?? <>Cast your vote</>}</Wrapper>;
 }

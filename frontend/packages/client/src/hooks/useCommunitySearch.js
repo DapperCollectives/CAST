@@ -54,19 +54,20 @@ export default function useCommunitySearch({
         const filters = queryKey[2];
 
         const queryParams = new URLSearchParams({
+          ...(searchText ? { text: searchText } : undefined),
           ...(filters ? { filters: filters } : undefined),
           start,
           count,
         }).toString();
 
-        const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/search/${searchText}?${queryParams}`;
+        const url = `${process.env.REACT_APP_BACK_END_SERVER_API}/communities/search?${queryParams}`;
 
         const response = await fetch(url);
         return checkResponse(response);
       },
       {
         getNextPageParam: (lastPage) => {
-          const { next, start, count, totalRecords } = lastPage;
+          const { next, start, count, totalRecords } = lastPage?.results ?? {};
           return [start + count, count, totalRecords, next];
         },
         onError: (error) => {
@@ -97,7 +98,6 @@ export default function useCommunitySearch({
         window.pageYOffset + window.innerHeight
       ) {
         if (document.hasMore && !document.isLoading) {
-          console.log('is fetching more ');
           document.fetchNextPage();
         }
       }

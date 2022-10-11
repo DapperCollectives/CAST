@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/DapperCollectives/CAST/backend/main/models"
@@ -328,7 +329,6 @@ func (h *Helpers) createVote(v models.Vote, p models.Proposal) (*models.VoteWith
 
 	voteWithBalance, errResponse := h.useStrategyFetchBalance(v, p, s)
 	if errResponse != nilErr {
-		fmt.Println(errResponse)
 		return nil, errResponse
 	}
 
@@ -462,13 +462,67 @@ func (h *Helpers) fetchCommunity(id int) (models.Community, error) {
 	return community, nil
 }
 
-func (h *Helpers) searchCommunities(query string) ([]models.Community, error) {
-	results, err := models.SearchForCommunity(h.A.DB, query)
-	if err != nil {
-		return []models.Community{}, err
+func (h *Helpers) searchCommunities(
+	searchText string,
+	filters string,
+	pageParams shared.PageParams,
+) (
+	[]*models.Community,
+	map[string]int,
+	int,
+	error,
+) {
+	filtersSlice := strings.Split(filters, ",")
+	if searchText == "" {
+		isSearch := true
+
+		results, totalRecords, err := models.GetDefaultCommunities(
+			h.A.DB,
+			pageParams,
+			filtersSlice,
+			isSearch,
+		)
+
+		if err != nil {
+			log.Error().Err(err)
+			return nil, nil, 0, err
+		}
+
+		categoryCount, err := models.GetCategoryCount(h.A.DB, searchText)
+		if err != nil {
+			return []*models.Community{}, nil, 0, err
+		}
+
+		return results, categoryCount, totalRecords, nil
+	} else {
+		results, totalRecords, err := models.SearchForCommunity(
+			h.A.DB,
+			searchText,
+			filtersSlice,
+			pageParams,
+		)
+		if err != nil {
+			return []*models.Community{}, nil, 0, err
+		}
+
+		categoryCount, err := models.GetCategoryCount(h.A.DB, searchText)
+		if err != nil {
+			return []*models.Community{}, nil, 0, err
+		}
+
+		return results, categoryCount, totalRecords, nil
+	}
+}
+
+func (h *Helpers) categoryCountToMap(results []*models.Community) map[string]int {
+	var categoryCount = make(map[string]int)
+	for _, community := range results {
+		if community.Category != nil {
+			categoryCount[*community.Category] = *community.Category_count
+		}
 	}
 
-	return results, nil
+	return categoryCount
 }
 
 func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorResponse) {
@@ -506,7 +560,7 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorRespo
 		p.Max_weight = strategy.Contract.MaxWeight
 	}
 
-	if err := h.enforceCommunityRestrictions(community, p, strategy); err != nil {
+	if err := community.CanUserCreateProposal(h.A.DB, h.A.FlowAdapter, p.Creator_addr); err != nil {
 		return models.Proposal{}, errIncompleteRequest
 	}
 
@@ -559,50 +613,6 @@ func (h *Helpers) validateStrategyName(name string) error {
 	}
 
 	return errors.New("Strategy not found.")
-}
-
-func (h *Helpers) enforceCommunityRestrictions(
-	c models.Community,
-	p models.Proposal,
-	s models.Strategy,
-) error {
-
-	if *c.Only_authors_to_submit {
-		if err := models.EnsureRoleForCommunity(h.A.DB, p.Creator_addr, c.ID, "author"); err != nil {
-			errMsg := fmt.Sprintf("Account %s is not an author for community %d.", p.Creator_addr, p.Community_id)
-			log.Error().Err(err).Msg(errMsg)
-			return errors.New(errMsg)
-		}
-	} else {
-		fmt.Println("Community does not require authors to submit proposals")
-
-		threshold, err := strconv.ParseFloat(*c.Proposal_threshold, 64)
-		if err != nil {
-			log.Error().Err(err).Msg("Invalid proposal threshold")
-			return errors.New("Invalid proposal threshold")
-		}
-
-		contract := shared.Contract{
-			Name:        c.Contract_name,
-			Addr:        c.Contract_addr,
-			Public_path: c.Public_path,
-			Threshold:   &threshold,
-		}
-		hasBalance, err := h.processTokenThreshold(p.Creator_addr, contract, *c.Contract_type)
-		if err != nil {
-			errMsg := "Error processing Token Threshold."
-			log.Error().Err(err).Msg(errMsg)
-			return errors.New(errMsg)
-		}
-
-		if !hasBalance {
-			errMsg := "Insufficient token balance to create proposal."
-			log.Error().Err(err).Msg(errMsg)
-			return errors.New(errMsg)
-		}
-	}
-
-	return nil
 }
 
 func (h *Helpers) createCommunity(payload models.CreateCommunityRequestPayload) (models.Community, error) {
@@ -1081,23 +1091,6 @@ func (h *Helpers) validateUserWithRoleViaVoucher(addr string, voucher *shared.Vo
 	return nil
 }
 
-func (h *Helpers) processTokenThreshold(address string, c shared.Contract, contractType string) (bool, error) {
-	var scriptPath string
-
-	if contractType == "nft" {
-		scriptPath = "./main/cadence/scripts/get_nfts_ids.cdc"
-	} else {
-		scriptPath = "./main/cadence/scripts/get_balance.cdc"
-	}
-
-	hasBalance, err := h.A.FlowAdapter.EnforceTokenThreshold(scriptPath, address, &c)
-	if err != nil {
-		return false, err
-	}
-
-	return hasBalance, nil
-}
-
 func (h *Helpers) initStrategy(name string) Strategy {
 	s := strategyMap[name]
 	if s == nil {
@@ -1121,6 +1114,49 @@ func (h *Helpers) pinJSONToIpfs(data interface{}) (*string, error) {
 		return nil, err
 	}
 	return &pin.IpfsHash, nil
+}
+
+func (h *Helpers) appendFiltersToResponse(
+	results *shared.PaginatedResponse,
+	count map[string]int,
+) (interface{}, error) {
+	var filters []shared.SearchFilter
+	var CATEGORIES = []string{
+		"all",
+		"dao",
+		"social",
+		"protocol",
+		"creator",
+		"nft",
+		"collector",
+	}
+
+	var totalCount int
+	for _, category := range CATEGORIES {
+		if category == "all" {
+			continue
+		}
+		filters = append(filters, shared.SearchFilter{
+			Text:   category,
+			Amount: count[category],
+		})
+		totalCount += count[category]
+	}
+
+	filters = append(filters, shared.SearchFilter{
+		Text:   "all",
+		Amount: totalCount,
+	})
+
+	appendedResponse := struct {
+		Filters []shared.SearchFilter    `json:"filters"`
+		Results shared.PaginatedResponse `json:"results"`
+	}{
+		Filters: filters,
+		Results: *results,
+	}
+
+	return appendedResponse, nil
 }
 
 func validateContractThreshold(s []models.Strategy) error {
