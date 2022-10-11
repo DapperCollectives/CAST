@@ -17,6 +17,7 @@ function StepByStep({
   passSubmitToComp = false,
   blockNavigationOut = false,
   blockNavigationText,
+  alignStepsToTop,
 } = {}) {
   const [currentStep, setCurrentStep] = useState(0);
   const [showPreStep, setShowPreStep] = useState(!!preStep);
@@ -114,6 +115,7 @@ function StepByStep({
             onSubmit={_onSubmit}
             isStepValid={isStepValid}
             moveBackStep={moveBackStep}
+            alignToTop={alignStepsToTop}
           />
 
           {/* right panel */}

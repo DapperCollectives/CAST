@@ -17,6 +17,7 @@ export default function LeftPannel({
   onSubmit,
   isStepValid,
   moveBackStep,
+  alignToTop,
 }) {
   const notMobile = useMediaQuery();
 
@@ -51,7 +52,11 @@ export default function LeftPannel({
         position: 'fixed',
         minHeight: '100%',
       }}
-      className="has-background-white-ter pl-4 is-hidden-mobile is-flex is-flex-direction-column is-justify-content-center"
+      className={`has-background-white-ter pl-4 is-hidden-mobile is-flex is-flex-direction-column ${
+        alignToTop
+          ? 'is-justify-content-flex-start pt-6'
+          : 'is-justify-content-center'
+      }`}
     >
       <div className="mb-6" style={{ minHeight: 24 }}>
         {currentStep > 0 && (
