@@ -12,6 +12,7 @@ export default function JoinCommunityButton({
   onLeaveCommunity = async () => {},
   onJoinCommunity = async () => {},
   size = 'small',
+  hasTooltip = false,
 }) {
   const [isModalErrorOpened, setIsModalErrorOpened] = useState(false);
   const { createCommunityUser, deleteUserFromCommunity } = useJoinCommunity();
@@ -86,15 +87,17 @@ export default function JoinCommunityButton({
     'button join-community-button p-0 is-fullwidth full-height',
     {
       'is-active': isMember,
-      'rounded-lg': size === 'small',
+      'rounded-lg': ['small', 'smaller'].includes(size),
       'rounded-xl small-text px-4': size === 'large',
     }
   );
 
-  const containerStyles =
-    size === 'small'
-      ? { width: 40, height: 40 }
-      : { height: 48, maxWidth: 125 };
+  const sizes = {
+    smaller: { height: 32, maxWidth: 32 },
+    small: { width: 40, height: 40 },
+  };
+
+  const containerStyles = sizes[size] ?? { height: 48, maxWidth: 125 };
 
   let joinCopy = 'Watch';
   if (isMember) joinCopy += 'ing';
@@ -110,7 +113,7 @@ export default function JoinCommunityButton({
       >
         <Svg name="Eye" />
         <Svg name="HideEye" />
-        {!isMember && (
+        {!isMember && hasTooltip && (
           <span className="join-community-cta py-2 px-4 rounded-lg has-text-white has-background-black smaller-text">
             Watch this community
           </span>

@@ -1,13 +1,15 @@
 import { useMemo } from 'react';
 import { Svg } from '@cast/shared-components';
-import { Pill } from 'components';
+import { StatusPill } from 'components';
 import { FilterValues } from 'const';
 import { parseDateFromServer } from 'utils';
 import Results from './Results';
 
 export default function ResultsPanel({
+  proposalChoices = [],
   results = [],
   endTime,
+  startTime,
   computedStatus,
 } = {}) {
   const status = FilterValues[computedStatus] ?? FilterValues.closed;
@@ -15,13 +17,19 @@ export default function ResultsPanel({
   const pillForStatus = useMemo(
     () => ({
       [FilterValues.active]: (
-        <Pill status="Active" backgroundColorClass="has-background-warning" />
+        <StatusPill
+          status="Active"
+          backgroundColorClass="has-background-warning"
+        />
       ),
       [FilterValues.pending]: (
-        <Pill status="Upcoming" backgroundColorClass="has-background-orange" />
+        <StatusPill
+          status="Upcoming"
+          backgroundColorClass="has-background-orange"
+        />
       ),
       [FilterValues.closed]: (
-        <Pill
+        <StatusPill
           status={
             <span>
               Complete <Svg name="CheckOutlined" />
@@ -31,7 +39,10 @@ export default function ResultsPanel({
         />
       ),
       [FilterValues.cancelled]: (
-        <Pill status="Canceled" backgroundColorClass="has-background-danger" />
+        <StatusPill
+          status="Canceled"
+          backgroundColorClass="has-background-danger"
+        />
       ),
     }),
     []
@@ -41,7 +52,9 @@ export default function ResultsPanel({
     [FilterValues.active]: <Svg name="Active" />,
   };
 
-  const { diffDuration } = parseDateFromServer(endTime);
+  const { diffDuration } = parseDateFromServer(
+    status === FilterValues.pending ? startTime : endTime
+  );
 
   const textDescriptionMap = {
     [FilterValues.active]: `${diffDuration} remaining`,
@@ -65,7 +78,11 @@ export default function ResultsPanel({
           </span>
         </div>
       </div>
-      <Results voteResults={results} computedStatus={computedStatus} />
+      <Results
+        proposalChoices={proposalChoices}
+        voteResults={results}
+        computedStatus={computedStatus}
+      />
     </div>
   );
 }

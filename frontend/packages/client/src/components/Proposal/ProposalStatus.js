@@ -1,4 +1,4 @@
-import { StatusLabel } from 'components';
+import { StyledStatusPill } from 'components';
 import { FilterValues } from 'const';
 import { parseDateFromServer } from 'utils';
 import { getStatus } from './getStatus';
@@ -23,22 +23,12 @@ const ProposalStatus = ({ proposal, className = '' }) => {
       <div className={className}>
         <code className="has-text-grey pl-0">
           {calculatedStatus === FilterValues.active && (
-            <StatusLabel
-              margin="mr-3"
-              status={<b>Active</b>}
-              color="has-background-orange"
-              className="smaller-text"
-            />
+            <StyledStatusPill status={FilterValues.active} />
           )}
           {calculatedStatus === FilterValues.pending && (
-            <StatusLabel
-              margin="mr-3"
-              status={<b>Pending</b>}
-              color="has-background-grey-light"
-              className="smaller-text"
-            />
+            <StyledStatusPill status={FilterValues.pending} />
           )}
-          <span style={{ lineHeight: '18.8px' }} className="smaller-text">
+          <span style={{ lineHeight: '18.8px' }} className="smaller-text pl-2">
             Ends in {diffDays} days
           </span>
         </code>
@@ -50,11 +40,7 @@ const ProposalStatus = ({ proposal, className = '' }) => {
     return (
       <div className={className}>
         <code className="has-text-grey pl-0">
-          <StatusLabel
-            status={<b>Cancelled</b>}
-            color="has-background-grey"
-            className="smaller-text"
-          />
+          <StyledStatusPill status={FilterValues.cancelled} />
         </code>
       </div>
     );
@@ -63,7 +49,7 @@ const ProposalStatus = ({ proposal, className = '' }) => {
   return (
     <div className={className}>
       <code className="has-text-grey pl-0">
-        <StatusLabel status={'Closed'} className="smaller-text" />
+        <StyledStatusPill status={FilterValues.closed} />
       </code>
     </div>
   );

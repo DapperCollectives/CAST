@@ -106,11 +106,11 @@ $popover-max-width: 20rem
 .App, #root
 	height: 100%
 .Body
-	padding-top: calc($navbar-height + 2rem)
+	padding-top: calc($navbar-height + 2.33rem)
 	height: 100%
 @include mobile
 	.Body
-		padding-top: calc($navbar-height + 1.25rem)
+		padding-top: calc($navbar-height + 1.2rem)
 		height: 100%
 .full-height
 	height: 100%
@@ -181,8 +181,8 @@ code
 	margin-bottom: 2.5rem
 @include mobile
 	.header-spacing
-		padding-bottom: 10px
-		padding-top: 10px
+		padding-bottom: 7px
+		padding-top: 7px
 	.section
 		padding-top: 1.57rem !important
 		padding-bottom: 3rem
@@ -303,6 +303,7 @@ hr
 	.container > .navbar .navbar-brand
 		margin-left: 0 !important
 
+
 @media (max-width: 769px)
 	.section
 		padding-right: 1rem
@@ -310,8 +311,8 @@ hr
 	.navbar-burger
 		display: block
 		width: 1.25rem
-	.navbar-brand
-		flex-direction: row-reverse
+		span
+			height: 2px !important
 	.navbar-start
 		margin-bottom: 1rem
 	a.navbar-item:hover
@@ -581,10 +582,7 @@ span[data-tooltip]
 	-moz-transition: opacity 0.3s ease-out
 	-ms-transition: opacity 0.3s ease-out
 	-o-transition: opacity 0.3s ease-out
-	opacity: 0
-
-.section.section-small
-	padding-top: 2rem !important	
+	opacity: 0	
 
 .word-break
 	word-break: break-word
@@ -845,31 +843,70 @@ input[type=range].slider::-ms-fill-upper
 		border-radius: 16px
 		background-size: contain !important
 
-.modal-error
+.c-modal
 	display: flex
 	flex-direction: column
 	width: 400px
 	border-radius: 16px
 	background-color: white
-	padding: 29px 24px 32px 24px
-	.modal-error-header
+	.spacing-header
+		padding: 29px 24px 0px 24px
+	.spacing-message
+		padding-right: 24px
+		padding-left: 24px
+		padding-top: 15px
+	.spacing-footer
+		padding: 0px 24px 32px 24px		
+	.c-modal-header
 		display: flex
 		flex-grow: 1
 		align-items: center
 		padding-bottom: 22px
 		border-bottom: 1px solid hsl(0deg, 0%, 71%)
-	.modal-error-title
+	.c-modal-title
 		display: flex
 		flex-grow: 1
 		font-weight: 500
 		font-size: 24px
 		line-height: 120%
 		padding: 0px 8px
-	.modal-error-message
+	.c-modal-message
 		display: flex
 		align-items: center
-		padding-top: 15px
 		color: $grey
-	.modal-error-footer
+	.c-modal-footer
 		display: flex
 		padding-top: 24px	
+
+.search-container
+	min-height: 214px
+.search-input
+	width: 480px		
+.pill-border
+	border: 2px solid
+.pill-border-disabled
+	border: 2px solid #BFBFBF
+	color: #BFBFBF !important
+.has-border-success
+	border-color: $success
+.has-border-danger
+	border-color: $danger
+.has-border-yellow
+	border-color: $yellow
+.has-border-orange
+	border-color: $orange
+
+@include mobile	
+	.search-container
+		min-height: 249px
+	.search-input
+		width: 100%	
+
+.fade-proposal-description 
+	position: absolute
+	bottom: 1.5rem
+	display: block
+	width: 100%
+	height: 200px
+	background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgb(255, 255, 255) 100%)
+

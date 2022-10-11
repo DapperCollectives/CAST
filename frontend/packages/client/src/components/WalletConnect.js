@@ -71,7 +71,7 @@ const SignInOutButton = ({
     { 'is-primary': !loggedIn },
     { 'px-2': !notMobile }
   );
-  const addressStyle = classnames('', { 'smaller-text': !notMobile });
+  const addressStyle = classnames('', { 'small-text': !notMobile });
 
   return !loggedIn ? (
     <>
@@ -83,10 +83,10 @@ const SignInOutButton = ({
             ? { width: '100%', height: '48px' }
             : notMobile
             ? {
-                width: '206px',
+                width: '159px',
                 height: '40px',
               }
-            : { width: '105px', height: '32px' }
+            : { width: '121px', height: '32px' }
         }
       >
         <span className="has-text-weight-bold">Connect</span>
@@ -114,7 +114,7 @@ const SignInOutButton = ({
                     width: '147px',
                     height: '40px',
                   }
-                : { width: '105px', height: '32px' }
+                : { width: '121px', height: '32px' }
             }
           >
             <div className="is-flex is-align-items-center flex-1">
@@ -124,7 +124,7 @@ const SignInOutButton = ({
                 scale={4}
                 className="blockies"
               />
-              <div className="is-flex flex-1 is-justify-content-flex-end">
+              <div className="is-flex flex-1 is-justify-content-flex-end pr-1-mobile">
                 <p className={addressStyle}>{truncateAddress(addr, 4, 4)}</p>
               </div>
             </div>
@@ -136,7 +136,7 @@ const SignInOutButton = ({
           id="dropdown-menu"
           role="menu"
           ref={dropdownRef}
-          style={!notMobile ? { left: '-170px' } : { left: '-130px' }}
+          style={!notMobile ? { left: '-155px' } : { left: '-130px' }}
         >
           <div
             className="dropdown-content p-0 rounded"
