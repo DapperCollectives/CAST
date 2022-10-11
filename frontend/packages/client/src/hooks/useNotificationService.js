@@ -40,7 +40,7 @@ export default function useNotificationService() {
     }
   };
 
-  const unsubscribeCommunityNotifications = async (communityId) => {
+  const unsubscribeCommunity = async (communityId) => {
     try {
       //here we call api
       setNotificationSettings((prevState) => ({
@@ -98,7 +98,7 @@ export default function useNotificationService() {
     setUserID,
     setUserEmail,
     getUserSettings,
-    unsubscribeCommunityNotifications,
+    unsubscribeCommunity,
     subscribeCommunity,
     unsubscribeFromEmailNotifications,
     resubscribeFromEmailNotifications,
