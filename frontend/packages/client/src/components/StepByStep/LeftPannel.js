@@ -56,7 +56,7 @@ export default function LeftPannel({
           <BackButton isSubmitting={isSubmitting} onClick={moveBackStep} />
         )}
       </div>
-      <div>
+      <div className="pr-7">
         {steps.map((step, i) => (
           <StepLabelAndIcon
             key={`step-and-icon-${i}`}
@@ -68,20 +68,24 @@ export default function LeftPannel({
         ))}
       </div>
       {currentStep < steps.length - 1 && showNextButton && (
-        <NextButton
-          formId={formId}
-          moveToNextStep={moveToNextStep}
-          disabled={!isStepValid}
-        />
+        <div className="pr-7">
+          <NextButton
+            formId={formId}
+            moveToNextStep={moveToNextStep}
+            disabled={!isStepValid}
+          />
+        </div>
       )}
       {currentStep === steps.length - 1 && showSubmitButton && (
-        <SubmitButton
-          formId={formId}
-          disabled={!isStepValid}
-          onSubmit={onSubmit}
-          label={finalLabel}
-          isSubmitting={isSubmitting}
-        />
+        <div className="pr-7">
+          <SubmitButton
+            formId={formId}
+            disabled={!isStepValid}
+            onSubmit={onSubmit}
+            label={finalLabel}
+            isSubmitting={isSubmitting}
+          />
+        </div>
       )}
     </div>
   );
