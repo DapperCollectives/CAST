@@ -219,7 +219,7 @@ export default function ProposalPage() {
     }
 
     const voteData = {
-      choice: optionChosen,
+      choices: [optionChosen],
       addr: user.addr,
     };
 
@@ -410,6 +410,7 @@ export default function ProposalPage() {
                     />
                     <ProposalInformation
                       proposalId={proposal.id}
+                      proposalChoices={proposal.choices}
                       creatorAddr={proposal.creatorAddr}
                       isCoreCreator={proposal.isCore}
                       strategyName={proposalStrategy?.name}
@@ -523,6 +524,7 @@ export default function ProposalPage() {
               <div className="column p-0 is-4">
                 <ProposalInformation
                   proposalId={proposal.id}
+                  proposalChoices={proposal.choices}
                   creatorAddr={proposal.creatorAddr}
                   isCoreCreator={proposal.isCore}
                   strategyName={proposalStrategy?.name}
