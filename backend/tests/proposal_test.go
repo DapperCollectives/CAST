@@ -21,7 +21,7 @@ func TestGetProposal(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")
 	clearTable("proposals")
-	communityId := otu.AddCommunities(1)[0]
+	communityId := otu.AddCommunities(1, "dao")[0]
 
 	t.Run("Requesting proposals for a community with none created should succeed and return an empty array", func(t *testing.T) {
 		response := otu.GetProposalsForCommunityAPI(communityId)

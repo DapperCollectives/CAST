@@ -521,17 +521,6 @@ func (h *Helpers) searchCommunities(
 	}
 }
 
-func (h *Helpers) categoryCountToMap(results []*models.Community) map[string]int {
-	var categoryCount = make(map[string]int)
-	for _, community := range results {
-		if community.Category != nil {
-			categoryCount[*community.Category] = *community.Category_count
-		}
-	}
-
-	return categoryCount
-}
-
 func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorResponse) {
 	if err := h.validateStrategyName(*p.Strategy); err != nil {
 		fmt.Printf("Error validating strategy name: %v \n", err)
