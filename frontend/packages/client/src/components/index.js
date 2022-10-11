@@ -3,7 +3,7 @@ export { default as Transactions } from './Transactions';
 export { default as WalletConnect } from './WalletConnect';
 export { default as Message } from './Message';
 export { default as VotesList } from './VotesList';
-export { ProposalInformation } from './ProposalInformation';
+export { ProposalInformation, CommunityName } from './ProposalInformation';
 export { default as StrategyModal } from './StrategyModal';
 export { default as StepByStep } from './StepByStep';
 export { default as StatusLabel } from './StatusLabel';
@@ -21,6 +21,7 @@ export { default as JoinCommunityButton } from './Community/JoinCommunityButton'
 export { CommunityEditorProfile } from './Community/CommunityEditorProfile';
 export { CommunityEditorLinks } from './Community/CommunityEditorLinks';
 export { CommunityEditorDetails } from './Community/CommunityEditorDetails';
+export { CommunityCard } from './Community/CommunityCard';
 export { default as CommunityPropsAndVoting } from './Community/CommunityPropsAndVoting';
 export { ProposalThresholdEditor } from './Community/ProposalThresholdEditor';
 export { default as AddButton } from './AddButton';
@@ -45,6 +46,16 @@ export { default as Form } from './common/Form';
 export { default as Input } from './Input';
 export { default as TooltipMessage } from './TooltipMessage';
 export { default as FadeInOut } from './FadeInOut';
-export { default as ErrorModal } from './ErrorModal';
-export { default as Pill } from './Pill';
+export {
+  Error as ErrorModal,
+  VoteConfirmation as VoteConfirmationModal,
+  CastingVote as CastingVoteModal,
+  VoteConfirmed as VoteConfirmedModal,
+  CancelProposal as CancelProposalModal,
+  Modal,
+} from './modals';
+export { default as StatusPill } from './StatusPill';
+export { default as StyledStatusPill } from './StyledStatusPill';
+export { default as FilterPill } from './FilterPill';
+export { default as BrowseCommunityButton } from './BrowseCommunityButton';
 export * from './Proposal';

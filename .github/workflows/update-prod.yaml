@@ -22,6 +22,7 @@ env:
   tx_options: ${{ secrets.TX_OPTIONS }}
   github_token: ${{ secrets.GH_TOKEN }}
   hotjar_site_id: ${{ secrets.HOTJAR_PROD_ID }}
+  sentry_url: ${{ secrets.SENTRY_PROD_URL }}
 
 jobs:
 
@@ -127,7 +128,7 @@ jobs:
       id: docker-from-release
       run: |
         export TAG=$(curl -H "Accept: application/vnd.github+json" https://api.github.com/repos/DapperCollectives/CAST/releases/latest | jq -r '.tag_name')
-        cd frontend && sed -i -e 's/REPLACE_HOTJAR_SITE_ID/${{ env.hotjar_site_id }}/g' Dockerfile && docker build . -t bruddev/cast-frontend:$TAG && docker push bruddev/cast-frontend:$TAG
+        cd frontend && sed -i -e 's/REPLACE_HOTJAR_SITE_ID/${{ env.hotjar_site_id }}/g' Dockerfile && sed -i -e 's|REPLACE_SENTRY_URL|${{ env.sentry_url }}|g' Dockerfile && docker build . -t bruddev/cast-frontend:$TAG && docker push bruddev/cast-frontend:$TAG
 
 ## ARGO FROM HERE
 

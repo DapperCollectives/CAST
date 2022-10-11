@@ -26,7 +26,6 @@ import (
 
 type Database shared.Database
 type IpfsClient shared.IpfsClient
-type SnapshotClient shared.SnapshotClient
 type Allowlist shared.Allowlist
 type Vote models.Vote
 type Proposal models.Proposal
@@ -46,8 +45,8 @@ type App struct {
 	DB          *shared.Database
 	IpfsClient  *shared.IpfsClient
 	FlowAdapter *shared.FlowAdapter
+	DpsAdapter  *shared.DpsAdapter
 
-	SnapshotClient     *shared.SnapshotClient
 	TxOptionsAddresses []string
 	Env                string
 	AdminAllowlist     shared.Allowlist
@@ -56,12 +55,11 @@ type App struct {
 }
 
 type Strategy interface {
-	TallyVotes(votes []*models.VoteWithBalance, p *models.ProposalResults, proposal *models.Proposal) (models.ProposalResults, error)
+	TallyVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) (models.ProposalResults, error)
 	GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error)
 	GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error)
-	InitStrategy(f *shared.FlowAdapter, db *shared.Database, sc *shared.SnapshotClient)
+	InitStrategy(f *shared.FlowAdapter, db *shared.Database, sc *shared.DpsAdapter)
 	FetchBalance(b *models.Balance, p *models.Proposal) (*models.Balance, error)
-	RequiresSnapshot() bool
 }
 
 var strategyMap = map[string]Strategy{
@@ -175,12 +173,9 @@ func (a *App) Initialize() {
 	}
 	a.FlowAdapter = shared.NewFlowClient(os.Getenv("FLOW_ENV"), customScriptsMap)
 
-	// Snapshot
-	log.Info().Msgf("SNAPSHOT_BASE_URL: %s", os.Getenv("SNAPSHOT_BASE_URL"))
-	a.SnapshotClient = shared.NewSnapshotClient(
-		os.Getenv("SNAPSHOT_BASE_URL"),
-		*a.FlowAdapter,
-	)
+	a.DpsAdapter = shared.NewDpsClient(os.Getenv("FLOW_ENV"))
+	a.DpsAdapter.Config = a.FlowAdapter.Config
+
 	a.TxOptionsAddresses = strings.Fields(os.Getenv("TX_OPTIONS_ADDRS"))
 
 	// Router
