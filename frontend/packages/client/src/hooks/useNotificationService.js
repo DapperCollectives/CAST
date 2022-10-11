@@ -1,12 +1,10 @@
-import { useState } from 'react';
+import { useNotificationServiceContext } from 'contexts/NotificationService';
 
 export default function useNotificationService() {
-  const [notificationSettings, setNotificationSettings] = useState({
-    walletId: '',
-    email: '',
-    communitySubscription: [],
-    isUnsubscribedFromCommunityUpdates: false,
-  });
+  //notificationSettings will be used to access the already set properties
+  //for calling the api
+  const { notificationSettings, setNotificationSettings } =
+    useNotificationServiceContext();
 
   const setUserID = async (walletId) => {
     try {
@@ -31,6 +29,7 @@ export default function useNotificationService() {
       throw new Error('cannot set user email');
     }
   };
+
   const getUserSettings = async () => {
     try {
       //here we call api

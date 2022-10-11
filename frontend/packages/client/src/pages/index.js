@@ -15,6 +15,7 @@ const Community = lazy(() => import('./Community'));
 const CommunityEditor = lazy(() => import('./CommunityEditor'));
 const CommunityCreate = lazy(() => import('./CommunityCreate'));
 const BrowseCommunities = lazy(() => import('./BrowseCommunities'));
+const Setting = lazy(() => import('./Setting'));
 
 export default function AppPages() {
   return (
@@ -51,6 +52,9 @@ export default function AppPages() {
 
             <Route exact path="/debug-contract">
               <Debug />
+            </Route>
+            <Route exact path="/setting">
+              <Setting />
             </Route>
           </Switch>
         </div>

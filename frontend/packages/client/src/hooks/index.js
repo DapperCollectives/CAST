@@ -29,3 +29,4 @@ export { default as useBrowserName } from './useBrowserName';
 export { default as useLocalStorage } from './useLocalStorage';
 export { default as useOnClickOutside } from './useOnOutsideClick';
 export { default as useFeaturedCommunities } from './useFeaturedCommunities';
+export { default as useNotificationService } from './useNotificationService';
