@@ -1,94 +1,8 @@
-import { Svg } from '@cast/shared-components';
 import { useMediaQuery } from 'hooks';
-import classnames from 'classnames';
+import BackButton from './BackButton';
 import NextButton from './NexStepButton';
+import StepLabelAndIcon from './StepLabelAndIcon';
 import SubmitButton from './SubmitButton';
-
-const StepNumber = ({ stepIdx, status }) => {
-  // status can be active - pending - done
-  if (status === 'done') {
-    return <Svg name="CheckMark" circleFill="#44C42F" />;
-  }
-
-  const classNames = classnames(
-    'rounded-full has-text-black is-flex is-align-items-center is-justify-content-center',
-    { 'has-background-yellow': status === 'active' },
-    { 'border-light': status === 'pending' }
-  );
-  return (
-    <div
-      className={classNames}
-      style={{
-        width: 30,
-        height: 30,
-      }}
-    >
-      <b>{stepIdx + 1}</b>
-    </div>
-  );
-};
-
-const StepLabelAndIcon = ({
-  stepIdx,
-  stepLabel,
-  showPreStep,
-  currentStep,
-  stepsSize,
-  isMobile,
-}) => {
-  const stepClasses = isMobile ? [] : ['mb-4'];
-  let divider = null;
-  if (!stepLabel && stepIdx < stepsSize - 1) {
-    stepClasses.push('mr-2');
-    divider = (
-      <span
-        className="has-background-grey-light ml-2"
-        style={{
-          height: '1px',
-          width: 20,
-          position: 'relative',
-          top: 14,
-        }}
-      />
-    );
-  }
-  if (stepLabel) {
-    stepClasses.push('is-align-items-center');
-  }
-
-  if (!showPreStep && stepIdx === currentStep) {
-    return (
-      <div className={`is-flex ${stepClasses.join(' ')}`} key={stepIdx}>
-        <StepNumber stepIdx={stepIdx} status="active" />
-        {stepLabel ? <b className="ml-4">{stepLabel}</b> : divider}
-      </div>
-    );
-  } else if (!showPreStep && currentStep > stepIdx) {
-    return (
-      <div className={`is-flex ${stepClasses.join(' ')}`} key={stepIdx}>
-        <StepNumber stepIdx={stepIdx} status="done" />
-        {stepLabel ? <span className="ml-4">{stepLabel}</span> : divider}
-      </div>
-    );
-  } else {
-    return (
-      <div className={`is-flex ${stepClasses.join(' ')}`} key={stepIdx}>
-        <StepNumber stepIdx={stepIdx} status="pending" />
-        {stepLabel ? <span className="ml-4">{stepLabel}</span> : divider}
-      </div>
-    );
-  }
-};
-
-const BackButton = ({ isSubmitting, onClick }) => (
-  <div
-    className="is-flex is-align-items-center has-text-grey cursor-pointer"
-    onClick={!isSubmitting ? onClick : () => {}}
-  >
-    <Svg name="ArrowLeft" />
-    <span className="ml-4">Back</span>
-  </div>
-);
 
 export default function LeftPannel({
   currentStep,
@@ -118,15 +32,11 @@ export default function LeftPannel({
             {currentStep > 0 && <BackButton isSubmitting={isSubmitting} />}
           </div>
           <div className="is-flex">
-            {steps.map((step, i) => (
-              <StepLabelAndIcon
-                stepIdx={i}
-                stepsSize={steps.length}
-                showPreStep={showPreStep}
-                currentStep={currentStep}
-                isMobile
-              />
-            ))}
+            <div className="step-indicator-mobile rounded">
+              <span className="p-3 small-text">
+                {currentStep} / {steps.length}
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -151,9 +61,9 @@ export default function LeftPannel({
       <div>
         {steps.map((step, i) => (
           <StepLabelAndIcon
+            key={`step-and-icon-${i}`}
             stepIdx={i}
             stepLabel={step.label}
-            stepsSize={steps.length}
             showPreStep={showPreStep}
             currentStep={currentStep}
           />
