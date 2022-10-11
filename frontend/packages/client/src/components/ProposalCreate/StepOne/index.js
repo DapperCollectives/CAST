@@ -66,8 +66,16 @@ const StepOne = ({
   };
 
   const defaultValueStrategy = useWatch({ control, name: 'strategy' });
+  const communityName = useWatch({ control, name: 'name' });
 
   const { isDirty, isSubmitting, isValid, errors } = formState;
+
+  useEffect(() => {
+    if (communityName && communityName?.length < 128) {
+      onDataChange({ name: communityName });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [communityName]);
 
   useEffect(() => {
     setStepValid((isDirty || isValid) && !isSubmitting);

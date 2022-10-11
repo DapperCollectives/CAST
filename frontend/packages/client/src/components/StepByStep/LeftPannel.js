@@ -17,7 +17,7 @@ export default function LeftPannel({
   onSubmit,
   isStepValid,
   moveBackStep,
-  alignToTop,
+  name,
 }) {
   const notMobile = useMediaQuery();
 
@@ -45,13 +45,12 @@ export default function LeftPannel({
   }
   // desktop version
   return (
-    <div
-      className={`step-by-step has-background-white-ter pl-4 is-hidden-mobile is-flex is-flex-direction-column ${
-        alignToTop
-          ? 'is-justify-content-flex-start pt-6'
-          : 'is-justify-content-center'
-      }`}
-    >
+    <div className="step-by-step has-background-white-ter pl-4 is-hidden-mobile is-flex is-flex-direction-column is-justify-content-flex-start pt-6">
+      <div className="is-flex column p-0 is-12">
+        <span className="stepper-name is-flex-wrap-wrap is-size-3 has-text-weight-bold">
+          {name}
+        </span>
+      </div>
       <div className="mb-6" style={{ minHeight: 24 }}>
         {currentStep > 0 && (
           <BackButton isSubmitting={isSubmitting} onClick={moveBackStep} />

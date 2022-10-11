@@ -116,6 +116,7 @@ function StepByStep({
             isStepValid={isStepValid}
             moveBackStep={moveBackStep}
             alignToTop={alignStepsToTop}
+            name={stepsData?.[0]?.name ?? ''}
           />
 
           {/* right panel */}

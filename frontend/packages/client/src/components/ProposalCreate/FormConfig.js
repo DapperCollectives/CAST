@@ -8,7 +8,7 @@ const StepOneSchema = yup.object().shape({
     .string()
     .trim()
     .required('Please enter a proposal title')
-    .max(150, 'The maximum length for title is 128 characters'),
+    .max(128, 'The maximum length for title is 128 characters'),
   strategy: yup.string().required('Please select a strategy'),
   body: yup.string().required('Please enter a proposal description'),
   tabOption: yup.string().oneOf(['text-based', 'visual']),

@@ -8,13 +8,18 @@
 	min-width: 326px
 	position: fixed
 	min-height: 100%
+	.stepper-name
+		max-width: 220px
+		min-height: 200px
+		word-wrap: break-word
+		overflow: hidden
 @include desktop-only
 	.step-by-step-body
 		padding-left: calc(4rem + 280px)
 		padding-right: 1rem
 
 
-@include tablet-only
+	@include tablet-only
 	.step-by-step-body
 		padding-left: calc(1rem + 280px)
 		padding-right: 1rem
