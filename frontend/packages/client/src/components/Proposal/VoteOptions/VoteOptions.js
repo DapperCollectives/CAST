@@ -17,7 +17,6 @@ const VoteOptions = ({
   onConfirmVote,
   loggedIn,
   addr,
-  readOnly = false,
 }) => {
   const { diffFromNow: endDiff } = parseDateFromServer(proposal.endTime);
   const { diffFromNow: startDiff } = parseDateFromServer(proposal.startTime);
@@ -46,9 +45,9 @@ const VoteOptions = ({
 
   const canVote = isActive && (hasntVoted || !loggedIn);
 
-  const voteClasses = `vote-options border-light rounded mb-6 ${
-    !canVote && 'is-disabled'
-  } ${!hasntVoted && 'is-voted'}`;
+  const voteClasses = `vote-options border-light rounded mb-6${
+    !hasntVoted ? ' is-voted' : ''
+  }`;
 
   let previousVote = castVote;
   let currentOption = optionChosen;
@@ -61,6 +60,7 @@ const VoteOptions = ({
     previousVote = voteOption;
     currentOption = voteOption;
   }
+
   const { choices } = proposal;
 
   const isImageChoice = useMemo(
@@ -75,6 +75,14 @@ const VoteOptions = ({
     onConfirmVote();
   };
 
+  const userVoted = currentOption !== null && currentOption === previousVote;
+
+  const headerStatus = userVoted
+    ? 'user-voted'
+    : isClosed
+    ? 'is-closed'
+    : 'invite-to-vote';
+
   return (
     <div className={voteClasses}>
       <Wrapper
@@ -86,20 +94,16 @@ const VoteOptions = ({
         extraClasses="px-6 pt-6 pb-6"
         extraClassesMobile="px-4 pt-6 pb-6"
       >
-        <VoteHeader
-          isClosed={isClosed}
-          previousVote={previousVote}
-          currentOption={currentOption}
-        />
+        <VoteHeader status={headerStatus} />
       </Wrapper>
       {!isImageChoice && (
         <TextBasedOptions
           choices={choices}
           currentOption={currentOption}
-          previousVote={previousVote}
+          hideVoteButton={previousVote || isClosed}
           labelType={labelType}
-          onOptionSelect={readOnly ? () => {} : onOptionSelect}
-          readOnly={readOnly}
+          onOptionSelect={isClosed ? () => {} : onOptionSelect}
+          readOnly={isClosed || !canVote}
           onConfirmVote={onConfirmVote}
         />
       )}
@@ -108,8 +112,7 @@ const VoteOptions = ({
           choiceA={choiceA}
           choiceB={choiceB}
           currentOption={currentOption}
-          previousVote={previousVote}
-          readOnly={readOnly}
+          readOnly={isClosed || !canVote}
           confirmAndVote={confirmAndVoteImage}
         />
       )}

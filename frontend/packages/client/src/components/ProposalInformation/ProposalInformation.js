@@ -146,6 +146,7 @@ const ProposalInformation = ({
             proposalChoices={proposalChoices}
             results={votingResults?.results}
             endTime={endTime}
+            startTime={startTime}
             computedStatus={computedStatus}
           />
         </div>

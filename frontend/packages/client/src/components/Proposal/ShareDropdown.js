@@ -24,6 +24,9 @@ export default function ShareDropdown({
     'button rounded-lg is-flex has-text-weight-bold has-background-white px-4 ml-4',
     { 'small-text': isMobile }
   );
+
+  const proposalUrl = `${FRONTEND_URL}/#/community/${communityId}/proposal/${proposalId}`;
+
   return (
     <div className={`dropdown ${dropdownStatus} is-right`}>
       <div className="dropdown-trigger">
@@ -42,10 +45,7 @@ export default function ShareDropdown({
         ref={dropdownRef}
       >
         <div className="dropdown-content rounded">
-          <CopyToClipboard
-            text={`${FRONTEND_URL}/community/${communityId}/proposal/${proposalId}`}
-            onCopy={closeDropDown}
-          >
+          <CopyToClipboard text={proposalUrl} onCopy={closeDropDown}>
             <div
               className="columns p-0 m-0 is-mobile button is-white "
               style={{ minHeight: '48px' }}
@@ -69,7 +69,11 @@ export default function ShareDropdown({
             <div className="column is-flex is-align-items-center">
               <a
                 className="twitter-share-button has-text-weight-bold has-text-black"
-                href={`https://twitter.com/intent/tweet?text=${`${FRONTEND_URL}/community/${communityId}/proposal/${proposalId}`}`}
+                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
+                  proposalUrl
+                )}`}
+                target="_blank"
+                rel="noreferrer noopenner"
               >
                 Tweet
               </a>

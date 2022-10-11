@@ -26,7 +26,7 @@ export default function BrowseCommunities() {
     location: { search: routerSearch },
   } = history;
 
-  const { search, filters: filtersUrl } = useQueryParams({
+  const { text: search, filters: filtersUrl } = useQueryParams({
     text: 'text',
     filters: 'filters',
   });
