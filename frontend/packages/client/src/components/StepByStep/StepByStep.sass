@@ -3,17 +3,26 @@
 	padding-top: 3rem
 	padding-right: 8rem
 	min-height: calc(100vh - 85px)
-
+.step-by-step	
+	padding-right: 5rem
+	min-width: 326px
+	position: fixed
+	min-height: 100%
 @include desktop-only
 	.step-by-step-body
 		padding-left: calc(4rem + 280px)
-		padding-right: 0
+		padding-right: 1rem
+
 
 @include tablet-only
 	.step-by-step-body
 		padding-left: calc(1rem + 280px)
 		padding-right: 1rem
-
+	.step-by-step	
+		padding-right: 1rem
+		min-width: 280px
+		position: fixed
+		min-height: 100%
 @include mobile
 	.step-by-step-body
 		padding-top: calc(3rem + 30px)

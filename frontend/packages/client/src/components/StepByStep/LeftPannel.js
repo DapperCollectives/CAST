@@ -46,13 +46,7 @@ export default function LeftPannel({
   // desktop version
   return (
     <div
-      style={{
-        paddingRight: '5rem',
-        minWidth: 326,
-        position: 'fixed',
-        minHeight: '100%',
-      }}
-      className={`has-background-white-ter pl-4 is-hidden-mobile is-flex is-flex-direction-column ${
+      className={`step-by-step has-background-white-ter pl-4 is-hidden-mobile is-flex is-flex-direction-column ${
         alignToTop
           ? 'is-justify-content-flex-start pt-6'
           : 'is-justify-content-center'
