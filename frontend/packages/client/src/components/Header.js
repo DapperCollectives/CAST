@@ -17,7 +17,7 @@ function Header(props) {
   };
 
   const classNamesLinks =
-    'navbar-item p-0 mr-6-desktop mr-5-tablet is-hidden-mobile';
+    'navbar-item p-0 mr-6-desktop mr-4-tablet is-hidden-mobile';
 
   return (
     <>
@@ -60,7 +60,7 @@ function Header(props) {
                     pathname: '/about',
                     state: { modal: true },
                   }}
-                  className={classNamesLinks}
+                  className={`${classNamesLinks} ml-4-tablet`}
                 >
                   <span className="navbar-item-hover transition-all has-text-weight-bold has-text-black">
                     About Us
