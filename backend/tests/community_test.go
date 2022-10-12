@@ -409,7 +409,7 @@ func TestSearchForCommunities(t *testing.T) {
 		var p test_utils.PaginatedResponseSearch
 		json.Unmarshal(response.Body.Bytes(), &p)
 
-		assert.Equal(t, p.Results.TotalRecords, p.Filters[len(p.Filters)-1].Amount)
+		assert.Equal(t, p.Results.TotalRecords, p.Filters[len(p.Filters)-1].Amount) // All
 	})
 
 }
