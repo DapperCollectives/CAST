@@ -326,7 +326,7 @@ func (a *App) getUserProposals(w http.ResponseWriter, r *http.Request) {
 
 	pageParams := getPageParams(*r, 25)
 
-	communities, totalRecords, err := models.GetCommunitiesForUser(a.DB, addr, pageParams)
+	communities, totalRecords, err := models.GetCommunityProposalsForUser(a.DB, addr, pageParams)
 	if err != nil {
 		log.Error().Err(err).Msg("Error getting user proposals.")
 		respondWithError(w, errIncompleteRequest)
