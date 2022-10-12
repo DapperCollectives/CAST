@@ -1,3 +1,5 @@
+import { Fragment } from 'react';
+import { HomeFooter } from 'components';
 import {
   BackButton,
   ConnectWalletPrompt,
@@ -12,22 +14,25 @@ export default function Settings() {
   const notMobile = useMediaQuery();
 
   return (
-    <div className="columns">
-      <div
-        className={`column is-one-third ${
-          notMobile ? 'p-6' : 'px-5 pt-5 pb-3'
-        }`}
-      >
-        <BackButton notMobile={notMobile} />
-      </div>
-      {walletId ? (
-        <div className="column is-two-fifths">
-          <SettingsSection />
-          <NotificationSettingsSection />
+    <Fragment>
+      <div className="columns">
+        <div
+          className={`column is-one-third ${
+            notMobile ? 'p-6' : 'px-5 pt-5 pb-3'
+          }`}
+        >
+          <BackButton notMobile={notMobile} />
         </div>
-      ) : (
-        <ConnectWalletPrompt />
-      )}
-    </div>
+        {walletId ? (
+          <div className="column is-two-fifths">
+            <SettingsSection />
+            <NotificationSettingsSection />
+          </div>
+        ) : (
+          <ConnectWalletPrompt />
+        )}
+      </div>
+      <HomeFooter />
+    </Fragment>
   );
 }
