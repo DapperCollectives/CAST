@@ -1,4 +1,3 @@
-import { Fragment } from 'react';
 import {
   BackButton,
   ConnectWalletPrompt,
@@ -14,12 +13,18 @@ export default function Settings() {
 
   return (
     <div className="columns">
-      <BackButton notMobile={notMobile} />
+      <div
+        className={`column is-one-third ${
+          notMobile ? 'p-6' : 'px-5 pt-5 pb-3'
+        }`}
+      >
+        <BackButton notMobile={notMobile} />
+      </div>
       {walletId ? (
-        <Fragment>
+        <div className="column is-two-fifths">
           <SettingsSection />
           <NotificationSettingsSection />
-        </Fragment>
+        </div>
       ) : (
         <ConnectWalletPrompt />
       )}
