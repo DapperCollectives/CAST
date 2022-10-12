@@ -14,10 +14,10 @@ import (
 )
 
 type errorResponse struct {
-	StatusCode int		`json:"statusCode,string"`
-	ErrorCode  string	`json:"errorCode"`
-	Message    string	`json:"message"`
-	Details    string	`json:"details"`
+	StatusCode int    `json:"statusCode,string"`
+	ErrorCode  string `json:"errorCode"`
+	Message    string `json:"message"`
+	Details    string `json:"details"`
 }
 
 var (
@@ -317,6 +317,25 @@ func (a *App) getProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondWithJSON(w, http.StatusOK, p)
+}
+
+func (a *App) getUserProposals(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	addr := vars["addr"]
+
+	pageParams := getPageParams(*r, 25)
+
+	proposals, totalRecords, err := models.GetUserProposals(a.DB, addr, pageParams)
+	if err != nil {
+		log.Error().Err(err).Msg("Error getting user proposals.")
+		respondWithError(w, errIncompleteRequest)
+		return
+	}
+
+	pageParams.TotalRecords = totalRecords
+
+	response := shared.GetPaginatedResponseWithPayload(proposals, pageParams)
+	respondWithJSON(w, http.StatusOK, response)
 }
 
 func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
@@ -1019,9 +1038,9 @@ func (a *App) removeUserRole(w http.ResponseWriter, r *http.Request) {
 func respondWithError(w http.ResponseWriter, err errorResponse) {
 	respondWithJSON(w, err.StatusCode, map[string]string{
 		"statusCode": strconv.Itoa(err.StatusCode),
-		"errorCode": err.ErrorCode,
-		"message":   err.Message,
-		"details":   err.Details,
+		"errorCode":  err.ErrorCode,
+		"message":    err.Message,
+		"details":    err.Details,
 	})
 }
 

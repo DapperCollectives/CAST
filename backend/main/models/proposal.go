@@ -23,8 +23,8 @@ type Proposal struct {
 	Community_id         int                     `json:"communityId"`
 	Choices              []s.Choice              `json:"choices" validate:"required"`
 	Strategy             *string                 `json:"strategy,omitempty"`
-	Max_weight           *float64                 `json:"maxWeight,omitempty"`
-	Min_balance          *float64                 `json:"minBalance,omitempty"`
+	Max_weight           *float64                `json:"maxWeight,omitempty"`
+	Min_balance          *float64                `json:"minBalance,omitempty"`
 	Creator_addr         string                  `json:"creatorAddr" validate:"required"`
 	Start_time           time.Time               `json:"startTime" validate:"required"`
 	Result               *string                 `json:"result,omitempty"`
@@ -40,7 +40,7 @@ type Proposal struct {
 	Computed_status      *string                 `json:"computedStatus,omitempty"`
 	Snapshot_status      *string                 `json:"snapshotStatus,omitempty"`
 	Voucher              *shared.Voucher         `json:"voucher,omitempty"`
-	Achievements_done	 bool					 `json:"achievementsDone"`
+	Achievements_done    bool                    `json:"achievementsDone"`
 }
 
 type UpdateProposalRequestPayload struct {
@@ -120,6 +120,13 @@ func (p *Proposal) GetProposalById(db *s.Database) error {
 	GROUP BY p.id`
 	sql = fmt.Sprintf(sql, computedStatusSQL)
 	return pgxscan.Get(db.Context, db.Conn, p, sql, p.ID)
+}
+
+func (p *Proposal) GetUserProposals(db *s.Database, addr string) ([]*Proposal, error) {
+	var proposals []*Proposal
+	sql := fmt.Sprintf(`SELECT *, %s FROM proposals WHERE creator_addr = $1`, computedStatusSQL)
+	err := pgxscan.Select(db.Context, db.Conn, &proposals, sql, addr)
+	return proposals, err
 }
 
 func (p *Proposal) CreateProposal(db *s.Database) error {

@@ -226,11 +226,11 @@ func TestSearchForCommunities(t *testing.T) {
 		var p test_utils.PaginatedResponseSearch
 		json.Unmarshal(response.Body.Bytes(), &p)
 
-		assert.Equal(t, 2, p.Filters[0].Amount)	// Dao
-		assert.Equal(t, 2, p.Filters[1].Amount)	// Social
-		assert.Equal(t, 1, p.Filters[2].Amount)	// Protocol
-		assert.Equal(t, 5, p.Filters[len(p.Filters) - 1].Amount) // All
-		assert.Equal(t, 5, len(p.Results.Data)) // Featured Communities
+		assert.Equal(t, 2, p.Filters[0].Amount)                // Dao
+		assert.Equal(t, 2, p.Filters[1].Amount)                // Social
+		assert.Equal(t, 1, p.Filters[2].Amount)                // Protocol
+		assert.Equal(t, 5, p.Filters[len(p.Filters)-1].Amount) // All
+		assert.Equal(t, 5, len(p.Results.Data))                // Featured Communities
 	})
 
 	t.Run("Default Search with filter", func(t *testing.T) {
@@ -241,11 +241,11 @@ func TestSearchForCommunities(t *testing.T) {
 		var p1 test_utils.PaginatedResponseSearch
 		json.Unmarshal(response.Body.Bytes(), &p1)
 
-		assert.Equal(t, 2, p1.Filters[0].Amount)	// Dao
-		assert.Equal(t, 2, p1.Filters[1].Amount)	// Social
-		assert.Equal(t, 1, p1.Filters[2].Amount)	// Protocol
-		assert.Equal(t, 5, p1.Filters[len(p1.Filters) - 1].Amount) // All
-		assert.Equal(t, 2, len(p1.Results.Data)) // Filtered by "social"
+		assert.Equal(t, 2, p1.Filters[0].Amount)                 // Dao
+		assert.Equal(t, 2, p1.Filters[1].Amount)                 // Social
+		assert.Equal(t, 1, p1.Filters[2].Amount)                 // Protocol
+		assert.Equal(t, 5, p1.Filters[len(p1.Filters)-1].Amount) // All
+		assert.Equal(t, 2, len(p1.Results.Data))                 // Filtered by "social"
 
 		response = otu.GetSearchCommunitiesAPI([]string{"social,dao"}, "", nil)
 
@@ -254,11 +254,11 @@ func TestSearchForCommunities(t *testing.T) {
 		var p2 test_utils.PaginatedResponseSearch
 		json.Unmarshal(response.Body.Bytes(), &p2)
 
-		assert.Equal(t, 2, p2.Filters[0].Amount)	// Dao
-		assert.Equal(t, 2, p2.Filters[1].Amount)	// Social
-		assert.Equal(t, 1, p2.Filters[2].Amount)	// Protocol
-		assert.Equal(t, 5, p2.Filters[len(p2.Filters) - 1].Amount) // All
-		assert.Equal(t, 4, len(p2.Results.Data)) // Filtered by "social" and "dao"
+		assert.Equal(t, 2, p2.Filters[0].Amount)                 // Dao
+		assert.Equal(t, 2, p2.Filters[1].Amount)                 // Social
+		assert.Equal(t, 1, p2.Filters[2].Amount)                 // Protocol
+		assert.Equal(t, 5, p2.Filters[len(p2.Filters)-1].Amount) // All
+		assert.Equal(t, 4, len(p2.Results.Data))                 // Filtered by "social" and "dao"
 	})
 
 	t.Run("Limit Default Search", func(t *testing.T) {
@@ -270,11 +270,11 @@ func TestSearchForCommunities(t *testing.T) {
 		var p test_utils.PaginatedResponseSearch
 		json.Unmarshal(response.Body.Bytes(), &p)
 
-		assert.Equal(t, 2, p.Filters[0].Amount)	// Dao
-		assert.Equal(t, 2, p.Filters[1].Amount)	// Social
-		assert.Equal(t, 1, p.Filters[2].Amount)	// Protocol
-		assert.Equal(t, 5, p.Filters[len(p.Filters) - 1].Amount) // All
-		assert.Equal(t, limit, len(p.Results.Data)) // Featured Communities limited
+		assert.Equal(t, 2, p.Filters[0].Amount)                // Dao
+		assert.Equal(t, 2, p.Filters[1].Amount)                // Social
+		assert.Equal(t, 1, p.Filters[2].Amount)                // Protocol
+		assert.Equal(t, 5, p.Filters[len(p.Filters)-1].Amount) // All
+		assert.Equal(t, limit, len(p.Results.Data))            // Featured Communities limited
 	})
 
 	t.Run("Limit Default Search with filter", func(t *testing.T) {
@@ -286,11 +286,11 @@ func TestSearchForCommunities(t *testing.T) {
 		var p test_utils.PaginatedResponseSearch
 		json.Unmarshal(response.Body.Bytes(), &p)
 
-		assert.Equal(t, 2, p.Filters[0].Amount)	// Dao
-		assert.Equal(t, 2, p.Filters[1].Amount)	// Social
-		assert.Equal(t, 1, p.Filters[2].Amount)	// Protocol
-		assert.Equal(t, 5, p.Filters[len(p.Filters) - 1].Amount) // All
-		assert.Equal(t, limit, len(p.Results.Data)) // Filtered and limited
+		assert.Equal(t, 2, p.Filters[0].Amount)                // Dao
+		assert.Equal(t, 2, p.Filters[1].Amount)                // Social
+		assert.Equal(t, 1, p.Filters[2].Amount)                // Protocol
+		assert.Equal(t, 5, p.Filters[len(p.Filters)-1].Amount) // All
+		assert.Equal(t, limit, len(p.Results.Data))            // Filtered and limited
 	})
 
 	t.Run("Search with text", func(t *testing.T) {
@@ -301,11 +301,11 @@ func TestSearchForCommunities(t *testing.T) {
 		var p test_utils.PaginatedResponseSearch
 		json.Unmarshal(response.Body.Bytes(), &p)
 
-		assert.Equal(t, 5, p.Filters[0].Amount)	// Dao
-		assert.Equal(t, 3, p.Filters[1].Amount)	// Social
-		assert.Equal(t, 2, p.Filters[2].Amount)	// Protocol
-		assert.Equal(t, 10, p.Filters[len(p.Filters) - 1].Amount) // All
-		assert.Equal(t, 10, len(p.Results.Data)) // text = "test"
+		assert.Equal(t, 5, p.Filters[0].Amount)                 // Dao
+		assert.Equal(t, 3, p.Filters[1].Amount)                 // Social
+		assert.Equal(t, 2, p.Filters[2].Amount)                 // Protocol
+		assert.Equal(t, 10, p.Filters[len(p.Filters)-1].Amount) // All
+		assert.Equal(t, 10, len(p.Results.Data))                // text = "test"
 	})
 
 	t.Run("Search with text no results", func(t *testing.T) {
@@ -316,11 +316,11 @@ func TestSearchForCommunities(t *testing.T) {
 		var p test_utils.PaginatedResponseSearch
 		json.Unmarshal(response.Body.Bytes(), &p)
 
-		assert.Equal(t, 0, p.Filters[0].Amount)	// Dao
-		assert.Equal(t, 0, p.Filters[1].Amount)	// Social
-		assert.Equal(t, 0, p.Filters[2].Amount)	// Protocol
-		assert.Equal(t, 0, p.Filters[len(p.Filters) - 1].Amount) // All
-		assert.Equal(t, 0, len(p.Results.Data)) // text = "abc"
+		assert.Equal(t, 0, p.Filters[0].Amount)                // Dao
+		assert.Equal(t, 0, p.Filters[1].Amount)                // Social
+		assert.Equal(t, 0, p.Filters[2].Amount)                // Protocol
+		assert.Equal(t, 0, p.Filters[len(p.Filters)-1].Amount) // All
+		assert.Equal(t, 0, len(p.Results.Data))                // text = "abc"
 	})
 
 	t.Run("Search with text and filter", func(t *testing.T) {
@@ -331,11 +331,11 @@ func TestSearchForCommunities(t *testing.T) {
 		var p test_utils.PaginatedResponseSearch
 		json.Unmarshal(response.Body.Bytes(), &p)
 
-		assert.Equal(t, 5, p.Filters[0].Amount)	// Dao
-		assert.Equal(t, 3, p.Filters[1].Amount)	// Social
-		assert.Equal(t, 2, p.Filters[2].Amount)	// Protocol
-		assert.Equal(t, 10, p.Filters[len(p.Filters) - 1].Amount) // All
-		assert.Equal(t, 5, len(p.Results.Data)) // text = "test"
+		assert.Equal(t, 5, p.Filters[0].Amount)                 // Dao
+		assert.Equal(t, 3, p.Filters[1].Amount)                 // Social
+		assert.Equal(t, 2, p.Filters[2].Amount)                 // Protocol
+		assert.Equal(t, 10, p.Filters[len(p.Filters)-1].Amount) // All
+		assert.Equal(t, 5, len(p.Results.Data))                 // text = "test"
 	})
 
 	t.Run("Search with text and multiple filters", func(t *testing.T) {
@@ -346,11 +346,11 @@ func TestSearchForCommunities(t *testing.T) {
 		var p test_utils.PaginatedResponseSearch
 		json.Unmarshal(response.Body.Bytes(), &p)
 
-		assert.Equal(t, 5, p.Filters[0].Amount)	// Dao
-		assert.Equal(t, 3, p.Filters[1].Amount)	// Social
-		assert.Equal(t, 2, p.Filters[2].Amount)	// Protocol
-		assert.Equal(t, 10, p.Filters[len(p.Filters) - 1].Amount) // All
-		assert.Equal(t, 8, len(p.Results.Data)) // text = "test"
+		assert.Equal(t, 5, p.Filters[0].Amount)                 // Dao
+		assert.Equal(t, 3, p.Filters[1].Amount)                 // Social
+		assert.Equal(t, 2, p.Filters[2].Amount)                 // Protocol
+		assert.Equal(t, 10, p.Filters[len(p.Filters)-1].Amount) // All
+		assert.Equal(t, 8, len(p.Results.Data))                 // text = "test"
 	})
 
 	t.Run("Limit Search with text", func(t *testing.T) {
@@ -362,11 +362,11 @@ func TestSearchForCommunities(t *testing.T) {
 		var p test_utils.PaginatedResponseSearch
 		json.Unmarshal(response.Body.Bytes(), &p)
 
-		assert.Equal(t, 5, p.Filters[0].Amount)	// Dao
-		assert.Equal(t, 3, p.Filters[1].Amount)	// Social
-		assert.Equal(t, 2, p.Filters[2].Amount)	// Protocol
-		assert.Equal(t, 10, p.Filters[len(p.Filters) - 1].Amount) // All
-		assert.Equal(t, limit, len(p.Results.Data)) // limited to 5
+		assert.Equal(t, 5, p.Filters[0].Amount)                 // Dao
+		assert.Equal(t, 3, p.Filters[1].Amount)                 // Social
+		assert.Equal(t, 2, p.Filters[2].Amount)                 // Protocol
+		assert.Equal(t, 10, p.Filters[len(p.Filters)-1].Amount) // All
+		assert.Equal(t, limit, len(p.Results.Data))             // limited to 5
 	})
 
 	t.Run("Limit Search with text and filter", func(t *testing.T) {
@@ -378,11 +378,11 @@ func TestSearchForCommunities(t *testing.T) {
 		var p test_utils.PaginatedResponseSearch
 		json.Unmarshal(response.Body.Bytes(), &p)
 
-		assert.Equal(t, 5, p.Filters[0].Amount)	// Dao
-		assert.Equal(t, 3, p.Filters[1].Amount)	// Social
-		assert.Equal(t, 2, p.Filters[2].Amount)	// Protocol
-		assert.Equal(t, 10, p.Filters[len(p.Filters) - 1].Amount) // All
-		assert.Equal(t, limit, len(p.Results.Data)) // limited to 3
+		assert.Equal(t, 5, p.Filters[0].Amount)                 // Dao
+		assert.Equal(t, 3, p.Filters[1].Amount)                 // Social
+		assert.Equal(t, 2, p.Filters[2].Amount)                 // Protocol
+		assert.Equal(t, 10, p.Filters[len(p.Filters)-1].Amount) // All
+		assert.Equal(t, limit, len(p.Results.Data))             // limited to 3
 	})
 
 	t.Run("Search Pagination", func(t *testing.T) {
@@ -394,11 +394,11 @@ func TestSearchForCommunities(t *testing.T) {
 		var p test_utils.PaginatedResponseSearch
 		json.Unmarshal(response.Body.Bytes(), &p)
 
-		assert.Equal(t, 5, p.Filters[0].Amount)	// Dao
-		assert.Equal(t, 3, p.Filters[1].Amount)	// Social
-		assert.Equal(t, 2, p.Filters[2].Amount)	// Protocol
-		assert.Equal(t, 10, p.Filters[len(p.Filters) - 1].Amount) // All
-		assert.Equal(t, limit, len(p.Results.Data)) // limited to 3
+		assert.Equal(t, 5, p.Filters[0].Amount)                 // Dao
+		assert.Equal(t, 3, p.Filters[1].Amount)                 // Social
+		assert.Equal(t, 2, p.Filters[2].Amount)                 // Protocol
+		assert.Equal(t, 10, p.Filters[len(p.Filters)-1].Amount) // All
+		assert.Equal(t, limit, len(p.Results.Data))             // limited to 3
 	})
 }
 
