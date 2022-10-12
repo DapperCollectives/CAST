@@ -420,6 +420,7 @@ export default function ProposalPage() {
                       computedStatus={proposal.computedStatus}
                       communityId={proposal.communityId}
                       openStrategyModal={openStrategyModal}
+                      proposalStrategy={proposal.strategy}
                     />
                   </div>
                 )}
