@@ -254,7 +254,6 @@ func GetDefaultCommunities(db *s.Database, params shared.PageParams, filters []s
 
 	var totalRecords int
 	countSql := `SELECT COUNT(*) FROM communities`
-	db.Conn.QueryRow(db.Context, countSql).Scan(&totalRecords)
 
 	if !isSearch {
 		sql = HOMEPAGE_SQL
@@ -278,6 +277,7 @@ func GetDefaultCommunities(db *s.Database, params shared.PageParams, filters []s
 			return []*Community{}, 0, nil
 		}
 
+		db.Conn.QueryRow(db.Context, countSql).Scan(&totalRecords)
 		return communities, totalRecords, nil
 	} else {
 		sql, err := addFiltersToSql(DEFAULT_SEARCH_SQL, "", filters)
@@ -302,7 +302,7 @@ func GetDefaultCommunities(db *s.Database, params shared.PageParams, filters []s
 			return nil, 0, err
 		}
 
-		totalRecords = len(communities)
+		db.Conn.QueryRow(db.Context, countSql).Scan(&totalRecords)
 		return communities, totalRecords, nil
 	}
 }
@@ -417,7 +417,9 @@ func SearchForCommunity(
 		return []*Community{}, 0, fmt.Errorf("error scanning search results for the query %s", query)
 	}
 
-	totalRecords := len(communities)
+	var totalRecords int
+	countSql := `SELECT COUNT(*) FROM communities`
+	db.Conn.QueryRow(db.Context, countSql).Scan(&totalRecords)
 	return communities, totalRecords, nil
 }
 

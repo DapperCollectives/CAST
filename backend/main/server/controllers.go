@@ -14,10 +14,10 @@ import (
 )
 
 type errorResponse struct {
-	StatusCode int		`json:"statusCode,string"`
-	ErrorCode  string	`json:"errorCode"`
-	Message    string	`json:"message"`
-	Details    string	`json:"details"`
+	StatusCode int    `json:"statusCode,string"`
+	ErrorCode  string `json:"errorCode"`
+	Message    string `json:"message"`
+	Details    string `json:"details"`
 }
 
 var (
@@ -434,7 +434,7 @@ func (a *App) searchCommunities(w http.ResponseWriter, r *http.Request) {
 	filters := r.FormValue("filters")
 	searchText := r.FormValue("text")
 
-	results, categories, totalRecords, err := helpers.searchCommunities(
+	results, categories, err := helpers.searchCommunities(
 		searchText,
 		filters,
 		pageParams,
@@ -443,7 +443,7 @@ func (a *App) searchCommunities(w http.ResponseWriter, r *http.Request) {
 		log.Error().Err(err).Msg("Error searching communities")
 		respondWithError(w, errIncompleteRequest)
 	}
-	pageParams.TotalRecords = totalRecords
+
 	paginatedResults := shared.GetPaginatedResponseWithPayload(results, pageParams)
 	response, err := helpers.appendFiltersToResponse(paginatedResults, categories)
 	if err != nil {
@@ -1018,9 +1018,9 @@ func (a *App) removeUserRole(w http.ResponseWriter, r *http.Request) {
 func respondWithError(w http.ResponseWriter, err errorResponse) {
 	respondWithJSON(w, err.StatusCode, map[string]string{
 		"statusCode": strconv.Itoa(err.StatusCode),
-		"errorCode": err.ErrorCode,
-		"message":   err.Message,
-		"details":   err.Details,
+		"errorCode":  err.ErrorCode,
+		"message":    err.Message,
+		"details":    err.Details,
 	})
 }
 
