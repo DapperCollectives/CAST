@@ -8,13 +8,16 @@
 	position: fixed
 	min-height: 100%
 	.stepper-name
-		max-width: 290px
+		max-width: 300px
 		min-height: 200px
 		word-wrap: break-word
 		display: -webkit-box
 		-webkit-box-orient: vertical
 		-webkit-line-clamp: 4
 		overflow: hidden
+	@media (max-width: 1300px)	
+		.stepper-name
+			max-width: 250px
 @media (max-width: 1300px)	
 	.step-by-step
 		padding-left: 1rem
@@ -23,6 +26,9 @@
 	.steps
 		padding-left: 1.5rem
 		padding-right: 3.4rem !important
+	.stepper-name
+		max-width: 250px
+		padding-left: 1.5rem	
 @include desktop-only
 	.step-by-step-body
 		padding-left: calc(4rem + 280px)
