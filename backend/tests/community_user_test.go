@@ -165,11 +165,19 @@ func TestGetUserProposals(t *testing.T) {
 	communityArgs := []map[string]string{argsOne, argsTwo, argsThree}
 
 	for _, args := range communityArgs {
+		communityID := 1
 		communityStruct := otu.GenerateCommunityStruct(args["user"], args["type"])
 		communityPayload := otu.GenerateCommunityPayload(args["user"], communityStruct)
 
 		response := otu.CreateCommunityAPI(communityPayload)
 		checkResponseCode(t, http.StatusCreated, response.Code)
+
+		proposal := otu.GenerateProposalStruct("account", communityID)
+		proposalPayload := otu.GenerateProposalPayload("account", proposal)
+
+		response = otu.CreateProposalAPI(proposalPayload)
+		checkResponseCode(t, http.StatusCreated, response.Code)
+		communityID += 1
 	}
 
 	response := otu.GetCommunityUserProposalsAPI(utils.AdminAddr) //Get proposals for user
