@@ -15,13 +15,19 @@
 		-webkit-box-orient: vertical
 		-webkit-line-clamp: 4
 		overflow: hidden
+@media (max-width: 1300px)	
+	.step-by-step
+		padding-left: 1rem
+
+@media (max-width: 1250px) and (min-width: 1022px)
+	.steps
+		padding-left: 1.5rem
+		padding-right: 3.4rem !important
 @include desktop-only
 	.step-by-step-body
 		padding-left: calc(4rem + 280px)
 		padding-right: 1rem
-
-
-	@include tablet-only
+@include tablet-only
 	.step-by-step-body
 		padding-left: calc(1rem + 280px)
 		padding-right: 1rem

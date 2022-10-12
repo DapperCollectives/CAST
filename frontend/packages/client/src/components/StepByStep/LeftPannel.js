@@ -21,6 +21,7 @@ export default function LeftPannel({
 }) {
   const notMobile = useMediaQuery();
 
+  const classNamesWrapper = 'pr-8 pr-1-tablet-only steps';
   // mobile version
   if (!notMobile) {
     return (
@@ -45,7 +46,7 @@ export default function LeftPannel({
   }
   // desktop version
   return (
-    <div className="step-by-step has-background-white-ter pl-4 is-hidden-mobile is-flex is-flex-direction-column is-justify-content-flex-start pt-6">
+    <div className="step-by-step has-background-white-ter is-hidden-mobile is-flex is-flex-direction-column is-justify-content-flex-start pt-6">
       <div className="is-flex column p-0 is-12">
         <span className="stepper-name is-flex-wrap-wrap is-size-3 has-text-weight-bold">
           {name}
@@ -56,7 +57,7 @@ export default function LeftPannel({
           <BackButton isSubmitting={isSubmitting} onClick={moveBackStep} />
         )}
       </div>
-      <div className="pr-7">
+      <div className={classNamesWrapper}>
         {steps.map((step, i) => (
           <StepLabelAndIcon
             key={`step-and-icon-${i}`}
@@ -68,7 +69,7 @@ export default function LeftPannel({
         ))}
       </div>
       {currentStep < steps.length - 1 && showNextButton && (
-        <div className="pr-7">
+        <div className={classNamesWrapper}>
           <NextButton
             formId={formId}
             moveToNextStep={moveToNextStep}
@@ -77,7 +78,7 @@ export default function LeftPannel({
         </div>
       )}
       {currentStep === steps.length - 1 && showSubmitButton && (
-        <div className="pr-7">
+        <div className={classNamesWrapper}>
           <SubmitButton
             formId={formId}
             disabled={!isStepValid}
