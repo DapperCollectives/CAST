@@ -184,8 +184,8 @@ func GetCommunitiesForUser(db *s.Database, addr string, pageParams shared.PagePa
 	return mergedCommunities, totalCommunities, nil
 }
 
-func GetCommunityProposalsForUser(db *s.Database, addr string, pageParams shared.PageParams) ([]Proposal, int, error) {
-	var proposals = []Proposal{}
+func GetCommunityProposalsForUser(db *s.Database, addr string, pageParams shared.PageParams) ([]interface{}, int, error) {
+	var proposals []interface{}
 
 	err := pgxscan.Select(db.Context, db.Conn, &proposals,
 		`
@@ -205,7 +205,7 @@ func GetCommunityProposalsForUser(db *s.Database, addr string, pageParams shared
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		return nil, 0, err
 	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
-		return []Proposal{}, 0, nil
+		return proposals, 0, nil
 	}
 
 	fmt.Printf("proposals: %v", proposals)
