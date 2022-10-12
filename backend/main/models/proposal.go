@@ -122,13 +122,6 @@ func (p *Proposal) GetProposalById(db *s.Database) error {
 	return pgxscan.Get(db.Context, db.Conn, p, sql, p.ID)
 }
 
-func (p *Proposal) GetUserProposals(db *s.Database, addr string) ([]*Proposal, error) {
-	var proposals []*Proposal
-	sql := fmt.Sprintf(`SELECT *, %s FROM proposals WHERE creator_addr = $1`, computedStatusSQL)
-	err := pgxscan.Select(db.Context, db.Conn, &proposals, sql, addr)
-	return proposals, err
-}
-
 func (p *Proposal) CreateProposal(db *s.Database) error {
 	err := db.Conn.QueryRow(db.Context,
 		`

@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -325,16 +326,18 @@ func (a *App) getUserProposals(w http.ResponseWriter, r *http.Request) {
 
 	pageParams := getPageParams(*r, 25)
 
-	proposals, totalRecords, err := models.GetUserProposals(a.DB, addr, pageParams)
+	communities, totalRecords, err := models.GetCommunitiesForUser(a.DB, addr, pageParams)
 	if err != nil {
 		log.Error().Err(err).Msg("Error getting user proposals.")
 		respondWithError(w, errIncompleteRequest)
 		return
 	}
 
+	fmt.Printf("communities: %v", communities)
+
 	pageParams.TotalRecords = totalRecords
 
-	response := shared.GetPaginatedResponseWithPayload(proposals, pageParams)
+	response := shared.GetPaginatedResponseWithPayload(communities, pageParams)
 	respondWithJSON(w, http.StatusOK, response)
 }
 
