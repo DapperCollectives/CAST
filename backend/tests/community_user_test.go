@@ -171,6 +171,9 @@ func TestGetUserProposals(t *testing.T) {
 		response := otu.CreateCommunityAPI(communityPayload)
 		checkResponseCode(t, http.StatusCreated, response.Code)
 	}
+
+	response := otu.GetCommunityUserProposalsAPI(utils.AdminAddr) //Get proposals for user
+	checkResponseCode(t, http.StatusOK, response.Code)
 }
 
 func TestDeleteUserFromCommunity(t *testing.T) {
