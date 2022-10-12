@@ -75,7 +75,7 @@ export default function ProposalPage() {
     proposal: true,
     summary: false,
   });
-  const [isCollaped, setIsCollaped] = useState(true);
+  const [isCollapsed, setIsCollapsed] = useState(true);
   const descriptionRef = useRef();
   const [isStrategyModalOpen, setIsStrategyModalOpen] = useState(false);
 
@@ -116,7 +116,7 @@ export default function ProposalPage() {
   useEffect(() => {
     const { current } = descriptionRef;
     if (current?.clientHeight < 300) {
-      setIsCollaped(false);
+      setIsCollapsed(false);
     }
   }, [descriptionRef, htmlBody]);
 
@@ -138,7 +138,7 @@ export default function ProposalPage() {
   const proposalStrategy =
     votingStrategies && !loadingStrategies && proposal && !loading
       ? votingStrategies.find(
-          (votStrategy) => votStrategy.key === proposal.strategy
+          (voteStrategy) => voteStrategy.key === proposal.strategy
         ) || {
           // fallback if no match
           description: proposal.strategy,
@@ -420,6 +420,8 @@ export default function ProposalPage() {
                       computedStatus={proposal.computedStatus}
                       communityId={proposal.communityId}
                       openStrategyModal={openStrategyModal}
+                      proposalStrategy={proposalStrategy}
+                      votingStrategies={votingStrategies}
                     />
                   </div>
                 )}
@@ -463,21 +465,21 @@ export default function ProposalPage() {
                 {proposal.body && (
                   <div
                     style={
-                      isCollaped
+                      isCollapsed
                         ? { position: 'relative', marginBottom: '80px' }
                         : {}
                     }
                   >
                     <div
                       className={`mt-5 ${
-                        !isCollaped ? 'mb-6 ' : ''
+                        !isCollapsed ? 'mb-6 ' : ''
                       }proposal-copy transition-all content`}
                       dangerouslySetInnerHTML={{
                         __html: htmlBody,
                       }}
                       ref={descriptionRef}
                       style={
-                        isCollaped
+                        isCollapsed
                           ? {
                               maxHeight: '300px',
                               overflow: 'hidden',
@@ -485,14 +487,14 @@ export default function ProposalPage() {
                           : {}
                       }
                     />
-                    {isCollaped && (
+                    {isCollapsed && (
                       <>
                         <div className="fade-proposal-description" />
                         <div className="is-flex flex-1 is-justify-content-center">
                           <div
                             className="button rounded-xl is-flex has-text-weight-bold has-background-white px-6"
                             style={{ minHeight: '48px', position: 'absolute' }}
-                            onClick={() => setIsCollaped(false)}
+                            onClick={() => setIsCollapsed(false)}
                           >
                             View Full Proposal
                           </div>
@@ -525,17 +527,18 @@ export default function ProposalPage() {
                   proposalId={proposal.id}
                   creatorAddr={proposal.creatorAddr}
                   isCoreCreator={proposal.isCore}
-                  strategyName={proposalStrategy?.name}
+                  strategyName={proposalStrategy?.name || proposal.strategy}
                   ipfs={proposal.ipfs}
                   ipfsUrl={proposal.ipfsUrl}
                   startTime={proposal.startTime}
                   endTime={proposal.endTime}
                   computedStatus={proposal.computedStatus}
                   communityId={proposal.communityId}
-                  proposalStrategy={proposal.strategy}
+                  proposalStrategy={proposalStrategy}
                   proposalMaxWeight={proposal?.maxWeight}
                   proposalMinBalance={proposal?.minBalance}
                   openStrategyModal={openStrategyModal}
+                  votingStrategies={votingStrategies}
                 />
               </div>
             </div>
