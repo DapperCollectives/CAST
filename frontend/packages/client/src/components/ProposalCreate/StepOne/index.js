@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import Dropdown from 'components/common/Dropdown';
@@ -37,12 +37,15 @@ const StepOne = ({
     [strategies]
   );
 
+  const [voteType, setVoteType] = useState('single-choice');
+
   const fieldsObj = Object.assign(
     {},
     stepOne.initialValues,
     {
       choices: [],
       tabOption: 'text-based',
+      voteType: 'single-choice',
     },
     pick(stepData || {}, stepOne.formFields)
   );
@@ -53,6 +56,11 @@ const StepOne = ({
       defaultValues: fieldsObj,
       resolver: yupResolver(stepOne.Schema),
     });
+
+  const handleVoteType = (voteType) => {
+    setVoteType(voteType);
+    setValue('voteType', voteType);
+  };
 
   const onSubmit = (data) => {
     let choices;
@@ -127,7 +135,7 @@ const StepOne = ({
               <Input
                 placeholder="Minimum Balance"
                 classNames="rounded-sm border-light p-3 column is-full"
-                conatinerClassNames="mt-4 mb-4"
+                containerClassNames="mt-4 mb-4"
                 register={register}
                 error={errors['minBalance']}
                 name="minBalance"
@@ -135,13 +143,155 @@ const StepOne = ({
               <Input
                 placeholder="Maximum Weight"
                 classNames="rounded-sm border-light p-3 column is-full"
-                conatinerClassNames="mb-4"
+                containerClassNames="mb-4"
                 register={register}
                 error={errors['maxWeight']}
                 name="maxWeight"
               />
             </>
           )}
+        </div>
+        <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6">
+          <h4 className="title is-5 mb-2">Type of Voting</h4>
+          <p className="has-text-grey mb-5">
+            Select the type of voting you would like to use for this proposal.
+            To learn more about these options,{' '}
+            <a
+              target="_blank"
+              rel="noreferrer noopener"
+              href="https://docs.cast.fyi"
+              className="is-underlined has-text-grey"
+            >
+              check out our FAQ
+            </a>
+            .
+          </p>
+          <div>
+            <div
+              className={`border-light rounded-sm is-flex is-align-items-center m-0 p-0 mb-4 cursor-pointer ${
+                voteType === 'single-choice' ? 'border-grey' : 'border-light'
+              }`}
+              onClick={() => handleVoteType('single-choice')}
+            >
+              <div className="p-4">
+                <div className="is-flex is-align-items-center mr-2">
+                  <div className="is-flex is-align-items-center mr-2">
+                    <input
+                      {...register('voteType')}
+                      type="radio"
+                      value="single-choice"
+                      className="radio"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="py-5 pr-5">
+                <h5 className="title is-6 mb-2">Single Choice Voting</h5>
+                <p>
+                  Voters can only vote on one option and all options are
+                  customized by proposal creator.
+                </p>
+              </div>
+              <div className="has-background-light-grey p-4 rounded-sm-br rounded-sm-tr is-flex is-flex-direction-column is-align-self-stretch is-justify-content-center ">
+                <div
+                  className="is-flex is-align-items-center mb-1"
+                  style={{ whiteSpace: 'nowrap' }}
+                >
+                  <div
+                    className="rounded-full has-background-grey has-text-white mr-2 is-flex is-align-items-center is-justify-content-center"
+                    style={{ width: 12, height: 12 }}
+                  ></div>
+                  <span className="smaller-text">Option A</span>
+                </div>
+                <div
+                  className="is-flex is-align-items-center mb-1"
+                  style={{ whiteSpace: 'nowrap' }}
+                >
+                  <div
+                    className="rounded-full has-background-grey has-text-white mr-2 is-flex is-align-items-center is-justify-content-center"
+                    style={{ width: 12, height: 12 }}
+                  >
+                    <span style={{ fontSize: 8 }}>&#x2713;</span>
+                  </div>
+                  <span className="smaller-text">Option B</span>
+                </div>
+                <div
+                  className="is-flex is-align-items-center"
+                  style={{ whiteSpace: 'nowrap' }}
+                >
+                  <div
+                    className="rounded-full has-background-grey has-text-white mr-2 is-flex is-align-items-center is-justify-content-center"
+                    style={{ width: 12, height: 12 }}
+                  ></div>
+                  <span className="smaller-text">Option C</span>
+                </div>
+              </div>
+            </div>
+            <div
+              className={`border-light rounded-sm is-flex is-align-items-center m-0 p-0 cursor-pointer ${
+                voteType === 'ranked-choice' ? 'border-grey' : 'border-light'
+              }`}
+              onClick={() => handleVoteType('ranked-choice')}
+            >
+              <div className="p-4">
+                <div className="is-flex is-align-items-center mr-2">
+                  <input
+                    {...register('voteType')}
+                    type="radio"
+                    value="ranked-choice"
+                    className="radio"
+                  />
+                </div>
+              </div>
+              <div className="py-5 pr-5">
+                <h5 className="title is-6 mb-2">Ranked Voting</h5>
+                <p>
+                  Voters may select and rank any number of choices. Choices are
+                  randomized by default.
+                </p>
+              </div>
+              <div className="has-background-light-grey p-4 rounded-sm-br rounded-sm-tr is-flex is-flex-direction-column is-align-self-stretch is-justify-content-center">
+                <div>
+                  <div
+                    className="is-flex is-align-items-center mb-1"
+                    style={{ whiteSpace: 'nowrap' }}
+                  >
+                    <div
+                      className="rounded-full has-background-grey has-text-white mr-2 is-flex is-align-items-center is-justify-content-center"
+                      style={{ width: 12, height: 12 }}
+                    >
+                      <span style={{ fontSize: 7 }}>1</span>
+                    </div>
+                    <span className="smaller-text">Option C</span>
+                  </div>
+                  <div
+                    className="is-flex is-align-items-center mb-1"
+                    style={{ whiteSpace: 'nowrap' }}
+                  >
+                    <div
+                      className="rounded-full has-background-grey has-text-white mr-2 is-flex is-align-items-center is-justify-content-center"
+                      style={{ width: 12, height: 12 }}
+                    >
+                      <span style={{ fontSize: 7 }}>2</span>
+                    </div>
+                    <span className="smaller-text">Option B</span>
+                  </div>
+                  <div
+                    className="is-flex is-align-items-center"
+                    style={{ whiteSpace: 'nowrap' }}
+                  >
+                    <div
+                      className="rounded-full has-background-grey has-text-white mr-2 is-flex is-align-items-center is-justify-content-center"
+                      style={{ width: 12, height: 12 }}
+                    >
+                      <span style={{ fontSize: 7 }}>3</span>
+                    </div>
+                    <span className="smaller-text">Option A</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6">
           <h4 className="title is-5 mb-2">
