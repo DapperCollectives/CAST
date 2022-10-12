@@ -188,7 +188,7 @@ const SignInOutButton = ({
             <Link
               to="/settings"
               className="has-text-black cursor-pointer is-flex is-flex-direction-row is-align-items-center is-fullwidth px-4 py-2 has-text-weight-bold"
-              onClick={() => closeDropdown()}
+              onClick={closeDropdown}
             >
               <Svg name="Cog" />
               <span className="ml-2">Settings</span>
