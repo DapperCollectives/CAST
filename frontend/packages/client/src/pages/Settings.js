@@ -1,11 +1,28 @@
-import { useNotificationService } from 'hooks';
+import { Fragment } from 'react';
+import {
+  BackButton,
+  ConnectWalletPrompt,
+  NotificationSettingsSection,
+  SettingsSection,
+} from 'components/Settings';
+import { useMediaQuery, useNotificationService } from 'hooks';
 
 export default function Settings() {
   const { notificationSettings } = useNotificationService();
   const { walletId } = notificationSettings;
-  if (walletId) {
-    return <h1>settings page</h1>;
-  } else {
-    return <h1>Please Connect to wallet first</h1>;
-  }
+  const notMobile = useMediaQuery();
+
+  return (
+    <div className="columns">
+      <BackButton notMobile={notMobile} />
+      {walletId ? (
+        <Fragment>
+          <SettingsSection />
+          <NotificationSettingsSection />
+        </Fragment>
+      ) : (
+        <ConnectWalletPrompt />
+      )}
+    </div>
+  );
 }
