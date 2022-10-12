@@ -8,9 +8,12 @@
 	position: fixed
 	min-height: 100%
 	.stepper-name
-		max-width: 220px
+		max-width: 290px
 		min-height: 200px
 		word-wrap: break-word
+		display: -webkit-box
+		-webkit-box-orient: vertical
+		-webkit-line-clamp: 4
 		overflow: hidden
 @include desktop-only
 	.step-by-step-body
