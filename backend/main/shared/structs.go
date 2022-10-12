@@ -120,6 +120,7 @@ func GetPaginatedResponseWithPayload(payload interface{}, p PageParams) *Paginat
 	// Tricky way of getting the length of a slice
 	// that is typed as interface{}
 
+	
 	_count := reflect.ValueOf(payload).Len()
 	var next int
 	if p.Start+_count >= p.TotalRecords {

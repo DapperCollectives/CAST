@@ -439,6 +439,7 @@ func (a *App) searchCommunities(w http.ResponseWriter, r *http.Request) {
 		filters,
 		pageParams,
 	)
+
 	if err != nil {
 		log.Error().Err(err).Msg("Error searching communities")
 		respondWithError(w, errIncompleteRequest)

@@ -23,7 +23,7 @@ func resetTables() {
 func TestGetLeaderboardCurrentUser(t *testing.T) {
 	resetTables()
 
-	communityId := otu.AddCommunities(1)[0]
+	communityId := otu.AddCommunities(1, "dao")[0]
 	proposalId := otu.AddActiveProposals(communityId, 1)[0]
 	vote := otu.GenerateValidVotePayload("user1", proposalId, "a")
 	otu.CreateVoteAPI(proposalId, vote)
@@ -48,7 +48,7 @@ func TestGetLeaderboardCurrentUser(t *testing.T) {
 func TestGetLeaderboardWithEarlyVotes(t *testing.T) {
 	resetTables()
 
-	communityId := otu.AddCommunities(1)[0]
+	communityId := otu.AddCommunities(1, "dao")[0]
 	earlyVoteBonus := 1
 	expectedUsers := 1
 	expectedProposals := 2
@@ -75,7 +75,7 @@ func TestGetLeaderboardWithEarlyVotes(t *testing.T) {
 func TestGetLeaderboardWithSingleStreak(t *testing.T) {
 	resetTables()
 
-	communityId := otu.AddCommunities(1)[0]
+	communityId := otu.AddCommunities(1, "dao")[0]
 	streaks := []int{3, 4}
 	streakBonus := 1
 	expectedUsers := len(streaks)
@@ -108,7 +108,7 @@ func TestGetLeaderboardWithSingleStreak(t *testing.T) {
 func TestGetLeaderboardWithMultiStreaks(t *testing.T) {
 	resetTables()
 
-	communityId := otu.AddCommunities(1)[0]
+	communityId := otu.AddCommunities(1, "dao")[0]
 	streaks := []int{3, 4}
 	streakBonus := 1
 	expectedUsers := 1
@@ -135,7 +135,7 @@ func TestGetLeaderboardWithMultiStreaks(t *testing.T) {
 func TestGetLeaderboardWithWinningVote(t *testing.T) {
 	resetTables()
 
-	communityId := otu.AddCommunities(1)[0]
+	communityId := otu.AddCommunities(1, "dao")[0]
 	winningVoteBonus := 1
 
 	proposalId := otu.GenerateWinningVoteAchievement(communityId, "token-weighted-default")
@@ -221,7 +221,7 @@ func TestGetLeaderboardWithCancelledProposal(t *testing.T) {
 func TestGetLeaderboardDefaultPaging(t *testing.T) {
 	resetTables()
 
-	communityId := otu.AddCommunities(1)[0]
+	communityId := otu.AddCommunities(1, "dao")[0]
 
 	numUsers := 6
 	numProposals := 1
@@ -241,7 +241,7 @@ func TestGetLeaderboardDefaultPaging(t *testing.T) {
 func TestGetLeaderboardPaging(t *testing.T) {
 	resetTables()
 
-	communityId := otu.AddCommunities(1)[0]
+	communityId := otu.AddCommunities(1, "dao")[0]
 
 	otu.AddActiveProposals(communityId, 1)
 
