@@ -254,7 +254,6 @@ func GetDefaultCommunities(db *s.Database, params shared.PageParams, filters []s
 
 	var totalRecords int
 	countSql := `SELECT COUNT(*) FROM communities`
-	db.Conn.QueryRow(db.Context, countSql).Scan(&totalRecords)
 
 	if !isSearch {
 		sql = HOMEPAGE_SQL
@@ -278,6 +277,7 @@ func GetDefaultCommunities(db *s.Database, params shared.PageParams, filters []s
 			return []*Community{}, 0, nil
 		}
 
+		db.Conn.QueryRow(db.Context, countSql).Scan(&totalRecords)
 		return communities, totalRecords, nil
 	} else {
 		sql, err := addFiltersToSql(DEFAULT_SEARCH_SQL, "", filters)
@@ -302,6 +302,7 @@ func GetDefaultCommunities(db *s.Database, params shared.PageParams, filters []s
 			return nil, 0, err
 		}
 
+		db.Conn.QueryRow(db.Context, countSql).Scan(&totalRecords)
 		return communities, totalRecords, nil
 	}
 }
@@ -386,12 +387,17 @@ func (c *Community) GetStrategy(name string) (Strategy, error) {
 	return Strategy{}, fmt.Errorf("Strategy %s does not exist on community", name)
 }
 
-func SearchForCommunity(db *s.Database, query string, filters []string, params shared.PageParams) ([]*Community, int, error) {
+func SearchForCommunity(
+	db *s.Database,
+	query string,
+	filters []string,
+	params shared.PageParams,
+) ([]*Community, int, error) {
 	sql, err := addFiltersToSql(SEARCH_COMMUNITIES_SQL, query, filters)
 	if err != nil {
 		return nil, 0, err
 	}
-	
+
 	rows, err := db.Conn.Query(
 		db.Context,
 		sql,
@@ -411,11 +417,9 @@ func SearchForCommunity(db *s.Database, query string, filters []string, params s
 		return []*Community{}, 0, fmt.Errorf("error scanning search results for the query %s", query)
 	}
 
-	// Get total number of communities
 	var totalRecords int
 	countSql := `SELECT COUNT(*) FROM communities`
-	_ = db.Conn.QueryRow(db.Context, countSql).Scan(&totalRecords)
-
+	db.Conn.QueryRow(db.Context, countSql).Scan(&totalRecords)
 	return communities, totalRecords, nil
 }
 
@@ -448,9 +452,9 @@ func GetCategoryCount(db *s.Database, search string) (map[string]int, error) {
 
 	categoryCount := make(map[string]int)
 	for rows.Next() {
-		results := struct{
+		results := struct {
 			Category string
-			Count int
+			Count    int
 		}{}
 		err := rows.Scan(&results.Category, &results.Count)
 		if err != nil {

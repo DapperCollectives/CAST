@@ -476,48 +476,46 @@ func (h *Helpers) searchCommunities(
 ) (
 	[]*models.Community,
 	map[string]int,
-	int,
 	error,
 ) {
 	filtersSlice := strings.Split(filters, ",")
 	if searchText == "" {
 		isSearch := true
 
-		results, totalRecords, err := models.GetDefaultCommunities(
+		results, _, err := models.GetDefaultCommunities(
 			h.A.DB,
 			pageParams,
 			filtersSlice,
 			isSearch,
 		)
-
 		if err != nil {
 			log.Error().Err(err)
-			return nil, nil, 0, err
+			return nil, nil, err
 		}
 
 		categoryCount, err := models.GetCategoryCount(h.A.DB, searchText)
 		if err != nil {
-			return []*models.Community{}, nil, 0, err
+			return []*models.Community{}, nil, err
 		}
 
-		return results, categoryCount, totalRecords, nil
+		return results, categoryCount, nil
 	} else {
-		results, totalRecords, err := models.SearchForCommunity(
+		results, _, err := models.SearchForCommunity(
 			h.A.DB,
 			searchText,
 			filtersSlice,
 			pageParams,
 		)
 		if err != nil {
-			return []*models.Community{}, nil, 0, err
+			return []*models.Community{}, nil, err
 		}
 
 		categoryCount, err := models.GetCategoryCount(h.A.DB, searchText)
 		if err != nil {
-			return []*models.Community{}, nil, 0, err
+			return []*models.Community{}, nil, err
 		}
 
-		return results, categoryCount, totalRecords, nil
+		return results, categoryCount, nil
 	}
 }
 
@@ -1245,6 +1243,8 @@ func (h *Helpers) appendFiltersToResponse(
 		Text:   "all",
 		Amount: totalCount,
 	})
+
+	results.TotalRecords = totalCount
 
 	appendedResponse := struct {
 		Filters []shared.SearchFilter    `json:"filters"`
