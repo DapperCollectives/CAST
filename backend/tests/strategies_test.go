@@ -37,7 +37,7 @@ func TestTokenWeightedDefaultStrategy(t *testing.T) {
 	clearTable("votes")
 	clearTable("balances")
 
-	communityId := otu.AddCommunities(1)[0]
+	communityId := otu.AddCommunities(1, "dao")[0]
 	proposalIds, proposals := otu.AddProposalsForStrategy(communityId, "token-weighted-default", 2)
 	votes := otu.GenerateListOfVotes(proposalIds[0], 10)
 	proposalId := proposalIds[0]
@@ -234,7 +234,7 @@ func TestStakedTokenWeightedDefaultStrategy(t *testing.T) {
 	clearTable("votes")
 	clearTable("balances")
 
-	communityId := otu.AddCommunities(1)[0]
+	communityId := otu.AddCommunities(1, "dao")[0]
 	proposalIds, proposals := otu.AddProposalsForStrategy(communityId, "staked-token-weighted-default", 2)
 	proposalIdTwo := proposalIds[1]
 	proposalId := proposalIds[0]

@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/DapperCollectives/CAST/backend/main/models"
@@ -51,6 +53,16 @@ type PaginatedResponseWithLeaderboardUser struct {
 	Count        int                       `json:"count"`
 	TotalRecords int                       `json:"totalRecords"`
 	Next         int                       `json:"next"`
+}
+
+type SearchFilter struct {
+	Text string 	`json:"text"`
+	Amount int 		`json:"amount"`
+}
+
+type PaginatedResponseSearch struct {
+	Filters []SearchFilter 	`json:"filters"`
+	Results PaginatedResponseWithCommunity   	`json:"results"`
 }
 
 var (
@@ -232,12 +244,13 @@ func (otu *OverflowTestUtils) GenerateCommunityPayload(signer string, payload *m
 	return payload
 }
 
-func (otu *OverflowTestUtils) GenerateCommunityStruct(accountName string) *models.Community {
+func (otu *OverflowTestUtils) GenerateCommunityStruct(accountName, category string) *models.Community {
 	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", accountName))
 
 	// this does a deep copy
 	community := DefaultCommunity
 	community.Creator_addr = "0x" + account.Address().String()
+	community.Category = &category
 	return &community
 }
 
@@ -320,8 +333,46 @@ func (otu *OverflowTestUtils) GetCommunitiesForHomepageAPI() *httptest.ResponseR
 	return response
 }
 
-func (otu *OverflowTestUtils) GetSearchCommunitiesAPI() *httptest.ResponseRecorder {
-	req, _ := http.NewRequest("GET", "/communities/search", nil)
+func (otu *OverflowTestUtils) GetSearchCommunitiesAPI(filters []string, text string, count *int) *httptest.ResponseRecorder {
+	searchUrl := "/communities/search"
+	filterStr := ""
+	textStr := ""
+	countStr := ""
+
+	if len(filters) > 0 {
+		filterStr = fmt.Sprintf("filters=%s", url.QueryEscape(strings.Join(filters, ",")))
+	}
+	if text != "" {
+		textStr = fmt.Sprintf("text=%s", url.QueryEscape(text))
+	}
+	if count != nil {
+		countStr = fmt.Sprintf("count=%d", *count)
+	}
+
+	queryStr := ""
+	if filterStr != "" {
+		queryStr = filterStr
+	}
+	if textStr != "" {
+		if queryStr != "" {
+			queryStr = fmt.Sprintf("%s&%s", queryStr, textStr)
+		} else {
+			queryStr = textStr
+		}
+	}
+	if countStr != "" {
+		if queryStr != "" {
+			queryStr = fmt.Sprintf("%s&%s", queryStr, countStr)
+		} else {
+			queryStr = countStr
+		}
+	}
+
+	if queryStr != "" {
+		searchUrl = fmt.Sprintf("%s?%s", searchUrl, queryStr)
+	}
+
+	req, _ := http.NewRequest("GET", searchUrl, nil)
 	response := otu.ExecuteRequest(req)
 	return response
 }
