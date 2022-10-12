@@ -75,7 +75,7 @@ const VoteOptions = ({
     onConfirmVote();
   };
 
-  const userVoted = currentOption !== null && currentOption === previousVote;
+  const userVoted = !!currentOption && currentOption === previousVote;
 
   const headerStatus = userVoted
     ? 'user-voted'
