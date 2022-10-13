@@ -445,6 +445,7 @@ func (a *App) searchCommunities(w http.ResponseWriter, r *http.Request) {
 	}
 
 	pageParams.TotalRecords = totalRecords
+
 	paginatedResults, err := helpers.appendFiltersToResponse(
 		results,
 		pageParams,
