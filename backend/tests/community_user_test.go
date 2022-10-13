@@ -182,6 +182,13 @@ func TestGetUserProposals(t *testing.T) {
 
 	response := otu.GetCommunityUserProposalsAPI(utils.AdminAddr) //Get proposals for user
 	checkResponseCode(t, http.StatusOK, response.Code)
+
+	var p test_utils.PaginatedResponseWithProposal
+
+	assert.Equal(t, 1, p.Data[0].Community_id)
+	assert.Equal(t, 2, p.Data[1].Community_id)
+	assert.Equal(t, 3, p.Data[2].Community_id)
+	assert.NotNil(t, p.Data[0].Proposal_name)
 }
 
 func TestDeleteUserFromCommunity(t *testing.T) {

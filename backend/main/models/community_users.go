@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"sort"
 	"strings"
 
@@ -184,15 +183,18 @@ func GetCommunitiesForUser(db *s.Database, addr string, pageParams shared.PagePa
 	return mergedCommunities, totalCommunities, nil
 }
 
-func GetCommunityProposalsForUser(db *s.Database, addr string, pageParams shared.PageParams) ([]interface{}, int, error) {
-	var proposals []interface{}
+func GetCommunityProposalsForUser(
+	db *s.Database,
+	addr string,
+	pageParams shared.PageParams,
+) ([]shared.UserProposal, int, error) {
 
-	err := pgxscan.Select(db.Context, db.Conn, &proposals,
-		`
+	var proposals = []shared.UserProposal{}
+	err := pgxscan.Select(db.Context, db.Conn, &proposals, `
 	SELECT 
  		u.community_id, 
-  	c.name, 
-  	p.name as propoal_name, 
+  	c.name as community_name, 
+  	p.name as proposal_name, 
   	p.status 
   FROM community_users AS u 
 	LEFT JOIN 
@@ -207,8 +209,6 @@ func GetCommunityProposalsForUser(db *s.Database, addr string, pageParams shared
 	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
 		return proposals, 0, nil
 	}
-
-	fmt.Printf("proposals: %v", proposals)
 
 	return proposals, len(proposals), nil
 }
