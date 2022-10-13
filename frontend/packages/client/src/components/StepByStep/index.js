@@ -1,5 +1,6 @@
 import { cloneElement, useCallback, useRef, useState } from 'react';
 import { Prompt } from 'react-router-dom';
+import { useMediaQuery } from 'hooks';
 import Loader from '../Loader';
 import HeaderStepByStep from './HeaderStepByStep';
 import LeftPannel from './LeftPannel';
@@ -19,7 +20,9 @@ function StepByStep({
   blockNavigationOut = false,
   blockNavigationText,
   alignStepsToTop,
+  useTopStepNavigation,
 } = {}) {
+  const notMobile = useMediaQuery();
   const [currentStep, setCurrentStep] = useState(0);
   const [showPreStep, setShowPreStep] = useState(!!preStep);
   const [isStepValid, setStepValid] = useState(false);
@@ -89,7 +92,21 @@ function StepByStep({
           message={() => blockNavigationText ?? 'Leave Page?'}
         />
       )}
-      <section>
+      {notMobile && (
+        <HeaderStepByStep
+          onClickBack={moveBackStep}
+          onClickPreview={() => {}}
+          showNextButton={showNextButton}
+          onClickNext={moveToNextStep}
+          showSubmitButton={showSubmitButton}
+          formId={formId}
+          finalLabel={finalLabel}
+          showPreStep={showPreStep}
+          onSubmit={_onSubmit}
+          isStepValid={isStepValid}
+        />
+      )}
+      <section style={notMobile ? { paddingTop: '77px' } : {}}>
         <div
           style={{
             position: 'fixed',
@@ -101,7 +118,6 @@ function StepByStep({
           }}
           className="has-background-white-ter is-hidden-mobile"
         />
-        <HeaderStepByStep />
         <div className="container is-flex is-flex-direction-column-mobile">
           {/* left panel */}
           <LeftPannel

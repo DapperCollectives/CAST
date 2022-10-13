@@ -52,11 +52,11 @@ export default function LeftPannel({
           {name}
         </span>
       </div>
-      <div className="mb-6" style={{ minHeight: 24 }}>
+      {/* <div className="mb-6" style={{ minHeight: 24 }}>
         {currentStep > 0 && (
           <BackButton isSubmitting={isSubmitting} onClick={moveBackStep} />
         )}
-      </div>
+      </div> */}
       <div className={classNamesWrapper}>
         {steps.map((step, i) => (
           <StepLabelAndIcon
