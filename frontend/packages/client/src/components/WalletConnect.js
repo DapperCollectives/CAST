@@ -2,13 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import Blockies from 'react-blockies';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { Link } from 'react-router-dom';
+import { useNotificationServiceContext } from 'contexts/NotificationService';
 import { Web3Consumer } from 'contexts/Web3';
 import { Svg } from '@cast/shared-components';
-import {
-  useMediaQuery,
-  useNotificationService,
-  useOnClickOutside,
-} from 'hooks';
+import { useMediaQuery, useOnClickOutside } from 'hooks';
 import { truncateAddress } from 'utils';
 import classnames from 'classnames';
 import Tooltip from './Tooltip';
@@ -21,7 +18,7 @@ const SignInOutButton = ({
   expandToContainer,
 }) => {
   const notMobile = useMediaQuery();
-  const { setUserID } = useNotificationService();
+  const { setUserID } = useNotificationServiceContext();
   const [dropDownClass, setDropDownClass] = useState('');
   const [addressCopied, setAddressCopied] = useState(false);
 

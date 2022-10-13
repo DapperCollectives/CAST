@@ -1,8 +1,9 @@
-import { useNotificationService } from 'hooks';
+import { useNotificationServiceContext } from 'contexts/NotificationService';
 
 export default function Settings() {
-  const { notificationSettings } = useNotificationService();
+  const { notificationSettings } = useNotificationServiceContext();
   const { walletId } = notificationSettings;
+
   if (!walletId) {
     return <h1>Please Connect to wallet first</h1>;
   }
