@@ -28,11 +28,6 @@ export default function ShareDropdown({
 
   const proposalUrl = `${FRONTEND_URL}/#/community/${communityId}/proposal/${proposalId}`;
 
-  console.log(
-    `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-      `I just voted on ${proposalName} on CAST! ${proposalUrl} `
-    )} `
-  );
   const twitterPost = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
     `I just voted on ${proposalName} on CAST! ${proposalUrl} `
   )} `;
