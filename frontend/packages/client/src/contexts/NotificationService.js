@@ -1,6 +1,14 @@
-import { createContext, useCallback, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
+import { useWebContext } from './Web3';
 
 const NotificationServiceContext = createContext({});
+
+const INIT_NOTIFICATION_SETTINGS = {
+  walletId: '',
+  email: '',
+  communitySubscription: [],
+  isUnsubscribedFromCommunityUpdates: false,
+};
 
 export const useNotificationServiceContext = () => {
   const context = useContext(NotificationServiceContext);
@@ -13,15 +21,25 @@ export const useNotificationServiceContext = () => {
 };
 
 const NotificationServiceProvider = ({ children }) => {
-  const [notificationSettings, setNotificationSettings] = useState({
-    walletId: '',
-    email: '',
-    communitySubscription: [],
-    isUnsubscribedFromCommunityUpdates: false,
-  });
+  const [notificationSettings, setNotificationSettings] = useState(
+    INIT_NOTIFICATION_SETTINGS
+  );
+
+  const {
+    user: { addr },
+  } = useWebContext();
+
+  useEffect(() => {
+    if (addr) {
+      setUserID();
+    } else {
+      setNotificationSettings(INIT_NOTIFICATION_SETTINGS);
+    }
+  }, [addr]);
+
   const setUserID = async (walletId) => {
     try {
-      //here we call api
+      //here we call api to init the leanplum sdk
       setNotificationSettings((prevState) => ({
         ...prevState,
         walletId,

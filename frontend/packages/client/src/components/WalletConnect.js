@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import Blockies from 'react-blockies';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { Link } from 'react-router-dom';
-import { useNotificationServiceContext } from 'contexts/NotificationService';
 import { Web3Consumer } from 'contexts/Web3';
 import { Svg } from '@cast/shared-components';
 import { useMediaQuery, useOnClickOutside } from 'hooks';
@@ -18,7 +17,6 @@ const SignInOutButton = ({
   expandToContainer,
 }) => {
   const notMobile = useMediaQuery();
-  const { setUserID } = useNotificationServiceContext();
   const [dropDownClass, setDropDownClass] = useState('');
   const [addressCopied, setAddressCopied] = useState(false);
 
@@ -63,11 +61,6 @@ const SignInOutButton = ({
     }
     return () => clearTimeout(timeout);
   }, [addressCopied]);
-
-  useEffect(() => {
-    setUserID(addr);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [addr]);
 
   const dropdownBackground = classnames('', {
     'wallet-connect-background': dropDownClass && !notMobile,
