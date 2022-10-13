@@ -176,12 +176,15 @@ const StepOne = ({
               <div className="p-4">
                 <div className="is-flex is-align-items-center mr-2">
                   <div className="is-flex is-align-items-center mr-2">
-                    <input
-                      {...register('voteType')}
-                      type="radio"
-                      value="single-choice"
-                      className="radio"
-                    />
+                    <label className="radio is-flex">
+                      <input
+                        {...register('voteType')}
+                        type="radio"
+                        value="single-choice"
+                        className="green-radio"
+                      />
+                      <span />
+                    </label>
                   </div>
                 </div>
               </div>
@@ -235,12 +238,15 @@ const StepOne = ({
             >
               <div className="p-4">
                 <div className="is-flex is-align-items-center mr-2">
-                  <input
-                    {...register('voteType')}
-                    type="radio"
-                    value="ranked-choice"
-                    className="radio"
-                  />
+                  <label className="radio is-flex">
+                    <input
+                      {...register('voteType')}
+                      type="radio"
+                      value="ranked-choice"
+                      className="green-radio"
+                    />
+                    <span />
+                  </label>
                 </div>
               </div>
               <div className="py-5 pr-5">
