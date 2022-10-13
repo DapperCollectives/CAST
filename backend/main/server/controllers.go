@@ -434,25 +434,29 @@ func (a *App) searchCommunities(w http.ResponseWriter, r *http.Request) {
 	filters := r.FormValue("filters")
 	searchText := r.FormValue("text")
 
-	results, categories, err := helpers.searchCommunities(
+	results, totalRecords, categories, err := helpers.searchCommunities(
 		searchText,
 		filters,
 		pageParams,
 	)
-
 	if err != nil {
 		log.Error().Err(err).Msg("Error searching communities")
 		respondWithError(w, errIncompleteRequest)
 	}
 
-	paginatedResults := shared.GetPaginatedResponseWithPayload(results, pageParams)
-	response, err := helpers.appendFiltersToResponse(paginatedResults, categories)
+	pageParams.TotalRecords = totalRecords
+
+	paginatedResults, err := helpers.appendFiltersToResponse(
+		results,
+		pageParams,
+		categories,
+	)
 	if err != nil {
 		log.Error().Err(err).Msg("Error appending filters to response")
 		respondWithError(w, errIncompleteRequest)
 	}
 
-	respondWithJSON(w, http.StatusOK, response)
+	respondWithJSON(w, http.StatusOK, paginatedResults)
 }
 
 func (a *App) getCommunity(w http.ResponseWriter, r *http.Request) {

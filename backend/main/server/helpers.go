@@ -475,6 +475,7 @@ func (h *Helpers) searchCommunities(
 	pageParams shared.PageParams,
 ) (
 	[]*models.Community,
+	int,
 	map[string]int,
 	error,
 ) {
@@ -482,7 +483,7 @@ func (h *Helpers) searchCommunities(
 	if searchText == "" {
 		isSearch := true
 
-		results, _, err := models.GetDefaultCommunities(
+		results, totalRecords, err := models.GetDefaultCommunities(
 			h.A.DB,
 			pageParams,
 			filtersSlice,
@@ -490,32 +491,32 @@ func (h *Helpers) searchCommunities(
 		)
 		if err != nil {
 			log.Error().Err(err)
-			return nil, nil, err
+			return nil, 0, nil, err
 		}
 
 		categoryCount, err := models.GetCategoryCount(h.A.DB, searchText)
 		if err != nil {
-			return []*models.Community{}, nil, err
+			return []*models.Community{}, 0, nil, err
 		}
 
-		return results, categoryCount, nil
+		return results, totalRecords, categoryCount, nil
 	} else {
-		results, _, err := models.SearchForCommunity(
+		results, totalRecords, err := models.SearchForCommunity(
 			h.A.DB,
 			searchText,
 			filtersSlice,
 			pageParams,
 		)
 		if err != nil {
-			return []*models.Community{}, nil, err
+			return []*models.Community{}, 0, nil, err
 		}
 
 		categoryCount, err := models.GetCategoryCount(h.A.DB, searchText)
 		if err != nil {
-			return []*models.Community{}, nil, err
+			return []*models.Community{}, 0, nil, err
 		}
 
-		return results, categoryCount, nil
+		return results, totalRecords, categoryCount, nil
 	}
 }
 
@@ -1213,7 +1214,8 @@ func (h *Helpers) pinJSONToIpfs(data interface{}) (*string, error) {
 }
 
 func (h *Helpers) appendFiltersToResponse(
-	results *shared.PaginatedResponse,
+	results []*models.Community,
+	pageParams shared.PageParams,
 	count map[string]int,
 ) (interface{}, error) {
 	var filters []shared.SearchFilter
@@ -1244,14 +1246,13 @@ func (h *Helpers) appendFiltersToResponse(
 		Amount: totalCount,
 	})
 
-	results.TotalRecords = totalCount
-
+	paginatedResults := shared.GetPaginatedResponseWithPayload(results, pageParams)
 	appendedResponse := struct {
 		Filters []shared.SearchFilter    `json:"filters"`
 		Results shared.PaginatedResponse `json:"results"`
 	}{
 		Filters: filters,
-		Results: *results,
+		Results: *paginatedResults,
 	}
 
 	return appendedResponse, nil

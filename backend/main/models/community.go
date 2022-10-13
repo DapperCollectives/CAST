@@ -36,6 +36,8 @@ type Community struct {
 	Slug                     *string     `json:"slug,omitempty"                  validate:"required"`
 	Is_featured              *bool       `json:"isFeatured,omitempty"`
 
+	Total *int `json:"total,omitempty"` // for search only
+
 	Contract_name *string `json:"contractName,omitempty"`
 	Contract_addr *string `json:"contractAddr,omitempty"`
 	Contract_type *string `json:"contractType,omitempty"`
@@ -178,7 +180,7 @@ const UPDATE_COMMUNITY_SQL = `
 	WHERE id = $21
 `
 const SEARCH_COMMUNITIES_SQL = `
-	SELECT id, name, body, logo, category
+	SELECT id, name, body, logo, category	
 	FROM communities 
 	WHERE SIMILARITY(name, $1) > 0.1
 		AND category IS NOT NULL
@@ -249,12 +251,16 @@ func (c *Community) GetCommunityByProposalId(db *s.Database, proposalId int) err
 		proposalId)
 }
 
-func GetDefaultCommunities(db *s.Database, params shared.PageParams, filters []string, isSearch bool) ([]*Community, int, error) {
+func GetDefaultCommunities(
+	db *s.Database,
+	params shared.PageParams,
+	filters []string,
+	isSearch bool,
+) ([]*Community, int, error) {
 	var sql string
 
 	var totalRecords int
 	countSql := `SELECT COUNT(*) FROM communities`
-
 	if !isSearch {
 		sql = HOMEPAGE_SQL
 
@@ -393,10 +399,14 @@ func SearchForCommunity(
 	filters []string,
 	params shared.PageParams,
 ) ([]*Community, int, error) {
+
+	countSql := `SELECT COUNT(*) FROM communities WHERE SIMILARITY(name, $1) > 0.1`
 	sql, err := addFiltersToSql(SEARCH_COMMUNITIES_SQL, query, filters)
 	if err != nil {
 		return nil, 0, err
 	}
+
+	fmt.Printf("Count, start: %d, %d \n", params.Count, params.Start)
 
 	rows, err := db.Conn.Query(
 		db.Context,
@@ -418,8 +428,8 @@ func SearchForCommunity(
 	}
 
 	var totalRecords int
-	countSql := `SELECT COUNT(*) FROM communities`
-	db.Conn.QueryRow(db.Context, countSql).Scan(&totalRecords)
+	db.Conn.QueryRow(db.Context, countSql, query).Scan(&totalRecords)
+	fmt.Printf("Query %s, total records: %d \n", query, totalRecords)
 	return communities, totalRecords, nil
 }
 
@@ -487,6 +497,8 @@ func addFiltersToSql(query, search string, filters []string) (string, error) {
 	} else {
 		sql = sql + " LIMIT $1 OFFSET $2"
 	}
+
+	fmt.Printf("SQL: %s \n", sql)
 
 	return sql, nil
 }
