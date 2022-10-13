@@ -1,6 +1,7 @@
 import { cloneElement, useCallback, useRef, useState } from 'react';
 import { Prompt } from 'react-router-dom';
 import Loader from '../Loader';
+import HeaderStepByStep from './HeaderStepByStep';
 import LeftPannel from './LeftPannel';
 import NextButton from './NexStepButton';
 import SubmitButton from './SubmitButton';
@@ -100,6 +101,7 @@ function StepByStep({
           }}
           className="has-background-white-ter is-hidden-mobile"
         />
+        <HeaderStepByStep />
         <div className="container is-flex is-flex-direction-column-mobile">
           {/* left panel */}
           <LeftPannel
