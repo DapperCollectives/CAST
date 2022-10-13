@@ -31,7 +31,7 @@ const NotificationServiceProvider = ({ children }) => {
 
   useEffect(() => {
     if (addr) {
-      setUserID();
+      setUserID(addr);
     } else {
       setNotificationSettings(INIT_NOTIFICATION_SETTINGS);
     }
