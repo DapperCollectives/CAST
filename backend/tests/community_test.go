@@ -359,6 +359,7 @@ func TestCanUserCreateProposalForCommunityOnlyAuthors(t *testing.T) {
 		json.Unmarshal(response.Body.Bytes(), &responsePayload)
 
 		assert.False(t, responsePayload.HasPermission)
+		assert.Contains(t, responsePayload.Reason, "is not an author for community")
 
 	})
 }
@@ -428,7 +429,7 @@ func TestCanUserCreateProposalForCommunityTokenThreshold(t *testing.T) {
 		json.Unmarshal(response.Body.Bytes(), &responsePayload)
 
 		assert.False(t, responsePayload.HasPermission)
-
+		assert.Equal(t, "Insufficient token balance to create proposal.", responsePayload.Reason)
 	})
 
 	t.Run("Non-authors should be able to create proposals if they do have enough tokens", func(t *testing.T) {
