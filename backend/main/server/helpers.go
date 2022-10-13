@@ -548,11 +548,18 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorRespo
 		p.Max_weight = strategy.Contract.MaxWeight
 	}
 
-	if err := community.CanUserCreateProposal(h.A.DB, h.A.FlowAdapter, p.Creator_addr); err != nil {
-		return models.Proposal{}, errIncompleteRequest
+	canUserCreateProposal := community.CanUserCreateProposal(h.A.DB, h.A.FlowAdapter, p.Creator_addr)
+
+	// If user doesn't have permission, populate errorResponse
+	// with reason and error.
+	if !canUserCreateProposal.HasPermission {
+		errPermissionsResponse := errCreateProposalPermissions
+		errPermissionsResponse.Message = canUserCreateProposal.Reason
+		errPermissionsResponse.Details = canUserCreateProposal.Error.Error()
+		return models.Proposal{}, errPermissionsResponse
 	}
 
-	// Set Blockheight to latest sealed
+	// Get latest sealed blockheight to use as proposal snapshot
 	blockheight, err := h.A.FlowAdapter.GetCurrentBlockHeight()
 	if err != nil {
 		errMsg := "couldn't fetch current blockheight"

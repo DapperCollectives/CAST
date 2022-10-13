@@ -244,7 +244,7 @@ func (fa *FlowAdapter) GetBalanceOfTokens(creatorAddr string, c *Contract, contr
 		// Return 0 balance.
 		var zero float64 = 0.0
 		if err != nil {
-			log.Error().Err(err).Msg("Error executing Funigble-Token Script.")
+			log.Error().Err(err).Msg("Error executing Fungible Token Script.")
 			return &zero, err
 		}
 
