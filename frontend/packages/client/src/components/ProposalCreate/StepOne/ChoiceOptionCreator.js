@@ -59,6 +59,7 @@ export default function ChoiceOptionCreator({
           fieldName={fieldName}
           control={control}
           clearErrors={clearErrors}
+          voteType={voteType}
         />
       )}
       {tabOption === 'visual' && (

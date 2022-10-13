@@ -40,7 +40,11 @@ const StepOneSchema = yup.object().shape({
         })
       ),
     })
-    .min(2, 'Please add a choice, minimum amount is two')
+    .when('$voteType', (voteType, schema) => {
+      return voteType === 'single-choice'
+        ? schema.min(2, 'Please add a choice, minimum amount is two')
+        : schema.min(3, 'Please add a choice, minimum amount is three');
+    })
     .unique('value', 'Invalid duplicated option'),
   maxWeight: yup
     .string()

@@ -55,6 +55,7 @@ const StepOne = ({
       reValidateMode: 'onChange',
       defaultValues: fieldsObj,
       resolver: yupResolver(stepOne.Schema),
+      context: { voteType },
     });
 
   const handleVoteType = (voteType) => {
