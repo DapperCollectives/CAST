@@ -311,6 +311,7 @@ export default function ProposalPage() {
           <HeaderNavigation
             communityId={proposal.communityId}
             proposalId={proposal.id}
+            proposalName={proposal.name}
           />
           {cancelled && (
             <Message messageText={`This proposal has been cancelled`} />

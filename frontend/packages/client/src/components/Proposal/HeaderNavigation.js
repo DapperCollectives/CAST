@@ -3,7 +3,7 @@ import { useMediaQuery } from 'hooks';
 import BackButton from './BackButton';
 import ShareDropdown from './ShareDropdown';
 
-const HeaderNavigation = ({ communityId, proposalId } = {}) => {
+const HeaderNavigation = ({ communityId, proposalId, proposalName } = {}) => {
   const notMobile = useMediaQuery();
 
   return (
@@ -21,6 +21,7 @@ const HeaderNavigation = ({ communityId, proposalId } = {}) => {
           isMobile={!notMobile}
           communityId={communityId}
           proposalId={proposalId}
+          proposalName={proposalName}
         />
       </div>
     </div>
