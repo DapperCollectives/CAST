@@ -47,7 +47,7 @@ const ProposalInformation = ({
 
   const { data: votingResults } = useVotingResults(proposalId);
 
-  const { data: community } = useCommunityDetails(communityId);
+  const { data: community, isLoading } = useCommunityDetails(communityId);
   const { strategies: communityStrategies } = community ?? {};
 
   // Find contract information on community
@@ -60,6 +60,7 @@ const ProposalInformation = ({
     maxWeight: maxWeightFromContract,
     minBalance: minBalanceFromContract,
     script,
+    addr: contractAddr,
   } = contract;
 
   let customStrategy;
@@ -157,21 +158,24 @@ const ProposalInformation = ({
             computedStatus={computedStatus}
           />
         </div>
-        <Information
-          creatorAddr={creatorAddr}
-          strategyName={strategyName}
-          isCoreCreator={isCoreCreator}
-          ipfs={ipfs}
-          ipfsUrl={ipfsUrl}
-          startTime={startTime}
-          endTime={endTime}
-          communityId={communityId}
-          tokenName={tokenName}
-          maxWeight={maxWeight}
-          minBalance={minBalance}
-          openStrategyModal={openStrategyModal}
-          customStrategy={customStrategy}
-        />
+        {!isLoading && (
+          <Information
+            creatorAddr={creatorAddr}
+            strategyName={strategyName}
+            isCoreCreator={isCoreCreator}
+            ipfs={ipfs}
+            ipfsUrl={ipfsUrl}
+            startTime={startTime}
+            endTime={endTime}
+            communityId={communityId}
+            tokenName={tokenName}
+            maxWeight={maxWeight}
+            minBalance={minBalance}
+            openStrategyModal={openStrategyModal}
+            customStrategy={customStrategy}
+            contractAddr={contractAddr}
+          />
+        )}
       </div>
     </div>
   );

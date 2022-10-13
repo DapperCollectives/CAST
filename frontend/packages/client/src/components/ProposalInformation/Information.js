@@ -26,6 +26,7 @@ export default function Information({
   endTime,
   ipfsUrl,
   communityId,
+  contractAddr,
   tokenName,
   maxWeight,
   minBalance,
@@ -84,28 +85,38 @@ export default function Information({
         <InfoBlock
           title={'Token required'}
           component={
-            <a
-              href={'https://flowscan.org/'}
-              rel="noopener noreferrer"
-              target="_blank"
-              className="is-underlined has-text-grey p-0 small-text"
-              style={{ height: '2rem !important' }}
-            >
-              <span className="mr-2">{`$${tokenName?.toUpperCase()}`}</span>
-              <Svg name="LinkOut" width="12" height="12" />
-            </a>
+            contractAddr ? (
+              <a
+                href={`https://flowscan.org/account/${contractAddr}`}
+                rel="noopener noreferrer"
+                target="_blank"
+                className="is-underlined has-text-grey p-0 small-text"
+                style={{ height: '2rem !important' }}
+              >
+                <span className="mr-2">{`$${tokenName?.toUpperCase()}`}</span>
+                <Svg name="LinkOut" width="12" height="12" />
+              </a>
+            ) : (
+              <div
+                className="has-text-grey p-0 small-text"
+                style={{ height: '2rem !important' }}
+              >
+                <span className="mr-2">{`$${tokenName?.toUpperCase()}`}</span>
+                <Svg name="LinkOut" width="12" height="12" />
+              </div>
+            )
           }
         />
       )}
       {isVisible(maxWeight) && (
         <InfoBlock
-          title={'Max tokens'}
+          title={'Max Weight'}
           component={<span className="has-text-grey">{maxWeight}</span>}
         />
       )}
       {isVisible(minBalance) && (
         <InfoBlock
-          title={'Min tokens'}
+          title={'Min Weight'}
           component={<span className="has-text-grey">{minBalance}</span>}
         />
       )}
