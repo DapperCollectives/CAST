@@ -261,6 +261,7 @@ func GetDefaultCommunities(
 
 	var totalRecords int
 	countSql := `SELECT COUNT(*) FROM communities`
+
 	if !isSearch {
 		sql = HOMEPAGE_SQL
 

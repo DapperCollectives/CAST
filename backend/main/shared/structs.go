@@ -121,7 +121,9 @@ func GetPaginatedResponseWithPayload(payload interface{}, p PageParams) *Paginat
 	// that is typed as interface{}
 
 	_count := reflect.ValueOf(payload).Len()
+	_count = _count + 1
 	var next int
+	// print p.Start + _count to the console
 	if p.Start+_count >= p.TotalRecords {
 		next = -1
 	} else {

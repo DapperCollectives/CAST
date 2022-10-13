@@ -1246,6 +1246,8 @@ func (h *Helpers) appendFiltersToResponse(
 		Amount: totalCount,
 	})
 
+	fmt.Printf("pageParams: %+v \n", pageParams)
+
 	paginatedResults := shared.GetPaginatedResponseWithPayload(results, pageParams)
 	appendedResponse := struct {
 		Filters []shared.SearchFilter    `json:"filters"`
