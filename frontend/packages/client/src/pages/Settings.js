@@ -24,14 +24,13 @@ export default function Settings() {
         >
           <BackButton notMobile={notMobile} />
         </div>
-        {walletId ? (
+        {walletId && (
           <div className="column is-two-fifths">
             <SettingsSection />
             <NotificationSettingsSection />
           </div>
-        ) : (
-          <ConnectWalletPrompt />
         )}
+        {!walletId && <ConnectWalletPrompt />}
       </div>
       <HomeFooter />
     </Fragment>

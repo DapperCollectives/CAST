@@ -1,11 +1,16 @@
 import Blockies from 'react-blockies';
+import CopyToClipboard from 'react-copy-to-clipboard';
+import { useNotificationServiceContext } from 'contexts/NotificationService';
+import { useWebContext } from 'contexts/Web3';
 import { Svg } from '@cast/shared-components';
-import { useMediaQuery, useNotificationService } from 'hooks';
+import { useMediaQuery } from 'hooks';
 
 export default function SettingsSection() {
   const notMobile = useMediaQuery();
-  const { notificationSettings } = useNotificationService();
+  const { notificationSettings } = useNotificationServiceContext();
+  const { injectedProvider } = useWebContext();
   const { walletId } = notificationSettings;
+
   return (
     <section
       className={`column is-flex is-flex-direction-column ${
@@ -16,13 +21,11 @@ export default function SettingsSection() {
       <h3 className="is-size-6 mt-2">Connected Wallet</h3>
       <div className="is-flex is-flex-direction-row is-flex-wrap-wrap is-align-items-center">
         <div className="mr-3 my-3">
-          <p className="control has-icons-left has-icons-right">
-            <input
-              className="rounded-lg border-light flex-1 pl-6 has-text-grey"
-              style={{ height: 41, width: 246 }}
-              value={walletId}
-            />
-            <span className="is-left icon pt-2 pl-2">
+          <p
+            className="rounded-lg border-light flex-1 has-text-grey is-flex is-align-items-center pl-2"
+            style={{ height: 41, width: 246 }}
+          >
+            <span>
               <Blockies
                 seed={walletId}
                 size={notMobile ? 6.5 : 5}
@@ -30,14 +33,26 @@ export default function SettingsSection() {
                 className="blockies"
               />
             </span>
-            <span className="is-right icon pt-2">
-              <Svg name="Copy"></Svg>
-            </span>
+            <span className="ml-1">{walletId}</span>
+
+            <CopyToClipboard
+              text={walletId}
+              onCopy={() => {
+                console.log('coiped');
+              }}
+            >
+              <span className="cursor-pointer mt-2 ml-1">
+                <Svg name="Copy"></Svg>
+              </span>
+            </CopyToClipboard>
           </p>
         </div>
 
         <button
           className={`button rounded-lg has-background-black has-text-white`}
+          onClick={() => {
+            injectedProvider.unauthenticate();
+          }}
         >
           Disconnect
         </button>

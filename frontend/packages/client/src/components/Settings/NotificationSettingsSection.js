@@ -1,10 +1,32 @@
+import { useState } from 'react';
 import Blockies from 'react-blockies';
-import { useMediaQuery, useNotificationService } from 'hooks';
+import { useNotificationServiceContext } from 'contexts/NotificationService';
+import { useMediaQuery } from 'hooks';
 
 export default function NotificationSettingsSection() {
   const notMobile = useMediaQuery();
-  const { notificationSettings } = useNotificationService();
-  const { walletId } = notificationSettings;
+  const {
+    notificationSettings,
+    setUserEmail,
+    unsubscribeFromEmailNotifications,
+    resubscribeFromEmailNotifications,
+  } = useNotificationServiceContext();
+  const { walletId, email, isUnsubscribedFromCommunityUpdates } =
+    notificationSettings;
+
+  const [newEmail, setNewEmail] = useState(email);
+
+  const handleSaveEmail = () => {
+    setUserEmail(newEmail);
+  };
+  const handleSubscribeAllNotifications = () => {
+    if (isUnsubscribedFromCommunityUpdates) {
+      resubscribeFromEmailNotifications();
+    } else {
+      unsubscribeFromEmailNotifications();
+    }
+  };
+  const isEmailChanged = newEmail !== email;
   return (
     <section
       className={`column is-flex is-flex-direction-column ${
@@ -18,11 +40,18 @@ export default function NotificationSettingsSection() {
           <input
             className="rounded-lg border-light flex-1 p-3"
             style={{ height: 41, width: 246 }}
-            value="jose@gmail.com"
+            value={newEmail}
+            onChange={(e) => {
+              setNewEmail(e.target.value);
+            }}
           />
         </div>
         <button
-          className={`button rounded-lg has-background-black has-text-white`}
+          className={`button rounded-lg has-background-black has-text-white ${
+            isEmailChanged ? '' : 'is-disabled'
+          }`}
+          disabled={!isEmailChanged}
+          onClick={handleSaveEmail}
         >
           Save
         </button>
@@ -42,9 +71,10 @@ export default function NotificationSettingsSection() {
             id="subscribeAllNotification"
             type="checkbox"
             className="switch is-rounded is-medium"
-            checked
+            checked={!isUnsubscribedFromCommunityUpdates}
+            onChange={handleSubscribeAllNotifications}
           ></input>
-          <label for="subscribeAllNotification"></label>
+          <label htmlFor="subscribeAllNotification"></label>
         </div>
       </div>
       <hr />
@@ -74,8 +104,9 @@ export default function NotificationSettingsSection() {
                 type="checkbox"
                 className="switch is-rounded is-medium"
                 checked
+                onChange={() => {}}
               ></input>
-              <label for="subscribeAllNotification"></label>
+              <label htmlFor="subscribeAllNotification"></label>
             </div>
           </li>
         </ul>

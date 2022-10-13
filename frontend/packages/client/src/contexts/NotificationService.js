@@ -64,7 +64,11 @@ const NotificationServiceProvider = ({ children }) => {
   const getUserSettings = async () => {
     try {
       //here we call api
-      setNotificationSettings();
+      setNotificationSettings((prevState) => ({
+        ...prevState,
+        communitySubscription: [{ communityId: 1, subscribed: true }],
+        isUnsubscribedFromCommunityUpdates: false,
+      }));
     } catch {
       throw new Error('cannot get user settings');
     }
