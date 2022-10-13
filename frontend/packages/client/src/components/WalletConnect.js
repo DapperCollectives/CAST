@@ -4,11 +4,7 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { Link } from 'react-router-dom';
 import { Web3Consumer } from 'contexts/Web3';
 import { Svg } from '@cast/shared-components';
-import {
-  useMediaQuery,
-  useNotificationService,
-  useOnClickOutside,
-} from 'hooks';
+import { useMediaQuery, useOnClickOutside } from 'hooks';
 import { truncateAddress } from 'utils';
 import classnames from 'classnames';
 import Tooltip from './Tooltip';
@@ -21,7 +17,6 @@ const SignInOutButton = ({
   expandToContainer,
 }) => {
   const notMobile = useMediaQuery();
-  const { setUserID } = useNotificationService();
   const [dropDownClass, setDropDownClass] = useState('');
   const [addressCopied, setAddressCopied] = useState(false);
 
@@ -66,11 +61,6 @@ const SignInOutButton = ({
     }
     return () => clearTimeout(timeout);
   }, [addressCopied]);
-
-  useEffect(() => {
-    setUserID(addr);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [addr]);
 
   const dropdownBackground = classnames('', {
     'wallet-connect-background': dropDownClass && !notMobile,

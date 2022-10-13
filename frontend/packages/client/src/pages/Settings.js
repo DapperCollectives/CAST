@@ -1,4 +1,5 @@
 import { Fragment } from 'react';
+import { useNotificationServiceContext } from 'contexts/NotificationService';
 import { HomeFooter } from 'components';
 import {
   BackButton,
@@ -6,10 +7,10 @@ import {
   NotificationSettingsSection,
   SettingsSection,
 } from 'components/Settings';
-import { useMediaQuery, useNotificationService } from 'hooks';
+import { useMediaQuery } from 'hooks';
 
 export default function Settings() {
-  const { notificationSettings } = useNotificationService();
+  const { notificationSettings } = useNotificationServiceContext();
   const { walletId } = notificationSettings;
   const notMobile = useMediaQuery();
 
