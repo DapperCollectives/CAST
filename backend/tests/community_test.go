@@ -406,6 +406,8 @@ func TestSearchForCommunities(t *testing.T) {
 
 		checkResponseCode(t, http.StatusOK, response.Code)
 
+		//test/tests
+
 		var p test_utils.PaginatedResponseSearch
 		json.Unmarshal(response.Body.Bytes(), &p)
 
