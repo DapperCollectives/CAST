@@ -423,6 +423,8 @@ export default function ProposalPage() {
                       openStrategyModal={openStrategyModal}
                       proposalStrategy={proposalStrategy}
                       votingStrategies={votingStrategies}
+                      proposalMaxWeight={proposal?.maxWeight}
+                      proposalMinBalance={proposal?.minBalance}
                     />
                   </div>
                 )}
