@@ -39,6 +39,8 @@ type Community struct {
 	Slug                     *string     `json:"slug,omitempty"                  validate:"required"`
 	Is_featured              *bool       `json:"isFeatured,omitempty"`
 
+	Total *int `json:"total,omitempty"` // for search only
+
 	Contract_name *string `json:"contractName,omitempty"`
 	Contract_addr *string `json:"contractAddr,omitempty"`
 	Contract_type *string `json:"contractType,omitempty"`
@@ -187,7 +189,7 @@ const UPDATE_COMMUNITY_SQL = `
 	WHERE id = $21
 `
 const SEARCH_COMMUNITIES_SQL = `
-	SELECT id, name, body, logo, category
+	SELECT id, name, body, logo, category	
 	FROM communities 
 	WHERE SIMILARITY(name, $1) > 0.1
 		AND category IS NOT NULL
@@ -258,13 +260,16 @@ func (c *Community) GetCommunityByProposalId(db *s.Database, proposalId int) err
 		proposalId)
 }
 
-func GetDefaultCommunities(db *s.Database, params shared.PageParams, filters []string, isSearch bool) ([]*Community, int, error) {
+func GetDefaultCommunities(
+	db *s.Database,
+	params shared.PageParams,
+	filters []string,
+	isSearch bool,
+) ([]*Community, int, error) {
 	var sql string
 
 	var totalRecords int
 	countSql := `SELECT COUNT(*) FROM communities`
-	db.Conn.QueryRow(db.Context, countSql).Scan(&totalRecords)
-
 	if !isSearch {
 		sql = HOMEPAGE_SQL
 
@@ -287,6 +292,7 @@ func GetDefaultCommunities(db *s.Database, params shared.PageParams, filters []s
 			return []*Community{}, 0, nil
 		}
 
+		db.Conn.QueryRow(db.Context, countSql).Scan(&totalRecords)
 		return communities, totalRecords, nil
 	} else {
 		sql, err := addFiltersToSql(DEFAULT_SEARCH_SQL, "", filters)
@@ -311,6 +317,7 @@ func GetDefaultCommunities(db *s.Database, params shared.PageParams, filters []s
 			return nil, 0, err
 		}
 
+		db.Conn.QueryRow(db.Context, countSql).Scan(&totalRecords)
 		return communities, totalRecords, nil
 	}
 }
@@ -441,12 +448,19 @@ func (c *Community) GetStrategy(name string) (Strategy, error) {
 	return Strategy{}, fmt.Errorf("Strategy %s does not exist on community", name)
 }
 
-func SearchForCommunity(db *s.Database, query string, filters []string, params shared.PageParams) ([]*Community, int, error) {
+func SearchForCommunity(
+	db *s.Database,
+	query string,
+	filters []string,
+	params shared.PageParams,
+) ([]*Community, int, error) {
+
+	countSql := `SELECT COUNT(*) FROM communities WHERE SIMILARITY(name, $1) > 0.1`
 	sql, err := addFiltersToSql(SEARCH_COMMUNITIES_SQL, query, filters)
 	if err != nil {
 		return nil, 0, err
 	}
-	
+
 	rows, err := db.Conn.Query(
 		db.Context,
 		sql,
@@ -466,11 +480,8 @@ func SearchForCommunity(db *s.Database, query string, filters []string, params s
 		return []*Community{}, 0, fmt.Errorf("error scanning search results for the query %s", query)
 	}
 
-	// Get total number of communities
 	var totalRecords int
-	countSql := `SELECT COUNT(*) FROM communities`
-	_ = db.Conn.QueryRow(db.Context, countSql).Scan(&totalRecords)
-
+	db.Conn.QueryRow(db.Context, countSql, query).Scan(&totalRecords)
 	return communities, totalRecords, nil
 }
 
@@ -503,9 +514,9 @@ func GetCategoryCount(db *s.Database, search string) (map[string]int, error) {
 
 	categoryCount := make(map[string]int)
 	for rows.Next() {
-		results := struct{
+		results := struct {
 			Category string
-			Count int
+			Count    int
 		}{}
 		err := rows.Scan(&results.Category, &results.Count)
 		if err != nil {

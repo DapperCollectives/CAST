@@ -122,15 +122,16 @@ export default function StrategySelectorForm({
         </div>
       </div>
       {/* filter elements that will be deleted */}
-      {strategies.map((st, index) => (
-        <StrategySelectorInput
-          index={index}
-          key={`strategy-${index}`}
-          commuVotStra={getStrategyName(allVotingStrategies, st)}
-          onDeleteStrategy={onDeleteStrategy}
-          enableDelete={enableDelete}
-        />
-      ))}
+      {!loadingAllStrategies &&
+        strategies.map((st, index) => (
+          <StrategySelectorInput
+            index={index}
+            key={`strategy-${index}`}
+            commuVotStra={getStrategyName(allVotingStrategies, st)}
+            onDeleteStrategy={onDeleteStrategy}
+            enableDelete={enableDelete}
+          />
+        ))}
       <AddButton
         disabled={disableAddButton || loadingAllStrategies}
         addText={'Strategy'}
