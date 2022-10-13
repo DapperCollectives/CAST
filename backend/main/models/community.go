@@ -406,8 +406,6 @@ func SearchForCommunity(
 		return nil, 0, err
 	}
 
-	fmt.Printf("Count, start: %d, %d \n", params.Count, params.Start)
-
 	rows, err := db.Conn.Query(
 		db.Context,
 		sql,
@@ -429,7 +427,6 @@ func SearchForCommunity(
 
 	var totalRecords int
 	db.Conn.QueryRow(db.Context, countSql, query).Scan(&totalRecords)
-	fmt.Printf("Query %s, total records: %d \n", query, totalRecords)
 	return communities, totalRecords, nil
 }
 
@@ -497,8 +494,6 @@ func addFiltersToSql(query, search string, filters []string) (string, error) {
 	} else {
 		sql = sql + " LIMIT $1 OFFSET $2"
 	}
-
-	fmt.Printf("SQL: %s \n", sql)
 
 	return sql, nil
 }

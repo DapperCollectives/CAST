@@ -2,7 +2,6 @@ package shared
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"reflect"
 	"time"
@@ -121,8 +120,6 @@ func GetPaginatedResponseWithPayload(payload interface{}, p PageParams) *Paginat
 	// Tricky way of getting the length of a slice
 	// that is typed as interface{}
 
-	fmt.Printf("total records: %v \n", p.TotalRecords)
-
 	_count := reflect.ValueOf(payload).Len()
 	var next int
 	if p.Start+_count >= p.TotalRecords {
@@ -137,8 +134,6 @@ func GetPaginatedResponseWithPayload(payload interface{}, p PageParams) *Paginat
 		TotalRecords: p.TotalRecords,
 		Next:         next,
 	}
-
-	fmt.Printf("next %d \n", next)
 
 	return &response
 }
