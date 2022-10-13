@@ -5,7 +5,6 @@ package models
 /////////////////
 
 import (
-	"errors"
 	"fmt"
 	"strconv"
 	"time"
@@ -14,7 +13,6 @@ import (
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/jackc/pgx/v4"
-	"github.com/rs/zerolog/log"
 )
 
 type Community struct {
@@ -93,8 +91,12 @@ type UpdateCommunityRequestPayload struct {
 
 type CanUserCreateProposalResponse struct {
 	shared.Contract
-	Balance       *float64 `json:"balance,omitempty"`
-	HasPermission bool     `json:"hasPermission"`
+	Balance                *float64 `json:"balance,omitempty"`
+	Only_authors_to_submit bool     `json:"onlyAuthorsToSubmit"`
+	IsAuthor               bool     `json:"isAuthor"`
+	HasPermission          bool     `json:"hasPermission"`
+	Reason                 string   `json:"reason,omitempty"`
+	Error                  error    `json:"error,omitempty"`
 }
 
 type Strategy struct {
@@ -413,50 +415,61 @@ func (c *Community) CanUpdateCommunity(db *s.Database, addr string) error {
 	return nil
 }
 
-func (c *Community) CanUserCreateProposal(db *s.Database, fa *s.FlowAdapter, address string) error {
-	var isAuthor = true
-	var errMsg string
+func (c *Community) CanUserCreateProposal(db *s.Database, fa *s.FlowAdapter, address string) CanUserCreateProposalResponse {
+	response := CanUserCreateProposalResponse{}
+	response.Only_authors_to_submit = *c.Only_authors_to_submit
+	response.HasPermission = false // false by default
 
 	// Check if user is an author
 	if err := EnsureRoleForCommunity(db, address, c.ID, "author"); err != nil {
-		isAuthor = false
-		errMsg = fmt.Sprintf("Account %s is not an author for community %d.", address, c.ID)
-		log.Error().Err(err).Msg(errMsg)
+		response.IsAuthor = false
 	} else { // return successfully if user is an author, regardless of Only_authors_to_submit
-		return nil
+		response.IsAuthor = true
+		response.HasPermission = true
+		return response
 	}
 
-	// If only authors can submit
-	if *c.Only_authors_to_submit && !isAuthor {
-		return errors.New(errMsg)
-	}
-	threshold, err := strconv.ParseFloat(*c.Proposal_threshold, 64)
-	if err != nil {
-		log.Error().Err(err).Msg("Invalid proposal threshold")
-		return errors.New("Invalid proposal threshold")
+	// If only authors can submit and user is not an author
+	if *c.Only_authors_to_submit && !response.IsAuthor {
+		response.Reason = fmt.Sprintf("Account %s is not an author for community %d.", address, c.ID)
+		response.HasPermission = false
+		return response
 	}
 
-	contract := shared.Contract{
-		Name:        c.Contract_name,
-		Addr:        c.Contract_addr,
-		Public_path: c.Public_path,
-		Threshold:   &threshold,
-	}
-	balance, err := fa.GetBalanceOfTokens(address, &contract, *c.Contract_type)
-	if err != nil {
-		errMsg := "Error processing Token Threshold."
-		log.Error().Err(err).Msg(errMsg)
-		return errors.New(errMsg)
+	// If we can use token threshold
+	if !*c.Only_authors_to_submit {
+		threshold, err := strconv.ParseFloat(*c.Proposal_threshold, 64)
+		if err != nil {
+			err = fmt.Errorf("invalid proposal threshold for community %d", c.ID)
+			response.Error = err
+			return response
+		}
+
+		// Get Contract
+		contract := shared.Contract{
+			Name:        c.Contract_name,
+			Addr:        c.Contract_addr,
+			Public_path: c.Public_path,
+			Threshold:   &threshold,
+		}
+		response.Contract = contract
+
+		// Get balance if community has proposal threshold rule
+		balance, _ := fa.GetBalanceOfTokens(address, &contract, *c.Contract_type)
+		response.Balance = balance
+
+		//check if balance is greater than threshold
+		if *balance < threshold {
+			reason := "Insufficient token balance to create proposal."
+			response.Reason = reason
+			return response
+		} else {
+			response.HasPermission = true
+			return response
+		}
 	}
 
-	//check if balance is greater than threshold
-	if *balance < threshold {
-		errMsg := "Insufficient token balance to create proposal."
-		log.Error().Err(err).Msg(errMsg)
-		return errors.New(errMsg)
-	}
-
-	return nil
+	return response
 }
 
 func (c *Community) GetStrategy(name string) (Strategy, error) {
