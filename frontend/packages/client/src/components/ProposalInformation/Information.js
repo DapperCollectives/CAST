@@ -85,7 +85,7 @@ export default function Information({
         <InfoBlock
           title={'Token required'}
           component={
-            false ? (
+            contractAddr ? (
               <a
                 href={`https://flowscan.org/account/${contractAddr}`}
                 rel="noopener noreferrer"
