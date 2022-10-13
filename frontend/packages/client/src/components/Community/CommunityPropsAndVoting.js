@@ -1,7 +1,7 @@
 import { createElement } from 'react';
 import { useModalContext } from 'contexts/NotificationModal';
 import { useWebContext } from 'contexts/Web3';
-import { ActionButton, Error } from 'components';
+import { ActionButton, ErrorModal } from 'components';
 import StrategySelectorForm from 'components/Community/StrategySelectorForm';
 import { kebabToString } from 'utils';
 import isEqual from 'lodash/isEqual';
@@ -50,8 +50,8 @@ export default function CommunityProposalsAndVoting({
     // open modal if there are errors on addresses
     if (errorMessages.length) {
       modalContext.openModal(
-        createElement(Error, {
-          error: (
+        createElement(ErrorModal, {
+          message: (
             <div className="mt-4">
               <p className="is-size-6">
                 Addresses used are not valid Flow addresses:
@@ -69,15 +69,18 @@ export default function CommunityProposalsAndVoting({
               </div>
             </div>
           ),
-          errorTitle: 'Flow Address Error',
+          title: 'Flow Address Error',
         }),
-        { classNameModalContent: 'rounded-sm' }
+        { isErrorModal: true }
       );
       return;
     }
 
+    // onError hook from react-query will handle error
     await updateCommunity({
       strategies: updatePayload,
+    }).catch(() => {
+      return;
     });
   };
 
@@ -86,20 +89,24 @@ export default function CommunityProposalsAndVoting({
       existingStrategies={communityVotingStrategies}
       activeStrategies={activeStrategies}
       disableAddButton={updatingCommunity}
-      callToAction={(st) => (
-        <ActionButton
-          label="Save"
-          enabled={
-            updatingCommunity
-              ? false
-              : // or check if list has changed to enable saving
-                !isEqual(st, communityVotingStrategies)
-          }
-          onClick={() => saveDataToBackend(st)}
-          loading={updatingCommunity}
-          classNames="mt-5"
-        />
-      )}
+      enableDelUniqueItem
+      callToAction={(st) => {
+        return (
+          <ActionButton
+            label="Save"
+            enabled={
+              updatingCommunity
+                ? false
+                : // or check if list has changed to enable saving
+                  // save will be enabled when lists with objecrs are different
+                  !isEqual(st, communityVotingStrategies) && st.length > 0
+            }
+            onClick={() => saveDataToBackend(st)}
+            loading={updatingCommunity}
+            classNames="mt-5"
+          />
+        );
+      }}
     />
   );
 }

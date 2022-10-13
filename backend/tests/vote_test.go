@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"testing"
@@ -21,7 +22,7 @@ func TestGetVotes(t *testing.T) {
 	clearTable("community_users")
 	clearTable("proposals")
 	clearTable("votes")
-	communityId := otu.AddCommunities(1)[0]
+	communityId := otu.AddCommunities(1, "dao")[0]
 	proposalId := otu.AddProposals(communityId, 1)[0]
 
 	// 	t.Run("Requesting votes for a proposal with none created should return a 200 and empty array", func(t *testing.T) {
@@ -108,11 +109,11 @@ func TestCreateVote(t *testing.T) {
 		clearTable("community_users")
 		clearTable("proposals")
 		clearTable("votes")
-		communityId := otu.AddCommunities(1)[0]
+		communityId := otu.AddCommunities(1, "dao")[0]
 		proposalId := otu.AddActiveProposals(communityId, 1)[0]
-		voteChoice := "a"
+		voteChoiceId := 0
 
-		votePayload := otu.GenerateValidVotePayload("user1", proposalId, voteChoice)
+		votePayload := otu.GenerateValidVotePayload("user1", proposalId, voteChoiceId)
 
 		response := otu.CreateVoteAPI(proposalId, votePayload)
 		CheckResponseCode(t, http.StatusCreated, response.Code)
@@ -124,7 +125,7 @@ func TestCreateVote(t *testing.T) {
 		json.Unmarshal(response.Body.Bytes(), &createdVote)
 
 		// assert.Equal(t, "user1", createdVote.Addr)
-		assert.Equal(t, voteChoice, createdVote.Choice)
+		assert.Equal(t, fmt.Sprintf("%d", voteChoiceId), createdVote.Choices[0])
 		assert.Equal(t, proposalId, createdVote.Proposal_id)
 		assert.Equal(t, 1, createdVote.ID)
 	})

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Svg } from '@cast/shared-components';
-import { StatusLabel, WrapperResponsive } from 'components';
+import { StatusLabel, StyledStatusPill, WrapperResponsive } from 'components';
 import { useVotingResults } from 'hooks';
 import { FilterValues } from 'const';
 import { parseDateFromServer } from 'utils';
@@ -95,19 +95,10 @@ const ProposalCardFooter = ({
         className="proposal-status-label has-text-weight-bold has-text-black"
       />
     ),
-    [FilterValues.pending]: (
-      <StatusLabel
-        status="Pending"
-        voted={voted}
-        rounder
-        color="has-background-grey-light"
-      />
-    ),
-    [FilterValues.closed]: (
-      <StatusLabel status="Closed" voted={voted} rounder />
-    ),
+    [FilterValues.pending]: <StyledStatusPill status={FilterValues.pending} />,
+    [FilterValues.closed]: <StyledStatusPill status={FilterValues.closed} />,
     [FilterValues.cancelled]: (
-      <StatusLabel status="Cancelled" voted={voted} rounder />
+      <StyledStatusPill status={FilterValues.cancelled} />
     ),
   };
 

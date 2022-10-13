@@ -44,6 +44,11 @@ type PageParams struct {
 	TotalRecords int
 }
 
+type SearchFilter struct {
+	Text   string `json:"text"`
+	Amount int    `json:"amount"`
+}
+
 type CompositeSignature struct {
 	Addr      string  `json:"addr"`
 	Key_id    uint    `json:"keyId"`
@@ -60,6 +65,7 @@ type TimestampSignaturePayload struct {
 
 // used in models/proposal.go
 type Choice struct {
+	ID             *uint   `json:"id,omitempty"`
 	Choice_text    string  `json:"choiceText"`
 	Choice_img_url *string `json:"choiceImgUrl"`
 }
@@ -92,14 +98,14 @@ type FTBalanceResponse struct {
 }
 
 type CustomScript struct {
-	Key 		string `json:"key" validate:"required"`
-	Name 		string `json:"name" validate:"required"`
+	Key         string `json:"key" validate:"required"`
+	Name        string `json:"name" validate:"required"`
 	Description string `json:"description" validate:"required"`
-	Src 		string `json:"src" validate:"required"`
+	Src         string `json:"src" validate:"required"`
 }
 
 func (b *FTBalanceResponse) NewFTBalance() {
-	if os.Getenv("APP_ENV") == "TEST" || os.Getenv("APP_ENV") == "DEV" {
+	if os.Getenv("FLOW_ENV") == "emulator" {
 		b.PrimaryAccountBalance = 11100000
 		b.SecondaryAccountBalance = 12300000
 		b.StakingBalance = 13500000
@@ -117,7 +123,7 @@ func GetPaginatedResponseWithPayload(payload interface{}, p PageParams) *Paginat
 
 	_count := reflect.ValueOf(payload).Len()
 	var next int
-	if p.Start+_count >= p.TotalRecords {
+	if p.Start+_count >= (p.TotalRecords - 1) {
 		next = -1
 	} else {
 		next = p.Start + _count

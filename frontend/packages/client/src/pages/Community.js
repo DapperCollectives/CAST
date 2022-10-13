@@ -178,7 +178,7 @@ export default function Community() {
 
   // check for allowing only three options
   if (!['proposals', 'about', 'members'].includes(activeTab)) {
-    history.push(`/community/${communityId}?tab=proposals`);
+    history.replace(`/community/${communityId}?tab=proposals`);
   }
   // navigation from leader board to member list
   const onClickViewMore = () => {

@@ -23,9 +23,9 @@ func resetTables() {
 func TestGetLeaderboardCurrentUser(t *testing.T) {
 	resetTables()
 
-	communityId := otu.AddCommunities(1)[0]
+	communityId := otu.AddCommunities(1, "dao")[0]
 	proposalId := otu.AddActiveProposals(communityId, 1)[0]
-	vote := otu.GenerateValidVotePayload("user1", proposalId, "a")
+	vote := otu.GenerateValidVotePayload("user1", proposalId, 0)
 	otu.CreateVoteAPI(proposalId, vote)
 
 	response := otu.GetCommunityLeaderboardAPI(communityId)
@@ -48,7 +48,7 @@ func TestGetLeaderboardCurrentUser(t *testing.T) {
 func TestGetLeaderboardWithEarlyVotes(t *testing.T) {
 	resetTables()
 
-	communityId := otu.AddCommunities(1)[0]
+	communityId := otu.AddCommunities(1, "dao")[0]
 	earlyVoteBonus := 1
 	expectedUsers := 1
 	expectedProposals := 2
@@ -75,7 +75,7 @@ func TestGetLeaderboardWithEarlyVotes(t *testing.T) {
 func TestGetLeaderboardWithSingleStreak(t *testing.T) {
 	resetTables()
 
-	communityId := otu.AddCommunities(1)[0]
+	communityId := otu.AddCommunities(1, "dao")[0]
 	streaks := []int{3, 4}
 	streakBonus := 1
 	expectedUsers := len(streaks)
@@ -108,7 +108,7 @@ func TestGetLeaderboardWithSingleStreak(t *testing.T) {
 func TestGetLeaderboardWithMultiStreaks(t *testing.T) {
 	resetTables()
 
-	communityId := otu.AddCommunities(1)[0]
+	communityId := otu.AddCommunities(1, "dao")[0]
 	streaks := []int{3, 4}
 	streakBonus := 1
 	expectedUsers := 1
@@ -135,10 +135,10 @@ func TestGetLeaderboardWithMultiStreaks(t *testing.T) {
 func TestGetLeaderboardWithWinningVote(t *testing.T) {
 	resetTables()
 
-	communityId := otu.AddCommunities(1)[0]
+	communityId := otu.AddCommunities(1, "dao")[0]
 	winningVoteBonus := 1
 
-	proposalId := otu.GenerateWinningVoteAchievement(communityId, "one-address-one-vote")
+	proposalId := otu.GenerateWinningVoteAchievement(communityId, "token-weighted-default")
 	otu.UpdateProposalEndTime(proposalId, time.Now().UTC())
 	otu.GetProposalResultsAPI(proposalId)
 
@@ -180,20 +180,20 @@ func TestGetLeaderboardWithCancelledProposal(t *testing.T) {
 		proposalIds := otu.AddActiveProposals(communityId, 3)
 
 		for _, id := range proposalIds {
-			vote := otu.GenerateValidVotePayload(authorName, id, "a")
+			vote := otu.GenerateValidVotePayload(authorName, id, 0)
 			otu.CreateVoteAPI(id, vote)
 		}
-	
+
 		// Cancel proposal
 		cancelPayload := otu.GenerateCancelProposalStruct(authorName, proposalIds[1])
 		otu.UpdateProposalAPI(proposalIds[1], cancelPayload)
-		
+
 		response := otu.GetCommunityLeaderboardAPI(communityId)
 		checkResponseCode(t, http.StatusOK, response.Code)
-	
+
 		var p test_utils.PaginatedResponseWithLeaderboardUser
 		json.Unmarshal(response.Body.Bytes(), &p)
-	
+
 		assert.Equal(t, 2, p.Data.Users[0].Score)
 	})
 
@@ -201,14 +201,14 @@ func TestGetLeaderboardWithCancelledProposal(t *testing.T) {
 		numProposals := 4
 		communityId := otu.AddCommunitiesWithUsers(1, authorName)[0]
 		proposalIds := otu.GenerateEarlyVoteAchievements(communityId, numProposals, 1)
-		
+
 		// Cancel a proposalId
 		cancelPayload := otu.GenerateCancelProposalStruct(authorName, proposalIds[1])
 		otu.UpdateProposalAPI(proposalIds[1], cancelPayload)
-		
+
 		response := otu.GetCommunityLeaderboardAPI(communityId)
 		checkResponseCode(t, http.StatusOK, response.Code)
-	
+
 		var p test_utils.PaginatedResponseWithLeaderboardUser
 		json.Unmarshal(response.Body.Bytes(), &p)
 
@@ -221,7 +221,7 @@ func TestGetLeaderboardWithCancelledProposal(t *testing.T) {
 func TestGetLeaderboardDefaultPaging(t *testing.T) {
 	resetTables()
 
-	communityId := otu.AddCommunities(1)[0]
+	communityId := otu.AddCommunities(1, "dao")[0]
 
 	numUsers := 6
 	numProposals := 1
@@ -241,7 +241,7 @@ func TestGetLeaderboardDefaultPaging(t *testing.T) {
 func TestGetLeaderboardPaging(t *testing.T) {
 	resetTables()
 
-	communityId := otu.AddCommunities(1)[0]
+	communityId := otu.AddCommunities(1, "dao")[0]
 
 	otu.AddActiveProposals(communityId, 1)
 

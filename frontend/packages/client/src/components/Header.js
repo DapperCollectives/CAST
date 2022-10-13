@@ -16,13 +16,16 @@ function Header(props) {
     setShowSidenav(false);
   };
 
+  const classNamesLinks =
+    'navbar-item p-0 mr-6-desktop mr-5-tablet is-hidden-mobile';
+
   return (
     <>
       <header
         id="navbar"
         className={`${props.location.pathname} has-background-white is-block navbar is-fixed-top`}
       >
-        <div className="px-4 divider">
+        <div className="px-6-desktop px-5-tablet px-4-mobile divider">
           <div className="container header-spacing">
             <nav className="navbar is-transparent">
               <div className="navbar-brand">
@@ -57,7 +60,7 @@ function Header(props) {
                     pathname: '/about',
                     state: { modal: true },
                   }}
-                  className="navbar-item p-0 mr-6 is-hidden-mobile"
+                  className={classNamesLinks}
                 >
                   <span className="navbar-item-hover transition-all has-text-weight-bold has-text-black">
                     About Us
@@ -65,16 +68,27 @@ function Header(props) {
                 </NavLink>
                 <NavLink
                   to={{
+                    pathname: '/browse-communities',
+                    state: { modal: true },
+                  }}
+                  className={classNamesLinks}
+                >
+                  <span className="navbar-item-hover transition-all has-text-weight-bold has-text-black">
+                    Browse
+                  </span>
+                </NavLink>
+                <NavLink
+                  to={{
                     pathname: '/community/create',
                   }}
-                  className="navbar-item p-0 mr-6 is-hidden-mobile"
+                  className={classNamesLinks}
                 >
                   <span className="navbar-item-hover transition-all has-text-weight-bold has-text-black">
                     Create a Community
                   </span>
                 </NavLink>
                 <span className="navbar-item p-0">
-                  <WalletConnect expandContainer />
+                  <WalletConnect />
                 </span>
               </div>
             </nav>

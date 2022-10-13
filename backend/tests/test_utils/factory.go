@@ -23,11 +23,13 @@ var InvalidServiceAccountKey = "5687d75f957bf64591b55eb19227706e3c8712c1387225b8
 
 func (otu *OverflowTestUtils) AddDummyVotesAndBalances(votes []*models.VoteWithBalance) error {
 	for _, vote := range votes {
+		choices := make([]string, 1)
+		choices[0] = vote.Vote.Choices[0]
 		// Insert Vote
 		_, err := otu.A.DB.Conn.Exec(otu.A.DB.Context, `
-			INSERT INTO votes(proposal_id, addr, choice, composite_signatures, message)
+			INSERT INTO votes(proposal_id, addr, choices, composite_signatures, message)
 			VALUES($1, $2, $3, $4, $5)
-		`, vote.Vote.Proposal_id, vote.Vote.Addr, vote.Vote.Choice, "[]", "__msg__")
+		`, vote.Vote.Proposal_id, vote.Vote.Addr, choices, "[]", "__msg__")
 		if err != nil {
 			log.Error().Err(err).Msg("AddDummyVotesAndBalances database error - votes.")
 			return err
@@ -49,12 +51,13 @@ func (otu *OverflowTestUtils) AddDummyVotesAndBalances(votes []*models.VoteWithB
 
 func (otu *OverflowTestUtils) AddDummyVotesAndNFTs(votes []*models.VoteWithBalance) {
 	for _, vote := range votes {
-
+		choices := make([]string, 1)
+		choices[0] = vote.Vote.Choices[0]
 		// Insert Vote
 		_, err := otu.A.DB.Conn.Exec(otu.A.DB.Context, `
-			INSERT INTO votes(proposal_id, addr, choice, composite_signatures, message)
+			INSERT INTO votes(proposal_id, addr, choices, composite_signatures, message)
 			VALUES($1, $2, $3, $4, $5)
-		`, vote.Vote.Proposal_id, vote.Vote.Addr, vote.Vote.Choice, "[]", "__msg__")
+		`, vote.Vote.Proposal_id, vote.Vote.Addr, choices, "[]", "__msg__")
 		if err != nil {
 			log.Error().Err(err).Msg("AddDummyVotesAndNFTS database error- votes.")
 			return
@@ -88,11 +91,13 @@ func (otu *OverflowTestUtils) AddVotes(pId int, count int) {
 	var addr string
 	for i := 1; i < count+1; i++ {
 		addr = otu.ResolveUser(i)
+		choices := make([]string, 1)
+		choices[0] = "yes"
 
 		_, err := otu.A.DB.Conn.Exec(otu.A.DB.Context, `
-			INSERT INTO votes(proposal_id, addr, choice, composite_signatures, message)
+			INSERT INTO votes(proposal_id, addr, choices, composite_signatures, message)
 			VALUES($1, $2, $3, $4, $5)
-			`, pId, addr, "yes", "[]", "__msg__")
+			`, pId, addr, choices, "[]", "__msg__")
 		if err != nil {
 			log.Error().Err(err).Msg("'addVotes' database error.")
 		}
@@ -103,13 +108,13 @@ func (otu *OverflowTestUtils) AddVotes(pId int, count int) {
 // COMMUNITIES
 //////////////
 
-func (otu *OverflowTestUtils) AddCommunities(count int) []int {
+func (otu *OverflowTestUtils) AddCommunities(count int, category string) []int {
 	if count < 1 {
 		count = 1
 	}
 	retIds := []int{}
 	for i := 0; i < count; i++ {
-		community := otu.GenerateCommunityStruct("account")
+		community := otu.GenerateCommunityStruct("account", category)
 
 		if err := community.CreateCommunity(otu.A.DB); err != nil {
 			fmt.Printf("Error in otu.AddCommunities.")
@@ -127,7 +132,8 @@ func (otu *OverflowTestUtils) AddCommunitiesWithUsers(count int, signer string) 
 	}
 	retIds := []int{}
 	for i := 0; i < count; i++ {
-		community := otu.GenerateCommunityStruct(signer)
+		
+		community := otu.GenerateCommunityStruct(signer, "dao")
 		if err := community.CreateCommunity(otu.A.DB); err != nil {
 			fmt.Printf("Error in otu.AddCommunities.")
 		}
@@ -269,6 +275,16 @@ func (otu *OverflowTestUtils) UpdateProposalEndTime(pId int, endTime time.Time) 
 		`, pId, endTime)
 	if err != nil {
 		log.Error().Err(err).Msg("Update proposal end_time database err.")
+	}
+}
+
+func (otu *OverflowTestUtils) UpdateProposalStartTime(pId int, endTime time.Time) {
+	_, err := otu.A.DB.Conn.Exec(otu.A.DB.Context,
+		`
+		UPDATE proposals SET start_time = $2 WHERE id = $1
+		`, pId, endTime)
+	if err != nil {
+		log.Error().Err(err).Msg("Update proposal start_time database err.")
 	}
 }
 

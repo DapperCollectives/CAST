@@ -1,8 +1,8 @@
 import { createElement, useEffect, useState } from 'react';
 import { useModalContext } from 'contexts/NotificationModal';
-import { AddButton, Error } from 'components';
+import { AddButton, ErrorModal } from 'components';
 import StrategySelectorInput from 'components/Community/StrategySelectorInput';
-import { useAddFungibleToken, useVotingStrategies } from 'hooks';
+import { useVotingStrategies } from 'hooks';
 import { kebabToString } from 'utils';
 import isEqual from 'lodash/isEqual';
 import StrategyEditorModal from './StrategyEditorModal';
@@ -40,7 +40,6 @@ export default function StrategySelectorForm({
 
   const { data: allVotingStrategies, isLoading: loadingAllStrategies } =
     useVotingStrategies();
-  const { addFungibleToken } = useAddFungibleToken();
 
   const { openModal, closeModal } = useModalContext();
 
@@ -51,12 +50,6 @@ export default function StrategySelectorForm({
 
   const addNewStrategy = (newStrategyInfo) => {
     const { contract } = newStrategyInfo;
-    if (
-      newStrategyInfo.name === 'staked-token-weighted-default' ||
-      newStrategyInfo.name === 'token-weighted-default'
-    ) {
-      addFungibleToken(contract.addr, contract.name, contract.publicPath);
-    }
     setStrategies((state) => [...state, newStrategyInfo]);
     closeModal();
   };
@@ -79,9 +72,9 @@ export default function StrategySelectorForm({
     const strategy = strategies[index];
     if (activeStrategies.includes(strategy.name)) {
       openModal(
-        createElement(Error, {
-          error: (
-            <div className="mt-4">
+        createElement(ErrorModal, {
+          message: (
+            <>
               <p className="is-size-6">
                 Selected strategy is currently used by a pending or active
                 proposal.
@@ -95,9 +88,9 @@ export default function StrategySelectorForm({
                   </li>
                 </ul>
               </div>
-            </div>
+            </>
           ),
-          errorTitle: 'Strategy In Use Error',
+          title: 'Strategy In Use Error',
         }),
         { classNameModalContent: 'rounded-sm' }
       );
@@ -129,15 +122,16 @@ export default function StrategySelectorForm({
         </div>
       </div>
       {/* filter elements that will be deleted */}
-      {strategies.map((st, index) => (
-        <StrategySelectorInput
-          index={index}
-          key={`strategy-${index}`}
-          commuVotStra={getStrategyName(allVotingStrategies, st)}
-          onDeleteStrategy={onDeleteStrategy}
-          enableDelete={enableDelete}
-        />
-      ))}
+      {!loadingAllStrategies &&
+        strategies.map((st, index) => (
+          <StrategySelectorInput
+            index={index}
+            key={`strategy-${index}`}
+            commuVotStra={getStrategyName(allVotingStrategies, st)}
+            onDeleteStrategy={onDeleteStrategy}
+            enableDelete={enableDelete}
+          />
+        ))}
       <AddButton
         disabled={disableAddButton || loadingAllStrategies}
         addText={'Strategy'}

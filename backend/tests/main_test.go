@@ -22,6 +22,103 @@ var otu *utils.OverflowTestUtils
 
 const ServiceAddress = "0xf8d6e0586b0a20c7"
 
+type errorResponse struct {
+	StatusCode int		`json:"statusCode,string"`
+	ErrorCode  string	`json:"errorCode"`
+	Message    string	`json:"message"`
+	Details    string	`json:"details"`
+}
+
+var (
+	errIncompleteRequest = errorResponse{
+		StatusCode: http.StatusBadRequest,
+		ErrorCode:  "ERR_1001",
+		Message:    "Error",
+		Details:    "There was an error trying to complete your request",
+	}
+
+	errCreateCommunity = errorResponse{
+		StatusCode: http.StatusBadRequest,
+		ErrorCode:  "ERR_1002",
+		Message:    "Error",
+		Details:    "There was an error trying to create your community",
+	}
+
+	errFetchingBalance = errorResponse{
+		StatusCode: http.StatusBadRequest,
+		ErrorCode:  "ERR_1003",
+		Message:    "Error Fetching Balance",
+		Details: `While confirming your balance, we've encountered an error
+							connecting to the Flow Blockchain.`,
+	}
+
+	errInsufficientBalance = errorResponse{
+		StatusCode: http.StatusUnauthorized,
+		ErrorCode:  "ERR_1004",
+		Message:    "Insufficient Balance",
+		Details: `In order to vote on this proposal you must have a minimum 
+							balance of %f %s tokens in your wallet.`,
+	}
+
+	errForbidden = errorResponse{
+		StatusCode: http.StatusForbidden,
+		ErrorCode:  "ERR_1005",
+		Message:    "Forbidden",
+		Details:    "You are not authorized to perform this action.",
+	}
+
+	errCreateProposal = errorResponse{
+		StatusCode: http.StatusForbidden,
+		ErrorCode:  "ERR_1006",
+		Message:    "Error",
+		Details:    "There was an error trying to create your proposal",
+	}
+
+	errUpdateCommunity = errorResponse{
+		StatusCode: http.StatusForbidden,
+		ErrorCode:  "ERR_1007",
+		Message:    "Error",
+		Details:    "There was an error trying to update your community",
+	}
+
+	errStrategyNotFound = errorResponse{
+		StatusCode: http.StatusNotFound,
+		ErrorCode:  "ERR_1008",
+		Message:    "Strategy Not Found",
+		Details:    "The strategy name you are trying to use no longer exists.",
+	}
+
+	errAlreadyVoted = errorResponse{
+		StatusCode: http.StatusBadRequest,
+		ErrorCode:  "ERR_1009",
+		Message:    "Error",
+		Details:    "Address %s has already voted for proposal %d.",
+	}
+
+	errInactiveProposal = errorResponse{
+		StatusCode: http.StatusBadRequest,
+		ErrorCode:  "ERR_1010",
+		Message:    "Error",
+		Details:    "Cannot vote on an inactive proposal.",
+	}
+
+	errGetCommunity = errorResponse{
+		StatusCode: http.StatusInternalServerError,
+		ErrorCode:  "ERR_1011",
+		Message:    "Error",
+		Details:    "There was an error retrieving the community.",
+	}
+
+	errCreateVote = errorResponse{
+		StatusCode: http.StatusInternalServerError,
+		ErrorCode:  "ERR_1012",
+		Message:    "Error",
+		Details:    "There was an error creating the vote.",
+	}
+
+	nilErr = errorResponse{}
+)
+
 func TestMain(m *testing.M) {
 	var err error
 

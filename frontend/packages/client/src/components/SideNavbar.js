@@ -44,6 +44,17 @@ const Sidenavbar = ({ showSidenav, closeSidenav }) => {
               <li>
                 <NavLink
                   to={{
+                    pathname: '/browse-communities',
+                  }}
+                  className="navbar-item pl-0 py-4 is-size-5 has-text-black"
+                  onClick={closeSidenav}
+                >
+                  Browse
+                </NavLink>
+              </li>
+              <li>
+                <NavLink
+                  to={{
                     pathname: '/community/create',
                   }}
                   className="navbar-item pl-0 py-4 is-size-5 has-text-black"

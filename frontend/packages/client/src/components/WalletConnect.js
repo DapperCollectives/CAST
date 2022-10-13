@@ -106,12 +106,12 @@ const SignInOutButton = ({
       >
         <div className="dropdown-trigger is-flex is-justify-content-flex-end">
           <button
-            onClick={loggedIn ? openDropdown : connectWallet}
+            onClick={openDropdown}
             className={buttonClass}
             style={
               notMobile
                 ? {
-                    ...(loggedIn ? { width: '147px' } : { width: '206px' }),
+                    width: '147px',
                     height: '40px',
                   }
                 : { width: '121px', height: '32px' }
@@ -191,22 +191,20 @@ const SignInOutButton = ({
   );
 };
 
-const CurrentUser = ({ web3, closeModal, expandContainer }) => {
+const CurrentUser = ({ web3, closeModal, expandToContainer = false } = {}) => {
   const { user, injectedProvider, openWalletModal } = web3;
   if (!user) {
     return null;
   }
 
   return (
-    <div className="card">
-      <SignInOutButton
-        user={user}
-        injectedProvider={injectedProvider}
-        openWalletModal={openWalletModal}
-        closeModal={closeModal}
-        expandContainer={expandContainer}
-      />
-    </div>
+    <SignInOutButton
+      user={user}
+      injectedProvider={injectedProvider}
+      openWalletModal={openWalletModal}
+      closeModal={closeModal}
+      expandToContainer={expandToContainer}
+    />
   );
 };
 
