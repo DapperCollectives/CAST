@@ -42,6 +42,7 @@ export default function useCommunityDetailsUpdate() {
           signingAddr: addr,
           timestamp,
           compositeSignatures,
+          voucher,
         },
       });
     },
