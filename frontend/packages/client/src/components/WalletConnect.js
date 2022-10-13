@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Blockies from 'react-blockies';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
+import { Link } from 'react-router-dom';
 import { Web3Consumer } from 'contexts/Web3';
 import { Svg } from '@cast/shared-components';
 import { useMediaQuery, useOnClickOutside } from 'hooks';
@@ -16,7 +17,6 @@ const SignInOutButton = ({
   expandToContainer,
 }) => {
   const notMobile = useMediaQuery();
-
   const [dropDownClass, setDropDownClass] = useState('');
   const [addressCopied, setAddressCopied] = useState(false);
 
@@ -175,9 +175,18 @@ const SignInOutButton = ({
             </div>
 
             <hr className="dropdown-divider" />
+            <Link
+              to="/settings"
+              className="has-text-black cursor-pointer is-flex is-flex-direction-row is-align-items-center is-fullwidth px-4 py-2 has-text-weight-bold"
+              onClick={closeDropdown}
+            >
+              <Svg name="Cog" />
+              <span className="ml-2">Settings</span>
+            </Link>
+            <hr className="dropdown-divider" />
             <div className="px-4 pb-4 pt-2">
               <div
-                className="button is-fullwidth rounded-lg is-flex small-text has-text-white has-background-black"
+                className="button is-fullwidth rounded-lg is-flex small-text has-text-white has-background-black cursor-pointer"
                 style={{ height: '32px' }}
                 onClick={signOut}
               >

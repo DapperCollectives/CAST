@@ -3,6 +3,7 @@ import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { ErrorBoundary } from 'react-error-boundary';
 import { HashRouter as Router } from 'react-router-dom';
 import NotificationModalProvider from 'contexts/NotificationModal';
+import NotificationServiceProvider from 'contexts/NotificationService';
 import { Web3Provider } from 'contexts/Web3';
 import { ErrorHandler } from 'components';
 import { IS_PRODUCTION } from 'const';
@@ -30,11 +31,13 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <Web3Provider network={process.env.REACT_APP_FLOW_ENV}>
           <NotificationModalProvider>
-            <Router>
-              <ErrorHandler>
-                <AppPages />
-              </ErrorHandler>
-            </Router>
+            <NotificationServiceProvider>
+              <Router>
+                <ErrorHandler>
+                  <AppPages />
+                </ErrorHandler>
+              </Router>
+            </NotificationServiceProvider>
           </NotificationModalProvider>
         </Web3Provider>
         {!IS_PRODUCTION && <ReactQueryDevtools initialIsOpen={false} />}
