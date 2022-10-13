@@ -9,6 +9,7 @@ export default function ChoiceOptionCreator({
   fieldName,
   control,
   clearErrors,
+  voteType,
 } = {}) {
   const tabOption = useWatch({ control, name: 'tabOption' });
 
@@ -19,32 +20,38 @@ export default function ChoiceOptionCreator({
     setValue('tabOption', option);
   };
 
+  if (voteType === 'ranked-choice') {
+    setTab('text-based');
+  }
+
   return (
     <>
-      <div className="tabs choice-option is-toggle mt-2 mb-4">
-        <ul>
-          <li>
-            <button
-              className={`button left ${
-                tabOption === 'text-based' ? 'is-black' : 'outlined'
-              }`}
-              onClick={setTab('text-based')}
-            >
-              <span>Text-based</span>
-            </button>
-          </li>
-          <li>
-            <button
-              className={`button right ${
-                tabOption === 'visual' ? 'is-black' : 'outlined'
-              }`}
-              onClick={setTab('visual')}
-            >
-              <span>Visual</span>
-            </button>
-          </li>
-        </ul>
-      </div>
+      {voteType === 'single-choice' ? (
+        <div className="tabs choice-option is-toggle mt-2 mb-4">
+          <ul>
+            <li>
+              <button
+                className={`button left ${
+                  tabOption === 'text-based' ? 'is-black' : 'outlined'
+                }`}
+                onClick={setTab('text-based')}
+              >
+                <span>Text-based</span>
+              </button>
+            </li>
+            <li>
+              <button
+                className={`button right ${
+                  tabOption === 'visual' ? 'is-black' : 'outlined'
+                }`}
+                onClick={setTab('visual')}
+              >
+                <span>Visual</span>
+              </button>
+            </li>
+          </ul>
+        </div>
+      ) : null}
       {tabOption === 'text-based' && (
         <TextBasedChoices
           error={error}

@@ -303,11 +303,19 @@ const StepOne = ({
           <h4 className="title is-5 mb-2">
             Choices <span className="has-text-danger">*</span>
           </h4>
-          <p className="has-text-grey mb-4">
-            Provide the specific options you’d like to cast votes for. Use
-            Text-based presentation for choices that described in words. Use
-            Visual for side-by-side visual options represented by images.
-          </p>
+          {voteType === 'single-choice' ? (
+            <p className="has-text-grey mb-4">
+              Provide the specific options you’d like to cast votes for. Use
+              Text-based presentation for choices that are described in words.
+              Use Visual for side-by-side visual options represented by images.
+            </p>
+          ) : (
+            <p className="has-text-grey mb-4">
+              Provide the specific options you’d like to cast votes for. Ranked
+              Choice Voting currently only supports Text-based presentation for
+              choices that are described in words.
+            </p>
+          )}
           <ChoiceOptionCreator
             setValue={setValue}
             error={errors['choices']}
@@ -315,6 +323,7 @@ const StepOne = ({
             register={register}
             control={control}
             clearErrors={clearErrors}
+            voteType={voteType}
           />
         </div>
       </div>
