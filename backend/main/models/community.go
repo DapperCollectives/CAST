@@ -424,8 +424,6 @@ func SearchForCommunity(
 		return []*Community{}, 0, fmt.Errorf("error scanning search results for the query %s", query)
 	}
 
-	//print index[0] of the filter
-	fmt.Println(filters[0])
 	//if filters are present generate a new sql query to get the total records
 	if filters[0] != "" {
 		countSql, err := generateFilterCountSql(filters)
