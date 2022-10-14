@@ -182,7 +182,7 @@ const UPDATE_COMMUNITY_SQL = `
 const SEARCH_COMMUNITIES_SQL = `
 	SELECT id, name, body, logo, category	
 	FROM communities 
-	WHERE SIMILARITY(name, $1) > 0.1
+	WHERE SIMILARITY(name, $1) > 0.7
 		AND category IS NOT NULL
 `
 
@@ -197,7 +197,7 @@ const COUNT_CATEGORIES_DEFAULT_SQL = `
 const COUNT_CATEGORIES_SEARCH_SQL = `
 	SELECT category, COUNT(*) as category_count
 	FROM communities 
-	WHERE SIMILARITY(name, $1) > 0.1
+	WHERE SIMILARITY(name, $1) > 0.7
 		AND category IS NOT NULL
 	GROUP BY category
 `
