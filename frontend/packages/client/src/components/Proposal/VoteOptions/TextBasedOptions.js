@@ -36,7 +36,7 @@ const TextBasedOptions = ({
               choices?.length !== i + 1 ? { marginBottom: '14px' } : {}
             }
           >
-            <label className="radio is-flex">
+            <label className={`radio is-flex${readOnly ? ' is-disabled' : ''}`}>
               <input
                 type="radio"
                 name={`${labelType}-${opt.value}`}

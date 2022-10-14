@@ -107,6 +107,12 @@ var (
 		Message:    "Error",
 		Details:    "There was an error creating the vote.",
 	}
+	errCreateProposalPermissions = errorResponse{
+		StatusCode: http.StatusForbidden,
+		ErrorCode:  "ERR_1013",
+		Message:    "User is not permitted to create a proposal for this community.",
+		Details:    "",
+	}
 
 	nilErr = errorResponse{}
 )
@@ -436,7 +442,7 @@ func (a *App) searchCommunities(w http.ResponseWriter, r *http.Request) {
 	filters := r.FormValue("filters")
 	searchText := r.FormValue("text")
 
-	results, categories, totalRecords, err := helpers.searchCommunities(
+	results, totalRecords, categories, err := helpers.searchCommunities(
 		searchText,
 		filters,
 		pageParams,
@@ -445,15 +451,20 @@ func (a *App) searchCommunities(w http.ResponseWriter, r *http.Request) {
 		log.Error().Err(err).Msg("Error searching communities")
 		respondWithError(w, errIncompleteRequest)
 	}
+
 	pageParams.TotalRecords = totalRecords
-	paginatedResults := shared.GetPaginatedResponseWithPayload(results, pageParams)
-	response, err := helpers.appendFiltersToResponse(paginatedResults, categories)
+
+	paginatedResults, err := helpers.appendFiltersToResponse(
+		results,
+		pageParams,
+		categories,
+	)
 	if err != nil {
 		log.Error().Err(err).Msg("Error appending filters to response")
 		respondWithError(w, errIncompleteRequest)
 	}
 
-	respondWithJSON(w, http.StatusOK, response)
+	respondWithJSON(w, http.StatusOK, paginatedResults)
 }
 
 func (a *App) getCommunity(w http.ResponseWriter, r *http.Request) {
@@ -986,36 +997,10 @@ func (a *App) canUserCreateProposal(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, errGetCommunity)
 	}
 
-	response := models.CanUserCreateProposalResponse{}
-
-	if !*community.Only_authors_to_submit {
-		threshold, err := strconv.ParseFloat(*community.Proposal_threshold, 64)
-		if err != nil {
-			log.Error().Err(err).Msg("Invalid proposal threshold")
-		}
-
-		// Get Contract
-		contract := shared.Contract{
-			Name:        community.Contract_name,
-			Addr:        community.Contract_addr,
-			Public_path: community.Public_path,
-			Threshold:   &threshold,
-		}
-		response.Contract = contract
-
-		// Get balance if community has proposal threshold rule
-		balance, _ := a.FlowAdapter.GetBalanceOfTokens(addr, &contract, *community.Contract_type)
-		response.Balance = balance
-	}
-
 	// Check if user can create proposal for community
-	if err := community.CanUserCreateProposal(a.DB, a.FlowAdapter, addr); err != nil {
-		response.HasPermission = false
-	} else {
-		response.HasPermission = true
-	}
+	canUserCreateProposal := community.CanUserCreateProposal(a.DB, a.FlowAdapter, addr)
 
-	respondWithJSON(w, http.StatusOK, response)
+	respondWithJSON(w, http.StatusOK, canUserCreateProposal)
 }
 
 /////////////
