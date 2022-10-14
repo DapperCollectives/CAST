@@ -514,6 +514,7 @@ func generateDefaultFilterCountSql(filters []string) (string, error) {
 		var sql string = `
 				SELECT COUNT(*) FROM communities
         WHERE category IS NOT NULL
+				AND is_featured = true
 				AND category IN (`
 		for i, filter := range filters {
 			if i == len(filters)-1 {
