@@ -1,5 +1,5 @@
 import { ActionButton } from 'components';
-import NextButton from './NextButton';
+import NextButton from './NextStepButton';
 
 export default function HeaderStepByStep({
   onClickBack,

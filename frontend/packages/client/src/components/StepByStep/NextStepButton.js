@@ -1,6 +1,6 @@
 import classnames from 'classnames';
 
-const NextButton = ({
+const NextStepButton = ({
   formId: formIdParam,
   moveToNextStep,
   disabled = false,
@@ -11,7 +11,7 @@ const NextButton = ({
     { 'is-fullwidth': !!formIdParam }
   );
   return (
-    <div className="my-6">
+    <>
       {formIdParam ? (
         <button className={classNames} form={formIdParam} type="submit">
           Next
@@ -21,8 +21,8 @@ const NextButton = ({
           Next
         </div>
       )}
-    </div>
+    </>
   );
 };
 
-export default NextButton;
+export default NextStepButton;

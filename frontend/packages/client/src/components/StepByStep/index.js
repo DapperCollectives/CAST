@@ -4,7 +4,7 @@ import { useMediaQuery } from 'hooks';
 import Loader from '../Loader';
 import HeaderStepByStep from './HeaderStepByStep';
 import LeftPannel from './LeftPannel';
-import NextButton from './NexStepButton';
+import NextButton from './NextStepButton';
 import SubmitButton from './SubmitButton';
 
 function StepByStep({
