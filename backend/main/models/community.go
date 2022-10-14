@@ -261,8 +261,8 @@ func GetDefaultCommunities(
 
 	var totalRecords int
 	countSql := `SELECT COUNT(*) FROM communities 
-							WHERE is_featured = 'true' AND category IS NOT NULL`
-
+	WHERE is_featured = 'true' AND category IS NOT NULL
+	`
 	if !isSearch {
 
 		sql = HOMEPAGE_SQL
