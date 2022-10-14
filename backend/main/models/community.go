@@ -261,11 +261,11 @@ func GetDefaultCommunities(
 
 	var totalRecords int
 	countSql := `SELECT COUNT(*) FROM communities 
-	WHERE is_featured = 'true' AND category IS NOT NULL
-	`
-	if !isSearch {
-		sql = HOMEPAGE_SQL
+							WHERE is_featured = 'true' AND category IS NOT NULL`
 
+	if !isSearch {
+
+		sql = HOMEPAGE_SQL
 		var communities []*Community
 
 		err := pgxscan.Select(
@@ -402,7 +402,11 @@ func SearchForCommunity(
 	params shared.PageParams,
 ) ([]*Community, int, error) {
 
-	countSql := `SELECT COUNT(*) FROM communities WHERE SIMILARITY(name, $1) > 0.1`
+	countSql, err := generateFilterCountSql(filters)
+	if err != nil {
+		return nil, 0, err
+	}
+
 	sql, err := addFiltersToSql(SEARCH_COMMUNITIES_SQL, query, filters)
 	if err != nil {
 		return nil, 0, err
@@ -430,6 +434,52 @@ func SearchForCommunity(
 	var totalRecords int
 	db.Conn.QueryRow(db.Context, countSql, query).Scan(&totalRecords)
 	return communities, totalRecords, nil
+}
+
+func scanSearchResults(rows pgx.Rows) ([]*Community, error) {
+	var communities []*Community
+	for rows.Next() {
+		var c Community
+		err := rows.Scan(&c.ID, &c.Name, &c.Body, &c.Logo, &c.Category)
+		if err != nil {
+			return communities, fmt.Errorf("error scanning community row: %v", err)
+		}
+		communities = append(communities, &c)
+	}
+	return communities, nil
+}
+
+func MatchStrategyByProposal(s []Strategy, strategyToMatch string) (Strategy, error) {
+	var match Strategy
+	for _, strategy := range s {
+		if *strategy.Name == strategyToMatch {
+			match = strategy
+			return match, nil
+		}
+	}
+	return match, fmt.Errorf("Community does not have strategy available")
+}
+
+/// Generate SQL Functions////
+func generateFilterCountSql(filters []string) (string, error) {
+	if len(filters) > 0 {
+		var sql string = `
+				SELECT COUNT(*) FROM communities
+        WHERE SIMILARITY(name, $1) > 0.1
+        AND category IS NOT NULL
+				AND category IN (`
+		for i, filter := range filters {
+			if i == len(filters)-1 {
+				sql += fmt.Sprintf("'%s')", filter)
+			} else {
+				sql += fmt.Sprintf("'%s',", filter)
+			}
+		}
+
+		return sql, nil
+	} else {
+		return "", fmt.Errorf("No filters provided")
+	}
 }
 
 func GetCategoryCount(db *s.Database, search string) (map[string]int, error) {
@@ -498,28 +548,4 @@ func addFiltersToSql(query, search string, filters []string) (string, error) {
 	}
 
 	return sql, nil
-}
-
-func scanSearchResults(rows pgx.Rows) ([]*Community, error) {
-	var communities []*Community
-	for rows.Next() {
-		var c Community
-		err := rows.Scan(&c.ID, &c.Name, &c.Body, &c.Logo, &c.Category)
-		if err != nil {
-			return communities, fmt.Errorf("error scanning community row: %v", err)
-		}
-		communities = append(communities, &c)
-	}
-	return communities, nil
-}
-
-func MatchStrategyByProposal(s []Strategy, strategyToMatch string) (Strategy, error) {
-	var match Strategy
-	for _, strategy := range s {
-		if *strategy.Name == strategyToMatch {
-			match = strategy
-			return match, nil
-		}
-	}
-	return match, fmt.Errorf("Community does not have strategy available")
 }
