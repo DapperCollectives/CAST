@@ -1,7 +1,7 @@
 import { cloneElement, useCallback, useRef, useState } from 'react';
 import { Prompt } from 'react-router-dom';
 import Loader from '../Loader';
-import LeftPannel from './LeftPannel';
+import LeftPanel from './LeftPanel';
 import NextButton from './NexStepButton';
 import SubmitButton from './SubmitButton';
 
@@ -13,7 +13,7 @@ function StepByStep({
   isSubmitting,
   submittingMessage,
   passNextToComp = false,
-  showActionButtonLeftPannel = false,
+  showActionButtonLeftPanel = false,
   passSubmitToComp = false,
   blockNavigationOut = false,
   blockNavigationText,
@@ -77,8 +77,8 @@ function StepByStep({
     [onSubmit, stepsData]
   );
 
-  const showNextButton = !passNextToComp || showActionButtonLeftPannel;
-  const showSubmitButton = !passSubmitToComp || showActionButtonLeftPannel;
+  const showNextButton = !passNextToComp || showActionButtonLeftPanel;
+  const showSubmitButton = !passSubmitToComp || showActionButtonLeftPanel;
 
   return (
     <>
@@ -102,7 +102,7 @@ function StepByStep({
         />
         <div className="container is-flex is-flex-direction-column-mobile">
           {/* left panel */}
-          <LeftPannel
+          <LeftPanel
             currentStep={currentStep}
             isSubmitting={isSubmitting}
             showNextButton={showNextButton}
@@ -116,6 +116,7 @@ function StepByStep({
             isStepValid={isStepValid}
             moveBackStep={moveBackStep}
             alignToTop={alignStepsToTop}
+            name={stepsData?.[0]?.name ?? ''}
           />
 
           {/* right panel */}
