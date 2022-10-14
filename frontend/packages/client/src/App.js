@@ -30,15 +30,15 @@ function App() {
     >
       <QueryClientProvider client={queryClient}>
         <Web3Provider network={process.env.REACT_APP_FLOW_ENV}>
-          <NotificationModalProvider>
+          <Router>
             <NotificationServiceProvider>
-              <Router>
+              <NotificationModalProvider>
                 <ErrorHandler>
                   <AppPages />
                 </ErrorHandler>
-              </Router>
+              </NotificationModalProvider>
             </NotificationServiceProvider>
-          </NotificationModalProvider>
+          </Router>
         </Web3Provider>
         {!IS_PRODUCTION && <ReactQueryDevtools initialIsOpen={false} />}
       </QueryClientProvider>

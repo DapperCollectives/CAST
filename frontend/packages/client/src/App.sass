@@ -58,6 +58,7 @@ $tooltip-radius: 6px
 $popover-max-width: 20rem
 @import '@creativebulma/bulma-tooltip'
 @import 'bulma-popover'
+@import 'bulma-switch'
 
 =spacing-helpers($suffix: '')
 	$suffix: if($suffix == '', '', '-' + $suffix)
@@ -582,7 +583,16 @@ span[data-tooltip]
 	-moz-transition: opacity 0.3s ease-out
 	-ms-transition: opacity 0.3s ease-out
 	-o-transition: opacity 0.3s ease-out
-	opacity: 0	
+	opacity: 0
+
+.fade-out-half
+	-webkit-transition: opacity 0.3s ease-out
+	-moz-transition: opacity 0.3s ease-out
+	-ms-transition: opacity 0.3s ease-out
+	-o-transition: opacity 0.3s ease-out
+	opacity: 0.5
+	&.is-disabled
+		pointer-events: none
 
 .word-break
 	word-break: break-word
@@ -745,7 +755,7 @@ span[data-tooltip]
 .wallet-connect-content
 	z-index: 32
 
-.modal-content-image-crop
+.modal-content-sm
 	max-width: 400px !important	
 	max-height: unset !important	
 	&.banner-crop

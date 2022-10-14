@@ -124,7 +124,7 @@ export default function ProfileForm({
           }}
         />,
         {
-          classNameModalContent: 'rounded modal-content-image-crop',
+          classNameModalContent: 'rounded modal-content-sm',
           showCloseButton: false,
         }
       );
@@ -162,7 +162,7 @@ export default function ProfileForm({
           }}
         />,
         {
-          classNameModalContent: 'rounded modal-content-image-crop banner-crop',
+          classNameModalContent: 'rounded modal-content-sm banner-crop',
           showCloseButton: false,
         }
       );
