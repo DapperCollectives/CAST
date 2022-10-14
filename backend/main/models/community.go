@@ -289,7 +289,9 @@ func GetDefaultCommunities(
 		if err != nil {
 			return nil, 0, err
 		}
-
+		
+		sql = sql + " LIMIT $1 OFFSET $2"
+		
 		rows, err := db.Conn.Query(
 			db.Context,
 			sql,
@@ -302,7 +304,7 @@ func GetDefaultCommunities(
 
 		defer rows.Close()
 
-		communities, err := scanSearchResults(rows)
+		communities, err := scanSearchResults(rows, true)
 		if err != nil {
 			return nil, 0, err
 		}
@@ -424,6 +426,8 @@ func SearchForCommunity(
 		return nil, 0, err
 	}
 
+	sql = sql + " ORDER BY score DESC LIMIT $2 OFFSET $3"
+
 	rows, err := db.Conn.Query(
 		db.Context,
 		sql,
@@ -438,7 +442,7 @@ func SearchForCommunity(
 
 	defer rows.Close()
 
-	communities, err := scanSearchResults(rows)
+	communities, err := scanSearchResults(rows, false)
 	if err != nil {
 		return []*Community{}, 0, fmt.Errorf("error scanning search results for the query %s", query)
 	}
@@ -464,16 +468,21 @@ func SearchForCommunity(
 	}
 }
 
-func scanSearchResults(rows pgx.Rows) ([]*Community, error) {
+func scanSearchResults(rows pgx.Rows, isDefault bool) ([]*Community, error) {
 	var communities []*Community
-	// score is required for scanning, but can be ignored. Only used
-	// to order the search results by SQL.
-	var score float32
+	
+	var err error
 	for rows.Next() {
 		var c Community
-		err := rows.Scan(&c.ID, &c.Name, &c.Body, &c.Logo, &c.Category, &score)
+		if isDefault {
+			err = rows.Scan(&c.ID, &c.Name, &c.Body, &c.Logo, &c.Category)
+		} else {
+			// score is required for scanning, but can be ignored. Only used
+			// to order the search results by SQL.
+			var score float32
+			err = rows.Scan(&c.ID, &c.Name, &c.Body, &c.Logo, &c.Category, &score)
+		}
 		if err != nil {
-			fmt.Println(err)
 			log.Error().Err(err)
 			return communities, fmt.Errorf("error scanning community row: %v", err)
 		}
@@ -592,12 +601,6 @@ func addFiltersToSql(query, search string, filters []string) (string, error) {
 		sql += ")"
 	} else {
 		sql = query
-	}
-
-	if search != "" {
-		sql = sql + " LIMIT $2 OFFSET $3"
-	} else {
-		sql = sql + " LIMIT $1 OFFSET $2"
 	}
 
 	return sql, nil
