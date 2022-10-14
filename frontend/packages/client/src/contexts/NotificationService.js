@@ -7,7 +7,7 @@ const NotificationServiceContext = createContext({});
 const INIT_NOTIFICATION_SETTINGS = {
   walletId: '',
   email: '',
-  communitySubscription: [],
+  communitySubscription: [{ communityId: '1', subscribed: true }],
   isSubscribedFromCommunityUpdates: true,
 };
 
