@@ -257,11 +257,9 @@ func GetDefaultCommunities(
 ) ([]*Community, int, error) {
 	var sql string
 
-	var totalRecords int
-	countSql := `SELECT COUNT(*) FROM communities 
-	WHERE is_featured = 'true' AND category IS NOT NULL
-	`
 	if !isSearch {
+		var totalRecords int
+		countSql := `SELECT COUNT(*) FROM communities `
 
 		sql = HOMEPAGE_SQL
 		var communities []*Community
@@ -308,8 +306,28 @@ func GetDefaultCommunities(
 			return nil, 0, err
 		}
 
-		db.Conn.QueryRow(db.Context, countSql).Scan(&totalRecords)
-		return communities, totalRecords, nil
+		//@TODO: Repeating logic here, refactor if checks into a function
+		//if filters are present generate a new sql query to get the total records
+		if filters[0] != "" {
+			countSql, err := generateDefaultFilterCountSql(filters)
+			if err != nil {
+				return nil, 0, err
+			}
+
+			fmt.Printf("count sql: %s \n", countSql)
+			var totalRecords int
+			db.Conn.QueryRow(db.Context, countSql).Scan(&totalRecords)
+
+			return communities, totalRecords, nil
+		} else {
+			countSql := `SELECT COUNT(*) FROM communities 
+			WHERE is_featured = 'true' AND category IS NOT NULL`
+
+			var totalRecords int
+			db.Conn.QueryRow(db.Context, countSql).Scan(&totalRecords)
+
+			return communities, totalRecords, nil
+		}
 	}
 }
 
@@ -424,9 +442,10 @@ func SearchForCommunity(
 		return []*Community{}, 0, fmt.Errorf("error scanning search results for the query %s", query)
 	}
 
+	//@TODO: Repeating logic here, refactor if checks into a function
 	//if filters are present generate a new sql query to get the total records
 	if filters[0] != "" {
-		countSql, err := generateFilterCountSql(filters)
+		countSql, err := generateSearchFilterCountSql(filters)
 		if err != nil {
 			return nil, 0, err
 		}
@@ -435,7 +454,8 @@ func SearchForCommunity(
 
 		return communities, totalRecords, nil
 	} else {
-		countSql := `SELECT COUNT(*) FROM communities WHERE SIMILARITY(name, $1) > 0.1`
+		countSql := `SELECT COUNT(*) FROM communities 
+									WHERE SIMILARITY(name, $1) > 0.1`
 		var totalRecords int
 		db.Conn.QueryRow(db.Context, countSql, query).Scan(&totalRecords)
 
@@ -468,7 +488,7 @@ func MatchStrategyByProposal(s []Strategy, strategyToMatch string) (Strategy, er
 }
 
 /// Generate SQL Functions////
-func generateFilterCountSql(filters []string) (string, error) {
+func generateSearchFilterCountSql(filters []string) (string, error) {
 	if len(filters) > 0 {
 		var sql string = `
 				SELECT COUNT(*) FROM communities
@@ -489,6 +509,25 @@ func generateFilterCountSql(filters []string) (string, error) {
 	}
 }
 
+func generateDefaultFilterCountSql(filters []string) (string, error) {
+	if len(filters) > 0 {
+		var sql string = `
+				SELECT COUNT(*) FROM communities
+        WHERE category IS NOT NULL
+				AND category IN (`
+		for i, filter := range filters {
+			if i == len(filters)-1 {
+				sql += fmt.Sprintf("'%s')", filter)
+			} else {
+				sql += fmt.Sprintf("'%s',", filter)
+			}
+		}
+
+		return sql, nil
+	} else {
+		return "", fmt.Errorf("No filters provided")
+	}
+}
 func GetCategoryCount(db *s.Database, search string) (map[string]int, error) {
 	var rows pgx.Rows
 	var err error
