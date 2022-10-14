@@ -10,6 +10,7 @@ export default function ShareDropdown({
   proposalId,
   proposalName = '',
   isMobile,
+  userVoted,
 } = {}) {
   const [dropdownStatus, setDropdownStatus] = useState('');
   const dropdownRef = useRef();
@@ -29,8 +30,11 @@ export default function ShareDropdown({
   const proposalUrl = `${FRONTEND_URL}/#/community/${communityId}/proposal/${proposalId}`;
 
   const twitterPost = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-    `I just voted on ${proposalName} on CAST! ${proposalUrl} `
+    userVoted
+      ? `I just voted on ${proposalName} on CAST! ${proposalUrl}`
+      : `Check out ${proposalName} on CAST! ${proposalUrl}`
   )} `;
+
   return (
     <div className={`dropdown ${dropdownStatus} is-right`}>
       <div className="dropdown-trigger">
