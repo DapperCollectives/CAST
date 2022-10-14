@@ -4,7 +4,7 @@ import NextButton from './NexStepButton';
 import StepLabelAndIcon from './StepLabelAndIcon';
 import SubmitButton from './SubmitButton';
 
-export default function LeftPannel({
+export default function LeftPanel({
   currentStep,
   isSubmitting,
   showNextButton,
