@@ -1,6 +1,6 @@
 import { useNotificationServiceContext } from 'contexts/NotificationService';
-import NotificationsManage from './NotificationsManage';
-import NotificationsSignUp from './NotificationsSignUp';
+import NotificationsManage from './Manage';
+import NotificationsSignUp from './SignUp';
 
 const NotificationsModal = ({ onClose, communityId }) => {
   const { notificationSettings, subscribeCommunity } =
