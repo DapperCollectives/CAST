@@ -43,8 +43,7 @@ func (h *Helpers) useStrategyTally(
 		return models.ProposalResults{}, errors.New("Strategy not found.")
 	}
 
-	proposalInitialized := models.NewProposalResults(p.ID, p.Choices)
-	results, err := s.TallyVotes(v, proposalInitialized, &p)
+	results, err := s.TallyVotes(v, &p)
 	if err != nil {
 		return models.ProposalResults{}, err
 	}
@@ -298,13 +297,7 @@ func (h *Helpers) processVotes(
 	return votesWithBalances, pageParams, nil
 }
 
-func (h *Helpers) createVote(r *http.Request, p models.Proposal) (*models.VoteWithBalance, errorResponse) {
-	var v models.Vote
-	if err := validatePayload(r.Body, &v); err != nil {
-		log.Error().Err(err).Msg("Invalid request payload.")
-		return nil, errIncompleteRequest
-	}
-
+func (h *Helpers) createVote(v models.Vote, p models.Proposal) (*models.VoteWithBalance, errorResponse) {
 	v.Proposal_id = p.ID
 
 	// validate user hasn't already voted
@@ -555,19 +548,25 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorRespo
 		p.Max_weight = strategy.Contract.MaxWeight
 	}
 
-	if err := h.snapshot(&strategy, &p); err != nil {
-		return models.Proposal{}, errIncompleteRequest
+	canUserCreateProposal := community.CanUserCreateProposal(h.A.DB, h.A.FlowAdapter, p.Creator_addr)
+
+	// If user doesn't have permission, populate errorResponse
+	// with reason and error.
+	if !canUserCreateProposal.HasPermission {
+		errPermissionsResponse := errCreateProposalPermissions
+		errPermissionsResponse.Message = canUserCreateProposal.Reason
+		errPermissionsResponse.Details = canUserCreateProposal.Error.Error()
+		return models.Proposal{}, errPermissionsResponse
 	}
 
-	if err := h.enforceCommunityRestrictions(community, p, strategy); err != nil {
-		return models.Proposal{}, errIncompleteRequest
-	}
-
-	if err := h.processSnapshotStatus(&strategy, &p); err != nil {
-		errMsg := "Error processing snapshot status."
+	// Get latest sealed blockheight to use as proposal snapshot
+	blockheight, err := h.A.FlowAdapter.GetCurrentBlockHeight()
+	if err != nil {
+		errMsg := "couldn't fetch current blockheight"
 		log.Error().Err(err).Msg(errMsg)
 		return models.Proposal{}, errIncompleteRequest
 	}
+	p.Block_height = &blockheight
 
 	p.Cid, err = h.pinJSONToIpfs(p)
 	if err != nil {
@@ -609,67 +608,6 @@ func (h *Helpers) validateStrategyName(name string) error {
 	}
 
 	return errors.New("Strategy not found.")
-}
-
-func (h *Helpers) enforceCommunityRestrictions(
-	c models.Community,
-	p models.Proposal,
-	s models.Strategy,
-) error {
-
-	if *c.Only_authors_to_submit {
-		if err := models.EnsureRoleForCommunity(h.A.DB, p.Creator_addr, c.ID, "author"); err != nil {
-			errMsg := fmt.Sprintf("Account %s is not an author for community %d.", p.Creator_addr, p.Community_id)
-			log.Error().Err(err).Msg(errMsg)
-			return errors.New(errMsg)
-		}
-	} else {
-		fmt.Println("Community does not require authors to submit proposals")
-
-		threshold, err := strconv.ParseFloat(*c.Proposal_threshold, 64)
-		if err != nil {
-			log.Error().Err(err).Msg("Invalid proposal threshold")
-			return errors.New("Invalid proposal threshold")
-		}
-
-		contract := shared.Contract{
-			Name:        c.Contract_name,
-			Addr:        c.Contract_addr,
-			Public_path: c.Public_path,
-			Threshold:   &threshold,
-		}
-		hasBalance, err := h.processTokenThreshold(p.Creator_addr, contract, *c.Contract_type)
-		if err != nil {
-			errMsg := "Error processing Token Threshold."
-			log.Error().Err(err).Msg(errMsg)
-			return errors.New(errMsg)
-		}
-
-		if !hasBalance {
-			errMsg := "Insufficient token balance to create proposal."
-			log.Error().Err(err).Msg(errMsg)
-			return errors.New(errMsg)
-		}
-	}
-
-	return nil
-}
-
-func (h *Helpers) snapshot(strategy *models.Strategy, p *models.Proposal) error {
-	s := h.initStrategy(*strategy.Name)
-
-	//var snapshotResponse *shared.SnapshotResponse
-	if s.RequiresSnapshot() {
-		snapshotResponse, err := h.A.SnapshotClient.TakeSnapshot(strategy.Contract)
-		if err != nil {
-			errMsg := "Error taking snapshot."
-			return errors.New(errMsg)
-		}
-		p.Block_height = &snapshotResponse.Data.BlockHeight
-		p.Snapshot_status = &snapshotResponse.Data.Status
-	}
-
-	return nil
 }
 
 func (h *Helpers) createCommunity(payload models.CreateCommunityRequestPayload) (models.Community, error) {
@@ -1148,53 +1086,13 @@ func (h *Helpers) validateUserWithRoleViaVoucher(addr string, voucher *shared.Vo
 	return nil
 }
 
-func (h *Helpers) processSnapshotStatus(s *models.Strategy, p *models.Proposal) error {
-	var processing = "processing"
-
-	if s.Contract.Name != nil && p.Snapshot_status == &processing {
-		snapshotResponse, err := h.A.SnapshotClient.
-			GetSnapshotStatusAtBlockHeight(
-				s.Contract,
-				*p.Block_height,
-			)
-		if err != nil {
-			return err
-		}
-
-		p.Snapshot_status = &snapshotResponse.Data.Status
-
-		if err := p.UpdateSnapshotStatus(h.A.DB); err != nil {
-			return err
-		}
-	}
-	return nil
-
-}
-
-func (h *Helpers) processTokenThreshold(address string, c shared.Contract, contractType string) (bool, error) {
-	var scriptPath string
-
-	if contractType == "nft" {
-		scriptPath = "./main/cadence/scripts/get_nfts_ids.cdc"
-	} else {
-		scriptPath = "./main/cadence/scripts/get_balance.cdc"
-	}
-
-	hasBalance, err := h.A.FlowAdapter.EnforceTokenThreshold(scriptPath, address, &c)
-	if err != nil {
-		return false, err
-	}
-
-	return hasBalance, nil
-}
-
 func (h *Helpers) initStrategy(name string) Strategy {
 	s := strategyMap[name]
 	if s == nil {
 		return nil
 	}
 
-	s.InitStrategy(h.A.FlowAdapter, h.A.DB, h.A.SnapshotClient)
+	s.InitStrategy(h.A.FlowAdapter, h.A.DB, h.A.DpsAdapter)
 
 	return s
 }

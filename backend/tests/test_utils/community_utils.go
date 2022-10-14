@@ -31,6 +31,14 @@ type PaginatedResponseWithCommunity struct {
 	Next         int                `json:"next"`
 }
 
+type PaginatedResponseWithProposal struct {
+	Data         []models.Proposal `json:"data"`
+	Start        int               `json:"start"`
+	Count        int               `json:"count"`
+	TotalRecords int               `json:"totalRecords"`
+	Next         int               `json:"next"`
+}
+
 type PaginatedResponseWithUserCommunity struct {
 	Data         []models.UserCommunity `json:"data"`
 	Start        int                    `json:"start"`
@@ -231,7 +239,6 @@ func (otu *OverflowTestUtils) GenerateCommunityPayload(signer string, payload *m
 	signingAddr := fmt.Sprintf("0x%s", account.Address().String())
 	timestamp := fmt.Sprint(time.Now().UnixNano() / int64(time.Millisecond))
 	compositeSignatures := otu.GenerateCompositeSignatures(signer, timestamp)
-	threshold := "0"
 
 	payload.Timestamp = timestamp
 	payload.Composite_signatures = compositeSignatures
@@ -239,7 +246,6 @@ func (otu *OverflowTestUtils) GenerateCommunityPayload(signer string, payload *m
 	if payload.Strategies == nil {
 		payload.Strategies = &strategies
 	}
-	payload.Proposal_threshold = &threshold
 
 	return payload
 }
