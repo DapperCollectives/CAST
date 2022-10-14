@@ -70,3 +70,9 @@ func (otu *OverflowTestUtils) DeleteUserFromCommunityAPI(id int, addr string, us
 	response := otu.ExecuteRequest(req)
 	return response
 }
+
+func (otu *OverflowTestUtils) GetCanUserCreateProposalAPI(id int, addr string) *httptest.ResponseRecorder {
+	req, _ := http.NewRequest("GET", "/communities/"+strconv.Itoa(id)+"/can-user-create-proposal/"+addr, nil)
+	response := otu.ExecuteRequest(req)
+	return response
+}

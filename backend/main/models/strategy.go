@@ -8,8 +8,8 @@ import (
 type VotingStrategy struct {
 	Key         string           `json:"key" validate:"required"`
 	Name        string           `json:"name" validate:"required"`
-	Description string 		     `json:"description,omitempty"`
-	Scripts 	[]s.CustomScript `json:"scripts,omitempty"`
+	Description string           `json:"description,omitempty"`
+	Scripts     []s.CustomScript `json:"scripts,omitempty"`
 }
 
 // type CustomScript struct {

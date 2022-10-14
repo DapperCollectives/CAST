@@ -66,10 +66,12 @@ func TestGetCommunityUsers(t *testing.T) {
 	var p test_utils.PaginatedResponseWithUserType
 	json.Unmarshal(response.Body.Bytes(), &p)
 
-	assert.Equal(t, 1, len(p.Data))
-	assert.Equal(t, true, p.Data[0].Is_admin)
-	assert.Equal(t, true, p.Data[0].Is_author)
-	assert.Equal(t, true, p.Data[0].Is_member)
+	t.Run("Community creator should be assigned correct roles", func(t *testing.T) {
+		assert.Equal(t, 1, len(p.Data))
+		assert.Equal(t, true, p.Data[0].Is_admin)
+		assert.Equal(t, true, p.Data[0].Is_author)
+		assert.Equal(t, true, p.Data[0].Is_member)
+	})
 }
 
 func TestGetCommunityUsersByType(t *testing.T) {

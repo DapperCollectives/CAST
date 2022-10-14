@@ -135,7 +135,7 @@ export default function ProposalCreatePage() {
     showActionButtonLeftPannel: true,
     steps: [
       {
-        label: 'Draft Proposal',
+        label: 'Proposal',
         description:
           'Some description of what you can write here that is useful.',
         component: <PropCreateStepOne />,

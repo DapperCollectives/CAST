@@ -261,7 +261,6 @@ func GrantRolesToCommunityCreator(db *s.Database, addr string, communityId int) 
 		if err := communityUser.CreateCommunityUser(db); err != nil {
 			return err
 		}
-		log.Debug().Msgf("granted addr %s role %s for community %d", addr, userType, communityId)
 	}
 	return nil
 }

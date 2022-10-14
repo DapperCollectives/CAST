@@ -13,11 +13,11 @@ func (otu *OverflowTestUtils) GenerateVotes(communityId int, numProposals int, n
 	}
 
 	proposalIds := otu.AddActiveProposals(communityId, numProposals)
-	voteChoice := "a"
+	voteChoiceId := 0
 
 	for _, id := range proposalIds {
 		for i := 1; i <= numUsers; i++ {
-			otu.CreateVoteAPI(id, otu.GenerateValidVotePayload("user"+strconv.Itoa(i), id, voteChoice))
+			otu.CreateVoteAPI(id, otu.GenerateValidVotePayload("user"+strconv.Itoa(i), id, voteChoiceId))
 		}
 	}
 }
@@ -31,11 +31,11 @@ func (otu *OverflowTestUtils) GenerateEarlyVoteAchievements(communityId int, num
 	}
 
 	proposalIds := otu.AddActiveProposalsWithStartTimeNow(communityId, numProposals)
-	voteChoice := "a"
+	voteChoiceId := 0
 
 	for _, id := range proposalIds {
 		for i := 1; i <= numUsers; i++ {
-			otu.CreateVoteAPI(id, otu.GenerateValidVotePayload("user"+strconv.Itoa(i), id, voteChoice))
+			otu.CreateVoteAPI(id, otu.GenerateValidVotePayload("user"+strconv.Itoa(i), id, voteChoiceId))
 		}
 	}
 
@@ -48,11 +48,11 @@ func (otu *OverflowTestUtils) GenerateSingleStreakAchievements(communityId int, 
 	}
 
 	proposalIds := otu.AddActiveProposals(communityId, max(streakLengths))
-	voteChoice := "a"
+	voteChoiceId := 0
 
 	for i, l := range streakLengths {
 		for j := 0; j < l; j++ {
-			otu.CreateVoteAPI(proposalIds[j], otu.GenerateValidVotePayload("user"+strconv.Itoa(i+1), proposalIds[j], voteChoice))
+			otu.CreateVoteAPI(proposalIds[j], otu.GenerateValidVotePayload("user"+strconv.Itoa(i+1), proposalIds[j], voteChoiceId))
 		}
 	}
 }
@@ -65,12 +65,12 @@ func (otu *OverflowTestUtils) GenerateMultiStreakAchievements(communityId int, s
 	// create enough proposals for streak lengths and gaps to create multiple separate streaks
 	numProposals := max(streakLengths)*len(streakLengths) + len(streakLengths)
 	proposalIds := otu.AddActiveProposals(communityId, numProposals)
-	voteChoice := "a"
+	voteChoiceId := 0
 
 	i := 0
 	for _, l := range streakLengths {
 		for j := 0; j < l; j++ {
-			otu.CreateVoteAPI(proposalIds[i], otu.GenerateValidVotePayload("user1", proposalIds[i], voteChoice))
+			otu.CreateVoteAPI(proposalIds[i], otu.GenerateValidVotePayload("user1", proposalIds[i], voteChoiceId))
 			i++
 		}
 		i++ // skip a proposal to start next streak
@@ -80,13 +80,13 @@ func (otu *OverflowTestUtils) GenerateMultiStreakAchievements(communityId int, s
 func (otu *OverflowTestUtils) GenerateWinningVoteAchievement(communityId int, strategy string) int {
 	proposalIds, _ := otu.AddProposalsForStrategy(communityId, strategy, 1)
 	proposalId := proposalIds[0]
-	winningChoice := "a"
-	losingChoice := "b"
+	winningChoiceId := 0
+	losingChoiceId := 1
 
-	otu.CreateVoteAPI(proposalId, otu.GenerateValidVotePayload("user1", proposalId, losingChoice))
-	otu.CreateVoteAPI(proposalId, otu.GenerateValidVotePayload("user2", proposalId, winningChoice))
-	otu.CreateVoteAPI(proposalId, otu.GenerateValidVotePayload("user3", proposalId, winningChoice))
-	otu.CreateVoteAPI(proposalId, otu.GenerateValidVotePayload("user4", proposalId, winningChoice))
+	otu.CreateVoteAPI(proposalId, otu.GenerateValidVotePayload("user1", proposalId, losingChoiceId))
+	otu.CreateVoteAPI(proposalId, otu.GenerateValidVotePayload("user2", proposalId, winningChoiceId))
+	otu.CreateVoteAPI(proposalId, otu.GenerateValidVotePayload("user3", proposalId, winningChoiceId))
+	otu.CreateVoteAPI(proposalId, otu.GenerateValidVotePayload("user4", proposalId, winningChoiceId))
 
 	return proposalId
 }
