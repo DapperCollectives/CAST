@@ -22,7 +22,7 @@ export default function Settings() {
             notMobile ? 'p-6' : 'px-5 pt-5 pb-3'
           }`}
         >
-          <BackButton notMobile={notMobile} />
+          <BackButton />
         </div>
         {walletId && (
           <div className="column is-two-fifths">

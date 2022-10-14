@@ -7,8 +7,8 @@ const NotificationServiceContext = createContext({});
 const INIT_NOTIFICATION_SETTINGS = {
   walletId: '',
   email: '',
-  communitySubscription: [{ communityId: '1', subscribed: true }],
-  isSubscribedFromCommunityUpdates: false,
+  communitySubscription: [],
+  isSubscribedFromCommunityUpdates: true,
 };
 
 const updateCommunitySubscriptionState = (
@@ -45,7 +45,10 @@ const NotificationServiceProvider = ({ children }) => {
 
   useEffect(() => {
     if (addr) {
-      setUserID(addr);
+      (async () => {
+        await setUserID(addr);
+        getUserSettings();
+      })();
     } else {
       setNotificationSettings(INIT_NOTIFICATION_SETTINGS);
     }
@@ -78,8 +81,13 @@ const NotificationServiceProvider = ({ children }) => {
   const getUserSettings = async () => {
     try {
       //here we call api
-      const userSettings = INIT_NOTIFICATION_SETTINGS;
-      setNotificationSettings(userSettings);
+      const { communitySubscription, isSubscribedFromCommunityUpdates } =
+        INIT_NOTIFICATION_SETTINGS;
+      setNotificationSettings((prevState) => ({
+        ...prevState,
+        communitySubscription,
+        isSubscribedFromCommunityUpdates,
+      }));
     } catch {
       throw new Error('cannot get user settings');
     }
@@ -112,6 +120,7 @@ const NotificationServiceProvider = ({ children }) => {
       throw new Error('cannot subscribe community');
     }
   };
+
   const updateAllEmailNotificationSubscription = async (subscribeIntention) => {
     if (subscribeIntention === subscribeNotificationIntentions.resubscribe) {
       //call api to resubscribe all email notifications

@@ -1,21 +1,19 @@
 import { useNotificationServiceContext } from 'contexts/NotificationService';
+import { subscribeNotificationIntentions } from 'const';
 
 export default function ReceiveEmailNotificationsSwitch() {
-  const {
-    notificationSettings,
-    unsubscribeFromEmailNotifications,
-    resubscribeFromEmailNotifications,
-  } = useNotificationServiceContext();
+  const { notificationSettings, updateAllEmailNotificationSubscription } =
+    useNotificationServiceContext();
 
   const { isSubscribedFromCommunityUpdates } = notificationSettings;
 
   const handleSubscribeAllNotifications = () => {
-    if (isSubscribedFromCommunityUpdates) {
-      unsubscribeFromEmailNotifications();
-    } else {
-      resubscribeFromEmailNotifications();
-    }
+    const subscribeIntention = isSubscribedFromCommunityUpdates
+      ? subscribeNotificationIntentions.unsubscribe
+      : subscribeNotificationIntentions.resubscribe;
+    updateAllEmailNotificationSubscription(subscribeIntention);
   };
+
   return (
     <div className="is-flex is-flex-direction-rowis-align-items-start">
       <div className="flex-2">
