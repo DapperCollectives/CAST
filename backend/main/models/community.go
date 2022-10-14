@@ -12,6 +12,7 @@ import (
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/jackc/pgx/v4"
+	"github.com/rs/zerolog/log"
 )
 
 type Community struct {
@@ -180,10 +181,10 @@ const UPDATE_COMMUNITY_SQL = `
 	WHERE id = $21
 `
 const SEARCH_COMMUNITIES_SQL = `
-	SELECT id, name, body, logo, category	
+	SELECT id, name, body, logo, category, SIMILARITY(name, $1) as score	
 	FROM communities 
 	WHERE SIMILARITY(name, $1) > 0.1
-		AND category IS NOT NULL
+		AND category IS NOT NULL ORDER BY score DESC
 `
 const COUNT_CATEGORIES_DEFAULT_SQL = `
 	SELECT category, COUNT(*) as category_count
@@ -465,10 +466,15 @@ func SearchForCommunity(
 
 func scanSearchResults(rows pgx.Rows) ([]*Community, error) {
 	var communities []*Community
+	// score is required for scanning, but can be ignored. Only used
+	// to order the search results by SQL.
+	var score float32
 	for rows.Next() {
 		var c Community
-		err := rows.Scan(&c.ID, &c.Name, &c.Body, &c.Logo, &c.Category)
+		err := rows.Scan(&c.ID, &c.Name, &c.Body, &c.Logo, &c.Category, &score)
 		if err != nil {
+			fmt.Println(err)
+			log.Error().Err(err)
 			return communities, fmt.Errorf("error scanning community row: %v", err)
 		}
 		communities = append(communities, &c)
