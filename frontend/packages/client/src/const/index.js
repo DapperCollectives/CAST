@@ -36,6 +36,12 @@ export const CommunityEditPageTabs = {
   votingStrategies: 'voting-strategies',
 };
 
+export const subscribeNotificationIntentions = {
+  subscribe: 'subscribe',
+  unsubscribe: 'unsubscribe',
+  resubscribe: 'resubscribe',
+};
+
 // Dapper Wallet Txs
 export const CREATE_COMMUNITY_TX = `
 transaction() {

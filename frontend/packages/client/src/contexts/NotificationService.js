@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
+import { subscribeNotificationIntentions } from 'const';
 import { useWebContext } from './Web3';
 
 const NotificationServiceContext = createContext({});
@@ -10,16 +11,16 @@ const INIT_NOTIFICATION_SETTINGS = {
   isSubscribedFromCommunityUpdates: false,
 };
 
-const updateCommunitySubscription = (
+const updateCommunitySubscriptionState = (
   communitySubscription,
   communityId,
-  subscribed
+  subscribedValue
 ) => {
   const newCommunitySubscription = [...communitySubscription];
   const updateIndex = newCommunitySubscription.findIndex(
     (communitySub) => communitySub.communityId === communityId
   );
-  newCommunitySubscription[updateIndex].subscribed = subscribed;
+  newCommunitySubscription[updateIndex].subscribed = subscribedValue;
   return newCommunitySubscription;
 };
 
@@ -84,33 +85,23 @@ const NotificationServiceProvider = ({ children }) => {
     }
   };
 
-  const unsubscribeCommunity = async (communityId) => {
+  const updateCommunitySubscription = async (
+    communityId,
+    subscribeIntention
+  ) => {
     try {
-      //here we call api
+      if (subscribeIntention === subscribeNotificationIntentions.subscribe) {
+        //call api to subscribe community
+      } else if (
+        subscribeIntention === subscribeNotificationIntentions.unsubscribe
+      ) {
+        //call api to unsubscribe community
+      }
       setNotificationSettings((prevState) => {
-        const newCommunitySubscription = updateCommunitySubscription(
+        const newCommunitySubscription = updateCommunitySubscriptionState(
           prevState.communitySubscription,
           communityId,
-          false
-        );
-        return {
-          ...prevState,
-          communitySubscription: newCommunitySubscription,
-        };
-      });
-    } catch {
-      throw new Error('cannot unsubscribe community');
-    }
-  };
-
-  const subscribeCommunity = async (communityId) => {
-    try {
-      //here we call api
-      setNotificationSettings((prevState) => {
-        const newCommunitySubscription = updateCommunitySubscription(
-          prevState.communitySubscription,
-          communityId,
-          true
+          subscribeIntention === subscribeNotificationIntentions.subscribe
         );
         return {
           ...prevState,
@@ -121,39 +112,28 @@ const NotificationServiceProvider = ({ children }) => {
       throw new Error('cannot subscribe community');
     }
   };
-
-  const unsubscribeFromEmailNotifications = async () => {
-    try {
-      //here we call api
-      setNotificationSettings((prevState) => ({
-        ...prevState,
-        isSubscribedFromCommunityUpdates: false,
-      }));
-    } catch {
-      throw new Error('cannot unscribe from email notifications');
+  const updateAllEmailNotificationSubscription = async (subscribeIntention) => {
+    if (subscribeIntention === subscribeNotificationIntentions.resubscribe) {
+      //call api to resubscribe all email notifications
+    } else if (
+      subscribeIntention === subscribeNotificationIntentions.unsubscribe
+    ) {
+      //call api to unsubscribe all email notifications
     }
+    setNotificationSettings((prevState) => ({
+      ...prevState,
+      isSubscribedFromCommunityUpdates:
+        subscribeIntention === subscribeNotificationIntentions.resubscribe,
+    }));
   };
 
-  const resubscribeFromEmailNotifications = async () => {
-    try {
-      //here we call api
-      setNotificationSettings((prevState) => ({
-        ...prevState,
-        isSubscribedFromCommunityUpdates: true,
-      }));
-    } catch {
-      throw new Error('cannot resubscribe from email notifications');
-    }
-  };
   const providerProps = {
     notificationSettings,
     setUserID,
     setUserEmail,
     getUserSettings,
-    unsubscribeCommunity,
-    subscribeCommunity,
-    unsubscribeFromEmailNotifications,
-    resubscribeFromEmailNotifications,
+    updateCommunitySubscription,
+    updateAllEmailNotificationSubscription,
   };
   return (
     <NotificationServiceContext.Provider value={providerProps}>
