@@ -41,7 +41,7 @@ const TextBasedOptions = ({
                 type="radio"
                 name={`${labelType}-${opt.value}`}
                 value={opt.value}
-                className={`mr-3`}
+                className={`yellow-radio mr-3`}
                 onChange={_onOptionSelect}
                 checked={currentOption === String(opt.value)}
                 disabled={readOnly}

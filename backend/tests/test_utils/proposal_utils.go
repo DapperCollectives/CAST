@@ -34,6 +34,7 @@ var (
 		Strategy:     &tokenWeightedDefault,
 		Status:       &published,
 		Block_height: &blockHeight,
+		TallyMethod: "single-choice",
 	}
 )
 

@@ -41,7 +41,7 @@ type Proposal struct {
 	Snapshot_status      *string                 `json:"snapshotStatus,omitempty"`
 	Voucher              *shared.Voucher         `json:"voucher,omitempty"`
 	Achievements_done    bool                    `json:"achievementsDone"`
-	TallyMethod          string                  `json:"tallyMethod"`
+	TallyMethod          string                  `json:"voteType" validate:"required"`
 }
 
 type UpdateProposalRequestPayload struct {
@@ -129,9 +129,10 @@ func (p *Proposal) CreateProposal(db *s.Database) error {
 	block_height, 
 	cid, 
 	composite_signatures,
-	voucher
+	voucher,
+	tally_method
 	)
-	VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+	VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
 	RETURNING id, created_at
 	`,
 		p.Community_id,
@@ -149,6 +150,7 @@ func (p *Proposal) CreateProposal(db *s.Database) error {
 		p.Cid,
 		p.Composite_signatures,
 		p.Voucher,
+		p.TallyMethod,
 	).Scan(&p.ID, &p.Created_at)
 
 	return err
