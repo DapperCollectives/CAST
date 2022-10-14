@@ -1,16 +1,7 @@
 import { useMemo } from 'react';
 import { Svg } from '@cast/shared-components';
-import { IS_LOCAL_DEV } from 'const';
-import * as fcl from '@onflow/fcl';
 import classnames from 'classnames';
 import sortBy from 'lodash/sortBy';
-
-const getWalletIcon = (provider) => {
-  if (provider?.name === 'Lilico') {
-    return 'https://raw.githubusercontent.com/Outblock/Lilico-Web/main/asset/logo-dis.png';
-  }
-  return `https://fcl-discovery.onflow.org${provider.icon}`;
-};
 
 export default function WalletConnectModal({
   services = [],
@@ -33,17 +24,11 @@ export default function WalletConnectModal({
         services.map((service) => {
           return {
             connectToService: () => {
-              if (service.uid !== 'Lilico') {
-                fcl.config().put('discovery.wallet.method', service.method);
-              }
-              injectedProvider.authenticate(
-                !IS_LOCAL_DEV ? { service } : undefined
-              );
+              injectedProvider.authenticate({ service });
               closeModal();
             },
-            icon: IS_LOCAL_DEV
-              ? getWalletIcon(service.provider)
-              : service.provider.icon,
+            icon: service.provider.icon,
+
             name: service.provider.name,
           };
         }),
