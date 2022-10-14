@@ -22,7 +22,7 @@ export default function SettingsSection() {
       <div className="is-flex is-flex-direction-row is-flex-wrap-wrap is-align-items-center">
         <div className="mr-3 my-3">
           <p
-            className="rounded-lg border-light flex-1 has-text-grey is-flex is-align-items-center pl-2"
+            className="rounded-lg border-light flex-1 has-text-grey is-flex is-align-items-center pl-2 pt-1"
             style={{ height: 41, width: 246 }}
           >
             <span>
@@ -33,7 +33,7 @@ export default function SettingsSection() {
                 className="blockies"
               />
             </span>
-            <span className="ml-1">{walletId}</span>
+            <span className="ml-1 mb-1 cursor-default">{walletId}</span>
 
             <CopyToClipboard
               text={walletId}
@@ -41,7 +41,7 @@ export default function SettingsSection() {
                 console.log('coiped');
               }}
             >
-              <span className="cursor-pointer mt-2 ml-1">
+              <span className="cursor-pointer mt-1 ml-1">
                 <Svg name="Copy"></Svg>
               </span>
             </CopyToClipboard>

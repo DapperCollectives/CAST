@@ -6,8 +6,21 @@ const NotificationServiceContext = createContext({});
 const INIT_NOTIFICATION_SETTINGS = {
   walletId: '',
   email: '',
-  communitySubscription: [],
-  isUnsubscribedFromCommunityUpdates: false,
+  communitySubscription: [{ communityId: '1', subscribed: true }],
+  isSubscribedFromCommunityUpdates: false,
+};
+
+const updateCommunitySubscription = (
+  communitySubscription,
+  communityId,
+  subscribed
+) => {
+  const newCommunitySubscription = [...communitySubscription];
+  const updateIndex = newCommunitySubscription.findIndex(
+    (communitySub) => communitySub.communityId === communityId
+  );
+  newCommunitySubscription[updateIndex].subscribed = subscribed;
+  return newCommunitySubscription;
 };
 
 export const useNotificationServiceContext = () => {
@@ -64,11 +77,8 @@ const NotificationServiceProvider = ({ children }) => {
   const getUserSettings = async () => {
     try {
       //here we call api
-      setNotificationSettings((prevState) => ({
-        ...prevState,
-        communitySubscription: [{ communityId: 1, subscribed: true }],
-        isUnsubscribedFromCommunityUpdates: false,
-      }));
+      const userSettings = INIT_NOTIFICATION_SETTINGS;
+      setNotificationSettings(userSettings);
     } catch {
       throw new Error('cannot get user settings');
     }
@@ -77,13 +87,17 @@ const NotificationServiceProvider = ({ children }) => {
   const unsubscribeCommunity = async (communityId) => {
     try {
       //here we call api
-      setNotificationSettings((prevState) => ({
-        ...prevState,
-        communitySubscription: {
-          ...prevState.communitySubscription,
-          [communityId]: false,
-        },
-      }));
+      setNotificationSettings((prevState) => {
+        const newCommunitySubscription = updateCommunitySubscription(
+          prevState.communitySubscription,
+          communityId,
+          false
+        );
+        return {
+          ...prevState,
+          communitySubscription: newCommunitySubscription,
+        };
+      });
     } catch {
       throw new Error('cannot unsubscribe community');
     }
@@ -92,13 +106,17 @@ const NotificationServiceProvider = ({ children }) => {
   const subscribeCommunity = async (communityId) => {
     try {
       //here we call api
-      setNotificationSettings((prevState) => ({
-        ...prevState,
-        communitySubscription: {
-          ...prevState.communitySubscription,
-          [communityId]: true,
-        },
-      }));
+      setNotificationSettings((prevState) => {
+        const newCommunitySubscription = updateCommunitySubscription(
+          prevState.communitySubscription,
+          communityId,
+          true
+        );
+        return {
+          ...prevState,
+          communitySubscription: newCommunitySubscription,
+        };
+      });
     } catch {
       throw new Error('cannot subscribe community');
     }
@@ -109,7 +127,7 @@ const NotificationServiceProvider = ({ children }) => {
       //here we call api
       setNotificationSettings((prevState) => ({
         ...prevState,
-        isUnsubscribedFromCommunityUpdates: true,
+        isSubscribedFromCommunityUpdates: false,
       }));
     } catch {
       throw new Error('cannot unscribe from email notifications');
@@ -121,7 +139,7 @@ const NotificationServiceProvider = ({ children }) => {
       //here we call api
       setNotificationSettings((prevState) => ({
         ...prevState,
-        isUnsubscribedFromCommunityUpdates: false,
+        isSubscribedFromCommunityUpdates: true,
       }));
     } catch {
       throw new Error('cannot resubscribe from email notifications');
