@@ -109,7 +109,7 @@ export default function BrowseCommunities() {
               style={{ position: 'relative' }}
             >
               <input
-                placeholder="Search communities by name or description"
+                placeholder="Search communities by name"
                 className="border-light rounded-sm pr-3 py-3 column"
                 style={{ paddingLeft: '40px' }}
                 value={searchText}

@@ -199,7 +199,10 @@ code
 	.message-container, .communities
 		margin-bottom: 1.5rem
 // custom radio buttons
-label > input[type="radio"].yellow-radio
+.radio.is-disabled
+	cursor: default !important
+	pointer-events: none
+label > input[type="radio"]
 	display: none
 label > input[type="radio"].yellow-radio + *::before
 	content: ""
