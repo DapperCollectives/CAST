@@ -1,6 +1,13 @@
 import yup from 'helpers/validation';
 
-const formFieldsStepOne = ['name', 'strategy', 'body', 'choices', 'tabOption'];
+const formFieldsStepOne = [
+  'name',
+  'strategy',
+  'body',
+  'choices',
+  'tabOption',
+  'voteType',
+];
 const formFieldsStepTwo = ['startDate', 'endDate', 'startTime', 'endTime'];
 
 const StepOneSchema = yup.object().shape({
@@ -33,14 +40,18 @@ const StepOneSchema = yup.object().shape({
         })
       ),
     })
-    .min(2, 'Please add a choice, minimum amout is two')
+    .when('voteType', (voteType, schema) =>
+      voteType === 'single-choice'
+        ? schema.min(2, 'Please add a choice, minimum amount is two')
+        : schema.min(3, 'Please add a choice, minimum amount is three')
+    )
     .unique('value', 'Invalid duplicated option'),
   maxWeight: yup
     .string()
     .trim()
     .matches(
       /\s+$|^$|(^[0-9]+$)/,
-      'Proposal maximun weight must be a valid number'
+      'Proposal maximum weight must be a valid number'
     ),
   minBalance: yup
     .string()

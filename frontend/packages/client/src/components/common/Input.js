@@ -9,11 +9,11 @@ export default function Input({
   disabled,
   error,
   type = 'text',
-  conatinerClassNames = '',
+  containerClassNames = '',
 } = {}) {
   return (
     <div
-      className={`is-flex is-flex-direction-column flex-1 ${conatinerClassNames}`.trim()}
+      className={`is-flex is-flex-direction-column flex-1 ${containerClassNames}`.trim()}
     >
       <input
         type={type}
