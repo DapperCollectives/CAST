@@ -132,7 +132,7 @@ export default function ProposalCreatePage() {
       'Proposal creation is not complete yet, are you sure you want to leave?',
     passNextToComp: true,
     passSubmitToComp: true,
-    showActionButtonLeftPannel: true,
+    showActionButtonLeftPanel: true,
     steps: [
       {
         label: 'Proposal',
