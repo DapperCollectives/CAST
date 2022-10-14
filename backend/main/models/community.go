@@ -184,7 +184,7 @@ const SEARCH_COMMUNITIES_SQL = `
 	SELECT id, name, body, logo, category, SIMILARITY(name, $1) as score	
 	FROM communities 
 	WHERE SIMILARITY(name, $1) > 0.1
-		AND category IS NOT NULL
+		AND category IS NOT NULL ORDER BY score DESC
 `
 const COUNT_CATEGORIES_DEFAULT_SQL = `
 	SELECT category, COUNT(*) as category_count
