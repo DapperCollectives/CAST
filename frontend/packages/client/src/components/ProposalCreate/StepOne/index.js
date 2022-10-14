@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import Dropdown from 'components/common/Dropdown';
@@ -37,8 +37,6 @@ const StepOne = ({
     [strategies]
   );
 
-  const [voteType, setVoteType] = useState('single-choice');
-
   const fieldsObj = Object.assign(
     {},
     stepOne.initialValues,
@@ -55,13 +53,9 @@ const StepOne = ({
       reValidateMode: 'onChange',
       defaultValues: fieldsObj,
       resolver: yupResolver(stepOne.Schema),
-      context: { voteType },
     });
 
-  const handleVoteType = (voteType) => {
-    setVoteType(voteType);
-    setValue('voteType', voteType);
-  };
+  const voteType = useWatch({ control, name: 'voteType' });
 
   const onSubmit = (data) => {
     let choices;
@@ -172,7 +166,7 @@ const StepOne = ({
               className={`border-light rounded-sm is-flex is-align-items-center m-0 p-0 mb-4 cursor-pointer ${
                 voteType === 'single-choice' ? 'border-grey' : 'border-light'
               }`}
-              onClick={() => handleVoteType('single-choice')}
+              onClick={() => setValue('voteType', 'single-choice')}
             >
               <div className="p-4">
                 <div className="is-flex is-align-items-center mr-2">
@@ -196,46 +190,15 @@ const StepOne = ({
                   customized by proposal creator.
                 </p>
               </div>
-              <div className="has-background-light-grey p-4 rounded-sm-br rounded-sm-tr is-flex is-flex-direction-column is-align-self-stretch is-justify-content-center ">
-                <div
-                  className="is-flex is-align-items-center mb-1"
-                  style={{ whiteSpace: 'nowrap' }}
-                >
-                  <div
-                    className="rounded-full has-background-grey has-text-white mr-2 is-flex is-align-items-center is-justify-content-center"
-                    style={{ width: 12, height: 12 }}
-                  ></div>
-                  <span className="smaller-text">Option A</span>
-                </div>
-                <div
-                  className="is-flex is-align-items-center mb-1"
-                  style={{ whiteSpace: 'nowrap' }}
-                >
-                  <div
-                    className="rounded-full has-background-grey has-text-white mr-2 is-flex is-align-items-center is-justify-content-center"
-                    style={{ width: 12, height: 12 }}
-                  >
-                    <span style={{ fontSize: 8 }}>&#x2713;</span>
-                  </div>
-                  <span className="smaller-text">Option B</span>
-                </div>
-                <div
-                  className="is-flex is-align-items-center"
-                  style={{ whiteSpace: 'nowrap' }}
-                >
-                  <div
-                    className="rounded-full has-background-grey has-text-white mr-2 is-flex is-align-items-center is-justify-content-center"
-                    style={{ width: 12, height: 12 }}
-                  ></div>
-                  <span className="smaller-text">Option C</span>
-                </div>
+              <div className="has-background-light-grey p-4 is-hidden-mobile rounded-sm-br rounded-sm-tr is-flex is-flex-direction-column is-align-self-stretch is-justify-content-center ">
+                {SingleVoteExample}
               </div>
             </div>
             <div
               className={`border-light rounded-sm is-flex is-align-items-center m-0 p-0 cursor-pointer ${
                 voteType === 'ranked-choice' ? 'border-grey' : 'border-light'
               }`}
-              onClick={() => handleVoteType('ranked-choice')}
+              onClick={() => setValue('voteType', 'ranked-choice')}
             >
               <div className="p-4">
                 <div className="is-flex is-align-items-center mr-2">
@@ -257,45 +220,8 @@ const StepOne = ({
                   randomized by default.
                 </p>
               </div>
-              <div className="has-background-light-grey p-4 rounded-sm-br rounded-sm-tr is-flex is-flex-direction-column is-align-self-stretch is-justify-content-center">
-                <div>
-                  <div
-                    className="is-flex is-align-items-center mb-1"
-                    style={{ whiteSpace: 'nowrap' }}
-                  >
-                    <div
-                      className="rounded-full has-background-grey has-text-white mr-2 is-flex is-align-items-center is-justify-content-center"
-                      style={{ width: 12, height: 12 }}
-                    >
-                      <span style={{ fontSize: 7 }}>1</span>
-                    </div>
-                    <span className="smaller-text">Option C</span>
-                  </div>
-                  <div
-                    className="is-flex is-align-items-center mb-1"
-                    style={{ whiteSpace: 'nowrap' }}
-                  >
-                    <div
-                      className="rounded-full has-background-grey has-text-white mr-2 is-flex is-align-items-center is-justify-content-center"
-                      style={{ width: 12, height: 12 }}
-                    >
-                      <span style={{ fontSize: 7 }}>2</span>
-                    </div>
-                    <span className="smaller-text">Option B</span>
-                  </div>
-                  <div
-                    className="is-flex is-align-items-center"
-                    style={{ whiteSpace: 'nowrap' }}
-                  >
-                    <div
-                      className="rounded-full has-background-grey has-text-white mr-2 is-flex is-align-items-center is-justify-content-center"
-                      style={{ width: 12, height: 12 }}
-                    >
-                      <span style={{ fontSize: 7 }}>3</span>
-                    </div>
-                    <span className="smaller-text">Option A</span>
-                  </div>
-                </div>
+              <div className="has-background-light-grey p-4 is-hidden-mobile rounded-sm-br rounded-sm-tr is-flex is-flex-direction-column is-align-self-stretch is-justify-content-center">
+                {RankedVoteExample}
               </div>
             </div>
           </div>
@@ -331,5 +257,83 @@ const StepOne = ({
     </Form>
   );
 };
+
+const SingleVoteExample = (
+  <>
+    <div
+      className="is-flex is-align-items-center mb-1"
+      style={{ whiteSpace: 'nowrap' }}
+    >
+      <div
+        className="rounded-full has-background-grey has-text-white mr-2 is-flex is-align-items-center is-justify-content-center"
+        style={{ width: 12, height: 12 }}
+      ></div>
+      <span className="smaller-text">Option A</span>
+    </div>
+    <div
+      className="is-flex is-align-items-center mb-1"
+      style={{ whiteSpace: 'nowrap' }}
+    >
+      <div
+        className="rounded-full has-background-grey has-text-white mr-2 is-flex is-align-items-center is-justify-content-center"
+        style={{ width: 12, height: 12 }}
+      >
+        <span style={{ fontSize: 8, paddingTop: 1 }}>&#x2713;</span>
+      </div>
+      <span className="smaller-text">Option B</span>
+    </div>
+    <div
+      className="is-flex is-align-items-center"
+      style={{ whiteSpace: 'nowrap' }}
+    >
+      <div
+        className="rounded-full has-background-grey has-text-white mr-2 is-flex is-align-items-center is-justify-content-center"
+        style={{ width: 12, height: 12 }}
+      ></div>
+      <span className="smaller-text">Option C</span>
+    </div>
+  </>
+);
+
+const RankedVoteExample = (
+  <>
+    <div
+      className="is-flex is-align-items-center mb-1"
+      style={{ whiteSpace: 'nowrap' }}
+    >
+      <div
+        className="rounded-full has-background-grey has-text-white mr-2 is-flex is-align-items-center is-justify-content-center"
+        style={{ width: 12, height: 12 }}
+      >
+        <span style={{ fontSize: 7, paddingTop: 1 }}>1</span>
+      </div>
+      <span className="smaller-text">Option C</span>
+    </div>
+    <div
+      className="is-flex is-align-items-center mb-1"
+      style={{ whiteSpace: 'nowrap' }}
+    >
+      <div
+        className="rounded-full has-background-grey has-text-white mr-2 is-flex is-align-items-center is-justify-content-center"
+        style={{ width: 12, height: 12 }}
+      >
+        <span style={{ fontSize: 7, paddingTop: 1 }}>2</span>
+      </div>
+      <span className="smaller-text">Option B</span>
+    </div>
+    <div
+      className="is-flex is-align-items-center"
+      style={{ whiteSpace: 'nowrap' }}
+    >
+      <div
+        className="rounded-full has-background-grey has-text-white mr-2 is-flex is-align-items-center is-justify-content-center"
+        style={{ width: 12, height: 12 }}
+      >
+        <span style={{ fontSize: 7, paddingTop: 1 }}>3</span>
+      </div>
+      <span className="smaller-text">Option A</span>
+    </div>
+  </>
+);
 
 export default StepOne;
