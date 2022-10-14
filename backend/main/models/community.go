@@ -185,7 +185,6 @@ const SEARCH_COMMUNITIES_SQL = `
 	WHERE SIMILARITY(name, $1) > 0.1
 		AND category IS NOT NULL
 `
-
 const COUNT_CATEGORIES_DEFAULT_SQL = `
 	SELECT category, COUNT(*) as category_count
 	FROM communities 
@@ -193,7 +192,6 @@ const COUNT_CATEGORIES_DEFAULT_SQL = `
 		AND category IS NOT NULL
 	GROUP BY category
 `
-
 const COUNT_CATEGORIES_SEARCH_SQL = `
 	SELECT category, COUNT(*) as category_count
 	FROM communities 
@@ -402,11 +400,6 @@ func SearchForCommunity(
 	params shared.PageParams,
 ) ([]*Community, int, error) {
 
-	countSql, err := generateFilterCountSql(filters)
-	if err != nil {
-		return nil, 0, err
-	}
-
 	sql, err := addFiltersToSql(SEARCH_COMMUNITIES_SQL, query, filters)
 	if err != nil {
 		return nil, 0, err
@@ -431,9 +424,26 @@ func SearchForCommunity(
 		return []*Community{}, 0, fmt.Errorf("error scanning search results for the query %s", query)
 	}
 
-	var totalRecords int
-	db.Conn.QueryRow(db.Context, countSql, query).Scan(&totalRecords)
-	return communities, totalRecords, nil
+	//print the length of filters
+	fmt.Println(len(filters))
+
+	//if filters are present generate a new sql query to get the total records
+	if len(filters) > 1 {
+		countSql, err := generateFilterCountSql(filters)
+		if err != nil {
+			return nil, 0, err
+		}
+		var totalRecords int
+		db.Conn.QueryRow(db.Context, countSql, query).Scan(&totalRecords)
+
+		return communities, totalRecords, nil
+	} else {
+		countSql := `SELECT COUNT(*) FROM communities WHERE SIMILARITY(name, $1) > 0.1`
+		var totalRecords int
+		db.Conn.QueryRow(db.Context, countSql, query).Scan(&totalRecords)
+
+		return communities, totalRecords, nil
+	}
 }
 
 func scanSearchResults(rows pgx.Rows) ([]*Community, error) {
