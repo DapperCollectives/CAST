@@ -3,7 +3,7 @@ import { Prompt } from 'react-router-dom';
 import { useMediaQuery } from 'hooks';
 import Loader from '../Loader';
 import HeaderStepByStep from './HeaderStepByStep';
-import LeftPannel from './LeftPannel';
+import LeftPannel from './LeftPanel';
 import NextButton from './NextStepButton';
 import SubmitButton from './SubmitButton';
 
@@ -20,7 +20,6 @@ function StepByStep({
   blockNavigationOut = false,
   blockNavigationText,
   alignStepsToTop,
-  useTopStepNavigation,
 } = {}) {
   const notMobile = useMediaQuery();
   const [currentStep, setCurrentStep] = useState(0);
