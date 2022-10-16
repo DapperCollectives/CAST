@@ -3,7 +3,7 @@ import { Prompt } from 'react-router-dom';
 import { useMediaQuery } from 'hooks';
 import Loader from '../Loader';
 import HeaderStepByStep from './HeaderStepByStep';
-import LeftPannel from './LeftPanel';
+import LeftPanel from './LeftPanel';
 import NextButton from './NextStepButton';
 import SubmitButton from './SubmitButton';
 
@@ -119,7 +119,7 @@ function StepByStep({
         />
         <div className="container is-flex is-flex-direction-column-mobile">
           {/* left panel */}
-          <LeftPannel
+          <LeftPanel
             currentStep={currentStep}
             isSubmitting={isSubmitting}
             showNextButton={showNextButton}
