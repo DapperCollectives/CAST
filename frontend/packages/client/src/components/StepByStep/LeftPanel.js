@@ -1,8 +1,9 @@
 import { useMediaQuery } from 'hooks';
 import BackButton from './BackButton';
-import NextButton from './NexStepButton';
+// import NextButton from './NextStepButton';
 import StepLabelAndIcon from './StepLabelAndIcon';
-import SubmitButton from './SubmitButton';
+
+// import SubmitButton from './SubmitButton';
 
 export default function LeftPanel({
   currentStep,
