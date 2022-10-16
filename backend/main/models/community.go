@@ -5,7 +5,6 @@ package models
 /////////////////
 
 import (
-	"errors"
 	"fmt"
 	"strconv"
 	"time"
@@ -14,7 +13,6 @@ import (
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/jackc/pgx/v4"
-	"github.com/rs/zerolog/log"
 )
 
 type Community struct {
@@ -38,6 +36,8 @@ type Community struct {
 	Proposal_threshold       *string     `json:"proposalThreshold,omitempty"`
 	Slug                     *string     `json:"slug,omitempty"                  validate:"required"`
 	Is_featured              *bool       `json:"isFeatured,omitempty"`
+
+	Total *int `json:"total,omitempty"` // for search only
 
 	Contract_name *string `json:"contractName,omitempty"`
 	Contract_addr *string `json:"contractAddr,omitempty"`
@@ -91,8 +91,12 @@ type UpdateCommunityRequestPayload struct {
 
 type CanUserCreateProposalResponse struct {
 	shared.Contract
-	Balance       *float64 `json:"balance,omitempty"`
-	HasPermission bool     `json:"hasPermission"`
+	Balance                *float64 `json:"balance,omitempty"`
+	Only_authors_to_submit bool     `json:"onlyAuthorsToSubmit"`
+	IsAuthor               bool     `json:"isAuthor"`
+	HasPermission          bool     `json:"hasPermission"`
+	Reason                 string   `json:"reason,omitempty"`
+	Error                  error    `json:"error,omitempty"`
 }
 
 type Strategy struct {
@@ -187,12 +191,11 @@ const UPDATE_COMMUNITY_SQL = `
 	WHERE id = $21
 `
 const SEARCH_COMMUNITIES_SQL = `
-	SELECT id, name, body, logo, category
+	SELECT id, name, body, logo, category	
 	FROM communities 
 	WHERE SIMILARITY(name, $1) > 0.1
 		AND category IS NOT NULL
 `
-
 const COUNT_CATEGORIES_DEFAULT_SQL = `
 	SELECT category, COUNT(*) as category_count
 	FROM communities 
@@ -200,7 +203,6 @@ const COUNT_CATEGORIES_DEFAULT_SQL = `
 		AND category IS NOT NULL
 	GROUP BY category
 `
-
 const COUNT_CATEGORIES_SEARCH_SQL = `
 	SELECT category, COUNT(*) as category_count
 	FROM communities 
@@ -258,16 +260,19 @@ func (c *Community) GetCommunityByProposalId(db *s.Database, proposalId int) err
 		proposalId)
 }
 
-func GetDefaultCommunities(db *s.Database, params shared.PageParams, filters []string, isSearch bool) ([]*Community, int, error) {
+func GetDefaultCommunities(
+	db *s.Database,
+	params shared.PageParams,
+	filters []string,
+	isSearch bool,
+) ([]*Community, int, error) {
 	var sql string
 
-	var totalRecords int
-	countSql := `SELECT COUNT(*) FROM communities`
-	db.Conn.QueryRow(db.Context, countSql).Scan(&totalRecords)
-
 	if !isSearch {
-		sql = HOMEPAGE_SQL
+		var totalRecords int
+		countSql := `SELECT COUNT(*) FROM communities `
 
+		sql = HOMEPAGE_SQL
 		var communities []*Community
 
 		err := pgxscan.Select(
@@ -287,6 +292,7 @@ func GetDefaultCommunities(db *s.Database, params shared.PageParams, filters []s
 			return []*Community{}, 0, nil
 		}
 
+		db.Conn.QueryRow(db.Context, countSql).Scan(&totalRecords)
 		return communities, totalRecords, nil
 	} else {
 		sql, err := addFiltersToSql(DEFAULT_SEARCH_SQL, "", filters)
@@ -311,7 +317,28 @@ func GetDefaultCommunities(db *s.Database, params shared.PageParams, filters []s
 			return nil, 0, err
 		}
 
-		return communities, totalRecords, nil
+		//@TODO: Repeating logic here, refactor if checks into a function
+		//if filters are present generate a new sql query to get the total records
+		if filters[0] != "" {
+			countSql, err := generateDefaultFilterCountSql(filters)
+			if err != nil {
+				return nil, 0, err
+			}
+
+			fmt.Printf("count sql: %s \n", countSql)
+			var totalRecords int
+			db.Conn.QueryRow(db.Context, countSql).Scan(&totalRecords)
+
+			return communities, totalRecords, nil
+		} else {
+			countSql := `SELECT COUNT(*) FROM communities 
+			WHERE is_featured = 'true' AND category IS NOT NULL`
+
+			var totalRecords int
+			db.Conn.QueryRow(db.Context, countSql).Scan(&totalRecords)
+
+			return communities, totalRecords, nil
+		}
 	}
 }
 
@@ -386,50 +413,61 @@ func (c *Community) CanUpdateCommunity(db *s.Database, addr string) error {
 	return nil
 }
 
-func (c *Community) CanUserCreateProposal(db *s.Database, fa *s.FlowAdapter, address string) error {
-	var isAuthor = true
-	var errMsg string
+func (c *Community) CanUserCreateProposal(db *s.Database, fa *s.FlowAdapter, address string) CanUserCreateProposalResponse {
+	response := CanUserCreateProposalResponse{}
+	response.Only_authors_to_submit = *c.Only_authors_to_submit
+	response.HasPermission = false // false by default
 
 	// Check if user is an author
 	if err := EnsureRoleForCommunity(db, address, c.ID, "author"); err != nil {
-		isAuthor = false
-		errMsg = fmt.Sprintf("Account %s is not an author for community %d.", address, c.ID)
-		log.Error().Err(err).Msg(errMsg)
+		response.IsAuthor = false
 	} else { // return successfully if user is an author, regardless of Only_authors_to_submit
-		return nil
+		response.IsAuthor = true
+		response.HasPermission = true
+		return response
 	}
 
-	// If only authors can submit
-	if *c.Only_authors_to_submit && !isAuthor {
-		return errors.New(errMsg)
-	}
-	threshold, err := strconv.ParseFloat(*c.Proposal_threshold, 64)
-	if err != nil {
-		log.Error().Err(err).Msg("Invalid proposal threshold")
-		return errors.New("Invalid proposal threshold")
+	// If only authors can submit and user is not an author
+	if *c.Only_authors_to_submit && !response.IsAuthor {
+		response.Reason = fmt.Sprintf("Account %s is not an author for community %d.", address, c.ID)
+		response.HasPermission = false
+		return response
 	}
 
-	contract := shared.Contract{
-		Name:        c.Contract_name,
-		Addr:        c.Contract_addr,
-		Public_path: c.Public_path,
-		Threshold:   &threshold,
-	}
-	balance, err := fa.GetBalanceOfTokens(address, &contract, *c.Contract_type)
-	if err != nil {
-		errMsg := "Error processing Token Threshold."
-		log.Error().Err(err).Msg(errMsg)
-		return errors.New(errMsg)
+	// If we can use token threshold
+	if !*c.Only_authors_to_submit {
+		threshold, err := strconv.ParseFloat(*c.Proposal_threshold, 64)
+		if err != nil {
+			err = fmt.Errorf("invalid proposal threshold for community %d", c.ID)
+			response.Error = err
+			return response
+		}
+
+		// Get Contract
+		contract := shared.Contract{
+			Name:        c.Contract_name,
+			Addr:        c.Contract_addr,
+			Public_path: c.Public_path,
+			Threshold:   &threshold,
+		}
+		response.Contract = contract
+
+		// Get balance if community has proposal threshold rule
+		balance, _ := fa.GetBalanceOfTokens(address, &contract, *c.Contract_type)
+		response.Balance = balance
+
+		//check if balance is greater than threshold
+		if *balance < threshold {
+			reason := "Insufficient token balance to create proposal."
+			response.Reason = reason
+			return response
+		} else {
+			response.HasPermission = true
+			return response
+		}
 	}
 
-	//check if balance is greater than threshold
-	if *balance < threshold {
-		errMsg := "Insufficient token balance to create proposal."
-		log.Error().Err(err).Msg(errMsg)
-		return errors.New(errMsg)
-	}
-
-	return nil
+	return response
 }
 
 func (c *Community) GetStrategy(name string) (Strategy, error) {
@@ -441,12 +479,18 @@ func (c *Community) GetStrategy(name string) (Strategy, error) {
 	return Strategy{}, fmt.Errorf("Strategy %s does not exist on community", name)
 }
 
-func SearchForCommunity(db *s.Database, query string, filters []string, params shared.PageParams) ([]*Community, int, error) {
+func SearchForCommunity(
+	db *s.Database,
+	query string,
+	filters []string,
+	params shared.PageParams,
+) ([]*Community, int, error) {
+
 	sql, err := addFiltersToSql(SEARCH_COMMUNITIES_SQL, query, filters)
 	if err != nil {
 		return nil, 0, err
 	}
-	
+
 	rows, err := db.Conn.Query(
 		db.Context,
 		sql,
@@ -466,14 +510,93 @@ func SearchForCommunity(db *s.Database, query string, filters []string, params s
 		return []*Community{}, 0, fmt.Errorf("error scanning search results for the query %s", query)
 	}
 
-	// Get total number of communities
-	var totalRecords int
-	countSql := `SELECT COUNT(*) FROM communities`
-	_ = db.Conn.QueryRow(db.Context, countSql).Scan(&totalRecords)
+	//@TODO: Repeating logic here, refactor if checks into a function
+	//if filters are present generate a new sql query to get the total records
+	if filters[0] != "" {
+		countSql, err := generateSearchFilterCountSql(filters)
+		if err != nil {
+			return nil, 0, err
+		}
+		var totalRecords int
+		db.Conn.QueryRow(db.Context, countSql, query).Scan(&totalRecords)
 
-	return communities, totalRecords, nil
+		return communities, totalRecords, nil
+	} else {
+		countSql := `SELECT COUNT(*) FROM communities 
+									WHERE SIMILARITY(name, $1) > 0.1`
+		var totalRecords int
+		db.Conn.QueryRow(db.Context, countSql, query).Scan(&totalRecords)
+
+		return communities, totalRecords, nil
+	}
 }
 
+func scanSearchResults(rows pgx.Rows) ([]*Community, error) {
+	var communities []*Community
+	for rows.Next() {
+		var c Community
+		err := rows.Scan(&c.ID, &c.Name, &c.Body, &c.Logo, &c.Category)
+		if err != nil {
+			return communities, fmt.Errorf("error scanning community row: %v", err)
+		}
+		communities = append(communities, &c)
+	}
+	return communities, nil
+}
+
+func MatchStrategyByProposal(s []Strategy, strategyToMatch string) (Strategy, error) {
+	var match Strategy
+	for _, strategy := range s {
+		if *strategy.Name == strategyToMatch {
+			match = strategy
+			return match, nil
+		}
+	}
+	return match, fmt.Errorf("Community does not have strategy available")
+}
+
+/// Generate SQL Functions////
+func generateSearchFilterCountSql(filters []string) (string, error) {
+	if len(filters) > 0 {
+		var sql string = `
+				SELECT COUNT(*) FROM communities
+        WHERE SIMILARITY(name, $1) > 0.1
+        AND category IS NOT NULL
+				AND category IN (`
+		for i, filter := range filters {
+			if i == len(filters)-1 {
+				sql += fmt.Sprintf("'%s')", filter)
+			} else {
+				sql += fmt.Sprintf("'%s',", filter)
+			}
+		}
+
+		return sql, nil
+	} else {
+		return "", fmt.Errorf("No filters provided")
+	}
+}
+
+func generateDefaultFilterCountSql(filters []string) (string, error) {
+	if len(filters) > 0 {
+		var sql string = `
+				SELECT COUNT(*) FROM communities
+        WHERE category IS NOT NULL
+				AND is_featured = true
+				AND category IN (`
+		for i, filter := range filters {
+			if i == len(filters)-1 {
+				sql += fmt.Sprintf("'%s')", filter)
+			} else {
+				sql += fmt.Sprintf("'%s',", filter)
+			}
+		}
+
+		return sql, nil
+	} else {
+		return "", fmt.Errorf("No filters provided")
+	}
+}
 func GetCategoryCount(db *s.Database, search string) (map[string]int, error) {
 	var rows pgx.Rows
 	var err error
@@ -503,9 +626,9 @@ func GetCategoryCount(db *s.Database, search string) (map[string]int, error) {
 
 	categoryCount := make(map[string]int)
 	for rows.Next() {
-		results := struct{
+		results := struct {
 			Category string
-			Count int
+			Count    int
 		}{}
 		err := rows.Scan(&results.Category, &results.Count)
 		if err != nil {
@@ -540,28 +663,4 @@ func addFiltersToSql(query, search string, filters []string) (string, error) {
 	}
 
 	return sql, nil
-}
-
-func scanSearchResults(rows pgx.Rows) ([]*Community, error) {
-	var communities []*Community
-	for rows.Next() {
-		var c Community
-		err := rows.Scan(&c.ID, &c.Name, &c.Body, &c.Logo, &c.Category)
-		if err != nil {
-			return communities, fmt.Errorf("error scanning community row: %v", err)
-		}
-		communities = append(communities, &c)
-	}
-	return communities, nil
-}
-
-func MatchStrategyByProposal(s []Strategy, strategyToMatch string) (Strategy, error) {
-	var match Strategy
-	for _, strategy := range s {
-		if *strategy.Name == strategyToMatch {
-			match = strategy
-			return match, nil
-		}
-	}
-	return match, fmt.Errorf("Community does not have strategy available")
 }

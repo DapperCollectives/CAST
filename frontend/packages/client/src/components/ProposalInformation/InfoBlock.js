@@ -18,9 +18,7 @@ const InfoBlock = ({ title, content, component, isLastElement = false }) => {
       </div>
       <div
         className="column p-0 is-flex flex-1 is-align-items-center is-justify-content-flex-end"
-        style={{
-          height: '1.5rem',
-        }}
+        style={content ? { height: '1.5rem' } : {}}
       >
         {content}
         {component && cloneElement(component, { ref: containerRef })}

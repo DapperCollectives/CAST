@@ -15,7 +15,7 @@ function StepByStep({
   isSubmitting,
   submittingMessage,
   passNextToComp = false,
-  showActionButtonLeftPannel = false,
+  showActionButtonLeftPanel = false,
   passSubmitToComp = false,
   blockNavigationOut = false,
   blockNavigationText,
@@ -81,8 +81,8 @@ function StepByStep({
     [onSubmit, stepsData]
   );
 
-  const showNextButton = !passNextToComp || showActionButtonLeftPannel;
-  const showSubmitButton = !passSubmitToComp || showActionButtonLeftPannel;
+  const showNextButton = !passNextToComp || showActionButtonLeftPanel;
+  const showSubmitButton = !passSubmitToComp || showActionButtonLeftPanel;
 
   return (
     <>

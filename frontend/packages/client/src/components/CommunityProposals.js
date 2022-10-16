@@ -6,6 +6,11 @@ import CommunityProposalList from './CommunityProposalList';
 import DropDown from './Dropdown';
 import WrapperResponsive from './WrapperResponsive';
 
+const statusMap = {
+  [FilterValues.pending]: 'Upcoming',
+  [FilterValues.closed]: 'Complete',
+  [FilterValues.cancelled]: 'Canceled',
+};
 export default function CommunityProposals({ communityId = 1, admins } = {}) {
   const notMobile = useMediaQuery();
 
@@ -14,7 +19,7 @@ export default function CommunityProposals({ communityId = 1, admins } = {}) {
       ([, value]) =>
         FilterValues.inProgress !== value && FilterValues.terminated !== value
     )
-    .map(([key, value]) => ({ value: key, label: value }));
+    .map(([key, value]) => ({ value: key, label: statusMap[value] ?? value }));
 
   const [filterValue, setFilterValues] = useState('all');
 
