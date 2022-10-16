@@ -7,17 +7,17 @@ import SubmitButton from './SubmitButton';
 export default function LeftPanel({
   currentStep,
   isSubmitting,
+  steps,
+  showPreStep,
+  moveBackStep,
+  name,
   showNextButton,
   moveToNextStep,
-  steps,
   showSubmitButton,
   formId,
   finalLabel,
-  showPreStep,
   onSubmit,
   isStepValid,
-  moveBackStep,
-  name,
 }) {
   const notMobile = useMediaQuery();
 
@@ -68,7 +68,7 @@ export default function LeftPanel({
           />
         ))}
       </div>
-      {currentStep < steps.length - 1 && showNextButton && (
+      {/* {currentStep < steps.length - 1 && showNextButton && (
         <div className={classNamesWrapper}>
           <NextButton
             formId={formId}
@@ -87,7 +87,7 @@ export default function LeftPanel({
             isSubmitting={isSubmitting}
           />
         </div>
-      )}
+      )} */}
     </div>
   );
 }
