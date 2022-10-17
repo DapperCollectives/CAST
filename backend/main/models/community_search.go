@@ -130,6 +130,7 @@ func GetSearchDefaultCommunities(
 	}
 	return communities, totalRecords, nil
 }
+
 func processTotalRecords(
 	db *s.Database,
 	filterCountSql,
