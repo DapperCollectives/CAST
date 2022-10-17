@@ -21,7 +21,7 @@ func TestGetVotes(t *testing.T) {
 	clearTable("community_users")
 	clearTable("proposals")
 	clearTable("votes")
-	communityId := otu.AddCommunities(1)[0]
+	communityId := otu.AddCommunities(1, "dao")[0]
 	proposalId := otu.AddProposals(communityId, 1)[0]
 
 	// 	t.Run("Requesting votes for a proposal with none created should return a 200 and empty array", func(t *testing.T) {
@@ -108,7 +108,7 @@ func TestCreateVote(t *testing.T) {
 		clearTable("community_users")
 		clearTable("proposals")
 		clearTable("votes")
-		communityId := otu.AddCommunities(1)[0]
+		communityId := otu.AddCommunities(1, "dao")[0]
 		proposalId := otu.AddActiveProposals(communityId, 1)[0]
 		voteChoice := "a"
 

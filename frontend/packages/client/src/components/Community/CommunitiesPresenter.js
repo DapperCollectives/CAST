@@ -1,5 +1,5 @@
+import { CommunityCard } from 'components';
 import classnames from 'classnames';
-import CommunityCard from './CommunityCard';
 
 /**
  * CommunitiesPresenter will group communities on a row bases,
@@ -11,6 +11,7 @@ const CommunitiesPresenter = ({
   elementsPerRow = 2,
   communities = [],
   hideJoin = false,
+  titleClasses = '',
 } = {}) => {
   // used to get column size based on number of elements
   // per row
@@ -29,13 +30,15 @@ const CommunitiesPresenter = ({
     }
   }
 
-  const containerClasses = classnames('container', {
+  const containerClasses = classnames({
     [classNames]: !!classNames,
   });
 
   return (
     <div className={containerClasses}>
-      <h1 className="is-uppercase has-text-weight-bold communities mb-5">
+      <h1
+        className={`is-uppercase has-text-weight-bold communities mb-5 ${titleClasses}`}
+      >
         {title}
       </h1>
       <div className="columns is-multiline">

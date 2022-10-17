@@ -103,13 +103,13 @@ func (otu *OverflowTestUtils) AddVotes(pId int, count int) {
 // COMMUNITIES
 //////////////
 
-func (otu *OverflowTestUtils) AddCommunities(count int) []int {
+func (otu *OverflowTestUtils) AddCommunities(count int, category string) []int {
 	if count < 1 {
 		count = 1
 	}
 	retIds := []int{}
 	for i := 0; i < count; i++ {
-		community := otu.GenerateCommunityStruct("account")
+		community := otu.GenerateCommunityStruct("account", category)
 
 		if err := community.CreateCommunity(otu.A.DB); err != nil {
 			fmt.Printf("Error in otu.AddCommunities.")
@@ -127,7 +127,8 @@ func (otu *OverflowTestUtils) AddCommunitiesWithUsers(count int, signer string) 
 	}
 	retIds := []int{}
 	for i := 0; i < count; i++ {
-		community := otu.GenerateCommunityStruct(signer)
+		
+		community := otu.GenerateCommunityStruct(signer, "dao")
 		if err := community.CreateCommunity(otu.A.DB); err != nil {
 			fmt.Printf("Error in otu.AddCommunities.")
 		}

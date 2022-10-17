@@ -18,7 +18,7 @@ export default function CommunityHeader({
 
   return (
     <div className="is-flex is-flex-direction-column">
-      <div className="is-flex flex-1 is-justify-content-center pt-2-tablet">
+      <div className="is-flex flex-1 is-justify-content-center commmunity-header-container">
         <div
           className="is-flex community-header-wrapper"
           style={{

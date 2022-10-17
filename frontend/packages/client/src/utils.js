@@ -2,6 +2,7 @@ import { HAS_DELAY_ON_START_TIME } from 'const';
 import { formatDistance } from 'date-fns';
 import { stateToHTML } from 'draft-js-export-html';
 import { stateFromHTML } from 'draft-js-import-html';
+import isError from 'lodash/isError';
 import { customAlphabet } from 'nanoid';
 
 const nanoid = customAlphabet('1234567890abcdef', 10);
@@ -38,10 +39,17 @@ export const checkResponse = async (response) => {
   // (with the ok property of the response set to false if the response isn't in the range 200–299),
   // and it will only reject on network failure or if anything prevented the request from completing.
   if (!response.ok) {
-    const { status, statusText, url } = response;
-    const { error } = response.json ? await response.json() : {};
+    const { status, statusText } = response;
+    const { message, errorCode, details } = response.json
+      ? await response.json()
+      : {};
+    // stringlify details on message in Error object
     throw new Error(
-      JSON.stringify({ status, statusText: error || statusText, url })
+      JSON.stringify({
+        message: message ? message : `Error ${status}`,
+        errorCode,
+        details: details ? details : statusText,
+      })
     );
   }
   return response.json();
@@ -68,8 +76,10 @@ export const getCompositeSigs = (sigArr) => {
   if (sigArr[0]?.signature?.signature) {
     return [sigArr[0].signature];
   }
-
-  if (typeof sigArr === 'string' && sigArr.includes('Declined:')) {
+  if (
+    isError(sigArr) ||
+    (typeof sigArr === 'string' && sigArr.includes('Declined'))
+  ) {
     return null;
   }
   return sigArr;
@@ -223,9 +233,13 @@ export const getPaginationFromPages = (pages) => {
   ];
 };
 
-export const getPagination = (data, countParam) => {
+export const getPagination = (
+  data,
+  countParam,
+  getPaginationFromPagesFn = getPaginationFromPages
+) => {
   const [start = 0, count = countParam, totalRecords = 0, next = -1] =
-    data?.pageParam ?? getPaginationFromPages(data?.pages);
+    data?.pageParam ?? getPaginationFromPagesFn(data?.pages);
   return {
     count,
     next,

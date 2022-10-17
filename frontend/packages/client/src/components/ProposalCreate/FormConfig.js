@@ -33,7 +33,7 @@ const StepOneSchema = yup.object().shape({
         })
       ),
     })
-    .min(2, 'Please add a choice, minimun amout is two')
+    .min(2, 'Please add a choice, minimum amout is two')
     .unique('value', 'Invalid duplicated option'),
   maxWeight: yup
     .string()
@@ -47,7 +47,7 @@ const StepOneSchema = yup.object().shape({
     .trim()
     .matches(
       /\s+$|^$|(^[0-9]+$)/,
-      'Proposal minimun balance must be a valid number'
+      'Proposal minimum balance must be a valid number'
     ),
 });
 

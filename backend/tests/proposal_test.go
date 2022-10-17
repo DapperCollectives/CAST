@@ -21,7 +21,7 @@ func TestGetProposal(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")
 	clearTable("proposals")
-	communityId := otu.AddCommunities(1)[0]
+	communityId := otu.AddCommunities(1, "dao")[0]
 
 	t.Run("Requesting proposals for a community with none created should succeed and return an empty array", func(t *testing.T) {
 		response := otu.GetProposalsForCommunityAPI(communityId)
@@ -38,11 +38,14 @@ func TestGetProposal(t *testing.T) {
 
 		response := otu.GetProposalByIdAPI(communityId, 420)
 
-		CheckResponseCode(t, http.StatusBadRequest, response.Code)
+		CheckResponseCode(t, http.StatusForbidden, response.Code)
 
-		var m map[string]string
-		json.Unmarshal(response.Body.Bytes(), &m)
-		assert.Equal(t, "Invalid Proposal ID.", m["error"])
+		expectedErr := errIncompleteRequest
+		expectedErr.StatusCode = http.StatusForbidden
+
+		var e errorResponse
+		json.Unmarshal(response.Body.Bytes(), &e)
+		assert.Equal(t, expectedErr, e)
 	})
 
 	t.Run("Should fetch existing proposal by ID", func(t *testing.T) {
@@ -88,10 +91,12 @@ func TestCreateProposal(t *testing.T) {
 
 		CheckResponseCode(t, http.StatusForbidden, response.Code)
 
-		var m map[string]interface{}
-		json.Unmarshal(response.Body.Bytes(), &m)
+		expectedErr := errForbidden
+		expectedErr.StatusCode = http.StatusForbidden
 
-		assert.Equal(t, "invalid signature", m["error"])
+		var e errorResponse
+		json.Unmarshal(response.Body.Bytes(), &e)
+		assert.Equal(t, expectedErr, e)
 	})
 
 	t.Run("Should throw an error if timestamp is more than 60 seconds", func(t *testing.T) {
@@ -107,10 +112,12 @@ func TestCreateProposal(t *testing.T) {
 
 		CheckResponseCode(t, http.StatusForbidden, response.Code)
 
-		var m map[string]interface{}
-		json.Unmarshal(response.Body.Bytes(), &m)
+		expectedErr := errForbidden
+		expectedErr.StatusCode = http.StatusForbidden
 
-		assert.Equal(t, "Timestamp on request has expired.", m["error"])
+		var e errorResponse
+		json.Unmarshal(response.Body.Bytes(), &e)
+		assert.Equal(t, expectedErr, e)
 	})
 }
 
