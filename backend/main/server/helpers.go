@@ -481,13 +481,11 @@ func (h *Helpers) searchCommunities(
 ) {
 	filtersSlice := strings.Split(filters, ",")
 	if searchText == "" {
-		isSearch := true
 
-		results, totalRecords, err := models.GetDefaultCommunities(
+		results, totalRecords, err := models.GetSearchDefaultCommunities(
 			h.A.DB,
 			pageParams,
 			filtersSlice,
-			isSearch,
 		)
 		if err != nil {
 			log.Error().Err(err)
