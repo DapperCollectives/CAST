@@ -1,4 +1,3 @@
-import classnames from 'classnames';
 import NavButton from './NavButton';
 
 const PossitionWrapper = ({
@@ -6,6 +5,7 @@ const PossitionWrapper = ({
   previewButton,
   backButton,
   submitOrNext,
+  isSubmit,
 }) => {
   return (
     <nav className="navbar is-transparent">
@@ -20,9 +20,13 @@ const PossitionWrapper = ({
           </div>
         </>
       ) : (
-        <div className="is-flex flex-1 is-align-items-center">
-          {backButton}
-          {submitOrNext}
+        <div className="columns is-mobile flex-1 is-align-items-center">
+          <div className={`column ${isSubmit ? 'is-4' : 'is-6'}`}>
+            {backButton}
+          </div>
+          <div className={`column ${isSubmit ? 'is-8' : 'is-6'}`}>
+            {submitOrNext}
+          </div>
         </div>
       )}
     </nav>
@@ -45,6 +49,8 @@ export default function NavStepByStep({
 }) {
   const isTopPossition = position === 'top';
 
+  const isNextButton = showSubmitOrNext === 'next';
+
   return (
     <div
       className={`is-flex flex-1 has-background-white ${
@@ -64,6 +70,7 @@ export default function NavStepByStep({
       >
         <div className="container header-spacing">
           <PossitionWrapper
+            isSubmit={showSubmitOrNext === 'submit'}
             isTopPossition={isTopPossition}
             previewButton={
               isPreviewModeVisible && (
@@ -86,23 +93,15 @@ export default function NavStepByStep({
               )
             }
             submitOrNext={
-              showSubmitOrNext === 'next' ? (
-                <NavButton
-                  formId={formId}
-                  disabled={!isStepValid || isSubmitting}
-                  classNames="vote-button transition-all has-background-yellow"
-                  onClick={onClickNext}
-                  text="Next"
-                />
-              ) : (
-                <NavButton
-                  formId={formId}
-                  disabled={!isStepValid || isSubmitting}
-                  classNames="vote-button transition-all has-background-yellow"
-                  onClick={onSubmit}
-                  text={finalLabel}
-                />
-              )
+              <NavButton
+                formId={formId}
+                disabled={!isStepValid || isSubmitting}
+                classNames={`vote-button has-background-yellow ${
+                  !isTopPossition ? 'is-fullwidth' : ''
+                }`}
+                onClick={isNextButton ? onClickNext : onSubmit}
+                text={isNextButton ? 'Next' : finalLabel}
+              />
             }
           />
         </div>
