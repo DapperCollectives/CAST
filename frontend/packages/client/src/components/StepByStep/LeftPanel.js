@@ -18,7 +18,7 @@ export default function LeftPanel({
   if (!notMobile) {
     return (
       <div
-        className="is-hidden-tablet has-background-white-ter p-4"
+        className="p-4"
         style={{ position: 'fixed', minWidth: '100%', zIndex: 2 }}
       >
         <div className="is-flex is-justify-content-space-between is-align-items-center">
