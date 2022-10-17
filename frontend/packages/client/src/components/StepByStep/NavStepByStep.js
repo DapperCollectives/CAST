@@ -1,6 +1,6 @@
 import NavButton from './NavButton';
 
-export default function HeaderStepByStep({
+export default function NavStepByStep({
   isStepValid,
   onClickBack,
   isBackButtonEnabled,
