@@ -115,7 +115,7 @@ export default function Information({
       )}
       {isVisible(minBalance) && (
         <InfoBlock
-          title={'Min Weight'}
+          title={'Min Required'}
           component={<span className="has-text-grey">{minBalance}</span>}
         />
       )}
