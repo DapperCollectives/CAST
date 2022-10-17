@@ -112,7 +112,7 @@ export default function JoinCommunityButton({
         onClick={isMember ? leaveCommunity : joinCommunity}
       >
         <Svg name="Eye" />
-        <Svg name="HideEye" />
+        <Svg name="EyeHidden" />
         {!isMember && hasTooltip && (
           <span className="join-community-cta py-2 px-4 rounded-lg has-text-white has-background-black smaller-text">
             Watch this community
