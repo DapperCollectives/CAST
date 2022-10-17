@@ -42,8 +42,8 @@ export default function LeftPanel({
   // desktop version
   return (
     <div className="step-by-step has-background-white-ter is-hidden-mobile is-flex is-flex-direction-column is-justify-content-flex-start pt-6">
-      {name && (
-        <div className="is-flex column p-0 is-12 mb-8">
+      {name !== null && (
+        <div className="is-flex column p-0 is-12 mb-9">
           <span className="stepper-name is-flex-wrap-wrap is-size-3 has-text-weight-bold">
             {name}
           </span>
@@ -67,26 +67,6 @@ export default function LeftPanel({
           />
         ))}
       </div>
-      {/* {currentStep < steps.length - 1 && showNextButton && (
-        <div className={classNamesWrapper}>
-          <NextButton
-            formId={formId}
-            moveToNextStep={moveToNextStep}
-            disabled={!isStepValid}
-          />
-        </div>
-      )}
-      {currentStep === steps.length - 1 && showSubmitButton && (
-        <div className={classNamesWrapper}>
-          <SubmitButton
-            formId={formId}
-            disabled={!isStepValid}
-            onSubmit={onSubmit}
-            label={finalLabel}
-            isSubmitting={isSubmitting}
-          />
-        </div>
-      )} */}
     </div>
   );
 }

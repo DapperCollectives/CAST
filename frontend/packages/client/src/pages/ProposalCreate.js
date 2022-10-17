@@ -6,6 +6,7 @@ import { useModalContext } from 'contexts/NotificationModal';
 import { useWebContext } from 'contexts/Web3';
 import { ErrorModal, StepByStep, WalletConnect } from 'components';
 import {
+  Preview,
   PropCreateStepOne,
   PropCreateStepThree,
   PropCreateStepTwo,
@@ -123,7 +124,7 @@ export default function ProposalCreatePage() {
   };
 
   const props = {
-    finalLabel: 'Publish',
+    finalLabel: 'Save and Publish',
     onSubmit,
     isSubmitting: (loading || data) && !error,
     submittingMessage: 'Creating Proposal...',
@@ -132,7 +133,6 @@ export default function ProposalCreatePage() {
       'Proposal creation is not complete yet, are you sure you want to leave?',
     passNextToComp: true,
     passSubmitToComp: true,
-    showActionButtonLeftPanel: true,
     steps: [
       {
         label: 'Proposal',

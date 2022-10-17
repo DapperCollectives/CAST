@@ -1,17 +1,17 @@
-import { ActionButton } from 'components';
-import NextButton from './NextStepButton';
+import NavButton from './NavButton';
 
 export default function HeaderStepByStep({
+  isStepValid,
   onClickBack,
-  onClickPreview = () => {},
-  showNextButton,
+  isBackButtonEnabled,
   onClickNext,
-  showSubmitButton,
+  showSubmitOrNext,
   formId,
   finalLabel,
-  showPreStep,
+  onClickPreview = () => {},
   onSubmit,
-  isStepValid,
+  isSubmitting,
+  isPreviewModeVisible,
 }) {
   return (
     <div
@@ -22,34 +22,40 @@ export default function HeaderStepByStep({
         <div className="container header-spacing">
           <nav className="navbar is-transparent">
             <div className="is-flex flex-0 is-align-items-center">
-              <ActionButton
-                height="40"
-                type="submit"
-                label="Preview"
-                enabled={true}
-                loading={false}
-                roundedClass="rounded-xl"
-                classNames="vote-button transition-all is-size-6 has-text-weight-bold mr-3"
-                styles={{ width: 94 }}
-              />
+              {isPreviewModeVisible && (
+                <NavButton
+                  disabled={isSubmitting}
+                  onClick={onClickPreview}
+                  classNames="vote-button transition-all mr-3"
+                  text="Preview"
+                />
+              )}
             </div>
             <div className="navbar-end">
-              <ActionButton
-                height="40"
+              <NavButton
+                disabled={isSubmitting || !isBackButtonEnabled}
                 onClick={onClickBack}
-                type="submit"
-                label="Back"
-                enabled={true}
-                loading={false}
-                roundedClass="rounded-xl"
-                classNames="vote-button transition-all is-size-6 has-text-weight-bold mr-3"
-                styles={{ width: 94 }}
+                classNames="vote-button transition-all mr-3"
+                text="Back"
               />
-              <NextButton
-                formId={formId}
-                moveToNextStep={showNextButton}
-                disabled={!isStepValid}
-              />
+
+              {showSubmitOrNext === 'next' ? (
+                <NavButton
+                  formId={formId}
+                  disabled={!isStepValid || isSubmitting}
+                  classNames="vote-button transition-all has-background-yellow"
+                  onClick={onClickNext}
+                  text="Next"
+                />
+              ) : (
+                <NavButton
+                  formId={formId}
+                  disabled={!isStepValid || isSubmitting}
+                  classNames="vote-button transition-all has-background-yellow"
+                  onClick={onSubmit}
+                  text={finalLabel}
+                />
+              )}
             </div>
           </nav>
         </div>

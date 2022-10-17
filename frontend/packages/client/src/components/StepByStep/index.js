@@ -15,11 +15,10 @@ function StepByStep({
   isSubmitting,
   submittingMessage,
   passNextToComp = false,
-  showActionButtonLeftPanel = false,
   passSubmitToComp = false,
   blockNavigationOut = false,
   blockNavigationText,
-  alignStepsToTop,
+  useControlsOnTopBar = true,
 } = {}) {
   const notMobile = useMediaQuery();
   const [currentStep, setCurrentStep] = useState(0);
@@ -80,8 +79,7 @@ function StepByStep({
     [onSubmit, stepsData]
   );
 
-  const showNextButton = !passNextToComp || showActionButtonLeftPanel;
-  const showSubmitButton = !passSubmitToComp || showActionButtonLeftPanel;
+  const nextAction = currentStep + 1 === steps.length ? 'submit' : 'next';
 
   return (
     <>
@@ -91,21 +89,25 @@ function StepByStep({
           message={() => blockNavigationText ?? 'Leave Page?'}
         />
       )}
-      {notMobile && (
+      {useControlsOnTopBar && (
         <HeaderStepByStep
+          position={notMobile ? 'top' : 'bottom'}
           onClickBack={moveBackStep}
-          onClickPreview={() => {}}
-          showNextButton={showNextButton}
+          isBackButtonEnabled={currentStep - 1 >= 0}
           onClickNext={moveToNextStep}
-          showSubmitButton={showSubmitButton}
+          isStepValid={isStepValid}
+          showSubmitOrNext={nextAction}
           formId={formId}
           finalLabel={finalLabel}
           showPreStep={showPreStep}
           onSubmit={_onSubmit}
-          isStepValid={isStepValid}
+          isPreviewModeVisible={currentStep > 0}
+          isSubmitting={isSubmitting}
         />
       )}
-      <section style={notMobile ? { paddingTop: '77px' } : {}}>
+      <section
+        style={notMobile && useControlsOnTopBar ? { paddingTop: '77px' } : {}}
+      >
         <div
           style={{
             position: 'fixed',
@@ -120,20 +122,13 @@ function StepByStep({
         <div className="container is-flex is-flex-direction-column-mobile">
           {/* left panel */}
           <LeftPanel
+            showBackButton={!useControlsOnTopBar}
             currentStep={currentStep}
             isSubmitting={isSubmitting}
-            showNextButton={showNextButton}
-            moveToNextStep={moveToNextStep}
             steps={steps}
-            showSubmitButton={showSubmitButton}
-            formId={formId}
-            finalLabel={finalLabel}
             showPreStep={showPreStep}
-            onSubmit={_onSubmit}
-            isStepValid={isStepValid}
             moveBackStep={moveBackStep}
-            alignToTop={alignStepsToTop}
-            name={stepsData?.[0]?.name ?? ''}
+            name={useControlsOnTopBar ? stepsData?.[0]?.name ?? '' : null}
           />
 
           {/* right panel */}
@@ -175,7 +170,7 @@ function StepByStep({
                 ...(showPreStep ? { dismissPreStep } : undefined),
                 ...(useHookForms ? { formId } : undefined),
               })}
-            <div className="is-hidden-tablet">
+            {/* <div className="is-hidden-tablet">
               {currentStep < steps.length - 1 && showNextButton && (
                 <NextButton
                   formId={formId}
@@ -192,7 +187,7 @@ function StepByStep({
                   isSubmitting={isSubmitting}
                 />
               )}
-            </div>
+            </div> */}
           </div>
         </div>
       </section>
