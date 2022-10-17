@@ -2,10 +2,8 @@ import { cloneElement, useCallback, useRef, useState } from 'react';
 import { Prompt } from 'react-router-dom';
 import { useMediaQuery } from 'hooks';
 import Loader from '../Loader';
-import HeaderStepByStep from './HeaderStepByStep';
 import LeftPanel from './LeftPanel';
-import NextButton from './NextStepButton';
-import SubmitButton from './SubmitButton';
+import NavStepByStep from './NavStepByStep';
 
 function StepByStep({
   finalLabel,
@@ -90,7 +88,7 @@ function StepByStep({
         />
       )}
       {useControlsOnTopBar && (
-        <HeaderStepByStep
+        <NavStepByStep
           position={notMobile ? 'top' : 'bottom'}
           onClickBack={moveBackStep}
           isBackButtonEnabled={currentStep - 1 >= 0}
@@ -170,24 +168,6 @@ function StepByStep({
                 ...(showPreStep ? { dismissPreStep } : undefined),
                 ...(useHookForms ? { formId } : undefined),
               })}
-            {/* <div className="is-hidden-tablet">
-              {currentStep < steps.length - 1 && showNextButton && (
-                <NextButton
-                  formId={formId}
-                  moveToNextStep={moveToNextStep}
-                  disabled={!isStepValid}
-                />
-              )}
-              {currentStep === steps.length - 1 && showSubmitButton && (
-                <SubmitButton
-                  formId={formId}
-                  disabled={!isStepValid}
-                  onSubmit={_onSubmit}
-                  label={finalLabel}
-                  isSubmitting={isSubmitting}
-                />
-              )}
-            </div> */}
           </div>
         </div>
       </section>
