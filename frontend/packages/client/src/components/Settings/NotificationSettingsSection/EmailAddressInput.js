@@ -1,12 +1,7 @@
 import { Fragment, useState } from 'react';
-import { useNotificationServiceContext } from 'contexts/NotificationService';
 
 const EMAIL_REGEX = /^\S+@\S+\.\S+$/i;
-export default function EmailAddressInput() {
-  const { notificationSettings, setUserEmail } =
-    useNotificationServiceContext();
-  const { email } = notificationSettings;
-
+export default function EmailAddressInput({ email, setUserEmail }) {
   const [newEmail, setNewEmail] = useState(email);
   const [isEmailValid, setIsEmailValid] = useState(true);
   const handleSaveEmail = () => {

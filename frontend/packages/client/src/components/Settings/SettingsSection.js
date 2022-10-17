@@ -1,15 +1,12 @@
 import Blockies from 'react-blockies';
 import CopyToClipboard from 'react-copy-to-clipboard';
-import { useNotificationServiceContext } from 'contexts/NotificationService';
 import { useWebContext } from 'contexts/Web3';
 import { Svg } from '@cast/shared-components';
 import { useMediaQuery } from 'hooks';
 
-export default function SettingsSection() {
+export default function SettingsSection({ walletId }) {
   const notMobile = useMediaQuery();
-  const { notificationSettings } = useNotificationServiceContext();
   const { injectedProvider } = useWebContext();
-  const { walletId } = notificationSettings;
 
   return (
     <section

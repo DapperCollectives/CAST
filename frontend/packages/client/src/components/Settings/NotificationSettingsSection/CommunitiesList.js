@@ -1,13 +1,11 @@
 import Blockies from 'react-blockies';
-import { useNotificationServiceContext } from 'contexts/NotificationService';
 import { useCommunityDetails } from 'hooks';
 import { subscribeNotificationIntentions } from 'const';
 
-export default function CommunitiesList() {
-  const { notificationSettings, updateCommunitySubscription } =
-    useNotificationServiceContext();
-  const { communitySubscription } = notificationSettings;
-
+export default function CommunitiesList({
+  communitySubscription,
+  updateCommunitySubscription,
+}) {
   const handleUpdateCommunitySubscription = (communityId, subscribed) => {
     const subscribeIntention = subscribed
       ? subscribeNotificationIntentions.unsubscribe

@@ -26,7 +26,7 @@ export default function Settings() {
         </div>
         {walletId && (
           <div className="column is-two-fifths">
-            <SettingsSection />
+            <SettingsSection walletId={walletId} />
             <NotificationSettingsSection />
           </div>
         )}
