@@ -47,11 +47,7 @@ export default function SubscribeCommunityButton({
     }
   };
 
-  let buttonIcon = 'BellHidden';
-  if (isSubscribed) {
-    buttonIcon = 'BellFilled';
-  }
-
+  const buttonIcon = isSubscribed ? 'BellFilled' : 'BellHidden';
   const buttonClasses = classnames(
     'button subscribe-community-button p-0 is-fullwidth full-height rounded-full',
     {
