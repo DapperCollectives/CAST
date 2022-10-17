@@ -13,6 +13,7 @@ import (
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/jackc/pgx/v4"
+	"github.com/rs/zerolog/log"
 )
 
 type Community struct {
@@ -574,8 +575,8 @@ func generateSearchFilterCountSql(filters []string) (string, error) {
 	if len(filters) > 0 {
 		var sql string = `
 				SELECT COUNT(*) FROM communities
-        WHERE SIMILARITY(name, $1) > 0.1
-        AND category IS NOT NULL
+        WHERE category IS NOT NULL
+				AND is_featured = true
 				AND category IN (`
 		for i, filter := range filters {
 			if i == len(filters)-1 {
@@ -611,6 +612,7 @@ func generateDefaultFilterCountSql(filters []string) (string, error) {
 		return "", fmt.Errorf("No filters provided")
 	}
 }
+
 func GetCategoryCount(db *s.Database, search string) (map[string]int, error) {
 	var rows pgx.Rows
 	var err error
