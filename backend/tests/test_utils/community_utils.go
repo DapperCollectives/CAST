@@ -378,8 +378,6 @@ func (otu *OverflowTestUtils) GetSearchCommunitiesAPI(
 		}
 	}
 
-	fmt.Printf("queryStr: %s \n", queryStr)
-
 	if countStr != "" {
 		if queryStr != "" {
 			queryStr = fmt.Sprintf("%s&%s", queryStr, countStr)
@@ -390,8 +388,6 @@ func (otu *OverflowTestUtils) GetSearchCommunitiesAPI(
 	if queryStr != "" {
 		searchUrl = fmt.Sprintf("%s?%s", searchUrl, queryStr)
 	}
-
-	fmt.Printf("searchUrl: %s \n", searchUrl)
 
 	req, _ := http.NewRequest("GET", searchUrl, nil)
 	response := otu.ExecuteRequest(req)

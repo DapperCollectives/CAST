@@ -82,7 +82,7 @@ func SearchForCommunity(
 		return []*Community{}, 0, fmt.Errorf("error scanning search results for the query %s", query)
 	}
 
-	totalRecords, err := getSearchTotalRecords(db, COUNT_TOTAL_RECORDS_SEARCH_SQL, query, filters)
+	totalRecords, err := processTotalRecords(db, COUNT_TOTAL_RECORDS_SEARCH_SQL, query, filters)
 	if err != nil {
 		return []*Community{}, 0, fmt.Errorf("error getting total records for the query %s", query)
 	}
@@ -124,34 +124,43 @@ func GetSearchDefaultCommunities(
 		return nil, 0, err
 	}
 
-	totalRecords, err := getSearchTotalRecords(db, COUNT_TOTAL_RECORDS_DEFAULT_SQL, "", filters)
+	totalRecords, err := processTotalRecords(db, COUNT_TOTAL_RECORDS_DEFAULT_SQL, "", filters)
 	if err != nil {
 		return nil, 0, err
 	}
 	return communities, totalRecords, nil
 }
-func getSearchTotalRecords(
+func processTotalRecords(
 	db *s.Database,
 	filterCountSql,
 	searchQuery string,
 	filters []string,
 ) (int, error) {
+
 	if filters[0] != "" {
 		countSql, err := generateSearchFilterCountSql(filters)
 		if err != nil {
 			return 0, err
 		}
-		var totalRecords int
-		db.Conn.QueryRow(db.Context, countSql, searchQuery).Scan(&totalRecords)
+
+		totalRecords := runTotalRecordsQuery(db, countSql, searchQuery)
 
 		return totalRecords, nil
 	} else {
-
-		var totalRecords int
-		db.Conn.QueryRow(db.Context, filterCountSql, searchQuery).Scan(&totalRecords)
+		totalRecords := runTotalRecordsQuery(db, filterCountSql, searchQuery)
 
 		return totalRecords, nil
 	}
+}
+
+func runTotalRecordsQuery(db *shared.Database, filterCountSql, searchQuery string) int {
+	var totalRecords int
+	if searchQuery != "" {
+		db.Conn.QueryRow(db.Context, filterCountSql, searchQuery).Scan(&totalRecords)
+	} else {
+		db.Conn.QueryRow(db.Context, filterCountSql).Scan(&totalRecords)
+	}
+	return totalRecords
 }
 
 func scanSearchResults(rows pgx.Rows, isDefault bool) ([]*Community, error) {
@@ -174,7 +183,6 @@ func scanSearchResults(rows pgx.Rows, isDefault bool) ([]*Community, error) {
 		}
 		communities = append(communities, &c)
 	}
-
 	return communities, nil
 }
 
