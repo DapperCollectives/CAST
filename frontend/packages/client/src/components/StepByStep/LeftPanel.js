@@ -12,13 +12,7 @@ export default function LeftPanel({
   showPreStep,
   moveBackStep,
   name,
-  showNextButton,
-  moveToNextStep,
-  showSubmitButton,
-  formId,
-  finalLabel,
-  onSubmit,
-  isStepValid,
+  showBackButton = true,
 }) {
   const notMobile = useMediaQuery();
 
@@ -48,16 +42,20 @@ export default function LeftPanel({
   // desktop version
   return (
     <div className="step-by-step has-background-white-ter is-hidden-mobile is-flex is-flex-direction-column is-justify-content-flex-start pt-6">
-      <div className="is-flex column p-0 is-12 mb-8">
-        <span className="stepper-name is-flex-wrap-wrap is-size-3 has-text-weight-bold">
-          {name}
-        </span>
-      </div>
-      <div className="mb-6" style={{ minHeight: 24 }}>
-        {currentStep > 0 && (
-          <BackButton isSubmitting={isSubmitting} onClick={moveBackStep} />
-        )}
-      </div>
+      {name && (
+        <div className="is-flex column p-0 is-12 mb-8">
+          <span className="stepper-name is-flex-wrap-wrap is-size-3 has-text-weight-bold">
+            {name}
+          </span>
+        </div>
+      )}
+      {showBackButton && (
+        <div className="mb-6 steps" style={{ minHeight: 24 }}>
+          {currentStep > 0 && (
+            <BackButton isSubmitting={isSubmitting} onClick={moveBackStep} />
+          )}
+        </div>
+      )}
       <div className={classNamesWrapper}>
         {steps.map((step, i) => (
           <StepLabelAndIcon
