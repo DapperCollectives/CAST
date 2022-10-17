@@ -30,7 +30,7 @@ export default function LeftPanel({
           <div className="is-flex">
             <div className="step-indicator-mobile rounded">
               <span className="p-3 small-text">
-                {currentStep} / {steps.length}
+                {currentStep + 1} / {steps.length}
               </span>
             </div>
           </div>
