@@ -5,6 +5,7 @@ import { FilterValues } from 'const';
 import { getProposalType, parseDateFromServer } from 'utils';
 import { getStatus } from '../getStatus';
 import ImageBasedOptions from './ImageBasedOptions';
+import PostVoteOptions from './PostVoteOptions';
 import TextBasedOptions from './TextBasedOptions';
 import VoteHeader from './VoteHeader';
 
@@ -45,9 +46,9 @@ const VoteOptions = ({
 
   const canVote = isActive && (hasntVoted || !loggedIn);
 
-  const voteClasses = `vote-options border-light rounded mb-6${
-    !hasntVoted ? ' is-voted' : ''
-  }`;
+  const voteClasses = 'vote-options border-light rounded mb-6$';
+  const disabledClass = !canVote ? 'is-disabled' : '';
+  const votedClass = !hasntVoted ? 'is-voted' : '';
 
   let previousVote = castVote;
   let currentOption = optionChosen;
@@ -94,28 +95,34 @@ const VoteOptions = ({
         extraClasses="px-6 pt-6 pb-6"
         extraClassesMobile="px-4 pt-6 pb-6"
       >
-        <VoteHeader status={headerStatus} />
+        {hasntVoted ? (
+          <VoteHeader status={headerStatus} />
+        ) : (
+          <PostVoteOptions communityId={proposal.commmunityId} />
+        )}
       </Wrapper>
-      {!isImageChoice && (
-        <TextBasedOptions
-          choices={choices}
-          currentOption={currentOption}
-          hideVoteButton={previousVote || isClosed}
-          labelType={labelType}
-          onOptionSelect={isClosed ? () => {} : onOptionSelect}
-          readOnly={isClosed || !canVote}
-          onConfirmVote={onConfirmVote}
-        />
-      )}
-      {isImageChoice && (
-        <ImageBasedOptions
-          choiceA={choiceA}
-          choiceB={choiceB}
-          currentOption={currentOption}
-          readOnly={isClosed || !canVote}
-          confirmAndVote={confirmAndVoteImage}
-        />
-      )}
+      <div className={`${disabledClass} ${votedClass}`}>
+        {!isImageChoice && (
+          <TextBasedOptions
+            choices={choices}
+            currentOption={currentOption}
+            hideVoteButton={previousVote || isClosed}
+            labelType={labelType}
+            onOptionSelect={isClosed ? () => {} : onOptionSelect}
+            readOnly={isClosed || !canVote}
+            onConfirmVote={onConfirmVote}
+          />
+        )}
+        {isImageChoice && (
+          <ImageBasedOptions
+            choiceA={choiceA}
+            choiceB={choiceB}
+            currentOption={currentOption}
+            readOnly={isClosed || !canVote}
+            confirmAndVote={confirmAndVoteImage}
+          />
+        )}
+      </div>
     </div>
   );
 };
