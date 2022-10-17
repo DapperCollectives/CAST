@@ -132,10 +132,10 @@ export default function ProposalCreatePage() {
       'Proposal creation is not complete yet, are you sure you want to leave?',
     passNextToComp: true,
     passSubmitToComp: true,
-    showActionButtonLeftPannel: true,
+    showActionButtonLeftPanel: true,
     steps: [
       {
-        label: 'Draft Proposal',
+        label: 'Proposal',
         description:
           'Some description of what you can write here that is useful.',
         component: <PropCreateStepOne />,

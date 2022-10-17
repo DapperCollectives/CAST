@@ -312,6 +312,7 @@ export default function ProposalPage() {
             communityId={proposal.communityId}
             proposalId={proposal.id}
             proposalName={proposal.name}
+            addr={user?.addr}
           />
           {cancelled && (
             <Message messageText={`This proposal has been cancelled`} />
@@ -424,6 +425,8 @@ export default function ProposalPage() {
                       openStrategyModal={openStrategyModal}
                       proposalStrategy={proposalStrategy}
                       votingStrategies={votingStrategies}
+                      proposalMaxWeight={proposal?.maxWeight}
+                      proposalMinBalance={proposal?.minBalance}
                     />
                   </div>
                 )}
