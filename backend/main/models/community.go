@@ -13,6 +13,7 @@ import (
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
 	"github.com/georgysavva/scany/pgxscan"
 	"github.com/jackc/pgx/v4"
+	"github.com/rs/zerolog/log"
 )
 
 type Community struct {
@@ -191,7 +192,7 @@ const UPDATE_COMMUNITY_SQL = `
 	WHERE id = $21
 `
 const SEARCH_COMMUNITIES_SQL = `
-	SELECT id, name, body, logo, category	
+	SELECT id, name, body, logo, category, SIMILARITY(name, $1) as score	
 	FROM communities 
 	WHERE SIMILARITY(name, $1) > 0.1
 		AND category IS NOT NULL
@@ -300,6 +301,8 @@ func GetDefaultCommunities(
 			return nil, 0, err
 		}
 
+		sql = sql + " LIMIT $1 OFFSET $2"
+
 		rows, err := db.Conn.Query(
 			db.Context,
 			sql,
@@ -312,7 +315,7 @@ func GetDefaultCommunities(
 
 		defer rows.Close()
 
-		communities, err := scanSearchResults(rows)
+		communities, err := scanSearchResults(rows, true)
 		if err != nil {
 			return nil, 0, err
 		}
@@ -491,6 +494,8 @@ func SearchForCommunity(
 		return nil, 0, err
 	}
 
+	sql = sql + " ORDER BY score DESC LIMIT $2 OFFSET $3"
+
 	rows, err := db.Conn.Query(
 		db.Context,
 		sql,
@@ -505,7 +510,7 @@ func SearchForCommunity(
 
 	defer rows.Close()
 
-	communities, err := scanSearchResults(rows)
+	communities, err := scanSearchResults(rows, false)
 	if err != nil {
 		return []*Community{}, 0, fmt.Errorf("error scanning search results for the query %s", query)
 	}
@@ -531,12 +536,22 @@ func SearchForCommunity(
 	}
 }
 
-func scanSearchResults(rows pgx.Rows) ([]*Community, error) {
+func scanSearchResults(rows pgx.Rows, isDefault bool) ([]*Community, error) {
 	var communities []*Community
+
+	var err error
 	for rows.Next() {
 		var c Community
-		err := rows.Scan(&c.ID, &c.Name, &c.Body, &c.Logo, &c.Category)
+		if isDefault {
+			err = rows.Scan(&c.ID, &c.Name, &c.Body, &c.Logo, &c.Category)
+		} else {
+			// score is required for scanning, but can be ignored. Only used
+			// to order the search results by SQL.
+			var score float32
+			err = rows.Scan(&c.ID, &c.Name, &c.Body, &c.Logo, &c.Category, &score)
+		}
 		if err != nil {
+			log.Error().Err(err)
 			return communities, fmt.Errorf("error scanning community row: %v", err)
 		}
 		communities = append(communities, &c)
@@ -560,8 +575,8 @@ func generateSearchFilterCountSql(filters []string) (string, error) {
 	if len(filters) > 0 {
 		var sql string = `
 				SELECT COUNT(*) FROM communities
-        WHERE SIMILARITY(name, $1) > 0.1
-        AND category IS NOT NULL
+        WHERE category IS NOT NULL
+				AND is_featured = true
 				AND category IN (`
 		for i, filter := range filters {
 			if i == len(filters)-1 {
@@ -597,6 +612,7 @@ func generateDefaultFilterCountSql(filters []string) (string, error) {
 		return "", fmt.Errorf("No filters provided")
 	}
 }
+
 func GetCategoryCount(db *s.Database, search string) (map[string]int, error) {
 	var rows pgx.Rows
 	var err error
@@ -654,12 +670,6 @@ func addFiltersToSql(query, search string, filters []string) (string, error) {
 		sql += ")"
 	} else {
 		sql = query
-	}
-
-	if search != "" {
-		sql = sql + " LIMIT $2 OFFSET $3"
-	} else {
-		sql = sql + " LIMIT $1 OFFSET $2"
 	}
 
 	return sql, nil
