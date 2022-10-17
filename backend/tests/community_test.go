@@ -435,11 +435,94 @@ func TestSearchPagination(t *testing.T) {
 		assert.Equal(t, totalRecords, p.Results.TotalRecords)
 	})
 
-	t.Run("next should be '-1' when there are no more records", func(t *testing.T) {
+	t.Run("next should be '-1' when there are no more records for 'default featured'", func(t *testing.T) {
+
+		//when start is set to 20 it will be the last pagination as total records are 25
+		//and limit is 10, so next should be -1 as there are no more records
 		start := 20
 		limit := 10
 		emptyFilters := []string{}
 		response := otu.GetSearchCommunitiesAPI(emptyFilters, "", &limit, &start)
+
+		checkResponseCode(t, http.StatusOK, response.Code)
+
+		var p test_utils.PaginatedResponseSearch
+		json.Unmarshal(response.Body.Bytes(), &p)
+		assert.Equal(t, -1, p.Results.Next)
+	})
+
+	t.Run("should have correct total record for search term with no filters", func(t *testing.T) {
+		start := 0
+		limit := 10
+		emptyFilters := []string{}
+		response := otu.GetSearchCommunitiesAPI(emptyFilters, "test", &limit, &start)
+
+		checkResponseCode(t, http.StatusOK, response.Code)
+
+		var p test_utils.PaginatedResponseSearch
+		json.Unmarshal(response.Body.Bytes(), &p)
+		assert.Equal(t, 25, p.Results.TotalRecords)
+	})
+
+	t.Run("next should be '-1' when there are no more records for search term with no filters", func(t *testing.T) {
+		start := 20
+		limit := 10
+		emptyFilters := []string{}
+		response := otu.GetSearchCommunitiesAPI(emptyFilters, "test", &limit, &start)
+
+		checkResponseCode(t, http.StatusOK, response.Code)
+
+		var p test_utils.PaginatedResponseSearch
+		json.Unmarshal(response.Body.Bytes(), &p)
+		assert.Equal(t, -1, p.Results.Next)
+	})
+
+	t.Run("should have correct total record for search term with filters", func(t *testing.T) {
+		start := 0
+		limit := 10
+		filters := []string{"dao"}
+		response := otu.GetSearchCommunitiesAPI(filters, "test", &limit, &start)
+
+		checkResponseCode(t, http.StatusOK, response.Code)
+
+		var p test_utils.PaginatedResponseSearch
+		json.Unmarshal(response.Body.Bytes(), &p)
+		assert.Equal(t, 10, p.Results.TotalRecords)
+	})
+
+	t.Run("next should be '-1' when there are no more records for search term with filters", func(t *testing.T) {
+		start := 10
+		limit := 10
+		filters := []string{"dao"}
+		response := otu.GetSearchCommunitiesAPI(filters, "test", &limit, &start)
+
+		checkResponseCode(t, http.StatusOK, response.Code)
+
+		var p test_utils.PaginatedResponseSearch
+		json.Unmarshal(response.Body.Bytes(), &p)
+		assert.Equal(t, -1, p.Results.Next)
+	})
+
+	t.Run("should have correct total records with search term and multiple filters", func(t *testing.T) {
+		start := 0
+		limit := 10
+		filters := []string{"dao", "protocol"}
+		response := otu.GetSearchCommunitiesAPI(filters, "test", &limit, &start)
+
+		checkResponseCode(t, http.StatusOK, response.Code)
+
+		var p test_utils.PaginatedResponseSearch
+		json.Unmarshal(response.Body.Bytes(), &p)
+
+		//total records should be 15 as there are 10 dao and 5 protocol communities
+		assert.Equal(t, 15, p.Results.TotalRecords)
+	})
+
+	t.Run("next should be '-1' when there are no more records for search term and multiple filters", func(t *testing.T) {
+		start := 10
+		limit := 10
+		filters := []string{"dao", "protocol"}
+		response := otu.GetSearchCommunitiesAPI(filters, "test", &limit, &start)
 
 		checkResponseCode(t, http.StatusOK, response.Code)
 

@@ -378,6 +378,8 @@ func (otu *OverflowTestUtils) GetSearchCommunitiesAPI(
 		}
 	}
 
+	fmt.Printf("queryStr: %s \n", queryStr)
+
 	if countStr != "" {
 		if queryStr != "" {
 			queryStr = fmt.Sprintf("%s&%s", queryStr, countStr)
