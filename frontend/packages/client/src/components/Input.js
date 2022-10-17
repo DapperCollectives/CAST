@@ -5,11 +5,12 @@ export default function Input({
   value,
   disabled,
   onChange = () => {},
+  className = '',
 } = {}) {
   return (
     <input
       type="text"
-      className="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
+      className={`rounded-sm border-light p-3 column is-full is-full-mobile ${className}`}
       placeholder={placeholder}
       name={name}
       defaultValue={defaultValue}

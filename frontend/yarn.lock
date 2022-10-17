@@ -4958,6 +4958,11 @@ bulma-popover@^1.1.1:
   resolved "https://registry.yarnpkg.com/bulma-popover/-/bulma-popover-1.1.1.tgz#93a4e910514b121490663c3aa309705c40b69c86"
   integrity sha512-QvYJq04usgiCvTwnEZr/xtStkKRTToO/tc7JVcdtRBIBBWNaUu4tfHAOFXDMav8NFIvN8JOiQEtHO1dHNvVr1Q==
 
+bulma-switch@^2.0.4:
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/bulma-switch/-/bulma-switch-2.0.4.tgz#a6dea1a026d025a7093a3675b2a599a36820e3a3"
+  integrity sha512-kMu4H0Pr0VjvfsnT6viRDCgptUq0Rvy7y7PX6q+IHg1xUynsjszPjhAdal5ysAlCG5HNO+5YXxeiu92qYGQolw==
+
 bulma@0.9.3:
   version "0.9.3"
   resolved "https://registry.yarnpkg.com/bulma/-/bulma-0.9.3.tgz#ddccb7436ebe3e21bf47afe01d3c43a296b70243"

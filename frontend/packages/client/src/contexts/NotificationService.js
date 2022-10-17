@@ -75,10 +75,9 @@ const NotificationServiceProvider = ({ children }) => {
       //here we call api
       setNotificationSettings((prevState) => ({
         ...prevState,
-        communitySubscription: {
-          ...prevState.communitySubscription,
-          [communityId]: false,
-        },
+        communitySubscription: [...prevState.communitySubscription].filter(
+          (c) => c === communityId
+        ),
       }));
     } catch {
       throw new Error('cannot unsubscribe community');
@@ -88,13 +87,15 @@ const NotificationServiceProvider = ({ children }) => {
   const subscribeCommunity = async (communityId) => {
     try {
       //here we call api
+      const apiResponse = true;
       setNotificationSettings((prevState) => ({
         ...prevState,
-        communitySubscription: {
+        communitySubscription: [
           ...prevState.communitySubscription,
-          [communityId]: true,
-        },
+          communityId,
+        ],
       }));
+      return apiResponse;
     } catch {
       throw new Error('cannot subscribe community');
     }
