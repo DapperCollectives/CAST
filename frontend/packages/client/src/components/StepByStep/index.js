@@ -131,7 +131,7 @@ function StepByStep({
 
           {/* right panel */}
           <div
-            className={`step-by-step-body flex-1 has-background-white px-4-mobile pt-7-mobile is-flex-mobile is-flex-direction-column-mobile`}
+            className={`step-by-step-body flex-1 has-background-white px-4-mobile pt-0-mobile is-flex-mobile is-flex-direction-column-mobile`}
           >
             {isSubmitting && (
               <div
