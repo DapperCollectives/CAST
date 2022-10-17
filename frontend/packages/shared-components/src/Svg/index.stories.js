@@ -26,6 +26,7 @@ export default {
         'Discord',
         'Eye',
         'ErrorOutline',
+        'Email',
         'GitHub',
         'HideEye',
         'Image',

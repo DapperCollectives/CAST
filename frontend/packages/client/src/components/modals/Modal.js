@@ -10,7 +10,7 @@ export default function Modal({ children }) {
 Modal.Header = ({ title, onClose }) => {
   return (
     <div className="c-modal-header spacing-header">
-      <p className="c-modal-title">{title}</p>
+      <p className="c-modal-title is-capitalized">{title}</p>
       <div className="is-flex cursor-pointer" onClick={onClose}>
         <Svg name="Close" width="18" heigth="18" />
       </div>
@@ -57,7 +57,7 @@ Modal.FooterButton = ({ onClick, text = 'Close', classNames = '' }) => {
   );
 };
 
-Modal.FotterWithFAQ = ({ faqLink, onClose }) => {
+Modal.FooterWithFAQ = ({ faqLink, onClose }) => {
   return (
     <>
       <a
