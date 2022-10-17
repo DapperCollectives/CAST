@@ -21,7 +21,7 @@ func TestCreateCommunityUsers(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")
 
-	communityStruct := otu.GenerateCommunityStruct("account")
+	communityStruct := otu.GenerateCommunityStruct("account", "dao")
 
 	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
 
@@ -51,7 +51,7 @@ func TestGetCommunityUsers(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")
 
-	communityStruct := otu.GenerateCommunityStruct("account")
+	communityStruct := otu.GenerateCommunityStruct("account", "dao")
 	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
 
 	response := otu.CreateCommunityAPI(communityPayload)
@@ -76,7 +76,7 @@ func TestGetCommunityUsersByType(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")
 
-	communityStruct := otu.GenerateCommunityStruct("account")
+	communityStruct := otu.GenerateCommunityStruct("account", "dao")
 	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
 
 	response := otu.CreateCommunityAPI(communityPayload)
@@ -115,7 +115,7 @@ func TestGetCommunityUsersByInvalidType(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")
 
-	communityStruct := otu.GenerateCommunityStruct("account")
+	communityStruct := otu.GenerateCommunityStruct("account", "dao")
 	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
 
 	response := otu.CreateCommunityAPI(communityPayload)
@@ -132,7 +132,7 @@ func TestGetUserCommunities(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")
 
-	communityStruct := otu.GenerateCommunityStruct("account")
+	communityStruct := otu.GenerateCommunityStruct("account", "dao")
 	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
 
 	response := otu.CreateCommunityAPI(communityPayload)
@@ -158,7 +158,7 @@ func TestDeleteUserFromCommunity(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")
 
-	communityStruct := otu.GenerateCommunityStruct("account")
+	communityStruct := otu.GenerateCommunityStruct("account", "dao")
 
 	//create the author before generating the payload
 	var createCommunityStruct models.CreateCommunityRequestPayload

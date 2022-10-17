@@ -16,5 +16,11 @@
     "name": "NBA TopShot - Portland Trailblazers",
     "description": "Voter must hold at least one Portland Trailblazers moment to vote",
     "src": "get_nba_topshot_trailblazers.cdc"
+  },
+  {
+    "key": "nfl-all-day-legendary",
+    "name": "NFL All Day Legendary",
+    "description": "Voter must hold at least one NFL All Day Legendary moment to vote",
+    "src": "get_nfl_all_day_legendary.cdc"
   }
 ]

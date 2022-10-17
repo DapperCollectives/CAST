@@ -20,10 +20,12 @@ export default {
         'CaretDown',
         'CheckCircle',
         'CheckMark',
+        'CheckOutlined',
         'Close',
         'Copy',
         'Discord',
         'Eye',
+        'ErrorOutline',
         'GitHub',
         'HideEye',
         'Image',
@@ -35,6 +37,7 @@ export default {
         'Plus',
         'PlusLightFill',
         'RemoveLightFill',
+        'Search',
         'Star',
         'Twitter',
         'Upload',
@@ -48,5 +51,5 @@ export default {
 const Template = (args) => <Svg {...args} />;
 export const Controls = Template.bind({});
 Controls.args = {
-  name: 'Plus',
+  name: 'ErrorOutline',
 };

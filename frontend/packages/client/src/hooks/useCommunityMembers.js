@@ -44,7 +44,7 @@ export default function useCommunityMembers({
     isError,
     data: getPlainData(data),
     error,
-    pagination: getPagination(data),
+    pagination: getPagination(data, countParam),
     fetchNextPage,
     queryKey: queryUniqueKey,
   };

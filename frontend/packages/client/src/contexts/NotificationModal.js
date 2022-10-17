@@ -1,4 +1,11 @@
-import { createContext, useCallback, useContext, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useRef,
+  useState,
+} from 'react';
+import isEqual from 'lodash/isEqual';
 
 /**
  *
@@ -29,6 +36,7 @@ export const useModalContext = () => {
 };
 
 const NotificationModalProvider = ({ children }) => {
+  const onCloseCallbackRef = useRef(() => {});
   const [modal, setModal] = useState(false);
   const [content, setContent] = useState(null);
   const [modalConfig, setModalConfig] = useState({
@@ -36,13 +44,19 @@ const NotificationModalProvider = ({ children }) => {
     closeOnBackgroundClick: true,
     showCloseButton: true,
     classNameModalContent: '',
-    onClose: () => {},
   });
 
   const openModal = useCallback(
     (content, customModalConfig) => {
       if (customModalConfig) {
-        setModalConfig(() => ({
+        const { isErrorModal, onClose } = customModalConfig;
+
+        // save in a ref callback when modal is closed
+        // can't set it in state bc onClosed does
+        // not get the correct ref to the function
+        onCloseCallbackRef.current = onClose;
+
+        const newConfiguration = {
           ...modalConfig,
           // set default values if modal is re-opened without configuration
           // this is when two components are using the modal with different configuration at the same time
@@ -50,7 +64,19 @@ const NotificationModalProvider = ({ children }) => {
           showCloseButton: true,
           classNameModalContent: '',
           ...customModalConfig,
-        }));
+          // only for error modals overwrite configuration to make it transparent and use ErrorModal component
+          ...(isErrorModal
+            ? {
+                classNameModalContent: 'is-flex is-justify-content-center',
+                backgroundColor: ' ',
+                showCloseButton: false,
+              }
+            : undefined),
+        };
+        // compare configuration to avoid setting state with same object values
+        if (!isEqual(modalConfig, newConfiguration)) {
+          setModalConfig(newConfiguration);
+        }
       }
       setContent(content);
       setModal(true);
@@ -58,12 +84,15 @@ const NotificationModalProvider = ({ children }) => {
     [modalConfig]
   );
 
-  const closeModal = useCallback(() => {
+  const closeModal = useCallback(({ onCloseCallback } = {}) => {
     setModal(false);
     // this unmounts the component
     setContent(null);
-    modalConfig.onClose();
-  }, [modalConfig]);
+    // calling any callback set on open modal
+    onCloseCallbackRef.current && onCloseCallbackRef.current();
+    // calling any callback set on closeModal
+    onCloseCallback && onCloseCallback();
+  }, []);
 
   const { closeOnBackgroundClick } = modalConfig;
   const handleClickOnBackground = useCallback(() => {
@@ -102,7 +131,7 @@ const NotificationModalProvider = ({ children }) => {
               className="modal-close is-large"
               aria-label="close"
               onClick={closeModal}
-            ></button>
+            />
           )}
         </div>
         {children}

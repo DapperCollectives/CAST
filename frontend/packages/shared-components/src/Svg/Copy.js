@@ -1,23 +1,32 @@
-const Copy = () => (
+const Copy = ({ width = '24', height = '24' }) => (
   <svg
-    width="15"
-    height="16"
-    viewBox="0 0 15 16"
+    width={width}
+    height={height}
+    viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <path
-      d="M12.3365 5.45825H6.41855C5.69224 5.45825 5.10345 6.09252 5.10345 6.87492V13.2499C5.10345 14.0323 5.69224 14.6666 6.41855 14.6666H12.3365C13.0628 14.6666 13.6516 14.0323 13.6516 13.2499V6.87492C13.6516 6.09252 13.0628 5.45825 12.3365 5.45825Z"
-      stroke="black"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M2.47264 9.70833H1.81509C1.46631 9.70833 1.13181 9.55908 0.885182 9.2934C0.638554 9.02772 0.5 8.66739 0.5 8.29167V1.91667C0.5 1.54094 0.638554 1.18061 0.885182 0.914932C1.13181 0.649255 1.46631 0.5 1.81509 0.5H7.73302C8.0818 0.5 8.4163 0.649255 8.66293 0.914932C8.90956 1.18061 9.04811 1.54094 9.04811 1.91667V2.625"
-      stroke="black"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
+    <g clipPath="url(#clip0_2518_6960)">
+      <path
+        d="M14.5 14H18.25C18.6642 14 19 13.6642 19 13.25V5.75C19 5.33579 18.6642 5 18.25 5L10.75 5C10.3358 5 10 5.33579 10 5.75L10 9.5"
+        stroke="black"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M5.75 19L13.25 19C13.6642 19 14 18.6642 14 18.25L14 10.75C14 10.3358 13.6642 10 13.25 10L5.75 10C5.33579 10 5 10.3358 5 10.75L5 18.25C5 18.6642 5.33579 19 5.75 19Z"
+        stroke="black"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </g>
+    <defs>
+      <clipPath id="clip0_2518_6960">
+        <rect width="16" height="16" fill="white" transform="translate(4 4)" />
+      </clipPath>
+    </defs>
   </svg>
 );
 
