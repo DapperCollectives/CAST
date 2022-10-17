@@ -6,7 +6,6 @@ import { useModalContext } from 'contexts/NotificationModal';
 import { useWebContext } from 'contexts/Web3';
 import { ErrorModal, StepByStep, WalletConnect } from 'components';
 import {
-  Preview,
   PropCreateStepOne,
   PropCreateStepThree,
   PropCreateStepTwo,
