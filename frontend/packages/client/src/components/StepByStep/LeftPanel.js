@@ -18,13 +18,15 @@ export default function LeftPanel({
   if (!notMobile) {
     return (
       <div
-        className="p-4"
-        style={{ position: 'fixed', minWidth: '100%', zIndex: 2 }}
+        className="has-background-white p-4"
+        style={{ minWidth: '100%', zIndex: 2 }}
       >
         <div className="is-flex is-justify-content-space-between is-align-items-center">
-          <div style={{ minHeight: 24 }}>
-            {currentStep > 0 && <BackButton isSubmitting={isSubmitting} />}
-          </div>
+          {showBackButton && (
+            <div style={{ minHeight: 24 }}>
+              {currentStep > 0 && <BackButton isSubmitting={isSubmitting} />}
+            </div>
+          )}
           <div className="is-flex">
             <div className="step-indicator-mobile rounded">
               <span className="p-3 small-text">
