@@ -15,7 +15,7 @@ test:
 	# creates proposals against local db for manual emulator testing
 proposals:
 	go test -v ./tests -run CreateManyProposals -amount=4 -db=local
-
+# sign test
 build_and_run: build run
 
 macrun: build_macos run && NFTdeploy
