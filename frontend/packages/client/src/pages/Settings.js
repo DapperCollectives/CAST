@@ -1,13 +1,12 @@
-import { Fragment } from 'react';
 import { useNotificationServiceContext } from 'contexts/NotificationService';
-import { HomeFooter } from 'components';
+import { BackButton, HomeFooter } from 'components';
 import {
-  BackButton,
   ConnectWalletPrompt,
   NotificationSettingsSection,
   SettingsSection,
 } from 'components/Settings';
 import { useMediaQuery } from 'hooks';
+import SectionContainer from 'layout/SectionContainer';
 
 export default function Settings() {
   const { notificationSettings } = useNotificationServiceContext();
@@ -15,14 +14,12 @@ export default function Settings() {
   const notMobile = useMediaQuery();
 
   return (
-    <Fragment>
+    <SectionContainer>
       <div className="columns">
-        <div
-          className={`column is-one-third ${
-            notMobile ? 'p-6' : 'px-5 pt-5 pb-3'
-          }`}
-        >
-          <BackButton />
+        <div className={'column is-one-third'}>
+          <div style={{ width: '115px' }}>
+            <BackButton isMobile={!notMobile} navTo={'/'} />
+          </div>
         </div>
         {walletId && (
           <div className="column is-two-fifths">
@@ -33,6 +30,6 @@ export default function Settings() {
         {!walletId && <ConnectWalletPrompt />}
       </div>
       <HomeFooter />
-    </Fragment>
+    </SectionContainer>
   );
 }

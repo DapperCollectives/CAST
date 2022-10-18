@@ -31,7 +31,7 @@ export default function ReceiveEmailNotificationsSwitch() {
           className="switch is-rounded is-medium"
           checked={isSubscribedFromCommunityUpdates}
           onChange={handleSubscribeAllNotifications}
-        ></input>
+        />
         <label htmlFor="subscribeAllNotification"></label>
       </div>
     </div>

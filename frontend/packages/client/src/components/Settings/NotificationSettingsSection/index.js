@@ -1,12 +1,10 @@
 import { Fragment } from 'react';
 import { useNotificationServiceContext } from 'contexts/NotificationService';
-import { useMediaQuery } from 'hooks';
 import CommunitiesList from './CommunitiesList';
 import EmailAddressInput from './EmailAddressInput';
 import ReceiveEmailNotificationsSwitch from './ReceiveEmailNotificationsSwitch';
 
 export default function NotificationSettingsSection() {
-  const notMobile = useMediaQuery();
   const {
     notificationSettings,
     setUserEmail,
@@ -16,11 +14,7 @@ export default function NotificationSettingsSection() {
   const { communitySubscription, email, isSubscribedFromCommunityUpdates } =
     notificationSettings;
   return (
-    <section
-      className={`column is-flex is-flex-direction-column ${
-        notMobile ? 'mt-7 px-6' : 'px-5'
-      }`}
-    >
+    <section className={'column is-flex is-flex-direction-column mt-5'}>
       <h2 className="is-size-4 has-text-weight-bold">Notification Settings</h2>
       {communitySubscription.length === 0 && (
         <div className="has-text-grey pt-3">

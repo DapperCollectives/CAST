@@ -9,11 +9,7 @@ export default function SettingsSection({ walletId }) {
   const { injectedProvider } = useWebContext();
 
   return (
-    <section
-      className={`column is-flex is-flex-direction-column ${
-        notMobile ? 'mt-5 px-6' : 'px-5'
-      }`}
-    >
+    <section className={'column is-flex is-flex-direction-column'}>
       <h2 className="is-size-4 has-text-weight-bold">Settings</h2>
       <h3 className="is-size-6 mt-2">Connected Wallet</h3>
       <div className="is-flex is-flex-direction-row is-flex-wrap-wrap is-align-items-center">

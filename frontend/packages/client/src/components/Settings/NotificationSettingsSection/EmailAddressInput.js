@@ -1,45 +1,52 @@
-import { Fragment, useState } from 'react';
+import { Fragment } from 'react';
+import { useForm } from 'react-hook-form';
+import Input from 'components/common/Input';
+import { EMAIL_REGEX } from 'const';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
 
-const EMAIL_REGEX = /^\S+@\S+\.\S+$/i;
 export default function EmailAddressInput({ email, setUserEmail }) {
-  const [newEmail, setNewEmail] = useState(email);
-  const [isEmailValid, setIsEmailValid] = useState(true);
-  const handleSaveEmail = () => {
-    if (EMAIL_REGEX.test(newEmail) && newEmail.length > 0) {
-      setIsEmailValid(true);
-      setUserEmail(newEmail);
-    } else {
-      setIsEmailValid(false);
-    }
+  const { register, handleSubmit, formState } = useForm({
+    resolver: yupResolver(
+      yup.object().shape({
+        email: yup.string().trim().matches(EMAIL_REGEX, 'Invalid email format'),
+      })
+    ),
+  });
+  const onSubmit = ({ email }) => {
+    setUserEmail(email);
   };
-  const isEmailChanged = newEmail !== email;
+  const { isSubmitting, errors, isDirty } = formState;
   return (
     <Fragment>
       <h3 className="is-size-5 mt-2 has-text-weight-medium">Email Address</h3>
-      <div className="is-flex is-flex-direction-row is-flex-wrap-wrap is-align-items-center">
+      <form
+        className="is-flex is-flex-direction-row is-flex-wrap-wrap is-align-items-flex-start"
+        onSubmit={handleSubmit(onSubmit)}
+      >
         <div className="mr-3 my-3">
-          <input
+          <Input
             className="rounded-lg border-light flex-1 p-3"
+            placeholder="Enter Email Address"
+            register={register}
+            name="email"
+            disabled={isSubmitting}
+            classNames="rounded-lg border-light flex-1 p-3"
             style={{ height: 41, width: 246 }}
-            value={newEmail}
-            onChange={(e) => {
-              setNewEmail(e.target.value);
-            }}
+            error={errors?.email}
           />
         </div>
         <button
-          className={`button rounded-lg has-background-black has-text-white ${
-            isEmailChanged ? '' : 'is-disabled'
+          className={`button rounded-lg has-background-black has-text-white my-3 ${
+            isDirty ? '' : 'is-disabled'
           }`}
-          disabled={!isEmailChanged}
-          onClick={handleSaveEmail}
+          disabled={!isDirty}
+          onClick={handleSubmit(onSubmit)}
+          type="submit"
         >
           Save
         </button>
-      </div>
-      {!isEmailValid && (
-        <p className="is-size-7 p-2">Please enter a valid email address</p>
-      )}
+      </form>
     </Fragment>
   );
 }
