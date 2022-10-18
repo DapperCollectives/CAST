@@ -2,6 +2,23 @@ import Blockies from 'react-blockies';
 import { JoinCommunityButton } from 'components';
 import { useMediaQuery } from 'hooks';
 
+interface CommunityHeaderProps {
+  isLoading?: boolean;
+  id?: string;
+  bannerImgUrl?: string;
+  logo?: string;
+  slug?: string;
+  communityName?: string;
+  members?: any;
+  totalMembers: number;
+  onLeaveCommunity?: any;
+  onJoinCommunity?: any;
+}
+
+interface Member {
+  addr: string;
+}
+
 export default function CommunityHeader({
   isLoading = false,
   id,
@@ -13,7 +30,7 @@ export default function CommunityHeader({
   totalMembers,
   onLeaveCommunity = () => {},
   onJoinCommunity = () => {},
-} = {}) {
+}: CommunityHeaderProps): JSX.Element {
   const notMobile = useMediaQuery();
 
   return (
@@ -88,7 +105,7 @@ export default function CommunityHeader({
               </p>
               <div className="is-flex mt-3 mt-1-mobile">
                 {members
-                  ? members.map(({ addr }, idx) => (
+                  ? members.map(({ addr }: Member, idx: number) => (
                       <div
                         key={`${idx}`}
                         className="blockies-wrapper is-relative"
