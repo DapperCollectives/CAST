@@ -21,7 +21,6 @@ export default function EmailAddressInput({ email, setUserEmail }) {
     ),
   });
   const onSubmit = ({ email }) => {
-    console.log(email);
     setUserEmail(email);
   };
   const { isSubmitting, errors, isDirty } = formState;
