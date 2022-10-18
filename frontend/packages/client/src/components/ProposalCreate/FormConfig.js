@@ -1,7 +1,8 @@
 import yup from 'helpers/validation';
 
-const formFieldsStepOne = ['name', 'strategy', 'body', 'choices', 'tabOption'];
-const formFieldsStepTwo = ['startDate', 'endDate', 'startTime', 'endTime'];
+const formFieldsStepOne = ['name', 'body'];
+const formFieldsStepTwo = ['strategy', 'choices', 'tabOption'];
+const formFieldsStepThree = ['startDate', 'endDate', 'startTime', 'endTime'];
 
 const NAME_MAX_LENGTH = 128;
 
@@ -11,8 +12,11 @@ const StepOneSchema = yup.object().shape({
     .trim()
     .required('Please enter a proposal title')
     .max(NAME_MAX_LENGTH, 'The maximum length for title is 128 characters'),
-  strategy: yup.string().required('Please select a strategy'),
   body: yup.string().required('Please enter a proposal description'),
+});
+
+const StepTwoSchema = yup.object().shape({
+  strategy: yup.string().required('Please select a strategy'),
   tabOption: yup.string().oneOf(['text-based', 'visual']),
   choices: yup
     .array()
@@ -53,7 +57,7 @@ const StepOneSchema = yup.object().shape({
     ),
 });
 
-const StepTwoSchema = yup.object().shape({
+const StepThreeSchema = yup.object().shape({
   startDate: yup.date().required('Please provide a start date'),
   startTime: yup.date().required('Please provide a start time'),
   endDate: yup.date().required('Please provide an end date'),
@@ -75,4 +79,10 @@ const stepTwo = {
   formFields: formFieldsStepTwo,
 };
 
-export { stepOne, stepTwo, NAME_MAX_LENGTH };
+const stepThree = {
+  Schema: StepThreeSchema,
+  initialValues: initialValues(formFieldsStepThree),
+  formFields: formFieldsStepThree,
+};
+
+export { stepOne, stepTwo, stepThree, NAME_MAX_LENGTH };
