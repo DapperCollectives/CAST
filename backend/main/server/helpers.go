@@ -519,6 +519,7 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorRespo
 		return models.Proposal{}, errStrategyNotFound
 	}
 
+	fmt.Printf("Proposal strategy: %v \n", p)
 	if p.Voucher != nil {
 		if err := h.validateUserViaVoucher(p.Creator_addr, p.Voucher); err != nil {
 			return models.Proposal{}, errForbidden
@@ -550,13 +551,8 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorRespo
 
 	canUserCreateProposal := community.CanUserCreateProposal(h.A.DB, h.A.FlowAdapter, p.Creator_addr)
 
-	// If user doesn't have permission, populate errorResponse
-	// with reason and error.
-	if !canUserCreateProposal.HasPermission {
-		errPermissionsResponse := errCreateProposalPermissions
-		errPermissionsResponse.Message = canUserCreateProposal.Reason
-		errPermissionsResponse.Details = canUserCreateProposal.Error.Error()
-		return models.Proposal{}, errPermissionsResponse
+	if err := handlePermissionErrorr(canUserCreateProposal); err != nilErr {
+		return models.Proposal{}, err
 	}
 
 	// Get latest sealed blockheight to use as proposal snapshot
@@ -592,6 +588,52 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorRespo
 	}
 
 	return p, nilErr
+}
+
+func (h *Helpers) createDraftProposal(p models.Proposal) (models.Proposal, errorResponse) {
+
+	if p.Voucher != nil {
+		if err := h.validateUserViaVoucher(p.Creator_addr, p.Voucher); err != nil {
+			return models.Proposal{}, errForbidden
+		}
+	} else {
+		if err := h.validateUser(p.Creator_addr, p.Timestamp, p.Composite_signatures); err != nil {
+			return models.Proposal{}, errForbidden
+		}
+	}
+
+	community, err := h.fetchCommunity(p.Community_id)
+	if err != nil {
+		return models.Proposal{}, errIncompleteRequest
+	}
+
+	canUserCreateProposal := community.CanUserCreateProposal(
+		h.A.DB,
+		h.A.FlowAdapter,
+		p.Creator_addr,
+	)
+
+	if err := handlePermissionErrorr(canUserCreateProposal); err != nilErr {
+		return models.Proposal{}, err
+	}
+
+	if err := p.CreateProposal(h.A.DB); err != nil {
+		return models.Proposal{}, errIncompleteRequest
+	}
+
+	return p, nilErr
+}
+
+func handlePermissionErrorr(result models.CanUserCreateProposalResponse) errorResponse {
+	// If user doesn't have permission, populate errorResponse
+	// with reason and error.
+	if !result.HasPermission {
+		errPermissionsResponse := errCreateProposalPermissions
+		errPermissionsResponse.Message = result.Reason
+		errPermissionsResponse.Details = result.Error.Error()
+		return errPermissionsResponse
+	}
+	return nilErr
 }
 
 func (h *Helpers) validateStrategyName(name string) error {

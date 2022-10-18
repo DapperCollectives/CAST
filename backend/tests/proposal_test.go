@@ -345,7 +345,7 @@ func TestCreateDraftProposal(t *testing.T) {
 	communityId := otu.AddCommunitiesWithUsers(1, authorName)[0]
 
 	t.Run("A community author should be able to create a draft proposal", func(t *testing.T) {
-		proposalStruct := otu.GenerateProposalStruct(authorName, communityId)
+		proposalStruct := otu.GenerateDraftProposalStruct(authorName, communityId)
 		payload := otu.GenerateProposalPayload(authorName, proposalStruct)
 		response := otu.CreateProposalAPI(payload)
 

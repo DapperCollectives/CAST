@@ -355,6 +355,34 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusCreated, proposal)
 }
 
+func (a *App) createDraftProposal(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	communityId, err := strconv.Atoi(vars["communityId"])
+	if err != nil {
+		log.Error().Err(err).Msg("Invalid Community ID")
+		respondWithError(w, errIncompleteRequest)
+		return
+	}
+
+	var p models.Proposal
+	p.Community_id = communityId
+
+	if err := validatePayload(r.Body, &p); err != nil {
+		log.Error().Err(err).Msg("Error validating payload")
+		respondWithError(w, errIncompleteRequest)
+		return
+	}
+
+	proposal, errResponse := helpers.createDraftProposal(p)
+	if errResponse != nilErr {
+		log.Error().Err(err).Msg("Error creating draft proposal")
+		respondWithError(w, errResponse)
+		return
+	}
+
+	respondWithJSON(w, http.StatusCreated, proposal)
+}
+
 func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	p, err := helpers.fetchProposal(vars, "id")
