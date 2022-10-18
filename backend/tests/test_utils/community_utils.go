@@ -64,13 +64,13 @@ type PaginatedResponseWithLeaderboardUser struct {
 }
 
 type SearchFilter struct {
-	Text string 	`json:"text"`
-	Amount int 		`json:"amount"`
+	Text   string `json:"text"`
+	Amount int    `json:"amount"`
 }
 
 type PaginatedResponseSearch struct {
-	Filters []SearchFilter 	`json:"filters"`
-	Results PaginatedResponseWithCommunity   	`json:"results"`
+	Filters []SearchFilter                 `json:"filters"`
+	Results PaginatedResponseWithCommunity `json:"results"`
 }
 
 var (
@@ -339,17 +339,27 @@ func (otu *OverflowTestUtils) GetCommunitiesForHomepageAPI() *httptest.ResponseR
 	return response
 }
 
-func (otu *OverflowTestUtils) GetSearchCommunitiesAPI(filters []string, text string, count *int) *httptest.ResponseRecorder {
+func (otu *OverflowTestUtils) GetSearchCommunitiesAPI(
+	filters []string,
+	text string,
+	count, start *int,
+) *httptest.ResponseRecorder {
 	searchUrl := "/communities/search"
 	filterStr := ""
 	textStr := ""
 	countStr := ""
+	startStr := ""
 
 	if len(filters) > 0 {
 		filterStr = fmt.Sprintf("filters=%s", url.QueryEscape(strings.Join(filters, ",")))
 	}
+
+	//@TODO: change this to switch
 	if text != "" {
 		textStr = fmt.Sprintf("text=%s", url.QueryEscape(text))
+	}
+	if start != nil {
+		startStr = fmt.Sprintf("start=%d", *start)
 	}
 	if count != nil {
 		countStr = fmt.Sprintf("count=%d", *count)
@@ -366,6 +376,14 @@ func (otu *OverflowTestUtils) GetSearchCommunitiesAPI(filters []string, text str
 			queryStr = textStr
 		}
 	}
+	if startStr != "" {
+		if queryStr != "" {
+			queryStr = fmt.Sprintf("%s&%s", queryStr, startStr)
+		} else {
+			queryStr = startStr
+		}
+	}
+
 	if countStr != "" {
 		if queryStr != "" {
 			queryStr = fmt.Sprintf("%s&%s", queryStr, countStr)
@@ -373,7 +391,6 @@ func (otu *OverflowTestUtils) GetSearchCommunitiesAPI(filters []string, text str
 			queryStr = countStr
 		}
 	}
-
 	if queryStr != "" {
 		searchUrl = fmt.Sprintf("%s?%s", searchUrl, queryStr)
 	}
