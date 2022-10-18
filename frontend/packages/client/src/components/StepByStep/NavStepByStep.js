@@ -1,7 +1,7 @@
 import NavButton from './NavButton';
 
-const PossitionWrapper = ({
-  isTopPossition,
+const PositionWrapper = ({
+  isTopPosition,
   previewButton,
   backButton,
   submitOrNext,
@@ -9,7 +9,7 @@ const PossitionWrapper = ({
 }) => {
   return (
     <nav className="navbar is-transparent">
-      {isTopPossition ? (
+      {isTopPosition ? (
         <>
           <div className="is-flex flex-0 is-align-items-center">
             {previewButton}
@@ -47,31 +47,31 @@ export default function NavStepByStep({
   isPreviewModeVisible,
   position,
 }) {
-  const isTopPossition = position === 'top';
+  const isTopPosition = position === 'top';
 
   const isNextButton = showSubmitOrNext === 'next';
 
   return (
     <div
       className={`is-flex flex-1 has-background-white ${
-        !isTopPossition ? 'has-background-light-grey' : ''
+        !isTopPosition ? 'has-background-light-grey' : ''
       }`}
       style={{
         position: 'fixed',
         width: '100%',
         zIndex: 2,
-        ...(!isTopPossition ? { bottom: 0 } : undefined),
+        ...(!isTopPosition ? { bottom: 0 } : undefined),
       }}
     >
       <div
         className={`is-flex flex-1 px-6-desktop px-5-tablet px-4-mobile  ${
-          isTopPossition ? 'divider' : 'divider-top'
+          isTopPosition ? 'divider' : 'divider-top'
         }`}
       >
         <div className="container header-spacing">
-          <PossitionWrapper
+          <PositionWrapper
             isSubmit={showSubmitOrNext === 'submit'}
-            isTopPossition={isTopPossition}
+            isTopPosition={isTopPosition}
             previewButton={
               isPreviewModeVisible && (
                 <NavButton
@@ -97,7 +97,7 @@ export default function NavStepByStep({
                 formId={formId}
                 disabled={!isStepValid || isSubmitting}
                 classNames={`vote-button has-background-yellow ${
-                  !isTopPossition ? 'is-fullwidth' : ''
+                  !isTopPosition ? 'is-fullwidth' : ''
                 }`}
                 onClick={isNextButton ? onClickNext : onSubmit}
                 text={isNextButton ? 'Next' : finalLabel}
