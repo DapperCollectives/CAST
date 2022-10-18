@@ -9,7 +9,7 @@ import { kebabToString } from 'utils';
 import { yupResolver } from '@hookform/resolvers/yup';
 import pick from 'lodash/pick';
 import { stepTwo } from '../FormConfig';
-import ChoiceOptionCreator from './ChoiceOptionCreator';
+import VotingSelector from './VotingSelector';
 
 const StepTwo = ({
   stepData,
@@ -65,6 +65,7 @@ const StepTwo = ({
   };
 
   const defaultValueStrategy = useWatch({ control, name: 'strategy' });
+  const voteType = useWatch({ control, name: 'voteType' });
 
   const { isDirty, isSubmitting, isValid, errors } = formState;
 
@@ -115,24 +116,14 @@ const StepTwo = ({
             </>
           )}
         </div>
-        <div className="border-light-tablet rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 p-0-mobile mb-6">
-          <h4 className="title is-4 mb-2">
-            Choices <span className="has-text-danger">*</span>
-          </h4>
-          <p className="has-text-grey mb-4">
-            Provide the specific options you’d like to cast votes for. Use
-            Text-based presentation for choices that described in words. Use
-            Visual for side-by-side visual options represented by images.
-          </p>
-          <ChoiceOptionCreator
-            setValue={setValue}
-            error={errors['choices']}
-            fieldName="choices"
-            register={register}
-            control={control}
-            clearErrors={clearErrors}
-          />
-        </div>
+        <VotingSelector
+          setValue={setValue}
+          clearErrors={clearErrors}
+          voteType={voteType}
+          register={register}
+          control={control}
+          errors={errors}
+        />
       </div>
     </Form>
   );

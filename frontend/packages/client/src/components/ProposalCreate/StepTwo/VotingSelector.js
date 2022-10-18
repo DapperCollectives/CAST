@@ -12,7 +12,7 @@ export default function VotingSelector({
 }) {
   return (
     <>
-      <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6">
+      <div className="border-light-tablet rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 p-0-mobile mb-6">
         <h4 className="title is-5 mb-2">Type of Voting</h4>
         <p className="has-text-grey mb-5">
           Select the type of voting you would like to use for this proposal. To
