@@ -79,6 +79,8 @@ function StepByStep({
 
   const nextAction = currentStep + 1 === steps.length ? 'submit' : 'next';
 
+  const navStepPosition = notMobile ? 'top' : 'bottom';
+
   return (
     <>
       {blockNavigationOut && (
@@ -89,7 +91,7 @@ function StepByStep({
       )}
       {useControlsOnTopBar && (
         <NavStepByStep
-          position={notMobile ? 'top' : 'bottom'}
+          position={navStepPosition}
           onClickBack={moveBackStep}
           isBackButtonEnabled={currentStep - 1 >= 0}
           onClickNext={moveToNextStep}
@@ -104,7 +106,13 @@ function StepByStep({
         />
       )}
       <section
-        style={notMobile && useControlsOnTopBar ? { paddingTop: '77px' } : {}}
+        style={
+          useControlsOnTopBar
+            ? navStepPosition === 'top'
+              ? { paddingTop: '77px' }
+              : { paddingBottom: '77px' }
+            : {}
+        }
       >
         <div
           style={{
