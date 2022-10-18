@@ -7,16 +7,25 @@ import * as yup from 'yup';
 
 export default function EmailAddressInput({ email, setUserEmail }) {
   const { register, handleSubmit, formState } = useForm({
+    defaultValues: {
+      email: email,
+    },
     resolver: yupResolver(
       yup.object().shape({
-        email: yup.string().trim().matches(EMAIL_REGEX, 'Invalid email format'),
+        email: yup
+          .string()
+          .trim()
+          .matches(EMAIL_REGEX, 'Invalid email format')
+          .required('Please enter an email address'),
       })
     ),
   });
   const onSubmit = ({ email }) => {
+    console.log(email);
     setUserEmail(email);
   };
   const { isSubmitting, errors, isDirty } = formState;
+
   return (
     <Fragment>
       <h3 className="is-size-5 mt-2 has-text-weight-medium">Email Address</h3>
