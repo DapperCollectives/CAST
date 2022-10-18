@@ -3,8 +3,9 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { useModalContext } from 'contexts/NotificationModal';
 import { Svg } from '@cast/shared-components';
 import NotificationsModal from 'components/modals/Notifications';
+import { FRONTEND_URL } from 'const';
 
-const PostVoteOptions = ({ communityId }) => {
+const PostVoteOptions = ({ communityId, proposalId }) => {
   const [linkCopied, setLinkCopied] = useState(false);
   const { openModal, closeModal } = useModalContext();
   const openNotificationsModal = () =>
@@ -14,6 +15,9 @@ const PostVoteOptions = ({ communityId }) => {
         classNameModalContent: 'modal-content-sm',
       }
     );
+
+  const proposalUrl = `${FRONTEND_URL}/#/community/${communityId}/proposal/${proposalId}`;
+
   return (
     <div className="">
       <div className="is-flex is-align-items-center">
@@ -23,10 +27,17 @@ const PostVoteOptions = ({ communityId }) => {
         </b>
       </div>
       <div className="is-flex is-align-items-center mt-5">
-        <div className="is-flex flex-1 is-align-items-center rounded-lg button twitter-button mr-2">
+        <a
+          className="is-flex flex-1 is-align-items-center rounded-lg button twitter-button mr-2"
+          href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
+            proposalUrl
+          )}`}
+          target="_blank"
+          rel="noreferrer noopenner"
+        >
           <Svg name="Twitter" />
           <span className="ml-1">Share on Twitter</span>
-        </div>
+        </a>
         <CopyToClipboard
           text={window?.location?.href}
           onCopy={() => setLinkCopied(true)}

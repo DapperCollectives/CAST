@@ -48,7 +48,6 @@ const VoteOptions = ({
 
   const voteClasses = 'vote-options border-light rounded mb-6$';
   const disabledClass = !canVote ? 'is-disabled' : '';
-  const votedClass = !hasntVoted ? 'is-voted' : '';
 
   let previousVote = castVote;
   let currentOption = optionChosen;
@@ -98,10 +97,13 @@ const VoteOptions = ({
         {hasntVoted ? (
           <VoteHeader status={headerStatus} />
         ) : (
-          <PostVoteOptions communityId={proposal.commmunityId} />
+          <PostVoteOptions
+            communityId={proposal.communityId}
+            proposalId={proposal.id}
+          />
         )}
       </Wrapper>
-      <div className={`${disabledClass} ${votedClass}`}>
+      <div className={disabledClass}>
         {!isImageChoice && (
           <TextBasedOptions
             choices={choices}
