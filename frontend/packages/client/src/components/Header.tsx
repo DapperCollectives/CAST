@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { NavLink, withRouter } from 'react-router-dom';
+import { NavLink, RouteComponentProps, withRouter } from 'react-router-dom';
 import { Svg } from '@cast/shared-components';
 import Label from './Label';
 import Sidenavbar from './SideNavbar';
 import WalletConnect from './WalletConnect';
 
-function Header(props) {
+function Header(props: RouteComponentProps): JSX.Element {
   const [showSidenav, setShowSidenav] = useState(false);
 
   const openNavbarMenu = () => {

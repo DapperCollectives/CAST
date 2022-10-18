@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 
-export default function HomeFooter() {
+export default function HomeFooter(): JSX.Element {
   return (
     <div className="section pt-6 mt-6">
       <div className="container">
