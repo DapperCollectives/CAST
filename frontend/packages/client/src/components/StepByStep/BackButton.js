@@ -2,7 +2,7 @@ import { Svg } from '@cast/shared-components';
 
 const BackButton = ({ isSubmitting, onClick }) => (
   <div
-    className="is-flex is-align-items-center has-text-grey cursor-pointer"
+    className="is-flex p-1 is-align-items-center has-text-grey cursor-pointer"
     onClick={!isSubmitting ? onClick : () => {}}
   >
     <Svg name="ArrowLeft" />

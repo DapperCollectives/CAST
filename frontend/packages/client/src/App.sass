@@ -106,7 +106,7 @@ $popover-max-width: 20rem
 .App, #root
 	height: 100%
 .Body
-	padding-top: calc($navbar-height + 2.33rem)
+	padding-top: calc($navbar-height + 1.78rem)
 	height: 100%
 @include mobile
 	.Body
@@ -120,6 +120,8 @@ code
 	background: transparent
 .divider
 	border-bottom: 1px solid $grey-light
+.divider-top
+	border-top: 1px solid $grey-light
 .rounded
 	border-radius: 16px
 .rounded-sm
@@ -144,6 +146,9 @@ code
 	border-radius: 50%
 .border-light
 	border: 1px solid $grey-lighter
+@include tablet	
+	.border-light-tablet
+		border: 1px solid $grey-lighter
 .border-grey
 	border: 1px solid $grey
 .border-dashed-dark
@@ -177,8 +182,8 @@ code
 .cursor-pointer
 	cursor: pointer
 .header-spacing
-	padding-bottom: 1rem
-	padding-top: 1rem
+	padding-bottom: 0.75rem
+	padding-top: 0.75rem
 .message-container, .communities
 	margin-bottom: 2.5rem
 @include mobile
@@ -224,6 +229,32 @@ label > input[type="radio"].is-chosen + *::before, .is-button-chosen
 	background-repeat: no-repeat
 label > input[type="radio"].is-chosen + *::before
 	background-color: white
+label > input[type="radio"].green-radio
+	display: none
+	-webkit-appearance: none
+	appearance: none
+	background-color: #fff
+	margin: 0
+	font: inherit
+	color: $grey-lighter
+	width: 20px
+	height: 20px
+	border: 1px solid $grey-lighter
+	border-radius: 50%
+	display: grid
+	place-content: center
+label > input[type="radio"].green-radio::before
+	content: ""
+	width: 14px
+	height: 14px
+	border-radius: 50%
+	transform: scale(0)
+	transition: 120ms transform ease-in-out
+	box-shadow: inset 1em 1em $success
+label > input[type="radio"].green-radio:checked::before
+	transform: scale(1)
+label > input[type="radio"].green-radio:checked
+	border-color: $success	
 .proposal-copy
 	color: $grey
 .proposal-copy ul
