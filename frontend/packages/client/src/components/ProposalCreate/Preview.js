@@ -20,7 +20,6 @@ const Preview = ({ stepsData }) => {
         label: choice.value,
       })),
   };
-  console.log(proposal);
 
   const htmlBody = stepOne?.body;
 
