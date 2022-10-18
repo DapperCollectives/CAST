@@ -44,7 +44,6 @@ export default function VotingSelector({
                       value="single-choice"
                       className="green-radio"
                     />
-                    <span />
                   </label>
                 </div>
               </div>
@@ -75,7 +74,6 @@ export default function VotingSelector({
                     value="ranked-choice"
                     className="green-radio"
                   />
-                  <span />
                 </label>
               </div>
             </div>
