@@ -5,6 +5,7 @@ export default function SingleVoteExample() {
         <div
           className="is-flex is-align-items-center mb-1"
           style={{ whiteSpace: 'nowrap' }}
+          key={index}
         >
           <div
             className="rounded-full has-background-grey has-text-white mr-2 is-flex is-align-items-center is-justify-content-center"
