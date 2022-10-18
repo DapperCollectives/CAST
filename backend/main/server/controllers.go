@@ -3,7 +3,6 @@ package server
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -340,8 +339,6 @@ func (a *App) getUserProposals(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, errIncompleteRequest)
 		return
 	}
-
-	fmt.Printf("communities: %v", communities)
 
 	pageParams.TotalRecords = totalRecords
 

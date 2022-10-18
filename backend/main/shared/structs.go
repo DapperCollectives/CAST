@@ -71,10 +71,11 @@ type Choice struct {
 }
 
 type UserProposal struct {
-	Community_id   int    `json:"communityId"`
-	Community_name string `json:"communityName"`
-	Proposal_name  string `json:"proposalName"`
-	Status         string `json:"status"`
+	Community_id   int       `json:"communityId"`
+	Community_name string    `json:"communityName"`
+	Proposal_name  string    `json:"proposalName"`
+	Start_time     time.Time `json:"startTime"`
+	Status         string    `json:"status"`
 }
 
 type MintParams struct {

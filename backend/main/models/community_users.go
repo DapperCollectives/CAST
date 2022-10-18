@@ -195,7 +195,8 @@ func GetCommunityProposalsForUser(
  		u.community_id, 
   	c.name as community_name, 
   	p.name as proposal_name, 
-  	p.status 
+  	p.status, 
+		p.start_time
   FROM community_users AS u 
 	LEFT JOIN 
   	proposals AS p on p.community_id = u.community_id
