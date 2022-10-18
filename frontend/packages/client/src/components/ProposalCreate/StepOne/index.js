@@ -17,10 +17,6 @@ const StepOne = ({
   const fieldsObj = Object.assign(
     {},
     stepOne.initialValues,
-    {
-      choices: [],
-      tabOption: 'text-based',
-    },
     pick(stepData || {}, stepOne.formFields)
   );
 

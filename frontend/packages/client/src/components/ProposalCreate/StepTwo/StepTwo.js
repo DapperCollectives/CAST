@@ -42,6 +42,7 @@ const StepTwo = ({
     {
       choices: [],
       tabOption: 'text-based',
+      voteType: 'single-choice',
     },
     pick(stepData || {}, stepTwo.formFields)
   );
