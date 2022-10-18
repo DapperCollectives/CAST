@@ -35,6 +35,11 @@ var (
 		Status:       &published,
 		Block_height: &blockHeight,
 	}
+
+	DraftProposalStruct = models.Proposal{
+		Name: "Draft Proposal",
+		Body: &proposalBody,
+	}
 )
 
 func (otu *OverflowTestUtils) GetProposalsForCommunityAPI(communityId int) *httptest.ResponseRecorder {
@@ -90,6 +95,22 @@ func (otu *OverflowTestUtils) GenerateProposalStruct(signer string, communityId 
 	proposal.Community_id = communityId
 	proposal.Start_time = time.Now().AddDate(0, 1, 0)
 	proposal.End_time = time.Now().Add(30 * 24 * time.Hour)
+	return &proposal
+}
+
+func (otu *OverflowTestUtils) GenerateDraftProposalStruct(
+	signer string,
+	communityId int,
+) *models.Proposal {
+	proposal := DraftProposalStruct
+	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", signer))
+	address := fmt.Sprintf("0x%s", account.Address().String())
+	proposal.Creator_addr = address
+	proposal.Community_id = communityId
+	proposal.Start_time = time.Now().AddDate(0, 1, 0)
+	proposal.End_time = time.Now().Add(30 * 24 * time.Hour)
+
+	proposal.Status = nil
 	return &proposal
 }
 

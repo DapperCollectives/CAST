@@ -335,3 +335,29 @@ func TestGetProposalsByStatus(t *testing.T) {
 		}
 	})
 }
+
+func TestCreateDraftProposal(t *testing.T) {
+	clearTable("communities")
+	clearTable("community_users")
+	clearTable("proposals")
+
+	authorName := "account"
+	communityId := otu.AddCommunitiesWithUsers(1, authorName)[0]
+
+	t.Run("A community author should be able to create a draft proposal", func(t *testing.T) {
+		proposalStruct := otu.GenerateProposalStruct(authorName, communityId)
+		payload := otu.GenerateProposalPayload(authorName, proposalStruct)
+		response := otu.CreateProposalAPI(payload)
+
+		CheckResponseCode(t, http.StatusCreated, response.Code)
+		var p models.Proposal
+		json.Unmarshal(response.Body.Bytes(), &p)
+
+		// Get proposal after create
+		response = otu.GetProposalByIdAPI(communityId, p.ID)
+		var created models.Proposal
+		json.Unmarshal(response.Body.Bytes(), &created)
+
+		assert.Equal(t, "pending", *created.Computed_status)
+	})
+}
