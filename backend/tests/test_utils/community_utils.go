@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/DapperCollectives/CAST/backend/main/models"
+	"github.com/DapperCollectives/CAST/backend/main/shared"
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
 )
 
@@ -61,6 +62,14 @@ type PaginatedResponseWithLeaderboardUser struct {
 	Count        int                       `json:"count"`
 	TotalRecords int                       `json:"totalRecords"`
 	Next         int                       `json:"next"`
+}
+
+type PaginatedResponseWithProposal struct {
+	Data         []shared.UserProposal `json:"data"`
+	Start        int                   `json:"start"`
+	Count        int                   `json:"count"`
+	TotalRecords int                   `json:"totalRecords"`
+	Next         int                   `json:"next"`
 }
 
 type SearchFilter struct {

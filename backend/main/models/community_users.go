@@ -183,6 +183,37 @@ func GetCommunitiesForUser(db *s.Database, addr string, pageParams shared.PagePa
 	return mergedCommunities, totalCommunities, nil
 }
 
+func GetCommunityProposalsForUser(
+	db *s.Database,
+	addr string,
+	pageParams shared.PageParams,
+) ([]shared.UserProposal, int, error) {
+
+	var proposals = []shared.UserProposal{}
+	err := pgxscan.Select(db.Context, db.Conn, &proposals, `
+	SELECT 
+ 		u.community_id, 
+  	c.name as community_name, 
+  	p.name as proposal_name, 
+  	p.status, 
+		p.start_time
+  FROM community_users AS u 
+	LEFT JOIN 
+  	proposals AS p on p.community_id = u.community_id
+	LEFT JOIN 
+  	communities AS c on c.id = p.community_id
+	WHERE addr = $1
+	`, addr)
+
+	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
+		return nil, 0, err
+	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
+		return proposals, 0, nil
+	}
+
+	return proposals, len(proposals), nil
+}
+
 func (u *CommunityUser) GetCommunityUser(db *s.Database) error {
 	sql := `
 	SELECT * from community_users as u

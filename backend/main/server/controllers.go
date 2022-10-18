@@ -327,6 +327,25 @@ func (a *App) getProposal(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, p)
 }
 
+func (a *App) getUserProposals(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	addr := vars["addr"]
+
+	pageParams := getPageParams(*r, 25)
+
+	communities, totalRecords, err := models.GetCommunityProposalsForUser(a.DB, addr, pageParams)
+	if err != nil {
+		log.Error().Err(err).Msg("Error getting user proposals.")
+		respondWithError(w, errIncompleteRequest)
+		return
+	}
+
+	pageParams.TotalRecords = totalRecords
+
+	response := shared.GetPaginatedResponseWithPayload(communities, pageParams)
+	respondWithJSON(w, http.StatusOK, response)
+}
+
 func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	communityId, err := strconv.Atoi(vars["communityId"])

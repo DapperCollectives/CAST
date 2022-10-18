@@ -43,6 +43,7 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/community-categories", a.getCommunityCategories).Methods("GET")
 	// Users
 	a.Router.HandleFunc("/users/{addr:0x[a-zA-Z0-9]{16}}/communities", a.getUserCommunities).Methods("GET")
+	a.Router.HandleFunc("/users/{addr:0x[a-zA-Z0-9]{16}}/proposals", a.getUserProposals).Methods("GET")
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users", a.createCommunityUser).Methods("POST", "OPTIONS")
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users", a.getCommunityUsers).Methods("GET")
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users/type/{userType:[a-zA-Z]+}", a.getCommunityUsersByType).
