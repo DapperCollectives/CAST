@@ -60,7 +60,7 @@ export default function SubscribeCommunityButton({
     small: { width: 40, height: 40 },
   };
 
-  const containerStyles = sizes[size] ?? { height: 48, maxWidth: 125 };
+  const containerStyles = sizes[size] ?? { height: 48, maxWidth: 48 };
 
   return (
     <div
