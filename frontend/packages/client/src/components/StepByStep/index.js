@@ -1,9 +1,9 @@
 import { cloneElement, useCallback, useRef, useState } from 'react';
 import { Prompt } from 'react-router-dom';
+import { useMediaQuery } from 'hooks';
 import Loader from '../Loader';
 import LeftPanel from './LeftPanel';
-import NextButton from './NexStepButton';
-import SubmitButton from './SubmitButton';
+import NavStepByStep from './NavStepByStep';
 
 function StepByStep({
   finalLabel,
@@ -13,12 +13,12 @@ function StepByStep({
   isSubmitting,
   submittingMessage,
   passNextToComp = false,
-  showActionButtonLeftPanel = false,
   passSubmitToComp = false,
   blockNavigationOut = false,
   blockNavigationText,
-  alignStepsToTop,
+  useControlsOnTopBar = true,
 } = {}) {
+  const notMobile = useMediaQuery();
   const [currentStep, setCurrentStep] = useState(0);
   const [showPreStep, setShowPreStep] = useState(!!preStep);
   const [isStepValid, setStepValid] = useState(false);
@@ -77,8 +77,9 @@ function StepByStep({
     [onSubmit, stepsData]
   );
 
-  const showNextButton = !passNextToComp || showActionButtonLeftPanel;
-  const showSubmitButton = !passSubmitToComp || showActionButtonLeftPanel;
+  const nextAction = currentStep + 1 === steps.length ? 'submit' : 'next';
+
+  const navStepPosition = notMobile ? 'top' : 'bottom';
 
   return (
     <>
@@ -88,7 +89,31 @@ function StepByStep({
           message={() => blockNavigationText ?? 'Leave Page?'}
         />
       )}
-      <section>
+      {useControlsOnTopBar && (
+        <NavStepByStep
+          position={navStepPosition}
+          onClickBack={moveBackStep}
+          isBackButtonEnabled={currentStep - 1 >= 0}
+          onClickNext={moveToNextStep}
+          isStepValid={isStepValid}
+          showSubmitOrNext={nextAction}
+          formId={formId}
+          finalLabel={finalLabel}
+          showPreStep={showPreStep}
+          onSubmit={_onSubmit}
+          isPreviewModeVisible={currentStep > 0}
+          isSubmitting={isSubmitting}
+        />
+      )}
+      <section
+        style={
+          useControlsOnTopBar
+            ? navStepPosition === 'top'
+              ? { paddingTop: '77px' }
+              : { paddingBottom: '77px' }
+            : {}
+        }
+      >
         <div
           style={{
             position: 'fixed',
@@ -103,25 +128,18 @@ function StepByStep({
         <div className="container is-flex is-flex-direction-column-mobile">
           {/* left panel */}
           <LeftPanel
+            showBackButton={!useControlsOnTopBar}
             currentStep={currentStep}
             isSubmitting={isSubmitting}
-            showNextButton={showNextButton}
-            moveToNextStep={moveToNextStep}
             steps={steps}
-            showSubmitButton={showSubmitButton}
-            formId={formId}
-            finalLabel={finalLabel}
             showPreStep={showPreStep}
-            onSubmit={_onSubmit}
-            isStepValid={isStepValid}
             moveBackStep={moveBackStep}
-            alignToTop={alignStepsToTop}
-            name={stepsData?.[0]?.name ?? ''}
+            name={useControlsOnTopBar ? stepsData?.[0]?.name ?? '' : null}
           />
 
           {/* right panel */}
           <div
-            className={`step-by-step-body flex-1 has-background-white px-4-mobile pt-7-mobile is-flex-mobile is-flex-direction-column-mobile`}
+            className={`step-by-step-body flex-1 has-background-white px-4-mobile pt-0-mobile is-flex-mobile is-flex-direction-column-mobile`}
           >
             {isSubmitting && (
               <div
@@ -158,24 +176,6 @@ function StepByStep({
                 ...(showPreStep ? { dismissPreStep } : undefined),
                 ...(useHookForms ? { formId } : undefined),
               })}
-            <div className="is-hidden-tablet">
-              {currentStep < steps.length - 1 && showNextButton && (
-                <NextButton
-                  formId={formId}
-                  moveToNextStep={moveToNextStep}
-                  disabled={!isStepValid}
-                />
-              )}
-              {currentStep === steps.length - 1 && showSubmitButton && (
-                <SubmitButton
-                  formId={formId}
-                  disabled={!isStepValid}
-                  onSubmit={_onSubmit}
-                  label={finalLabel}
-                  isSubmitting={isSubmitting}
-                />
-              )}
-            </div>
           </div>
         </div>
       </section>

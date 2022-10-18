@@ -84,8 +84,8 @@ const StepOne = ({
   return (
     <Form onSubmit={handleSubmit(onSubmit)} formId={formId}>
       <div className="is-flex-direction-column">
-        <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6">
-          <h4 className="title is-5 mb-2">
+        <div className="border-light-tablet rounded-lg columns is-flex-direction-column is-mobile m-0 p-0-mobile p-6 mb-6">
+          <h4 className="title is-4 mb-2">
             Title <span className="has-text-danger">*</span>
           </h4>
           <p className="has-text-grey mb-4">
@@ -101,8 +101,8 @@ const StepOne = ({
             maxLengthSize={NAME_MAX_LENGTH}
           />
         </div>
-        <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6">
-          <h4 className="title is-5 mb-2">
+        <div className="border-light-tablet rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 p-0-mobile mb-6">
+          <h4 className="title is-4 mb-2">
             Description <span className="has-text-danger">*</span>
           </h4>
           <p className="has-text-grey mb-4">
@@ -113,8 +113,8 @@ const StepOne = ({
           </p>
           <Editor name="body" control={control} error={errors['body']} />
         </div>
-        <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6">
-          <h4 className="title is-5 mb-2">Voting Strategy</h4>
+        <div className="border-light-tablet rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 p-0-mobile mb-6">
+          <h4 className="title is-4 mb-2">Voting Strategy</h4>
           <p className="has-text-grey mb-5">
             Select a strategy for how voting power is calculated. Voting
             strategies are set by community admins.
@@ -153,8 +153,8 @@ const StepOne = ({
             </>
           )}
         </div>
-        <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6">
-          <h4 className="title is-5 mb-2">
+        <div className="border-light-tablet rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 p-0-mobile mb-6">
+          <h4 className="title is-4 mb-2">
             Choices <span className="has-text-danger">*</span>
           </h4>
           <p className="has-text-grey mb-4">
