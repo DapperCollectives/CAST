@@ -9,7 +9,7 @@ import { useCommunityDetails } from 'hooks';
 import { kebabToString } from 'utils';
 import { yupResolver } from '@hookform/resolvers/yup';
 import pick from 'lodash/pick';
-import { stepOne } from '../FormConfig';
+import { NAME_MAX_LENGTH, stepOne } from '../FormConfig';
 import ChoiceOptionCreator from './ChoiceOptionCreator';
 
 const StepOne = ({
@@ -66,8 +66,16 @@ const StepOne = ({
   };
 
   const defaultValueStrategy = useWatch({ control, name: 'strategy' });
+  const communityName = useWatch({ control, name: 'name' });
 
   const { isDirty, isSubmitting, isValid, errors } = formState;
+
+  useEffect(() => {
+    if (communityName && communityName?.length < 128) {
+      onDataChange({ name: communityName });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [communityName]);
 
   useEffect(() => {
     setStepValid((isDirty || isValid) && !isSubmitting);
@@ -89,6 +97,8 @@ const StepOne = ({
             register={register}
             error={errors['name']}
             name="name"
+            currentLength={communityName?.length ?? '0'}
+            maxLengthSize={NAME_MAX_LENGTH}
           />
         </div>
         <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6">

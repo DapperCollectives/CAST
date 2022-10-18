@@ -3,12 +3,14 @@ import yup from 'helpers/validation';
 const formFieldsStepOne = ['name', 'strategy', 'body', 'choices', 'tabOption'];
 const formFieldsStepTwo = ['startDate', 'endDate', 'startTime', 'endTime'];
 
+const NAME_MAX_LENGTH = 128;
+
 const StepOneSchema = yup.object().shape({
   name: yup
     .string()
     .trim()
     .required('Please enter a proposal title')
-    .max(150, 'The maximum length for title is 128 characters'),
+    .max(NAME_MAX_LENGTH, 'The maximum length for title is 128 characters'),
   strategy: yup.string().required('Please select a strategy'),
   body: yup.string().required('Please enter a proposal description'),
   tabOption: yup.string().oneOf(['text-based', 'visual']),
@@ -73,4 +75,4 @@ const stepTwo = {
   formFields: formFieldsStepTwo,
 };
 
-export { stepOne, stepTwo };
+export { stepOne, stepTwo, NAME_MAX_LENGTH };

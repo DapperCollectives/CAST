@@ -16,6 +16,7 @@ const ProposalInformation = ({
   startTime = '',
   endTime = '',
   proposalId = '',
+  proposalChoices = [],
   computedStatus,
   communityId,
   proposalStrategy,
@@ -152,6 +153,7 @@ const ProposalInformation = ({
       >
         <div className="mb-5">
           <ResultsPanel
+            proposalChoices={proposalChoices}
             results={votingResults?.results}
             endTime={endTime}
             startTime={startTime}
