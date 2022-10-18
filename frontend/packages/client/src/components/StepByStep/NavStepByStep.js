@@ -1,3 +1,4 @@
+import { Svg } from '@cast/shared-components';
 import NavButton from './NavButton';
 
 const PossitionWrapper = ({
@@ -42,6 +43,7 @@ export default function NavStepByStep({
   formId,
   finalLabel,
   onClickPreview = () => {},
+  previewMode,
   onSubmit,
   isSubmitting,
   isPreviewModeVisible,
@@ -78,7 +80,16 @@ export default function NavStepByStep({
                   disabled={isSubmitting}
                   onClick={onClickPreview}
                   classNames="vote-button transition-all mr-3"
-                  text="Preview"
+                  text={
+                    previewMode ? (
+                      <div className="is-flex is-align-items-center">
+                        <span className="mr-3">Close Preview</span>
+                        <Svg name="Close" width="14" height="14" />
+                      </div>
+                    ) : (
+                      'Preview'
+                    )
+                  }
                 />
               )
             }
