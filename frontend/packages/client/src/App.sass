@@ -106,7 +106,7 @@ $popover-max-width: 20rem
 .App, #root
 	height: 100%
 .Body
-	padding-top: calc($navbar-height + 2.33rem)
+	padding-top: calc($navbar-height + 1.78rem)
 	height: 100%
 @include mobile
 	.Body
@@ -120,6 +120,8 @@ code
 	background: transparent
 .divider
 	border-bottom: 1px solid $grey-light
+.divider-top
+	border-top: 1px solid $grey-light
 .rounded
 	border-radius: 16px
 .rounded-sm
@@ -144,6 +146,9 @@ code
 	border-radius: 50%
 .border-light
 	border: 1px solid $grey-lighter
+@include tablet	
+	.border-light-tablet
+		border: 1px solid $grey-lighter
 .border-grey
 	border: 1px solid $grey
 .border-dashed-dark
@@ -177,8 +182,8 @@ code
 .cursor-pointer
 	cursor: pointer
 .header-spacing
-	padding-bottom: 1rem
-	padding-top: 1rem
+	padding-bottom: 0.75rem
+	padding-top: 0.75rem
 .message-container, .communities
 	margin-bottom: 2.5rem
 @include mobile
