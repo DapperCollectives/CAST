@@ -156,6 +156,43 @@ func TestGetUserCommunities(t *testing.T) {
 	assert.Equal(t, "admin,author,member", strings.Join(roles, ","))
 }
 
+func TestGetUserProposals(t *testing.T) {
+	clearTable("communities")
+	clearTable("community_users")
+
+	argsOne := map[string]string{"user": "account", "type": "dao"}
+	argsTwo := map[string]string{"user": "account", "type": "protocol"}
+	argsThree := map[string]string{"user": "account", "type": "creator"}
+
+	communityArgs := []map[string]string{argsOne, argsTwo, argsThree}
+
+	for _, args := range communityArgs {
+		communityID := 1
+		communityStruct := otu.GenerateCommunityStruct(args["user"], args["type"])
+		communityPayload := otu.GenerateCommunityPayload(args["user"], communityStruct)
+
+		response := otu.CreateCommunityAPI(communityPayload)
+		checkResponseCode(t, http.StatusCreated, response.Code)
+
+		proposal := otu.GenerateProposalStruct("account", communityID)
+		proposalPayload := otu.GenerateProposalPayload("account", proposal)
+
+		response = otu.CreateProposalAPI(proposalPayload)
+		checkResponseCode(t, http.StatusCreated, response.Code)
+		communityID += 1
+	}
+
+	response := otu.GetCommunityUserProposalsAPI(utils.AdminAddr) //Get proposals for user
+	checkResponseCode(t, http.StatusOK, response.Code)
+
+	var p test_utils.PaginatedResponseWithProposal
+
+	assert.Equal(t, 1, p.Data[0].Community_id)
+	assert.Equal(t, 2, p.Data[1].Community_id)
+	assert.Equal(t, 3, p.Data[2].Community_id)
+	assert.NotNil(t, p.Data[0].Proposal_name)
+}
+
 func TestDeleteUserFromCommunity(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")
