@@ -500,7 +500,7 @@ func TestCanUserCreateProposalForCommunityOnlyAuthors(t *testing.T) {
 	var contractType = "ft"
 
 	// Create Community
-	communityStruct := otu.GenerateCommunityStruct("account")
+	communityStruct := otu.GenerateCommunityStruct("account", "dao")
 	communityStruct.Only_authors_to_submit = &_true
 	communityStruct.Contract_type = &contractType
 	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
@@ -582,7 +582,7 @@ func TestCanUserCreateProposalForCommunityTokenThreshold(t *testing.T) {
 	var _false = false
 
 	// Create Community
-	communityStruct := otu.GenerateCommunityStruct("account")
+	communityStruct := otu.GenerateCommunityStruct("account", "dao")
 	communityStruct.Only_authors_to_submit = &_false
 	threshold := "10"
 	contractName := "FlowToken"
