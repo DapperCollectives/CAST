@@ -32,6 +32,14 @@ type PaginatedResponseWithCommunity struct {
 	Next         int                `json:"next"`
 }
 
+type PaginatedResponseWithProposal struct {
+	Data         []models.Proposal `json:"data"`
+	Start        int               `json:"start"`
+	Count        int               `json:"count"`
+	TotalRecords int               `json:"totalRecords"`
+	Next         int               `json:"next"`
+}
+
 type PaginatedResponseWithUserCommunity struct {
 	Data         []models.UserCommunity `json:"data"`
 	Start        int                    `json:"start"`
@@ -240,7 +248,6 @@ func (otu *OverflowTestUtils) GenerateCommunityPayload(signer string, payload *m
 	signingAddr := fmt.Sprintf("0x%s", account.Address().String())
 	timestamp := fmt.Sprint(time.Now().UnixNano() / int64(time.Millisecond))
 	compositeSignatures := otu.GenerateCompositeSignatures(signer, timestamp)
-	threshold := "0"
 
 	payload.Timestamp = timestamp
 	payload.Composite_signatures = compositeSignatures
@@ -248,7 +255,6 @@ func (otu *OverflowTestUtils) GenerateCommunityPayload(signer string, payload *m
 	if payload.Strategies == nil {
 		payload.Strategies = &strategies
 	}
-	payload.Proposal_threshold = &threshold
 
 	return payload
 }
@@ -342,17 +348,27 @@ func (otu *OverflowTestUtils) GetCommunitiesForHomepageAPI() *httptest.ResponseR
 	return response
 }
 
-func (otu *OverflowTestUtils) GetSearchCommunitiesAPI(filters []string, text string, count *int) *httptest.ResponseRecorder {
+func (otu *OverflowTestUtils) GetSearchCommunitiesAPI(
+	filters []string,
+	text string,
+	count, start *int,
+) *httptest.ResponseRecorder {
 	searchUrl := "/communities/search"
 	filterStr := ""
 	textStr := ""
 	countStr := ""
+	startStr := ""
 
 	if len(filters) > 0 {
 		filterStr = fmt.Sprintf("filters=%s", url.QueryEscape(strings.Join(filters, ",")))
 	}
+
+	//@TODO: change this to switch
 	if text != "" {
 		textStr = fmt.Sprintf("text=%s", url.QueryEscape(text))
+	}
+	if start != nil {
+		startStr = fmt.Sprintf("start=%d", *start)
 	}
 	if count != nil {
 		countStr = fmt.Sprintf("count=%d", *count)
@@ -369,6 +385,14 @@ func (otu *OverflowTestUtils) GetSearchCommunitiesAPI(filters []string, text str
 			queryStr = textStr
 		}
 	}
+	if startStr != "" {
+		if queryStr != "" {
+			queryStr = fmt.Sprintf("%s&%s", queryStr, startStr)
+		} else {
+			queryStr = startStr
+		}
+	}
+
 	if countStr != "" {
 		if queryStr != "" {
 			queryStr = fmt.Sprintf("%s&%s", queryStr, countStr)
@@ -376,7 +400,6 @@ func (otu *OverflowTestUtils) GetSearchCommunitiesAPI(filters []string, text str
 			queryStr = countStr
 		}
 	}
-
 	if queryStr != "" {
 		searchUrl = fmt.Sprintf("%s?%s", searchUrl, queryStr)
 	}

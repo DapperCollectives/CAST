@@ -12,13 +12,13 @@ const StepThree = ({ stepsData, setStepValid }) => {
   }, [setPreviewValid]);
 
   const proposal = {
-    endTime: parseDateToServer(stepsData[1].endDate, stepsData[1].endTime),
+    endTime: parseDateToServer(stepsData[2].endDate, stepsData[2].endTime),
     startTime: parseDateToServer(
-      stepsData[1].startDate,
-      stepsData[1].startTime
+      stepsData[2].startDate,
+      stepsData[2].startTime
     ),
     winCount: 0,
-    choices: stepsData[0]?.choices
+    choices: stepsData[1]?.choices
       ?.sort((a, b) => (a.value > b.value ? 1 : -1))
       .map((choice) => ({
         ...choice,

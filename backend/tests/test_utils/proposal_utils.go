@@ -43,6 +43,12 @@ func (otu *OverflowTestUtils) GetProposalsForCommunityAPI(communityId int) *http
 	return response
 }
 
+func (otu *OverflowTestUtils) GetProposalsForCommunityQueryParamsAPI(communityId int, qp string) *httptest.ResponseRecorder {
+	req, _ := http.NewRequest("GET", "/communities/"+strconv.Itoa(communityId)+"/proposals?"+qp, nil)
+	response := otu.ExecuteRequest(req)
+	return response
+}
+
 func (otu *OverflowTestUtils) GetProposalByIdAPI(communityId int, proposalId int) *httptest.ResponseRecorder {
 	req, _ := http.NewRequest("GET", "/communities/"+strconv.Itoa(communityId)+"/proposals/"+strconv.Itoa(proposalId), nil)
 	response := otu.ExecuteRequest(req)
@@ -125,6 +131,80 @@ func (otu *OverflowTestUtils) GenerateProposalPayload(signer string, proposal *m
 	proposal.Composite_signatures = compositeSignatures
 
 	return proposal
+}
+
+func (otu *OverflowTestUtils) CreatePendingProposal(authorName string, communityId int) *models.Proposal {
+	proposalStruct := otu.GenerateProposalStruct(authorName, communityId)
+	payload := otu.GenerateProposalPayload(authorName, proposalStruct)
+	response := otu.CreateProposalAPI(payload)
+
+	var p models.Proposal
+	json.Unmarshal(response.Body.Bytes(), &p)
+
+	// Get proposal
+	response = otu.GetProposalByIdAPI(communityId, p.ID)
+	json.Unmarshal(response.Body.Bytes(), &p)
+
+	return &p
+}
+
+func (otu *OverflowTestUtils) CreateActiveProposal(authorName string, communityId int) *models.Proposal {
+	proposalStruct := otu.GenerateProposalStruct(authorName, communityId)
+	payload := otu.GenerateProposalPayload(authorName, proposalStruct)
+	response := otu.CreateProposalAPI(payload)
+
+	var p models.Proposal
+	json.Unmarshal(response.Body.Bytes(), &p)
+
+	// Update startime so proposal will be active
+	otu.UpdateProposalStartTime(p.ID, time.Now().UTC())
+
+	// Get proposal
+	response = otu.GetProposalByIdAPI(communityId, p.ID)
+	json.Unmarshal(response.Body.Bytes(), &p)
+
+	// assert.Equal(otu.T, "active", *p.Computed_status)
+	return &p
+}
+
+func (otu *OverflowTestUtils) CreateCancelledProposal(authorName string, communityId int) *models.Proposal {
+	proposalStruct := otu.GenerateProposalStruct(authorName, communityId)
+	payload := otu.GenerateProposalPayload(authorName, proposalStruct)
+	response := otu.CreateProposalAPI(payload)
+
+	var p models.Proposal
+	json.Unmarshal(response.Body.Bytes(), &p)
+
+	// Cancel the proposal
+	cancelPayload := otu.GenerateCancelProposalStruct(authorName, p.ID)
+	otu.UpdateProposalAPI(p.ID, cancelPayload)
+
+	// Get proposal
+	response = otu.GetProposalByIdAPI(communityId, p.ID)
+	json.Unmarshal(response.Body.Bytes(), &p)
+
+	// assert.Equal(otu.T, "cancelled", *p.Computed_status)
+	return &p
+}
+
+func (otu *OverflowTestUtils) CreateClosedProposal(authorName string, communityId int) *models.Proposal {
+	proposalStruct := otu.GenerateProposalStruct(authorName, communityId)
+	payload := otu.GenerateProposalPayload(authorName, proposalStruct)
+	response := otu.CreateProposalAPI(payload)
+
+	var p models.Proposal
+	json.Unmarshal(response.Body.Bytes(), &p)
+
+	// Close the proposal
+	otu.UpdateProposalStartTime(p.ID, time.Now().UTC())
+	otu.UpdateProposalEndTime(p.ID, time.Now().UTC())
+
+	// Get proposal
+	response = otu.GetProposalByIdAPI(communityId, p.ID)
+	json.Unmarshal(response.Body.Bytes(), &p)
+
+	// assert.Equal(otu.T, "closed", *p.Computed_status)
+	return &p
 }
 
 // func GenerateInvalidSignatureProposalPayload(communityId int) []byte {

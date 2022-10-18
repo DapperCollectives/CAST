@@ -7,7 +7,6 @@ import {
 } from 'react';
 import { WalletConnectModal } from 'components';
 import { useFclUser } from 'hooks';
-import { IS_LOCAL_DEV } from 'const';
 import { getCompositeSigs } from 'utils';
 import * as fcl from '@onflow/fcl';
 import * as t from '@onflow/types';
@@ -88,49 +87,9 @@ export function Web3Provider({ children, network = 'testnet', ...props }) {
 
   // filter services for now only blocto
   useEffect(() => {
-    if (!IS_LOCAL_DEV) {
-      fcl.discovery.authn.subscribe((res) => {
-        setServices(res.results);
-      });
-    } else {
-      // hard code service for local dev wallet
-      // this setting will enable to show blocto to connect
-      setServices([
-        {
-          f_type: 'Service',
-          f_vsn: '1.0.0',
-          method: 'EXT/RPC',
-          provider: {
-            icon: 'https://raw.githubusercontent.com/Outblock/Lilico-Web/main/asset/logo-dis.png',
-            name: 'Lilico',
-          },
-          type: 'authn',
-          uid: 'Lilico',
-        },
-        {
-          f_type: 'Service',
-          f_vsn: '1.0.0',
-          type: 'authn',
-          method: 'IFRAME/RPC',
-          uid: 'blocto#authn',
-          provider: {
-            name: 'Blocto',
-            icon: '/images/blocto.png',
-          },
-        },
-        {
-          f_type: 'Service',
-          f_vsn: '1.0.0',
-          type: 'authn',
-          method: 'POP/RPC',
-          uid: 'dapper-wallet#authn',
-          provider: {
-            name: 'Dapper Wallet',
-            icon: '/images/dapper.svg',
-          },
-        },
-      ]);
-    }
+    fcl.discovery.authn.subscribe((res) => {
+      setServices(res.results);
+    });
   }, []);
 
   const setWebContextConfig = useCallback((config) => {

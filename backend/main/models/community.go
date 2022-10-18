@@ -6,6 +6,7 @@ package models
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/DapperCollectives/CAST/backend/main/shared"
@@ -35,6 +36,8 @@ type Community struct {
 	Proposal_threshold       *string     `json:"proposalThreshold,omitempty"`
 	Slug                     *string     `json:"slug,omitempty"                  validate:"required"`
 	Is_featured              *bool       `json:"isFeatured,omitempty"`
+
+	Total *int `json:"total,omitempty"` // for search only
 
 	Contract_name *string `json:"contractName,omitempty"`
 	Contract_addr *string `json:"contractAddr,omitempty"`
@@ -86,6 +89,16 @@ type UpdateCommunityRequestPayload struct {
 	s.TimestampSignaturePayload
 }
 
+type CanUserCreateProposalResponse struct {
+	shared.Contract
+	Balance                *float64 `json:"balance,omitempty"`
+	Only_authors_to_submit bool     `json:"onlyAuthorsToSubmit"`
+	IsAuthor               bool     `json:"isAuthor"`
+	HasPermission          bool     `json:"hasPermission"`
+	Reason                 string   `json:"reason,omitempty"`
+	Error                  error    `json:"error,omitempty"`
+}
+
 type Strategy struct {
 	Name            *string `json:"name,omitempty"`
 	shared.Contract `json:"contract,omitempty"`
@@ -114,12 +127,6 @@ const HOMEPAGE_SQL = `
   	))
 		OR is_featured = 'true'
 		LIMIT $1 OFFSET $2
-`
-const DEFAULT_SEARCH_SQL = `
-	SELECT id, name, body, logo, category
-		FROM communities
-    WHERE is_featured = 'true'
-		AND category IS NOT NULL
 `
 const INSERT_COMMUNITY_SQL = `
 	INSERT INTO communities(
@@ -177,28 +184,6 @@ const UPDATE_COMMUNITY_SQL = `
 	only_authors_to_submit = COALESCE($20, only_authors_to_submit)
 	WHERE id = $21
 `
-const SEARCH_COMMUNITIES_SQL = `
-	SELECT id, name, body, logo, category
-	FROM communities 
-	WHERE SIMILARITY(name, $1) > 0.1
-		AND category IS NOT NULL
-`
-
-const COUNT_CATEGORIES_DEFAULT_SQL = `
-	SELECT category, COUNT(*) as category_count
-	FROM communities 
-	WHERE is_featured = 'true'
-		AND category IS NOT NULL
-	GROUP BY category
-`
-
-const COUNT_CATEGORIES_SEARCH_SQL = `
-	SELECT category, COUNT(*) as category_count
-	FROM communities 
-	WHERE SIMILARITY(name, $1) > 0.1
-		AND category IS NOT NULL
-	GROUP BY category
-`
 
 func GetCommunityTypes(db *s.Database) ([]*CommunityType, error) {
 	var communityTypes []*CommunityType
@@ -249,65 +234,35 @@ func (c *Community) GetCommunityByProposalId(db *s.Database, proposalId int) err
 		proposalId)
 }
 
-func GetDefaultCommunities(db *s.Database, params shared.PageParams, filters []string, isSearch bool) ([]*Community, int, error) {
-	var sql string
-
+func GetHomePageCommunities(db *s.Database, pageParams shared.PageParams) ([]*Community, int, error) {
 	var totalRecords int
-	countSql := `SELECT COUNT(*) FROM communities`
-	db.Conn.QueryRow(db.Context, countSql).Scan(&totalRecords)
+	countSql := `SELECT COUNT(*) FROM communities `
 
-	if !isSearch {
-		sql = HOMEPAGE_SQL
+	sql := HOMEPAGE_SQL
+	var communities []*Community
 
-		var communities []*Community
+	err := pgxscan.Select(
+		db.Context,
+		db.Conn,
+		&communities,
+		sql,
+		pageParams.Count,
+		pageParams.Start,
+	)
 
-		err := pgxscan.Select(
-			db.Context,
-			db.Conn,
-			&communities,
-			sql,
-			params.Count,
-			params.Start,
-		)
-
-		// If we get pgx.ErrNoRows, just return an empty array
-		// and obfuscate error
-		if err != nil && err.Error() != pgx.ErrNoRows.Error() {
-			return nil, 0, err
-		} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
-			return []*Community{}, 0, nil
-		}
-
-		return communities, totalRecords, nil
-	} else {
-		sql, err := addFiltersToSql(DEFAULT_SEARCH_SQL, "", filters)
-		if err != nil {
-			return nil, 0, err
-		}
-
-		rows, err := db.Conn.Query(
-			db.Context,
-			sql,
-			params.Count,
-			params.Start,
-		)
-		if err != nil {
-			return nil, 0, err
-		}
-
-		defer rows.Close()
-
-		communities, err := scanSearchResults(rows)
-		if err != nil {
-			return nil, 0, err
-		}
-
-		return communities, totalRecords, nil
+	// If we get pgx.ErrNoRows, just return an empty array
+	// and obfuscate error
+	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
+		return nil, 0, err
+	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
+		return []*Community{}, 0, nil
 	}
+
+	db.Conn.QueryRow(db.Context, countSql).Scan(&totalRecords)
+	return communities, totalRecords, nil
 }
 
 func (c *Community) CreateCommunity(db *s.Database) error {
-
 	err := db.Conn.QueryRow(db.Context,
 		INSERT_COMMUNITY_SQL,
 		c.Name,
@@ -335,6 +290,7 @@ func (c *Community) CreateCommunity(db *s.Database) error {
 		c.Only_authors_to_submit,
 		c.Voucher).
 		Scan(&c.ID, &c.Created_at)
+
 	return err
 }
 
@@ -377,6 +333,63 @@ func (c *Community) CanUpdateCommunity(db *s.Database, addr string) error {
 	return nil
 }
 
+func (c *Community) CanUserCreateProposal(db *s.Database, fa *s.FlowAdapter, address string) CanUserCreateProposalResponse {
+	response := CanUserCreateProposalResponse{}
+	response.Only_authors_to_submit = *c.Only_authors_to_submit
+	response.HasPermission = false // false by default
+
+	// Check if user is an author
+	if err := EnsureRoleForCommunity(db, address, c.ID, "author"); err != nil {
+		response.IsAuthor = false
+	} else { // return successfully if user is an author, regardless of Only_authors_to_submit
+		response.IsAuthor = true
+		response.HasPermission = true
+		return response
+	}
+
+	// If only authors can submit and user is not an author
+	if *c.Only_authors_to_submit && !response.IsAuthor {
+		response.Reason = fmt.Sprintf("Account %s is not an author for community %d.", address, c.ID)
+		response.HasPermission = false
+		return response
+	}
+
+	// If we can use token threshold
+	if !*c.Only_authors_to_submit {
+		threshold, err := strconv.ParseFloat(*c.Proposal_threshold, 64)
+		if err != nil {
+			err = fmt.Errorf("invalid proposal threshold for community %d", c.ID)
+			response.Error = err
+			return response
+		}
+
+		// Get Contract
+		contract := shared.Contract{
+			Name:        c.Contract_name,
+			Addr:        c.Contract_addr,
+			Public_path: c.Public_path,
+			Threshold:   &threshold,
+		}
+		response.Contract = contract
+
+		// Get balance if community has proposal threshold rule
+		balance, _ := fa.GetBalanceOfTokens(address, &contract, *c.Contract_type)
+		response.Balance = balance
+
+		//check if balance is greater than threshold
+		if *balance < threshold {
+			reason := "Insufficient token balance to create proposal."
+			response.Reason = reason
+			return response
+		} else {
+			response.HasPermission = true
+			return response
+		}
+	}
+
+	return response
+}
+
 func (c *Community) GetStrategy(name string) (Strategy, error) {
 	for _, s := range *c.Strategies {
 		if *s.Name == name {
@@ -384,120 +397,6 @@ func (c *Community) GetStrategy(name string) (Strategy, error) {
 		}
 	}
 	return Strategy{}, fmt.Errorf("Strategy %s does not exist on community", name)
-}
-
-func SearchForCommunity(db *s.Database, query string, filters []string, params shared.PageParams) ([]*Community, int, error) {
-	sql, err := addFiltersToSql(SEARCH_COMMUNITIES_SQL, query, filters)
-	if err != nil {
-		return nil, 0, err
-	}
-	
-	rows, err := db.Conn.Query(
-		db.Context,
-		sql,
-		query,
-		params.Count,
-		params.Start,
-	)
-
-	if err != nil {
-		return []*Community{}, 0, fmt.Errorf("error searching for a community with the the query %s", query)
-	}
-
-	defer rows.Close()
-
-	communities, err := scanSearchResults(rows)
-	if err != nil {
-		return []*Community{}, 0, fmt.Errorf("error scanning search results for the query %s", query)
-	}
-
-	// Get total number of communities
-	var totalRecords int
-	countSql := `SELECT COUNT(*) FROM communities`
-	_ = db.Conn.QueryRow(db.Context, countSql).Scan(&totalRecords)
-
-	return communities, totalRecords, nil
-}
-
-func GetCategoryCount(db *s.Database, search string) (map[string]int, error) {
-	var rows pgx.Rows
-	var err error
-
-	if search == "" {
-		rows, err = db.Conn.Query(
-			db.Context,
-			COUNT_CATEGORIES_DEFAULT_SQL,
-		)
-	} else {
-		rows, err = db.Conn.Query(
-			db.Context,
-			COUNT_CATEGORIES_SEARCH_SQL,
-			search,
-		)
-	}
-
-	// If we get pgx.ErrNoRows, just return an empty array
-	// and obfuscate error
-	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
-		return nil, err
-	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
-		return make(map[string]int), nil
-	}
-
-	defer rows.Close()
-
-	categoryCount := make(map[string]int)
-	for rows.Next() {
-		results := struct{
-			Category string
-			Count int
-		}{}
-		err := rows.Scan(&results.Category, &results.Count)
-		if err != nil {
-			return make(map[string]int), fmt.Errorf("error scanning community row: %v", err)
-		}
-		categoryCount[results.Category] = results.Count
-	}
-
-	return categoryCount, nil
-}
-
-func addFiltersToSql(query, search string, filters []string) (string, error) {
-	var sql string
-	if filters[0] != "" {
-		sql = query + " AND ("
-		for i, filter := range filters {
-			if i == 0 {
-				sql += fmt.Sprintf("category = '%s'", filter)
-			} else {
-				sql += fmt.Sprintf(" OR category = '%s'", filter)
-			}
-		}
-		sql += ")"
-	} else {
-		sql = query
-	}
-
-	if search != "" {
-		sql = sql + " LIMIT $2 OFFSET $3"
-	} else {
-		sql = sql + " LIMIT $1 OFFSET $2"
-	}
-
-	return sql, nil
-}
-
-func scanSearchResults(rows pgx.Rows) ([]*Community, error) {
-	var communities []*Community
-	for rows.Next() {
-		var c Community
-		err := rows.Scan(&c.ID, &c.Name, &c.Body, &c.Logo, &c.Category)
-		if err != nil {
-			return communities, fmt.Errorf("error scanning community row: %v", err)
-		}
-		communities = append(communities, &c)
-	}
-	return communities, nil
 }
 
 func MatchStrategyByProposal(s []Strategy, strategyToMatch string) (Strategy, error) {
