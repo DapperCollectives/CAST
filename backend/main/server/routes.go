@@ -42,6 +42,7 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/community-categories", a.getCommunityCategories).Methods("GET")
 	// Users
 	a.Router.HandleFunc("/users/{addr:0x[a-zA-Z0-9]{16}}/communities", a.getUserCommunities).Methods("GET")
+	a.Router.HandleFunc("/users/{addr:0x[a-zA-Z0-9]{16}}/proposals", a.getUserProposals).Methods("GET")
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users", a.createCommunityUser).Methods("POST", "OPTIONS")
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users", a.getCommunityUsers).Methods("GET")
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users/type/{userType:[a-zA-Z]+}", a.getCommunityUsersByType).
@@ -49,13 +50,12 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users/{addr:0x[a-zA-Z0-9]{16}}/{userType:[a-zA-Z]+}", a.removeUserRole).
 		Methods("DELETE", "OPTIONS")
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/leaderboard", a.getCommunityLeaderboard).Methods("GET")
+	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/can-user-create-proposal/{addr:0x[a-zA-Z0-9]+}", a.canUserCreateProposal).Methods("GET")
 	// Utilities
 	a.Router.HandleFunc("/accounts/admin", a.getAdminList).Methods("GET")
 	a.Router.HandleFunc("/accounts/blocklist", a.getCommunityBlocklist).Methods("GET")
-	a.Router.HandleFunc("/accounts/{addr:0x[a-zA-Z0-9]{16}}/{blockHeight:[0-9]+}", a.getAccountAtBlockHeight).Methods("GET")
 
 	// Snapshotter
-	a.Router.HandleFunc("/latest-snapshot", a.getLatestSnapshot).Methods("GET")
-	a.Router.HandleFunc("/add-fungible-token", a.addFungibleToken).Methods("POST", "OPTIONS")
+	a.Router.HandleFunc("/get-token-balance-at-blockheight", a.getBalanceAtBlockheight).Methods("POST", "OPTIONS")
 
 }

@@ -63,10 +63,22 @@ func (otu *OverflowTestUtils) GetUserCommunitiesAPI(addr string) *httptest.Respo
 	return response
 }
 
+func (otu *OverflowTestUtils) GetCommunityUserProposalsAPI(addr string) *httptest.ResponseRecorder {
+	req, _ := http.NewRequest("GET", "/users/"+addr+"/proposals", nil)
+	response := otu.ExecuteRequest(req)
+	return response
+}
+
 func (otu *OverflowTestUtils) DeleteUserFromCommunityAPI(id int, addr string, userType string, payload *models.CommunityUserPayload) *httptest.ResponseRecorder {
 	json, _ := json.Marshal(payload)
 	req, _ := http.NewRequest("DELETE", "/communities/"+strconv.Itoa(id)+"/users/"+addr+"/"+userType, bytes.NewBuffer(json))
 	req.Header.Set("Content-Type", "application/json")
+	response := otu.ExecuteRequest(req)
+	return response
+}
+
+func (otu *OverflowTestUtils) GetCanUserCreateProposalAPI(id int, addr string) *httptest.ResponseRecorder {
+	req, _ := http.NewRequest("GET", "/communities/"+strconv.Itoa(id)+"/can-user-create-proposal/"+addr, nil)
 	response := otu.ExecuteRequest(req)
 	return response
 }

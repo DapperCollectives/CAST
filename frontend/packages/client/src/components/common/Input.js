@@ -10,18 +10,37 @@ export default function Input({
   error,
   type = 'text',
   conatinerClassNames = '',
+  currentLength,
+  maxLengthSize,
 } = {}) {
+  const showCharCount = Boolean(currentLength && maxLengthSize);
   return (
     <div
       className={`is-flex is-flex-direction-column flex-1 ${conatinerClassNames}`.trim()}
+      style={showCharCount ? { position: 'relative' } : {}}
     >
       <input
         type={type}
         style={{ width: '100%', ...style }}
         placeholder={placeholder}
-        className={classNames}
+        className={showCharCount ? `${classNames} pr-7` : classNames}
         {...register(name, { disabled })}
       />
+      {showCharCount && (
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            alignContent: 'center',
+            position: 'absolute',
+            right: 12,
+            top: 11,
+          }}
+          className="small-text has-text-grey"
+        >
+          {currentLength ?? 0}/{maxLengthSize}
+        </div>
+      )}
       {error && (
         <FadeIn>
           <div className="pl-1 mt-2">

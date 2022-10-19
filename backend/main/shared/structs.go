@@ -65,8 +65,17 @@ type TimestampSignaturePayload struct {
 
 // used in models/proposal.go
 type Choice struct {
+	ID             *uint   `json:"id,omitempty"`
 	Choice_text    string  `json:"choiceText"`
 	Choice_img_url *string `json:"choiceImgUrl"`
+}
+
+type UserProposal struct {
+	Community_id   int       `json:"communityId"`
+	Community_name string    `json:"communityName"`
+	Proposal_name  string    `json:"proposalName"`
+	Start_time     time.Time `json:"startTime"`
+	Status         string    `json:"status"`
 }
 
 type MintParams struct {
@@ -104,7 +113,7 @@ type CustomScript struct {
 }
 
 func (b *FTBalanceResponse) NewFTBalance() {
-	if os.Getenv("APP_ENV") == "TEST" || os.Getenv("APP_ENV") == "DEV" {
+	if os.Getenv("FLOW_ENV") == "emulator" {
 		b.PrimaryAccountBalance = 11100000
 		b.SecondaryAccountBalance = 12300000
 		b.StakingBalance = 13500000

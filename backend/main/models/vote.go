@@ -1,7 +1,6 @@
 package models
 
 import (
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"strconv"
@@ -20,7 +19,7 @@ type Vote struct {
 	ID                   int                     `json:"id,omitempty"`
 	Proposal_id          int                     `json:"proposalId"`
 	Addr                 string                  `json:"addr"                validate:"required"`
-	Choice               string                  `json:"choice"              validate:"required"`
+	Choices              []string                `json:"choices"              validate:"required"`
 	Composite_signatures *[]s.CompositeSignature `json:"compositeSignatures" validate:"required"`
 	Created_at           time.Time               `json:"createdAt,omitempty"`
 	Cid                  *string                 `json:"cid"`
@@ -275,16 +274,16 @@ func ValidateVoteMessage(message string, proposal Proposal) error {
 	vars := strings.Split(message, ":")
 
 	// check proposal choices to see if choice is valid
-	encodedChoice := vars[1]
-	choiceBytes, err := hex.DecodeString(encodedChoice)
+	voteChoiceString := vars[1]
+	voteChoiceId, err := strconv.Atoi(voteChoiceString)
 
 	if err != nil {
-		return errors.New("couldnt decode choice in message from hex string")
+		return errors.New("couldn't convert choice ID in message from string to int")
 	}
 
 	validChoice := false
 	for _, choice := range proposal.Choices {
-		if choice.Choice_text == string(choiceBytes) {
+		if *choice.ID == uint(voteChoiceId) {
 			validChoice = true
 			break
 		}
@@ -306,8 +305,16 @@ func ValidateVoteMessage(message string, proposal Proposal) error {
 
 func (v *Vote) ValidateChoice(proposal Proposal) error {
 	validChoice := false
+
+	voteChoiceString := v.Choices[0]
+	voteChoiceId, err := strconv.Atoi(voteChoiceString)
+
+	if err != nil {
+		return errors.New("couldn't convert choice ID from string to int")
+	}
+
 	for _, choice := range proposal.Choices {
-		if choice.Choice_text == v.Choice {
+		if *choice.ID == uint(voteChoiceId) {
 			validChoice = true
 			break
 		}
@@ -382,10 +389,10 @@ func createVote(db *s.Database, v *Vote) error {
 	// Create Vote
 	err := db.Conn.QueryRow(db.Context,
 		`
-			INSERT INTO votes(proposal_id, addr, choice, composite_signatures, cid, message)
+			INSERT INTO votes(proposal_id, addr, choices, composite_signatures, cid, message)
 			VALUES($1, $2, $3, $4, $5, $6)
 			RETURNING id, created_at
-		`, v.Proposal_id, v.Addr, v.Choice, v.Composite_signatures, v.Cid, v.Message).Scan(&v.ID, &v.Created_at)
+		`, v.Proposal_id, v.Addr, v.Choices, v.Composite_signatures, v.Cid, v.Message).Scan(&v.ID, &v.Created_at)
 
 	return err
 }
@@ -420,7 +427,7 @@ func AddWinningVoteAchievement(db *s.Database, votes []*VoteWithBalance, p Propo
 		}
 	}
 	for _, v := range votes {
-		if v.Choice == winningChoice {
+		if v.Choices[0] == winningChoice {
 			_, err := db.Conn.Exec(db.Context, `UPDATE votes SET is_winning = 'true' WHERE id = $1`, v.ID)
 			if err != nil {
 				return err
