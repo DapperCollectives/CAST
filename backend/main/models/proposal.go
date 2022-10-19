@@ -183,6 +183,15 @@ func (p *Proposal) CreateDraftProposal(db *s.Database) error {
 
 	return err
 }
+
+func (p *Proposal) DeleteDraftProposal(db *s.Database) error {
+	_, err := db.Conn.Exec(db.Context, `
+	DELETE FROM proposals
+	WHERE id = $1
+	`, p.ID)
+	return err
+}
+
 func (p *Proposal) UpdateProposal(db *s.Database) error {
 	_, err := db.Conn.Exec(db.Context, `
 		UPDATE proposals

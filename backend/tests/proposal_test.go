@@ -336,7 +336,7 @@ func TestGetProposalsByStatus(t *testing.T) {
 	})
 }
 
-func TestCreateDraftProposal(t *testing.T) {
+func TestDraftProposal(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")
 	clearTable("proposals")
@@ -361,8 +361,19 @@ func TestCreateDraftProposal(t *testing.T) {
 		assert.Equal(t, 1, created.ID)
 	})
 
-	t.Run(`A community author should be able to create a draft proposal 
-				with various fields partially filled`, func(t *testing.T) {
+	t.Run("A community author should be able to delete a draft proposal", func(t *testing.T) {
+		proposalStruct := otu.GenerateDraftProposalStruct(authorName, communityId)
+		payload := otu.GenerateProposalPayload(authorName, proposalStruct)
+		response := otu.CreateDraftProposalAPI(payload)
 
+		CheckResponseCode(t, http.StatusCreated, response.Code)
+		var p models.Proposal
+		json.Unmarshal(response.Body.Bytes(), &p)
+
+		response = otu.DeleteDraftProposalAPI(p.ID)
+		CheckResponseCode(t, http.StatusOK, response.Code)
+
+		response = otu.GetDraftProposalAPI(p.ID)
+		CheckResponseCode(t, http.StatusNotFound, response.Code)
 	})
 }

@@ -107,11 +107,19 @@ var (
 		Message:    "Error",
 		Details:    "There was an error creating the vote.",
 	}
+
 	errCreateProposalPermissions = errorResponse{
 		StatusCode: http.StatusForbidden,
 		ErrorCode:  "ERR_1013",
 		Message:    "User is not permitted to create a proposal for this community.",
 		Details:    "",
+	}
+
+	errProposalNotFound = errorResponse{
+		StatusCode: http.StatusNotFound,
+		ErrorCode:  "ERR_1014",
+		Message:    "Proposal Not Found",
+		Details:    "The proposal you are trying to access no longer exists.",
 	}
 
 	nilErr = errorResponse{}
@@ -320,7 +328,7 @@ func (a *App) getProposal(w http.ResponseWriter, r *http.Request) {
 	p, err := helpers.fetchProposal(vars, "id")
 	if err != nil {
 		log.Error().Err(err).Msg("Invalid Proposal ID.")
-		respondWithError(w, errIncompleteRequest)
+		respondWithError(w, errProposalNotFound)
 		return
 	}
 
@@ -332,7 +340,7 @@ func (a *App) getDraftProposal(w http.ResponseWriter, r *http.Request) {
 	p, err := helpers.fetchProposal(vars, "id")
 	if err != nil {
 		log.Error().Err(err).Msg("Invalid Proposal ID.")
-		respondWithError(w, errIncompleteRequest)
+		respondWithError(w, errProposalNotFound)
 		return
 	}
 
@@ -412,6 +420,24 @@ func (a *App) createDraftProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondWithJSON(w, http.StatusCreated, proposal)
+}
+
+func (a *App) deleteDraftProposal(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	p, err := helpers.fetchProposal(vars, "id")
+	if err != nil {
+		log.Error().Err(err).Msg("Invalid Proposal ID.")
+		respondWithError(w, errIncompleteRequest)
+		return
+	}
+
+	if err := p.DeleteDraftProposal(a.DB); err != nil {
+		log.Error().Err(err).Msg("Error deleting draft proposal.")
+		respondWithError(w, errIncompleteRequest)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, p)
 }
 
 func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {

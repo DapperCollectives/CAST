@@ -66,6 +66,11 @@ func (otu *OverflowTestUtils) GetDraftProposalAPI(proposalId int) *httptest.Resp
 	return response
 }
 
+func (otu *OverflowTestUtils) DeleteDraftProposalAPI(proposalId int) *httptest.ResponseRecorder {
+	req, _ := http.NewRequest("DELETE", "/proposals/"+strconv.Itoa(proposalId)+"/draft", nil)
+	return otu.ExecuteRequest(req)
+}
+
 func (otu *OverflowTestUtils) CreateProposalAPI(proposal *models.Proposal) *httptest.ResponseRecorder {
 	json, _ := json.Marshal(proposal)
 	req, _ := http.NewRequest(
