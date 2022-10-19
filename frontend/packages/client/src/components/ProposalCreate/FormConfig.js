@@ -1,7 +1,14 @@
 import yup from 'helpers/validation';
 
 const formFieldsStepOne = ['name', 'body'];
-const formFieldsStepTwo = ['strategy', 'choices', 'tabOption', 'voteType'];
+const formFieldsStepTwo = [
+  'strategy',
+  'choices',
+  'tabOption',
+  'voteType',
+  'maxWeight',
+  'minBalance',
+];
 const formFieldsStepThree = ['startDate', 'endDate', 'startTime', 'endTime'];
 
 const NAME_MAX_LENGTH = 128;

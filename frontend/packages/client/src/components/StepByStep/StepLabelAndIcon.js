@@ -7,6 +7,7 @@ const StepLabelAndIcon = ({
   showPreStep,
   currentStep,
   disableAll,
+  moveToStep,
 }) => {
   const isActiveStep = !showPreStep && stepIdx === currentStep;
   const isDoneStep = !showPreStep && currentStep > stepIdx;
@@ -18,7 +19,8 @@ const StepLabelAndIcon = ({
       'has-background-grey-lighter has-text-weight-bold has-text-black':
         isActiveStep && !disableAll,
     },
-    { 'has-text-grey': isPendingStep || isDoneStep }
+    { 'has-text-grey': isPendingStep || isDoneStep },
+    { 'cursor-pointer': isDoneStep }
   );
 
   const statusText = {
@@ -33,7 +35,11 @@ const StepLabelAndIcon = ({
     ];
 
   return (
-    <div className={stepClasses} key={stepIdx}>
+    <div
+      className={stepClasses}
+      key={stepIdx}
+      onClick={isDoneStep ? () => moveToStep(stepIdx) : () => {}}
+    >
       <StepNumber stepIdx={stepIdx} status={status} />
       {stepLabel ? <span className="ml-4">{stepLabel}</span> : null}
     </div>
