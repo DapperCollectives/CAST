@@ -17,9 +17,11 @@ function StepByStep({
   blockNavigationOut = false,
   blockNavigationText,
   useControlsOnTopBar = true,
+  previewComponent,
 } = {}) {
   const notMobile = useMediaQuery();
   const [currentStep, setCurrentStep] = useState(0);
+  const [previewMode, setPreviewMode] = useState(false);
   const [showPreStep, setShowPreStep] = useState(!!preStep);
   const [isStepValid, setStepValid] = useState(false);
   const [stepsData, setStepsData] = useState({});
@@ -42,6 +44,8 @@ function StepByStep({
   };
 
   const dismissPreStep = () => setShowPreStep(false);
+
+  const togglePreviewMode = () => setPreviewMode((state) => !state);
 
   const runPreCheckStepAdvance = () => {
     if (refs.current) {
@@ -103,6 +107,8 @@ function StepByStep({
           onSubmit={_onSubmit}
           isPreviewModeVisible={currentStep > 0}
           isSubmitting={isSubmitting}
+          onClickPreview={togglePreviewMode}
+          previewMode={previewMode}
         />
       )}
       <section
