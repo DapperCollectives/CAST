@@ -50,7 +50,7 @@ const StepTwoSchema = yup.object().shape({
     .trim()
     .matches(
       /\s+$|^$|(^[0-9]+$)/,
-      'Proposal maximun weight must be a valid number'
+      'Proposal maximum weight must be a valid number'
     ),
   minBalance: yup
     .string()
