@@ -15,12 +15,12 @@ export default function ReceiveEmailNotificationsSwitch() {
   };
 
   return (
-    <div className="is-flex is-flex-direction-rowis-align-items-start">
+    <div className="is-flex is-flex-direction-rowis-align-items-start py-5">
       <div className="flex-2">
         <h3 className="is-size-6 has-text-weight-medium">
           Receive Email Notifications
         </h3>
-        <p className="has-text-grey">
+        <p className="has-text-grey pt-2">
           Emails are sent when a community adds a new proposal.
         </p>
       </div>
@@ -32,7 +32,10 @@ export default function ReceiveEmailNotificationsSwitch() {
           checked={isSubscribedFromCommunityUpdates}
           onChange={handleSubscribeAllNotifications}
         />
-        <label htmlFor="subscribeAllNotification"></label>
+        <label
+          htmlFor="subscribeAllNotification"
+          style={{ position: 'relative', top: '-10%' }}
+        ></label>
       </div>
     </div>
   );

@@ -27,12 +27,12 @@ export default function EmailAddressInput({ email, setUserEmail }) {
 
   return (
     <Fragment>
-      <h3 className="is-size-5 mt-2 has-text-weight-medium">Email Address</h3>
+      <h3 className="is-size-6 mt-2 has-text-weight-medium">Email Address</h3>
       <form
         className="is-flex is-flex-direction-row is-flex-wrap-wrap is-align-items-flex-start"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <div className="mr-3 my-3">
+        <div className="mr-3 my-5">
           <Input
             className="rounded-lg border-light flex-1 p-3"
             placeholder="Enter Email Address"
@@ -45,7 +45,7 @@ export default function EmailAddressInput({ email, setUserEmail }) {
           />
         </div>
         <button
-          className={`button rounded-lg has-background-black has-text-white my-3 ${
+          className={`button rounded-lg has-background-black has-text-white my-5 ${
             isDirty ? '' : 'is-disabled'
           }`}
           disabled={!isDirty}

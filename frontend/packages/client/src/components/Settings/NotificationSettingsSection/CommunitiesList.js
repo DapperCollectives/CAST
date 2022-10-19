@@ -13,11 +13,11 @@ export default function CommunitiesList({
     updateCommunitySubscription(communityId, subscribeIntention);
   };
   return (
-    <div>
+    <div className="py-5">
       <h3 className="is-size-6 has-text-weight-medium" style={{ width: '66%' }}>
         Edit which communities you want notifications from:
       </h3>
-      <ul className="my-2">
+      <ul className="my-3">
         {communitySubscription.map(({ communityId, subscribed }) => (
           <CommunityListItem
             key={communityId}

@@ -44,7 +44,7 @@ export default function NotificationSettingsSection() {
           )}
 
           <hr />
-          <p className="has-text-grey has-text-centered">
+          <p className="has-text-grey has-text-centered py-5">
             Changes are autosaved ✨
           </p>
         </>
