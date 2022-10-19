@@ -228,7 +228,7 @@ func TestSearchForCommunities(t *testing.T) {
 	otu.AddCommunities(1, "Collector")
 
 	t.Run("Default Search for Featured Communities", func(t *testing.T) {
-		response := otu.GetSearchCommunitiesAPI([]string{}, "", nil)
+		response := otu.GetSearchCommunitiesAPI([]string{}, "", nil, nil)
 
 		checkResponseCode(t, http.StatusOK, response.Code)
 
@@ -243,7 +243,7 @@ func TestSearchForCommunities(t *testing.T) {
 	})
 
 	t.Run("Default Search with filter", func(t *testing.T) {
-		response := otu.GetSearchCommunitiesAPI([]string{"social"}, "", nil)
+		response := otu.GetSearchCommunitiesAPI([]string{"social"}, "", nil, nil)
 
 		checkResponseCode(t, http.StatusOK, response.Code)
 
@@ -256,7 +256,7 @@ func TestSearchForCommunities(t *testing.T) {
 		assert.Equal(t, 5, p1.Filters[len(p1.Filters)-1].Amount) // All
 		assert.Equal(t, 2, len(p1.Results.Data))                 // Filtered by "social"
 
-		response = otu.GetSearchCommunitiesAPI([]string{"social,dao"}, "", nil)
+		response = otu.GetSearchCommunitiesAPI([]string{"social,dao"}, "", nil, nil)
 
 		checkResponseCode(t, http.StatusOK, response.Code)
 
@@ -272,7 +272,7 @@ func TestSearchForCommunities(t *testing.T) {
 
 	t.Run("Limit Default Search", func(t *testing.T) {
 		limit := 2
-		response := otu.GetSearchCommunitiesAPI([]string{}, "", &limit)
+		response := otu.GetSearchCommunitiesAPI([]string{}, "", &limit, nil)
 
 		checkResponseCode(t, http.StatusOK, response.Code)
 
@@ -288,7 +288,7 @@ func TestSearchForCommunities(t *testing.T) {
 
 	t.Run("Limit Default Search with filter", func(t *testing.T) {
 		limit := 1
-		response := otu.GetSearchCommunitiesAPI([]string{"dao"}, "", &limit)
+		response := otu.GetSearchCommunitiesAPI([]string{"dao"}, "", &limit, nil)
 
 		checkResponseCode(t, http.StatusOK, response.Code)
 
@@ -303,7 +303,7 @@ func TestSearchForCommunities(t *testing.T) {
 	})
 
 	t.Run("Search with text", func(t *testing.T) {
-		response := otu.GetSearchCommunitiesAPI([]string{}, "test", nil)
+		response := otu.GetSearchCommunitiesAPI([]string{}, "test", nil, nil)
 
 		checkResponseCode(t, http.StatusOK, response.Code)
 
@@ -318,7 +318,7 @@ func TestSearchForCommunities(t *testing.T) {
 	})
 
 	t.Run("Search with text no results", func(t *testing.T) {
-		response := otu.GetSearchCommunitiesAPI([]string{}, "abc", nil)
+		response := otu.GetSearchCommunitiesAPI([]string{}, "abc", nil, nil)
 
 		checkResponseCode(t, http.StatusOK, response.Code)
 
@@ -333,7 +333,7 @@ func TestSearchForCommunities(t *testing.T) {
 	})
 
 	t.Run("Search with text and filter", func(t *testing.T) {
-		response := otu.GetSearchCommunitiesAPI([]string{"dao"}, "test", nil)
+		response := otu.GetSearchCommunitiesAPI([]string{"dao"}, "test", nil, nil)
 
 		checkResponseCode(t, http.StatusOK, response.Code)
 
@@ -348,7 +348,7 @@ func TestSearchForCommunities(t *testing.T) {
 	})
 
 	t.Run("Search with text and multiple filters", func(t *testing.T) {
-		response := otu.GetSearchCommunitiesAPI([]string{"dao", "social"}, "test", nil)
+		response := otu.GetSearchCommunitiesAPI([]string{"dao", "social"}, "test", nil, nil)
 
 		checkResponseCode(t, http.StatusOK, response.Code)
 
@@ -364,7 +364,7 @@ func TestSearchForCommunities(t *testing.T) {
 
 	t.Run("Limit Search with text", func(t *testing.T) {
 		limit := 5
-		response := otu.GetSearchCommunitiesAPI([]string{}, "test", &limit)
+		response := otu.GetSearchCommunitiesAPI([]string{}, "test", &limit, nil)
 
 		checkResponseCode(t, http.StatusOK, response.Code)
 
@@ -380,7 +380,7 @@ func TestSearchForCommunities(t *testing.T) {
 
 	t.Run("Limit Search with text and filter", func(t *testing.T) {
 		limit := 3
-		response := otu.GetSearchCommunitiesAPI([]string{"dao"}, "test", &limit)
+		response := otu.GetSearchCommunitiesAPI([]string{"dao"}, "test", &limit, nil)
 
 		checkResponseCode(t, http.StatusOK, response.Code)
 
@@ -396,7 +396,7 @@ func TestSearchForCommunities(t *testing.T) {
 
 	t.Run("Search Pagination", func(t *testing.T) {
 		limit := 3
-		response := otu.GetSearchCommunitiesAPI([]string{"dao"}, "test", &limit)
+		response := otu.GetSearchCommunitiesAPI([]string{"dao"}, "test", &limit, nil)
 
 		checkResponseCode(t, http.StatusOK, response.Code)
 
@@ -410,23 +410,169 @@ func TestSearchForCommunities(t *testing.T) {
 		assert.Equal(t, limit, len(p.Results.Data))             // limited to 3
 	})
 
-	t.Run("Total Records should be the same as all field of filters", func(t *testing.T) {
-		response := otu.GetSearchCommunitiesAPI([]string{"dao"}, "test", nil)
+}
+
+func TestSearchPagination(t *testing.T) {
+	//clear communities for new pagination cases
+	clearTable("communities")
+	clearTable("community_users")
+	var totalCommunityIds []int
+
+	communityIds := otu.AddCommunities(10, "dao")
+	totalCommunityIds = append(totalCommunityIds, communityIds...)
+	communityIds = otu.AddCommunities(10, "social")
+	totalCommunityIds = append(totalCommunityIds, communityIds...)
+	communityIds = otu.AddCommunities(5, "protocol")
+	totalCommunityIds = append(totalCommunityIds, communityIds...)
+
+	totalRecords := len(totalCommunityIds)
+
+	for _, communityId := range totalCommunityIds {
+		otu.MakeFeaturedCommunity(communityId)
+	}
+
+	t.Run("should have correct total records for 'default featured'", func(t *testing.T) {
+		start := 0
+		limit := 10
+		emptyFilters := []string{}
+		response := otu.GetSearchCommunitiesAPI(emptyFilters, "", &limit, &start)
+
+		checkResponseCode(t, http.StatusOK, response.Code)
+
+		var p test_utils.PaginatedResponseSearch
+		json.Unmarshal(response.Body.Bytes(), &p)
+		assert.Equal(t, totalRecords, p.Results.TotalRecords)
+	})
+
+	t.Run("next should be '-1' when there are no more records for 'default featured'", func(t *testing.T) {
+
+		//when start is set to 20 it will be the last pagination as total records are 25
+		//and limit is 10, so next should be -1 as there are no more records
+		start := 20
+		limit := 10
+		emptyFilters := []string{}
+		response := otu.GetSearchCommunitiesAPI(emptyFilters, "", &limit, &start)
+
+		checkResponseCode(t, http.StatusOK, response.Code)
+
+		var p test_utils.PaginatedResponseSearch
+		json.Unmarshal(response.Body.Bytes(), &p)
+		assert.Equal(t, -1, p.Results.Next)
+	})
+
+	t.Run("should have correct total record for search term with no filters", func(t *testing.T) {
+		start := 0
+		limit := 10
+		emptyFilters := []string{}
+		response := otu.GetSearchCommunitiesAPI(emptyFilters, "test", &limit, &start)
+
+		checkResponseCode(t, http.StatusOK, response.Code)
+
+		var p test_utils.PaginatedResponseSearch
+		json.Unmarshal(response.Body.Bytes(), &p)
+		assert.Equal(t, 25, p.Results.TotalRecords)
+	})
+
+	t.Run("next should be '-1' when there are no more records for search term with no filters", func(t *testing.T) {
+		start := 20
+		limit := 10
+		emptyFilters := []string{}
+		response := otu.GetSearchCommunitiesAPI(emptyFilters, "test", &limit, &start)
+
+		checkResponseCode(t, http.StatusOK, response.Code)
+
+		var p test_utils.PaginatedResponseSearch
+		json.Unmarshal(response.Body.Bytes(), &p)
+		assert.Equal(t, -1, p.Results.Next)
+	})
+
+	t.Run("should have correct total record for search term with filters", func(t *testing.T) {
+		start := 0
+		limit := 10
+		filters := []string{"dao"}
+		response := otu.GetSearchCommunitiesAPI(filters, "test", &limit, &start)
+
+		checkResponseCode(t, http.StatusOK, response.Code)
+
+		var p test_utils.PaginatedResponseSearch
+		json.Unmarshal(response.Body.Bytes(), &p)
+		assert.Equal(t, 10, p.Results.TotalRecords)
+	})
+
+	t.Run("next should be '-1' when there are no more records for search term with filters", func(t *testing.T) {
+		start := 10
+		limit := 10
+		filters := []string{"dao"}
+		response := otu.GetSearchCommunitiesAPI(filters, "test", &limit, &start)
+
+		checkResponseCode(t, http.StatusOK, response.Code)
+
+		var p test_utils.PaginatedResponseSearch
+		json.Unmarshal(response.Body.Bytes(), &p)
+		assert.Equal(t, -1, p.Results.Next)
+	})
+
+	t.Run("should have correct total records with search term and multiple filters", func(t *testing.T) {
+		start := 0
+		limit := 10
+		filters := []string{"dao", "protocol"}
+		response := otu.GetSearchCommunitiesAPI(filters, "test", &limit, &start)
 
 		checkResponseCode(t, http.StatusOK, response.Code)
 
 		var p test_utils.PaginatedResponseSearch
 		json.Unmarshal(response.Body.Bytes(), &p)
 
-		assert.Equal(t, p.Results.TotalRecords, p.Filters[len(p.Filters)-1].Amount) // All
+		//total records should be 15 as there are 10 dao and 5 protocol communities
+		assert.Equal(t, 15, p.Results.TotalRecords)
 	})
 
+	t.Run("next should be '-1' when there are no more records for search term and multiple filters", func(t *testing.T) {
+		start := 10
+		limit := 10
+		filters := []string{"dao", "protocol"}
+		response := otu.GetSearchCommunitiesAPI(filters, "test", &limit, &start)
+
+		checkResponseCode(t, http.StatusOK, response.Code)
+
+		var p test_utils.PaginatedResponseSearch
+		json.Unmarshal(response.Body.Bytes(), &p)
+		assert.Equal(t, -1, p.Results.Next)
+	})
 }
 
 func TestGetCommunityActiveStrategies(t *testing.T) {
 	clearTable("communities")
 	clearTable("community_users")
 	clearTable("proposals")
+	clearTable("communities")
+	clearTable("community_users")
+	communityIds := otu.AddCommunities(5, "dao")
+	otu.MakeFeaturedCommunity(communityIds[0])
+	otu.MakeFeaturedCommunity(communityIds[1])
+
+	communityIds = otu.AddCommunities(3, "social")
+	otu.MakeFeaturedCommunity(communityIds[0])
+	otu.MakeFeaturedCommunity(communityIds[1])
+
+	communityIds = otu.AddCommunities(2, "protocol")
+	otu.MakeFeaturedCommunity(communityIds[0])
+
+	otu.AddCommunities(1, "Collector")
+	clearTable("communities")
+	clearTable("community_users")
+	communityIds = otu.AddCommunities(5, "dao")
+	otu.MakeFeaturedCommunity(communityIds[0])
+	otu.MakeFeaturedCommunity(communityIds[1])
+
+	communityIds = otu.AddCommunities(3, "social")
+	otu.MakeFeaturedCommunity(communityIds[0])
+	otu.MakeFeaturedCommunity(communityIds[1])
+
+	communityIds = otu.AddCommunities(2, "protocol")
+	otu.MakeFeaturedCommunity(communityIds[0])
+
+	otu.AddCommunities(1, "Collector")
 
 	communityId := otu.AddCommunitiesWithUsers(1, "user1")[0]
 
@@ -500,7 +646,7 @@ func TestCanUserCreateProposalForCommunityOnlyAuthors(t *testing.T) {
 	var contractType = "ft"
 
 	// Create Community
-	communityStruct := otu.GenerateCommunityStruct("account")
+	communityStruct := otu.GenerateCommunityStruct("account", "dao")
 	communityStruct.Only_authors_to_submit = &_true
 	communityStruct.Contract_type = &contractType
 	communityPayload := otu.GenerateCommunityPayload("account", communityStruct)
@@ -582,7 +728,7 @@ func TestCanUserCreateProposalForCommunityTokenThreshold(t *testing.T) {
 	var _false = false
 
 	// Create Community
-	communityStruct := otu.GenerateCommunityStruct("account")
+	communityStruct := otu.GenerateCommunityStruct("account", "dao")
 	communityStruct.Only_authors_to_submit = &_false
 	threshold := "10"
 	contractName := "FlowToken"

@@ -1,33 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
-import { Svg } from '@cast/shared-components';
-import { FadeIn } from 'components';
-import CustomDatePicker from 'components/common/CustomDatePicker';
+import { useParams } from 'react-router-dom';
+import Dropdown from 'components/common/Dropdown';
 import Form from 'components/common/Form';
-import { useMediaQuery } from 'hooks';
-import { HAS_DELAY_ON_START_TIME } from 'const';
-import { formatTime } from 'utils';
+import Input from 'components/common/Input';
+import { useCommunityDetails } from 'hooks';
+import { kebabToString } from 'utils';
 import { yupResolver } from '@hookform/resolvers/yup';
 import pick from 'lodash/pick';
 import { stepTwo } from '../FormConfig';
-import TimeIntervals from './TimeIntervals';
-
-const detectTimeZone = () =>
-  new window.Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-const addDays = (date, days) => {
-  date.setDate(date.getDate() + days);
-  return date;
-};
-
-const subtractDays = (date, days) => {
-  date.setDate(date.getDate() - days);
-  return date;
-};
-
-const isToday = (date) => {
-  return date?.setHours(0, 0, 0, 0) === new Date().setHours(0, 0, 0, 0);
-};
+import VotingSelector from './VotingSelector';
 
 const StepTwo = ({
   stepData,
@@ -36,234 +18,136 @@ const StepTwo = ({
   formId,
   moveToNextStep,
 }) => {
-  const [isStartTimeOpen, setStartTimeOpen] = useState(false);
-  const [isEndTimeOpen, setEndTimeOpen] = useState(false);
+  const { communityId } = useParams();
 
-  const notMobile = useMediaQuery();
+  const { data: community } = useCommunityDetails(communityId);
 
-  const closeStartOnBlur = () => {
-    setStartTimeOpen(false);
-  };
+  const { strategies = [] } = community || {};
 
-  const closeEndOnBlur = () => {
-    setEndTimeOpen(false);
-  };
-
-  const timeZone = detectTimeZone();
+  const votingStrategies = useMemo(
+    () =>
+      strategies.map((st) => ({
+        key: st.name,
+        name:
+          st.name === 'custom-script'
+            ? `${kebabToString(st.name)}: ${kebabToString(st.contract.script)}`
+            : kebabToString(st.name),
+      })),
+    [strategies]
+  );
 
   const fieldsObj = Object.assign(
     {},
     stepTwo.initialValues,
+    {
+      choices: [],
+      tabOption: 'text-based',
+      voteType: 'single-choice',
+    },
     pick(stepData || {}, stepTwo.formFields)
   );
 
-  const { handleSubmit, formState, control, setValue, clearErrors } = useForm({
-    defaultValues: fieldsObj,
-    resolver: yupResolver(stepTwo.Schema),
-  });
-
-  const setTime = (field) => (itemValue) => (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setValue(field, itemValue);
-    field === 'startTime' ? setStartTimeOpen(false) : setEndTimeOpen(false);
-  };
-
-  const { errors, isValid, isDirty, isSubmitting } = formState;
+  const { register, handleSubmit, formState, control, setValue, clearErrors } =
+    useForm({
+      reValidateMode: 'onChange',
+      defaultValues: fieldsObj,
+      resolver: yupResolver(stepTwo.Schema),
+    });
 
   const onSubmit = (data) => {
-    onDataChange(data);
+    let choices;
+    if (data.tabOption === 'visual') {
+      choices = data.choices.slice(0, 2);
+    } else {
+      choices = data.choices.map((e) => ({ value: e.value }));
+    }
+    onDataChange({ ...data, choices });
     moveToNextStep();
   };
 
-  const onSetStartTimeOpen = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    clearErrors('startTime');
-    setStartTimeOpen(true);
-  };
+  const defaultValueStrategy = useWatch({ control, name: 'strategy' });
+  const voteType = useWatch({ control, name: 'voteType' });
 
-  const onSetEndTimeOpen = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    clearErrors('endTime');
-    setEndTimeOpen(true);
-  };
-
-  const startDate = useWatch({ control, name: 'startDate' });
-  const startTime = useWatch({ control, name: 'startTime' });
-  const endDate = useWatch({ control, name: 'endDate' });
-  const endTime = useWatch({ control, name: 'endTime' });
-
+  // **************************************************************
+  //   This is to enable having choices when entering in preview mode
+  //   fields are saved and valilated when user hits on next
+  //   by doing this we are saving the options before without validation
+  //   when user hits next fields will be validated and overwritten with valid values
+  //   for example it's possible to enter in preview mode with duplicated voting options
+  //   but next will let the user know this needs to be updated
+  const choicesTemp = useWatch({ control, name: 'choices' });
+  const tabOption = useWatch({ control, name: 'tabOption' });
   useEffect(() => {
-    setStepValid((isValid || isDirty) && !isSubmitting);
-  }, [isValid, isDirty, isSubmitting, setStepValid]);
-
-  useEffect(() => {
-    if (
-      isToday(startDate) &&
-      startTime &&
-      new Date().setHours(startTime.getHours(), startTime.getMinutes(), 0, 0) <
-        new Date().setHours(1, 0, 0, 0)
-    ) {
-      setValue('startTime', '');
+    let choices = choicesTemp;
+    if (tabOption === 'visual') {
+      choices = choicesTemp.slice(0, 2);
+    } else {
+      choices = choicesTemp.map((e) => ({ value: e.value }));
     }
-  }, [startDate, startTime, setValue]);
+    onDataChange({ choices });
 
-  const minDateForStartDate = new Date(
-    HAS_DELAY_ON_START_TIME ? Date.now() + 60 * 60 * 1000 : Date.now()
-  );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [choicesTemp, tabOption]);
+  // **************************************************************
 
-  const maxDateForStartDate = endDate
-    ? subtractDays(new Date(endDate), 1)
-    : undefined;
+  const { isDirty, isSubmitting, isValid, errors } = formState;
+
+  useEffect(() => {
+    setStepValid((isDirty || isValid) && !isSubmitting);
+  }, [isDirty, isValid, isSubmitting, setStepValid]);
 
   return (
     <Form onSubmit={handleSubmit(onSubmit)} formId={formId}>
-      <div className="border-light rounded-lg is-flex-direction-column is-mobile m-0 p-6 mb-6">
-        <h4 className="title is-5 mb-5">
-          Start date and time <span className="has-text-danger">*</span>
-        </h4>
-        <div className="columns p-0 m-0">
-          <CustomDatePicker
+      <div className="is-flex-direction-column">
+        <div className="border-light-tablet rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 p-0-mobile mb-6">
+          <h4 className="title is-4 mb-2">Voting Strategy</h4>
+          <p className="has-text-grey mb-5">
+            Select a strategy for how voting power is calculated. Voting
+            strategies are set by community admins.
+          </p>
+          <Dropdown
+            label="Select from drop-down menu"
+            name="strategy"
+            margin="mt-4"
+            options={
+              votingStrategies?.map((vs) => ({
+                label: vs.name,
+                value: vs.key,
+              })) ?? []
+            }
+            disabled={isSubmitting || votingStrategies.length === 0}
             control={control}
-            fieldName="startDate"
-            notMobile={notMobile}
-            placeholderText="Choose date"
-            minDate={minDateForStartDate}
-            maxDate={maxDateForStartDate}
           />
-          <div className="columns is-mobile p-0 pl-2 p-0-mobile m-0 column is-half">
-            <div
-              className={`dropdown columns is-mobile p-0 m-0 is-right is-flex is-flex-grow-1${
-                isStartTimeOpen ? ' is-active' : ''
-              } ${startDate ? '' : ' is-disabled'}`}
-              onBlur={closeStartOnBlur}
-              aria-haspopup="true"
-              aria-controls="dropdown-menu"
-            >
-              <div className="dropdown-trigger columns is-multiline m-0 p-0 is-flex-grow-1">
-                <div className="column p-0 is-12">
-                  <button
-                    className="button rounded-sm is-outlined border-light column m-0 py-0 px-3 is-fullwidth"
-                    aria-haspopup="true"
-                    aria-controls="dropdown-menu"
-                    onClick={onSetStartTimeOpen}
-                  >
-                    <div className="is-flex is-flex-grow-1 is-align-items-center is-justify-content-space-between has-text-grey small-text">
-                      {startTime ? formatTime(startTime) : 'Select Time'}
-                      <Svg name="CaretDown" className="has-text-black" />
-                    </div>
-                  </button>
-                </div>
-                {errors?.startTime?.message && (
-                  <div className="column p-0 is-12">
-                    <FadeIn>
-                      <div className="pl-1 mt-2 mb-4">
-                        <p className="smaller-text has-text-danger">
-                          {errors?.startTime?.message}
-                        </p>
-                      </div>
-                    </FadeIn>
-                  </div>
-                )}
-              </div>
-              <div
-                className="dropdown-menu column p-0 is-full"
-                id="dropdown-menu"
-                role="menu"
-              >
-                <div
-                  className="dropdown-content"
-                  style={{ maxHeight: 300, overflow: 'auto' }}
-                >
-                  <TimeIntervals
-                    type="start"
-                    date={startDate}
-                    time={startTime}
-                    setTime={setTime('startTime')}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+          {defaultValueStrategy && (
+            <>
+              <Input
+                placeholder="Minimum Balance"
+                classNames="rounded-sm border-light p-3 column is-full"
+                conatinerClassNames="mt-4 mb-4"
+                register={register}
+                error={errors['minBalance']}
+                name="minBalance"
+              />
+              <Input
+                placeholder="Maximum Weight"
+                classNames="rounded-sm border-light p-3 column is-full"
+                conatinerClassNames="mb-4"
+                register={register}
+                error={errors['maxWeight']}
+                name="maxWeight"
+              />
+            </>
+          )}
         </div>
+        <VotingSelector
+          setValue={setValue}
+          clearErrors={clearErrors}
+          voteType={voteType}
+          register={register}
+          control={control}
+          errors={errors}
+        />
       </div>
-      <div className="border-light rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 mb-6">
-        <h4 className="title is-5 mb-5">
-          End date and time <span className="has-text-danger">*</span>
-        </h4>
-        <div className="columns p-0 m-0">
-          <CustomDatePicker
-            placeholderText="Choose date"
-            control={control}
-            fieldName="endDate"
-            notMobile={notMobile}
-            minDate={addDays(new Date(startDate), 1)}
-            disabled={!Boolean(startDate) || !Boolean(startTime)}
-            errorMessage={errors?.endTime?.message}
-          />
-          <div className="columns is-mobile p-0 pl-2 p-0-mobile m-0 column is-half">
-            <div
-              className={`dropdown columns is-mobile p-0 m-0 is-right is-flex is-flex-grow-1${
-                isEndTimeOpen ? ' is-active' : ''
-              } ${endDate ? '' : 'is-disabled'}`}
-              onBlur={closeEndOnBlur}
-              aria-haspopup="true"
-              aria-controls="dropdown-menu"
-            >
-              <div className="dropdown-trigger columns is-multiline m-0 p-0 is-flex-grow-1">
-                <div className="column p-0 is-12">
-                  <button
-                    className="button rounded-sm is-outlined border-light column m-0 py-0 px-3 is-fullwidth"
-                    aria-haspopup="true"
-                    aria-controls="dropdown-menu"
-                    onClick={onSetEndTimeOpen}
-                  >
-                    <div className="is-flex is-flex-grow-1 is-align-items-center is-justify-content-space-between has-text-grey small-text">
-                      {endTime ? formatTime(endTime) : 'Select Time'}
-                      <Svg name="CaretDown" className="has-text-black" />
-                    </div>
-                  </button>
-                </div>
-                {errors?.endTime?.message && (
-                  <div className="column p-0 is-12">
-                    <FadeIn>
-                      <div className="pl-1 mt-2 mb-4">
-                        <p className="smaller-text has-text-danger">
-                          {errors?.endTime?.message}
-                        </p>
-                      </div>
-                    </FadeIn>
-                  </div>
-                )}
-              </div>
-              <div
-                className="dropdown-menu column p-0 is-full"
-                id="dropdown-menu"
-                role="menu"
-              >
-                <div
-                  className="dropdown-content"
-                  style={{ maxHeight: 300, overflow: 'auto' }}
-                >
-                  <TimeIntervals
-                    type="end"
-                    time={endTime}
-                    setTime={setTime('endTime')}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      {timeZone && (
-        <div className="has-text-grey mt-6">
-          <span alt="globe with meridians">🌐</span> We've detected your time
-          zone as: {timeZone}
-        </div>
-      )}
     </Form>
   );
 };

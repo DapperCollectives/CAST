@@ -70,6 +70,14 @@ type Choice struct {
 	Choice_img_url *string `json:"choiceImgUrl"`
 }
 
+type UserProposal struct {
+	Community_id   int       `json:"communityId"`
+	Community_name string    `json:"communityName"`
+	Proposal_name  string    `json:"proposalName"`
+	Start_time     time.Time `json:"startTime"`
+	Status         string    `json:"status"`
+}
+
 type MintParams struct {
 	Recipient            string
 	Name                 string
