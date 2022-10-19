@@ -360,4 +360,9 @@ func TestCreateDraftProposal(t *testing.T) {
 
 		assert.Equal(t, 1, created.ID)
 	})
+
+	t.Run(`A community author should be able to create a draft proposal 
+				with various fields partially filled`, func(t *testing.T) {
+
+	})
 }
