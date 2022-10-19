@@ -107,6 +107,12 @@ var (
 		Message:    "Error",
 		Details:    "There was an error creating the vote.",
 	}
+	errCreateProposalPermissions = errorResponse{
+		StatusCode: http.StatusForbidden,
+		ErrorCode:  "ERR_1013",
+		Message:    "User is not permitted to create a proposal for this community.",
+		Details:    "",
+	}
 
 	nilErr = errorResponse{}
 )
@@ -321,6 +327,25 @@ func (a *App) getProposal(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, p)
 }
 
+func (a *App) getUserProposals(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	addr := vars["addr"]
+
+	pageParams := getPageParams(*r, 25)
+
+	communities, totalRecords, err := models.GetCommunityProposalsForUser(a.DB, addr, pageParams)
+	if err != nil {
+		log.Error().Err(err).Msg("Error getting user proposals.")
+		respondWithError(w, errIncompleteRequest)
+		return
+	}
+
+	pageParams.TotalRecords = totalRecords
+
+	response := shared.GetPaginatedResponseWithPayload(communities, pageParams)
+	respondWithJSON(w, http.StatusOK, response)
+}
+
 func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	communityId, err := strconv.Atoi(vars["communityId"])
@@ -436,7 +461,7 @@ func (a *App) searchCommunities(w http.ResponseWriter, r *http.Request) {
 	filters := r.FormValue("filters")
 	searchText := r.FormValue("text")
 
-	results, categories, totalRecords, err := helpers.searchCommunities(
+	results, totalRecords, categories, err := helpers.searchCommunities(
 		searchText,
 		filters,
 		pageParams,
@@ -445,15 +470,20 @@ func (a *App) searchCommunities(w http.ResponseWriter, r *http.Request) {
 		log.Error().Err(err).Msg("Error searching communities")
 		respondWithError(w, errIncompleteRequest)
 	}
+
 	pageParams.TotalRecords = totalRecords
-	paginatedResults := shared.GetPaginatedResponseWithPayload(results, pageParams)
-	response, err := helpers.appendFiltersToResponse(paginatedResults, categories)
+
+	paginatedResults, err := helpers.appendFiltersToResponse(
+		results,
+		pageParams,
+		categories,
+	)
 	if err != nil {
 		log.Error().Err(err).Msg("Error appending filters to response")
 		respondWithError(w, errIncompleteRequest)
 	}
 
-	respondWithJSON(w, http.StatusOK, response)
+	respondWithJSON(w, http.StatusOK, paginatedResults)
 }
 
 func (a *App) getCommunity(w http.ResponseWriter, r *http.Request) {
@@ -477,14 +507,8 @@ func (a *App) getCommunity(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) getCommunitiesForHomePage(w http.ResponseWriter, r *http.Request) {
 	pageParams := getPageParams(*r, 25)
-	isSearch := false
 
-	communities, totalRecords, err := models.GetDefaultCommunities(
-		a.DB,
-		pageParams,
-		[]string{},
-		isSearch,
-	)
+	communities, totalRecords, err := models.GetHomePageCommunities(a.DB, pageParams)
 	if err != nil {
 		log.Error().Err(err).Msg("Error fetching communities for home page")
 		respondWithError(w, errIncompleteRequest)
@@ -986,36 +1010,10 @@ func (a *App) canUserCreateProposal(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, errGetCommunity)
 	}
 
-	response := models.CanUserCreateProposalResponse{}
-
-	if !*community.Only_authors_to_submit {
-		threshold, err := strconv.ParseFloat(*community.Proposal_threshold, 64)
-		if err != nil {
-			log.Error().Err(err).Msg("Invalid proposal threshold")
-		}
-
-		// Get Contract
-		contract := shared.Contract{
-			Name:        community.Contract_name,
-			Addr:        community.Contract_addr,
-			Public_path: community.Public_path,
-			Threshold:   &threshold,
-		}
-		response.Contract = contract
-
-		// Get balance if community has proposal threshold rule
-		balance, _ := a.FlowAdapter.GetBalanceOfTokens(addr, &contract, *community.Contract_type)
-		response.Balance = balance
-	}
-
 	// Check if user can create proposal for community
-	if err := community.CanUserCreateProposal(a.DB, a.FlowAdapter, addr); err != nil {
-		response.HasPermission = false
-	} else {
-		response.HasPermission = true
-	}
+	canUserCreateProposal := community.CanUserCreateProposal(a.DB, a.FlowAdapter, addr)
 
-	respondWithJSON(w, http.StatusOK, response)
+	respondWithJSON(w, http.StatusOK, canUserCreateProposal)
 }
 
 /////////////

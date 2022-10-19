@@ -7,6 +7,7 @@ import NotificationServiceProvider from 'contexts/NotificationService';
 import { Web3Provider } from 'contexts/Web3';
 import { ErrorHandler } from 'components';
 import { IS_PRODUCTION } from 'const';
+import { ChakraProvider } from '@chakra-ui/react';
 import Hotjar from '@hotjar/browser';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
@@ -32,11 +33,13 @@ function App() {
         <Web3Provider network={process.env.REACT_APP_FLOW_ENV}>
           <Router>
             <NotificationServiceProvider>
-              <NotificationModalProvider>
-                <ErrorHandler>
-                  <AppPages />
-                </ErrorHandler>
-              </NotificationModalProvider>
+              <ChakraProvider>
+                <NotificationModalProvider>
+                  <ErrorHandler>
+                    <AppPages />
+                  </ErrorHandler>
+                </NotificationModalProvider>
+              </ChakraProvider>
             </NotificationServiceProvider>
           </Router>
         </Web3Provider>
