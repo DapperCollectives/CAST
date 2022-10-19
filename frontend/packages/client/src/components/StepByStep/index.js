@@ -110,7 +110,6 @@ function StepByStep({
           showSubmitOrNext={nextAction}
           formId={formId}
           finalLabel={finalLabel}
-          onSubmit={_onSubmit}
           isSubmitting={isSubmitting}
           onClickPreview={togglePreviewMode}
           previewMode={previewMode}
