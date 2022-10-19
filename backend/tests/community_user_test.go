@@ -190,7 +190,7 @@ func TestGetUserProposals(t *testing.T) {
 	assert.Equal(t, 1, p.Data[0].Community_id)
 	assert.Equal(t, 2, p.Data[1].Community_id)
 	assert.Equal(t, 3, p.Data[2].Community_id)
-	assert.NotNil(t, p.Data[0].Proposal_name)
+	assert.NotNil(t, p.Data[0].Name)
 }
 
 func TestDeleteUserFromCommunity(t *testing.T) {

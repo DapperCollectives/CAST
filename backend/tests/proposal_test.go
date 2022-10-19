@@ -347,14 +347,16 @@ func TestCreateDraftProposal(t *testing.T) {
 	t.Run("A community author should be able to create a draft proposal", func(t *testing.T) {
 		proposalStruct := otu.GenerateDraftProposalStruct(authorName, communityId)
 		payload := otu.GenerateProposalPayload(authorName, proposalStruct)
-		response := otu.CreateProposalAPI(payload)
+		response := otu.CreateDraftProposalAPI(payload)
 
 		CheckResponseCode(t, http.StatusCreated, response.Code)
 		var p models.Proposal
 		json.Unmarshal(response.Body.Bytes(), &p)
 
+		fmt.Printf("Created proposal TEST: %+v ", p)
+
 		// Get proposal after create
-		response = otu.GetProposalByIdAPI(communityId, p.ID)
+		response = otu.GetDraftProposalAPI(p.ID)
 		var created models.Proposal
 		json.Unmarshal(response.Body.Bytes(), &created)
 

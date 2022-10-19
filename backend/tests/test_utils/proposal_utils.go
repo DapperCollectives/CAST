@@ -60,11 +60,28 @@ func (otu *OverflowTestUtils) GetProposalByIdAPI(communityId int, proposalId int
 	return response
 }
 
+func (otu *OverflowTestUtils) GetDraftProposalAPI(proposalId int) *httptest.ResponseRecorder {
+	req, _ := http.NewRequest("GET", "/proposals/"+strconv.Itoa(proposalId)+"/draft", nil)
+	response := otu.ExecuteRequest(req)
+	return response
+}
+
 func (otu *OverflowTestUtils) CreateProposalAPI(proposal *models.Proposal) *httptest.ResponseRecorder {
 	json, _ := json.Marshal(proposal)
 	req, _ := http.NewRequest(
 		"POST",
 		"/communities/"+strconv.Itoa(proposal.Community_id)+"/proposals",
+		bytes.NewBuffer(json),
+	)
+	req.Header.Set("Content-Type", "application/json")
+	return otu.ExecuteRequest(req)
+}
+
+func (otu *OverflowTestUtils) CreateDraftProposalAPI(proposal *models.Proposal) *httptest.ResponseRecorder {
+	json, _ := json.Marshal(proposal)
+	req, _ := http.NewRequest(
+		"POST",
+		"/communities/"+strconv.Itoa(proposal.Community_id)+"/proposals/draft",
 		bytes.NewBuffer(json),
 	)
 	req.Header.Set("Content-Type", "application/json")

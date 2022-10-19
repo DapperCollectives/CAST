@@ -66,7 +66,11 @@ func GetProposalsForCommunity(
 	communityId int,
 	statuses []string,
 	params shared.PageParams,
-) ([]*Proposal, int, error) {
+) (
+	[]*Proposal,
+	int,
+	error,
+) {
 	var proposals []*Proposal
 	var err error
 
@@ -154,6 +158,31 @@ func (p *Proposal) CreateProposal(db *s.Database) error {
 	return err
 }
 
+func (p *Proposal) CreateDraftProposal(db *s.Database) error {
+	err := db.Conn.QueryRow(db.Context, `
+	INSERT INTO proposals(
+	community_id, 
+	name, 
+	body,
+	strategy,
+	creator_addr,
+	start_time,
+	end_time
+	)
+	VALUES($1, $2, $3, $4, $5, $6, $7)
+	RETURNING id, created_at
+	`,
+		p.Community_id,
+		p.Name,
+		p.Body,
+		p.Strategy,
+		p.Creator_addr,
+		p.Start_time,
+		p.End_time,
+	).Scan(&p.ID, &p.Created_at)
+
+	return err
+}
 func (p *Proposal) UpdateProposal(db *s.Database) error {
 	_, err := db.Conn.Exec(db.Context, `
 		UPDATE proposals

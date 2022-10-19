@@ -589,7 +589,6 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorRespo
 }
 
 func (h *Helpers) createDraftProposal(p models.Proposal) (models.Proposal, errorResponse) {
-
 	if p.Voucher != nil {
 		if err := h.validateUserViaVoucher(p.Creator_addr, p.Voucher); err != nil {
 			return models.Proposal{}, errForbidden
@@ -615,9 +614,16 @@ func (h *Helpers) createDraftProposal(p models.Proposal) (models.Proposal, error
 		return models.Proposal{}, err
 	}
 
-	if err := p.CreateProposal(h.A.DB); err != nil {
+	defaultStrategy := "token-weighted-default"
+	pendingStatus := "pending"
+	p.Strategy = &defaultStrategy
+	p.Computed_status = &pendingStatus
+
+	if err := p.CreateDraftProposal(h.A.DB); err != nil {
 		return models.Proposal{}, errIncompleteRequest
 	}
+
+	fmt.Printf("Models function success \n : %v \n", p)
 
 	return p, nilErr
 }
