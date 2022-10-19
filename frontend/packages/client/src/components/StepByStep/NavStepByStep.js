@@ -7,6 +7,7 @@ const PositionWrapper = ({
   backButton,
   submitOrNext,
   isSubmit,
+  previewMode,
 }) => {
   return (
     <nav className="navbar is-transparent">
@@ -15,19 +16,29 @@ const PositionWrapper = ({
           <div className="is-flex flex-0 is-align-items-center">
             {previewButton}
           </div>
-          <div className="navbar-end">
-            {backButton}
-            {submitOrNext}
-          </div>
+          {!previewMode && (
+            <div className="navbar-end">
+              {backButton}
+              {submitOrNext}
+            </div>
+          )}
         </>
       ) : (
         <div className="columns is-mobile flex-1 is-align-items-center">
-          <div className={`column ${isSubmit ? 'is-4' : 'is-6'}`}>
-            {backButton}
-          </div>
-          <div className={`column ${isSubmit ? 'is-8' : 'is-6'}`}>
-            {submitOrNext}
-          </div>
+          {!previewMode ? (
+            <>
+              <div className={`column ${isSubmit ? 'is-4' : 'is-6'}`}>
+                {backButton}
+              </div>
+              <div className={`column ${isSubmit ? 'is-8' : 'is-6'}`}>
+                {submitOrNext}
+              </div>
+            </>
+          ) : (
+            <div className="column is-12 is-flex is-align-items-center is-justify-content-center">
+              {previewButton}
+            </div>
+          )}
         </div>
       )}
     </nav>
@@ -74,6 +85,7 @@ export default function NavStepByStep({
           <PositionWrapper
             isSubmit={showSubmitOrNext === 'submit'}
             isTopPosition={isTopPosition}
+            previewMode={previewMode}
             previewButton={
               isPreviewModeVisible && (
                 <NavButton
