@@ -3,6 +3,7 @@ import { Prompt } from 'react-router-dom';
 import { useMediaQuery } from 'hooks';
 import Loader from '../Loader';
 import LeftPanel from './LeftPanel';
+import NavButton from './NavButton';
 import NavStepByStep from './NavStepByStep';
 
 function StepByStep({
@@ -17,9 +18,11 @@ function StepByStep({
   blockNavigationOut = false,
   blockNavigationText,
   useControlsOnTopBar = true,
+  previewComponent,
 } = {}) {
   const notMobile = useMediaQuery();
   const [currentStep, setCurrentStep] = useState(0);
+  const [previewMode, setPreviewMode] = useState(false);
   const [showPreStep, setShowPreStep] = useState(!!preStep);
   const [isStepValid, setStepValid] = useState(false);
   const [stepsData, setStepsData] = useState({});
@@ -43,6 +46,8 @@ function StepByStep({
 
   const dismissPreStep = () => setShowPreStep(false);
 
+  const togglePreviewMode = () => setPreviewMode((state) => !state);
+
   const runPreCheckStepAdvance = () => {
     if (refs.current) {
       const runCheckResult = refs.current();
@@ -62,7 +67,11 @@ function StepByStep({
     [refs]
   );
 
-  const child = showPreStep ? preStep : steps[currentStep].component;
+  const child = previewMode
+    ? previewComponent
+    : showPreStep
+    ? preStep
+    : steps[currentStep].component;
 
   const { useHookForms = false } = steps[currentStep];
 
@@ -80,6 +89,8 @@ function StepByStep({
   const nextAction = currentStep + 1 === steps.length ? 'submit' : 'next';
 
   const navStepPosition = notMobile ? 'top' : 'bottom';
+
+  const isPreviewModeVisible = currentStep > 0;
 
   return (
     <>
@@ -99,10 +110,11 @@ function StepByStep({
           showSubmitOrNext={nextAction}
           formId={formId}
           finalLabel={finalLabel}
-          showPreStep={showPreStep}
           onSubmit={_onSubmit}
-          isPreviewModeVisible={currentStep > 0}
           isSubmitting={isSubmitting}
+          onClickPreview={togglePreviewMode}
+          previewMode={previewMode}
+          isPreviewModeVisible={isPreviewModeVisible}
         />
       )}
       <section
@@ -110,7 +122,7 @@ function StepByStep({
           useControlsOnTopBar
             ? navStepPosition === 'top'
               ? { paddingTop: '77px' }
-              : { paddingBottom: '77px' }
+              : { paddingBottom: '68px' }
             : {}
         }
       >
@@ -135,6 +147,7 @@ function StepByStep({
             showPreStep={showPreStep}
             moveBackStep={moveBackStep}
             name={useControlsOnTopBar ? stepsData?.[0]?.name ?? '' : null}
+            previewMode={previewMode}
           />
 
           {/* right panel */}
@@ -176,6 +189,16 @@ function StepByStep({
                 ...(showPreStep ? { dismissPreStep } : undefined),
                 ...(useHookForms ? { formId } : undefined),
               })}
+            <div className="is-hidden-tablet mt-3 mb-5">
+              {Boolean(isPreviewModeVisible && !previewMode) && (
+                <NavButton
+                  disabled={isSubmitting}
+                  onClick={togglePreviewMode}
+                  classNames="vote-button transition-all"
+                  text={'Preview'}
+                />
+              )}
+            </div>
           </div>
         </div>
       </section>
