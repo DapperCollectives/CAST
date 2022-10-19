@@ -44,6 +44,8 @@ function StepByStep({
     }
   };
 
+  const moveToStep = (step) => setCurrentStep(step);
+
   const dismissPreStep = () => setShowPreStep(false);
 
   const togglePreviewMode = () => setPreviewMode((state) => !state);
@@ -147,6 +149,7 @@ function StepByStep({
             moveBackStep={moveBackStep}
             name={useControlsOnTopBar ? stepsData?.[0]?.name ?? '' : null}
             previewMode={previewMode}
+            moveToStep={moveToStep}
           />
 
           {/* right panel */}
