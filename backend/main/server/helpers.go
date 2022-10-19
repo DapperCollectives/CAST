@@ -623,8 +623,6 @@ func (h *Helpers) createDraftProposal(p models.Proposal) (models.Proposal, error
 		return models.Proposal{}, errIncompleteRequest
 	}
 
-	fmt.Printf("Models function success \n : %v \n", p)
-
 	return p, nilErr
 }
 

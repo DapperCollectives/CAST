@@ -3,7 +3,6 @@ package server
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -329,17 +328,10 @@ func (a *App) getProposal(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) getDraftProposal(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("getDraftProposal called")
 	vars := mux.Vars(r)
 	p, err := helpers.fetchProposal(vars, "id")
 	if err != nil {
 		log.Error().Err(err).Msg("Invalid Proposal ID.")
-		respondWithError(w, errIncompleteRequest)
-		return
-	}
-
-	if *p.Computed_status != "pending" {
-		log.Error().Err(err).Msg("Invalid Proposal Status.")
 		respondWithError(w, errIncompleteRequest)
 		return
 	}
@@ -418,8 +410,6 @@ func (a *App) createDraftProposal(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, errResponse)
 		return
 	}
-
-	fmt.Printf("Proposal created %+v", proposal)
 
 	respondWithJSON(w, http.StatusCreated, proposal)
 }

@@ -353,13 +353,11 @@ func TestCreateDraftProposal(t *testing.T) {
 		var p models.Proposal
 		json.Unmarshal(response.Body.Bytes(), &p)
 
-		fmt.Printf("Created proposal TEST: %+v ", p)
-
 		// Get proposal after create
 		response = otu.GetDraftProposalAPI(p.ID)
 		var created models.Proposal
 		json.Unmarshal(response.Body.Bytes(), &created)
 
-		assert.Equal(t, "pending", *created.Computed_status)
+		assert.Equal(t, 1, created.ID)
 	})
 }
