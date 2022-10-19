@@ -5,31 +5,33 @@ import { parseDateToServer } from 'utils';
 import { VoteOptions } from '../Proposal';
 
 const Preview = ({ stepsData }) => {
-  const [stepOne, stepTwo, stepThree = {}] = Object.values(stepsData);
-
-  const { name, communityId, body } = stepOne;
-  const { endDate, endTime, startDate, startTime } = stepThree;
+  const [
+    { name, communityId, body },
+    { choices } = { choices: [] },
+    { endDate, endTime, startDate, startTime } = {},
+  ] = Object.values(stepsData);
 
   // use a date here to allow VoteOptions to show the correct message
   const date = new Date();
-
   const proposal = {
     endTime:
       endDate && endTime
-        ? parseDateToServer(stepThree.endDate, stepThree.endTime)
+        ? parseDateToServer(endDate, endTime)
         : new Date().setDate(date.getDate() + 2),
     startTime:
       startDate && startTime
-        ? parseDateToServer(stepThree.startDate, stepThree.startTime)
+        ? parseDateToServer(startDate, startTime)
         : new Date().setDate(date.getDate() + 1),
     winCount: 0,
     choices:
-      stepTwo?.choices
-        ?.sort((a, b) => (a.value > b.value ? 1 : -1))
-        .map((choice) => ({
-          ...choice,
-          label: choice.value,
-        })) ?? null,
+      choices.length >= 2 && choices.every((el) => el.value !== '')
+        ? choices
+            .sort((a, b) => (a.value > b.value ? 1 : -1))
+            .map((choice) => ({
+              ...choice,
+              label: choice.value,
+            }))
+        : null,
   };
   return (
     <div>
