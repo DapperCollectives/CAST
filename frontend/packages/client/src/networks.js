@@ -1,10 +1,8 @@
 const networksConfig = {
   emulator: {
     accessApi: process.env.REACT_APP_EMULATOR_API || 'http://localhost:8888',
-    walletDiscovery:
-      process.env.REACT_APP_EMULATOR_WALLET_DISCOVERY ||
-      'http://localhost:8701/fcl/authn',
-    walletDiscoveryApi: null,
+    walletDiscovery: 'https://fcl-discovery.onflow.org/local/authn',
+    walletDiscoveryApi: 'https://fcl-discovery.onflow.org/api/local/authn',
     walletDiscoveryInclude: [],
     strategiesConfig: {},
     flowAddress: {
