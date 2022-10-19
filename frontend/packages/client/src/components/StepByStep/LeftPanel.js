@@ -17,6 +17,9 @@ export default function LeftPanel({
   const classNamesWrapper = 'pr-8 pr-1-tablet-only steps';
   // mobile version
   if (!notMobile) {
+    if (previewMode) {
+      return null;
+    }
     return (
       <div
         className="has-background-white p-4"
