@@ -14,6 +14,10 @@ export default function StyledStatusPill({ status }) {
         status: 'Upcoming',
         backgroundColorClass: 'has-background-orange',
       },
+      [FilterValues.draft]: {
+        status: 'Draft',
+        backgroundColorClass: 'has-background-blue',
+      },
       [FilterValues.closed]: {
         status: (
           <span>

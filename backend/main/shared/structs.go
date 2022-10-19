@@ -70,6 +70,14 @@ type Choice struct {
 	Choice_img_url *string `json:"choiceImgUrl"`
 }
 
+type UserProposal struct {
+	Community_id   int       `json:"communityId"`
+	Community_name string    `json:"communityName"`
+	Proposal_name  string    `json:"proposalName"`
+	Start_time     time.Time `json:"startTime"`
+	Status         string    `json:"status"`
+}
+
 type MintParams struct {
 	Recipient            string
 	Name                 string
@@ -123,7 +131,7 @@ func GetPaginatedResponseWithPayload(payload interface{}, p PageParams) *Paginat
 
 	_count := reflect.ValueOf(payload).Len()
 	var next int
-	if p.Start+_count >= p.TotalRecords {
+	if p.Start+_count >= (p.TotalRecords - 1) {
 		next = -1
 	} else {
 		next = p.Start + _count

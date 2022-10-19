@@ -23,13 +23,13 @@ func TestGetLists(t *testing.T) {
 	clearTable("lists")
 
 	t.Run("API should return an empty set of lists if no lists exists", func(t *testing.T) {
-		communityId := otu.AddCommunities(1)[0]
+		communityId := otu.AddCommunities(1, "dao")[0]
 		response := otu.GetListsForCommunityAPI(communityId)
 		checkResponseCode(t, http.StatusOK, response.Code)
 	})
 
 	t.Run("API should return list of existing lists", func(t *testing.T) {
-		communityId := otu.AddCommunities(1)[0]
+		communityId := otu.AddCommunities(1, "dao")[0]
 		otu.AddLists(communityId, 1)
 
 		req, _ := http.NewRequest("GET", "/communities/"+strconv.Itoa(communityId)+"/lists", nil)

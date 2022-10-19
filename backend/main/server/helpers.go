@@ -468,32 +468,29 @@ func (h *Helpers) searchCommunities(
 	pageParams shared.PageParams,
 ) (
 	[]*models.Community,
-	map[string]int,
 	int,
+	map[string]int,
 	error,
 ) {
 	filtersSlice := strings.Split(filters, ",")
 	if searchText == "" {
-		isSearch := true
 
-		results, totalRecords, err := models.GetDefaultCommunities(
+		results, totalRecords, err := models.GetSearchDefaultCommunities(
 			h.A.DB,
 			pageParams,
 			filtersSlice,
-			isSearch,
 		)
-
 		if err != nil {
 			log.Error().Err(err)
-			return nil, nil, 0, err
+			return nil, 0, nil, err
 		}
 
 		categoryCount, err := models.GetCategoryCount(h.A.DB, searchText)
 		if err != nil {
-			return []*models.Community{}, nil, 0, err
+			return []*models.Community{}, 0, nil, err
 		}
 
-		return results, categoryCount, totalRecords, nil
+		return results, totalRecords, categoryCount, nil
 	} else {
 		results, totalRecords, err := models.SearchForCommunity(
 			h.A.DB,
@@ -502,27 +499,16 @@ func (h *Helpers) searchCommunities(
 			pageParams,
 		)
 		if err != nil {
-			return []*models.Community{}, nil, 0, err
+			return []*models.Community{}, 0, nil, err
 		}
 
 		categoryCount, err := models.GetCategoryCount(h.A.DB, searchText)
 		if err != nil {
-			return []*models.Community{}, nil, 0, err
+			return []*models.Community{}, 0, nil, err
 		}
 
-		return results, categoryCount, totalRecords, nil
+		return results, totalRecords, categoryCount, nil
 	}
-}
-
-func (h *Helpers) categoryCountToMap(results []*models.Community) map[string]int {
-	var categoryCount = make(map[string]int)
-	for _, community := range results {
-		if community.Category != nil {
-			categoryCount[*community.Category] = *community.Category_count
-		}
-	}
-
-	return categoryCount
 }
 
 func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorResponse) {
@@ -560,11 +546,18 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorRespo
 		p.Max_weight = strategy.Contract.MaxWeight
 	}
 
-	if err := community.CanUserCreateProposal(h.A.DB, h.A.FlowAdapter, p.Creator_addr); err != nil {
-		return models.Proposal{}, errIncompleteRequest
+	canUserCreateProposal := community.CanUserCreateProposal(h.A.DB, h.A.FlowAdapter, p.Creator_addr)
+
+	// If user doesn't have permission, populate errorResponse
+	// with reason and error.
+	if !canUserCreateProposal.HasPermission {
+		errPermissionsResponse := errCreateProposalPermissions
+		errPermissionsResponse.Message = canUserCreateProposal.Reason
+		errPermissionsResponse.Details = canUserCreateProposal.Error.Error()
+		return models.Proposal{}, errPermissionsResponse
 	}
 
-	// Set Blockheight to latest sealed
+	// Get latest sealed blockheight to use as proposal snapshot
 	blockheight, err := h.A.FlowAdapter.GetCurrentBlockHeight()
 	if err != nil {
 		errMsg := "couldn't fetch current blockheight"
@@ -1117,7 +1110,8 @@ func (h *Helpers) pinJSONToIpfs(data interface{}) (*string, error) {
 }
 
 func (h *Helpers) appendFiltersToResponse(
-	results *shared.PaginatedResponse,
+	results []*models.Community,
+	pageParams shared.PageParams,
 	count map[string]int,
 ) (interface{}, error) {
 	var filters []shared.SearchFilter
@@ -1148,12 +1142,13 @@ func (h *Helpers) appendFiltersToResponse(
 		Amount: totalCount,
 	})
 
+	paginatedResults := shared.GetPaginatedResponseWithPayload(results, pageParams)
 	appendedResponse := struct {
 		Filters []shared.SearchFilter    `json:"filters"`
 		Results shared.PaginatedResponse `json:"results"`
 	}{
 		Filters: filters,
-		Results: *results,
+		Results: *paginatedResults,
 	}
 
 	return appendedResponse, nil

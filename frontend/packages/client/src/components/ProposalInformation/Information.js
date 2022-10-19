@@ -26,9 +26,11 @@ export default function Information({
   endTime,
   ipfsUrl,
   communityId,
+  contractAddr,
   tokenName,
   maxWeight,
   minBalance,
+  customStrategy,
 }) {
   return (
     <div
@@ -56,35 +58,64 @@ export default function Information({
       <InfoBlock
         title="Voting strategy"
         component={
-          <div className="is-flex" onClick={openStrategyModal}>
-            <div className="cursor-pointer has-text-grey">{strategyName}</div>
-          </div>
+          customStrategy ? (
+            <div
+              className="has-text-grey is-flex"
+              style={{ textAlign: 'right' }}
+            >
+              {customStrategy.name}
+            </div>
+          ) : (
+            <div className="is-flex" onClick={openStrategyModal}>
+              <div className="cursor-pointer has-text-grey">{strategyName}</div>
+            </div>
+          )
         }
       />
-      <InfoBlock
-        title={'Token required'}
-        component={
-          <a
-            href={'https://flowscan.org/'}
-            rel="noopener noreferrer"
-            target="_blank"
-            className="is-underlined has-text-grey p-0 small-text"
-            style={{ height: '2rem !important' }}
-          >
-            <span className="mr-2">{`$${tokenName?.toUpperCase()}`}</span>
-            <Svg name="LinkOut" width="12" height="12" />
-          </a>
-        }
-      />
+      {customStrategy ? (
+        <InfoBlock
+          title={'Description'}
+          component={
+            <span className="has-text-grey" style={{ textAlign: 'right' }}>
+              {customStrategy.description}
+            </span>
+          }
+        />
+      ) : (
+        <InfoBlock
+          title={'Token required'}
+          component={
+            contractAddr ? (
+              <a
+                href={`https://flowscan.org/account/${contractAddr}`}
+                rel="noopener noreferrer"
+                target="_blank"
+                className="is-underlined has-text-grey p-0 small-text"
+                style={{ height: '2rem !important' }}
+              >
+                <span className="mr-2">{`$${tokenName?.toUpperCase()}`}</span>
+                <Svg name="LinkOut" width="12" height="12" />
+              </a>
+            ) : (
+              <div
+                className="has-text-grey p-0 small-text"
+                style={{ height: '2rem !important' }}
+              >
+                {tokenName?.toUpperCase()}
+              </div>
+            )
+          }
+        />
+      )}
       {isVisible(maxWeight) && (
         <InfoBlock
-          title={'Max tokens'}
+          title={'Max Weight'}
           component={<span className="has-text-grey">{maxWeight}</span>}
         />
       )}
       {isVisible(minBalance) && (
         <InfoBlock
-          title={'Min tokens'}
+          title={'Min Required'}
           component={<span className="has-text-grey">{minBalance}</span>}
         />
       )}
