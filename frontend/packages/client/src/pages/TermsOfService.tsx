@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 
-const Body = () => (
+const Body = (): JSX.Element => (
   <div className="content">
     <p>
       CAST is a voting tool application (the “App”) for communities in the Flow™
@@ -596,7 +596,7 @@ const Body = () => (
   </div>
 );
 
-export default function TermsOfService() {
+export default function TermsOfService(): JSX.Element {
   return (
     <section className="container">
       <div className="columns mx-auto">
