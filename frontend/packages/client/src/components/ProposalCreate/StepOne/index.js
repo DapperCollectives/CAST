@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
+import { useParams } from 'react-router-dom';
 import { Editor } from 'components/common/Editor';
 import Form from 'components/common/Form';
 import Input from 'components/common/Input';
@@ -14,10 +15,12 @@ const StepOne = ({
   formId,
   moveToNextStep,
 }) => {
+  const { communityId } = useParams();
   const fieldsObj = Object.assign(
     {},
     stepOne.initialValues,
-    pick(stepData || {}, stepOne.formFields)
+    pick(stepData || {}, stepOne.formFields),
+    { communityId }
   );
 
   const { register, handleSubmit, formState, control } = useForm({
