@@ -12,9 +12,11 @@ export default function SubscribeCommunityButton({
 }) {
   const { openModal, closeModal } = useModalContext();
   const { notificationSettings } = useNotificationServiceContext();
-  const isSubscribed = notificationSettings?.communitySubscription.some(
-    (c) => c === communityId
-  );
+  const subscribedToCommunity =
+    notificationSettings?.communitySubscription.some((c) => c === communityId);
+  const subscribedToEmails =
+    notificationSettings?.isSubscribedFromCommunityUpdates;
+  const isSubscribed = subscribedToCommunity && subscribedToEmails;
 
   const { user } = useWebContext();
 
