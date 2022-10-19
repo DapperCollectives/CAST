@@ -4,8 +4,8 @@ export default function SettingsConnectWalletPrompt() {
   const { openWalletModal } = useWebContext();
   return (
     <div
-      className="column is-two-fifths mt-6 is-flex is-flex-direction-column is-justify-content-center is-align-items-center"
-      style={{ height: '65vh' }}
+      className="mt-6 is-flex is-flex-direction-column is-justify-content-center is-align-items-center"
+      style={{ height: '65vh', width: '50%', margin: 'auto' }}
     >
       <h1 className="is-size-4 has-text-centered has-text-weight-bold">
         To view your settings, you must first connect your wallet.

@@ -42,8 +42,6 @@ export default function NotificationSettingsSection() {
               updateCommunitySubscription={updateCommunitySubscription}
             />
           )}
-
-          <hr />
           <p className="has-text-grey has-text-centered py-5">
             Changes are autosaved ✨
           </p>
