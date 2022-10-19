@@ -359,6 +359,7 @@ func TestDraftProposal(t *testing.T) {
 		json.Unmarshal(response.Body.Bytes(), &created)
 
 		assert.Equal(t, 1, created.ID)
+		assert.Equal(t, "draft", *created.Status)
 	})
 
 	t.Run("A community author should be able to delete a draft proposal", func(t *testing.T) {

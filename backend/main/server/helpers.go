@@ -615,9 +615,9 @@ func (h *Helpers) createDraftProposal(p models.Proposal) (models.Proposal, error
 	}
 
 	defaultStrategy := "token-weighted-default"
-	pendingStatus := "pending"
+	draftStatus := "draft"
 	p.Strategy = &defaultStrategy
-	p.Computed_status = &pendingStatus
+	p.Status = &draftStatus
 
 	if err := p.CreateDraftProposal(h.A.DB); err != nil {
 		return models.Proposal{}, errIncompleteRequest

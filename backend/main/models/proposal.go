@@ -167,9 +167,10 @@ func (p *Proposal) CreateDraftProposal(db *s.Database) error {
 	strategy,
 	creator_addr,
 	start_time,
-	end_time
+	end_time,
+	status
 	)
-	VALUES($1, $2, $3, $4, $5, $6, $7)
+	VALUES($1, $2, $3, $4, $5, $6, $7, $8)
 	RETURNING id, created_at
 	`,
 		p.Community_id,
@@ -179,6 +180,7 @@ func (p *Proposal) CreateDraftProposal(db *s.Database) error {
 		p.Creator_addr,
 		p.Start_time,
 		p.End_time,
+		p.Status,
 	).Scan(&p.ID, &p.Created_at)
 
 	return err
