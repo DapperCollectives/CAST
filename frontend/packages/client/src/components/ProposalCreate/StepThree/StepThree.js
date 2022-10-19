@@ -34,7 +34,6 @@ const StepThree = ({
   setStepValid,
   onDataChange,
   formId,
-  isStepValid,
   onSubmit: onSubmitParam = () => {},
 }) => {
   const [isStartTimeOpen, setStartTimeOpen] = useState(false);
