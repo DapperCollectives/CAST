@@ -20,7 +20,7 @@ const updateCommunitySubscriptionState = (
   const updateIndex = newCommunitySubscription.findIndex(
     (communitySub) => communitySub.communityId === communityId
   );
-  if (!updateIndex) {
+  if (updateIndex === -1) {
     newCommunitySubscription.push({ communityId, subscribed: subscribedValue });
   } else {
     newCommunitySubscription[updateIndex].subscribed = subscribedValue;

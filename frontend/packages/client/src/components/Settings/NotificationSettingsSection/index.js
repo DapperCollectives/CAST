@@ -26,7 +26,7 @@ export default function NotificationSettingsSection() {
         </div>
       )}
       {communitySubscription.length > 0 && (
-        <Fragment>
+        <>
           <EmailAddressInput email={email} setUserEmail={setUserEmail} />
           <hr />
           <ReceiveEmailNotificationsSwitch
@@ -47,7 +47,7 @@ export default function NotificationSettingsSection() {
           <p className="has-text-grey has-text-centered">
             Changes are autosaved ✨
           </p>
-        </Fragment>
+        </>
       )}
     </section>
   );
