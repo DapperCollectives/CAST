@@ -1,38 +1,52 @@
+import { StyledStatusPill } from 'components';
+import { CommunityName } from 'components/ProposalInformation';
+import { FilterValues } from 'const';
 import { parseDateToServer } from 'utils';
-import { ProposalStatus, VoteOptions } from '../Proposal';
+import { VoteOptions } from '../Proposal';
 
 const Preview = ({ stepsData }) => {
   const [stepOne, stepTwo, stepThree = {}] = Object.values(stepsData);
+
+  const { name, communityId, body } = stepOne;
+  const { endDate, endTime, startDate, startTime } = stepThree;
+
+  // use a date here to allow VoteOptions to show the correct message
   const date = new Date();
+
   const proposal = {
     endTime:
-      parseDateToServer(stepThree?.endDate, stepThree?.endTime) ??
-      new Date().setDate(date.getDate() + 2),
+      endDate && endTime
+        ? parseDateToServer(stepThree.endDate, stepThree.endTime)
+        : new Date().setDate(date.getDate() + 2),
     startTime:
-      parseDateToServer(stepThree?.startDate, stepThree?.startTime) ??
-      new Date(),
+      startDate && startTime
+        ? parseDateToServer(stepThree.startDate, stepThree.startTime)
+        : new Date().setDate(date.getDate() + 1),
     winCount: 0,
-    choices: stepTwo?.choices
-      ?.sort((a, b) => (a.value > b.value ? 1 : -1))
-      .map((choice) => ({
-        ...choice,
-        label: choice.value,
-      })),
+    choices:
+      stepTwo?.choices
+        ?.sort((a, b) => (a.value > b.value ? 1 : -1))
+        .map((choice) => ({
+          ...choice,
+          label: choice.value,
+        })) ?? null,
   };
-
-  const htmlBody = stepOne?.body;
-
   return (
     <div>
-      <ProposalStatus proposal={proposal} />
-      <h1 className="title mt-5 is-3">{stepOne?.title}</h1>
+      <h1 className="title mt-5 is-3">{name}</h1>
+      <div className="is-flex is-align-items-center">
+        <CommunityName communityId={communityId} classNames="mr-3" />
+        <StyledStatusPill status={FilterValues.draft} />
+      </div>
       <div
         className="mt-6 mb-5 proposal-copy content"
         dangerouslySetInnerHTML={{
-          __html: htmlBody,
+          __html: body,
         }}
       />
-      <VoteOptions proposal={proposal} readOnly />
+      {Boolean(proposal.choices) && (
+        <VoteOptions proposal={proposal} readOnly />
+      )}
     </div>
   );
 };
