@@ -147,6 +147,7 @@ function StepByStep({
             showPreStep={showPreStep}
             moveBackStep={moveBackStep}
             name={useControlsOnTopBar ? stepsData?.[0]?.name ?? '' : null}
+            previewMode={previewMode}
           />
 
           {/* right panel */}

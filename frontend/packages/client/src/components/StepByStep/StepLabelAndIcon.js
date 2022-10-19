@@ -1,16 +1,22 @@
 import classnames from 'classnames';
 import StepNumber from './StepNumber';
 
-const StepLabelAndIcon = ({ stepIdx, stepLabel, showPreStep, currentStep }) => {
+const StepLabelAndIcon = ({
+  stepIdx,
+  stepLabel,
+  showPreStep,
+  currentStep,
+  disableAll,
+}) => {
   const isActiveStep = !showPreStep && stepIdx === currentStep;
   const isDoneStep = !showPreStep && currentStep > stepIdx;
-  const isPendingStep = !isActiveStep && !isDoneStep;
+  const isPendingStep = disableAll || (!isActiveStep && !isDoneStep);
 
   const stepClasses = classnames(
     'is-flex p-1 is-align-items-center rounded-xl mb-4 medium-text',
     {
       'has-background-grey-lighter has-text-weight-bold has-text-black':
-        isActiveStep,
+        isActiveStep && !disableAll,
     },
     { 'has-text-grey': isPendingStep || isDoneStep }
   );
