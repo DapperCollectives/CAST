@@ -119,7 +119,11 @@ const StepTwo = ({
     : undefined;
 
   return (
-    <Form onSubmit={handleSubmit(onSubmit)} formId={formId}>
+    <Form
+      onSubmit={handleSubmit(onSubmit)}
+      formId={formId}
+      formClasses="mb-6-mobile"
+    >
       <div className="border-light-tablet rounded-lg is-flex-direction-column is-mobile m-0 p-6 p-0-mobile mb-6">
         <h4 className="title is-5 mb-5">
           Start date and time <span className="has-text-danger">*</span>
