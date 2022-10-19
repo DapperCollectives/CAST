@@ -10,12 +10,16 @@ export default function LeftPanel({
   moveBackStep,
   name,
   showBackButton = true,
+  previewMode,
 }) {
   const notMobile = useMediaQuery();
 
   const classNamesWrapper = 'pr-8 pr-1-tablet-only steps';
   // mobile version
   if (!notMobile) {
+    if (previewMode) {
+      return null;
+    }
     return (
       <div
         className="has-background-white p-4"
@@ -63,6 +67,7 @@ export default function LeftPanel({
             stepLabel={step.label}
             showPreStep={showPreStep}
             currentStep={currentStep}
+            disableAll={previewMode}
           />
         ))}
       </div>

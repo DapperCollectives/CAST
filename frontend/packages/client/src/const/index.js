@@ -21,6 +21,7 @@ export const FilterValues = {
   all: 'All',
   active: 'Active',
   pending: 'Pending',
+  draft: 'Draft',
   closed: 'Closed',
   cancelled: 'Cancelled',
   // group of active and pending
