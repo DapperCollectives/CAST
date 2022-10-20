@@ -581,10 +581,6 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorRespo
 		}
 	}
 
-	p = h.setNullFieldsToEmpty(p)
-
-	fmt.Printf("Proposal: %v \n", p)
-
 	if err := p.CreateProposal(h.A.DB); err != nil {
 		return models.Proposal{}, errIncompleteRequest
 	}
@@ -660,7 +656,9 @@ func (h *Helpers) createDraftProposal(p models.Proposal) (models.Proposal, error
 	p.Strategy = &defaultStrategy
 	p.Status = &draftStatus
 
-	if err := p.CreateDraftProposal(h.A.DB); err != nil {
+	p = h.setNullFieldsToEmpty(p)
+
+	if err := p.CreateProposal(h.A.DB); err != nil {
 		return models.Proposal{}, errIncompleteRequest
 	}
 

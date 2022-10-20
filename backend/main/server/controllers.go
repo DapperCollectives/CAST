@@ -361,7 +361,6 @@ func (a *App) getUserProposals(w http.ResponseWriter, r *http.Request) {
 	}
 
 	pageParams.TotalRecords = totalRecords
-
 	response := shared.GetPaginatedResponseWithPayload(communities, pageParams)
 	respondWithJSON(w, http.StatusOK, response)
 }

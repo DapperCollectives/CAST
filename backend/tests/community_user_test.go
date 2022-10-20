@@ -186,6 +186,7 @@ func TestGetUserProposals(t *testing.T) {
 	checkResponseCode(t, http.StatusOK, response.Code)
 
 	var p test_utils.PaginatedResponseWithProposal
+	json.Unmarshal(response.Body.Bytes(), &p)
 
 	assert.Equal(t, 1, p.Data[0].Community_id)
 	assert.Equal(t, 2, p.Data[1].Community_id)
