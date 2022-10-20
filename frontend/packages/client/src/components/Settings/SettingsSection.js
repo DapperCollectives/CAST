@@ -1,0 +1,75 @@
+import { useEffect, useState } from 'react';
+import Blockies from 'react-blockies';
+import CopyToClipboard from 'react-copy-to-clipboard';
+import { useWebContext } from 'contexts/Web3';
+import { Svg } from '@cast/shared-components';
+import { Tooltip } from 'components';
+import { useMediaQuery } from 'hooks';
+
+export default function SettingsSection({ walletId }) {
+  const notMobile = useMediaQuery();
+  const { injectedProvider } = useWebContext();
+  const [addressCopied, setAddressCopied] = useState(false);
+
+  useEffect(() => {
+    let timeout;
+    if (addressCopied) {
+      timeout = setTimeout(() => {
+        setAddressCopied(false);
+      }, 500);
+    }
+    return () => clearTimeout(timeout);
+  }, [addressCopied]);
+
+  return (
+    <section className={'column is-flex is-flex-direction-column'}>
+      <h2 className="is-size-4 has-text-weight-bold">Settings</h2>
+      <h3 className="is-size-6 mt-2 has-text-weight-medium">
+        Connected Wallet
+      </h3>
+      <div className="is-flex is-flex-direction-row is-flex-wrap-wrap is-align-items-center">
+        <div className="mr-3 my-3">
+          <p
+            className="rounded-lg border-light flex-1 has-text-grey is-flex is-align-items-center pl-2 pt-1"
+            style={{ height: 41, width: 246 }}
+          >
+            <span>
+              <Blockies
+                seed={walletId}
+                size={notMobile ? 6.5 : 5}
+                scale={4}
+                className="blockies"
+              />
+            </span>
+            <span className="ml-1 mb-1 cursor-default">{walletId}</span>
+            <Tooltip
+              classNames="is-flex is-flex-grow-1 is-align-items-center transition-all"
+              position="top"
+              text="Copied!"
+              alwaysVisible={true}
+              enabled={addressCopied}
+            >
+              <CopyToClipboard
+                text={walletId}
+                onCopy={() => {
+                  setAddressCopied(true);
+                }}
+              >
+                <span className="cursor-pointer mt-1 ml-1">
+                  <Svg name="Copy"></Svg>
+                </span>
+              </CopyToClipboard>
+            </Tooltip>
+          </p>
+        </div>
+
+        <button
+          className={`button rounded-lg has-background-black has-text-white`}
+          onClick={injectedProvider.unauthenticate}
+        >
+          Disconnect
+        </button>
+      </div>
+    </section>
+  );
+}

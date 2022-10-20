@@ -1,6 +1,9 @@
-import { JoinCommunityButton, SubscribeCommunityButton } from 'components';
+import {
+  BackButton,
+  JoinCommunityButton,
+  SubscribeCommunityButton,
+} from 'components';
 import { useMediaQuery, useVotesForAddress } from 'hooks';
-import BackButton from './BackButton';
 import ShareDropdown from './ShareDropdown';
 
 const HeaderNavigation = ({
@@ -24,7 +27,10 @@ const HeaderNavigation = ({
       className="is-flex mb-5 mb-3-mobile"
       style={{ justifyContent: 'space-between' }}
     >
-      <BackButton isMobile={!notMobile} communityId={communityId} />
+      <BackButton
+        isMobile={!notMobile}
+        navTo={`/community/${communityId}?tab=proposals`}
+      />
       <div className="is-flex">
         <JoinCommunityButton
           communityId={communityId}
