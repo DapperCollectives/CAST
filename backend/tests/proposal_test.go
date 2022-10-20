@@ -39,11 +39,9 @@ func TestGetProposal(t *testing.T) {
 	t.Run("Should throw an error if proposal with ID doesnt exist", func(t *testing.T) {
 
 		response := otu.GetProposalByIdAPI(communityId, 420)
+		CheckResponseCode(t, http.StatusNotFound, response.Code)
 
-		CheckResponseCode(t, http.StatusForbidden, response.Code)
-
-		expectedErr := errIncompleteRequest
-		expectedErr.StatusCode = http.StatusForbidden
+		expectedErr := errProposalNotFound
 
 		var e errorResponse
 		json.Unmarshal(response.Body.Bytes(), &e)
