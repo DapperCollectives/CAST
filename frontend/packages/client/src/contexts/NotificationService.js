@@ -7,7 +7,7 @@ const INIT_NOTIFICATION_SETTINGS = {
   walletId: '',
   email: '',
   communitySubscription: [],
-  isUnsubscribedFromCommunityUpdates: false,
+  isSubscribedFromCommunityUpdates: false,
 };
 
 export const useNotificationServiceContext = () => {
@@ -84,10 +84,9 @@ const NotificationServiceProvider = ({ children }) => {
     }
   };
 
-  const subscribeCommunity = async (communityId) => {
+  const subscribeCommunity = async (communityId, subscribeAll) => {
     try {
       //here we call api
-      const apiResponse = true;
       setNotificationSettings((prevState) => ({
         ...prevState,
         communitySubscription: [
@@ -95,9 +94,12 @@ const NotificationServiceProvider = ({ children }) => {
           communityId,
         ],
       }));
-      return apiResponse;
     } catch {
       throw new Error('cannot subscribe community');
+    }
+
+    if (subscribeAll) {
+      await resubscribeFromEmailNotifications();
     }
   };
 
@@ -106,7 +108,7 @@ const NotificationServiceProvider = ({ children }) => {
       //here we call api
       setNotificationSettings((prevState) => ({
         ...prevState,
-        isUnsubscribedFromCommunityUpdates: true,
+        isSubscribedFromCommunityUpdates: false,
       }));
     } catch {
       throw new Error('cannot unscribe from email notifications');
@@ -118,7 +120,7 @@ const NotificationServiceProvider = ({ children }) => {
       //here we call api
       setNotificationSettings((prevState) => ({
         ...prevState,
-        isUnsubscribedFromCommunityUpdates: false,
+        isSubscribedFromCommunityUpdates: true,
       }));
     } catch {
       throw new Error('cannot resubscribe from email notifications');

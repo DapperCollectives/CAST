@@ -3,7 +3,7 @@ import NotificationsManage from './Manage';
 import NotificationsSignUp from './SignUp';
 
 const NotificationsModal = ({ onClose, communityId }) => {
-  const { notificationSettings, subscribeCommunity } =
+  const { notificationSettings, subscribeCommunity, setUserEmail } =
     useNotificationServiceContext();
 
   const isSubscribed = notificationSettings?.communitySubscription.some(
@@ -15,6 +15,7 @@ const NotificationsModal = ({ onClose, communityId }) => {
 
   return (
     <NotificationsSignUp
+      setUserEmail={setUserEmail}
       onSubscribe={subscribeCommunity}
       onClose={onClose}
       communityId={communityId}

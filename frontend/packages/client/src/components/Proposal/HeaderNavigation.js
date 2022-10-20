@@ -1,4 +1,4 @@
-import { JoinCommunityButton } from 'components';
+import { JoinCommunityButton, SubscribeCommunityButton } from 'components';
 import { useMediaQuery, useVotesForAddress } from 'hooks';
 import BackButton from './BackButton';
 import ShareDropdown from './ShareDropdown';
@@ -29,6 +29,11 @@ const HeaderNavigation = ({
         <JoinCommunityButton
           communityId={communityId}
           size={notMobile ? 'small' : 'smaller'}
+        />
+        <SubscribeCommunityButton
+          communityId={communityId}
+          size={notMobile ? 'small' : 'smaller'}
+          className="ml-4"
         />
         <ShareDropdown
           isMobile={!notMobile}
