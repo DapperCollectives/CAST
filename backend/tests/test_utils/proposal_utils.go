@@ -93,6 +93,13 @@ func (otu *OverflowTestUtils) CreateDraftProposalAPI(proposal *models.Proposal) 
 	return otu.ExecuteRequest(req)
 }
 
+func (otu *OverflowTestUtils) UpdateDraftProposalAPI(proposalId int, proposal *models.Proposal) *httptest.ResponseRecorder {
+	json, _ := json.Marshal(proposal)
+	req, _ := http.NewRequest("PUT", "/communities/"+strconv.Itoa(proposalId)+"/proposals/draft", bytes.NewBuffer(json))
+	req.Header.Set("Content-Type", "application/json")
+	return otu.ExecuteRequest(req)
+}
+
 func (otu *OverflowTestUtils) UpdateProposalAPI(
 	proposalId int,
 	payload *models.UpdateProposalRequestPayload,

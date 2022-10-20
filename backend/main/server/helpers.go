@@ -692,7 +692,7 @@ func (h *Helpers) updateDraftProposal(p models.Proposal) (models.Proposal, error
 
 	p = h.setNullFieldsToEmpty(p)
 
-	if err := p.UpdateProposal(h.A.DB); err != nil {
+	if err := p.UpdateDraftProposal(h.A.DB); err != nil {
 		return models.Proposal{}, errIncompleteRequest
 	}
 
