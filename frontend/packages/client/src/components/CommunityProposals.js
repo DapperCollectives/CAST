@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useWebContext } from 'contexts/Web3';
 import { useCommunityProposalsWithVotes, useMediaQuery } from 'hooks';
-import { useWebContext } from 'hooks';
 import { FilterValues } from 'const';
 import CommunityProposalList from './CommunityProposalList';
 import DropDown from './Dropdown';
@@ -17,6 +17,7 @@ export default function CommunityProposals({ communityId = 1, admins } = {}) {
 
   const {
     user: { addr },
+    openWalletModal,
   } = useWebContext();
 
   const proposalFilterValues = Object.entries(FilterValues)
@@ -106,9 +107,7 @@ export default function CommunityProposals({ communityId = 1, admins } = {}) {
                 <div
                   className="button is-fullwidth rounded-sm is-flex small-text has-text-white has-background-black"
                   style={{ minHeight: '40px' }}
-                  onClick={() => {
-                    console.log('open modal connect');
-                  }}
+                  onClick={openWalletModal}
                 >
                   Create Proposal
                 </div>
