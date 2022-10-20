@@ -73,6 +73,11 @@ func (otu *OverflowTestUtils) CreateProposalAPI(proposal *models.Proposal) *http
 	return otu.ExecuteRequest(req)
 }
 
+func (otu *OverflowTestUtils) DeleteProposalAPI(communityId int, proposalId int) *httptest.ResponseRecorder {
+	req, _ := http.NewRequest("DELETE", "/communities/"+strconv.Itoa(communityId)+"/proposals/"+strconv.Itoa(proposalId), nil)
+	return otu.ExecuteRequest(req)
+}
+
 func (otu *OverflowTestUtils) UpdateProposalAPI(
 	proposalId int,
 	payload *models.UpdateProposalRequestPayload,

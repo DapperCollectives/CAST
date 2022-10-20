@@ -468,6 +468,30 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (a *App) deleteProposal(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	p, err := helpers.fetchProposal(vars, "id")
+	if err != nil {
+		log.Error().Err(err).Msg("Invalid Proposal ID.")
+		respondWithError(w, errIncompleteRequest)
+		return
+	}
+
+	if *p.Status != "draft" {
+		log.Error().Err(err).Msg("Only draft proposals can be deleted")
+		respondWithError(w, errIncompleteRequest)
+		return
+	}
+
+	if err := p.DeleteProposal(a.DB); err != nil {
+		log.Error().Err(err).Msg("Error deleting proposal")
+		respondWithError(w, errIncompleteRequest)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, p)
+}
+
 // Communities
 func (a *App) getCommunities(w http.ResponseWriter, r *http.Request) {
 	pageParams := getPageParams(*r, 25)

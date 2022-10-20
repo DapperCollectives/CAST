@@ -157,7 +157,7 @@ func (p *Proposal) CreateProposal(db *s.Database) error {
 	return err
 }
 
-func (p *Proposal) DeleteDraftProposal(db *s.Database) error {
+func (p *Proposal) DeleteProposal(db *s.Database) error {
 	_, err := db.Conn.Exec(db.Context, `
 	DELETE FROM proposals
 	WHERE id = $1
