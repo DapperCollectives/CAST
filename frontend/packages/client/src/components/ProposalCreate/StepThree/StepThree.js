@@ -29,12 +29,12 @@ const isToday = (date) => {
   return date?.setHours(0, 0, 0, 0) === new Date().setHours(0, 0, 0, 0);
 };
 
-const StepTwo = ({
+const StepThree = ({
   stepData,
   setStepValid,
   onDataChange,
   formId,
-  moveToNextStep,
+  onSubmit: onSubmitParam = () => {},
 }) => {
   const [isStartTimeOpen, setStartTimeOpen] = useState(false);
   const [isEndTimeOpen, setEndTimeOpen] = useState(false);
@@ -71,9 +71,8 @@ const StepTwo = ({
 
   const { errors, isValid, isDirty, isSubmitting } = formState;
 
-  const onSubmit = (data) => {
-    onDataChange(data);
-    moveToNextStep();
+  const onSubmit = () => {
+    onSubmitParam();
   };
 
   const onSetStartTimeOpen = (e) => {
@@ -99,6 +98,15 @@ const StepTwo = ({
     setStepValid((isValid || isDirty) && !isSubmitting);
   }, [isValid, isDirty, isSubmitting, setStepValid]);
 
+  // pre saves data so when submit
+  // is triggered onDataChange has been already executed
+  useEffect(() => {
+    if (startDate && startTime && endDate && endTime) {
+      onDataChange({ startDate, startTime, endDate, endTime });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startDate, startTime, endDate, endTime]);
+
   useEffect(() => {
     if (
       isToday(startDate) &&
@@ -119,7 +127,11 @@ const StepTwo = ({
     : undefined;
 
   return (
-    <Form onSubmit={handleSubmit(onSubmit)} formId={formId}>
+    <Form
+      onSubmit={handleSubmit(onSubmit)}
+      formId={formId}
+      formClasses="mb-6-mobile"
+    >
       <div className="border-light-tablet rounded-lg is-flex-direction-column is-mobile m-0 p-6 p-0-mobile mb-6">
         <h4 className="title is-5 mb-5">
           Start date and time <span className="has-text-danger">*</span>
@@ -268,4 +280,4 @@ const StepTwo = ({
   );
 };
 
-export default StepTwo;
+export default StepThree;
