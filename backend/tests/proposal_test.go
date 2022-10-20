@@ -365,7 +365,7 @@ func TestDraftProposal(t *testing.T) {
 	proposalID := 1
 
 	t.Run("A community author should be able to update a draft proposal", func(t *testing.T) {
-		response := otu.GetDraftProposalAPI(proposalID)
+		response := otu.GetProposalByIdAPI(1, proposalID)
 		CheckResponseCode(t, http.StatusOK, response.Code)
 
 		var p models.Proposal
@@ -378,12 +378,12 @@ func TestDraftProposal(t *testing.T) {
 		)
 
 		response = otu.UpdateProposalAPI(proposalID, payload)
+		fmt.Println(response.Body.String())
 		CheckResponseCode(t, http.StatusOK, response.Code)
 
 		var updated models.Proposal
 		json.Unmarshal(response.Body.Bytes(), &updated)
 
-		assert.Equal(t, 1, updated.ID)
 		assert.Equal(t, "draft", *updated.Status)
 		assert.Equal(t, "balance-of-nfts", *updated.Strategy)
 	})

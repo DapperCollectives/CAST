@@ -410,9 +410,7 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check that status update is valid
-	// For now we are assuming proposals are creating with
-	// status 'published' and may be cancelled.
-	if payload.Status != "cancelled" {
+	if *payload.Proposal.Status != "cancelled" && *payload.Proposal.Status != "draft" {
 		log.Error().Err(err).Msg("Invalid status update")
 		respondWithError(w, errIncompleteRequest)
 		return
@@ -441,21 +439,33 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	p.Status = &payload.Status
-	p.Cid, err = helpers.pinJSONToIpfs(p)
-	if err != nil {
-		log.Error().Err(err).Msg("Error pinning proposal to IPFS")
-		respondWithError(w, errIncompleteRequest)
-		return
-	}
+	if *payload.Proposal.Status == "draft" {
+		p = *payload.Proposal
 
-	if err := p.UpdateProposal(a.DB); err != nil {
-		log.Error().Err(err).Msg("Error updating proposal")
-		respondWithError(w, errIncompleteRequest)
-		return
-	}
+		if err := p.UpdateDraftProposal(a.DB); err != nil {
+			log.Error().Err(err).Msg("Error updating draft proposal")
+			respondWithError(w, errIncompleteRequest)
+			return
+		}
 
-	respondWithJSON(w, http.StatusOK, p)
+		respondWithJSON(w, http.StatusOK, p)
+	} else {
+		p.Status = payload.Proposal.Status
+		p.Cid, err = helpers.pinJSONToIpfs(p)
+		if err != nil {
+			log.Error().Err(err).Msg("Error pinning proposal to IPFS")
+			respondWithError(w, errIncompleteRequest)
+			return
+		}
+
+		if err := p.UpdateProposal(a.DB); err != nil {
+			log.Error().Err(err).Msg("Error updating proposal")
+			respondWithError(w, errIncompleteRequest)
+			return
+		}
+
+		respondWithJSON(w, http.StatusOK, p)
+	}
 }
 
 // Communities

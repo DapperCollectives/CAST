@@ -45,10 +45,8 @@ type Proposal struct {
 }
 
 type UpdateProposalRequestPayload struct {
-	Strategy *string    `json:"strategy,omitempty"`
-	Status   string     `json:"status"`
-	Voucher  *s.Voucher `json:"voucher,omitempty"`
-
+	Proposal *Proposal  `json:"payload"`
+	Voucher  *s.Voucher `json:"voucher"`
 	s.TimestampSignaturePayload
 }
 

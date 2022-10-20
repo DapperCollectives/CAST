@@ -62,17 +62,6 @@ func (otu *OverflowTestUtils) GetProposalByIdAPI(communityId int, proposalId int
 	return response
 }
 
-func (otu *OverflowTestUtils) GetDraftProposalAPI(proposalId int) *httptest.ResponseRecorder {
-	req, _ := http.NewRequest("GET", "/proposals/"+strconv.Itoa(proposalId)+"/draft", nil)
-	response := otu.ExecuteRequest(req)
-	return response
-}
-
-func (otu *OverflowTestUtils) DeleteDraftProposalAPI(proposalId int) *httptest.ResponseRecorder {
-	req, _ := http.NewRequest("DELETE", "/proposals/"+strconv.Itoa(proposalId)+"/draft", nil)
-	return otu.ExecuteRequest(req)
-}
-
 func (otu *OverflowTestUtils) CreateProposalAPI(proposal *models.Proposal) *httptest.ResponseRecorder {
 	json, _ := json.Marshal(proposal)
 	req, _ := http.NewRequest(
@@ -80,24 +69,6 @@ func (otu *OverflowTestUtils) CreateProposalAPI(proposal *models.Proposal) *http
 		"/communities/"+strconv.Itoa(proposal.Community_id)+"/proposals",
 		bytes.NewBuffer(json),
 	)
-	req.Header.Set("Content-Type", "application/json")
-	return otu.ExecuteRequest(req)
-}
-
-func (otu *OverflowTestUtils) CreateDraftProposalAPI(proposal *models.Proposal) *httptest.ResponseRecorder {
-	json, _ := json.Marshal(proposal)
-	req, _ := http.NewRequest(
-		"POST",
-		"/communities/"+strconv.Itoa(proposal.Community_id)+"/proposals/draft",
-		bytes.NewBuffer(json),
-	)
-	req.Header.Set("Content-Type", "application/json")
-	return otu.ExecuteRequest(req)
-}
-
-func (otu *OverflowTestUtils) UpdateDraftProposalAPI(proposalId int, proposal *models.Proposal) *httptest.ResponseRecorder {
-	json, _ := json.Marshal(proposal)
-	req, _ := http.NewRequest("PUT", "/communities/"+strconv.Itoa(proposalId)+"/proposals/draft", bytes.NewBuffer(json))
 	req.Header.Set("Content-Type", "application/json")
 	return otu.ExecuteRequest(req)
 }
@@ -140,7 +111,6 @@ func (otu *OverflowTestUtils) GenerateDraftProposalStruct(
 	proposal.Community_id = communityId
 	proposal.Start_time = time.Now().AddDate(0, 1, 0)
 	proposal.End_time = time.Now().Add(30 * 24 * time.Hour)
-	fmt.Printf("GENERATE proposal: %+v ", proposal)
 	return &proposal
 }
 
@@ -148,7 +118,8 @@ func (otu *OverflowTestUtils) GenerateCancelProposalStruct(
 	signer string,
 	proposalId int,
 ) *models.UpdateProposalRequestPayload {
-	payload := models.UpdateProposalRequestPayload{Status: "cancelled"}
+	cancelled := "canclled"
+	payload := models.UpdateProposalRequestPayload{Proposal: &models.Proposal{Status: &cancelled}}
 	timestamp := fmt.Sprint(time.Now().UnixNano() / int64(time.Millisecond))
 	compositeSignatures := otu.GenerateCompositeSignatures(signer, timestamp)
 	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", signer))
@@ -164,14 +135,19 @@ func (otu *OverflowTestUtils) GenerateUpdatedDraftProposalPayload(
 	proposalId int,
 	strategy string,
 ) *models.UpdateProposalRequestPayload {
-	payload := models.UpdateProposalRequestPayload{Status: "draft"}
+	draft := "draft"
+	payload := models.UpdateProposalRequestPayload{
+		Proposal: &models.Proposal{
+			Status:   &draft,
+			Strategy: &strategy,
+		},
+	}
 	timestamp := fmt.Sprint(time.Now().UnixNano() / int64(time.Millisecond))
 	compositeSignatures := otu.GenerateCompositeSignatures(signer, timestamp)
 	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", signer))
 	payload.Signing_addr = fmt.Sprintf("0x%s", account.Address().String())
 	payload.Timestamp = timestamp
 	payload.Composite_signatures = compositeSignatures
-	payload.Strategy = &strategy
 
 	return &payload
 }
@@ -180,7 +156,8 @@ func (otu *OverflowTestUtils) GenerateClosedProposalStruct(
 	signer string,
 	proposalId int,
 ) *models.UpdateProposalRequestPayload {
-	payload := models.UpdateProposalRequestPayload{Status: "closed"}
+	closed := "closed"
+	payload := models.UpdateProposalRequestPayload{Proposal: &models.Proposal{Status: &closed}}
 	timestamp := fmt.Sprint(time.Now().UnixNano() / int64(time.Millisecond))
 	compositeSignatures := otu.GenerateCompositeSignatures(signer, timestamp)
 	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", signer))
