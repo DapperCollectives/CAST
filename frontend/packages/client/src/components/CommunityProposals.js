@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCommunityProposalsWithVotes, useMediaQuery } from 'hooks';
+import { useWebContext } from 'hooks';
 import { FilterValues } from 'const';
 import CommunityProposalList from './CommunityProposalList';
 import DropDown from './Dropdown';
@@ -13,6 +14,10 @@ const statusMap = {
 };
 export default function CommunityProposals({ communityId = 1, admins } = {}) {
   const notMobile = useMediaQuery();
+
+  const {
+    user: { addr },
+  } = useWebContext();
 
   const proposalFilterValues = Object.entries(FilterValues)
     .filter(
@@ -88,14 +93,26 @@ export default function CommunityProposals({ communityId = 1, admins } = {}) {
         {notMobile && (
           <div className="columns m-0">
             <div className="column p-0 is-10">
-              <Link to={`/community/${communityId}/proposal/create`}>
+              {addr ? (
+                <Link to={`/community/${communityId}/proposal/create`}>
+                  <div
+                    className="button is-fullwidth rounded-sm is-flex small-text has-text-white has-background-black"
+                    style={{ minHeight: '40px' }}
+                  >
+                    Create Proposal
+                  </div>
+                </Link>
+              ) : (
                 <div
                   className="button is-fullwidth rounded-sm is-flex small-text has-text-white has-background-black"
                   style={{ minHeight: '40px' }}
+                  onClick={() => {
+                    console.log('open modal connect');
+                  }}
                 >
                   Create Proposal
                 </div>
-              </Link>
+              )}
             </div>
           </div>
         )}

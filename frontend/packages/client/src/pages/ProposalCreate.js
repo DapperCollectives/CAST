@@ -11,11 +11,12 @@ import {
   PropCreateStepThree,
   PropCreateStepTwo,
 } from 'components/ProposalCreate';
-import { useProposalCreateMutation } from 'hooks';
+import { useProposalCreateCheck, useProposalCreateMutation } from 'hooks';
 import { isStartTimeValid, parseDateToServer } from 'utils';
 
 export default function ProposalCreatePage() {
   const { createProposal, data, loading, error } = useProposalCreateMutation();
+
   const [modalError, setModalError] = useState(null);
   const {
     user: { addr: creatorAddr },
@@ -27,6 +28,14 @@ export default function ProposalCreatePage() {
   const { notifyError } = useErrorHandlerContext();
 
   const { communityId } = useParams();
+
+  const {
+    isLoading: isLoadingCheck,
+    data: canCreateCheck,
+    error: errorCanCreateCheck,
+  } = useProposalCreateCheck({ communityId, addr: creatorAddr });
+
+  console.log(canCreateCheck);
 
   useEffect(() => {
     if (data?.id) {
