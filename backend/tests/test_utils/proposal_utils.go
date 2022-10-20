@@ -123,7 +123,7 @@ func (otu *OverflowTestUtils) GenerateCancelProposalStruct(
 	signer string,
 	proposalId int,
 ) *models.UpdateProposalRequestPayload {
-	cancelled := "canclled"
+	cancelled := "cancelled"
 	payload := models.UpdateProposalRequestPayload{Proposal: &models.Proposal{Status: &cancelled}}
 	timestamp := fmt.Sprint(time.Now().UnixNano() / int64(time.Millisecond))
 	compositeSignatures := otu.GenerateCompositeSignatures(signer, timestamp)

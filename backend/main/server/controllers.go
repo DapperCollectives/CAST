@@ -409,13 +409,6 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Check that status update is valid
-	if *payload.Proposal.Status != "cancelled" && *payload.Proposal.Status != "draft" {
-		log.Error().Err(err).Msg("Invalid status update")
-		respondWithError(w, errIncompleteRequest)
-		return
-	}
-
 	if payload.Voucher != nil {
 		if err := helpers.validateUserWithRoleViaVoucher(
 			payload.Signing_addr,
@@ -473,13 +466,13 @@ func (a *App) deleteProposal(w http.ResponseWriter, r *http.Request) {
 	p, err := helpers.fetchProposal(vars, "id")
 	if err != nil {
 		log.Error().Err(err).Msg("Invalid Proposal ID.")
-		respondWithError(w, errIncompleteRequest)
+		respondWithError(w, errProposalNotFound)
 		return
 	}
 
 	if *p.Status != "draft" {
 		log.Error().Err(err).Msg("Only draft proposals can be deleted")
-		respondWithError(w, errIncompleteRequest)
+		respondWithError(w, errForbidden)
 		return
 	}
 
