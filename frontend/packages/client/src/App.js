@@ -1,4 +1,6 @@
 import 'react-datepicker/dist/react-datepicker.css';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { ErrorBoundary } from 'react-error-boundary';
 import { HashRouter as Router } from 'react-router-dom';
@@ -36,7 +38,9 @@ function App() {
             <ChakraProvider theme={theme} resetCSS={false}>
               <NotificationModalProvider>
                 <ErrorHandler>
-                  <AppPages />
+                  <DndProvider backend={HTML5Backend}>
+                    <AppPages />
+                  </DndProvider>
                 </ErrorHandler>
               </NotificationModalProvider>
             </ChakraProvider>
