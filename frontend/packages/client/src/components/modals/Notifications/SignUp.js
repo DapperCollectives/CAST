@@ -17,7 +17,7 @@ const SignUpForm = ({ setErrorMessage, onSubscribe, onClose }) => {
     },
   });
 
-  const onSubmit = async () => {
+  const onSubmit = async (formData) => {
     try {
       onSubscribe(signupAll);
       onClose();

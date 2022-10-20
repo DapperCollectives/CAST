@@ -18,6 +18,7 @@ export { default as CommunityPulse } from './CommunityPulse';
 export { default as CommunityMemberList } from './CommunityMembersList';
 export { default as CommunityAbout } from './CommunityAbout';
 export { default as JoinCommunityButton } from './Community/JoinCommunityButton';
+export { default as SubscribeCommunityButton } from './Community/SubscribeCommunityButton';
 export { CommunityEditorProfile } from './Community/CommunityEditorProfile';
 export { CommunityEditorLinks } from './Community/CommunityEditorLinks';
 export { CommunityEditorDetails } from './Community/CommunityEditorDetails';
@@ -56,8 +57,10 @@ export {
   CancelProposal as CancelProposalModal,
   Modal,
 } from './modals';
+export { default as NotificationsModal } from './modals/Notifications';
 export { default as StatusPill } from './StatusPill';
 export { default as StyledStatusPill } from './StyledStatusPill';
 export { default as FilterPill } from './FilterPill';
 export { default as BrowseCommunityButton } from './BrowseCommunityButton';
+export { default as Tooltip } from './Tooltip';
 export * from './Proposal';
