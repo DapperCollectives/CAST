@@ -9,6 +9,7 @@ $orange: #F4AF4A
 $light-grey: #F9F9F9
 $grey: #636363
 $light-blue: hsla(211, 98%, 46%, 1)
+$blue-twitter: #1DA1F2
 
 // Update Bulma's global variables
 $family-sans-serif: "DM Sans"
@@ -304,14 +305,15 @@ header#navbar
 	display: none
 hr
 	border: 1px solid $grey-lightest
-.vote-options.is-disabled
-	opacity: 0.5
+.vote-options .is-disabled
 	pointer-events: none
-.vote-options.is-disabled.is-voted
-	opacity: 1
 .dropdown.is-disabled
 	background-color: rgba(239, 239, 239, 0.3)
 	pointer-events: none
+.twitter-button, .twitter-button:hover
+	background: $blue-twitter !important
+	border-color: $blue-twitter !important
+	color: white !important
 .join-community-button
 	transition: all .3s
 	.hide-eye
@@ -473,6 +475,8 @@ hr
 		max-width: 960px
 		padding-left: 0
 		padding-right: 0
+	.is-flex-direction-row-desktop-only
+		flex-direction: row !important
 
 @include tablet-only
 	.spacing-left-panel
