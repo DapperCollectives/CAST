@@ -4,6 +4,7 @@ import { useModalContext } from 'contexts/NotificationModal';
 import { Svg } from '@cast/shared-components';
 import NotificationsModal from 'components/modals/Notifications';
 import { FRONTEND_URL } from 'const';
+import classnames from 'classnames';
 
 const PostVoteOptions = ({ communityId, proposalId }) => {
   const [linkCopied, setLinkCopied] = useState(false);
@@ -18,6 +19,12 @@ const PostVoteOptions = ({ communityId, proposalId }) => {
 
   const proposalUrl = `${FRONTEND_URL}/#/community/${communityId}/proposal/${proposalId}`;
 
+  const buttonsContainerClasses = classnames(
+    'is-flex is-flex-wrap-wrap is-flex-direction-column',
+    'is-flex-direction-row-desktop-only is-justify-content-center',
+    'mt-5 m-0 columns is-mobile p-0'
+  );
+
   return (
     <div className="">
       <div className="is-flex is-align-items-center">
@@ -26,7 +33,7 @@ const PostVoteOptions = ({ communityId, proposalId }) => {
           You successfully voted on this proposal!
         </b>
       </div>
-      <div className="is-flex is-flex-wrap-wrap is-flex-direction-column is-flex-direction-row-desktop-only is-justify-content-center mt-5 columns is-mobile p-0">
+      <div className={buttonsContainerClasses}>
         <div
           className="column is-full-mobile p-0 mr-2-desktop mb-2"
           style={{ flexGrow: 0 }}
