@@ -185,7 +185,7 @@ func TestGetUserProposals(t *testing.T) {
 	response := otu.GetCommunityUserProposalsAPI(utils.AdminAddr) //Get proposals for user
 	checkResponseCode(t, http.StatusOK, response.Code)
 
-	var p test_utils.PaginatedResponseWithProposal
+	var p test_utils.PaginatedResponseWithUserProposal
 
 	assert.Equal(t, 1, p.Data[0].Community_id)
 	assert.Equal(t, 2, p.Data[1].Community_id)
