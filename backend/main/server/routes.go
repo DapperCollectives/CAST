@@ -22,11 +22,6 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/proposals/{id:[0-9]+}", a.getProposal).Methods("GET")
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/proposals", a.createProposal).Methods("POST", "OPTIONS")
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/proposals/{id:[0-9]+}", a.updateProposal).Methods("PUT", "OPTIONS")
-	//Proposals/draft
-	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/proposals/draft", a.createDraftProposal).Methods("POST")
-	a.Router.HandleFunc("/communities/{id:[0-9]+}/proposals/draft", a.updateDraftProposal).Methods("PUT")
-	a.Router.HandleFunc("/proposals/{id:[0-9]+}/draft", a.getDraftProposal).Methods("GET")
-	a.Router.HandleFunc("/proposals/{id:[0-9]+}/draft", a.deleteDraftProposal).Methods("DELETE")
 	// Lists
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/lists", a.getListsForCommunity).Methods("GET")
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/lists", a.createListForCommunity).Methods("POST", "OPTIONS")

@@ -20,6 +20,7 @@ import (
 var (
 	proposalBody                = "<html>something</html>"
 	published                   = "published"
+	draft                       = "draft"
 	tokenWeightedDefault        = "token-weighted-default"
 	blockHeight          uint64 = 1
 
@@ -37,8 +38,9 @@ var (
 	}
 
 	DraftProposalStruct = models.Proposal{
-		Name: "Draft Proposal",
-		Body: &proposalBody,
+		Name:   "Draft Proposal",
+		Body:   &proposalBody,
+		Status: &draft,
 	}
 )
 
@@ -138,8 +140,7 @@ func (otu *OverflowTestUtils) GenerateDraftProposalStruct(
 	proposal.Community_id = communityId
 	proposal.Start_time = time.Now().AddDate(0, 1, 0)
 	proposal.End_time = time.Now().Add(30 * 24 * time.Hour)
-
-	proposal.Status = nil
+	fmt.Printf("GENERATE proposal: %+v ", proposal)
 	return &proposal
 }
 
