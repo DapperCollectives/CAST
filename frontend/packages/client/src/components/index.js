@@ -60,4 +60,5 @@ export { default as StatusPill } from './StatusPill';
 export { default as StyledStatusPill } from './StyledStatusPill';
 export { default as FilterPill } from './FilterPill';
 export { default as BrowseCommunityButton } from './BrowseCommunityButton';
+export { default as Tooltip } from './Tooltip';
 export * from './Proposal';
