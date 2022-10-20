@@ -517,7 +517,6 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorRespo
 		return models.Proposal{}, errStrategyNotFound
 	}
 
-	fmt.Printf("Proposal strategy: %v \n", p)
 	if p.Voucher != nil {
 		if err := h.validateUserViaVoucher(p.Creator_addr, p.Voucher); err != nil {
 			return models.Proposal{}, errForbidden
@@ -659,6 +658,41 @@ func (h *Helpers) createDraftProposal(p models.Proposal) (models.Proposal, error
 	p = h.setNullFieldsToEmpty(p)
 
 	if err := p.CreateProposal(h.A.DB); err != nil {
+		return models.Proposal{}, errIncompleteRequest
+	}
+
+	return p, nilErr
+}
+
+func (h *Helpers) updateDraftProposal(p models.Proposal) (models.Proposal, errorResponse) {
+	if p.Voucher != nil {
+		if err := h.validateUserViaVoucher(p.Creator_addr, p.Voucher); err != nil {
+			return models.Proposal{}, errForbidden
+		}
+	} else {
+		if err := h.validateUser(p.Creator_addr, p.Timestamp, p.Composite_signatures); err != nil {
+			return models.Proposal{}, errForbidden
+		}
+	}
+
+	community, err := h.fetchCommunity(p.Community_id)
+	if err != nil {
+		return models.Proposal{}, errIncompleteRequest
+	}
+
+	canUserCreateProposal := community.CanUserCreateProposal(
+		h.A.DB,
+		h.A.FlowAdapter,
+		p.Creator_addr,
+	)
+
+	if err := handlePermissionErrorr(canUserCreateProposal); err != nilErr {
+		return models.Proposal{}, err
+	}
+
+	p = h.setNullFieldsToEmpty(p)
+
+	if err := p.UpdateProposal(h.A.DB); err != nil {
 		return models.Proposal{}, errIncompleteRequest
 	}
 

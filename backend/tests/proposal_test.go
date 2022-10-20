@@ -355,6 +355,7 @@ func TestDraftProposal(t *testing.T) {
 
 		// Get proposal after create
 		response = otu.GetDraftProposalAPI(p.ID)
+
 		var created models.Proposal
 		json.Unmarshal(response.Body.Bytes(), &created)
 
@@ -363,18 +364,13 @@ func TestDraftProposal(t *testing.T) {
 	})
 
 	t.Run("A community author should be able to delete a draft proposal", func(t *testing.T) {
-		proposalStruct := otu.GenerateDraftProposalStruct(authorName, communityId)
-		payload := otu.GenerateProposalPayload(authorName, proposalStruct)
-		response := otu.CreateDraftProposalAPI(payload)
+		response := otu.GetDraftProposalAPI(1)
+		CheckResponseCode(t, http.StatusNotFound, response.Code)
 
-		CheckResponseCode(t, http.StatusCreated, response.Code)
 		var p models.Proposal
 		json.Unmarshal(response.Body.Bytes(), &p)
+		strategy := "balance-of-nfts"
+		p.Strategy = &strategy
 
-		response = otu.DeleteDraftProposalAPI(p.ID)
-		CheckResponseCode(t, http.StatusOK, response.Code)
-
-		response = otu.GetDraftProposalAPI(p.ID)
-		CheckResponseCode(t, http.StatusNotFound, response.Code)
 	})
 }

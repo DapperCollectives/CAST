@@ -421,6 +421,31 @@ func (a *App) createDraftProposal(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusCreated, proposal)
 }
 
+func (a *App) updateDraftProposal(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	p, err := helpers.fetchProposal(vars, "id")
+	if err != nil {
+		log.Error().Err(err).Msg("Invalid Proposal ID.")
+		respondWithError(w, errProposalNotFound)
+		return
+	}
+
+	if err := validatePayload(r.Body, &p); err != nil {
+		log.Error().Err(err).Msg("Error validating payload")
+		respondWithError(w, errIncompleteRequest)
+		return
+	}
+
+	proposal, errResponse := helpers.updateDraftProposal(p)
+	if errResponse != nilErr {
+		log.Error().Err(err).Msg("Error updating draft proposal")
+		respondWithError(w, errResponse)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, proposal)
+}
+
 func (a *App) deleteDraftProposal(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	p, err := helpers.fetchProposal(vars, "id")
