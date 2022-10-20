@@ -128,12 +128,6 @@ const HOMEPAGE_SQL = `
 		OR is_featured = 'true'
 		LIMIT $1 OFFSET $2
 `
-const DEFAULT_SEARCH_SQL = `
-	SELECT id, name, body, logo, category
-		FROM communities
-    WHERE is_featured = 'true'
-		AND category IS NOT NULL
-`
 const INSERT_COMMUNITY_SQL = `
 	INSERT INTO communities(
 		name, 
@@ -190,28 +184,6 @@ const UPDATE_COMMUNITY_SQL = `
 	only_authors_to_submit = COALESCE($20, only_authors_to_submit)
 	WHERE id = $21
 `
-const SEARCH_COMMUNITIES_SQL = `
-	SELECT id, name, body, logo, category	
-	FROM communities 
-	WHERE SIMILARITY(name, $1) > 0.1
-		AND category IS NOT NULL
-`
-
-const COUNT_CATEGORIES_DEFAULT_SQL = `
-	SELECT category, COUNT(*) as category_count
-	FROM communities 
-	WHERE is_featured = 'true'
-		AND category IS NOT NULL
-	GROUP BY category
-`
-
-const COUNT_CATEGORIES_SEARCH_SQL = `
-	SELECT category, COUNT(*) as category_count
-	FROM communities 
-	WHERE SIMILARITY(name, $1) > 0.1
-		AND category IS NOT NULL
-	GROUP BY category
-`
 
 func GetCommunityTypes(db *s.Database) ([]*CommunityType, error) {
 	var communityTypes []*CommunityType
@@ -262,70 +234,35 @@ func (c *Community) GetCommunityByProposalId(db *s.Database, proposalId int) err
 		proposalId)
 }
 
-func GetDefaultCommunities(
-	db *s.Database,
-	params shared.PageParams,
-	filters []string,
-	isSearch bool,
-) ([]*Community, int, error) {
-	var sql string
-
+func GetHomePageCommunities(db *s.Database, pageParams shared.PageParams) ([]*Community, int, error) {
 	var totalRecords int
-	countSql := `SELECT COUNT(*) FROM communities`
-	if !isSearch {
-		sql = HOMEPAGE_SQL
+	countSql := `SELECT COUNT(*) FROM communities `
 
-		var communities []*Community
+	sql := HOMEPAGE_SQL
+	var communities []*Community
 
-		err := pgxscan.Select(
-			db.Context,
-			db.Conn,
-			&communities,
-			sql,
-			params.Count,
-			params.Start,
-		)
+	err := pgxscan.Select(
+		db.Context,
+		db.Conn,
+		&communities,
+		sql,
+		pageParams.Count,
+		pageParams.Start,
+	)
 
-		// If we get pgx.ErrNoRows, just return an empty array
-		// and obfuscate error
-		if err != nil && err.Error() != pgx.ErrNoRows.Error() {
-			return nil, 0, err
-		} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
-			return []*Community{}, 0, nil
-		}
-
-		db.Conn.QueryRow(db.Context, countSql).Scan(&totalRecords)
-		return communities, totalRecords, nil
-	} else {
-		sql, err := addFiltersToSql(DEFAULT_SEARCH_SQL, "", filters)
-		if err != nil {
-			return nil, 0, err
-		}
-
-		rows, err := db.Conn.Query(
-			db.Context,
-			sql,
-			params.Count,
-			params.Start,
-		)
-		if err != nil {
-			return nil, 0, err
-		}
-
-		defer rows.Close()
-
-		communities, err := scanSearchResults(rows)
-		if err != nil {
-			return nil, 0, err
-		}
-
-		db.Conn.QueryRow(db.Context, countSql).Scan(&totalRecords)
-		return communities, totalRecords, nil
+	// If we get pgx.ErrNoRows, just return an empty array
+	// and obfuscate error
+	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
+		return nil, 0, err
+	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
+		return []*Community{}, 0, nil
 	}
+
+	db.Conn.QueryRow(db.Context, countSql).Scan(&totalRecords)
+	return communities, totalRecords, nil
 }
 
 func (c *Community) CreateCommunity(db *s.Database) error {
-
 	err := db.Conn.QueryRow(db.Context,
 		INSERT_COMMUNITY_SQL,
 		c.Name,
@@ -353,6 +290,7 @@ func (c *Community) CreateCommunity(db *s.Database) error {
 		c.Only_authors_to_submit,
 		c.Voucher).
 		Scan(&c.ID, &c.Created_at)
+
 	return err
 }
 
@@ -459,124 +397,6 @@ func (c *Community) GetStrategy(name string) (Strategy, error) {
 		}
 	}
 	return Strategy{}, fmt.Errorf("Strategy %s does not exist on community", name)
-}
-
-func SearchForCommunity(
-	db *s.Database,
-	query string,
-	filters []string,
-	params shared.PageParams,
-) ([]*Community, int, error) {
-
-	countSql := `SELECT COUNT(*) FROM communities WHERE SIMILARITY(name, $1) > 0.1`
-	sql, err := addFiltersToSql(SEARCH_COMMUNITIES_SQL, query, filters)
-	if err != nil {
-		return nil, 0, err
-	}
-
-	rows, err := db.Conn.Query(
-		db.Context,
-		sql,
-		query,
-		params.Count,
-		params.Start,
-	)
-
-	if err != nil {
-		return []*Community{}, 0, fmt.Errorf("error searching for a community with the the query %s", query)
-	}
-
-	defer rows.Close()
-
-	communities, err := scanSearchResults(rows)
-	if err != nil {
-		return []*Community{}, 0, fmt.Errorf("error scanning search results for the query %s", query)
-	}
-
-	var totalRecords int
-	db.Conn.QueryRow(db.Context, countSql, query).Scan(&totalRecords)
-	return communities, totalRecords, nil
-}
-
-func GetCategoryCount(db *s.Database, search string) (map[string]int, error) {
-	var rows pgx.Rows
-	var err error
-
-	if search == "" {
-		rows, err = db.Conn.Query(
-			db.Context,
-			COUNT_CATEGORIES_DEFAULT_SQL,
-		)
-	} else {
-		rows, err = db.Conn.Query(
-			db.Context,
-			COUNT_CATEGORIES_SEARCH_SQL,
-			search,
-		)
-	}
-
-	// If we get pgx.ErrNoRows, just return an empty array
-	// and obfuscate error
-	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
-		return nil, err
-	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
-		return make(map[string]int), nil
-	}
-
-	defer rows.Close()
-
-	categoryCount := make(map[string]int)
-	for rows.Next() {
-		results := struct {
-			Category string
-			Count    int
-		}{}
-		err := rows.Scan(&results.Category, &results.Count)
-		if err != nil {
-			return make(map[string]int), fmt.Errorf("error scanning community row: %v", err)
-		}
-		categoryCount[results.Category] = results.Count
-	}
-
-	return categoryCount, nil
-}
-
-func addFiltersToSql(query, search string, filters []string) (string, error) {
-	var sql string
-	if filters[0] != "" {
-		sql = query + " AND ("
-		for i, filter := range filters {
-			if i == 0 {
-				sql += fmt.Sprintf("category = '%s'", filter)
-			} else {
-				sql += fmt.Sprintf(" OR category = '%s'", filter)
-			}
-		}
-		sql += ")"
-	} else {
-		sql = query
-	}
-
-	if search != "" {
-		sql = sql + " LIMIT $2 OFFSET $3"
-	} else {
-		sql = sql + " LIMIT $1 OFFSET $2"
-	}
-
-	return sql, nil
-}
-
-func scanSearchResults(rows pgx.Rows) ([]*Community, error) {
-	var communities []*Community
-	for rows.Next() {
-		var c Community
-		err := rows.Scan(&c.ID, &c.Name, &c.Body, &c.Logo, &c.Category)
-		if err != nil {
-			return communities, fmt.Errorf("error scanning community row: %v", err)
-		}
-		communities = append(communities, &c)
-	}
-	return communities, nil
 }
 
 func MatchStrategyByProposal(s []Strategy, strategyToMatch string) (Strategy, error) {

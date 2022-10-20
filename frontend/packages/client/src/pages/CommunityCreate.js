@@ -167,6 +167,7 @@ export default function CommunityCreate() {
     blockNavigationOut: true && !data,
     blockNavigationText:
       'Community creation is not complete yet, are you sure you want to leave?',
+    useControlsOnTopBar: false,
     steps: [
       {
         label: 'Community Profile',

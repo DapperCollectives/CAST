@@ -4,6 +4,9 @@ import { BrowserTracing } from '@sentry/tracing';
 import App from './App';
 import './index.css';
 
+// hack for buffer error on react-scripts version > 5
+window.Buffer = window.Buffer || require('buffer').Buffer;
+
 Sentry.init({
   dsn: process.env.REACT_APP_SENTRY_URL,
   integrations: [new BrowserTracing()],

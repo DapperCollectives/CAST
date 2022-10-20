@@ -8,6 +8,7 @@ $yellow: #FBD84D
 $orange: #F4AF4A
 $light-grey: #F9F9F9
 $grey: #636363
+$light-blue: hsla(211, 98%, 46%, 1)
 
 // Update Bulma's global variables
 $family-sans-serif: "DM Sans"
@@ -106,7 +107,7 @@ $popover-max-width: 20rem
 .App, #root
 	height: 100%
 .Body
-	padding-top: calc($navbar-height + 2.33rem)
+	padding-top: calc($navbar-height + 1.78rem)
 	height: 100%
 @include mobile
 	.Body
@@ -120,6 +121,8 @@ code
 	background: transparent
 .divider
 	border-bottom: 1px solid $grey-light
+.divider-top
+	border-top: 1px solid $grey-light
 .rounded
 	border-radius: 16px
 .rounded-sm
@@ -130,6 +133,8 @@ code
 	border-top-right-radius: 8px
 .rounded-sm-bl
 	border-bottom-left-radius: 8px
+.rounded-sm-tr
+	border-top-right-radius: 8px
 .rounded-sm-br
 	border-bottom-right-radius: 8px
 .rounded-lg
@@ -146,24 +151,35 @@ code
 	border-radius: 50%
 .border-light
 	border: 1px solid $grey-lighter
+@include tablet	
+	.border-light-tablet
+		border: 1px solid $grey-lighter
 .border-grey
 	border: 1px solid $grey
 .border-green
 	border: 1px solid $success
 .border-dashed-dark
 	border: 2px dashed $grey
+.border-left-yellow
+	border-left: 5px solid $yellow
+.box-shadow
+	box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.25)
 .flex-1
 	flex: 1 0 0
 .flex-2
 	flex: 2 0 0
 .has-background-orange
 	background-color: $orange
+.has-background-blue
+	background-color: $light-blue
 .has-background-green
 	background-color: $success
 .has-background-grey
 	background-color: $grey
 .has-background-light-grey
 	background-color: $light-grey
+.has-background-grey-lighter
+	background-color: hsl(0deg, 0%, 86%, 0.3) !important
 .has-background-yellow
 	background-color: $yellow
 	&.button
@@ -183,8 +199,8 @@ code
 .cursor-pointer
 	cursor: pointer
 .header-spacing
-	padding-bottom: 1rem
-	padding-top: 1rem
+	padding-bottom: 0.75rem
+	padding-top: 0.75rem
 .message-container, .communities
 	margin-bottom: 2.5rem
 @include mobile
@@ -255,7 +271,7 @@ label > input[type="radio"].green-radio::before
 label > input[type="radio"].green-radio:checked::before
 	transform: scale(1)
 label > input[type="radio"].green-radio:checked
-	border-color: $success
+	border-color: $success	
 .proposal-copy
 	color: $grey
 .proposal-copy ul
@@ -947,3 +963,5 @@ input[type=range].slider::-ms-fill-upper
 	height: 200px
 	background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgb(255, 255, 255) 100%)
 
+.step-indicator-mobile
+	background-color: hsla(48, 96%, 64%, 0.5)

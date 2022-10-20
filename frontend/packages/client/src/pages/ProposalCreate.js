@@ -6,6 +6,7 @@ import { useModalContext } from 'contexts/NotificationModal';
 import { useWebContext } from 'contexts/Web3';
 import { ErrorModal, StepByStep, WalletConnect } from 'components';
 import {
+  PreviewComponent,
   PropCreateStepOne,
   PropCreateStepThree,
   PropCreateStepTwo,
@@ -71,12 +72,11 @@ export default function ProposalCreatePage() {
       return;
     }
 
-    const { strategy, minBalance, maxWeight, name, body, voteType } =
-      stepsData[0];
+    const { strategy, minBalance, maxWeight, name, body } = stepsData[0];
 
     const hasValidStartTime = isStartTimeValid(
-      stepsData[1].startTime,
-      stepsData[1].startDate
+      stepsData[2].startTime,
+      stepsData[2].startDate
     );
 
     if (!hasValidStartTime) {
@@ -88,16 +88,16 @@ export default function ProposalCreatePage() {
     }
 
     const startTime = parseDateToServer(
-      stepsData[1].startDate,
-      stepsData[1].startTime
+      stepsData[2].startDate,
+      stepsData[2].startTime
     ).toISOString();
 
     const endTime = parseDateToServer(
-      stepsData[1].endDate,
-      stepsData[1].endTime
+      stepsData[2].endDate,
+      stepsData[2].endTime
     ).toISOString();
 
-    const choices = stepsData[0].choices.map((c) => ({
+    const choices = stepsData[1].choices.map((c) => ({
       choiceText: c.value,
       choiceImgUrl: c?.choiceImgUrl ?? null,
     }));
@@ -110,7 +110,6 @@ export default function ProposalCreatePage() {
       endTime,
       startTime,
       strategy: strategy,
-      voteType,
       ...(minBalance !== ''
         ? { minBalance: parseFloat(minBalance) }
         : undefined),
@@ -125,7 +124,7 @@ export default function ProposalCreatePage() {
   };
 
   const props = {
-    finalLabel: 'Publish',
+    finalLabel: 'Save and Publish',
     onSubmit,
     isSubmitting: (loading || data) && !error,
     submittingMessage: 'Creating Proposal...',
@@ -134,27 +133,28 @@ export default function ProposalCreatePage() {
       'Proposal creation is not complete yet, are you sure you want to leave?',
     passNextToComp: true,
     passSubmitToComp: true,
-    showActionButtonLeftPannel: true,
+    previewComponent: <PreviewComponent />,
     steps: [
       {
-        label: 'Draft Proposal',
+        label: 'Proposal',
         description:
           'Some description of what you can write here that is useful.',
         component: <PropCreateStepOne />,
         useHookForms: true,
       },
       {
-        label: 'Set Date & Time',
+        label: 'Voting Options',
         description:
           'Some description of what you can write here that is useful.',
         component: <PropCreateStepTwo />,
         useHookForms: true,
       },
       {
-        label: 'Preview Proposal',
+        label: 'Date and Time',
         description:
           'Some description of what you can write here that is useful.',
         component: <PropCreateStepThree />,
+        useHookForms: true,
       },
     ],
   };

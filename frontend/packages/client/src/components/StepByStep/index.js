@@ -1,9 +1,10 @@
 import { cloneElement, useCallback, useRef, useState } from 'react';
 import { Prompt } from 'react-router-dom';
-import { Svg } from '@cast/shared-components';
+import { useMediaQuery } from 'hooks';
 import Loader from '../Loader';
-import NextButton from './NexStepButton';
-import SubmitButton from './SubmitButton';
+import LeftPanel from './LeftPanel';
+import NavButton from './NavButton';
+import NavStepByStep from './NavStepByStep';
 
 function StepByStep({
   finalLabel,
@@ -13,12 +14,15 @@ function StepByStep({
   isSubmitting,
   submittingMessage,
   passNextToComp = false,
-  showActionButtonLeftPannel = false,
   passSubmitToComp = false,
   blockNavigationOut = false,
   blockNavigationText,
+  useControlsOnTopBar = true,
+  previewComponent,
 } = {}) {
+  const notMobile = useMediaQuery();
   const [currentStep, setCurrentStep] = useState(0);
+  const [previewMode, setPreviewMode] = useState(false);
   const [showPreStep, setShowPreStep] = useState(!!preStep);
   const [isStepValid, setStepValid] = useState(false);
   const [stepsData, setStepsData] = useState({});
@@ -40,7 +44,11 @@ function StepByStep({
     }
   };
 
+  const moveToStep = (step) => setCurrentStep(step);
+
   const dismissPreStep = () => setShowPreStep(false);
+
+  const togglePreviewMode = () => setPreviewMode((state) => !state);
 
   const runPreCheckStepAdvance = () => {
     if (refs.current) {
@@ -61,93 +69,30 @@ function StepByStep({
     [refs]
   );
 
-  const getStepIcon = (stepIdx, stepLabel) => {
-    const stepClasses = [];
-    let divider = null;
-    if (!stepLabel && stepIdx < steps.length - 1) {
-      stepClasses.push('mr-2');
-      divider = (
-        <span
-          className="has-background-grey-light ml-2"
-          style={{
-            height: '1px',
-            width: 20,
-            position: 'relative',
-            top: 14,
-          }}
-        />
-      );
-    }
-    if (stepLabel) {
-      stepClasses.push('mb-6 is-align-items-center');
-    }
-
-    if (!showPreStep && stepIdx === currentStep) {
-      return (
-        <div className={`is-flex ${stepClasses.join(' ')}`} key={stepIdx}>
-          <div
-            className="rounded-full has-text-black has-background-orange is-flex
-              is-align-items-center is-justify-content-center"
-            style={{
-              width: 30,
-              height: 30,
-            }}
-          >
-            <b>{stepIdx + 1}</b>
-          </div>
-          {stepLabel ? <b className="ml-4">{stepLabel}</b> : divider}
-        </div>
-      );
-    } else if (!showPreStep && currentStep > stepIdx) {
-      return (
-        <div className={`is-flex ${stepClasses.join(' ')}`} key={stepIdx}>
-          <Svg name="CheckMark" circleFill="#44C42F" />
-          {stepLabel ? <span className="ml-4">{stepLabel}</span> : divider}
-        </div>
-      );
-    } else {
-      return (
-        <div className={`is-flex ${stepClasses.join(' ')}`} key={stepIdx}>
-          <div
-            className="rounded-full border-light is-flex is-align-items-center is-justify-content-center"
-            style={{
-              width: 30,
-              height: 30,
-            }}
-          >
-            {stepIdx + 1}
-          </div>
-          {stepLabel ? <span className="ml-4">{stepLabel}</span> : divider}
-        </div>
-      );
-    }
-  };
-
-  const child = showPreStep ? preStep : steps[currentStep].component;
+  const child = previewMode
+    ? previewComponent
+    : showPreStep
+    ? preStep
+    : steps[currentStep].component;
 
   const { useHookForms = false } = steps[currentStep];
 
   const formId = useHookForms ? `form-Id-${currentStep}` : undefined;
 
-  const getBackLabel = (isSubmitting) => (
-    <div
-      className="is-flex is-align-items-center has-text-grey cursor-pointer"
-      onClick={!isSubmitting ? () => onStepAdvance('prev') : () => {}}
-    >
-      <Svg name="ArrowLeft" />
-      <span className="ml-4">Back</span>
-    </div>
-  );
-
   const moveToNextStep = () => onStepAdvance('next');
+
+  const moveBackStep = () => onStepAdvance('prev');
 
   const _onSubmit = useCallback(
     () => onSubmit(stepsData),
     [onSubmit, stepsData]
   );
 
-  const showNextButton = !passNextToComp || showActionButtonLeftPannel;
-  const showSubmitButton = !passSubmitToComp || showActionButtonLeftPannel;
+  const nextAction = currentStep + 1 === steps.length ? 'submit' : 'next';
+
+  const navStepPosition = notMobile ? 'top' : 'bottom';
+
+  const isPreviewModeVisible = currentStep > 0;
 
   return (
     <>
@@ -157,7 +102,31 @@ function StepByStep({
           message={() => blockNavigationText ?? 'Leave Page?'}
         />
       )}
-      <section>
+      {useControlsOnTopBar && (
+        <NavStepByStep
+          position={navStepPosition}
+          onClickBack={moveBackStep}
+          isBackButtonEnabled={currentStep - 1 >= 0}
+          onClickNext={moveToNextStep}
+          isStepValid={isStepValid}
+          showSubmitOrNext={nextAction}
+          formId={formId}
+          finalLabel={finalLabel}
+          isSubmitting={isSubmitting}
+          onClickPreview={togglePreviewMode}
+          previewMode={previewMode}
+          isPreviewModeVisible={isPreviewModeVisible}
+        />
+      )}
+      <section
+        style={
+          useControlsOnTopBar
+            ? navStepPosition === 'top'
+              ? { paddingTop: '77px' }
+              : { paddingBottom: '68px' }
+            : {}
+        }
+      >
         <div
           style={{
             position: 'fixed',
@@ -171,54 +140,21 @@ function StepByStep({
         />
         <div className="container is-flex is-flex-direction-column-mobile">
           {/* left panel */}
-          <div
-            style={{
-              paddingTop: '3rem',
-              paddingRight: '5rem',
-              minWidth: 280,
-              position: 'fixed',
-              minHeight: '100%',
-            }}
-            className="has-background-white-ter pl-4 is-hidden-mobile"
-          >
-            <div className="mb-6" style={{ minHeight: 24 }}>
-              {currentStep > 0 && getBackLabel(isSubmitting)}
-            </div>
-            <div>{steps.map((step, i) => getStepIcon(i, step.label))}</div>
-            {currentStep < steps.length - 1 && showNextButton && (
-              <NextButton
-                formId={formId}
-                moveToNextStep={moveToNextStep}
-                disabled={!isStepValid}
-              />
-            )}
-            {currentStep === steps.length - 1 && showSubmitButton && (
-              <SubmitButton
-                formId={formId}
-                disabled={!isStepValid}
-                onSubmit={_onSubmit}
-                label={finalLabel}
-                isSubmitting={isSubmitting}
-              />
-            )}
-          </div>
-          {/* left panel mobile */}
-          <div
-            className="is-hidden-tablet has-background-white-ter p-4"
-            style={{ position: 'fixed', minWidth: '100%', zIndex: 2 }}
-          >
-            <div className="is-flex is-justify-content-space-between is-align-items-center">
-              <div style={{ minHeight: 24 }}>
-                {currentStep > 0 && getBackLabel(isSubmitting)}
-              </div>
-              <div className="is-flex">
-                {steps.map((step, i) => getStepIcon(i, null))}
-              </div>
-            </div>
-          </div>
+          <LeftPanel
+            showBackButton={!useControlsOnTopBar}
+            currentStep={currentStep}
+            isSubmitting={isSubmitting}
+            steps={steps}
+            showPreStep={showPreStep}
+            moveBackStep={moveBackStep}
+            name={useControlsOnTopBar ? stepsData?.[0]?.name ?? '' : null}
+            previewMode={previewMode}
+            moveToStep={moveToStep}
+          />
+
           {/* right panel */}
           <div
-            className={`step-by-step-body flex-1 has-background-white px-4-mobile pt-7-mobile is-flex-mobile is-flex-direction-column-mobile`}
+            className={`step-by-step-body flex-1 has-background-white px-4-mobile pt-0-mobile is-flex-mobile is-flex-direction-column-mobile`}
           >
             {isSubmitting && (
               <div
@@ -255,21 +191,13 @@ function StepByStep({
                 ...(showPreStep ? { dismissPreStep } : undefined),
                 ...(useHookForms ? { formId } : undefined),
               })}
-            <div className="is-hidden-tablet">
-              {currentStep < steps.length - 1 && showNextButton && (
-                <NextButton
-                  formId={formId}
-                  moveToNextStep={moveToNextStep}
-                  disabled={!isStepValid}
-                />
-              )}
-              {currentStep === steps.length - 1 && showSubmitButton && (
-                <SubmitButton
-                  formId={formId}
-                  disabled={!isStepValid}
-                  onSubmit={_onSubmit}
-                  label={finalLabel}
-                  isSubmitting={isSubmitting}
+            <div className="is-hidden-tablet mt-3 mb-5">
+              {Boolean(isPreviewModeVisible && !previewMode) && (
+                <NavButton
+                  disabled={isSubmitting}
+                  onClick={togglePreviewMode}
+                  classNames="vote-button transition-all"
+                  text={'Preview'}
                 />
               )}
             </div>
