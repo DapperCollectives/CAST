@@ -188,9 +188,10 @@ func TestGetUserProposals(t *testing.T) {
 	var p test_utils.PaginatedResponseWithProposal
 	json.Unmarshal(response.Body.Bytes(), &p)
 
+	//all have the same community id
 	assert.Equal(t, 1, p.Data[0].Community_id)
-	assert.Equal(t, 2, p.Data[1].Community_id)
-	assert.Equal(t, 3, p.Data[2].Community_id)
+	assert.Equal(t, 1, p.Data[1].Community_id)
+	assert.Equal(t, 1, p.Data[2].Community_id)
 	assert.NotNil(t, p.Data[0].Name)
 }
 
