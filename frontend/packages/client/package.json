@@ -22,6 +22,7 @@
     "@types/jest": "^29.1.2",
     "@types/node": "^18.8.5",
     "@types/react": "^18.0.21",
+    "@types/react-blockies": "^1.4.1",
     "@types/react-dom": "^18.0.6",
     "bulma": "0.9.3",
     "bulma-popover": "^1.1.1",
@@ -70,7 +71,8 @@
     "extends": [
       "react-app",
       "react-app/jest",
-      "plugin:prettier/recommended"
+      "plugin:prettier/recommended",
+      "plugin:@typescript-eslint/recommended"
     ],
     "rules": {
       "prettier/prettier": [
@@ -94,6 +96,9 @@
         {
           "ignoreStateless": true
         }
+      ],
+      "@typescript-eslint/no-empty-function": [
+        "off"
       ]
     }
   },
@@ -114,7 +119,10 @@
     "@testing-library/jest-dom": "^5.16.2",
     "@testing-library/react": "^12.1.3",
     "@testing-library/user-event": "^14.0.0",
-    "react-test-renderer": "^17.0.2"
+    "@typescript-eslint/eslint-plugin": "^5.40.1",
+    "@typescript-eslint/parser": "^5.40.1",
+    "react-test-renderer": "^17.0.2",
+    "typescript": "^4.8.4"
   },
   "resolutions": {
     "react-error-overlay": "6.0.9"

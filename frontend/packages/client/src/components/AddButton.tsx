@@ -1,12 +1,19 @@
 import { Svg } from '@cast/shared-components';
 import classnames from 'classnames';
 
+interface AddButtonProps {
+  onAdd: any;
+  disabled?: boolean;
+  addText: string;
+  className: string;
+}
+
 export default function AddButton({
   onAdd = () => {},
   disabled = false,
   addText = '',
   className = '',
-} = {}) {
+}: AddButtonProps): JSX.Element {
   const classNames = classnames(
     'is-flex is-align-items-centered',
     {
@@ -17,6 +24,7 @@ export default function AddButton({
   );
   const onClick = !disabled ? onAdd : () => {};
   const fill = disabled ? 'hsl(0, 0%, 48%)' : 'black';
+
   return (
     <div className={classNames} onClick={onClick}>
       <Svg name="Plus" fill={fill} />{' '}
