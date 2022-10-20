@@ -20,6 +20,7 @@ import (
 var (
 	proposalBody                = "<html>something</html>"
 	published                   = "published"
+	draft                       = "draft"
 	tokenWeightedDefault        = "token-weighted-default"
 	blockHeight          uint64 = 1
 
@@ -37,8 +38,9 @@ var (
 	}
 
 	DraftProposalStruct = models.Proposal{
-		Name: "Draft Proposal",
-		Body: &proposalBody,
+		Name:   "Draft Proposal",
+		Body:   &proposalBody,
+		Status: &draft,
 	}
 )
 
@@ -60,17 +62,6 @@ func (otu *OverflowTestUtils) GetProposalByIdAPI(communityId int, proposalId int
 	return response
 }
 
-func (otu *OverflowTestUtils) GetDraftProposalAPI(proposalId int) *httptest.ResponseRecorder {
-	req, _ := http.NewRequest("GET", "/proposals/"+strconv.Itoa(proposalId)+"/draft", nil)
-	response := otu.ExecuteRequest(req)
-	return response
-}
-
-func (otu *OverflowTestUtils) DeleteDraftProposalAPI(proposalId int) *httptest.ResponseRecorder {
-	req, _ := http.NewRequest("DELETE", "/proposals/"+strconv.Itoa(proposalId)+"/draft", nil)
-	return otu.ExecuteRequest(req)
-}
-
 func (otu *OverflowTestUtils) CreateProposalAPI(proposal *models.Proposal) *httptest.ResponseRecorder {
 	json, _ := json.Marshal(proposal)
 	req, _ := http.NewRequest(
@@ -82,14 +73,8 @@ func (otu *OverflowTestUtils) CreateProposalAPI(proposal *models.Proposal) *http
 	return otu.ExecuteRequest(req)
 }
 
-func (otu *OverflowTestUtils) CreateDraftProposalAPI(proposal *models.Proposal) *httptest.ResponseRecorder {
-	json, _ := json.Marshal(proposal)
-	req, _ := http.NewRequest(
-		"POST",
-		"/communities/"+strconv.Itoa(proposal.Community_id)+"/proposals/draft",
-		bytes.NewBuffer(json),
-	)
-	req.Header.Set("Content-Type", "application/json")
+func (otu *OverflowTestUtils) DeleteProposalAPI(communityId int, proposalId int) *httptest.ResponseRecorder {
+	req, _ := http.NewRequest("DELETE", "/communities/"+strconv.Itoa(communityId)+"/proposals/"+strconv.Itoa(proposalId), nil)
 	return otu.ExecuteRequest(req)
 }
 
@@ -131,8 +116,6 @@ func (otu *OverflowTestUtils) GenerateDraftProposalStruct(
 	proposal.Community_id = communityId
 	proposal.Start_time = time.Now().AddDate(0, 1, 0)
 	proposal.End_time = time.Now().Add(30 * 24 * time.Hour)
-
-	proposal.Status = nil
 	return &proposal
 }
 
@@ -140,7 +123,30 @@ func (otu *OverflowTestUtils) GenerateCancelProposalStruct(
 	signer string,
 	proposalId int,
 ) *models.UpdateProposalRequestPayload {
-	payload := models.UpdateProposalRequestPayload{Status: "cancelled"}
+	cancelled := "cancelled"
+	payload := models.UpdateProposalRequestPayload{Proposal: &models.Proposal{Status: &cancelled}}
+	timestamp := fmt.Sprint(time.Now().UnixNano() / int64(time.Millisecond))
+	compositeSignatures := otu.GenerateCompositeSignatures(signer, timestamp)
+	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", signer))
+	payload.Signing_addr = fmt.Sprintf("0x%s", account.Address().String())
+	payload.Timestamp = timestamp
+	payload.Composite_signatures = compositeSignatures
+
+	return &payload
+}
+
+func (otu *OverflowTestUtils) GenerateUpdatedDraftProposalPayload(
+	signer string,
+	proposalId int,
+	strategy string,
+) *models.UpdateProposalRequestPayload {
+	draft := "draft"
+	payload := models.UpdateProposalRequestPayload{
+		Proposal: &models.Proposal{
+			Status:   &draft,
+			Strategy: &strategy,
+		},
+	}
 	timestamp := fmt.Sprint(time.Now().UnixNano() / int64(time.Millisecond))
 	compositeSignatures := otu.GenerateCompositeSignatures(signer, timestamp)
 	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", signer))
@@ -155,7 +161,8 @@ func (otu *OverflowTestUtils) GenerateClosedProposalStruct(
 	signer string,
 	proposalId int,
 ) *models.UpdateProposalRequestPayload {
-	payload := models.UpdateProposalRequestPayload{Status: "closed"}
+	closed := "closed"
+	payload := models.UpdateProposalRequestPayload{Proposal: &models.Proposal{Status: &closed}}
 	timestamp := fmt.Sprint(time.Now().UnixNano() / int64(time.Millisecond))
 	compositeSignatures := otu.GenerateCompositeSignatures(signer, timestamp)
 	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", signer))

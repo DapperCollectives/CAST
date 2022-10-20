@@ -8,6 +8,7 @@ $yellow: #FBD84D
 $orange: #F4AF4A
 $light-grey: #F9F9F9
 $grey: #636363
+$light-blue: hsla(211, 98%, 46%, 1)
 
 // Update Bulma's global variables
 $family-sans-serif: "DM Sans"
@@ -130,6 +131,8 @@ code
 	border-top-left-radius: 8px
 .rounded-sm-bl
 	border-bottom-left-radius: 8px
+.rounded-sm-tr
+	border-top-right-radius: 8px
 .rounded-sm-br
 	border-bottom-right-radius: 8px
 .rounded-lg
@@ -153,12 +156,18 @@ code
 	border: 1px solid $grey
 .border-dashed-dark
 	border: 2px dashed $grey
+.border-left-yellow
+	border-left: 5px solid $yellow
+.box-shadow
+	box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.25)
 .flex-1
 	flex: 1 0 0
 .flex-2
 	flex: 2 0 0
 .has-background-orange
 	background-color: $orange
+.has-background-blue
+	background-color: $light-blue
 .has-background-light-grey
 	background-color: $light-grey
 .has-background-grey-lighter

@@ -512,12 +512,6 @@ func (h *Helpers) searchCommunities(
 }
 
 func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorResponse) {
-	if err := h.validateStrategyName(*p.Strategy); err != nil {
-		fmt.Printf("Error validating strategy name: %v \n", err)
-		return models.Proposal{}, errStrategyNotFound
-	}
-
-	fmt.Printf("Proposal strategy: %v \n", p)
 	if p.Voucher != nil {
 		if err := h.validateUserViaVoucher(p.Creator_addr, p.Voucher); err != nil {
 			return models.Proposal{}, errForbidden
@@ -531,6 +525,20 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorRespo
 	community, err := h.fetchCommunity(p.Community_id)
 	if err != nil {
 		return models.Proposal{}, errIncompleteRequest
+	}
+
+	if *p.Status == "draft" {
+		p, err := h.createDraftProposal(community, p)
+		if err != nilErr {
+			return models.Proposal{}, err
+		}
+
+		return p, nilErr
+	}
+
+	if err := h.validateStrategyName(*p.Strategy); err != nil {
+		fmt.Printf("Error validating strategy name: %v \n", err)
+		return models.Proposal{}, errStrategyNotFound
 	}
 
 	strategy, err := models.MatchStrategyByProposal(*community.Strategies, *p.Strategy)
@@ -588,7 +596,69 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorRespo
 	return p, nilErr
 }
 
-func (h *Helpers) createDraftProposal(p models.Proposal) (models.Proposal, errorResponse) {
+func (h *Helpers) createDraftProposal(c models.Community, p models.Proposal) (models.Proposal, errorResponse) {
+	canUserCreateProposal := c.CanUserCreateProposal(
+		h.A.DB,
+		h.A.FlowAdapter,
+		p.Creator_addr,
+	)
+
+	if err := handlePermissionErrorr(canUserCreateProposal); err != nilErr {
+		return models.Proposal{}, err
+	}
+
+	defaultStrategy := "token-weighted-default"
+	draftStatus := "draft"
+	p.Strategy = &defaultStrategy
+	p.Status = &draftStatus
+
+	p = h.setNullFieldsToEmpty(p)
+
+	if err := p.CreateProposal(h.A.DB); err != nil {
+		return models.Proposal{}, errIncompleteRequest
+	}
+
+	return p, nilErr
+}
+
+func (h *Helpers) setNullFieldsToEmpty(p models.Proposal) models.Proposal {
+	emptyString := ""
+	emptyTime := time.Time{}
+	emptyFloat := float64(0)
+	emptyUint64 := uint64(0)
+
+	if &p.Start_time == nil {
+		p.Start_time = emptyTime
+	}
+	if &p.End_time == nil {
+		p.End_time = emptyTime
+	}
+	if p.Min_balance == nil {
+		p.Min_balance = &emptyFloat
+	}
+	if p.Max_weight == nil {
+		p.Max_weight = &emptyFloat
+	}
+	if p.Strategy == nil {
+		p.Strategy = &emptyString
+	}
+	if p.Cid == nil {
+		p.Cid = &emptyString
+	}
+	if p.Block_height == nil {
+		p.Block_height = &emptyUint64
+	}
+	if p.Status == nil {
+		p.Status = &emptyString
+	}
+	if p.Created_at == nil {
+		p.Created_at = &emptyTime
+	}
+
+	return p
+}
+
+func (h *Helpers) updateDraftProposal(p models.Proposal) (models.Proposal, errorResponse) {
 	if p.Voucher != nil {
 		if err := h.validateUserViaVoucher(p.Creator_addr, p.Voucher); err != nil {
 			return models.Proposal{}, errForbidden
@@ -614,12 +684,9 @@ func (h *Helpers) createDraftProposal(p models.Proposal) (models.Proposal, error
 		return models.Proposal{}, err
 	}
 
-	defaultStrategy := "token-weighted-default"
-	draftStatus := "draft"
-	p.Strategy = &defaultStrategy
-	p.Status = &draftStatus
+	p = h.setNullFieldsToEmpty(p)
 
-	if err := p.CreateDraftProposal(h.A.DB); err != nil {
+	if err := p.UpdateDraftProposal(h.A.DB); err != nil {
 		return models.Proposal{}, errIncompleteRequest
 	}
 

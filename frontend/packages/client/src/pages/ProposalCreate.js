@@ -6,7 +6,7 @@ import { useModalContext } from 'contexts/NotificationModal';
 import { useWebContext } from 'contexts/Web3';
 import { ErrorModal, StepByStep, WalletConnect } from 'components';
 import {
-  PropCreateStepFour,
+  PreviewComponent,
   PropCreateStepOne,
   PropCreateStepThree,
   PropCreateStepTwo,
@@ -73,7 +73,7 @@ export default function ProposalCreatePage() {
     }
 
     const { name, body } = stepsData[0];
-    const { strategy, minBalance, maxWeight } = stepsData[1];
+    const { strategy, minBalance, maxWeight, voteType } = stepsData[1];
 
     const hasValidStartTime = isStartTimeValid(
       stepsData[2].startTime,
@@ -111,6 +111,7 @@ export default function ProposalCreatePage() {
       endTime,
       startTime,
       strategy: strategy,
+      voteType,
       ...(minBalance !== ''
         ? { minBalance: parseFloat(minBalance) }
         : undefined),
@@ -134,6 +135,7 @@ export default function ProposalCreatePage() {
       'Proposal creation is not complete yet, are you sure you want to leave?',
     passNextToComp: true,
     passSubmitToComp: true,
+    previewComponent: <PreviewComponent />,
     steps: [
       {
         label: 'Proposal',
@@ -155,12 +157,6 @@ export default function ProposalCreatePage() {
           'Some description of what you can write here that is useful.',
         component: <PropCreateStepThree />,
         useHookForms: true,
-      },
-      {
-        label: 'Preview Proposal',
-        description:
-          'Some description of what you can write here that is useful.',
-        component: <PropCreateStepFour />,
       },
     ],
   };

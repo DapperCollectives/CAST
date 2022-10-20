@@ -203,6 +203,7 @@ func GetCommunityProposalsForUser(
 	LEFT JOIN 
   	communities AS c on c.id = p.community_id
 	WHERE addr = $1
+	AND p.status != 'draft'
 	`
 
 	if filters != "" {

@@ -68,6 +68,28 @@ const StepTwo = ({
   const defaultValueStrategy = useWatch({ control, name: 'strategy' });
   const voteType = useWatch({ control, name: 'voteType' });
 
+  // **************************************************************
+  //   This is to enable having choices when entering in preview mode
+  //   fields are saved and valilated when user hits on next
+  //   by doing this we are saving the options before without validation
+  //   when user hits next fields will be validated and overwritten with valid values
+  //   for example it's possible to enter in preview mode with duplicated voting options
+  //   but next will let the user know this needs to be updated
+  const choicesTemp = useWatch({ control, name: 'choices' });
+  const tabOption = useWatch({ control, name: 'tabOption' });
+  useEffect(() => {
+    let choices = choicesTemp;
+    if (tabOption === 'visual') {
+      choices = choicesTemp.slice(0, 2);
+    } else {
+      choices = choicesTemp.map((e) => ({ value: e.value }));
+    }
+    onDataChange({ choices });
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [choicesTemp, tabOption]);
+  // **************************************************************
+
   const { isDirty, isSubmitting, isValid, errors } = formState;
 
   useEffect(() => {

@@ -1,3 +1,4 @@
+import { Svg } from '@cast/shared-components';
 import NavButton from './NavButton';
 
 const PositionWrapper = ({
@@ -6,6 +7,7 @@ const PositionWrapper = ({
   backButton,
   submitOrNext,
   isSubmit,
+  previewMode,
 }) => {
   return (
     <nav className="navbar is-transparent">
@@ -14,19 +16,29 @@ const PositionWrapper = ({
           <div className="is-flex flex-0 is-align-items-center">
             {previewButton}
           </div>
-          <div className="navbar-end">
-            {backButton}
-            {submitOrNext}
-          </div>
+          {!previewMode && (
+            <div className="navbar-end">
+              {backButton}
+              {submitOrNext}
+            </div>
+          )}
         </>
       ) : (
         <div className="columns is-mobile flex-1 is-align-items-center">
-          <div className={`column ${isSubmit ? 'is-4' : 'is-6'}`}>
-            {backButton}
-          </div>
-          <div className={`column ${isSubmit ? 'is-8' : 'is-6'}`}>
-            {submitOrNext}
-          </div>
+          {!previewMode ? (
+            <>
+              <div className={`column ${isSubmit ? 'is-4' : 'is-6'}`}>
+                {backButton}
+              </div>
+              <div className={`column ${isSubmit ? 'is-8' : 'is-6'}`}>
+                {submitOrNext}
+              </div>
+            </>
+          ) : (
+            <div className="column is-12 is-flex is-align-items-center is-justify-content-center">
+              {previewButton}
+            </div>
+          )}
         </div>
       )}
     </nav>
@@ -42,7 +54,7 @@ export default function NavStepByStep({
   formId,
   finalLabel,
   onClickPreview = () => {},
-  onSubmit,
+  previewMode,
   isSubmitting,
   isPreviewModeVisible,
   position,
@@ -72,13 +84,23 @@ export default function NavStepByStep({
           <PositionWrapper
             isSubmit={showSubmitOrNext === 'submit'}
             isTopPosition={isTopPosition}
+            previewMode={previewMode}
             previewButton={
               isPreviewModeVisible && (
                 <NavButton
                   disabled={isSubmitting}
                   onClick={onClickPreview}
                   classNames="vote-button transition-all mr-3"
-                  text="Preview"
+                  text={
+                    previewMode ? (
+                      <div className="is-flex is-align-items-center">
+                        <span className="mr-3">Close Preview</span>
+                        <Svg name="Close" width="14" height="14" />
+                      </div>
+                    ) : (
+                      'Preview'
+                    )
+                  }
                 />
               )
             }
@@ -99,7 +121,7 @@ export default function NavStepByStep({
                 classNames={`vote-button has-background-yellow ${
                   !isTopPosition ? 'is-fullwidth' : ''
                 }`}
-                onClick={isNextButton ? onClickNext : onSubmit}
+                onClick={isNextButton ? onClickNext : () => {}}
                 text={isNextButton ? 'Next' : finalLabel}
               />
             }

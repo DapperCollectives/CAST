@@ -367,7 +367,6 @@ func (a *App) getUserProposals(w http.ResponseWriter, r *http.Request) {
 	}
 
 	pageParams.TotalRecords = totalRecords
-
 	response := shared.GetPaginatedResponseWithPayload(communities, pageParams)
 	respondWithJSON(w, http.StatusOK, response)
 }
@@ -400,52 +399,6 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusCreated, proposal)
 }
 
-func (a *App) createDraftProposal(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	communityId, err := strconv.Atoi(vars["communityId"])
-	if err != nil {
-		log.Error().Err(err).Msg("Invalid Community ID")
-		respondWithError(w, errIncompleteRequest)
-		return
-	}
-
-	var p models.Proposal
-	p.Community_id = communityId
-
-	if err := validatePayload(r.Body, &p); err != nil {
-		log.Error().Err(err).Msg("Error validating payload")
-		respondWithError(w, errIncompleteRequest)
-		return
-	}
-
-	proposal, errResponse := helpers.createDraftProposal(p)
-	if errResponse != nilErr {
-		log.Error().Err(err).Msg("Error creating draft proposal")
-		respondWithError(w, errResponse)
-		return
-	}
-
-	respondWithJSON(w, http.StatusCreated, proposal)
-}
-
-func (a *App) deleteDraftProposal(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	p, err := helpers.fetchProposal(vars, "id")
-	if err != nil {
-		log.Error().Err(err).Msg("Invalid Proposal ID.")
-		respondWithError(w, errIncompleteRequest)
-		return
-	}
-
-	if err := p.DeleteDraftProposal(a.DB); err != nil {
-		log.Error().Err(err).Msg("Error deleting draft proposal.")
-		respondWithError(w, errIncompleteRequest)
-		return
-	}
-
-	respondWithJSON(w, http.StatusOK, p)
-}
-
 func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	p, err := helpers.fetchProposal(vars, "id")
@@ -458,15 +411,6 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 	var payload models.UpdateProposalRequestPayload
 	if err := validatePayload(r.Body, &payload); err != nil {
 		log.Error().Err(err).Msg("Error validating payload")
-		respondWithError(w, errIncompleteRequest)
-		return
-	}
-
-	// Check that status update is valid
-	// For now we are assuming proposals are creating with
-	// status 'published' and may be cancelled.
-	if payload.Status != "cancelled" {
-		log.Error().Err(err).Msg("Invalid status update")
 		respondWithError(w, errIncompleteRequest)
 		return
 	}
@@ -494,16 +438,52 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	p.Status = &payload.Status
-	p.Cid, err = helpers.pinJSONToIpfs(p)
+	if *payload.Proposal.Status == "draft" {
+		p = *payload.Proposal
+
+		if err := p.UpdateDraftProposal(a.DB); err != nil {
+			log.Error().Err(err).Msg("Error updating draft proposal")
+			respondWithError(w, errIncompleteRequest)
+			return
+		}
+
+		respondWithJSON(w, http.StatusOK, p)
+	} else {
+		p.Status = payload.Proposal.Status
+		p.Cid, err = helpers.pinJSONToIpfs(p)
+		if err != nil {
+			log.Error().Err(err).Msg("Error pinning proposal to IPFS")
+			respondWithError(w, errIncompleteRequest)
+			return
+		}
+
+		if err := p.UpdateProposal(a.DB); err != nil {
+			log.Error().Err(err).Msg("Error updating proposal")
+			respondWithError(w, errIncompleteRequest)
+			return
+		}
+
+		respondWithJSON(w, http.StatusOK, p)
+	}
+}
+
+func (a *App) deleteProposal(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	p, err := helpers.fetchProposal(vars, "id")
 	if err != nil {
-		log.Error().Err(err).Msg("Error pinning proposal to IPFS")
-		respondWithError(w, errIncompleteRequest)
+		log.Error().Err(err).Msg("Invalid Proposal ID.")
+		respondWithError(w, errProposalNotFound)
 		return
 	}
 
-	if err := p.UpdateProposal(a.DB); err != nil {
-		log.Error().Err(err).Msg("Error updating proposal")
+	if *p.Status != "draft" {
+		log.Error().Err(err).Msg("Only draft proposals can be deleted")
+		respondWithError(w, errForbidden)
+		return
+	}
+
+	if err := p.DeleteProposal(a.DB); err != nil {
+		log.Error().Err(err).Msg("Error deleting proposal")
 		respondWithError(w, errIncompleteRequest)
 		return
 	}

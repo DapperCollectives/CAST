@@ -45,9 +45,8 @@ type Proposal struct {
 }
 
 type UpdateProposalRequestPayload struct {
-	Status  string     `json:"status"`
-	Voucher *s.Voucher `json:"voucher,omitempty"`
-
+	Proposal *Proposal  `json:"payload"`
+	Voucher  *s.Voucher `json:"voucher"`
 	s.TimestampSignaturePayload
 }
 
@@ -158,35 +157,7 @@ func (p *Proposal) CreateProposal(db *s.Database) error {
 	return err
 }
 
-func (p *Proposal) CreateDraftProposal(db *s.Database) error {
-	err := db.Conn.QueryRow(db.Context, `
-	INSERT INTO proposals(
-	community_id, 
-	name, 
-	body,
-	strategy,
-	creator_addr,
-	start_time,
-	end_time,
-	status
-	)
-	VALUES($1, $2, $3, $4, $5, $6, $7, $8)
-	RETURNING id, created_at
-	`,
-		p.Community_id,
-		p.Name,
-		p.Body,
-		p.Strategy,
-		p.Creator_addr,
-		p.Start_time,
-		p.End_time,
-		p.Status,
-	).Scan(&p.ID, &p.Created_at)
-
-	return err
-}
-
-func (p *Proposal) DeleteDraftProposal(db *s.Database) error {
+func (p *Proposal) DeleteProposal(db *s.Database) error {
 	_, err := db.Conn.Exec(db.Context, `
 	DELETE FROM proposals
 	WHERE id = $1
@@ -213,6 +184,31 @@ func (p *Proposal) UpdateProposal(db *s.Database) error {
 	}
 
 	err = p.GetProposalById(db)
+	return err
+}
+
+func (p *Proposal) UpdateDraftProposal(db *s.Database) error {
+	_, err := db.Conn.Exec(db.Context, `
+		UPDATE proposals
+		SET name = COALESCE($1, name), 
+		choices = COALESCE($2, choices),
+		strategy = COALESCE($3, strategy),
+		min_balance = COALESCE($4, min_balance),
+		max_weight = COALESCE($5, max_weight),
+		start_time = COALESCE($6, start_time),
+		end_time = COALESCE($7, end_time),
+		body = COALESCE($8, body),
+		block_height = COALESCE($9, block_height),
+		cid = COALESCE($10, cid),
+		composite_signatures = COALESCE($11, composite_signatures),
+		voucher = COALESCE($12, voucher)
+		WHERE id = $13
+	`, p.Name, p.Choices, p.Strategy, p.Min_balance, p.Max_weight, p.Start_time, p.End_time, p.Body, p.Block_height, p.Cid, p.Composite_signatures, p.Voucher, p.ID)
+
+	if err != nil {
+		return err
+	}
+
 	return err
 }
 
