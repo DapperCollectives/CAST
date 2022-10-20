@@ -364,9 +364,11 @@ func TestDraftProposal(t *testing.T) {
 		assert.Equal(t, "draft", *created.Status)
 	})
 
+	proposalID := 1
+
 	t.Run("A community author should be able to update a draft proposal", func(t *testing.T) {
-		response := otu.GetDraftProposalAPI(1)
-		CheckResponseCode(t, http.StatusNotFound, response.Code)
+		response := otu.GetDraftProposalAPI(proposalID)
+		CheckResponseCode(t, http.StatusOK, response.Code)
 
 		var p models.Proposal
 
@@ -375,15 +377,25 @@ func TestDraftProposal(t *testing.T) {
 		p.Strategy = &strategy
 
 		payload := otu.GenerateProposalPayload(authorName, &p)
-		response = otu.UpdateDraftProposalAPI(1, payload)
+		response = otu.UpdateDraftProposalAPI(proposalID, payload)
 		CheckResponseCode(t, http.StatusOK, response.Code)
 
 		var updated models.Proposal
 		json.Unmarshal(response.Body.Bytes(), &updated)
+
+		assert.Equal(t, 1, updated.ID)
+		assert.Equal(t, "draft", *updated.Status)
+		assert.Equal(t, "balance-of-nfts", *updated.Strategy)
 	})
 
 	t.Run("A community author should be able to delete a draft proposal", func(t *testing.T) {
-		response := otu.GetDraftProposalAPI(1)
+		response := otu.GetDraftProposalAPI(proposalID)
 		CheckResponseCode(t, http.StatusOK, response.Code)
+
+		response = otu.DeleteDraftProposalAPI(proposalID)
+		CheckResponseCode(t, http.StatusOK, response.Code)
+
+		response = otu.GetDraftProposalAPI(proposalID)
+		CheckResponseCode(t, http.StatusNotFound, response.Code)
 	})
 }

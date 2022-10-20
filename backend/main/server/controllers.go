@@ -3,7 +3,6 @@ package server
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -423,7 +422,6 @@ func (a *App) createDraftProposal(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) updateDraftProposal(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("updateDraftProposal")
 	vars := mux.Vars(r)
 	p, err := helpers.fetchProposal(vars, "id")
 	if err != nil {
@@ -437,8 +435,6 @@ func (a *App) updateDraftProposal(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, errIncompleteRequest)
 		return
 	}
-
-	fmt.Printf("p to update: %+v \n", p)
 
 	proposal, errResponse := helpers.updateDraftProposal(p)
 	if errResponse != nilErr {
