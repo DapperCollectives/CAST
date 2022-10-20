@@ -581,11 +581,52 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorRespo
 		}
 	}
 
+	p = h.setNullFieldsToEmpty(p)
+
+	fmt.Printf("Proposal: %v \n", p)
+
 	if err := p.CreateProposal(h.A.DB); err != nil {
 		return models.Proposal{}, errIncompleteRequest
 	}
 
 	return p, nilErr
+}
+
+func (h *Helpers) setNullFieldsToEmpty(p models.Proposal) models.Proposal {
+	emptyString := ""
+	emptyTime := time.Time{}
+	emptyFloat := float64(0)
+	emptyUint64 := uint64(0)
+
+	if &p.Start_time == nil {
+		p.Start_time = emptyTime
+	}
+	if &p.End_time == nil {
+		p.End_time = emptyTime
+	}
+	if p.Min_balance == nil {
+		p.Min_balance = &emptyFloat
+	}
+	if p.Max_weight == nil {
+		p.Max_weight = &emptyFloat
+	}
+	if p.Strategy == nil {
+		p.Strategy = &emptyString
+	}
+	if p.Cid == nil {
+		p.Cid = &emptyString
+	}
+	if p.Block_height == nil {
+		p.Block_height = &emptyUint64
+	}
+	if p.Status == nil {
+		p.Status = &emptyString
+	}
+	if p.Created_at == nil {
+		p.Created_at = &emptyTime
+	}
+
+	return p
 }
 
 func (h *Helpers) createDraftProposal(p models.Proposal) (models.Proposal, errorResponse) {
