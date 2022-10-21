@@ -203,11 +203,11 @@ func GetCommunityProposalsForUser(
 	LEFT JOIN 
   	communities AS c on c.id = p.community_id
 	WHERE addr = $1
-	AND p.status != 'draft'
 	`
-
 	if filters != "" {
-		sql += fmt.Sprintf("AND p.status IN (%s)", filters)
+		sql += fmt.Sprintf("AND p.status = (%s)", filters)
+	} else {
+		sql += "AND p.status != 'draft'"
 	}
 	var proposals = []shared.UserProposal{}
 	err := pgxscan.Select(db.Context, db.Conn, &proposals, sql, addr)
