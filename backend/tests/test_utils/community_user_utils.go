@@ -69,6 +69,12 @@ func (otu *OverflowTestUtils) GetCommunityUserProposalsAPI(addr string) *httptes
 	return response
 }
 
+func (otu *OverflowTestUtils) GetCommunityUserProposalsAPIWithFilter(addr string, filter string) *httptest.ResponseRecorder {
+	req, _ := http.NewRequest("GET", "/users/"+addr+"/proposals?filter="+filter, nil)
+	response := otu.ExecuteRequest(req)
+	return response
+}
+
 func (otu *OverflowTestUtils) DeleteUserFromCommunityAPI(id int, addr string, userType string, payload *models.CommunityUserPayload) *httptest.ResponseRecorder {
 	json, _ := json.Marshal(payload)
 	req, _ := http.NewRequest("DELETE", "/communities/"+strconv.Itoa(id)+"/users/"+addr+"/"+userType, bytes.NewBuffer(json))

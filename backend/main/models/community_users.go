@@ -205,7 +205,7 @@ func GetCommunityProposalsForUser(
 	WHERE addr = $1
 	`
 	if filters != "" {
-		sql += fmt.Sprintf("AND p.status = (%s)", filters)
+		sql += fmt.Sprintf("AND p.status = '%s'", filters)
 	} else {
 		sql += "AND p.status != 'draft'"
 	}
