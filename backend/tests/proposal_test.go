@@ -147,7 +147,6 @@ func TestUpdateProposal(t *testing.T) {
 
 		cancelPayload := otu.GenerateCancelProposalStruct(authorName, p.ID)
 		response = otu.UpdateProposalAPI(p.ID, cancelPayload)
-		fmt.Printf("Response code and body %v %v", response.Code, response.Body.String())
 		checkResponseCode(t, http.StatusOK, response.Code)
 
 		// Get proposal after update

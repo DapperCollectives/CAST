@@ -200,10 +200,19 @@ func (p *Proposal) UpdateDraftProposal(db *s.Database) error {
 		body = COALESCE($8, body),
 		block_height = COALESCE($9, block_height),
 		cid = COALESCE($10, cid),
-		composite_signatures = COALESCE($11, composite_signatures),
-		voucher = COALESCE($12, voucher)
-		WHERE id = $13
-	`, p.Name, p.Choices, p.Strategy, p.Min_balance, p.Max_weight, p.Start_time, p.End_time, p.Body, p.Block_height, p.Cid, p.Composite_signatures, p.Voucher, p.ID)
+		WHERE id = $11
+	`, p.Name,
+		p.Choices,
+		p.Strategy,
+		p.Min_balance,
+		p.Max_weight,
+		p.Start_time,
+		p.End_time,
+		p.Body,
+		p.Block_height,
+		p.Cid,
+		p.ID,
+	)
 
 	if err != nil {
 		return err
