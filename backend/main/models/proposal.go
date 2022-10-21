@@ -199,7 +199,7 @@ func (p *Proposal) UpdateDraftProposal(db *s.Database) error {
 		end_time = COALESCE($7, end_time),
 		body = COALESCE($8, body),
 		block_height = COALESCE($9, block_height),
-		cid = COALESCE($10, cid),
+		cid = COALESCE($10, cid)
 		WHERE id = $11
 	`, p.Name,
 		p.Choices,
