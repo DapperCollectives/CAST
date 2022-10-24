@@ -11,6 +11,7 @@ export default function LeftPanel({
   name,
   showBackButton = true,
   previewMode,
+  moveToStep,
 }) {
   const notMobile = useMediaQuery();
 
@@ -46,7 +47,7 @@ export default function LeftPanel({
   return (
     <div className="step-by-step has-background-white-ter is-hidden-mobile is-flex is-flex-direction-column is-justify-content-flex-start pt-6">
       {name !== null && (
-        <div className="is-flex column p-0 is-12 mb-9">
+        <div className="is-flex column p-0 is-12 mb-7">
           <span className="stepper-name is-flex-wrap-wrap is-size-3 has-text-weight-bold">
             {name}
           </span>
@@ -68,6 +69,7 @@ export default function LeftPanel({
             showPreStep={showPreStep}
             currentStep={currentStep}
             disableAll={previewMode}
+            moveToStep={moveToStep}
           />
         ))}
       </div>
