@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 
-export const HomeFooter: React.FC = () => {
+const HomeFooter: React.FC = () => {
   return (
     <div className="section pt-6 mt-6">
       <div className="container">
@@ -52,4 +52,6 @@ export const HomeFooter: React.FC = () => {
       </div>
     </div>
   );
-}
+};
+
+export default HomeFooter;

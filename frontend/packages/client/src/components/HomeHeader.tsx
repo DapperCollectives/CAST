@@ -14,7 +14,7 @@ interface HomeHeaderProps {
   isVisible: boolean;
 }
 
-export const HomeHeader: React.FC<HomeHeaderProps> = ({
+const HomeHeader: React.FC<HomeHeaderProps> = ({
   isVisible = true,
 }: HomeHeaderProps) => {
   const { addToArrayOfRefes, starArray, parentRef } = useStarAnimation({
@@ -77,4 +77,6 @@ export const HomeHeader: React.FC<HomeHeaderProps> = ({
       </div>
     </div>
   );
-}
+};
+
+export default HomeHeader;

@@ -8,7 +8,7 @@ interface AddButtonProps {
   className: string;
 }
 
-export const AddButton: React.FC<AddButtonProps> = ({
+const AddButton: React.FC<AddButtonProps> = ({
   onAdd = () => {},
   disabled = false,
   addText = '',
@@ -33,4 +33,6 @@ export const AddButton: React.FC<AddButtonProps> = ({
       </span>
     </div>
   );
-}
+};
+
+export default AddButton;

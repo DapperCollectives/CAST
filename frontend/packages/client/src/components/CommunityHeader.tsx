@@ -17,11 +17,11 @@ interface CommunityHeaderProps {
   communityName?: string;
   members?: Member[];
   totalMembers: number;
-  onLeaveCommunity?: () => void;
-  onJoinCommunity?: () => void;
+  onLeaveCommunity?: any;
+  onJoinCommunity?: any;
 }
 
-export const CommunityHeader: React.FC<CommunityHeaderProps> = ({
+const CommunityHeader: React.FC<CommunityHeaderProps> = ({
   isLoading = false,
   id,
   bannerImgUrl,
@@ -137,4 +137,6 @@ export const CommunityHeader: React.FC<CommunityHeaderProps> = ({
       </div>
     </div>
   );
-}
+};
+
+export default CommunityHeader;

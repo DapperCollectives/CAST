@@ -98,6 +98,6 @@ const Header: React.FC<RouteComponentProps> = (props) => {
       <Sidenavbar showSidenav={showSidenav} closeSidenav={closeNavbarMenu} />
     </>
   );
-}
+};
 
 export default withRouter((props) => <Header {...props} />);
