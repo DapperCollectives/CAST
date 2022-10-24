@@ -145,7 +145,7 @@ func TestUpdateProposal(t *testing.T) {
 
 		assert.Equal(t, "pending", *created.Computed_status)
 
-		cancelPayload := otu.GenerateCancelProposalStruct(authorName, p.ID)
+		cancelPayload := otu.GenerateCancelProposalStruct(authorName)
 		response = otu.UpdateProposalAPI(p.ID, cancelPayload)
 		checkResponseCode(t, http.StatusOK, response.Code)
 
@@ -175,7 +175,7 @@ func TestUpdateProposal(t *testing.T) {
 
 		assert.Equal(t, "active", *created.Computed_status)
 
-		cancelPayload := otu.GenerateCancelProposalStruct(authorName, p.ID)
+		cancelPayload := otu.GenerateCancelProposalStruct(authorName)
 		response = otu.UpdateProposalAPI(p.ID, cancelPayload)
 		checkResponseCode(t, http.StatusOK, response.Code)
 
@@ -212,7 +212,7 @@ func TestUpdateProposal(t *testing.T) {
 
 		assert.Equal(t, "active", *created.Computed_status)
 
-		cancelPayload := otu.GenerateCancelProposalStruct("user2", communityId)
+		cancelPayload := otu.GenerateCancelProposalStruct("user2")
 		response = otu.UpdateProposalAPI(p.ID, cancelPayload)
 		checkResponseCode(t, http.StatusOK, response.Code)
 

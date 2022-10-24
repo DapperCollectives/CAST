@@ -121,7 +121,6 @@ func (otu *OverflowTestUtils) GenerateDraftProposalStruct(
 
 func (otu *OverflowTestUtils) GenerateCancelProposalStruct(
 	signer string,
-	proposalId int,
 ) *models.UpdateProposalRequestPayload {
 	cancelled := "cancelled"
 	payload := models.UpdateProposalRequestPayload{Proposal: &models.Proposal{Status: &cancelled}}
@@ -224,7 +223,7 @@ func (otu *OverflowTestUtils) CreateCancelledProposal(authorName string, communi
 	json.Unmarshal(response.Body.Bytes(), &p)
 
 	// Cancel the proposal
-	cancelPayload := otu.GenerateCancelProposalStruct(authorName, p.ID)
+	cancelPayload := otu.GenerateCancelProposalStruct(authorName)
 	otu.UpdateProposalAPI(p.ID, cancelPayload)
 
 	// Get proposal
