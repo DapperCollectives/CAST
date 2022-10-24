@@ -18,10 +18,24 @@ export default function useProposalCreateCheck({ communityId, addr } = {}) {
     }
   );
 
+  // reasons for not being able to create a proposal
+  // Premissions: user needs to be an author to be able to create
+  // Token amount restriction
+  // NFT restriction
+
+  const dataMocked = {
+    isBlocked: true,
+    title: 'Minimum Balance Required',
+    description:
+      'In order to create a proposal for this community, you must have a minimum of 100 FLOW tokens in your wallet. Learn More',
+    footerText:
+      'Note: These tokens are ONLY used for verification and will not be debited from your wallet.',
+  };
+
   return {
     isLoading,
     isError,
-    data,
+    data: dataMocked,
     error,
   };
 }

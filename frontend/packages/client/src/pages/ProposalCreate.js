@@ -13,6 +13,7 @@ import {
 } from 'components/ProposalCreate';
 import { useProposalCreateCheck, useProposalCreateMutation } from 'hooks';
 import { isStartTimeValid, parseDateToServer } from 'utils';
+import { checkCanUserCreateProposal } from 'api/proposals';
 
 export default function ProposalCreatePage() {
   const { createProposal, data, loading, error } = useProposalCreateMutation();
@@ -29,11 +30,10 @@ export default function ProposalCreatePage() {
 
   const { communityId } = useParams();
 
-  const {
-    isLoading: isLoadingCheck,
-    data: canCreateCheck,
-    error: errorCanCreateCheck,
-  } = useProposalCreateCheck({ communityId, addr: creatorAddr });
+  const { data: canCreateCheck } = useProposalCreateCheck({
+    communityId,
+    addr: creatorAddr,
+  });
 
   console.log(canCreateCheck);
 
@@ -145,6 +145,7 @@ export default function ProposalCreatePage() {
     passNextToComp: true,
     passSubmitToComp: true,
     previewComponent: <PreviewComponent />,
+    isBlocked: canCreateCheck.isBlocked,
     steps: [
       {
         label: 'Proposal',

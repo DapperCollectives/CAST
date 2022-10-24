@@ -58,6 +58,7 @@ export default function NavStepByStep({
   isSubmitting,
   isPreviewModeVisible,
   position,
+  isBlocked,
 }) {
   const isTopPosition = position === 'top';
 
@@ -117,7 +118,7 @@ export default function NavStepByStep({
             submitOrNext={
               <NavButton
                 formId={formId}
-                disabled={!isStepValid || isSubmitting}
+                disabled={!isStepValid || isSubmitting || isBlocked}
                 classNames={`vote-button has-background-yellow ${
                   !isTopPosition ? 'is-fullwidth' : ''
                 }`}

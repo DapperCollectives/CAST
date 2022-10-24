@@ -1,5 +1,6 @@
 import { cloneElement, useCallback, useRef, useState } from 'react';
 import { Prompt } from 'react-router-dom';
+import { Card } from 'components/Card';
 import { useMediaQuery } from 'hooks';
 import Loader from '../Loader';
 import LeftPanel from './LeftPanel';
@@ -19,6 +20,7 @@ function StepByStep({
   blockNavigationText,
   useControlsOnTopBar = true,
   previewComponent,
+  isBlocked = false,
 } = {}) {
   const notMobile = useMediaQuery();
   const [currentStep, setCurrentStep] = useState(0);
@@ -116,6 +118,7 @@ function StepByStep({
           onClickPreview={togglePreviewMode}
           previewMode={previewMode}
           isPreviewModeVisible={isPreviewModeVisible}
+          isBlocked={isBlocked}
         />
       )}
       <section
@@ -156,6 +159,7 @@ function StepByStep({
           <div
             className={`step-by-step-body flex-1 has-background-white px-4-mobile pt-0-mobile is-flex-mobile is-flex-direction-column-mobile`}
           >
+            {isBlocked && <Card variant="warning">hello</Card>}
             {isSubmitting && (
               <div
                 className="is-flex flex-1 is-flex-direction-column is-align-items-center is-justify-content-center"
