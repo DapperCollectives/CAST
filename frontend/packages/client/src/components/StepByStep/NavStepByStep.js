@@ -55,7 +55,6 @@ export default function NavStepByStep({
   finalLabel,
   onClickPreview = () => {},
   previewMode,
-  onSubmit,
   isSubmitting,
   isPreviewModeVisible,
   position,
@@ -122,7 +121,7 @@ export default function NavStepByStep({
                 classNames={`vote-button has-background-yellow ${
                   !isTopPosition ? 'is-fullwidth' : ''
                 }`}
-                onClick={isNextButton ? onClickNext : onSubmit}
+                onClick={isNextButton ? onClickNext : () => {}}
                 text={isNextButton ? 'Next' : finalLabel}
               />
             }
