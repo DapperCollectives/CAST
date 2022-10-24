@@ -5,6 +5,7 @@ const globalStyles = {
       fontFamily: 'body',
       lineHeight: 'base',
       fontSize: 'md',
+      color: 'black',
     },
     input: {
       fontSize: 'sm',
