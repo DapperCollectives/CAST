@@ -3,7 +3,6 @@ package server
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -355,7 +354,6 @@ func (a *App) getUserProposals(w http.ResponseWriter, r *http.Request) {
 
 	pageParams := getPageParams(*r, 25)
 
-	fmt.Println("filter", filter)
 	communities, totalRecords, err := models.GetCommunityProposalsForUser(
 		a.DB,
 		addr,
