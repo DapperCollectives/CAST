@@ -5,7 +5,7 @@ import Label from './Label';
 import Sidenavbar from './SideNavbar';
 import WalletConnect from './WalletConnect';
 
-function Header(props: RouteComponentProps): JSX.Element {
+const Header: React.FC<RouteComponentProps> = (props) => {
   const [showSidenav, setShowSidenav] = useState(false);
 
   const openNavbarMenu = () => {

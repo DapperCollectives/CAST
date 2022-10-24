@@ -14,9 +14,9 @@ interface HomeHeaderProps {
   isVisible: boolean;
 }
 
-export default function HomeHeader({
+export const HomeHeader: React.FC<HomeHeaderProps> = ({
   isVisible = true,
-}: HomeHeaderProps): JSX.Element | null {
+}: HomeHeaderProps) => {
   const { addToArrayOfRefes, starArray, parentRef } = useStarAnimation({
     stars,
   });

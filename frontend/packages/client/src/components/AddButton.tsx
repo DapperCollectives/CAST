@@ -2,18 +2,18 @@ import { Svg } from '@cast/shared-components';
 import classnames from 'classnames';
 
 interface AddButtonProps {
-  onAdd: any;
+  onAdd: () => void;
   disabled?: boolean;
   addText: string;
   className: string;
 }
 
-export default function AddButton({
+export const AddButton: React.FC<AddButtonProps> = ({
   onAdd = () => {},
   disabled = false,
   addText = '',
   className = '',
-}: AddButtonProps): JSX.Element {
+}) => {
   const classNames = classnames(
     'is-flex is-align-items-centered',
     {

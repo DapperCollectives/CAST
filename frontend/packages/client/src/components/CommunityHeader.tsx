@@ -17,11 +17,11 @@ interface CommunityHeaderProps {
   communityName?: string;
   members?: Member[];
   totalMembers: number;
-  onLeaveCommunity?: any;
-  onJoinCommunity?: any;
+  onLeaveCommunity?: () => void;
+  onJoinCommunity?: () => void;
 }
 
-export default function CommunityHeader({
+export const CommunityHeader: React.FC<CommunityHeaderProps> = ({
   isLoading = false,
   id,
   bannerImgUrl,
@@ -32,9 +32,9 @@ export default function CommunityHeader({
   totalMembers,
   onLeaveCommunity = () => {},
   onJoinCommunity = () => {},
-}: CommunityHeaderProps): JSX.Element {
+}) => {
   const notMobile = useMediaQuery();
-  console.log({ members });
+
   return (
     <div className="is-flex is-flex-direction-column">
       <div className="is-flex flex-1 is-justify-content-center commmunity-header-container">

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 
-const Body = (): JSX.Element => (
+const Body: React.FC = () => (
   <div className="content">
     <p>
       CAST is a voting tool application (the “App”) for communities in the Flow™

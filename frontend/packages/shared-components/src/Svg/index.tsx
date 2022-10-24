@@ -5,7 +5,7 @@ export interface SvgProps {
   props: any;
 }
 
-const Svg = ({ name, ...props }: SvgProps) => {
+const Svg: React.FC<SvgProps> = ({ name, ...props }) => {
   const [svgComponent, setSvgComponent] = useState<any>(null);
 
   useEffect(() => {
