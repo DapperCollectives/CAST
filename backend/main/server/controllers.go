@@ -409,6 +409,12 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := helpers.validateUpdateProposalStatus(*payload.Proposal.Status); err != nil {
+		log.Error().Err(err).Msg("Error validating status")
+		respondWithError(w, errIncompleteRequest)
+		return
+	}
+
 	if payload.Voucher != nil {
 		if err := helpers.validateUserWithRoleViaVoucher(
 			payload.Signing_addr,
@@ -432,7 +438,7 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if *p.Status == "draft" {
+	if *payload.Proposal.Status == "draft" {
 		p = *payload.Proposal
 
 		if err := p.UpdateDraftProposal(a.DB); err != nil {

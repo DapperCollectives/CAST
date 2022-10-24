@@ -137,7 +137,6 @@ func (otu *OverflowTestUtils) GenerateCancelProposalStruct(
 
 func (otu *OverflowTestUtils) GenerateUpdatedDraftProposalPayload(
 	signer string,
-	proposalId int,
 	strategy string,
 ) *models.UpdateProposalRequestPayload {
 	draft := "draft"
@@ -159,7 +158,6 @@ func (otu *OverflowTestUtils) GenerateUpdatedDraftProposalPayload(
 
 func (otu *OverflowTestUtils) GenerateClosedProposalStruct(
 	signer string,
-	proposalId int,
 ) *models.UpdateProposalRequestPayload {
 	closed := "closed"
 	payload := models.UpdateProposalRequestPayload{Proposal: &models.Proposal{Status: &closed}}

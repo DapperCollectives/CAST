@@ -705,6 +705,18 @@ func handlePermissionErrorr(result models.CanUserCreateProposalResponse) errorRe
 	return nilErr
 }
 
+func (h *Helpers) validateUpdateProposalStatus(status string) error {
+	validStatuses := []string{"draft", "pending", "published", "cancelled"}
+
+	for _, validStatus := range validStatuses {
+		if status == validStatus {
+			return nil
+		}
+	}
+
+	return errors.New("invalid status")
+}
+
 func (h *Helpers) validateStrategyName(name string) error {
 	if name == "" {
 		return errors.New("Strategy name is required.")

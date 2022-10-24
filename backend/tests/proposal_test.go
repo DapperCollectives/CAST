@@ -374,7 +374,6 @@ func TestDraftProposal(t *testing.T) {
 
 		payload := otu.GenerateUpdatedDraftProposalPayload(
 			authorName,
-			p.ID,
 			"balance-of-nfts",
 		)
 
