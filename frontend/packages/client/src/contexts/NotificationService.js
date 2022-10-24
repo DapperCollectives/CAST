@@ -4,8 +4,8 @@ import {
   LEANPLUM_DEV_KEY,
   LEANPLUM_PROD_KEY,
 } from 'api/constants';
-import Leanplum from 'leanplum-sdk';
 import { subscribeNotificationIntentions } from 'const';
+import Leanplum from 'leanplum-sdk';
 import { useWebContext } from './Web3';
 
 const NotificationServiceContext = createContext({});
