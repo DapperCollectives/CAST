@@ -1,4 +1,5 @@
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
+import { Link } from '@chakra-ui/react';
 import { useQuery } from '@tanstack/react-query';
 import { checkCanUserCreateProposal } from 'api/proposals';
 
@@ -26,8 +27,15 @@ export default function useProposalCreateCheck({ communityId, addr } = {}) {
   const dataMocked = {
     isBlocked: true,
     title: 'Minimum Balance Required',
-    description:
-      'In order to create a proposal for this community, you must have a minimum of 100 FLOW tokens in your wallet. Learn More',
+    description: (
+      <>
+        In order to create a proposal for this community, you must have a
+        minimum of 100 FLOW tokens in your wallet.{' '}
+        <Link href="#" variant="underlined">
+          Learn More
+        </Link>
+      </>
+    ),
     footerText:
       'Note: These tokens are ONLY used for verification and will not be debited from your wallet.',
   };
