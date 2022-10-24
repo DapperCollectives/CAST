@@ -19,31 +19,41 @@ export default function useProposalCreateCheck({ communityId, addr } = {}) {
     }
   );
 
-  // reasons for not being able to create a proposal
-  // Premissions: user needs to be an author to be able to create
-  // Token amount restriction
-  // NFT restriction
-
-  const dataMocked = {
-    isBlocked: true,
-    title: 'Minimum Balance Required',
-    description: (
-      <>
-        In order to create a proposal for this community, you must have a
-        minimum of 100 FLOW tokens in your wallet.{' '}
-        <Link href="#" variant="underlined">
-          Learn More
-        </Link>
-      </>
-    ),
-    footerText:
-      'Note: These tokens are ONLY used for verification and will not be debited from your wallet.',
+  // Check reason why not user can not crate a proposal
+  let response = {
+    isBlocked: false,
   };
+  // Token amount restriction
+  if (data?.reason === 'Insufficient token balance to create proposal.') {
+    const { balance, threshold } = data;
+    response = {
+      isBlocked: true,
+      title: 'Minimum Balance Required',
+      description: (
+        <>
+          In order to create a proposal for this community, you must have a
+          minimum of 100 FLOW tokens in your wallet.{' '}
+          <Link
+            href="https://dapper-collectives-1.gitbook.io/cast-docs/"
+            variant="underlined"
+          >
+            Learn More
+          </Link>
+        </>
+      ),
+      footerText:
+        'Note: These tokens are ONLY used for verification and will not be debited from your wallet.',
+      balance,
+      threshold,
+    };
+  }
 
+  //TODO: NFT restriction
+  //TODO: user is not an author
   return {
     isLoading,
     isError,
-    data: dataMocked,
+    data: response,
     error,
   };
 }

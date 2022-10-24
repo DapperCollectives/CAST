@@ -3,7 +3,13 @@ import { Card } from 'components';
 import { Flex, Heading, Text } from '@chakra-ui/react';
 import FlowCard from './FlowCard';
 
-export default function WarningMessage({ title, description, footerText }) {
+export default function WarningMessage({
+  title,
+  description,
+  footerText,
+  balance,
+  threshold,
+}) {
   return (
     <Card variant="warning">
       <Flex>
@@ -17,10 +23,13 @@ export default function WarningMessage({ title, description, footerText }) {
           <Text size="lg" fontSize="lg" fontWeight="medium" mb={5}>
             {description}
           </Text>
-          <Flex gap={4} flexWrap="wrap">
-            <FlowCard title="Minimum balance required" balance={22} />
-            <FlowCard title="Your Balance" balance={22} />
+          <Flex gap={4} flexWrap="wrap" mb={5}>
+            <FlowCard title="Minimum balance required" balance={threshold} />
+            <FlowCard title="Your Balance" balance={balance} />
           </Flex>
+          <Text size="lg" fontSize="xs" color="grey.500" fontWeight="medium">
+            {footerText}
+          </Text>
         </Flex>
       </Flex>
     </Card>

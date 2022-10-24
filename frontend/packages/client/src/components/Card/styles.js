@@ -17,7 +17,9 @@ const Card = {
     flowBox: {
       gap: 1,
       paddingTop: '14px',
+      paddingBottom: '14px',
       paddingLeft: '16px',
+      paddingRight: '16px',
       display: 'flex',
       flexDirection: 'column',
       borderRadius: 'lg',
