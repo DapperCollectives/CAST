@@ -1,21 +1,12 @@
 import { useNotificationServiceContext } from 'contexts/NotificationService';
 import { subscribeNotificationIntentions } from 'const';
-import NotificationsManage from './Manage';
 import NotificationsSignUp from './SignUp';
 
 const NotificationsModal = ({ onClose, communityId }) => {
   const {
-    notificationSettings,
     updateCommunitySubscription,
     updateAllEmailNotificationSubscription,
   } = useNotificationServiceContext();
-
-  const community =
-    notificationSettings?.communitySubscription?.find(
-      ({ communityId: id }) => id === communityId
-    ) ?? {};
-
-  const { subscribed: isSubscribed } = community;
 
   const handleSubscribeNotification = (signupAll) => {
     if (signupAll) {
@@ -29,9 +20,6 @@ const NotificationsModal = ({ onClose, communityId }) => {
       );
     }
   };
-  if (isSubscribed) {
-    return <NotificationsManage onClose={onClose} />;
-  }
 
   return (
     <NotificationsSignUp

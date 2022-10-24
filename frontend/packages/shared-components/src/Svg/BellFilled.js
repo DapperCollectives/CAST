@@ -1,11 +1,11 @@
-const BellFilled = ({ height = '24', width = '24', className = '' }) => (
+const BellFilled = ({ height = '24', width = '24', ...props }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={width}
     height={height}
-    className={className}
     fill="none"
     viewBox="0 0 24 24"
+    {...props}
   >
     <g className="has-text-yellow">
       <path

@@ -30,3 +30,4 @@ export { default as useOnClickOutside } from './useOnOutsideClick';
 export { default as useFeaturedCommunities } from './useFeaturedCommunities';
 export { default as useCommunitySearch } from './useCommunitySearch';
 export { default as useDebounce } from './useDebounce';
+export { default as useToast } from './useToast';

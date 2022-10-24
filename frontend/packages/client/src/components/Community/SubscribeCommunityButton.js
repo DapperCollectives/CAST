@@ -3,6 +3,7 @@ import { useNotificationServiceContext } from 'contexts/NotificationService';
 import { useWebContext } from 'contexts/Web3';
 import { Svg } from '@cast/shared-components';
 import { ErrorModal, NotificationsModal, WalletConnect } from 'components';
+import useToast from 'hooks/useToast';
 import classnames from 'classnames';
 
 export default function SubscribeCommunityButton({
@@ -13,11 +14,13 @@ export default function SubscribeCommunityButton({
   const { openModal, closeModal } = useModalContext();
   const { notificationSettings } = useNotificationServiceContext();
   const subscribedToCommunity =
-    notificationSettings?.communitySubscription.some((c) => c === communityId);
+    notificationSettings?.communitySubscription.some(
+      (c) => c.communityId === communityId
+    );
   const subscribedToEmails =
     notificationSettings?.isSubscribedFromCommunityUpdates;
   const isSubscribed = subscribedToCommunity && subscribedToEmails;
-
+  const { popToast } = useToast();
   const { user } = useWebContext();
 
   const onOpenModal = () => {
@@ -38,6 +41,11 @@ export default function SubscribeCommunityButton({
         />,
         { isErrorModal: true }
       );
+    } else if (isSubscribed) {
+      popToast('Email notifications are turned on', {
+        footerLink: '/settings',
+        footerText: 'Manage Settings',
+      });
     } else {
       openModal(
         <NotificationsModal communityId={communityId} onClose={closeModal} />,
@@ -70,7 +78,7 @@ export default function SubscribeCommunityButton({
       style={containerStyles}
     >
       <button className={buttonClasses} onClick={onOpenModal}>
-        <Svg name={buttonIcon} />
+        <Svg name={buttonIcon} style={{ minWidth: 24 }} />
       </button>
     </div>
   );
