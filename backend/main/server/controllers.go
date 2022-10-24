@@ -350,10 +350,16 @@ func (a *App) getDraftProposal(w http.ResponseWriter, r *http.Request) {
 func (a *App) getUserProposals(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	addr := vars["addr"]
+	filter := r.FormValue("filter")
 
 	pageParams := getPageParams(*r, 25)
 
-	communities, totalRecords, err := models.GetCommunityProposalsForUser(a.DB, addr, pageParams)
+	communities, totalRecords, err := models.GetCommunityProposalsForUser(
+		a.DB,
+		addr,
+		filter,
+		pageParams,
+	)
 	if err != nil {
 		log.Error().Err(err).Msg("Error getting user proposals.")
 		respondWithError(w, errIncompleteRequest)
