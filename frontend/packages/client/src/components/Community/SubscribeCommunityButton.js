@@ -3,7 +3,7 @@ import { useNotificationServiceContext } from 'contexts/NotificationService';
 import { useWebContext } from 'contexts/Web3';
 import { Svg } from '@cast/shared-components';
 import { ErrorModal, NotificationsModal, WalletConnect } from 'components';
-import useToast from 'hooks/useToast';
+import { useToast } from 'hooks';
 import classnames from 'classnames';
 
 export default function SubscribeCommunityButton({
