@@ -1,4 +1,4 @@
-const HideEye = () => (
+const EyeHidden = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="24"
@@ -17,4 +17,4 @@ const HideEye = () => (
   </svg>
 );
 
-export default HideEye;
+export default EyeHidden;

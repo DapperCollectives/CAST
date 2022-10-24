@@ -9,6 +9,7 @@ export default function ChoiceOptionCreator({
   fieldName,
   control,
   clearErrors,
+  voteType,
 } = {}) {
   const tabOption = useWatch({ control, name: 'tabOption' });
 
@@ -52,6 +53,7 @@ export default function ChoiceOptionCreator({
           fieldName={fieldName}
           control={control}
           clearErrors={clearErrors}
+          voteType={voteType}
         />
       )}
       {tabOption === 'visual' && (

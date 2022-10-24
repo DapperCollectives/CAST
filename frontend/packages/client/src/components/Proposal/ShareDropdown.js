@@ -8,7 +8,9 @@ import classnames from 'classnames';
 export default function ShareDropdown({
   communityId,
   proposalId,
+  proposalName = '',
   isMobile,
+  userVoted,
 } = {}) {
   const [dropdownStatus, setDropdownStatus] = useState('');
   const dropdownRef = useRef();
@@ -26,6 +28,12 @@ export default function ShareDropdown({
   );
 
   const proposalUrl = `${FRONTEND_URL}/#/community/${communityId}/proposal/${proposalId}`;
+
+  const twitterPost = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+    userVoted
+      ? `I just voted on ${proposalName} on CAST! ${proposalUrl}`
+      : `Check out ${proposalName} on CAST! ${proposalUrl}`
+  )} `;
 
   return (
     <div className={`dropdown ${dropdownStatus} is-right`}>
@@ -69,9 +77,7 @@ export default function ShareDropdown({
             <div className="column is-flex is-align-items-center">
               <a
                 className="twitter-share-button has-text-weight-bold has-text-black"
-                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
-                  proposalUrl
-                )}`}
+                href={twitterPost}
                 target="_blank"
                 rel="noreferrer noopenner"
               >

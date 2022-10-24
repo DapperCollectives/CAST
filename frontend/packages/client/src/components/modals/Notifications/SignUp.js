@@ -7,7 +7,7 @@ import Error from '../Error';
 import Modal from '../Modal';
 import { getSchema } from './FormConfig';
 
-const SignUpForm = ({ setErrorMessage, onSubscribe, communityId, onClose }) => {
+const SignUpForm = ({ setErrorMessage, onSubscribe, onClose }) => {
   const [signupAll, setSignupAll] = useState(false);
 
   const { register, handleSubmit, formState } = useForm({
@@ -17,9 +17,9 @@ const SignUpForm = ({ setErrorMessage, onSubscribe, communityId, onClose }) => {
     },
   });
 
-  const onSubmit = async () => {
+  const onSubmit = async (formData) => {
     try {
-      onSubscribe(communityId, signupAll);
+      onSubscribe(signupAll);
       onClose();
     } catch (e) {
       setErrorMessage(e.message);

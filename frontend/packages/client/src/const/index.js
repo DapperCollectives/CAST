@@ -21,6 +21,7 @@ export const FilterValues = {
   all: 'All',
   active: 'Active',
   pending: 'Pending',
+  draft: 'Draft',
   closed: 'Closed',
   cancelled: 'Cancelled',
   // group of active and pending
@@ -34,6 +35,12 @@ export const CommunityEditPageTabs = {
   details: 'details',
   proposalAndVoting: 'proposals-and-voting',
   votingStrategies: 'voting-strategies',
+};
+
+export const subscribeNotificationIntentions = {
+  subscribe: 'subscribe',
+  unsubscribe: 'unsubscribe',
+  resubscribe: 'resubscribe',
 };
 
 // Dapper Wallet Txs
@@ -102,3 +109,6 @@ transaction() {
 export const FRONTEND_URL = `${IS_PRODUCTION ? 'https://' : 'http://'}${
   process.env.REACT_APP_FRONTEND_URL
 }`;
+
+export const EMAIL_REGEX =
+  /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/gim;

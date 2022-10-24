@@ -10,7 +10,7 @@ run:
 	./${BINARY_NAME}
 
 test:
-	go test -v -cover ./...
+	go test -v ./...
 
 	# creates proposals against local db for manual emulator testing
 proposals:

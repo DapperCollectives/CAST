@@ -38,7 +38,6 @@ export default function HomePage() {
         // missing fields
         isComingSoon: datum.isComingSoon || false,
       }));
-
   const browserName = useBrowserName();
 
   const [showToolTip, setValue] = useLocalStorage('dw-safary-tooltip', null);
