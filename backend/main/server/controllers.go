@@ -432,7 +432,7 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if *payload.Proposal.Status == "draft" {
+	if *p.Status == "draft" {
 		p = *payload.Proposal
 
 		if err := p.UpdateDraftProposal(a.DB); err != nil {
