@@ -21,6 +21,7 @@ function StepByStep({
   useControlsOnTopBar = true,
   previewComponent,
   isBlocked = false,
+  warningBlockedComponent,
 } = {}) {
   const notMobile = useMediaQuery();
   const [currentStep, setCurrentStep] = useState(0);
@@ -159,13 +160,13 @@ function StepByStep({
           <div
             className={`step-by-step-body flex-1 has-background-white px-4-mobile pt-0-mobile is-flex-mobile is-flex-direction-column-mobile`}
           >
-            {isBlocked && <Card variant="warning">hello</Card>}
+            {isBlocked && <div className="mb-5">{warningBlockedComponent}</div>}
             {isSubmitting && (
               <div
                 className="is-flex flex-1 is-flex-direction-column is-align-items-center is-justify-content-center"
                 style={{ height: '100%' }}
               >
-                <Loader className="mb-4" />
+                <Loader className="mb-5" />
                 <p className="has-text-grey">{submittingMessage}</p>
               </div>
             )}

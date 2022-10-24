@@ -10,10 +10,10 @@ import {
   PropCreateStepOne,
   PropCreateStepThree,
   PropCreateStepTwo,
+  WarningMessage,
 } from 'components/ProposalCreate';
 import { useProposalCreateCheck, useProposalCreateMutation } from 'hooks';
 import { isStartTimeValid, parseDateToServer } from 'utils';
-import { checkCanUserCreateProposal } from 'api/proposals';
 
 export default function ProposalCreatePage() {
   const { createProposal, data, loading, error } = useProposalCreateMutation();
@@ -146,6 +146,7 @@ export default function ProposalCreatePage() {
     passSubmitToComp: true,
     previewComponent: <PreviewComponent />,
     isBlocked: canCreateCheck.isBlocked,
+    warningBlockedComponent: <WarningMessage {...(canCreateCheck ?? {})} />,
     steps: [
       {
         label: 'Proposal',
