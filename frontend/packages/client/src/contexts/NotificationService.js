@@ -1,4 +1,10 @@
 import { createContext, useContext, useEffect, useState } from 'react';
+import {
+  LEANPLUM_APP_ID,
+  LEANPLUM_DEV_KEY,
+  LEANPLUM_PROD_KEY,
+} from 'api/constants';
+import Leanplum from 'leanplum-sdk';
 import { useWebContext } from './Web3';
 
 const NotificationServiceContext = createContext({});
@@ -9,6 +15,16 @@ const INIT_NOTIFICATION_SETTINGS = {
   communitySubscription: [],
   isUnsubscribedFromCommunityUpdates: false,
 };
+
+const IS_LOCAL_DEV = process.env.REACT_APP_APP_ENV === 'development';
+
+if (IS_LOCAL_DEV) {
+  Leanplum.setAppIdForDevelopmentMode(LEANPLUM_APP_ID, LEANPLUM_DEV_KEY);
+} else {
+  Leanplum.setAppIdForProductionMode(LEANPLUM_APP_ID, LEANPLUM_PROD_KEY);
+}
+
+Leanplum.start();
 
 export const useNotificationServiceContext = () => {
   const context = useContext(NotificationServiceContext);

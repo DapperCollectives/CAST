@@ -1,3 +1,4 @@
+/* eslint-disable */
 import 'react-datepicker/dist/react-datepicker.css';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { ErrorBoundary } from 'react-error-boundary';

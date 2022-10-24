@@ -1,7 +1,7 @@
 import {
-  LP_APP_ID,
-  LP_CRO_KEY,
-  LP_EXPORT_KEY,
+  LEANPLUM_APP_ID,
+  LEANPLUM_CRO_KEY,
+  LEANPLUM_EXPORT_KEY,
 } from 'api/constants';
 import Leanplum from 'leanplum-sdk';
 
@@ -22,39 +22,48 @@ export const setUserId = async (walletId) => {
 export const getUserSettings = async (walletId) => {
   try {
     fetch(
-      `https://api.leanplum.com/api?appId=${LP_APP_ID}&clientKey=${LP_EXPORT_KEY}&apiVersion=1.0.6&userId=${walletId}&action=exportUser`,
+      `https://api.leanplum.com/api?appId=${LEANPLUM_APP_ID}&clientKey=${LEANPLUM_EXPORT_KEY}&apiVersion=1.0.6&userId=${walletId}&action=exportUser`,
       options
-    ).then((response) => {
-      let data = response.response[0];
-      let communitySubscriptions = [];
-      let isSubscribedToCommunityUpdates = true;
-      const res = {
-        email: data.userAttributes.email,
-      };
+    )
+      .then((response) => response.json())
+      .then((response) => {
+        const data = response.response[0];
+        if (!data.success) {
+          throw new Error(data.error.message);
+        }
+        if (!data.userAttributes) {
+          throw new Error('User Not Found');
+        }
 
-      for (const property in data.userAttributes) {
-        if (property.includes('community')) {
-          let communityId = property.split('community')[1];
-          communitySubscriptions.push({
-            communityId,
-            subscribed: data.userAttributes[property] === 'True',
+        const communitySubscriptions = [];
+        const res = {
+          email: data.userAttributes.email,
+        };
+        let isSubscribedToCommunityUpdates = true;
+
+        for (const property in data.userAttributes) {
+          if (property.includes('community')) {
+            const communityId = property.split('community')[1];
+            communitySubscriptions.push({
+              communityId,
+              subscribed: data.userAttributes[property] === 'True',
+            });
+          }
+        }
+
+        res.communitySubscription = communitySubscriptions;
+
+        if (data.unsubscribeCategories) {
+          data.unsubscribeCategories.forEach((category) => {
+            if (parseInt(category.id) === COMMUNITY_UPDATES_CATEGORY_ID) {
+              isSubscribedToCommunityUpdates = false;
+            }
           });
         }
-      }
 
-      res.communitySubscription = communitySubscriptions;
-
-      if (data.unsubscribeCategories) {
-        data.unsubscribeCategories.forEach((category) => {
-          if (category.id == 1) {
-            isSubscribedToCommunityUpdates = false;
-          }
-        });
-      }
-
-      res.isSubscribedToCommunityUpdates = isSubscribedToCommunityUpdates;
-      return res;
-    });
+        res.isSubscribedToCommunityUpdates = isSubscribedToCommunityUpdates;
+        return res;
+      });
   } catch (e) {
     throw new Error(e);
   }
@@ -70,10 +79,7 @@ export const setUserEmail = async (email) => {
 
 export const unsubscribeCommunity = async (communityId) => {
   try {
-    let userAttributes = {};
-    let communityKey = 'community' + communityId;
-    userAttributes[communityKey] = false;
-    Leanplum.setUserAttributes(userAttributes);
+    Leanplum.setUserAttributes({ [`community${communityId}`]: false });
   } catch (e) {
     throw new Error(e);
   }
@@ -81,10 +87,7 @@ export const unsubscribeCommunity = async (communityId) => {
 
 export const subscribeCommunity = async (communityId) => {
   try {
-    let userAttributes = {};
-    let communityKey = 'community' + communityId;
-    userAttributes[communityKey] = true;
-    Leanplum.setUserAttributes(userAttributes);
+    Leanplum.setUserAttributes({ [`community${communityId}`]: true });
   } catch (e) {
     throw new Error(e);
   }
@@ -93,11 +96,17 @@ export const subscribeCommunity = async (communityId) => {
 export const unsubscribeFromEmailNotifications = async (walletId) => {
   try {
     fetch(
-      `https://www.leanplum.com/api?appId=${LP_APP_ID}&clientKey=${LP_CRO_KEY}&action=setUserAttributes&userId=${walletId}&unsubscribeCategoriesToAdd=${COMMUNITY_UPDATES_CATEGORY_ID}`,
+      `https://www.leanplum.com/api?appId=${LEANPLUM_APP_ID}&clientKey=${LEANPLUM_CRO_KEY}&action=setUserAttributes&userId=${walletId}&unsubscribeCategoriesToAdd=${COMMUNITY_UPDATES_CATEGORY_ID}`,
       options
-    ).then((response) => {
-      return response;
-    });
+    )
+      .then((response) => response.json())
+      .then((response) => {
+        const data = response.response[0];
+        if (!data.success) {
+          throw new Error(data.error.message);
+        }
+        return response;
+      });
   } catch (e) {
     throw new Error(e);
   }
@@ -106,11 +115,17 @@ export const unsubscribeFromEmailNotifications = async (walletId) => {
 export const subscribeToEmailNotifications = async (walletId) => {
   try {
     fetch(
-      `https://www.leanplum.com/api?appId=${LP_APP_ID}&clientKey=${LP_CRO_KEY}&action=setUserAttributes&userId=${walletId}&unsubscribeCategoriesToRemove=${COMMUNITY_UPDATES_CATEGORY_ID}`,
+      `https://www.leanplum.com/api?appId=${LEANPLUM_APP_ID}&clientKey=${LEANPLUM_CRO_KEY}&action=setUserAttributes&userId=${walletId}&unsubscribeCategoriesToRemove=${COMMUNITY_UPDATES_CATEGORY_ID}`,
       options
-    ).then((response) => {
-      return response;
-    });
+    )
+      .then((response) => response.json())
+      .then((response) => {
+        const data = response.response[0];
+        if (!data.success) {
+          throw new Error(data.error.message);
+        }
+        return response;
+      });
   } catch (e) {
     throw new Error(e);
   }
