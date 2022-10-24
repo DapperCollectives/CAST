@@ -35,11 +35,13 @@ function App() {
           <Router>
             {/* using resetCSS to avoid conficts */}
             <ChakraProvider theme={theme} resetCSS={false}>
-              <NotificationModalProvider>
-                <ErrorHandler>
-                  <AppPages />
-                </ErrorHandler>
-              </NotificationModalProvider>
+              <NotificationServiceProvider>
+                <NotificationModalProvider>
+                  <ErrorHandler>
+                    <AppPages />
+                  </ErrorHandler>
+                </NotificationModalProvider>
+              </NotificationServiceProvider>
             </ChakraProvider>
           </Router>
         </Web3Provider>
