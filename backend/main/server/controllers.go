@@ -122,6 +122,13 @@ var (
 		Details:    "The proposal you are trying to access no longer exists.",
 	}
 
+	errUserNotFound = errorResponse{
+		StatusCode: http.StatusNotFound,
+		ErrorCode:  "ERR_1015",
+		Message:    "User Not Found",
+		Details:    "The user you are trying to access does not exist.",
+	}
+
 	nilErr = errorResponse{}
 )
 
@@ -900,8 +907,8 @@ func (a *App) getUser(w http.ResponseWriter, r *http.Request) {
 
 	var user models.User
 	if err := user.GetUser(a.DB, addr); err != nil {
-		log.Error().Err(err).Msg("Error getting user")
-		respondWithError(w, errIncompleteRequest)
+		log.Error().Err(err).Msg("Error user not foune")
+		respondWithError(w, errUserNotFound)
 		return
 	}
 

@@ -2,7 +2,6 @@ package models
 
 import (
 	"github.com/DapperCollectives/CAST/backend/main/shared"
-	"github.com/georgysavva/scany/pgxscan"
 	"github.com/google/uuid"
 )
 
@@ -51,10 +50,22 @@ func (u *User) CreateUser(db *shared.Database, payload *User) error {
 	return nil
 }
 
-func (u *User) GetUser(db *shared.Database, address string) error {
-	err := pgxscan.Get(db.Context, db.Conn, u,
-		"SELECT * FROM users WHERE address = $1",
-		address)
+func (u *User) GetUser(db *shared.Database, addr string) error {
+	err := db.Conn.QueryRow(
+		db.Context,
+		"SELECT * FROM users WHERE addr = $1",
+		addr).Scan(
+		&u.Uuid,
+		&u.Addr,
+		&u.Profile_image,
+		&u.Name,
+		&u.Website,
+		&u.Bio,
+		&u.Twitter,
+		&u.Discord,
+		&u.Instagram,
+	)
+
 	if err != nil {
 		return err
 	}
