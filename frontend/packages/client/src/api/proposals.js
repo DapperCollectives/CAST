@@ -160,3 +160,10 @@ export const fetchProposalResults = async ({ proposalId }) => {
 
   return checkResponse(response);
 };
+
+export const checkCanUserCreateProposal = async ({ communityId, addr }) => {
+  const response = await fetch(
+    `${COMMUNITIES_URL}/${communityId}/can-user-create-proposal/${addr}`
+  );
+  return checkResponse(response);
+};
