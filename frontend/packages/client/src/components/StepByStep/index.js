@@ -1,6 +1,5 @@
 import { cloneElement, useCallback, useRef, useState } from 'react';
 import { Prompt } from 'react-router-dom';
-import { Card } from 'components/Card';
 import { useMediaQuery } from 'hooks';
 import Loader from '../Loader';
 import LeftPanel from './LeftPanel';
