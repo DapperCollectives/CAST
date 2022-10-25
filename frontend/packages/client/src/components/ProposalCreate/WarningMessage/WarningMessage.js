@@ -17,7 +17,7 @@ export default function WarningMessage({
           <Svg name="ErrorOutline" width="24" height="24" color="#F54339" />
         </Flex>
         <Flex pl={6} direction="column">
-          <Heading as="h4" fontSize="xl" mb={2}>
+          <Heading as="h4" fontSize="lg" mb={2}>
             {title}
           </Heading>
           <Text size="lg" fontSize="lg" fontWeight="medium" mb={5}>
