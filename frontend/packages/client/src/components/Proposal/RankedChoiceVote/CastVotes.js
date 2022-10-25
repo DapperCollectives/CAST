@@ -9,16 +9,18 @@ const ITEM_TYPE = 'vote';
 const CastVotes = ({ votes, setVotes, readOnly = false, removeVote }) => {
   const ref = useRef(null);
   const moveVote = useCallback(
-    (dragIndex, hoverIndex) => {
-      setVotes((prevVotes) =>
-        update(prevVotes, {
+    (dragIndex, hoverIndex) =>
+      setVotes((prevVotes) => {
+        return update(prevVotes, {
           $splice: [
             [dragIndex, 1],
             [hoverIndex, 0, prevVotes[dragIndex]],
           ],
-        })
-      );
-    },
+        });
+        // const draggedVote = prevVotes.splice(dragIndex, 1)[0];
+        // prevVotes.splice(hoverIndex, 0, draggedVote);
+        // return prevVotes;
+      }),
     [setVotes]
   );
   return (

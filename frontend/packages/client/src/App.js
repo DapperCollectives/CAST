@@ -8,11 +8,13 @@ import { HashRouter as Router } from 'react-router-dom';
 import NotificationModalProvider from 'contexts/NotificationModal';
 import { Web3Provider } from 'contexts/Web3';
 import { ErrorHandler } from 'components';
-import { useMediaQuery } from 'hooks';
 import { IS_PRODUCTION } from 'const';
+import { ChakraProvider } from '@chakra-ui/react';
 import Hotjar from '@hotjar/browser';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import detectTouchScreen from 'helpers/detectTouchScreen';
+import theme from 'helpers/theme';
 import AppPages from 'pages';
 import Error from 'pages/Error';
 import './App.sass';
@@ -24,7 +26,7 @@ Hotjar.init(process.env.REACT_APP_HOTJAR_SITE_ID, hotjarVersion);
 const queryClient = new QueryClient();
 
 function App() {
-  const notMobile = useMediaQuery();
+  const hasTouchScreen = detectTouchScreen();
   return (
     <ErrorBoundary
       fallbackRender={({ error, resetErrorBoundary }) => (
@@ -34,15 +36,20 @@ function App() {
     >
       <QueryClientProvider client={queryClient}>
         <Web3Provider network={process.env.REACT_APP_FLOW_ENV}>
-          <NotificationModalProvider>
-            <Router>
-              <ErrorHandler>
-                <DndProvider backend={notMobile ? HTML5Backend : TouchBackend}>
-                  <AppPages />
-                </DndProvider>
-              </ErrorHandler>
-            </Router>
-          </NotificationModalProvider>
+          {/* using resetCSS to avoid conficts */}
+          <ChakraProvider theme={theme} resetCSS={false}>
+            <NotificationModalProvider>
+              <Router>
+                <ErrorHandler>
+                  <DndProvider
+                    backend={hasTouchScreen ? TouchBackend : HTML5Backend}
+                  >
+                    <AppPages />
+                  </DndProvider>
+                </ErrorHandler>
+              </Router>
+            </NotificationModalProvider>
+          </ChakraProvider>
         </Web3Provider>
         {!IS_PRODUCTION && <ReactQueryDevtools initialIsOpen={false} />}
       </QueryClientProvider>
