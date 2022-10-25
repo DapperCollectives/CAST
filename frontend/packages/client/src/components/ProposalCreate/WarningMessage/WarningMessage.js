@@ -23,13 +23,17 @@ export default function WarningMessage({
           <Text size="lg" fontSize="lg" fontWeight="medium" mb={5}>
             {description}
           </Text>
-          <Flex gap={4} flexWrap="wrap" mb={5}>
-            <FlowCard title="Minimum balance required" balance={threshold} />
-            <FlowCard title="Your Balance" balance={balance} />
-          </Flex>
-          <Text size="lg" fontSize="xs" color="grey.500" fontWeight="medium">
-            {footerText}
-          </Text>
+          {Boolean(threshold && balance) && (
+            <Flex gap={4} flexWrap="wrap" mb={5}>
+              <FlowCard title="Minimum balance required" balance={threshold} />
+              <FlowCard title="Your Balance" balance={balance} />
+            </Flex>
+          )}
+          {footerText && (
+            <Text size="lg" fontSize="xs" color="grey.500" fontWeight="medium">
+              {footerText}
+            </Text>
+          )}
         </Flex>
       </Flex>
     </Card>
