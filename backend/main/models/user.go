@@ -71,3 +71,42 @@ func (u *User) GetUser(db *shared.Database, addr string) error {
 	}
 	return nil
 }
+
+func (u *User) UpdateUser(db *shared.Database, payload *User) error {
+	err := db.Conn.QueryRow(
+		db.Context,
+		`UPDATE users 
+		SET profile_image = COALESCE($1,profile_image),
+		name = COALESCE($2, name), 
+		website = COALESCE($3, website), 
+		bio = COALESCE($4, bio), 
+		twitter = COALESCE($5, twitter), 
+		discord = COALESCE($6, discord), 
+		instagram = COALESCE($7, instagram)
+		WHERE addr = $8		
+		RETURNING *`,
+		payload.Profile_image,
+		payload.Name,
+		payload.Website,
+		payload.Bio,
+		payload.Twitter,
+		payload.Discord,
+		payload.Instagram,
+		payload.Addr,
+	).Scan(
+		&u.Uuid,
+		&u.Addr,
+		&u.Profile_image,
+		&u.Name,
+		&u.Website,
+		&u.Bio,
+		&u.Twitter,
+		&u.Discord,
+		&u.Instagram,
+	)
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
