@@ -35,8 +35,6 @@ export default function ProposalCreatePage() {
     addr: creatorAddr,
   });
 
-  console.log(canCreateCheck);
-
   useEffect(() => {
     if (data?.id) {
       history.push(`/community/${data.communityId}/proposal/${data.id}`);
