@@ -70,7 +70,7 @@ const StepTwo = ({
 
   // **************************************************************
   //   This is to enable having choices when entering in preview mode
-  //   fields are saved and valilated when user hits on next
+  //   fields are saved and validated when user hits on next
   //   by doing this we are saving the options before without validation
   //   when user hits next fields will be validated and overwritten with valid values
   //   for example it's possible to enter in preview mode with duplicated voting options
@@ -123,7 +123,7 @@ const StepTwo = ({
               <Input
                 placeholder="Minimum Balance"
                 classNames="rounded-sm border-light p-3 column is-full"
-                conatinerClassNames="mt-4 mb-4"
+                containerClassNames="mt-4 mb-4"
                 register={register}
                 error={errors['minBalance']}
                 name="minBalance"
@@ -131,7 +131,7 @@ const StepTwo = ({
               <Input
                 placeholder="Maximum Weight"
                 classNames="rounded-sm border-light p-3 column is-full"
-                conatinerClassNames="mb-4"
+                containerClassNames="mb-4"
                 register={register}
                 error={errors['maxWeight']}
                 name="maxWeight"

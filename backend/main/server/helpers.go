@@ -514,6 +514,9 @@ func (h *Helpers) searchCommunities(
 }
 
 func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorResponse) {
+
+	fmt.Println(p)
+
 	if p.Voucher != nil {
 		if err := h.validateUserViaVoucher(p.Creator_addr, p.Voucher); err != nil {
 			return models.Proposal{}, errForbidden
@@ -538,10 +541,13 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorRespo
 		return p, nilErr
 	}
 
+	fmt.Println("B")
+
 	if err := h.validateStrategyName(*p.Strategy); err != nil {
 		fmt.Printf("Error validating strategy name: %v \n", err)
 		return models.Proposal{}, errStrategyNotFound
 	}
+
 
 	strategy, err := models.MatchStrategyByProposal(*community.Strategies, *p.Strategy)
 	if err != nil {
@@ -557,7 +563,11 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorRespo
 		p.Max_weight = strategy.Contract.MaxWeight
 	}
 
+	fmt.Println("C")
+
 	canUserCreateProposal := community.CanUserCreateProposal(h.A.DB, h.A.FlowAdapter, p.Creator_addr)
+
+	fmt.Println("D")
 
 	if err := handlePermissionErrorr(canUserCreateProposal); err != nilErr {
 		return models.Proposal{}, err
@@ -591,9 +601,13 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorRespo
 		}
 	}
 
+	fmt.Println("E")
+
 	if err := p.CreateProposal(h.A.DB); err != nil {
 		return models.Proposal{}, errIncompleteRequest
 	}
+
+	fmt.Println("F")
 
 	return p, nilErr
 }

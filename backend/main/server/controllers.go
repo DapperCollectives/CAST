@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -383,11 +384,14 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 	var p models.Proposal
 	p.Community_id = communityId
 
+	
 	if err := validatePayload(r.Body, &p); err != nil {
 		log.Error().Err(err).Msg("Error validating payload")
 		respondWithError(w, errIncompleteRequest)
 		return
 	}
+
+	fmt.Printf("%+v\n", *p.Strategy)
 
 	proposal, errResponse := helpers.createProposal(p)
 	if errResponse != nilErr {
