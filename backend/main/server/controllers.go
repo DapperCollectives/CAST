@@ -943,9 +943,10 @@ func (a *App) updateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var user models.User
+
 	if err := user.UpdateUser(a.DB, &payload); err != nil {
 		log.Error().Err(err).Msg("Error updating user")
-		respondWithError(w, errIncompleteRequest)
+		respondWithError(w, errUserNotFound)
 		return
 	}
 	respondWithJSON(w, http.StatusOK, user)

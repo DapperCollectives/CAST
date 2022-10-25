@@ -41,3 +41,17 @@ func (otu *OverflowTestUtils) GenerateUserStruct(signer string) *models.User {
 		Instagram:     &dummyInstagram,
 	}
 }
+
+func (otu *OverflowTestUtils) GenerateFailUserStruct() *models.User {
+	nonExistentAccount := "0x696969"
+
+	return &models.User{
+		Addr:          &nonExistentAccount,
+		Profile_image: &dummyProfileImage,
+		Name:          &dummyName,
+		Bio:           &dummyBio,
+		Twitter:       &dummyTwitter,
+		Discord:       &dummyDiscord,
+		Instagram:     &dummyInstagram,
+	}
+}

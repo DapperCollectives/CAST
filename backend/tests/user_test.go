@@ -75,4 +75,19 @@ func TestUser(t *testing.T) {
 
 		assert.Equal(t, "User not found", m["message"])
 	})
+
+	t.Run("should throw an error when updating a user that doesn't exist", func(t *testing.T) {
+		userStruct := otu.GenerateFailUserStruct()
+		payload, _ := json.Marshal(userStruct)
+		req, _ := http.NewRequest("PUT", "/user", bytes.NewBuffer(payload))
+		req.Header.Set("Content-Type", "application/json")
+		response := otu.ExecuteRequest(req)
+
+		checkResponseCode(t, http.StatusNotFound, response.Code)
+
+		var m map[string]string
+		json.Unmarshal(response.Body.Bytes(), &m)
+
+		assert.Equal(t, "User not found", m["message"])
+	})
 }
