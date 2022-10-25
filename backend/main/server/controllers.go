@@ -107,11 +107,19 @@ var (
 		Message:    "Error",
 		Details:    "There was an error creating the vote.",
 	}
+
 	errCreateProposalPermissions = errorResponse{
 		StatusCode: http.StatusForbidden,
 		ErrorCode:  "ERR_1013",
 		Message:    "User is not permitted to create a proposal for this community.",
 		Details:    "",
+	}
+
+	errProposalNotFound = errorResponse{
+		StatusCode: http.StatusNotFound,
+		ErrorCode:  "ERR_1014",
+		Message:    "Proposal Not Found",
+		Details:    "The proposal you are trying to access no longer exists.",
 	}
 
 	nilErr = errorResponse{}
@@ -320,7 +328,19 @@ func (a *App) getProposal(w http.ResponseWriter, r *http.Request) {
 	p, err := helpers.fetchProposal(vars, "id")
 	if err != nil {
 		log.Error().Err(err).Msg("Invalid Proposal ID.")
-		respondWithError(w, errIncompleteRequest)
+		respondWithError(w, errProposalNotFound)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, p)
+}
+
+func (a *App) getDraftProposal(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	p, err := helpers.fetchProposal(vars, "id")
+	if err != nil {
+		log.Error().Err(err).Msg("Invalid Proposal ID.")
+		respondWithError(w, errProposalNotFound)
 		return
 	}
 
@@ -344,10 +364,16 @@ func (a *App) getProposal(w http.ResponseWriter, r *http.Request) {
 func (a *App) getUserProposals(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	addr := vars["addr"]
+	filter := r.FormValue("filter")
 
 	pageParams := getPageParams(*r, 25)
 
-	communities, totalRecords, err := models.GetCommunityProposalsForUser(a.DB, addr, pageParams)
+	communities, totalRecords, err := models.GetCommunityProposalsForUser(
+		a.DB,
+		addr,
+		filter,
+		pageParams,
+	)
 	if err != nil {
 		log.Error().Err(err).Msg("Error getting user proposals.")
 		respondWithError(w, errIncompleteRequest)
@@ -355,7 +381,6 @@ func (a *App) getUserProposals(w http.ResponseWriter, r *http.Request) {
 	}
 
 	pageParams.TotalRecords = totalRecords
-
 	response := shared.GetPaginatedResponseWithPayload(communities, pageParams)
 	respondWithJSON(w, http.StatusOK, response)
 }
@@ -404,11 +429,8 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Check that status update is valid
-	// For now we are assuming proposals are creating with
-	// status 'published' and may be cancelled.
-	if payload.Status != "cancelled" {
-		log.Error().Err(err).Msg("Invalid status update")
+	if err := helpers.validateUpdateProposalStatus(*payload.Proposal.Status); err != nil {
+		log.Error().Err(err).Msg("Error validating status")
 		respondWithError(w, errIncompleteRequest)
 		return
 	}
@@ -436,16 +458,52 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	p.Status = &payload.Status
-	p.Cid, err = helpers.pinJSONToIpfs(p)
+	if *payload.Proposal.Status == "draft" {
+		p = *payload.Proposal
+
+		if err := p.UpdateDraftProposal(a.DB); err != nil {
+			log.Error().Err(err).Msg("Error updating draft proposal")
+			respondWithError(w, errIncompleteRequest)
+			return
+		}
+
+		respondWithJSON(w, http.StatusOK, p)
+	} else {
+		p.Status = payload.Proposal.Status
+		p.Cid, err = helpers.pinJSONToIpfs(p)
+		if err != nil {
+			log.Error().Err(err).Msg("Error pinning proposal to IPFS")
+			respondWithError(w, errIncompleteRequest)
+			return
+		}
+
+		if err := p.UpdateProposal(a.DB); err != nil {
+			log.Error().Err(err).Msg("Error updating proposal")
+			respondWithError(w, errIncompleteRequest)
+			return
+		}
+
+		respondWithJSON(w, http.StatusOK, p)
+	}
+}
+
+func (a *App) deleteProposal(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	p, err := helpers.fetchProposal(vars, "id")
 	if err != nil {
-		log.Error().Err(err).Msg("Error pinning proposal to IPFS")
-		respondWithError(w, errIncompleteRequest)
+		log.Error().Err(err).Msg("Invalid Proposal ID.")
+		respondWithError(w, errProposalNotFound)
 		return
 	}
 
-	if err := p.UpdateProposal(a.DB); err != nil {
-		log.Error().Err(err).Msg("Error updating proposal")
+	if *p.Status != "draft" {
+		log.Error().Err(err).Msg("Only draft proposals can be deleted")
+		respondWithError(w, errForbidden)
+		return
+	}
+
+	if err := p.DeleteProposal(a.DB); err != nil {
+		log.Error().Err(err).Msg("Error deleting proposal")
 		respondWithError(w, errIncompleteRequest)
 		return
 	}

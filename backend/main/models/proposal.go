@@ -44,9 +44,8 @@ type Proposal struct {
 }
 
 type UpdateProposalRequestPayload struct {
-	Status  string     `json:"status"`
-	Voucher *s.Voucher `json:"voucher,omitempty"`
-
+	Proposal *Proposal  `json:"payload"`
+	Voucher  *s.Voucher `json:"voucher"`
 	s.TimestampSignaturePayload
 }
 
@@ -65,7 +64,11 @@ func GetProposalsForCommunity(
 	communityId int,
 	statuses []string,
 	params shared.PageParams,
-) ([]*Proposal, int, error) {
+) (
+	[]*Proposal,
+	int,
+	error,
+) {
 	var proposals []*Proposal
 	var err error
 
@@ -150,6 +153,14 @@ func (p *Proposal) CreateProposal(db *s.Database) error {
 		p.Voucher,
 	).Scan(&p.ID, &p.Created_at)
 
+	return err
+}
+
+func (p *Proposal) DeleteProposal(db *s.Database) error {
+	_, err := db.Conn.Exec(db.Context, `
+	DELETE FROM proposals
+	WHERE id = $1
+	`, p.ID)
 	return err
 }
 

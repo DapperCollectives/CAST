@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"sort"
 	"strings"
 
@@ -185,12 +186,11 @@ func GetCommunitiesForUser(db *s.Database, addr string, pageParams shared.PagePa
 
 func GetCommunityProposalsForUser(
 	db *s.Database,
-	addr string,
+	addr,
+	filters string,
 	pageParams shared.PageParams,
 ) ([]shared.UserProposal, int, error) {
-
-	var proposals = []shared.UserProposal{}
-	err := pgxscan.Select(db.Context, db.Conn, &proposals, `
+	sql := `
 	SELECT 
  		u.community_id, 
   	c.name as community_name, 
@@ -203,7 +203,14 @@ func GetCommunityProposalsForUser(
 	LEFT JOIN 
   	communities AS c on c.id = p.community_id
 	WHERE addr = $1
-	`, addr)
+	`
+	if filters != "" {
+		sql += fmt.Sprintf("AND p.status = '%s'", filters)
+	} else {
+		sql += "AND p.status != 'draft'"
+	}
+	var proposals = []shared.UserProposal{}
+	err := pgxscan.Select(db.Context, db.Conn, &proposals, sql, addr)
 
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		return nil, 0, err

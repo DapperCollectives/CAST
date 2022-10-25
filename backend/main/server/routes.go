@@ -21,8 +21,8 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/proposals", a.getProposalsForCommunity).Methods("GET")
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/proposals/{id:[0-9]+}", a.getProposal).Methods("GET")
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/proposals", a.createProposal).Methods("POST", "OPTIONS")
-	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/proposals/{id:[0-9]+}", a.updateProposal).
-		Methods("PUT", "OPTIONS")
+	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/proposals/{id:[0-9]+}", a.updateProposal).Methods("PUT", "OPTIONS")
+	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/proposals/{id:[0-9]+}", a.deleteProposal).Methods("DELETE", "OPTIONS")
 	// Lists
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/lists", a.getListsForCommunity).Methods("GET")
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/lists", a.createListForCommunity).Methods("POST", "OPTIONS")
@@ -35,7 +35,6 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/proposals/{proposalId:[0-9]+}/votes", a.createVoteForProposal).Methods("POST", "OPTIONS")
 	a.Router.HandleFunc("/votes/{addr:0x[a-zA-Z0-9]+}", a.getVotesForAddress).Methods("GET")
 	//Strategies
-	// a.Router.HandleFunc("/proposals/{proposalId:[0-9]+}/votes/{addr:0x[a-zA-Z0-9]{16}}", a.updateVoteForProposal).Methods("PUT", "OPTIONS")
 	a.Router.HandleFunc("/proposals/{proposalId:[0-9]+}/results", a.getResultsForProposal)
 	// Types
 	a.Router.HandleFunc("/voting-strategies", a.getVotingStrategies).Methods("GET")
@@ -45,13 +44,10 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/users/{addr:0x[a-zA-Z0-9]{16}}/proposals", a.getUserProposals).Methods("GET")
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users", a.createCommunityUser).Methods("POST", "OPTIONS")
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users", a.getCommunityUsers).Methods("GET")
-	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users/type/{userType:[a-zA-Z]+}", a.getCommunityUsersByType).
-		Methods("GET")
-	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users/{addr:0x[a-zA-Z0-9]{16}}/{userType:[a-zA-Z]+}", a.removeUserRole).
-		Methods("DELETE", "OPTIONS")
+	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users/type/{userType:[a-zA-Z]+}", a.getCommunityUsersByType).Methods("GET")
+	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users/{addr:0x[a-zA-Z0-9]{16}}/{userType:[a-zA-Z]+}", a.removeUserRole).Methods("DELETE", "OPTIONS")
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/leaderboard", a.getCommunityLeaderboard).Methods("GET")
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/can-user-create-proposal/{addr:0x[a-zA-Z0-9]+}", a.canUserCreateProposal).Methods("GET")
-	// Utilities
 	a.Router.HandleFunc("/accounts/admin", a.getAdminList).Methods("GET")
 	a.Router.HandleFunc("/accounts/blocklist", a.getCommunityBlocklist).Methods("GET")
 

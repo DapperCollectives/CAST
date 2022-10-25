@@ -20,6 +20,7 @@ import (
 var (
 	proposalBody                = "<html>something</html>"
 	published                   = "published"
+	draft                       = "draft"
 	tokenWeightedDefault        = "token-weighted-default"
 	blockHeight          uint64 = 9
 
@@ -34,6 +35,12 @@ var (
 		Strategy:     &tokenWeightedDefault,
 		Status:       &published,
 		Block_height: &blockHeight,
+	}
+
+	DraftProposalStruct = models.Proposal{
+		Name:   "Draft Proposal",
+		Body:   &proposalBody,
+		Status: &draft,
 	}
 )
 
@@ -66,6 +73,11 @@ func (otu *OverflowTestUtils) CreateProposalAPI(proposal *models.Proposal) *http
 	return otu.ExecuteRequest(req)
 }
 
+func (otu *OverflowTestUtils) DeleteProposalAPI(communityId int, proposalId int) *httptest.ResponseRecorder {
+	req, _ := http.NewRequest("DELETE", "/communities/"+strconv.Itoa(communityId)+"/proposals/"+strconv.Itoa(proposalId), nil)
+	return otu.ExecuteRequest(req)
+}
+
 func (otu *OverflowTestUtils) UpdateProposalAPI(
 	proposalId int,
 	payload *models.UpdateProposalRequestPayload,
@@ -93,11 +105,46 @@ func (otu *OverflowTestUtils) GenerateProposalStruct(signer string, communityId 
 	return &proposal
 }
 
+func (otu *OverflowTestUtils) GenerateDraftProposalStruct(
+	signer string,
+	communityId int,
+) *models.Proposal {
+	proposal := DraftProposalStruct
+	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", signer))
+	address := fmt.Sprintf("0x%s", account.Address().String())
+	proposal.Creator_addr = address
+	proposal.Community_id = communityId
+	proposal.Start_time = time.Now().AddDate(0, 1, 0)
+	proposal.End_time = time.Now().Add(30 * 24 * time.Hour)
+	return &proposal
+}
+
 func (otu *OverflowTestUtils) GenerateCancelProposalStruct(
 	signer string,
-	proposalId int,
 ) *models.UpdateProposalRequestPayload {
-	payload := models.UpdateProposalRequestPayload{Status: "cancelled"}
+	cancelled := "cancelled"
+	payload := models.UpdateProposalRequestPayload{Proposal: &models.Proposal{Status: &cancelled}}
+	timestamp := fmt.Sprint(time.Now().UnixNano() / int64(time.Millisecond))
+	compositeSignatures := otu.GenerateCompositeSignatures(signer, timestamp)
+	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", signer))
+	payload.Signing_addr = fmt.Sprintf("0x%s", account.Address().String())
+	payload.Timestamp = timestamp
+	payload.Composite_signatures = compositeSignatures
+
+	return &payload
+}
+
+func (otu *OverflowTestUtils) GenerateUpdatedDraftProposalPayload(
+	signer string,
+	strategy string,
+) *models.UpdateProposalRequestPayload {
+	draft := "draft"
+	payload := models.UpdateProposalRequestPayload{
+		Proposal: &models.Proposal{
+			Status:   &draft,
+			Strategy: &strategy,
+		},
+	}
 	timestamp := fmt.Sprint(time.Now().UnixNano() / int64(time.Millisecond))
 	compositeSignatures := otu.GenerateCompositeSignatures(signer, timestamp)
 	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", signer))
@@ -110,9 +157,9 @@ func (otu *OverflowTestUtils) GenerateCancelProposalStruct(
 
 func (otu *OverflowTestUtils) GenerateClosedProposalStruct(
 	signer string,
-	proposalId int,
 ) *models.UpdateProposalRequestPayload {
-	payload := models.UpdateProposalRequestPayload{Status: "closed"}
+	closed := "closed"
+	payload := models.UpdateProposalRequestPayload{Proposal: &models.Proposal{Status: &closed}}
 	timestamp := fmt.Sprint(time.Now().UnixNano() / int64(time.Millisecond))
 	compositeSignatures := otu.GenerateCompositeSignatures(signer, timestamp)
 	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", signer))
@@ -176,7 +223,7 @@ func (otu *OverflowTestUtils) CreateCancelledProposal(authorName string, communi
 	json.Unmarshal(response.Body.Bytes(), &p)
 
 	// Cancel the proposal
-	cancelPayload := otu.GenerateCancelProposalStruct(authorName, p.ID)
+	cancelPayload := otu.GenerateCancelProposalStruct(authorName)
 	otu.UpdateProposalAPI(p.ID, cancelPayload)
 
 	// Get proposal
