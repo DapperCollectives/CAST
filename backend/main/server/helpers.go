@@ -706,7 +706,7 @@ func handlePermissionErrorr(result models.CanUserCreateProposalResponse) errorRe
 }
 
 func (h *Helpers) validateUpdateProposalStatus(status string) error {
-	validStatuses := []string{"draft", "pending", "published", "cancelled"}
+	validStatuses := []string{"draft", "closed", "published", "cancelled"}
 
 	for _, validStatus := range validStatuses {
 		if status == validStatus {
