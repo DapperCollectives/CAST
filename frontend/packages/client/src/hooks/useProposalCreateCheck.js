@@ -23,16 +23,38 @@ export default function useProposalCreateCheck({ communityId, addr } = {}) {
   let response = {
     isBlocked: false,
   };
-  // Token amount restriction
+
+  const { onlyAuthorsToSubmit, isAuthor, hasPermission, reason } = data ?? {};
+
+  // Check if user onlyAuthorsToSubmit is on and user is not an author
+  if (onlyAuthorsToSubmit && !isAuthor && !hasPermission) {
+    response = {
+      isBlocked: true,
+      title: 'Only Authors can submit proposals',
+      description: (
+        <>
+          {reason}{' '}
+          <Link
+            href="https://dapper-collectives-1.gitbook.io/cast-docs/"
+            variant="underlined"
+          >
+            Learn More
+          </Link>
+        </>
+      ),
+    };
+  }
+
+  // Token amount restriction check
   if (data?.reason === 'Insufficient token balance to create proposal.') {
-    const { balance, threshold } = data;
+    const { balance, threshold, name } = data;
     response = {
       isBlocked: true,
       title: 'Minimum Balance Required',
       description: (
         <>
-          In order to create a proposal for this community, you must have a
-          minimum of 100 FLOW tokens in your wallet.{' '}
+          {`In order to create a proposal for this community, you must have a
+          minimum of ${threshold} ${name?.toUpperCase()} tokens in your wallet.`}{' '}
           <Link
             href="https://dapper-collectives-1.gitbook.io/cast-docs/"
             variant="underlined"
@@ -48,8 +70,9 @@ export default function useProposalCreateCheck({ communityId, addr } = {}) {
     };
   }
 
-  //TODO: NFT restriction
-  //TODO: user is not an author
+  // TODO: NFT restriction
+  // Implement check based on backend response
+
   return {
     isLoading,
     isError,
