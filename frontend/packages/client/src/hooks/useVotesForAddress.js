@@ -15,8 +15,8 @@ export default function useVotesForAddress({
 
       const userVotes = await fetchProposalUserVotes({ addr, proposalIds });
 
-      return (userVotes?.data ?? []).map(({ proposalId, choice }) => ({
-        [proposalId]: choice,
+      return (userVotes?.data ?? []).map(({ proposalId, choices }) => ({
+        [proposalId]: choices,
       }));
     },
     {

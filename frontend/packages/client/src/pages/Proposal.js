@@ -22,8 +22,10 @@ import {
 import {
   CancelProposalModalConfirmation,
   HeaderNavigation,
-  VoteOptions,
+  RankedChoiceVote,
+  SingleChoiceVote,
 } from 'components/Proposal';
+import TextOption from 'components/Proposal/RankedChoiceVote/TextOption';
 import {
   useMediaQuery,
   useProposal,
@@ -159,9 +161,12 @@ export default function ProposalPage() {
     setOptionChosen(value);
   };
 
-  const onConfirmVote = () => {
+  const onConfirmVote = (options) => {
     if (user.loggedIn) {
       setConfirmingVote(true);
+      if (options) {
+        setOptionChosen(options);
+      }
     } else {
       openWalletModal();
     }
@@ -218,8 +223,12 @@ export default function ProposalPage() {
       return;
     }
 
+    const choices = Array.isArray(optionChosen)
+      ? optionChosen.map((opt) => `${opt.value}`)
+      : [optionChosen];
+
     const voteData = {
-      choices: [optionChosen],
+      choices,
       addr: user.addr,
     };
 
@@ -245,6 +254,25 @@ export default function ProposalPage() {
       (opt) => String(opt.value) === String(val)
     );
     return match?.label;
+  };
+
+  const getCastVotes = (votes) => {
+    return (
+      <div>
+        {votes.map((vote, i, arr) => (
+          <TextOption
+            key={`${vote.label}-${i}`}
+            index={i}
+            label={vote.label}
+            labelType={vote.labelType}
+            value={vote.value}
+            optionsLength={arr.length}
+            readOnly={true}
+            isCastVote={true}
+          />
+        ))}
+      </div>
+    );
   };
 
   const showCancelButton = ![
@@ -280,7 +308,11 @@ export default function ProposalPage() {
             <VoteConfirmationModal
               onCancelVote={onCancelVote}
               onVote={onVote}
-              voteLabel={getVoteLabel(optionChosen)}
+              castVotes={
+                Array.isArray(optionChosen)
+                  ? getCastVotes(optionChosen)
+                  : getVoteLabel(optionChosen)
+              }
             />
           </div>
         </div>
@@ -380,15 +412,27 @@ export default function ProposalPage() {
                         held in Balancer's liquidity pools.
                       </div>
                     )}
-                    <VoteOptions
-                      labelType="mobile"
-                      addr={user?.addr}
-                      proposal={proposal}
-                      optionChosen={optionChosen}
-                      castVote={castVote}
-                      onOptionSelect={onOptionSelect}
-                      onConfirmVote={onConfirmVote}
-                    />
+                    {proposal.voteType === 'single-choice' ? (
+                      <SingleChoiceVote
+                        labelType="mobile"
+                        addr={user?.addr}
+                        proposal={proposal}
+                        optionChosen={optionChosen}
+                        castVote={castVote}
+                        onOptionSelect={onOptionSelect}
+                        onConfirmVote={onConfirmVote}
+                      />
+                    ) : (
+                      <RankedChoiceVote
+                        labelType="mobile"
+                        addr={user?.addr}
+                        proposal={proposal}
+                        optionChosen={optionChosen}
+                        castVote={castVote}
+                        onOptionSelect={onOptionSelect}
+                        onConfirmVote={onConfirmVote}
+                      />
+                    )}
                     <VotesList proposalId={proposalId} castVote={castVote} />
                   </div>
                 )}
@@ -515,16 +559,29 @@ export default function ProposalPage() {
                     Balancer's liquidity pools.
                   </div>
                 )}
-                <VoteOptions
-                  labelType="desktop"
-                  loggedIn={user?.loggedIn}
-                  addr={user?.addr}
-                  proposal={proposal}
-                  onOptionSelect={onOptionSelect}
-                  optionChosen={optionChosen}
-                  castVote={castVote}
-                  onConfirmVote={onConfirmVote}
-                />
+                {proposal.voteType === 'single-choice' ? (
+                  <SingleChoiceVote
+                    labelType="desktop"
+                    loggedIn={user?.loggedIn}
+                    addr={user?.addr}
+                    proposal={proposal}
+                    onOptionSelect={onOptionSelect}
+                    optionChosen={optionChosen}
+                    castVote={castVote}
+                    onConfirmVote={onConfirmVote}
+                  />
+                ) : (
+                  <RankedChoiceVote
+                    labelType="desktop"
+                    loggedIn={user?.loggedIn}
+                    addr={user?.addr}
+                    proposal={proposal}
+                    onOptionSelect={onOptionSelect}
+                    optionChosen={optionChosen}
+                    castVote={castVote}
+                    onConfirmVote={onConfirmVote}
+                  />
+                )}
                 <VotesList proposalId={proposalId} castVote={castVote} />
               </div>
               <div className="column p-0 is-4">

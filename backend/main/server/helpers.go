@@ -390,6 +390,8 @@ func (h *Helpers) validateVote(p models.Proposal, v models.Vote) errorResponse {
 		return errForbidden
 	}
 
+	fmt.Printf("%+v\n", v)
+
 	// validate choice exists on proposal
 	if err := v.ValidateChoice(p); err != nil {
 		log.Error().Err(err)

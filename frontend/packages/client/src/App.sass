@@ -182,6 +182,8 @@ code
 	background-color: hsl(0deg, 0%, 86%, 0.3) !important
 .has-background-yellow
 	background-color: $yellow
+.has-background-green
+	background-color: $success
 	&.button
 		border: none !important
 		&:hover
@@ -198,6 +200,8 @@ code
 	line-height: 1
 .cursor-pointer
 	cursor: pointer
+.cursor-grab
+	cursor: grab
 .header-spacing
 	padding-bottom: 0.75rem
 	padding-top: 0.75rem
@@ -583,9 +587,17 @@ span[data-tooltip]
 	margin-left: -0.25rem
 	color: rgba(0, 0, 0, 0.7) !important
 
-.option-vote:hover
+.option-vote:hover,
+.option-vote-dragging
 	border-color: rgba(0, 0, 0, 0.4)
 	border-width: 1px
+
+.option-vote-dragging
+	transform: rotate(-7deg),
+
+.option-vote:hover svg > path,
+.option-vote-dragging svg > path
+	fill: rgba(0, 0, 0, 0.7)
 
 .navbar-item-hover:hover
 	color: rgba(0, 0, 0, 0.7)
