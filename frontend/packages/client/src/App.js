@@ -32,8 +32,7 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <Web3Provider network={process.env.REACT_APP_FLOW_ENV}>
           <Router>
-            {/* using resetCSS to avoid conficts */}
-            <ChakraProvider theme={theme} resetCSS={false}>
+            <ChakraProvider theme={theme}>
               <NotificationModalProvider>
                 <ErrorHandler>
                   <AppPages />

@@ -233,6 +233,7 @@ func (fa *FlowAdapter) ValidateSignature(address, message string, sigs *[]Compos
 func (fa *FlowAdapter) GetBalanceOfTokens(creatorAddr string, c *Contract, contractType string) (*float64, error) {
 
 	var scriptPath string
+	var zero float64 = 0.0
 	if contractType == "nft" {
 		scriptPath = "./main/cadence/scripts/get_nfts_ids.cdc"
 	} else {
@@ -265,9 +266,12 @@ func (fa *FlowAdapter) GetBalanceOfTokens(creatorAddr string, c *Contract, contr
 			[]cadence.Value{
 				cadenceAddress,
 			})
+
+		// If script fails, its probably because the vault/collection doenst exist.
+		// Return 0 balance.
 		if err != nil {
 			log.Error().Err(err).Msg("Error executing Non-Fungible-Token script.")
-			return nil, err
+			return &zero, err
 		}
 		value := CadenceValueToInterface(cadenceValue)
 
@@ -286,7 +290,6 @@ func (fa *FlowAdapter) GetBalanceOfTokens(creatorAddr string, c *Contract, contr
 
 		// If script fails, its probably because the vault/collection doenst exist.
 		// Return 0 balance.
-		var zero float64 = 0.0
 		if err != nil {
 			log.Error().Err(err).Msg("Error executing Fungible-Token Script.")
 			return false, err
