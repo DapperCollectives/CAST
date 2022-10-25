@@ -96,7 +96,7 @@ type CanUserCreateProposalResponse struct {
 	IsAuthor               bool     `json:"isAuthor"`
 	HasPermission          bool     `json:"hasPermission"`
 	Reason                 string   `json:"reason,omitempty"`
-	Contract_type 		   string  `json:"contractType,omitempty"`
+	Contract_type          string  `json:"contractType,omitempty"`
 	Error                  error    `json:"error,omitempty"`
 }
 
@@ -377,7 +377,7 @@ func (c *Community) CanUserCreateProposal(db *s.Database, fa *s.FlowAdapter, add
 		balance, _ := fa.GetBalanceOfTokens(address, &contract, *c.Contract_type)
 		response.Balance = balance
 		response.Contract_type = *c.Contract_type
-		
+
 		//check if balance is greater than threshold
 		if *balance < threshold {
 			reason := "Insufficient token balance to create proposal."
