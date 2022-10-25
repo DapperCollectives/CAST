@@ -45,9 +45,8 @@ type Proposal struct {
 }
 
 type UpdateProposalRequestPayload struct {
-	Status  string     `json:"status"`
-	Voucher *s.Voucher `json:"voucher,omitempty"`
-
+	Proposal *Proposal  `json:"payload"`
+	Voucher  *s.Voucher `json:"voucher"`
 	s.TimestampSignaturePayload
 }
 
@@ -66,7 +65,11 @@ func GetProposalsForCommunity(
 	communityId int,
 	statuses []string,
 	params shared.PageParams,
-) ([]*Proposal, int, error) {
+) (
+	[]*Proposal,
+	int,
+	error,
+) {
 	var proposals []*Proposal
 	var err error
 
@@ -156,6 +159,14 @@ func (p *Proposal) CreateProposal(db *s.Database) error {
 	return err
 }
 
+func (p *Proposal) DeleteProposal(db *s.Database) error {
+	_, err := db.Conn.Exec(db.Context, `
+	DELETE FROM proposals
+	WHERE id = $1
+	`, p.ID)
+	return err
+}
+
 func (p *Proposal) UpdateProposal(db *s.Database) error {
 	_, err := db.Conn.Exec(db.Context, `
 		UPDATE proposals
@@ -175,6 +186,40 @@ func (p *Proposal) UpdateProposal(db *s.Database) error {
 	}
 
 	err = p.GetProposalById(db)
+	return err
+}
+
+func (p *Proposal) UpdateDraftProposal(db *s.Database) error {
+	_, err := db.Conn.Exec(db.Context, `
+		UPDATE proposals
+		SET name = COALESCE($1, name), 
+		choices = COALESCE($2, choices),
+		strategy = COALESCE($3, strategy),
+		min_balance = COALESCE($4, min_balance),
+		max_weight = COALESCE($5, max_weight),
+		start_time = COALESCE($6, start_time),
+		end_time = COALESCE($7, end_time),
+		body = COALESCE($8, body),
+		block_height = COALESCE($9, block_height),
+		cid = COALESCE($10, cid)
+		WHERE id = $11
+	`, p.Name,
+		p.Choices,
+		p.Strategy,
+		p.Min_balance,
+		p.Max_weight,
+		p.Start_time,
+		p.End_time,
+		p.Body,
+		p.Block_height,
+		p.Cid,
+		p.ID,
+	)
+
+	if err != nil {
+		return err
+	}
+
 	return err
 }
 

@@ -56,7 +56,7 @@ type PaginatedResponseWithLeaderboardUser struct {
 	Next         int                       `json:"next"`
 }
 
-type PaginatedResponseWithProposal struct {
+type PaginatedResponseWithUserProposal struct {
 	Data         []shared.UserProposal `json:"data"`
 	Start        int                   `json:"start"`
 	Count        int                   `json:"count"`
