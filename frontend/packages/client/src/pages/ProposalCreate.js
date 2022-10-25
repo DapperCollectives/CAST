@@ -15,10 +15,30 @@ import {
 import { useProposalCreateCheck, useProposalCreateMutation } from 'hooks';
 import { isStartTimeValid, parseDateToServer } from 'utils';
 
+const openModalFc = (modalContext) => {
+  modalContext.openModal(
+    <ErrorModal
+      message="Please connect a wallet to create a proposal."
+      title="Connect Wallet"
+      footerComponent={
+        <WalletConnect
+          closeModal={() => {
+            modalContext.closeModal();
+          }}
+          expandToContainer
+        />
+      }
+      onClose={modalContext.closeModal}
+    />,
+    { isErrorModal: true }
+  );
+};
+
 export default function ProposalCreatePage() {
   const { createProposal, data, loading, error } = useProposalCreateMutation();
 
   const [modalError, setModalError] = useState(null);
+
   const {
     user: { addr: creatorAddr },
   } = useWebContext();
@@ -46,26 +66,15 @@ export default function ProposalCreatePage() {
       setModalError(false);
       modalContext.closeModal();
     }
+    if (!modalContext.isOpen && !creatorAddr && !modalError) {
+      openModalFc(modalContext);
+      setModalError(true);
+    }
   }, [modalContext, creatorAddr, modalError]);
 
   const onSubmit = async (stepsData) => {
     if (!creatorAddr) {
-      modalContext.openModal(
-        <ErrorModal
-          message="Please connect a wallet to create a proposal."
-          title="Connect Wallet"
-          footerComponent={
-            <WalletConnect
-              closeModal={() => {
-                modalContext.closeModal();
-              }}
-              expandToContainer
-            />
-          }
-          onClose={modalContext.closeModal}
-        />,
-        { isErrorModal: true }
-      );
+      openModalFc(modalContext);
       setModalError(true);
       return;
     }
@@ -143,8 +152,10 @@ export default function ProposalCreatePage() {
     passNextToComp: true,
     passSubmitToComp: true,
     previewComponent: <PreviewComponent />,
-    isBlocked: canCreateCheck.isBlocked,
-    warningBlockedComponent: <WarningMessage {...(canCreateCheck ?? {})} />,
+    isBlocked: canCreateCheck.isBlocked || !creatorAddr,
+    warningBlockedComponent: canCreateCheck.isBlocked && (
+      <WarningMessage {...(canCreateCheck ?? {})} />
+    ),
     steps: [
       {
         label: 'Proposal',
