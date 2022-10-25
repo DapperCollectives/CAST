@@ -63,4 +63,16 @@ func TestUser(t *testing.T) {
 
 		assert.Equal(t, *toUpdate.Name, *updated.Name)
 	})
+
+	t.Run("should throw an error when getting a user that doesn't exist", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "/user/0x69", nil)
+		response := otu.ExecuteRequest(req)
+
+		checkResponseCode(t, http.StatusNotFound, response.Code)
+
+		var m map[string]string
+		json.Unmarshal(response.Body.Bytes(), &m)
+
+		assert.Equal(t, "User not found", m["message"])
+	})
 }

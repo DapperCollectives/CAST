@@ -125,7 +125,7 @@ var (
 	errUserNotFound = errorResponse{
 		StatusCode: http.StatusNotFound,
 		ErrorCode:  "ERR_1015",
-		Message:    "User Not Found",
+		Message:    "User not found",
 		Details:    "The user you are trying to access does not exist.",
 	}
 
@@ -907,7 +907,7 @@ func (a *App) getUser(w http.ResponseWriter, r *http.Request) {
 
 	var user models.User
 	if err := user.GetUser(a.DB, addr); err != nil {
-		log.Error().Err(err).Msg("Error user not foune")
+		log.Error().Err(err).Msg("Error user not found")
 		respondWithError(w, errUserNotFound)
 		return
 	}
