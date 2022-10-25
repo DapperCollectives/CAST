@@ -894,6 +894,38 @@ func (a *App) createCommunityUser(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusCreated, "OK")
 }
 
+func (a *App) getUser(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	addr := vars["addr"]
+
+	var user models.User
+	if err := user.GetUser(a.DB, addr); err != nil {
+		log.Error().Err(err).Msg("Error getting user")
+		respondWithError(w, errIncompleteRequest)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, user)
+}
+
+func (a *App) createUser(w http.ResponseWriter, r *http.Request) {
+	payload := models.User{}
+
+	if err := validatePayload(r.Body, &payload); err != nil {
+		log.Error().Err(err).Msg("Error validating payload")
+		respondWithError(w, errIncompleteRequest)
+		return
+	}
+
+	var user models.User
+	if err := user.CreateUser(a.DB, &payload); err != nil {
+		log.Error().Err(err).Msg("Error creating user")
+		respondWithError(w, errIncompleteRequest)
+		return
+	}
+	respondWithJSON(w, http.StatusCreated, user)
+}
+
 func (a *App) getCommunityUsers(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	communityId, err := strconv.Atoi(vars["communityId"])

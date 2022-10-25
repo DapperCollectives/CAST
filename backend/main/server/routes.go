@@ -40,6 +40,10 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/voting-strategies", a.getVotingStrategies).Methods("GET")
 	a.Router.HandleFunc("/community-categories", a.getCommunityCategories).Methods("GET")
 	// Users
+	a.Router.HandleFunc("/user/{addr:0x[a-zA-Z0-9]+}", a.getUser).Methods("GET")
+	//a.Router.HandleFunc("/user/{addr:0x[a-zA-Z0-9]+}", a.updateUser).Methods("PUT", "OPTIONS")
+	a.Router.HandleFunc("/user", a.createUser).Methods("POST", "OPTIONS")
+
 	a.Router.HandleFunc("/users/{addr:0x[a-zA-Z0-9]{16}}/communities", a.getUserCommunities).Methods("GET")
 	a.Router.HandleFunc("/users/{addr:0x[a-zA-Z0-9]{16}}/proposals", a.getUserProposals).Methods("GET")
 	a.Router.HandleFunc("/communities/{communityId:[0-9]+}/users", a.createCommunityUser).Methods("POST", "OPTIONS")
