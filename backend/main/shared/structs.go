@@ -73,7 +73,7 @@ type Choice struct {
 type UserProposal struct {
 	Community_id   int       `json:"communityId"`
 	Community_name string    `json:"communityName"`
-	Proposal_name  string    `json:"proposalName"`
+	Proposal_name  string    `json:"name"`
 	Start_time     time.Time `json:"startTime"`
 	Status         string    `json:"status"`
 }

@@ -583,7 +583,7 @@ func TestGetCommunityActiveStrategies(t *testing.T) {
 	payload2 := otu.GenerateProposalPayload("user1", proposalStruct)
 	otu.CreateProposalAPI(payload2)
 
-	cancelPayload := otu.GenerateCancelProposalStruct("user1", payload1.ID)
+	cancelPayload := otu.GenerateCancelProposalStruct("user1")
 	otu.UpdateProposalAPI(payload1.ID, cancelPayload)
 
 	response := otu.GetCommunityActiveStrategies(communityId)

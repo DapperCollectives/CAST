@@ -23,10 +23,10 @@ var otu *utils.OverflowTestUtils
 const ServiceAddress = "0xf8d6e0586b0a20c7"
 
 type errorResponse struct {
-	StatusCode int		`json:"statusCode,string"`
-	ErrorCode  string	`json:"errorCode"`
-	Message    string	`json:"message"`
-	Details    string	`json:"details"`
+	StatusCode int    `json:"statusCode,string"`
+	ErrorCode  string `json:"errorCode"`
+	Message    string `json:"message"`
+	Details    string `json:"details"`
 }
 
 var (
@@ -116,6 +116,12 @@ var (
 		Details:    "There was an error creating the vote.",
 	}
 
+	errProposalNotFound = errorResponse{
+		StatusCode: http.StatusNotFound,
+		ErrorCode:  "ERR_1014",
+		Message:    "Proposal Not Found",
+		Details:    "The proposal you are trying to access no longer exists.",
+	}
 	nilErr = errorResponse{}
 )
 
