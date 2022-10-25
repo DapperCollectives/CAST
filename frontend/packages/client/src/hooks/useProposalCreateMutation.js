@@ -28,7 +28,6 @@ export default function useProposalCreateMuation() {
       if (!compositeSignatures && !voucher) {
         throw new Error('No valid user signature found.');
       }
-
       return createProposalApiReq({
         proposalPayload,
         compositeSignatures,

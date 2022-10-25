@@ -1,6 +1,14 @@
 import yup from 'helpers/validation';
 
-const formFieldsStepOne = ['name', 'body'];
+const NAME_MAX_LENGTH = 128;
+const formFieldsStepOne = [
+  'name',
+  'strategy',
+  'body',
+  'choices',
+  'tabOption',
+  'voteType',
+];
 const formFieldsStepTwo = [
   'strategy',
   'choices',
@@ -10,8 +18,6 @@ const formFieldsStepTwo = [
   'minBalance',
 ];
 const formFieldsStepThree = ['startDate', 'endDate', 'startTime', 'endTime'];
-
-const NAME_MAX_LENGTH = 128;
 
 const StepOneSchema = yup.object().shape({
   name: yup

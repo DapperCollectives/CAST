@@ -57,7 +57,7 @@ Modal.FooterButton = ({ onClick, text = 'Close', classNames = '' }) => {
   );
 };
 
-Modal.FotterWithFAQ = ({ faqLink, onClose }) => {
+Modal.FooterWithFAQ = ({ faqLink, onClose }) => {
   return (
     <>
       <a
