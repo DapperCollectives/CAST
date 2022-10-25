@@ -24,7 +24,16 @@ export default function useProposalCreateCheck({ communityId, addr } = {}) {
     isBlocked: false,
   };
 
-  const { onlyAuthorsToSubmit, isAuthor, hasPermission, reason } = data ?? {};
+  const {
+    onlyAuthorsToSubmit,
+    isAuthor,
+    hasPermission,
+    reason,
+    balance,
+    threshold,
+    name,
+    contractType,
+  } = data ?? {};
 
   // Check if user onlyAuthorsToSubmit is on and user is not an author
   if (onlyAuthorsToSubmit && !isAuthor && !hasPermission) {
@@ -33,7 +42,8 @@ export default function useProposalCreateCheck({ communityId, addr } = {}) {
       title: 'Only Authors can submit proposals',
       description: (
         <>
-          {reason}{' '}
+          In order to create a proposal for this community, you must be an
+          author of the community.{' '}
           <Link
             href="https://dapper-collectives-1.gitbook.io/cast-docs/"
             variant="underlined"
@@ -45,9 +55,39 @@ export default function useProposalCreateCheck({ communityId, addr } = {}) {
     };
   }
 
+  const footerText =
+    'Note: These tokens/NFTs are ONLY used for verification and will not be debited from your wallet.';
+
   // Token amount restriction check
-  if (data?.reason === 'Insufficient token balance to create proposal.') {
-    const { balance, threshold, name } = data;
+  if (
+    reason === 'Insufficient token balance to create proposal.' &&
+    contractType === 'nft'
+  ) {
+    response = {
+      isBlocked: true,
+      title: 'Insufficient NFT balance to create proposal',
+      description: (
+        <>
+          {`In order to create a proposal for this community, you must have the required NFT in your wallet or be an author of the community.`}{' '}
+          <Link
+            href="https://dapper-collectives-1.gitbook.io/cast-docs/"
+            variant="underlined"
+          >
+            Learn More
+          </Link>
+        </>
+      ),
+      footerText,
+      contractType,
+      contractName: name,
+      balance,
+      threshold,
+    };
+  }
+  if (
+    reason === 'Insufficient token balance to create proposal.' &&
+    contractType === 'ft'
+  ) {
     response = {
       isBlocked: true,
       title: 'Minimum Balance Required',
@@ -63,15 +103,13 @@ export default function useProposalCreateCheck({ communityId, addr } = {}) {
           </Link>
         </>
       ),
-      footerText:
-        'Note: These tokens are ONLY used for verification and will not be debited from your wallet.',
+      footerText,
+      contractName: name,
+      contractType,
       balance,
       threshold,
     };
   }
-
-  // TODO: NFT restriction
-  // Implement check based on backend response
 
   return {
     isLoading,
