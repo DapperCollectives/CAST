@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useModalContext } from 'contexts/NotificationModal';
 import { useWebContext } from 'contexts/Web3';
+import { ErrorModal, WalletConnect } from 'components';
 import { useCommunityProposalsWithVotes, useMediaQuery } from 'hooks';
 import { FilterValues } from 'const';
 import CommunityProposalList from './CommunityProposalList';
@@ -17,8 +19,28 @@ export default function CommunityProposals({ communityId = 1, admins } = {}) {
 
   const {
     user: { addr },
-    openWalletModal,
   } = useWebContext();
+
+  const { openModal, closeModal } = useModalContext();
+
+  const promptWalletConnect = () => {
+    openModal(
+      <ErrorModal
+        message="Please connect a wallet to create a proposal."
+        title="Connect Wallet"
+        footerComponent={
+          <WalletConnect
+            closeModal={() => {
+              closeModal();
+            }}
+            expandToContainer
+          />
+        }
+        onClose={closeModal}
+      />,
+      { isErrorModal: true }
+    );
+  };
 
   const proposalFilterValues = Object.entries(FilterValues)
     .filter(
@@ -107,7 +129,7 @@ export default function CommunityProposals({ communityId = 1, admins } = {}) {
                 <div
                   className="button is-fullwidth rounded-sm is-flex small-text has-text-white has-background-black"
                   style={{ minHeight: '40px' }}
-                  onClick={openWalletModal}
+                  onClick={promptWalletConnect}
                 >
                   Create Proposal
                 </div>
