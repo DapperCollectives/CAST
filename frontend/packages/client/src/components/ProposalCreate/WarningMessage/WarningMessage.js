@@ -1,7 +1,8 @@
 import { Svg } from '@cast/shared-components';
 import { Card } from 'components';
 import { Flex, Heading, Text } from '@chakra-ui/react';
-import FlowCard from './FlowCard';
+import NFTCard from './NFTCard';
+import TokenCard from './TokenCard';
 
 export default function WarningMessage({
   title,
@@ -9,6 +10,8 @@ export default function WarningMessage({
   footerText,
   balance,
   threshold,
+  contractType,
+  contractName,
 }) {
   return (
     <Card variant="warning">
@@ -23,10 +26,27 @@ export default function WarningMessage({
           <Text size="lg" fontSize="lg" fontWeight="medium" mb={5}>
             {description}
           </Text>
-          {Boolean(threshold && balance) && (
+          {contractType === 'ft' && (
             <Flex gap={4} flexWrap="wrap" mb={5}>
-              <FlowCard title="Minimum balance required" balance={threshold} />
-              <FlowCard title="Your Balance" balance={balance} />
+              <TokenCard
+                title="Minimum balance required"
+                balance={threshold}
+                contractName={contractName}
+              />
+              <TokenCard
+                title="Your Balance"
+                balance={balance}
+                contractName={contractName}
+              />
+            </Flex>
+          )}
+          {contractType === 'nft' && (
+            <Flex gap={4} flexWrap="wrap" mb={5}>
+              <NFTCard
+                title="NFT Required"
+                balance={threshold}
+                contractName={contractName}
+              />
             </Flex>
           )}
           {footerText && (
