@@ -3,6 +3,7 @@
   "version": "1.0.1",
   "private": true,
   "dependencies": {
+    "leanplum-sdk": "^1.10.5",
     "@chakra-ui/react": "1.8.9",
     "@craco/craco": "^6.4.5",
     "@creativebulma/bulma-tooltip": "^1.2.0",
