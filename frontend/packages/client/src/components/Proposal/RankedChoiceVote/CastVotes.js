@@ -1,5 +1,4 @@
 import { useCallback, useRef } from 'react';
-import update from 'immutability-helper';
 import { DragLayer } from './DragLayer';
 import { Draggable } from './Draggable';
 import TextOption from './TextOption';
@@ -11,15 +10,10 @@ const CastVotes = ({ votes, setVotes, readOnly = false, removeVote }) => {
   const moveVote = useCallback(
     (dragIndex, hoverIndex) =>
       setVotes((prevVotes) => {
-        return update(prevVotes, {
-          $splice: [
-            [dragIndex, 1],
-            [hoverIndex, 0, prevVotes[dragIndex]],
-          ],
-        });
-        // const draggedVote = prevVotes.splice(dragIndex, 1)[0];
-        // prevVotes.splice(hoverIndex, 0, draggedVote);
-        // return prevVotes;
+        const votes = [...prevVotes];
+        const draggedVote = votes.splice(dragIndex, 1)[0];
+        votes.splice(hoverIndex, 0, draggedVote);
+        return votes;
       }),
     [setVotes]
   );

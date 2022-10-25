@@ -47,9 +47,11 @@ const TextOption = ({
   return (
     <Wrapper
       key={`proposal-option-${index}`}
-      classNames={`has-background-white border-light transition-all rounded-xl py-4 px-5 has-text-justified word-break is-flex is-justify-content-space-between ${cursorStyle} ${
-        !readOnly ? 'option-vote' : ''
-      } ${isDragging ? 'option-vote-dragging' : ''}`}
+      classNames={`border-light transition-all rounded-xl py-4 px-5 has-text-justified word-break is-flex is-justify-content-space-between ${cursorStyle} ${
+        isDragging
+          ? 'option-vote-dragging has-background-light-grey'
+          : 'has-background-white'
+      }`}
       extraClasses={extraClasses}
       extraStylesMobile={extraStylesMobile}
       onClick={() => !readOnly && handleVote && handleVote(value)}
