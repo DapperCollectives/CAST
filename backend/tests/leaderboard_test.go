@@ -185,7 +185,7 @@ func TestGetLeaderboardWithCancelledProposal(t *testing.T) {
 		}
 
 		// Cancel proposal
-		cancelPayload := otu.GenerateCancelProposalStruct(authorName, proposalIds[1])
+		cancelPayload := otu.GenerateCancelProposalStruct(authorName)
 		otu.UpdateProposalAPI(proposalIds[1], cancelPayload)
 
 		response := otu.GetCommunityLeaderboardAPI(communityId)
@@ -203,7 +203,7 @@ func TestGetLeaderboardWithCancelledProposal(t *testing.T) {
 		proposalIds := otu.GenerateEarlyVoteAchievements(communityId, numProposals, 1)
 
 		// Cancel a proposalId
-		cancelPayload := otu.GenerateCancelProposalStruct(authorName, proposalIds[1])
+		cancelPayload := otu.GenerateCancelProposalStruct(authorName)
 		otu.UpdateProposalAPI(proposalIds[1], cancelPayload)
 
 		response := otu.GetCommunityLeaderboardAPI(communityId)

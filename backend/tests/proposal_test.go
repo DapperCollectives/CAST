@@ -39,11 +39,9 @@ func TestGetProposal(t *testing.T) {
 	t.Run("Should throw an error if proposal with ID doesnt exist", func(t *testing.T) {
 
 		response := otu.GetProposalByIdAPI(communityId, 420)
+		CheckResponseCode(t, http.StatusNotFound, response.Code)
 
-		CheckResponseCode(t, http.StatusForbidden, response.Code)
-
-		expectedErr := errIncompleteRequest
-		expectedErr.StatusCode = http.StatusForbidden
+		expectedErr := errProposalNotFound
 
 		var e errorResponse
 		json.Unmarshal(response.Body.Bytes(), &e)
@@ -147,7 +145,7 @@ func TestUpdateProposal(t *testing.T) {
 
 		assert.Equal(t, "pending", *created.Computed_status)
 
-		cancelPayload := otu.GenerateCancelProposalStruct(authorName, p.ID)
+		cancelPayload := otu.GenerateCancelProposalStruct(authorName)
 		response = otu.UpdateProposalAPI(p.ID, cancelPayload)
 		checkResponseCode(t, http.StatusOK, response.Code)
 
@@ -177,7 +175,7 @@ func TestUpdateProposal(t *testing.T) {
 
 		assert.Equal(t, "active", *created.Computed_status)
 
-		cancelPayload := otu.GenerateCancelProposalStruct(authorName, communityId)
+		cancelPayload := otu.GenerateCancelProposalStruct(authorName)
 		response = otu.UpdateProposalAPI(p.ID, cancelPayload)
 		checkResponseCode(t, http.StatusOK, response.Code)
 
@@ -214,7 +212,7 @@ func TestUpdateProposal(t *testing.T) {
 
 		assert.Equal(t, "active", *created.Computed_status)
 
-		cancelPayload := otu.GenerateCancelProposalStruct("user2", communityId)
+		cancelPayload := otu.GenerateCancelProposalStruct("user2")
 		response = otu.UpdateProposalAPI(p.ID, cancelPayload)
 		checkResponseCode(t, http.StatusOK, response.Code)
 
@@ -333,5 +331,98 @@ func TestGetProposalsByStatus(t *testing.T) {
 				assert.Equal(t, expectedStatus, *proposal.Computed_status)
 			}
 		}
+	})
+}
+
+func TestDraftProposal(t *testing.T) {
+	clearTable("communities")
+	clearTable("community_users")
+	clearTable("proposals")
+
+	authorName := "account"
+	communityId := otu.AddCommunitiesWithUsers(1, authorName)[0]
+
+	t.Run("should be able to create a draft proposal", func(t *testing.T) {
+		proposalStruct := otu.GenerateDraftProposalStruct(authorName, communityId)
+		payload := otu.GenerateProposalPayload(authorName, proposalStruct)
+		response := otu.CreateProposalAPI(payload)
+
+		CheckResponseCode(t, http.StatusCreated, response.Code)
+		var p models.Proposal
+		json.Unmarshal(response.Body.Bytes(), &p)
+
+		// Get proposal after create
+		response = otu.GetProposalByIdAPI(1, p.ID)
+		CheckResponseCode(t, http.StatusOK, response.Code)
+
+		var created models.Proposal
+		json.Unmarshal(response.Body.Bytes(), &created)
+
+		assert.Equal(t, 1, created.ID)
+		assert.Equal(t, "draft", *created.Status)
+	})
+
+	proposalID := 1
+	communityID := 1
+
+	t.Run("should be able to update a draft proposal", func(t *testing.T) {
+		response := otu.GetProposalByIdAPI(communityID, proposalID)
+		CheckResponseCode(t, http.StatusOK, response.Code)
+
+		var p models.Proposal
+		json.Unmarshal(response.Body.Bytes(), &p)
+
+		payload := otu.GenerateUpdatedDraftProposalPayload(
+			authorName,
+			"balance-of-nfts",
+		)
+
+		response = otu.UpdateProposalAPI(proposalID, payload)
+		CheckResponseCode(t, http.StatusOK, response.Code)
+
+		var updated models.Proposal
+		json.Unmarshal(response.Body.Bytes(), &updated)
+
+		assert.Equal(t, "draft", *updated.Status)
+		assert.Equal(t, "balance-of-nfts", *updated.Strategy)
+	})
+
+	t.Run("should be able to delete a draft proposal", func(t *testing.T) {
+		response := otu.GetProposalByIdAPI(communityID, proposalID)
+		CheckResponseCode(t, http.StatusOK, response.Code)
+
+		response = otu.DeleteProposalAPI(communityID, proposalID)
+		CheckResponseCode(t, http.StatusOK, response.Code)
+
+		var deleted models.Proposal
+		json.Unmarshal(response.Body.Bytes(), &deleted)
+
+		assert.Equal(t, 1, deleted.ID)
+
+		response = otu.GetProposalByIdAPI(communityID, proposalID)
+		CheckResponseCode(t, http.StatusNotFound, response.Code)
+	})
+
+	t.Run("should not be able to delete a non-draft proposal", func(t *testing.T) {
+		proposalStruct := otu.GenerateProposalStruct(authorName, communityId)
+		payload := otu.GenerateProposalPayload(authorName, proposalStruct)
+		response := otu.CreateProposalAPI(payload)
+		CheckResponseCode(t, http.StatusCreated, response.Code)
+
+		var p models.Proposal
+		json.Unmarshal(response.Body.Bytes(), &p)
+
+		// Get proposal after create
+		response = otu.GetProposalByIdAPI(1, p.ID)
+		CheckResponseCode(t, http.StatusOK, response.Code)
+
+		var created models.Proposal
+		json.Unmarshal(response.Body.Bytes(), &created)
+
+		assert.Equal(t, 2, created.ID)
+		assert.Equal(t, "published", *created.Status)
+
+		response = otu.DeleteProposalAPI(communityID, created.ID)
+		CheckResponseCode(t, http.StatusForbidden, response.Code)
 	})
 }
