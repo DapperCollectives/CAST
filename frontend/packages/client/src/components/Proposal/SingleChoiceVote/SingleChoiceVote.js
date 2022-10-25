@@ -3,10 +3,10 @@ import { WrapperResponsive as Wrapper } from 'components';
 import { useVotesForAddress } from 'hooks';
 import { FilterValues } from 'const';
 import { getProposalType, parseDateFromServer } from 'utils';
+import VoteHeader from '../VoteHeader';
 import { getStatus } from '../getStatus';
 import ImageBasedOptions from './ImageBasedOptions';
 import TextBasedOptions from './TextBasedOptions';
-import VoteHeader from './VoteHeader';
 
 const SingleChoiceVote = ({
   labelType,
