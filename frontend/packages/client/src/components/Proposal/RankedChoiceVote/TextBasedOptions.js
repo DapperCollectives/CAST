@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Svg } from '@cast/shared-components';
 import { WrapperResponsive as Wrapper } from 'components';
 import CastVotes from './CastVotes';
 import TextOption from './TextOption';
@@ -67,8 +68,11 @@ const TextBasedOptions = ({
               </span>
             </div>
           ) : (
-            <p className="mb-6 has-text-centered has-text-grey has-text-weight-bold smaller-text">
-              All choices are randomized on page load
+            <p className="mb-6 has-text-grey has-text-weight-bold smaller-text is-flex is-align-items-center is-justify-content-center">
+              All choices are randomized on page load{' '}
+              <div className="pl-2 is-flex is-align-items-center">
+                <Svg name="Reload" width={10} height={12} />
+              </div>
             </p>
           )}
         </div>
