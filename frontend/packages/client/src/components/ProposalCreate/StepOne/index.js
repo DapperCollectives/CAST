@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import { Editor } from 'components/common/Editor';
 import Form from 'components/common/Form';
 import Input from 'components/common/Input';
+import { Heading } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import pick from 'lodash/pick';
 import { NAME_MAX_LENGTH, stepOne } from '../FormConfig';
@@ -53,9 +54,9 @@ const StepOne = ({
     <Form onSubmit={handleSubmit(onSubmit)} formId={formId}>
       <div className="is-flex-direction-column">
         <div className="border-light-tablet rounded-lg columns is-flex-direction-column is-mobile m-0 p-0-mobile p-6 mb-6">
-          <h4 className="title is-4 mb-2">
+          <Heading as="h4" fontSize="2xl" mb={2}>
             Title <span className="has-text-danger">*</span>
-          </h4>
+          </Heading>
           <p className="has-text-grey mb-4">
             Give your proposal a title based on the decision or initiative being
             voted on. Best to keep it simple and specific.
@@ -70,9 +71,9 @@ const StepOne = ({
           />
         </div>
         <div className="border-light-tablet rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 p-0-mobile mb-6">
-          <h4 className="title is-4 mb-2">
+          <Heading as="h4" fontSize="2xl" mb={2}>
             Description <span className="has-text-danger">*</span>
-          </h4>
+          </Heading>
           <p className="has-text-grey mb-4">
             This is where you build the key information for the proposal: the
             details of what’s being voted on; background information for

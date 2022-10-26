@@ -6,6 +6,7 @@ import Form from 'components/common/Form';
 import Input from 'components/common/Input';
 import { useCommunityDetails } from 'hooks';
 import { kebabToString } from 'utils';
+import { Heading } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import pick from 'lodash/pick';
 import { stepTwo } from '../FormConfig';
@@ -100,7 +101,9 @@ const StepTwo = ({
     <Form onSubmit={handleSubmit(onSubmit)} formId={formId}>
       <div className="is-flex-direction-column">
         <div className="border-light-tablet rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 p-0-mobile mb-6">
-          <h4 className="title is-4 mb-2">Voting Strategy</h4>
+          <Heading as="h4" fontSize="2xl" mb={2}>
+            Voting Strategy <span className="has-text-danger">*</span>
+          </Heading>
           <p className="has-text-grey mb-5">
             Select a strategy for how voting power is calculated. Voting
             strategies are set by community admins.
