@@ -1,3 +1,4 @@
+import { Heading } from '@chakra-ui/react';
 import ChoiceOptionCreator from './ChoiceOptionCreator';
 import RankedVoteExample from './RankedVoteExample';
 import SingleVoteExample from './SingleVoteExample';
@@ -13,7 +14,9 @@ export default function VotingSelector({
   return (
     <>
       <div className="border-light-tablet rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 p-0-mobile mb-6">
-        <h4 className="title is-5 mb-2">Type of Voting</h4>
+        <Heading as="h4" fontSize="2xl" mb={2}>
+          Type of Voting
+        </Heading>
         <p className="has-text-grey mb-5">
           Select the type of voting you would like to use for this proposal. To
           learn more about these options,{' '}
@@ -91,9 +94,9 @@ export default function VotingSelector({
         </div>
       </div>
       <div className="border-light-tablet rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 p-0-mobile mb-6">
-        <h4 className="title is-5 mb-2">
+        <Heading as="h4" fontSize="2xl" mb={2}>
           Choices <span className="has-text-danger">*</span>
-        </h4>
+        </Heading>
         {voteType === 'single-choice' ? (
           <p className="has-text-grey mb-4">
             Provide the specific options you’d like to cast votes for. Use
