@@ -12,7 +12,6 @@
       "packages/*"
     ]
   },
-  "dependencies": {},
   "resolutions": {
     "babel-loader": "8.1.0",
     "react-error-overlay": "6.0.9"
