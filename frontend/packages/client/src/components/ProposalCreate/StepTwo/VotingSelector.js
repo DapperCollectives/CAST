@@ -1,5 +1,6 @@
 import { Card } from 'components/Card';
 import { Box, Heading } from '@chakra-ui/react';
+import { Text } from '@chakra-ui/react';
 import ChoiceOptionCreator from './ChoiceOptionCreator';
 import RankedVoteExample from './RankedVoteExample';
 import SingleVoteExample from './SingleVoteExample';
@@ -106,17 +107,22 @@ export default function VotingSelector({
           Choices <span className="has-text-danger">*</span>
         </Heading>
         {voteType === 'single-choice' ? (
-          <p className="has-text-grey mb-4">
+          <Text color={'grey.500'} mb={4}>
             Provide the specific options you’d like to cast votes for. Use
             Text-based presentation for choices that are described in words. Use
             Visual for side-by-side visual options represented by images.
-          </p>
+          </Text>
         ) : (
-          <p className="has-text-grey mb-4">
-            Provide the specific options you’d like to cast votes for. Ranked
-            Choice Voting currently only supports Text-based presentation for
-            choices that are described in words.
-          </p>
+          <>
+            <Text color={'grey.500'} mb={4}>
+              Provide the specific options you’d like to cast votes for. Ranked
+              Choice Voting currently only supports Text-based presentation for
+              choices that are described in words.
+            </Text>
+            <Text color={'grey.500'} mb={4} fontWeight="bold" fontSize="sm">
+              All choices will be randomized for voters
+            </Text>
+          </>
         )}
         <ChoiceOptionCreator
           setValue={setValue}
