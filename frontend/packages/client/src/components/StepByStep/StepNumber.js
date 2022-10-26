@@ -4,7 +4,7 @@ import classnames from 'classnames';
 const StepNumber = ({ stepIdx, status }) => {
   // status can be active - pending - done
   if (status === 'done') {
-    return <Svg name="CheckMark" circleFill="#44C42F" />;
+    return <Svg name="CheckMark" circleFill="#2EAE4F" />;
   }
 
   const classNames = classnames(
