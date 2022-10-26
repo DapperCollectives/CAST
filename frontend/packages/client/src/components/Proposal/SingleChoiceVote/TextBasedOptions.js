@@ -30,7 +30,7 @@ const TextBasedOptions = ({
         {choices.map((opt, i) => (
           <Wrapper
             key={`proposal-option-${i}`}
-            classNames="has-background-white border-light option-vote transition-all rounded py-5 px-4 has-text-justified word-break"
+            classNames="has-background-white border-light transition-all rounded py-5 px-4 has-text-justified word-break"
             extraClasses={choices?.length !== i + 1 ? 'mb-5' : {}}
             extraStylesMobile={
               choices?.length !== i + 1 ? { marginBottom: '14px' } : {}

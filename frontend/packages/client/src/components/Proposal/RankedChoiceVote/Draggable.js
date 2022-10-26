@@ -19,6 +19,9 @@ export const Draggable = ({
   const ref = useRef(null);
   const [, drop] = useDrop({
     accept: itemType,
+    collect: (monitor) => ({
+      item: monitor.getItem(),
+    }),
     hover(item, monitor) {
       if (!ref.current) {
         return;

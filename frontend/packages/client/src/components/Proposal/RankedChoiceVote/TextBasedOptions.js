@@ -70,9 +70,9 @@ const TextBasedOptions = ({
           ) : (
             <p className="mb-6 has-text-grey has-text-weight-bold smaller-text is-flex is-align-items-center is-justify-content-center">
               All choices are randomized on page load{' '}
-              <div className="pl-2 is-flex is-align-items-center">
+              <span className="pl-2 is-flex is-align-items-center">
                 <Svg name="Reload" width={10} height={12} />
-              </div>
+              </span>
             </p>
           )}
         </div>

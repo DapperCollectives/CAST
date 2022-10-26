@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { Svg } from '@cast/shared-components';
 import { WrapperResponsive as Wrapper } from 'components';
+import Tooltip from 'components/Tooltip';
 
 const TextOption = ({
   index,
@@ -12,6 +14,7 @@ const TextOption = ({
   isDragging = false,
   opacity,
 }) => {
+  const [isHover, setIsHover] = useState(false);
   const rankStyle =
     isCastVote && index === 0
       ? 'has-background-green'
@@ -47,9 +50,11 @@ const TextOption = ({
   return (
     <Wrapper
       key={`proposal-option-${index}`}
-      classNames={`has-background-white border-light transition-all rounded-xl py-4 px-5 has-text-justified word-break is-flex is-justify-content-space-between ${cursorStyle} ${
-        !readOnly ? 'option-vote' : ''
-      } ${isDragging ? 'option-vote-dragging' : ''}`}
+      classNames={`border-light transition-all rounded-xl py-4 px-5 has-text-justified word-break is-flex is-justify-content-space-between ${cursorStyle} ${
+        isDragging
+          ? 'option-vote-dragging has-background-light-grey'
+          : 'has-background-white'
+      }`}
       extraClasses={extraClasses}
       extraStylesMobile={extraStylesMobile}
       onClick={() => !readOnly && handleVote && handleVote(value)}
@@ -71,9 +76,23 @@ const TextOption = ({
           {label}
         </div>
       </div>
-      {(isCastVote && !readOnly) || isDragging ? (
-        <div className="is-flex is-align-items-center">
-          <Svg name="MoveHandle" />
+      {isCastVote && !readOnly ? (
+        <div
+          className="is-flex is-align-items-center"
+          onMouseEnter={() => setIsHover(true)}
+          onMouseLeave={() => setIsHover(false)}
+        >
+          {isHover ? (
+            <Tooltip
+              classNames="is-flex is-flex-grow-1 is-align-items-center"
+              position="top"
+              text="Drag to Reorder"
+            >
+              <Svg name="MoveHandle" />
+            </Tooltip>
+          ) : (
+            <Svg name="MoveHandle" />
+          )}
         </div>
       ) : null}
     </Wrapper>

@@ -3,7 +3,6 @@ package server
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -390,8 +389,6 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, errIncompleteRequest)
 		return
 	}
-
-	fmt.Printf("%+v\n", *p.Strategy)
 
 	proposal, errResponse := helpers.createProposal(p)
 	if errResponse != nilErr {

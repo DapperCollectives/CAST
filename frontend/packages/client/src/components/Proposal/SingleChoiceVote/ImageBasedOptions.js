@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { WrapperResponsive as Wrapper } from 'components';
-import ButtonChoice from './ButtonChoice';
+import ButtonChoice from '../ButtonChoice';
 
 const ImageBasedOptions = ({
   choiceA,
