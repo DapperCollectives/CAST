@@ -456,7 +456,7 @@ func (h *Helpers) fetchAllUserVotes(
 	addr string,
 	pageParams shared.PageParams,
 ) (
-	[]models.ProposalResults,
+	[]models.UserProfileProposal,
 	int,
 	error,
 ) {
@@ -466,7 +466,7 @@ func (h *Helpers) fetchAllUserVotes(
 		return nil, 0, err
 	}
 
-	var totalResults []models.ProposalResults
+	var totalProposals []models.UserProfileProposal
 
 	for _, p := range proposals {
 		var tallyProposal models.Proposal
@@ -489,10 +489,13 @@ func (h *Helpers) fetchAllUserVotes(
 			return nil, 0, err
 		}
 
-		totalResults = append(totalResults, results)
+		totalProposals = append(totalProposals, models.UserProfileProposal{
+			Proposal: p,
+			Results:  results,
+		})
 	}
 
-	return totalResults, totalRecords, nil
+	return totalProposals, totalRecords, nil
 }
 
 func (h *Helpers) fetchCommunity(id int) (models.Community, error) {

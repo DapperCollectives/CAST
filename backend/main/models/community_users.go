@@ -217,7 +217,7 @@ func GetCommunityProposalsForUser(
 	addr,
 	filters string,
 	pageParams shared.PageParams,
-) ([]shared.UserProposal, int, error) {
+) ([]UserProposal, int, error) {
 
 	sql := USER_PROPOSALS + `LIMIT $2 OFFSET $3`
 
@@ -226,7 +226,7 @@ func GetCommunityProposalsForUser(
 	} else {
 		sql += "AND p.status != 'draft'"
 	}
-	var proposals = []shared.UserProposal{}
+	var proposals = []UserProposal{}
 	err := pgxscan.Select(
 		db.Context,
 		db.Conn,
@@ -255,11 +255,11 @@ func GetUserProposalVotes(
 	addr string,
 	pageParams shared.PageParams,
 ) (
-	[]shared.UserProposal,
+	[]UserProposal,
 	int,
 	error,
 ) {
-	var proposals = []shared.UserProposal{}
+	var proposals = []UserProposal{}
 	err := pgxscan.Select(db.Context, db.Conn, &proposals,
 		`
 		SELECT 
@@ -278,7 +278,7 @@ func GetUserProposalVotes(
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		return nil, 0, err
 	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
-		return []shared.UserProposal{}, 0, nil
+		return []UserProposal{}, 0, nil
 	}
 
 	return proposals, len(proposals), nil
