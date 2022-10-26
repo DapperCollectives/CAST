@@ -23,7 +23,7 @@ export default function WarningMessage({
           <Heading as="h4" fontSize="lg" mb={2}>
             {title}
           </Heading>
-          <Text size="lg" fontSize="lg" fontWeight="medium" mb={5}>
+          <Text size="lg" fontSize="md" fontWeight="medium" mb={5}>
             {description}
           </Text>
           {contractType === 'ft' && (
