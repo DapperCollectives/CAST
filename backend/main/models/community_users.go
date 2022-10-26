@@ -62,19 +62,42 @@ type LeaderboardPayload struct {
 	CurrentUser LeaderboardUser   `json:"currentUser"`
 }
 
-func GetUsersForCommunity(db *s.Database, communityId int, pageParams shared.PageParams) ([]CommunityUserType, int, error) {
-	var users = []CommunityUserType{}
-	err := pgxscan.Select(db.Context, db.Conn, &users,
-		`
+const USER_PROPOSALS = `
+	SELECT 
+ 	u.community_id, 
+  c.name as community_name, 
+  p.name as proposal_name, 
+  p.status, 
+	p.start_time
+  FROM community_users AS u 
+	LEFT JOIN 
+  proposals AS p on p.community_id = u.community_id
+	LEFT JOIN 
+  communities AS c on c.id = p.community_id
+	WHERE addr = $1
+`
+const USER_PROPOSALS_COUNT = `
+	SELECT COUNT(*)
+  FROM community_users AS u 
+	LEFT JOIN 
+  proposals AS p on p.community_id = u.community_id
+	LEFT JOIN 
+  communities AS c on c.id = p.community_id
+	WHERE addr = '0xf8d6e0586b0a20c7'
+`
+const USERS_IN_COMMUNITY = `
 		SELECT
  				(CASE WHEN 
-					(EXISTS (SELECT community_users.addr FROM community_users WHERE community_users.addr = temp_user_addrs.addr AND community_users.user_type = 'admin')) 
+					(EXISTS (SELECT community_users.addr FROM community_users 
+					WHERE community_users.addr = temp_user_addrs.addr AND community_users.user_type = 'admin')) 
 					THEN '1' else '0' end)::boolean AS is_admin,
  				(CASE WHEN 
-					(EXISTS (SELECT community_users.addr FROM community_users WHERE community_users.addr = temp_user_addrs.addr AND community_users.user_type = 'author')) 
+					(EXISTS (SELECT community_users.addr FROM community_users 
+					WHERE community_users.addr = temp_user_addrs.addr AND community_users.user_type = 'author')) 
 				THEN '1' else '0' end)::boolean AS is_author,
  				(CASE WHEN 
-					(EXISTS (SELECT community_users.addr FROM community_users WHERE community_users.addr = temp_user_addrs.addr AND community_users.user_type = 'member')) 
+					(EXISTS (SELECT community_users.addr FROM community_users 
+					WHERE community_users.addr = temp_user_addrs.addr AND community_users.user_type = 'member')) 
 				THEN '1' else '0' end)::boolean AS is_member,
 				temp_user_addrs.addr AS addr,
 				$1 as community_id
@@ -82,8 +105,13 @@ func GetUsersForCommunity(db *s.Database, communityId int, pageParams shared.Pag
 				(SELECT addr FROM community_users WHERE community_id = $1 group BY community_users.addr) 
 		AS temp_user_addrs 
 		LIMIT $2 OFFSET $3
-		`, communityId, pageParams.Count, pageParams.Start)
+`
 
+func GetUsersForCommunity(db *s.Database, communityId int, pageParams shared.PageParams) ([]CommunityUserType, int, error) {
+	var users = []CommunityUserType{}
+
+	sql := USERS_IN_COMMUNITY
+	err := pgxscan.Select(db.Context, db.Conn, &users, sql, communityId, pageParams.Count, pageParams.Start)
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		return nil, 0, err
 	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
@@ -190,32 +218,67 @@ func GetCommunityProposalsForUser(
 	filters string,
 	pageParams shared.PageParams,
 ) ([]shared.UserProposal, int, error) {
-	sql := `
-	SELECT 
- 		u.community_id, 
-  	c.name as community_name, 
-  	p.name as proposal_name, 
-  	p.status, 
-		p.start_time
-  FROM community_users AS u 
-	LEFT JOIN 
-  	proposals AS p on p.community_id = u.community_id
-	LEFT JOIN 
-  	communities AS c on c.id = p.community_id
-	WHERE addr = $1
-	`
+
+	sql := USER_PROPOSALS + `LIMIT $2 OFFSET $3`
+
 	if filters != "" {
 		sql += fmt.Sprintf("AND p.status = '%s'", filters)
 	} else {
 		sql += "AND p.status != 'draft'"
 	}
 	var proposals = []shared.UserProposal{}
-	err := pgxscan.Select(db.Context, db.Conn, &proposals, sql, addr)
+	err := pgxscan.Select(
+		db.Context,
+		db.Conn,
+		&proposals,
+		sql,
+		addr,
+		pageParams.Count,
+		pageParams.Start,
+	)
 
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
 		return nil, 0, err
 	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
 		return proposals, 0, nil
+	}
+
+	var totalRecords int
+	countSql := USER_PROPOSALS_COUNT
+	err = db.Conn.QueryRow(db.Context, countSql, addr).Scan(&totalRecords)
+
+	return proposals, totalRecords, nil
+}
+
+func GetUserProposalVotes(
+	db *s.Database,
+	addr string,
+	pageParams shared.PageParams,
+) (
+	[]shared.UserProposal,
+	int,
+	error,
+) {
+	var proposals = []shared.UserProposal{}
+	err := pgxscan.Select(db.Context, db.Conn, &proposals,
+		`
+		SELECT 
+			communities.id as community_id,
+			communities.name as community_name,
+			proposals.name as proposal_name,
+			proposals.id as proposal_id,
+			proposals.status,
+			proposals.start_time
+		FROM communities
+		JOIN proposals ON proposals.community_id = communities.id
+		JOIN votes ON votes.proposal_id = proposals.id
+		WHERE votes.addr = $1
+		`, addr)
+
+	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
+		return nil, 0, err
+	} else if err != nil && err.Error() == pgx.ErrNoRows.Error() {
+		return []shared.UserProposal{}, 0, nil
 	}
 
 	return proposals, len(proposals), nil

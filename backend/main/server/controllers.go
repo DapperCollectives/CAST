@@ -354,21 +354,36 @@ func (a *App) getUserProposals(w http.ResponseWriter, r *http.Request) {
 
 	pageParams := getPageParams(*r, 25)
 
-	communities, totalRecords, err := models.GetCommunityProposalsForUser(
-		a.DB,
-		addr,
-		filter,
-		pageParams,
-	)
-	if err != nil {
-		log.Error().Err(err).Msg("Error getting user proposals.")
-		respondWithError(w, errIncompleteRequest)
-		return
-	}
+	if filter == "profile-votes" {
+		proposals, totalRecords, err := helpers.fetchAllUserVotes(a.DB, addr, pageParams)
+		if err != nil {
+			log.Error().Err(err).Msg("Error getting proposals for profile votes.")
+			respondWithError(w, errIncompleteRequest)
+			return
+		}
 
-	pageParams.TotalRecords = totalRecords
-	response := shared.GetPaginatedResponseWithPayload(communities, pageParams)
-	respondWithJSON(w, http.StatusOK, response)
+		pageParams.TotalRecords = totalRecords
+		response := shared.GetPaginatedResponseWithPayload(proposals, pageParams)
+
+		respondWithJSON(w, http.StatusOK, response)
+	} else {
+		proposals, totalRecords, err := models.GetCommunityProposalsForUser(
+			a.DB,
+			addr,
+			filter,
+			pageParams,
+		)
+		if err != nil {
+			log.Error().Err(err).Msg("Error getting user proposals.")
+			respondWithError(w, errIncompleteRequest)
+			return
+		}
+
+		pageParams.TotalRecords = totalRecords
+		response := shared.GetPaginatedResponseWithPayload(proposals, pageParams)
+
+		respondWithJSON(w, http.StatusOK, response)
+	}
 }
 
 func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {

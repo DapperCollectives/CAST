@@ -451,6 +451,50 @@ func (h *Helpers) validateVote(p models.Proposal, v models.Vote) errorResponse {
 	return nilErr
 }
 
+func (h *Helpers) fetchAllUserVotes(
+	db *shared.Database,
+	addr string,
+	pageParams shared.PageParams,
+) (
+	[]models.ProposalResults,
+	int,
+	error,
+) {
+	proposals, totalRecords, err := models.GetUserProposalVotes(db, addr, pageParams)
+	if err != nil {
+		log.Error().Err(err).Msg("Error getting user profile votes.")
+		return nil, 0, err
+	}
+
+	var totalResults []models.ProposalResults
+
+	for _, p := range proposals {
+		var tallyProposal models.Proposal
+		tallyProposal.ID = p.Proposal_id
+
+		if err := tallyProposal.GetProposalById(db); err != nil {
+			log.Error().Err(err).Msg("Error getting proposal.")
+			return nil, 0, err
+		}
+
+		votes, err := models.GetAllVotesForProposal(db, p.Proposal_id, *tallyProposal.Strategy)
+		if err != nil {
+			log.Error().Err(err).Msg("Error getting votes for proposal.")
+			return nil, 0, err
+		}
+
+		results, err := helpers.useStrategyTally(tallyProposal, votes)
+		if err != nil {
+			log.Error().Err(err).Msg("Error tallying votes.")
+			return nil, 0, err
+		}
+
+		totalResults = append(totalResults, results)
+	}
+
+	return totalResults, totalRecords, nil
+}
+
 func (h *Helpers) fetchCommunity(id int) (models.Community, error) {
 	community := models.Community{ID: id}
 
