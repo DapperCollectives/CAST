@@ -2,6 +2,8 @@ import {
   LEANPLUM_APP_ID,
   LEANPLUM_CRO_KEY,
   LEANPLUM_EXPORT_KEY,
+  LEANPLUM_DEV_KEY,
+  LEANPLUM_PROD_KEY,
 } from 'api/constants';
 import Leanplum from 'leanplum-sdk';
 
@@ -10,6 +12,18 @@ const options = {
   method: 'GET',
   headers: { accept: 'application/json' },
 };
+
+export const startLeanplum = () => {
+  const IS_LOCAL_DEV = process.env.REACT_APP_APP_ENV === 'development';
+
+  if (IS_LOCAL_DEV) {
+    Leanplum.setAppIdForDevelopmentMode(LEANPLUM_APP_ID, LEANPLUM_DEV_KEY);
+  } else {
+    Leanplum.setAppIdForProductionMode(LEANPLUM_APP_ID, LEANPLUM_PROD_KEY);
+  }
+  
+  Leanplum.start();
+}
 
 export const setUserId = async (walletId) => {
   try {
@@ -78,7 +92,7 @@ export const setUserEmail = async (email) => {
 
 export const unsubscribeCommunity = async (communityId) => {
   try {
-    Leanplum.setUserAttributes({ [`community${communityId}`]: false });
+    Leanplum.setUserAttributes({ [`community${communityId}`]: 'False' });
     return true
   } catch (e) {
     throw new Error(e);
@@ -87,7 +101,7 @@ export const unsubscribeCommunity = async (communityId) => {
 
 export const subscribeCommunity = async (communityId) => {
   try {
-    Leanplum.setUserAttributes({ [`community${communityId}`]: true });
+    Leanplum.setUserAttributes({ [`community${communityId}`]: 'True' });
     return true
   } catch (e) {
     throw new Error(e);
