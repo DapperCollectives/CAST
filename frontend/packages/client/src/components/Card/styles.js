@@ -28,6 +28,16 @@ const Card = {
       minWidth: '210px',
       height: '69px',
     },
+    votingType: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderColor: 'grey.300',
+      borderRadius: 'lg',
+      cursor: 'pointer',
+      _hover: {
+        border: '2px',
+      },
+    },
   },
   defaultProps: {
     background: 'white',

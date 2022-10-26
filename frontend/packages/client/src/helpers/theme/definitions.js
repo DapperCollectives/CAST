@@ -25,6 +25,7 @@ const definitions = {
     '8xl': '6rem',
     '9xl': '8rem',
   },
+  // colors used in CAST designs
   colors: {
     red: {
       600: '#C2130A',
