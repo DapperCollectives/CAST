@@ -924,6 +924,16 @@ func (a *App) createUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := helpers.validateUser(
+		*payload.Addr,
+		*payload.Timestamp,
+		payload.Composite_signatures,
+	); err != nil {
+		log.Error().Err(err).Msg("Error validating signature")
+		respondWithError(w, errIncompleteRequest)
+		return
+	}
+
 	var user models.User
 	if err := user.CreateUser(a.DB, &payload); err != nil {
 		log.Error().Err(err).Msg("Error creating user")

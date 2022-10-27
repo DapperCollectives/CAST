@@ -16,7 +16,9 @@ func TestUser(t *testing.T) {
 
 	t.Run("should be able to create a user", func(t *testing.T) {
 		userStruct := otu.GenerateUserStruct("account")
-		response := otu.CreateUserAPI(userStruct)
+		payload := otu.GenerateUserPayload("account", *userStruct)
+		fmt.Printf("payload: %+v \r", payload)
+		response := otu.CreateUserAPI(payload)
 		checkResponseCode(t, http.StatusCreated, response.Code)
 
 		var created models.User
@@ -27,8 +29,8 @@ func TestUser(t *testing.T) {
 
 	t.Run("should be able to get a user", func(t *testing.T) {
 		userStruct := otu.GenerateUserStruct("account")
-		response := otu.CreateUserAPI(userStruct)
-		checkResponseCode(t, http.StatusCreated, response.Code)
+		response := otu.GetUserAPI(userStruct)
+		checkResponseCode(t, http.StatusOK, response.Code)
 
 		var created models.User
 		json.Unmarshal(response.Body.Bytes(), &created)
@@ -44,7 +46,8 @@ func TestUser(t *testing.T) {
 
 	t.Run("should be able to update a user", func(t *testing.T) {
 		userStruct := otu.GenerateUserStruct("account")
-		response := otu.CreateUserAPI(userStruct)
+		payload := otu.GenerateUserPayload("account", *userStruct)
+		response := otu.CreateUserAPI(payload)
 		checkResponseCode(t, http.StatusCreated, response.Code)
 
 		var toUpdate models.User
@@ -53,10 +56,8 @@ func TestUser(t *testing.T) {
 		updatedName := "Updated Name"
 
 		toUpdate.Name = &updatedName
-		payload, _ := json.Marshal(toUpdate)
-		req, _ := http.NewRequest("PUT", fmt.Sprintf("/user"), bytes.NewBuffer(payload))
-		req.Header.Set("Content-Type", "application/json")
-		response = otu.ExecuteRequest(req)
+		updatePayload := otu.GenerateUserPayload("account", toUpdate)
+		response = otu.UpdateUserAPI(updatePayload)
 
 		var updated models.User
 		json.Unmarshal(response.Body.Bytes(), &updated)

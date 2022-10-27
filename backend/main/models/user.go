@@ -6,15 +6,17 @@ import (
 )
 
 type User struct {
-	Uuid          *string `json:"uuid,omitempty"`
-	Addr          *string `json:"address"`
-	Profile_image *string `json:"profileImage,omitempty"`
-	Name          *string `json:"name,omitempty"`
-	Website       *string `json:"website,omitempty"`
-	Bio           *string `json:"bio,omitempty"`
-	Twitter       *string `json:"twitter,omitempty"`
-	Discord       *string `json:"discord,omitempty"`
-	Instagram     *string `json:"instagram,omitempty"`
+	Uuid                 *string                      `json:"uuid,omitempty"`
+	Addr                 *string                      `json:"address,validate:required"`
+	Composite_signatures *[]shared.CompositeSignature `json:"compositeSignatures,validate:required"`
+	Timestamp            *string                      `json:"timestamp,validate:required"`
+	Profile_image        *string                      `json:"profileImage,omitempty"`
+	Name                 *string                      `json:"name,omitempty"`
+	Website              *string                      `json:"website,omitempty"`
+	Bio                  *string                      `json:"bio,omitempty"`
+	Twitter              *string                      `json:"twitter,omitempty"`
+	Discord              *string                      `json:"discord,omitempty"`
+	Instagram            *string                      `json:"instagram,omitempty"`
 }
 
 func (u *User) CreateUser(db *shared.Database, payload *User) error {

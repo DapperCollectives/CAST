@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"net/http"
 	"net/http/httptest"
@@ -27,6 +28,18 @@ func (otu *OverflowTestUtils) CreateUserAPI(user *models.User) *httptest.Respons
 	return otu.ExecuteRequest(req)
 }
 
+func (otu *OverflowTestUtils) GetUserAPI(user *models.User) *httptest.ResponseRecorder {
+	req, _ := http.NewRequest("GET", fmt.Sprintf("/user/%s", *user.Addr), nil)
+	return otu.ExecuteRequest(req)
+}
+
+func (otu *OverflowTestUtils) UpdateUserAPI(user *models.User) *httptest.ResponseRecorder {
+	json, _ := json.Marshal(user)
+	req, _ := http.NewRequest("PUT", "/user", bytes.NewBuffer(json))
+	req.Header.Set("Content-Type", "application/json")
+	return otu.ExecuteRequest(req)
+}
+
 func (otu *OverflowTestUtils) GenerateUserStruct(signer string) *models.User {
 	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", signer))
 	address := fmt.Sprintf("0x%s", account.Address().String())
@@ -40,6 +53,18 @@ func (otu *OverflowTestUtils) GenerateUserStruct(signer string) *models.User {
 		Discord:       &dummyDiscord,
 		Instagram:     &dummyInstagram,
 	}
+}
+
+func (otu *OverflowTestUtils) GenerateUserPayload(signer string, user models.User) *models.User {
+	payload := user
+	fmt.Printf("payload: %+v \n", payload)
+	timestamp := fmt.Sprint(time.Now().UnixNano() / int64(time.Millisecond))
+	fmt.Printf("timestamp: %s \n", timestamp)
+	compositeSignatures := otu.GenerateCompositeSignatures(signer, timestamp)
+	fmt.Printf("compositeSignatures: %+v \n", compositeSignatures)
+	payload.Timestamp = &timestamp
+	payload.Composite_signatures = compositeSignatures
+	return &payload
 }
 
 func (otu *OverflowTestUtils) GenerateFailUserStruct() *models.User {

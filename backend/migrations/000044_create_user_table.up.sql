@@ -1,6 +1,6 @@
 CREATE TABLE users (
   uuid UUID PRIMARY KEY NOT NULL,
-  addr VARCHAR(255),
+  addr VARCHAR(255) NOT NULL,
   profile_image TEXT,
   name VARCHAR(50),
   website VARCHAR(50),
