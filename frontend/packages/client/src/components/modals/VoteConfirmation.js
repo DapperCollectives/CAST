@@ -18,16 +18,15 @@ export default function VoteConfirmation({ onCancelVote, onVote, castVotes }) {
       <Modal.FooterContainer>
         <>
           <div className="columns is-mobile p-0 m-0 flex-1 pr-2">
-            <button
-              className="button column is-full p-0 rounded-xl has-text-weight-bold"
+            <Modal.FooterButton
+              classNames="has-background-white"
               onClick={onCancelVote}
-            >
-              Cancel
-            </button>
+              text="Cancel"
+            />
           </div>
           <div className="columns is-mobile p-0 m-0 flex-1 pl-2">
             <Modal.FooterButton
-              classNames="has-background-yellow"
+              classNames="has-background-yellow vote-button transition-all"
               onClick={onVote}
               text="Vote"
             />
