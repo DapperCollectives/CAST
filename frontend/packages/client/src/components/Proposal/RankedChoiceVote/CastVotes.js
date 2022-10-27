@@ -23,6 +23,7 @@ const CastVotes = ({ votes, setVotes, readOnly = false, removeVote }) => {
       {votes.map((vote, i) =>
         readOnly ? (
           <TextOption
+            key={`${vote.value}-${i}`}
             index={i}
             label={vote.label}
             labelType={vote.labelType}
