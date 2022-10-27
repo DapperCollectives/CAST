@@ -225,7 +225,7 @@ export default function ProposalPage() {
 
     const choices = Array.isArray(optionChosen)
       ? optionChosen.map((opt) => `${opt.value}`)
-      : [optionChosen];
+      : [`${optionChosen}`];
 
     const voteData = {
       choices,

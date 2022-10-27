@@ -43,7 +43,9 @@ const TextBasedOptions = ({
                 value={opt.value}
                 className={`yellow-radio mr-3`}
                 onChange={_onOptionSelect}
-                checked={currentOption === String(opt.value)}
+                checked={
+                  currentOption && currentOption[0] === String(opt.value)
+                }
                 disabled={readOnly}
               />
               <span />
@@ -65,7 +67,7 @@ const TextBasedOptions = ({
             className={`button vote-button transition-all is-flex has-background-yellow rounded-xl is-${
               currentOption && !readOnly ? 'enabled' : 'disabled'
             }`}
-            onClick={readOnly ? () => {} : onConfirmVote}
+            onClick={readOnly ? () => {} : () => onConfirmVote()}
           >
             Vote
           </button>

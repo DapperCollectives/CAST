@@ -8,7 +8,8 @@ const ButtonChoice = ({
   const _confirmAndVote = (value) => () => confirmAndVote(value);
 
   const showVotedCheck = (value) =>
-    String(currentOption) === String(value) &&
+    !!currentOption &&
+    String(currentOption[0]) === String(value) &&
     String(previousVote) === String(value);
 
   return (
