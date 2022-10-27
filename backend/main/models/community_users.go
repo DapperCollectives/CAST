@@ -219,13 +219,16 @@ func GetCommunityProposalsForUser(
 	pageParams shared.PageParams,
 ) ([]UserProposal, int, error) {
 
-	sql := USER_PROPOSALS + `LIMIT $2 OFFSET $3`
+	var sql string
 
 	if filters != "" {
 		sql += fmt.Sprintf("AND p.status = '%s'", filters)
 	} else {
 		sql += "AND p.status != 'draft'"
 	}
+
+	sql = USER_PROPOSALS + `LIMIT $2 OFFSET $3`
+
 	var proposals = []UserProposal{}
 	err := pgxscan.Select(
 		db.Context,
