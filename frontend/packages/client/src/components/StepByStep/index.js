@@ -26,9 +26,18 @@ function StepByStep({
   const [currentStep, setCurrentStep] = useState(0);
   const [previewMode, setPreviewMode] = useState(false);
   const [showPreStep, setShowPreStep] = useState(!!preStep);
-  const [isStepValid, setStepValid] = useState(false);
+  const [isMovingNextStep, setIsMovingNextStep] = useState(false);
+  const [validationStepMap, setValidationStepMap] = useState({});
+
   const [stepsData, setStepsData] = useState({});
   const refs = useRef();
+
+  const updateStepValid = (currentStep) => (isValid) => {
+    setValidationStepMap((state) => ({
+      ...state,
+      ...{ [currentStep]: isValid },
+    }));
+  };
 
   const onStepAdvance = (direction = 'next') => {
     if (direction === 'next') {
@@ -110,7 +119,9 @@ function StepByStep({
           onClickBack={moveBackStep}
           isBackButtonEnabled={currentStep - 1 >= 0}
           onClickNext={moveToNextStep}
-          isStepValid={isStepValid}
+          isStepValid={
+            (validationStepMap?.[currentStep] ?? false) && !isMovingNextStep
+          }
           showSubmitOrNext={nextAction}
           formId={formId}
           finalLabel={finalLabel}
@@ -153,6 +164,7 @@ function StepByStep({
             name={useControlsOnTopBar ? stepsData?.[0]?.name ?? '' : null}
             previewMode={previewMode}
             moveToStep={moveToStep}
+            validatedSteps={validationStepMap}
           />
 
           {/* right panel */}
@@ -181,8 +193,9 @@ function StepByStep({
                     },
                   });
                 },
-                setStepValid,
-                isStepValid,
+                setStepValid: updateStepValid(currentStep),
+                isStepValid: validationStepMap?.[currentStep],
+                setIsMovingNextStep,
                 stepData: stepsData[currentStep],
                 stepsData,
                 setPreCheckStepAdvance,

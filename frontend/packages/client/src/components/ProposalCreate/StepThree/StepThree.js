@@ -7,6 +7,7 @@ import Form from 'components/common/Form';
 import { useMediaQuery } from 'hooks';
 import { HAS_DELAY_ON_START_TIME } from 'const';
 import { formatTime } from 'utils';
+import { Heading } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import pick from 'lodash/pick';
 import { stepThree } from '../FormConfig';
@@ -32,6 +33,7 @@ const isToday = (date) => {
 const StepThree = ({
   stepData,
   setStepValid,
+  isStepValid,
   onDataChange,
   formId,
   onSubmit: onSubmitParam = () => {},
@@ -58,6 +60,8 @@ const StepThree = ({
   );
 
   const { handleSubmit, formState, control, setValue, clearErrors } = useForm({
+    mode: 'onChange',
+    reValidateMode: 'onChange',
     defaultValues: fieldsObj,
     resolver: yupResolver(stepThree.Schema),
   });
@@ -69,7 +73,9 @@ const StepThree = ({
     field === 'startTime' ? setStartTimeOpen(false) : setEndTimeOpen(false);
   };
 
-  const { errors, isValid, isDirty, isSubmitting } = formState;
+  const { errors, isValid } = formState;
+
+  console.log('validation step thre is ', isValid, errors);
 
   const onSubmit = () => {
     onSubmitParam();
@@ -95,8 +101,10 @@ const StepThree = ({
   const endTime = useWatch({ control, name: 'endTime' });
 
   useEffect(() => {
-    setStepValid((isValid || isDirty) && !isSubmitting);
-  }, [isValid, isDirty, isSubmitting, setStepValid]);
+    if (isStepValid !== isValid) {
+      setStepValid(isValid);
+    }
+  }, [isValid, isStepValid, setStepValid]);
 
   // pre saves data so when submit
   // is triggered onDataChange has been already executed
@@ -133,9 +141,9 @@ const StepThree = ({
       formClasses="mb-6-mobile"
     >
       <div className="border-light-tablet rounded-lg is-flex-direction-column is-mobile m-0 p-6 p-0-mobile mb-6">
-        <h4 className="title is-5 mb-5">
+        <Heading as="h4" fontSize="2xl" mb={6}>
           Start date and time <span className="has-text-danger">*</span>
-        </h4>
+        </Heading>
         <div className="columns p-0 m-0">
           <CustomDatePicker
             control={control}
@@ -202,9 +210,9 @@ const StepThree = ({
         </div>
       </div>
       <div className="border-light-tablet rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 p-0-mobile mb-6">
-        <h4 className="title is-5 mb-5">
+        <Heading as="h4" fontSize="2xl" mb={6}>
           End date and time <span className="has-text-danger">*</span>
-        </h4>
+        </Heading>
         <div className="columns p-0 m-0">
           <CustomDatePicker
             placeholderText="Choose date"

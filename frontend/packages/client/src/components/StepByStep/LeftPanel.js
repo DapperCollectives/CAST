@@ -12,6 +12,7 @@ export default function LeftPanel({
   showBackButton = true,
   previewMode,
   moveToStep,
+  validatedSteps,
 }) {
   const notMobile = useMediaQuery();
 
@@ -66,10 +67,10 @@ export default function LeftPanel({
             key={`step-and-icon-${i}`}
             stepIdx={i}
             stepLabel={step.label}
-            showPreStep={showPreStep}
             currentStep={currentStep}
-            disableAll={previewMode}
+            disableAll={previewMode || showPreStep}
             moveToStep={moveToStep}
+            validatedSteps={validatedSteps}
           />
         ))}
       </div>

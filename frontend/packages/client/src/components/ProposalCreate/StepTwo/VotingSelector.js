@@ -32,7 +32,8 @@ export default function VotingSelector({
             className={`border-light rounded-sm is-flex is-align-items-center m-0 p-0 mb-4 cursor-pointer ${
               voteType === 'single-choice' ? 'border-grey' : 'border-light'
             }`}
-            onClick={() => setValue('voteType', 'single-choice')}
+            // TODO FIX THIS
+            // onClick={() => setValue('voteType', 'single-choice')}
           >
             <div className="p-4">
               <div className="is-flex is-align-items-center mr-2">
@@ -63,7 +64,7 @@ export default function VotingSelector({
             className={`border-light rounded-sm is-flex is-align-items-center m-0 p-0 cursor-pointer ${
               voteType === 'ranked-choice' ? 'border-grey' : 'border-light'
             }`}
-            onClick={() => setValue('voteType', 'ranked-choice')}
+            // onClick={() => setValue('voteType', 'ranked-choice')}
           >
             <div className="p-4">
               <div className="is-flex is-align-items-center mr-2">

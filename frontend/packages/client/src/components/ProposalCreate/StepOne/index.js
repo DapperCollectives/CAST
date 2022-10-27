@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import { Editor } from 'components/common/Editor';
 import Form from 'components/common/Form';
 import Input from 'components/common/Input';
+import { wait } from 'utils';
 import { yupResolver } from '@hookform/resolvers/yup';
 import pick from 'lodash/pick';
 import { NAME_MAX_LENGTH, stepOne } from '../FormConfig';
@@ -14,6 +15,8 @@ const StepOne = ({
   onDataChange,
   formId,
   moveToNextStep,
+  isStepValid,
+  setIsMovingNextStep,
 }) => {
   const { communityId } = useParams();
   const fieldsObj = Object.assign(
@@ -25,18 +28,28 @@ const StepOne = ({
 
   const { register, handleSubmit, formState, control } = useForm({
     reValidateMode: 'onChange',
+    mode: 'onChange',
     defaultValues: fieldsObj,
     resolver: yupResolver(stepOne.Schema),
   });
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     onDataChange(data);
+    await wait(5000);
     moveToNextStep();
   };
 
   const communityName = useWatch({ control, name: 'name' });
 
-  const { isDirty, isSubmitting, isValid, errors } = formState;
+  const { isSubmitting, isValid, errors } = formState;
+
+  useEffect(() => {
+    setIsMovingNextStep(isSubmitting);
+    return () => {
+      setIsMovingNextStep(false);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSubmitting]);
 
   useEffect(() => {
     if (communityName && communityName?.length < 128) {
@@ -46,8 +59,10 @@ const StepOne = ({
   }, [communityName]);
 
   useEffect(() => {
-    setStepValid((isDirty || isValid) && !isSubmitting);
-  }, [isDirty, isValid, isSubmitting, setStepValid]);
+    if (isStepValid !== isValid) {
+      setStepValid(isValid);
+    }
+  }, [isValid, isStepValid, setStepValid]);
 
   return (
     <Form onSubmit={handleSubmit(onSubmit)} formId={formId}>
