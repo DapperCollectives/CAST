@@ -1,6 +1,7 @@
 CREATE TABLE users (
   uuid UUID PRIMARY KEY NOT NULL,
   addr VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP without time zone default (now() at time zone 'utc'),
   profile_image TEXT,
   name VARCHAR(50),
   website VARCHAR(50),
