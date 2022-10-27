@@ -244,9 +244,6 @@ func GetCommunityProposalsForUser(
 		return proposals, 0, nil
 	}
 
-	fmt.Printf("Total Proposals: %v \n", totalProposals)
-	fmt.Printf("Total Proposals length: %v \n", len(totalProposals))
-
 	return proposals, len(totalProposals), nil
 }
 
