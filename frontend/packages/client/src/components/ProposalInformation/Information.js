@@ -90,7 +90,7 @@ export default function Information({
                 href={`https://flowscan.org/account/${contractAddr}`}
                 rel="noopener noreferrer"
                 target="_blank"
-                className="is-underlined has-text-grey p-0 small-text"
+                className="is-underlined has-text-grey p-0 small-text is-inline-flex is-align-items-center"
                 style={{ height: '2rem !important' }}
               >
                 <span className="mr-2">{`$${tokenName?.toUpperCase()}`}</span>

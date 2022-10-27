@@ -425,4 +425,60 @@ func TestDraftProposal(t *testing.T) {
 		response = otu.DeleteProposalAPI(communityID, created.ID)
 		CheckResponseCode(t, http.StatusForbidden, response.Code)
 	})
+
+	t.Run("should be able to update the status of a draft proposal to 'published'", func(t *testing.T) {
+		// Create a draft proposal
+		proposalStruct := otu.GenerateDraftProposalStruct(authorName, communityId)
+		payload := otu.GenerateProposalPayload(authorName, proposalStruct)
+		response := otu.CreateProposalAPI(payload)
+		CheckResponseCode(t, http.StatusCreated, response.Code)
+
+		var created models.Proposal
+		json.Unmarshal(response.Body.Bytes(), &created)
+
+		response = otu.GetProposalByIdAPI(communityID, created.ID)
+		CheckResponseCode(t, http.StatusOK, response.Code)
+
+		var fetched models.Proposal
+		json.Unmarshal(response.Body.Bytes(), &fetched)
+
+		updatePayload := otu.GenerateUpdateProposalStatusPayload("account", "published")
+
+		response = otu.UpdateProposalAPI(fetched.ID, updatePayload)
+		CheckResponseCode(t, http.StatusOK, response.Code)
+
+		var updated models.Proposal
+		json.Unmarshal(response.Body.Bytes(), &updated)
+
+		assert.Equal(t, "published", *updated.Status)
+	})
+
+	t.Run("should be able to update a draft proposal with a new body", func(t *testing.T) {
+		// Create a draft proposal
+		proposalStruct := otu.GenerateDraftProposalStruct(authorName, communityId)
+		payload := otu.GenerateProposalPayload(authorName, proposalStruct)
+		response := otu.CreateProposalAPI(payload)
+		CheckResponseCode(t, http.StatusCreated, response.Code)
+
+		var created models.Proposal
+		json.Unmarshal(response.Body.Bytes(), &created)
+
+		response = otu.GetProposalByIdAPI(communityID, created.ID)
+		CheckResponseCode(t, http.StatusOK, response.Code)
+
+		var fetched models.Proposal
+		json.Unmarshal(response.Body.Bytes(), &fetched)
+
+		newBody := "new body"
+		fetched.Body = &newBody
+
+		updatePayload := otu.GenerateUpdateProposalBodyPayload("account", &fetched)
+		response = otu.UpdateProposalAPI(fetched.ID, updatePayload)
+		CheckResponseCode(t, http.StatusOK, response.Code)
+
+		var updated models.Proposal
+		json.Unmarshal(response.Body.Bytes(), &updated)
+
+		assert.Equal(t, "new body", *updated.Body)
+	})
 }

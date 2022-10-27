@@ -7,6 +7,7 @@ import Form from 'components/common/Form';
 import { useMediaQuery } from 'hooks';
 import { HAS_DELAY_ON_START_TIME } from 'const';
 import { formatTime } from 'utils';
+import { Heading } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import pick from 'lodash/pick';
 import { stepThree } from '../FormConfig';
@@ -133,9 +134,9 @@ const StepThree = ({
       formClasses="mb-6-mobile"
     >
       <div className="border-light-tablet rounded-lg is-flex-direction-column is-mobile m-0 p-6 p-0-mobile mb-6">
-        <h4 className="title is-5 mb-5">
+        <Heading as="h4" fontSize="2xl" mb={6}>
           Start date and time <span className="has-text-danger">*</span>
-        </h4>
+        </Heading>
         <div className="columns p-0 m-0">
           <CustomDatePicker
             control={control}
@@ -202,9 +203,9 @@ const StepThree = ({
         </div>
       </div>
       <div className="border-light-tablet rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 p-0-mobile mb-6">
-        <h4 className="title is-5 mb-5">
+        <Heading as="h4" fontSize="2xl" mb={6}>
           End date and time <span className="has-text-danger">*</span>
-        </h4>
+        </Heading>
         <div className="columns p-0 m-0">
           <CustomDatePicker
             placeholderText="Choose date"
