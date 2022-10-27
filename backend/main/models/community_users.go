@@ -247,7 +247,7 @@ func GetCommunityProposalsForUser(
 	return proposals, len(totalProposals), nil
 }
 
-func GetUserProposalVotes(
+func GetUserVotedProposals(
 	db *s.Database,
 	addr string,
 	pageParams shared.PageParams,

@@ -451,7 +451,7 @@ func (h *Helpers) validateVote(p models.Proposal, v models.Vote) errorResponse {
 	return nilErr
 }
 
-func (h *Helpers) fetchAllUserVotes(
+func (h *Helpers) fetchUserVotedProposals(
 	db *shared.Database,
 	addr string,
 	pageParams shared.PageParams,
@@ -460,7 +460,7 @@ func (h *Helpers) fetchAllUserVotes(
 	int,
 	error,
 ) {
-	proposals, totalRecords, err := models.GetUserProposalVotes(db, addr, pageParams)
+	proposals, totalRecords, err := models.GetUserVotedProposals(db, addr, pageParams)
 	if err != nil {
 		log.Error().Err(err).Msg("Error getting user profile votes.")
 		return nil, 0, err

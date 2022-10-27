@@ -355,7 +355,7 @@ func (a *App) getUserProposals(w http.ResponseWriter, r *http.Request) {
 	pageParams := getPageParams(*r, 25)
 
 	if filter == "profile-votes" {
-		proposals, totalRecords, err := helpers.fetchAllUserVotes(a.DB, addr, pageParams)
+		proposals, totalRecords, err := helpers.fetchUserVotedProposals(a.DB, addr, pageParams)
 		if err != nil {
 			log.Error().Err(err).Msg("Error getting proposals for profile votes.")
 			respondWithError(w, errIncompleteRequest)
