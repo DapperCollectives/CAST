@@ -19,7 +19,7 @@ export default function FormFields({
         name="communityName"
         disabled={isSubmitting}
         error={errors['communityName']}
-        classNames="rounded-sm border-light p-3 column is-full mt-2"
+        classNames="mt-2"
       />
       <TextArea
         placeholder="Short Description"
@@ -46,7 +46,7 @@ export default function FormFields({
         name="communityTerms"
         disabled={isSubmitting}
         error={errors['communityTerms']}
-        classNames="rounded-sm border-light p-3 column is-full mt-4"
+        classNames="mt-4"
       />
     </>
   );
