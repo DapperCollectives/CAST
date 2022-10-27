@@ -87,7 +87,8 @@ export const updateProposalApiReq = async ({
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      ...updatePayload,
+      payload: updatePayload,
+      signingAddr: updatePayload.signingAddr,
       timestamp,
       compositeSignatures,
       voucher,

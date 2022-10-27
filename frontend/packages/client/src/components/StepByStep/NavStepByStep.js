@@ -124,6 +124,7 @@ export default function NavStepByStep({
                 }`}
                 onClick={isNextButton ? onClickNext : () => {}}
                 text={isNextButton ? 'Next' : finalLabel}
+                styles={isNextButton ? {} : { minWidth: '180px' }}
               />
             }
           />
