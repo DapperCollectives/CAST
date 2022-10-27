@@ -162,7 +162,6 @@ export default function ProposalPage() {
   };
 
   const onConfirmVote = (options) => {
-    console.log('onConfirmVote', options);
     if (user.loggedIn) {
       setConfirmingVote(true);
       if (options) {
@@ -224,11 +223,9 @@ export default function ProposalPage() {
       return;
     }
 
-    console.log(optionChosen);
-
     const choices = Array.isArray(optionChosen)
       ? optionChosen.map((opt) => `${opt.value}`)
-      : [optionChosen];
+      : [`${optionChosen}`];
 
     const voteData = {
       choices,

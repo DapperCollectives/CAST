@@ -72,7 +72,7 @@ const SingleChoiceVote = ({
 
   const confirmAndVoteImage = (value) => {
     onOptionSelect(value);
-    onConfirmVote();
+    onConfirmVote(value);
   };
 
   const userVoted = !!currentOption && currentOption === previousVote;
@@ -114,6 +114,7 @@ const SingleChoiceVote = ({
           currentOption={currentOption}
           readOnly={isClosed || !canVote}
           confirmAndVote={confirmAndVoteImage}
+          previousVote={previousVote}
         />
       )}
     </div>
