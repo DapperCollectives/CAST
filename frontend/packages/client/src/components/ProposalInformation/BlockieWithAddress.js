@@ -27,7 +27,7 @@ const BlockieWithAddress = forwardRef(({ creatorAddr }, ref) => {
           href={`https://flowscan.org/account/${addr}`}
           rel="noopener noreferrer"
           target="_blank"
-          className="is-underlined has-text-grey p-0 small-text"
+          className="is-underlined has-text-grey p-0 small-text is-inline-flex is-align-items-center"
           style={{ height: '2rem !important' }}
         >
           <div className="is-flex is-align-items-center">

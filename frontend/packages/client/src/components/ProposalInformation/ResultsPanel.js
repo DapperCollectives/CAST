@@ -31,8 +31,9 @@ export default function ResultsPanel({
       [FilterValues.closed]: (
         <StatusPill
           status={
-            <span>
-              Complete <Svg name="CheckOutlined" />
+            <span className="is-inline-flex is-align-items-center">
+              <span className="mr-1">Complete</span>
+              <Svg name="CheckOutlined" />
             </span>
           }
           backgroundColorClass="has-background-success"
