@@ -63,10 +63,11 @@ type LeaderboardPayload struct {
 }
 
 const USER_PROPOSALS = `
-	SELECT 
+	SELECT DISTINCT 
  	u.community_id, 
   c.name as community_name, 
   p.name as proposal_name, 
+	p.id as proposal_id,
   p.status, 
 	p.start_time
   FROM community_users AS u 
@@ -75,15 +76,6 @@ const USER_PROPOSALS = `
 	LEFT JOIN 
   communities AS c on c.id = p.community_id
 	WHERE addr = $1
-`
-const USER_PROPOSALS_COUNT = `
-	SELECT COUNT(*)
-  FROM community_users AS u 
-	LEFT JOIN 
-  proposals AS p on p.community_id = u.community_id
-	LEFT JOIN 
-  communities AS c on c.id = p.community_id
-	WHERE addr = '0xf8d6e0586b0a20c7'
 `
 const USERS_IN_COMMUNITY = `
 		SELECT
@@ -215,22 +207,28 @@ func GetCommunitiesForUser(db *s.Database, addr string, pageParams shared.PagePa
 func GetCommunityProposalsForUser(
 	db *s.Database,
 	addr,
-	filters string,
+	filter string,
 	pageParams shared.PageParams,
 ) ([]UserProposal, int, error) {
 
-	var sql string
-
-	if filters != "" {
-		sql += fmt.Sprintf("AND p.status = '%s'", filters)
-	} else {
-		sql += "AND p.status != 'draft'"
+	sql := USER_PROPOSALS
+	if filter != "" {
+		sql += fmt.Sprintf("AND p.status = '%s'", filter)
 	}
 
-	sql = USER_PROPOSALS + `LIMIT $2 OFFSET $3`
+	var totalProposals = []UserProposal{}
+	err := pgxscan.Select(
+		db.Context,
+		db.Conn,
+		&totalProposals,
+		sql,
+		addr,
+	)
+
+	sql += `LIMIT $2 OFFSET $3`
 
 	var proposals = []UserProposal{}
-	err := pgxscan.Select(
+	err = pgxscan.Select(
 		db.Context,
 		db.Conn,
 		&proposals,
@@ -246,11 +244,10 @@ func GetCommunityProposalsForUser(
 		return proposals, 0, nil
 	}
 
-	var totalRecords int
-	countSql := USER_PROPOSALS_COUNT
-	err = db.Conn.QueryRow(db.Context, countSql, addr).Scan(&totalRecords)
+	fmt.Printf("Total Proposals: %v \n", totalProposals)
+	fmt.Printf("Total Proposals length: %v \n", len(totalProposals))
 
-	return proposals, totalRecords, nil
+	return proposals, len(totalProposals), nil
 }
 
 func GetUserProposalVotes(
@@ -276,6 +273,7 @@ func GetUserProposalVotes(
 		JOIN proposals ON proposals.community_id = communities.id
 		JOIN votes ON votes.proposal_id = proposals.id
 		WHERE votes.addr = $1
+		AND proposals.status = 'closed'
 		`, addr)
 
 	if err != nil && err.Error() != pgx.ErrNoRows.Error() {
