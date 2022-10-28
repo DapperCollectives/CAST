@@ -32,7 +32,7 @@ const Toast = ({
       className="rounded-sm box-shadow p-4"
       style={{
         position: 'relative',
-        maxWidth: 280,
+        maxWidth: 350,
         top: -25,
         backgroundColor: bgColor,
         border: `1px solid ${borderColor}`,
