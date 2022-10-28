@@ -29,7 +29,7 @@ const StepLabelAndIcon = ({
   }
 
   // this enabled showing higher steps already submitted to have green check
-  if (validatedSteps?.[stepIdx]) {
+  if (validatedSteps?.[stepIdx] && !isActive) {
     status = statusText[3];
   }
 
