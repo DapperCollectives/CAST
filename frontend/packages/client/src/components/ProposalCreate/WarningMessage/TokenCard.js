@@ -11,7 +11,7 @@ export default function TokenCard({ title, balance, contractName = '' }) {
       <Flex alignItems="center" gap={2}>
         {contractName.toUpperCase() === 'FLOWTOKEN' && <Svg name="Flow" />}
         <Text size="lg" fontSize="lg" fontWeight="bold">
-          {balance} FLOW
+          {new Intl.NumberFormat('en-US').format(Number(balance))} FLOW
         </Text>
       </Flex>
     </Card>
