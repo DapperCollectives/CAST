@@ -1,4 +1,5 @@
 export { default as CancelProposalModalConfirmation } from './CancelProposalModalConfirmation';
 export { default as ProposalStatus } from './ProposalStatus';
-export { VoteOptions } from './VoteOptions';
+export { SingleChoiceVote } from './SingleChoiceVote';
+export { RankedChoiceVote } from './RankedChoiceVote';
 export { default as HeaderNavigation } from './HeaderNavigation';

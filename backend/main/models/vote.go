@@ -275,19 +275,27 @@ func ValidateVoteMessage(message string, proposal Proposal) error {
 
 	// check proposal choices to see if choice is valid
 	voteChoiceString := vars[1]
-	voteChoiceId, err := strconv.Atoi(voteChoiceString)
-
-	if err != nil {
-		return errors.New("couldn't convert choice ID in message from string to int")
-	}
+	voteChoiceIds := strings.Split(voteChoiceString, ",")
 
 	validChoice := false
-	for _, choice := range proposal.Choices {
-		if *choice.ID == uint(voteChoiceId) {
-			validChoice = true
+	for _, id := range voteChoiceIds {
+		if validChoice {
 			break
 		}
+
+		voteChoiceId, err := strconv.Atoi(id)
+		if err != nil {
+			return errors.New("couldn't convert choice ID in message from string to int")
+		}
+
+		for _, choice := range proposal.Choices {
+			if *choice.ID == uint(voteChoiceId) {
+				validChoice = true
+				break
+			}
+		}
 	}
+
 	if !validChoice {
 		return errors.New("invalid choice for proposal")
 	}
@@ -306,22 +314,29 @@ func ValidateVoteMessage(message string, proposal Proposal) error {
 func (v *Vote) ValidateChoice(proposal Proposal) error {
 	validChoice := false
 
-	voteChoiceString := v.Choices[0]
-	voteChoiceId, err := strconv.Atoi(voteChoiceString)
-
-	if err != nil {
-		return errors.New("couldn't convert choice ID from string to int")
-	}
-
-	for _, choice := range proposal.Choices {
-		if *choice.ID == uint(voteChoiceId) {
-			validChoice = true
+	for _, id := range v.Choices {
+		if validChoice {
 			break
 		}
+		
+		voteChoiceId, err := strconv.Atoi(id)
+		if err != nil {
+			return errors.New("couldn't convert choice ID in message from string to int")
+		}
+
+		for _, choice := range proposal.Choices {
+			if *choice.ID == uint(voteChoiceId) {
+				validChoice = true
+				break
+			}
+		}
 	}
+
+
 	if !validChoice {
 		return errors.New("invalid choice for proposal")
 	}
+
 	return nil
 }
 

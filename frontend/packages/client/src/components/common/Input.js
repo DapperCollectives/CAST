@@ -9,14 +9,14 @@ export default function Input({
   disabled,
   error,
   type = 'text',
-  conatinerClassNames = '',
+  containerClassNames = '',
   currentLength,
   maxLengthSize,
 } = {}) {
   const showCharCount = Boolean(currentLength && maxLengthSize);
   return (
     <div
-      className={`is-flex is-flex-direction-column flex-1 ${conatinerClassNames}`.trim()}
+      className={`is-flex is-flex-direction-column flex-1 ${containerClassNames}`.trim()}
       style={showCharCount ? { position: 'relative' } : {}}
     >
       <input

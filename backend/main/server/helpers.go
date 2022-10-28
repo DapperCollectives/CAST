@@ -512,6 +512,7 @@ func (h *Helpers) searchCommunities(
 }
 
 func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorResponse) {
+
 	if p.Voucher != nil {
 		if err := h.validateUserViaVoucher(p.Creator_addr, p.Voucher); err != nil {
 			return models.Proposal{}, errForbidden
@@ -540,6 +541,7 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorRespo
 		fmt.Printf("Error validating strategy name: %v \n", err)
 		return models.Proposal{}, errStrategyNotFound
 	}
+
 
 	strategy, err := models.MatchStrategyByProposal(*community.Strategies, *p.Strategy)
 	if err != nil {

@@ -4,7 +4,7 @@ import { CREATE_PROPOSAL_TX } from 'const';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createProposalApiReq } from 'api/proposals';
 
-export default function useProposalCreateMuation() {
+export default function useProposalCreateMutation() {
   const { notifyError } = useErrorHandlerContext();
   const { user, signMessageByWalletProvider } = useWebContext();
   const queryClient = useQueryClient();
@@ -28,7 +28,6 @@ export default function useProposalCreateMuation() {
       if (!compositeSignatures && !voucher) {
         throw new Error('No valid user signature found.');
       }
-
       return createProposalApiReq({
         proposalPayload,
         compositeSignatures,
