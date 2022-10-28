@@ -9,13 +9,12 @@ const NotificationsModal = ({ onClose, communityId }) => {
   } = useNotificationServiceContext();
 
   const handleSubscribeNotification = (signupAll) => {
+    updateCommunitySubscription(
+      communityId,
+      subscribeNotificationIntentions.subscribe
+    );
     if (signupAll) {
       updateAllEmailNotificationSubscription(
-        subscribeNotificationIntentions.subscribe
-      );
-    } else {
-      updateCommunitySubscription(
-        communityId,
         subscribeNotificationIntentions.subscribe
       );
     }
