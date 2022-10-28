@@ -309,12 +309,17 @@ func (h *Helpers) createVote(v models.Vote, p models.Proposal) (*models.VoteWith
 		return nil, errResponse
 	}
 
-	// check that proposal is live
-	if os.Getenv("APP_ENV") != "DEV" {
+	//print type of app env
+	fmt.Printf("APP ENV: %s", os.Getenv("APP_ENV"))
+
+	if os.Getenv("APP_ENV") == "PROD" {
+		fmt.Println("Checking proposal is live")
 		if !p.IsLive() {
 			return nil, errInactiveProposal
 		}
 	}
+
+	fmt.Printf("check %v", v)
 
 	if errResponse := h.validateVote(p, v); errResponse != nilErr {
 		return nil, errResponse

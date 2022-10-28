@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -353,6 +354,8 @@ func (a *App) getUserProposals(w http.ResponseWriter, r *http.Request) {
 	filter := r.FormValue("filter")
 
 	pageParams := getPageParams(*r, 25)
+
+	fmt.Printf("filter: %s ", filter)
 
 	if filter == "profile-votes" {
 		proposals, totalRecords, err := helpers.fetchUserVotedProposals(a.DB, addr, pageParams)
