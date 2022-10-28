@@ -129,6 +129,8 @@ code
 	border-radius: 8px
 .rounded-sm-tl
 	border-top-left-radius: 8px
+.rounded-sm-tr
+	border-top-right-radius: 8px
 .rounded-sm-bl
 	border-bottom-left-radius: 8px
 .rounded-sm-tr
@@ -149,11 +151,15 @@ code
 	border-radius: 50%
 .border-light
 	border: 1px solid $grey-lighter
+.border-danger
+	border: 1px solid $danger
 @include tablet	
 	.border-light-tablet
 		border: 1px solid $grey-lighter
 .border-grey
 	border: 1px solid $grey
+.border-green
+	border: 1px solid $success
 .border-dashed-dark
 	border: 2px dashed $grey
 .border-left-yellow
@@ -166,6 +172,10 @@ code
 	flex: 2 0 0
 .has-background-orange
 	background-color: $orange
+.has-background-blue
+	background-color: $light-blue
+.has-background-grey
+	background-color: $grey
 .has-background-blue
 	background-color: $light-blue
 .has-background-light-grey
@@ -181,6 +191,10 @@ code
 		&.vote-button:hover, &.has-button-border-hover:hover
 			color: black
 			border: 1px solid rgba(0, 0, 0, 0.4) !important
+.has-background-green
+	background-color: $success
+.drag-tooltip:hover > svg > path
+	fill: rgba(0, 0, 0, 0.4)
 .button.is-disabled
 	pointer-events: none
 	opacity: 0.5
@@ -190,6 +204,8 @@ code
 	line-height: 1
 .cursor-pointer
 	cursor: pointer
+.cursor-grab
+	cursor: grab
 .header-spacing
 	padding-bottom: 0.75rem
 	padding-top: 0.75rem
@@ -210,9 +226,9 @@ code
 .radio.is-disabled
 	cursor: default !important
 	pointer-events: none
-label > input[type="radio"]
+label > input[type="radio"].yellow-radio
 	display: none
-label > input[type="radio"] + *::before
+label > input[type="radio"].yellow-radio + *::before
 	content: ""
 	display: inline-block
 	vertical-align: middle
@@ -223,12 +239,12 @@ label > input[type="radio"] + *::before
 	border-style: solid
 	border-width: 0.1rem
 	border-color: gray
-label > input[type="radio"]:checked + *
+label > input[type="radio"].yellow-radio:checked + *
 	color: $yellow
-label > input[type="radio"]:checked + *::before
+label > input[type="radio"].yellow-radio:checked + *::before
 	background: radial-gradient($yellow 0%, $yellow 40%, transparent 50%, transparent)
 	border-color: $yellow
-label > input[type="radio"].is-chosen + *::before, .is-button-chosen
+label > input[type="radio"].yellow-radio.is-chosen + *::before, .is-button-chosen
 	// green checkmark image
 	background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTIiIGZpbGw9IiMwRTVCMjAiLz4KPHBhdGggZD0iTTE4LjEyOTMgNy40NzkyOEMxNy45NjE1IDcuMzU5IDE3Ljc1MjkgNy4zMTAyOSAxNy41NDkyIDcuMzQzODZDMTcuMzQ1NSA3LjM3NzQ0IDE3LjE2MzUgNy40OTA1NCAxNy4wNDMyIDcuNjU4M0w5Ljc2MDE2IDE0LjY5OUw3LjMyOTAyIDEyLjI2NThDNy4xODMwNyAxMi4xMTk4IDYuOTg1MDkgMTIuMDM3NyA2Ljc3ODYzIDEyLjAzNzdDNi41NzIxNyAxMi4wMzc2IDYuMzc0MTUgMTIuMTE5NiA2LjIyODEzIDEyLjI2NTVDNi4wODIxMSAxMi40MTE1IDYuMDAwMDUgMTIuNjA5NSA2IDEyLjgxNTlDNS45OTk5NSAxMy4wMjI0IDYuMDgxOTIgMTMuMjIwNCA2LjIyNzg3IDEzLjM2NjRMOS4zMDc2NyAxNi40NDU3QzkuMzg4NTIgMTYuNTIzNSA5LjQ4NSAxNi41ODMyIDkuNTkwNyAxNi42MjA5QzkuNjk2NCAxNi42NTg2IDkuODA4OTEgMTYuNjczMyA5LjkyMDc1IDE2LjY2NDJDMTAuMDMyNiAxNi42NTUxIDEwLjE0MTIgMTYuNjIyMyAxMC4yMzk0IDE2LjU2OEMxMC4zMzc2IDE2LjUxMzYgMTAuNDIzMSAxNi40MzkxIDEwLjQ5MDMgMTYuMzQ5MkwxOC4zMDgzIDguNTY1MzhDMTguNDI4NiA4LjM5NzYxIDE4LjQ3NzMgOC4xODg5MyAxOC40NDM4IDcuOTg1MjVDMTguNDEwMiA3Ljc4MTU3IDE4LjI5NzEgNy41OTk1NyAxOC4xMjkzIDcuNDc5MjhaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K')
 	background-size: contain
@@ -236,7 +252,7 @@ label > input[type="radio"].is-chosen + *::before, .is-button-chosen
 	height: 25px
 	border-color: transparent
 	background-repeat: no-repeat
-label > input[type="radio"].is-chosen + *::before
+label > input[type="radio"].yello-radio.is-chosen + *::before
 	background-color: white
 label > input[type="radio"].green-radio
 	display: none
@@ -263,7 +279,7 @@ label > input[type="radio"].green-radio::before
 label > input[type="radio"].green-radio:checked::before
 	transform: scale(1)
 label > input[type="radio"].green-radio:checked
-	border-color: $success	
+	border-color: $success
 .proposal-copy
 	color: $grey
 .proposal-copy ul
@@ -575,9 +591,13 @@ span[data-tooltip]
 	margin-left: -0.25rem
 	color: rgba(0, 0, 0, 0.7) !important
 
-.option-vote:hover
+.option-vote:hover,
+.option-vote-dragging
 	border-color: rgba(0, 0, 0, 0.4)
 	border-width: 1px
+
+.option-vote-dragging
+	transform: rotate(-7deg),
 
 .navbar-item-hover:hover
 	color: rgba(0, 0, 0, 0.7)

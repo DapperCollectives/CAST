@@ -32,14 +32,6 @@ type PaginatedResponseWithCommunity struct {
 	Next         int                `json:"next"`
 }
 
-type PaginatedResponseWithProposal struct {
-	Data         []models.Proposal `json:"data"`
-	Start        int               `json:"start"`
-	Count        int               `json:"count"`
-	TotalRecords int               `json:"totalRecords"`
-	Next         int               `json:"next"`
-}
-
 type PaginatedResponseWithUserCommunity struct {
 	Data         []models.UserCommunity `json:"data"`
 	Start        int                    `json:"start"`

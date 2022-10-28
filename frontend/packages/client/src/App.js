@@ -1,4 +1,7 @@
 import 'react-datepicker/dist/react-datepicker.css';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import { TouchBackend } from 'react-dnd-touch-backend';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { ErrorBoundary } from 'react-error-boundary';
 import { HashRouter as Router } from 'react-router-dom';
@@ -10,6 +13,7 @@ import { ChakraProvider } from '@chakra-ui/react';
 import Hotjar from '@hotjar/browser';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import detectTouchScreen from 'helpers/detectTouchScreen';
 import theme from 'helpers/theme';
 import AppPages from 'pages';
 import Error from 'pages/Error';
@@ -22,6 +26,7 @@ Hotjar.init(process.env.REACT_APP_HOTJAR_SITE_ID, hotjarVersion);
 const queryClient = new QueryClient();
 
 function App() {
+  const hasTouchScreen = detectTouchScreen();
   return (
     <ErrorBoundary
       fallbackRender={({ error, resetErrorBoundary }) => (
@@ -35,7 +40,11 @@ function App() {
             <ChakraProvider theme={theme}>
               <NotificationModalProvider>
                 <ErrorHandler>
-                  <AppPages />
+                  <DndProvider
+                    backend={hasTouchScreen ? TouchBackend : HTML5Backend}
+                  >
+                    <AppPages />
+                  </DndProvider>
                 </ErrorHandler>
               </NotificationModalProvider>
             </ChakraProvider>
