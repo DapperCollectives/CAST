@@ -39,6 +39,9 @@ const definitions = {
       300: '#DCDCDC',
       200: '#F9F9F9',
     },
+    yellow: {
+      500: '#FBD84D',
+    },
   },
 };
 

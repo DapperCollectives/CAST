@@ -15,9 +15,13 @@ import VotingSelector from './VotingSelector';
 const StepTwo = ({
   stepData,
   setStepValid,
+  isStepValid,
+  setIsMovingNextStep,
   onDataChange,
   formId,
   moveToNextStep,
+  stepStatus,
+  setStepStatus,
 }) => {
   const { communityId } = useParams();
 
@@ -50,6 +54,7 @@ const StepTwo = ({
 
   const { register, handleSubmit, formState, control, setValue, clearErrors } =
     useForm({
+      mode: 'onChange',
       reValidateMode: 'onChange',
       defaultValues: fieldsObj,
       resolver: yupResolver(stepTwo.Schema),
@@ -91,11 +96,27 @@ const StepTwo = ({
   }, [choicesTemp, tabOption]);
   // **************************************************************
 
-  const { isDirty, isSubmitting, isValid, errors } = formState;
+  const { isSubmitting, isValid, errors, isDirty } = formState;
 
   useEffect(() => {
-    setStepValid((isDirty || isValid) && !isSubmitting);
-  }, [isDirty, isValid, isSubmitting, setStepValid]);
+    if (isStepValid !== isValid) {
+      setStepValid(isValid);
+    }
+  }, [isValid, isStepValid, setStepValid]);
+
+  useEffect(() => {
+    setIsMovingNextStep(isSubmitting);
+    return () => {
+      setIsMovingNextStep(false);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSubmitting]);
+
+  useEffect(() => {
+    if (stepStatus === 'submitted' && isDirty) {
+      setStepStatus('updated');
+    }
+  }, [isDirty, stepStatus, setStepStatus]);
 
   return (
     <Form onSubmit={handleSubmit(onSubmit)} formId={formId}>

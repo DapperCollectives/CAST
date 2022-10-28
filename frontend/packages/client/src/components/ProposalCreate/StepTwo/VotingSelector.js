@@ -32,7 +32,6 @@ export default function VotingSelector({
           </a>
           .
         </p>
-
         <Box
           sx={{
             '.border-grey': {
@@ -43,7 +42,9 @@ export default function VotingSelector({
           <Card
             variant="votingType"
             mb={4}
-            onClick={() => setValue('voteType', 'single-choice')}
+            onClick={() =>
+              setValue('voteType', 'single-choice', { shouldValidate: true })
+            }
             className={voteType === 'single-choice' ? 'border-grey' : ''}
           >
             <div className="p-4">
@@ -74,7 +75,9 @@ export default function VotingSelector({
           <Card
             variant="votingType"
             mb={4}
-            onClick={() => setValue('voteType', 'ranked-choice')}
+            onClick={() =>
+              setValue('voteType', 'ranked-choice', { shouldValidate: true })
+            }
             className={voteType === 'ranked-choice' ? 'border-grey' : ''}
           >
             <div className="p-4">
