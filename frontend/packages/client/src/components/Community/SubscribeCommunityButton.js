@@ -49,7 +49,7 @@ export default function SubscribeCommunityButton({
       const emailNotificationsState = subscribedToEmails ? 'on' : 'off';
       popToast({
         message: `Email notifications are turned ${emailNotificationsState}`,
-        messageType: 'success',
+        messageType: 'info',
         actionFn: () => history.push('/settings'),
         actionText: 'Manage Settings',
       });
