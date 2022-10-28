@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
-import { useStarAnimation } from 'hooks';
+import { StarProps, useStarAnimation } from 'hooks/useStarAnimation';
 
-const stars = [
+const stars: StarProps[] = [
   { topPer: 0, leftPer: 0, width: '31px', height: '31px', start: 100 },
   { topPer: 0.42, leftPer: 0.18, width: '20px', height: '20px', start: 1000 },
   { topPer: 0.1, leftPer: 0.45, width: '31px', height: '31px', start: 700 },
@@ -10,7 +10,13 @@ const stars = [
   { topPer: 0.92, leftPer: 0.67, width: '25px', height: '25px', start: 500 },
 ];
 
-export default function HomeHeader({ isVisible = true } = {}) {
+interface HomeHeaderProps {
+  isVisible: boolean;
+}
+
+const HomeHeader: React.FC<HomeHeaderProps> = ({
+  isVisible = true,
+}: HomeHeaderProps) => {
   const { addToArrayOfRefes, starArray, parentRef } = useStarAnimation({
     stars,
   });
@@ -71,4 +77,6 @@ export default function HomeHeader({ isVisible = true } = {}) {
       </div>
     </div>
   );
-}
+};
+
+export default HomeHeader;

@@ -1,7 +1,12 @@
 import { useEffect, useState } from 'react';
 
-const Svg = ({ name, ...props }) => {
-  const [svgComponent, setSvgComponent] = useState(null);
+export interface SvgProps {
+  name: string;
+  props: any;
+}
+
+const Svg: React.FC<SvgProps> = ({ name, ...props }) => {
+  const [svgComponent, setSvgComponent] = useState<any>(null);
 
   useEffect(() => {
     (async () => {
