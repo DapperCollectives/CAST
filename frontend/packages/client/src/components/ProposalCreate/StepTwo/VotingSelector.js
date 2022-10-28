@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { Card } from 'components/Card';
 import { Box, Heading } from '@chakra-ui/react';
 import { Text } from '@chakra-ui/react';
@@ -42,8 +43,9 @@ export default function VotingSelector({
           <Card
             variant="votingType"
             mb={4}
-            // TODO FIX THIS
-            // onClick={() => setValue('voteType', 'single-choice')}
+            onClick={() =>
+              setValue('voteType', 'single-choice', { shouldValidate: true })
+            }
             className={voteType === 'single-choice' ? 'border-grey' : ''}
           >
             <div className="p-4">
@@ -74,8 +76,9 @@ export default function VotingSelector({
           <Card
             variant="votingType"
             mb={4}
-            // TODO FIX THIS
-            // onClick={() => setValue('voteType', 'ranked-choice')}
+            onClick={() =>
+              setValue('voteType', 'ranked-choice', { shouldValidate: true })
+            }
             className={voteType === 'ranked-choice' ? 'border-grey' : ''}
           >
             <div className="p-4">
