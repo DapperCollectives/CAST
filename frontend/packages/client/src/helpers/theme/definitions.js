@@ -9,6 +9,13 @@ const definitions = {
   lineHeights: {
     shorter: 1.2858,
   },
+  breakpoints: {
+    // update this
+    sm: '360px',
+    md: '48em',
+    lg: '62em',
+    xl: '80em',
+  },
   fontSizes: {
     xxs: '0.625rem', // 10px
     xs: '0.75rem',
