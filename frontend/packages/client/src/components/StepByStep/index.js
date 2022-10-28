@@ -28,6 +28,7 @@ function StepByStep({
   const [showPreStep, setShowPreStep] = useState(!!preStep);
   const [isMovingNextStep, setIsMovingNextStep] = useState(false);
   const [validationStepMap, setValidationStepMap] = useState({});
+  const [stepStatusMap, setStepStatusMap] = useState({});
 
   const [stepsData, setStepsData] = useState({});
   const refs = useRef();
@@ -39,6 +40,14 @@ function StepByStep({
     }));
   };
 
+  const setStepStatus = (currentStep) => (status) => {
+    // status: submitted | updated
+    setStepStatusMap((state) => ({
+      ...state,
+      ...{ [currentStep]: status },
+    }));
+  };
+
   const onStepAdvance = (direction = 'next') => {
     if (direction === 'next') {
       if (currentStep + 1 <= steps.length - 1) {
@@ -47,6 +56,7 @@ function StepByStep({
           return;
         }
         setCurrentStep(currentStep + 1);
+        setStepStatus(currentStep)('submitted');
       }
     } else if (direction === 'prev') {
       if (currentStep - 1 >= 0) {
@@ -105,6 +115,11 @@ function StepByStep({
 
   const isPreviewModeVisible = currentStep > 0;
 
+  // if one step was updated after submitted then moving next is only enabled thru next button
+  const leftNavNavigationEnabled = Object.values(stepStatusMap).every(
+    (stepStatus) => stepStatus !== 'updated'
+  );
+  console.log('navigation enabled', leftNavNavigationEnabled);
   return (
     <>
       {blockNavigationOut && (
@@ -165,6 +180,7 @@ function StepByStep({
             previewMode={previewMode}
             moveToStep={moveToStep}
             validatedSteps={validationStepMap}
+            navigationEnabled={leftNavNavigationEnabled}
           />
 
           {/* right panel */}
@@ -196,6 +212,8 @@ function StepByStep({
                 setStepValid: updateStepValid(currentStep),
                 isStepValid: validationStepMap?.[currentStep],
                 setIsMovingNextStep,
+                stepStatus: stepStatusMap?.[currentStep],
+                setStepStatus: setStepStatus(currentStep),
                 stepData: stepsData[currentStep],
                 stepsData,
                 setPreCheckStepAdvance,

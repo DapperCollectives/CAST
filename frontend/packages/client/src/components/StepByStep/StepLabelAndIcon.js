@@ -8,6 +8,7 @@ const StepLabelAndIcon = ({
   disableAll,
   moveToStep,
   validatedSteps,
+  navigationEnabled = true,
 }) => {
   // Calculated Status
   const isActive = stepIdx === currentStep;
@@ -26,6 +27,8 @@ const StepLabelAndIcon = ({
   if (disableAll) {
     status = statusText[1];
   }
+
+  // this enabled showing higher steps already submitted to have green check
   if (validatedSteps?.[stepIdx]) {
     status = statusText[3];
   }
@@ -34,6 +37,7 @@ const StepLabelAndIcon = ({
   // out to anther step until current step is valid
   const enableNavigation =
     status === statusText[3] &&
+    navigationEnabled &&
     Object.values(validatedSteps)
       // remove last element since could be false
       .slice(0, Object.values(validatedSteps).length - 1)
@@ -56,6 +60,11 @@ const StepLabelAndIcon = ({
       className={stepClasses}
       key={stepIdx}
       onClick={enableNavigation ? () => moveToStep(stepIdx) : () => {}}
+      style={
+        !enableNavigation && stepIdx !== currentStep
+          ? { cursor: 'no-drop' }
+          : {}
+      }
     >
       <StepNumber stepIdx={stepIdx} status={status} />
       {stepLabel ? <span className="ml-4">{stepLabel}</span> : null}

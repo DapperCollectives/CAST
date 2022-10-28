@@ -13,6 +13,7 @@ export default function LeftPanel({
   previewMode,
   moveToStep,
   validatedSteps,
+  navigationEnabled,
 }) {
   const notMobile = useMediaQuery();
 
@@ -71,6 +72,7 @@ export default function LeftPanel({
             disableAll={previewMode || showPreStep}
             moveToStep={moveToStep}
             validatedSteps={validatedSteps}
+            navigationEnabled={navigationEnabled}
           />
         ))}
       </div>
