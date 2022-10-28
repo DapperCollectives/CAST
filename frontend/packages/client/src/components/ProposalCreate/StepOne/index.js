@@ -15,6 +15,10 @@ const StepOne = ({
   onDataChange,
   formId,
   moveToNextStep,
+  isStepValid,
+  setIsMovingNextStep,
+  stepStatus,
+  setStepStatus,
 }) => {
   const { communityId } = useParams();
   const fieldsObj = Object.assign(
@@ -26,6 +30,7 @@ const StepOne = ({
 
   const { register, handleSubmit, formState, control } = useForm({
     reValidateMode: 'onChange',
+    mode: 'onChange',
     defaultValues: fieldsObj,
     resolver: yupResolver(stepOne.Schema),
   });
@@ -37,7 +42,15 @@ const StepOne = ({
 
   const communityName = useWatch({ control, name: 'name' });
 
-  const { isDirty, isSubmitting, isValid, errors } = formState;
+  const { isSubmitting, isValid, errors, isDirty } = formState;
+
+  useEffect(() => {
+    setIsMovingNextStep(isSubmitting);
+    return () => {
+      setIsMovingNextStep(false);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSubmitting]);
 
   useEffect(() => {
     if (communityName && communityName?.length < 128) {
@@ -47,8 +60,16 @@ const StepOne = ({
   }, [communityName]);
 
   useEffect(() => {
-    setStepValid((isDirty || isValid) && !isSubmitting);
-  }, [isDirty, isValid, isSubmitting, setStepValid]);
+    if (isStepValid !== isValid) {
+      setStepValid(isValid);
+    }
+  }, [isValid, isStepValid, setStepValid]);
+
+  useEffect(() => {
+    if (stepStatus === 'submitted' && isDirty) {
+      setStepStatus('updated');
+    }
+  }, [isDirty, stepStatus, setStepStatus]);
 
   return (
     <Form onSubmit={handleSubmit(onSubmit)} formId={formId}>

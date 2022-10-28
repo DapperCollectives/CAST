@@ -26,9 +26,27 @@ function StepByStep({
   const [currentStep, setCurrentStep] = useState(0);
   const [previewMode, setPreviewMode] = useState(false);
   const [showPreStep, setShowPreStep] = useState(!!preStep);
-  const [isStepValid, setStepValid] = useState(false);
+  const [isMovingNextStep, setIsMovingNextStep] = useState(false);
+  const [validationStepMap, setValidationStepMap] = useState({});
+  const [stepStatusMap, setStepStatusMap] = useState({});
+
   const [stepsData, setStepsData] = useState({});
   const refs = useRef();
+
+  const updateStepValid = (currentStep) => (isValid) => {
+    setValidationStepMap((state) => ({
+      ...state,
+      ...{ [currentStep]: isValid },
+    }));
+  };
+
+  const setStepStatus = (currentStep) => (status) => {
+    // status: submitted | updated
+    setStepStatusMap((state) => ({
+      ...state,
+      ...{ [currentStep]: status },
+    }));
+  };
 
   const onStepAdvance = (direction = 'next') => {
     if (direction === 'next') {
@@ -38,6 +56,7 @@ function StepByStep({
           return;
         }
         setCurrentStep(currentStep + 1);
+        setStepStatus(currentStep)('submitted');
       }
     } else if (direction === 'prev') {
       if (currentStep - 1 >= 0) {
@@ -96,6 +115,11 @@ function StepByStep({
 
   const isPreviewModeVisible = currentStep > 0;
 
+  // if one step was updated after submitted then moving next is only enabled thru next button
+  const leftNavNavigationEnabled = Object.values(stepStatusMap).every(
+    (stepStatus) => stepStatus !== 'updated'
+  );
+
   return (
     <>
       {blockNavigationOut && (
@@ -110,7 +134,9 @@ function StepByStep({
           onClickBack={moveBackStep}
           isBackButtonEnabled={currentStep - 1 >= 0}
           onClickNext={moveToNextStep}
-          isStepValid={isStepValid}
+          isStepValid={
+            (validationStepMap?.[currentStep] ?? false) && !isMovingNextStep
+          }
           showSubmitOrNext={nextAction}
           formId={formId}
           finalLabel={finalLabel}
@@ -153,6 +179,8 @@ function StepByStep({
             name={useControlsOnTopBar ? stepsData?.[0]?.name ?? '' : null}
             previewMode={previewMode}
             moveToStep={moveToStep}
+            validatedSteps={validationStepMap}
+            navigationEnabled={leftNavNavigationEnabled}
           />
 
           {/* right panel */}
@@ -181,8 +209,11 @@ function StepByStep({
                     },
                   });
                 },
-                setStepValid,
-                isStepValid,
+                setStepValid: updateStepValid(currentStep),
+                isStepValid: validationStepMap?.[currentStep],
+                setIsMovingNextStep,
+                stepStatus: stepStatusMap?.[currentStep],
+                setStepStatus: setStepStatus(currentStep),
                 stepData: stepsData[currentStep],
                 stepsData,
                 setPreCheckStepAdvance,
