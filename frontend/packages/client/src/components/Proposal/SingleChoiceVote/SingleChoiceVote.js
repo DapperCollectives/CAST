@@ -3,12 +3,12 @@ import { WrapperResponsive as Wrapper } from 'components';
 import { useVotesForAddress } from 'hooks';
 import { FilterValues } from 'const';
 import { getProposalType, parseDateFromServer } from 'utils';
+import VoteHeader from '../VoteHeader';
 import { getStatus } from '../getStatus';
 import ImageBasedOptions from './ImageBasedOptions';
 import TextBasedOptions from './TextBasedOptions';
-import VoteHeader from './VoteHeader';
 
-const VoteOptions = ({
+const SingleChoiceVote = ({
   labelType,
   proposal,
   onOptionSelect,
@@ -72,7 +72,7 @@ const VoteOptions = ({
 
   const confirmAndVoteImage = (value) => {
     onOptionSelect(value);
-    onConfirmVote();
+    onConfirmVote(value);
   };
 
   const userVoted = !!currentOption && currentOption === previousVote;
@@ -114,10 +114,11 @@ const VoteOptions = ({
           currentOption={currentOption}
           readOnly={isClosed || !canVote}
           confirmAndVote={confirmAndVoteImage}
+          previousVote={previousVote}
         />
       )}
     </div>
   );
 };
 
-export default VoteOptions;
+export default SingleChoiceVote;

@@ -71,7 +71,7 @@ const StepTwo = ({
 
   // **************************************************************
   //   This is to enable having choices when entering in preview mode
-  //   fields are saved and valilated when user hits on next
+  //   fields are saved and validated when user hits on next
   //   by doing this we are saving the options before without validation
   //   when user hits next fields will be validated and overwritten with valid values
   //   for example it's possible to enter in preview mode with duplicated voting options
