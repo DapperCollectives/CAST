@@ -18,9 +18,14 @@ const TOAST_PROPS = {
   },
 };
 
-const Toast = ({ onClose, message, messageType, actionText, actionFn }) => {
-  const { bgColor, borderColor, icon } =
-    TOAST_PROPS[messageType] ?? TOAST_PROPS.info;
+const Toast = ({
+  onClose,
+  message,
+  messageType = 'info',
+  actionText,
+  actionFn,
+}) => {
+  const { bgColor, borderColor, icon } = TOAST_PROPS[messageType];
 
   return (
     <div
