@@ -184,6 +184,11 @@ const UPDATE_COMMUNITY_SQL = `
 	only_authors_to_submit = COALESCE($20, only_authors_to_submit)
 	WHERE id = $21
 `
+const COMMUNITY_BY_ID_SQL = `
+	SELECT *
+	FROM communities
+	WHERE id = $1
+`
 
 func GetCommunityTypes(db *s.Database) ([]*CommunityType, error) {
 	var communityTypes []*CommunityType
@@ -408,4 +413,11 @@ func MatchStrategyByProposal(s []Strategy, strategyToMatch string) (Strategy, er
 		}
 	}
 	return match, fmt.Errorf("Community does not have strategy available")
+}
+
+func GetCommunityById(db *s.Database, id int) (Community, error) {
+	var community Community
+
+	err := pgxscan.Get(db.Context, db.Conn, &community, COMMUNITY_BY_ID_SQL, id)
+	return community, err
 }

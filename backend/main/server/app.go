@@ -193,6 +193,7 @@ func (a *App) Initialize() {
 func (a *App) Run() {
 	addr := fmt.Sprintf(":%s", os.Getenv("API_PORT"))
 	log.Info().Msgf("Starting server on %s ...", addr)
+	go shared.StartJobWorkers()
 	log.Fatal().Err(http.ListenAndServe(addr, a.Router)).Msgf("Server at %s crashed!", addr)
 }
 

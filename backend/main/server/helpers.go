@@ -1175,3 +1175,32 @@ func validateProposalThreshold(threshold string, onlyAuthorsToSubmit bool) error
 	}
 	return nil
 }
+
+func (h *Helpers) createProposalNotificationJob(p models.Proposal) error {
+	var banner string
+	c, err := models.GetCommunityById(h.A.DB, p.Community_id)
+	if err != nil {
+		log.Error().Msgf("Could not find community by ID %d", p.Community_id)
+	}
+
+	pUrl := os.Getenv("CAST_URL") + "/community/" + strconv.Itoa(p.Community_id) + "/proposal/" + strconv.Itoa(p.ID)
+
+	if c.Banner_img_url == nil {
+		banner = ""
+	} else {
+		banner = *c.Banner_img_url
+	}
+
+	payload := shared.EmailTaskPayload{
+		CommunityId:       p.Community_id,
+		CommunityName:     c.Name,
+		CommunityImageUrl: banner,
+		ProposalId:        p.ID,
+		ProposalTitle:     p.Name,
+		ProposalUrl:       pUrl,
+		EndTime:           p.End_time.Format("09/14/22 05:45PM PST"),
+	}
+	job := shared.EnqueueProposalEmailTask(payload, p.Start_time)
+
+	return p.CreateProposalNotification(h.A.DB, job.ID)
+}

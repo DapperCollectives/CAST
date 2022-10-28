@@ -371,6 +371,11 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = helpers.createProposalNotificationJob(proposal)
+	if err != nil {
+		log.Error().Err(err).Msgf("Error when creating proposal notification job %+v.", err)
+	}
+
 	respondWithJSON(w, http.StatusCreated, proposal)
 }
 
@@ -434,6 +439,15 @@ func (a *App) updateProposal(w http.ResponseWriter, r *http.Request) {
 		log.Error().Err(err).Msg("Error updating proposal")
 		respondWithError(w, errIncompleteRequest)
 		return
+	}
+
+	jobId, err := p.GetProposalNotificationJobId(a.DB)
+	if err != nil {
+		log.Error().Err(err).Msg("Error finding proposal notification job id.")
+	}
+	err = shared.ArchiveTask(jobId)
+	if err != nil {
+		log.Error().Err(err).Msgf("Error archiving job id %s.", jobId)
 	}
 
 	respondWithJSON(w, http.StatusOK, p)
