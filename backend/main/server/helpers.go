@@ -470,14 +470,14 @@ func (h *Helpers) fetchUserVotedProposals(
 
 	for _, p := range proposals {
 		var tallyProposal models.Proposal
-		tallyProposal.ID = p.Proposal_id
+		tallyProposal.ID = *p.Proposal_id
 
 		if err := tallyProposal.GetProposalById(db); err != nil {
 			log.Error().Err(err).Msg("Error getting proposal.")
 			return nil, 0, err
 		}
 
-		votes, err := models.GetAllVotesForProposal(db, p.Proposal_id, *tallyProposal.Strategy)
+		votes, err := models.GetAllVotesForProposal(db, *p.Proposal_id, *tallyProposal.Strategy)
 		if err != nil {
 			log.Error().Err(err).Msg("Error getting votes for proposal.")
 			return nil, 0, err

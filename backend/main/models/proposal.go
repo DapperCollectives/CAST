@@ -55,12 +55,12 @@ type UserProfileProposal struct {
 	Results  ProposalResults `json:"result"`
 }
 type UserProposal struct {
-	Community_id   int       `json:"communityId"`
-	Community_name string    `json:"communityName"`
-	Proposal_id    int       `json:"proposalId"`
-	Proposal_name  string    `json:"name"`
-	Start_time     time.Time `json:"startTime"`
-	Status         string    `json:"status"`
+	Community_id   *int       `json:"communityId,omitempty"`
+	Community_name *string    `json:"communityName,omitempty"`
+	Proposal_id    *int       `json:"proposalId,omitempty"`
+	Proposal_name  *string    `json:"name,omitempty"`
+	Start_time     *time.Time `json:"startTime,omitempty"`
+	Status         *string    `json:"status,omitempty"`
 }
 
 var computedStatusSQL = `

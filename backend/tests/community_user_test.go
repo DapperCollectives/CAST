@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"sort"
 	"strings"
@@ -180,11 +181,14 @@ func TestUserProposals(t *testing.T) {
 			proposalPayload := otu.GenerateProposalPayload("account", proposal)
 
 			response = otu.CreateProposalAPI(proposalPayload)
+			fmt.Printf("For Loop Response: %v \n", response.Body)
 			checkResponseCode(t, http.StatusCreated, response.Code)
 			communityID += 1
 		}
 
-		response := otu.GetCommunityUserProposalsAPI(utils.AdminAddr) //Get proposals for user
+		response := otu.GetCommunityUserProposalsAPI(utils.AdminAddr)
+
+		fmt.Printf("Response: %v ", response.Body.String())
 		checkResponseCode(t, http.StatusOK, response.Code)
 
 		var p test_utils.PaginatedResponseWithProposal
