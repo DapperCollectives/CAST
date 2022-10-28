@@ -1,4 +1,3 @@
-import { useRef } from 'react';
 import { Card } from 'components/Card';
 import { Box, Heading } from '@chakra-ui/react';
 import { Text } from '@chakra-ui/react';
