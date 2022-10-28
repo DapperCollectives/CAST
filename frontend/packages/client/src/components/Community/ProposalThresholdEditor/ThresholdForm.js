@@ -60,7 +60,7 @@ export default function ThresholdForm({
           name="contractAddress"
           disabled={isSubmitting}
           error={errors['contractAddress']}
-          classNames="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
+          classNames="is-full-mobile mt-4"
         />
         <Input
           placeholder="Contract Name"
@@ -68,7 +68,7 @@ export default function ThresholdForm({
           name="contractName"
           disabled={isSubmitting}
           error={errors['contractName']}
-          classNames="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
+          classNames="is-full-mobile mt-4"
         />
         <Input
           placeholder="Collection Public Path"
@@ -76,7 +76,7 @@ export default function ThresholdForm({
           register={register}
           disabled={isSubmitting}
           error={errors['storagePath']}
-          classNames="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
+          classNames="is-full-mobile mt-4"
         />
         <Input
           placeholder="Number of Tokens"
@@ -84,7 +84,7 @@ export default function ThresholdForm({
           register={register}
           disabled={isSubmitting}
           error={errors['proposalThreshold']}
-          classNames="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
+          classNames="is-full-mobile mt-4"
         />
         <Checkbox
           type="checkbox"
