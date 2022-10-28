@@ -119,7 +119,7 @@ function StepByStep({
   const leftNavNavigationEnabled = Object.values(stepStatusMap).every(
     (stepStatus) => stepStatus !== 'updated'
   );
-  console.log('navigation enabled', leftNavNavigationEnabled);
+
   return (
     <>
       {blockNavigationOut && (

@@ -60,11 +60,7 @@ const StepLabelAndIcon = ({
       className={stepClasses}
       key={stepIdx}
       onClick={enableNavigation ? () => moveToStep(stepIdx) : () => {}}
-      style={
-        !enableNavigation && stepIdx !== currentStep
-          ? { cursor: 'no-drop' }
-          : {}
-      }
+      style={!navigationEnabled ? { cursor: 'no-drop' } : {}}
     >
       <StepNumber stepIdx={stepIdx} status={status} />
       {stepLabel ? <span className="ml-4">{stepLabel}</span> : null}
