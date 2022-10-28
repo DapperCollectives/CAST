@@ -5,6 +5,10 @@ module.exports = {
     '@storybook/addon-essentials',
     '@storybook/addon-interactions',
     '@storybook/preset-create-react-app',
+    '@chakra-ui/storybook-addon',
   ],
   framework: '@storybook/react',
+  features: {
+    emotionAlias: false,
+  },
 };
