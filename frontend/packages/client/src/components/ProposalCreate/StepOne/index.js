@@ -62,7 +62,6 @@ const StepOne = ({
             voted on. Best to keep it simple and specific.
           </p>
           <Input
-            classNames="rounded-sm border-light p-3 column is-full"
             register={register}
             error={errors['name']}
             name="name"
