@@ -36,10 +36,9 @@ function App() {
     >
       <QueryClientProvider client={queryClient}>
         <Web3Provider network={process.env.REACT_APP_FLOW_ENV}>
-          {/* using resetCSS to avoid conficts */}
-          <ChakraProvider theme={theme} resetCSS={false}>
-            <NotificationModalProvider>
-              <Router>
+          <Router>
+            <ChakraProvider theme={theme}>
+              <NotificationModalProvider>
                 <ErrorHandler>
                   <DndProvider
                     backend={hasTouchScreen ? TouchBackend : HTML5Backend}
@@ -47,9 +46,9 @@ function App() {
                     <AppPages />
                   </DndProvider>
                 </ErrorHandler>
-              </Router>
-            </NotificationModalProvider>
-          </ChakraProvider>
+              </NotificationModalProvider>
+            </ChakraProvider>
+          </Router>
         </Web3Provider>
         {!IS_PRODUCTION && <ReactQueryDevtools initialIsOpen={false} />}
       </QueryClientProvider>

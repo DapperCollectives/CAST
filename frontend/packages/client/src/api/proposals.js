@@ -87,7 +87,8 @@ export const updateProposalApiReq = async ({
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      ...updatePayload,
+      payload: updatePayload,
+      signingAddr: updatePayload.signingAddr,
       timestamp,
       compositeSignatures,
       voucher,
@@ -158,5 +159,12 @@ export const voteOnProposalApiReq = async ({
 export const fetchProposalResults = async ({ proposalId }) => {
   const response = await fetch(`${PROPOSALS_URL}/${proposalId}/results`);
 
+  return checkResponse(response);
+};
+
+export const checkCanUserCreateProposal = async ({ communityId, addr }) => {
+  const response = await fetch(
+    `${COMMUNITIES_URL}/${communityId}/can-user-create-proposal/${addr}`
+  );
   return checkResponse(response);
 };
