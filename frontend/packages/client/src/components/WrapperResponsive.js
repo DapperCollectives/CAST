@@ -10,6 +10,7 @@ export default function WrapperResponsive({
   extraClassesMobile = '',
   extraStyles,
   extraStylesMobile,
+  onClick,
 } = {}) {
   const notMobile = useMediaQuery();
 
@@ -18,12 +19,12 @@ export default function WrapperResponsive({
       const classes = `${classNames} ${extraClasses}`.trim();
       const stylesObj = Object.assign({}, styles, extraStyles ?? {});
       return (
-        <Tag className={classes} style={stylesObj}>
+        <Tag className={classes} style={stylesObj} onClick={onClick}>
           {children}
         </Tag>
       );
     },
-    [styles, extraStyles, classNames, extraClasses]
+    [styles, extraStyles, classNames, extraClasses, onClick]
   );
 
   const mobileComponent = useCallback(
@@ -31,12 +32,16 @@ export default function WrapperResponsive({
       const classesForMobile = `${classNames} ${extraClassesMobile}`.trim();
       const stylesObjMob = Object.assign({}, styles, extraStylesMobile ?? {});
       return (
-        <Tag className={classesForMobile} style={stylesObjMob}>
+        <Tag
+          className={classesForMobile}
+          style={stylesObjMob}
+          onClick={onClick}
+        >
           {children}
         </Tag>
       );
     },
-    [styles, classNames, extraClassesMobile, extraStylesMobile]
+    [styles, classNames, extraClassesMobile, extraStylesMobile, onClick]
   );
 
   const returnComponent = useCallback(
