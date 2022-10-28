@@ -4,13 +4,11 @@ import { useToast } from '@chakra-ui/react';
 export default function useToastHook() {
   const toast = useToast();
 
-  const popToast = (text, toastProps = {}) => {
+  const popToast = (toastProps = {}) => {
     toast({
       position: 'bottom',
       duration: 5000,
-      render: ({ onClose }) => (
-        <Toast text={text} onClose={onClose} {...toastProps} />
-      ),
+      render: ({ onClose }) => <Toast onClose={onClose} {...toastProps} />,
     });
   };
 

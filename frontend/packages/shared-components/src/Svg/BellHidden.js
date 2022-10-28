@@ -1,11 +1,11 @@
-const BellHidden = ({ height = '20', width = '19', className = '' }) => (
+const BellHidden = ({ height = '20', width = '19', ...props }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={width}
     height={height}
-    className={className}
     fill="none"
     viewBox="0 0 19 20"
+    {...props}
   >
     <path
       fill="currentColor"

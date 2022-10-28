@@ -1,23 +1,13 @@
 import { useEffect, useState } from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { useModalContext } from 'contexts/NotificationModal';
 import { Svg } from '@cast/shared-components';
+import { SubscribeCommunityButton } from 'components';
 import { Tooltip } from 'components';
-import NotificationsModal from 'components/modals/Notifications';
 import { FRONTEND_URL } from 'const';
 import classnames from 'classnames';
 
 const PostVoteOptions = ({ communityId, proposalId }) => {
   const [linkCopied, setLinkCopied] = useState(false);
-  const { openModal, closeModal } = useModalContext();
-  const openNotificationsModal = () =>
-    openModal(
-      <NotificationsModal onClose={closeModal} communityId={communityId} />,
-      {
-        classNameModalContent: 'modal-content-sm',
-      }
-    );
-
   const proposalUrl = `${FRONTEND_URL}/#/community/${communityId}/proposal/${proposalId}`;
 
   useEffect(() => {
@@ -87,13 +77,11 @@ const PostVoteOptions = ({ communityId, proposalId }) => {
           className="column is-full-mobile p-0 ml-2-desktop mb-2"
           style={{ flexGrow: 0 }}
         >
-          <div
-            className="is-flex flex-1 is-align-items-center rounded-lg button"
-            onClick={openNotificationsModal}
-          >
-            <Svg name="Bell" />
-            <span className="ml-1">Subscribe for Updates</span>
-          </div>
+          <SubscribeCommunityButton
+            communityId={communityId}
+            emptyIcon="Bell"
+            size="full"
+          />
         </div>
       </div>
     </div>
