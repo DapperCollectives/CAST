@@ -5,7 +5,13 @@ import TextOption from './TextOption';
 
 const ITEM_TYPE = 'vote';
 
-const CastVotes = ({ votes, setVotes, readOnly = false, removeVote }) => {
+const CastVotes = ({
+  votes,
+  setVotes,
+  readOnly = false,
+  removeVote,
+  hasntVoted,
+}) => {
   const ref = useRef(null);
   const moveVote = useCallback(
     (dragIndex, hoverIndex) =>
@@ -17,6 +23,7 @@ const CastVotes = ({ votes, setVotes, readOnly = false, removeVote }) => {
       }),
     [setVotes]
   );
+
   return (
     <div ref={ref}>
       <DragLayer votes={votes} width={ref?.current?.offsetWidth} />
@@ -30,7 +37,7 @@ const CastVotes = ({ votes, setVotes, readOnly = false, removeVote }) => {
             value={vote.value}
             optionsLength={vote.length}
             readOnly={readOnly}
-            isCastVote={true}
+            isCastVote={!hasntVoted}
           />
         ) : (
           <Draggable

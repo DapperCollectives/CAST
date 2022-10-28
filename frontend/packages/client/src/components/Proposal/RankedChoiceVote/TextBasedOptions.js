@@ -25,6 +25,7 @@ const TextBasedOptions = ({
   castVotes,
   setCastVotes,
   optionChosen,
+  hasntVoted,
 }) => {
   const [options, setOptions] = useState(choices);
 
@@ -79,7 +80,7 @@ const TextBasedOptions = ({
         <div>
           <CastVotes
             votes={
-              readOnly && optionChosen
+              readOnly && optionChosen && optionChosen.length > 0
                 ? optionChosen
                 : readOnly
                 ? options
@@ -88,6 +89,7 @@ const TextBasedOptions = ({
             setVotes={setCastVotes}
             readOnly={readOnly}
             removeVote={handleRemoveVote}
+            hasntVoted={hasntVoted}
           />
         </div>
         {!readOnly && castVotes.length > 0 && options.length !== 0 ? (

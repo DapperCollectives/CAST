@@ -133,7 +133,7 @@ const RankedChoiceVote = ({
           hideVoteButton={!hasntVoted || previousVote || isClosed}
           readOnly={isClosed || !canVote || readOnly}
           onConfirmVote={onConfirmVote}
-          voteStatus={voteStatus}
+          hasntVoted={hasntVoted}
           optionChosen={optionChosen || userVotes}
         />
       )}
