@@ -17,6 +17,8 @@ const StepOne = ({
   moveToNextStep,
   isStepValid,
   setIsMovingNextStep,
+  stepStatus,
+  setStepStatus,
 }) => {
   const { communityId } = useParams();
   const fieldsObj = Object.assign(
@@ -40,7 +42,7 @@ const StepOne = ({
 
   const communityName = useWatch({ control, name: 'name' });
 
-  const { isSubmitting, isValid, errors } = formState;
+  const { isSubmitting, isValid, errors, isDirty } = formState;
 
   useEffect(() => {
     setIsMovingNextStep(isSubmitting);
@@ -62,6 +64,12 @@ const StepOne = ({
       setStepValid(isValid);
     }
   }, [isValid, isStepValid, setStepValid]);
+
+  useEffect(() => {
+    if (stepStatus === 'submitted' && isDirty) {
+      setStepStatus('updated');
+    }
+  }, [isDirty, stepStatus, setStepStatus]);
 
   return (
     <Form onSubmit={handleSubmit(onSubmit)} formId={formId}>

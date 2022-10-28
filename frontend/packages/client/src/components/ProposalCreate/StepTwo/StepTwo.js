@@ -20,6 +20,8 @@ const StepTwo = ({
   onDataChange,
   formId,
   moveToNextStep,
+  stepStatus,
+  setStepStatus,
 }) => {
   const { communityId } = useParams();
 
@@ -94,7 +96,7 @@ const StepTwo = ({
   }, [choicesTemp, tabOption]);
   // **************************************************************
 
-  const { isSubmitting, isValid, errors } = formState;
+  const { isSubmitting, isValid, errors, isDirty } = formState;
 
   useEffect(() => {
     if (isStepValid !== isValid) {
@@ -109,6 +111,12 @@ const StepTwo = ({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSubmitting]);
+
+  useEffect(() => {
+    if (stepStatus === 'submitted' && isDirty) {
+      setStepStatus('updated');
+    }
+  }, [isDirty, stepStatus, setStepStatus]);
 
   return (
     <Form onSubmit={handleSubmit(onSubmit)} formId={formId}>

@@ -59,12 +59,13 @@ const StepThree = ({
     pick(stepData || {}, stepThree.formFields)
   );
 
-  const { handleSubmit, formState, control, setValue, clearErrors } = useForm({
-    mode: 'onChange',
-    reValidateMode: 'onChange',
-    defaultValues: fieldsObj,
-    resolver: yupResolver(stepThree.Schema),
-  });
+  const { handleSubmit, formState, control, setValue, clearErrors, trigger } =
+    useForm({
+      mode: 'onChange',
+      reValidateMode: 'onChange',
+      defaultValues: fieldsObj,
+      resolver: yupResolver(stepThree.Schema),
+    });
 
   const setTime = (field) => (itemValue) => (e) => {
     e.preventDefault();
@@ -74,8 +75,6 @@ const StepThree = ({
   };
 
   const { errors, isValid } = formState;
-
-  console.log('validation step thre is ', isValid, errors);
 
   const onSubmit = () => {
     onSubmitParam();
@@ -95,10 +94,8 @@ const StepThree = ({
     setEndTimeOpen(true);
   };
 
-  const startDate = useWatch({ control, name: 'startDate' });
-  const startTime = useWatch({ control, name: 'startTime' });
-  const endDate = useWatch({ control, name: 'endDate' });
-  const endTime = useWatch({ control, name: 'endTime' });
+  const allFields = useWatch({ control });
+  const { startDate, startTime, endDate, endTime } = allFields;
 
   useEffect(() => {
     if (isStepValid !== isValid) {
@@ -108,8 +105,10 @@ const StepThree = ({
 
   // pre saves data so when submit
   // is triggered onDataChange has been already executed
+  // triggers validation on form to enable saving when all fields are completed
   useEffect(() => {
     if (startDate && startTime && endDate && endTime) {
+      trigger();
       onDataChange({ startDate, startTime, endDate, endTime });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
