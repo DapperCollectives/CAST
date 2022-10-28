@@ -21,12 +21,11 @@ const TextOption = ({
       : isCastVote
       ? 'has-background-yellow'
       : 'border-light';
-  const cursorStyle =
-    isCastVote && readOnly
-      ? 'auto'
-      : isCastVote
-      ? 'cursor-grab'
-      : 'cursor-pointer';
+  const cursorStyle = readOnly
+    ? 'auto'
+    : isCastVote
+    ? 'cursor-grab'
+    : 'cursor-pointer';
 
   let extraClasses = '';
   if (optionsLength !== index + 1) {
