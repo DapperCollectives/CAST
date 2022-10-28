@@ -1,4 +1,5 @@
 import FadeIn from 'components/FadeIn';
+import classnames from 'classnames';
 
 export default function Input({
   style = {},
@@ -14,6 +15,16 @@ export default function Input({
   maxLengthSize,
 } = {}) {
   const showCharCount = Boolean(currentLength && maxLengthSize);
+  const borderClass = error ? 'border-danger' : 'border-light';
+  const inputClasses = classnames(
+    'column is-full rounded-sm p-3',
+    classNames,
+    borderClass,
+    {
+      'pr-7': showCharCount,
+    }
+  );
+
   return (
     <div
       className={`is-flex is-flex-direction-column flex-1 ${containerClassNames}`.trim()}
@@ -23,7 +34,7 @@ export default function Input({
         type={type}
         style={{ width: '100%', ...style }}
         placeholder={placeholder}
-        className={showCharCount ? `${classNames} pr-7` : classNames}
+        className={inputClasses}
         {...register(name, { disabled })}
       />
       {showCharCount && (

@@ -81,7 +81,7 @@ func GetVotesForAddress(
 	var votes []*VoteWithBalance
 	var err error
 
-	sql := `select v.*, 
+	sql := `select distinct v.*, 
 		b.primary_account_balance,
 		b.secondary_account_balance,
 		b.staking_balance
@@ -159,13 +159,13 @@ func GetVotesForProposal(
 	var orderBySql string
 
 	if pageParams.Order == "desc" {
-		orderBySql = "ORDER BY b.created_at DESC"
+		orderBySql = "ORDER BY v.created_at DESC"
 	} else {
-		orderBySql = "ORDER BY b.created_at ASC"
+		orderBySql = "ORDER BY v.created_at ASC"
 	}
 
 	//return all balances, strategy will do rest of the work
-	sql := `select v.*, p.block_height, 
+	sql := `select distinct v.*, p.block_height, 
 		b.primary_account_balance,
 		b.secondary_account_balance,
 		b.staking_balance

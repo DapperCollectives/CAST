@@ -146,7 +146,6 @@ const StepTwo = ({
             <>
               <Input
                 placeholder="Minimum Balance"
-                classNames="rounded-sm border-light p-3 column is-full"
                 containerClassNames="mt-4 mb-4"
                 register={register}
                 error={errors['minBalance']}
@@ -154,7 +153,6 @@ const StepTwo = ({
               />
               <Input
                 placeholder="Maximum Weight"
-                classNames="rounded-sm border-light p-3 column is-full"
                 containerClassNames="mb-4"
                 register={register}
                 error={errors['maxWeight']}
