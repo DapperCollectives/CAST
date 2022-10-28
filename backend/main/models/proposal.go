@@ -340,3 +340,31 @@ func generateStatusesFilterSQL(statuses []string) string {
 	}
 	return statusesFilter
 }
+
+func (p *Proposal) CreateProposalNotification(db *s.Database, jobId string) error {
+	err := db.Conn.QueryRow(db.Context,
+		`
+	INSERT INTO proposal_notifications(
+		proposal_id, 
+		job_id
+	)
+	VALUES($1, $2)
+	RETURNING proposal_id, job_id
+	`,
+		p.ID,
+		jobId,
+	).Scan(&p.ID, &jobId)
+
+	return err
+}
+
+func (p *Proposal) GetProposalNotificationJobId(db *s.Database) (string, error) {
+	var jobId string
+
+	sql := `
+	SELECT job_id from proposal_notifications as p
+	WHERE p.proposal_id = $1`
+
+	err := pgxscan.Get(db.Context, db.Conn, &jobId, sql, p.ID)
+	return jobId, err
+}
