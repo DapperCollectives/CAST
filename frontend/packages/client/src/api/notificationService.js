@@ -1,8 +1,8 @@
 import {
   LEANPLUM_APP_ID,
   LEANPLUM_CRO_KEY,
-  LEANPLUM_EXPORT_KEY,
   LEANPLUM_DEV_KEY,
+  LEANPLUM_EXPORT_KEY,
   LEANPLUM_PROD_KEY,
 } from 'api/constants';
 import Leanplum from 'leanplum-sdk';
@@ -21,9 +21,9 @@ export const startLeanplum = () => {
   } else {
     Leanplum.setAppIdForProductionMode(LEANPLUM_APP_ID, LEANPLUM_PROD_KEY);
   }
-  
+
   Leanplum.start();
-}
+};
 
 export const setUserId = async (walletId) => {
   try {
@@ -38,9 +38,9 @@ export const getUserSettings = async (walletId) => {
     let response = await fetch(
       `https://api.leanplum.com/api?appId=${LEANPLUM_APP_ID}&clientKey=${LEANPLUM_EXPORT_KEY}&apiVersion=1.0.6&userId=${walletId}&action=exportUser`,
       options
-    )
-    response = await response.json()
-    const data = response.response[0]
+    );
+    response = await response.json();
+    const data = response.response[0];
     if (!data.success) {
       throw new Error(data.error.message);
     }
@@ -77,14 +77,14 @@ export const getUserSettings = async (walletId) => {
     res.isSubscribedToCommunityUpdates = isSubscribedToCommunityUpdates;
     return res;
   } catch (e) {
-    throw new Error(e)
+    throw new Error(e);
   }
 };
 
 export const setUserEmail = async (email) => {
   try {
     await Leanplum.setUserAttributes({ email });
-    return true
+    return true;
   } catch (e) {
     throw new Error(e);
   }
@@ -93,7 +93,7 @@ export const setUserEmail = async (email) => {
 export const unsubscribeCommunity = async (communityId) => {
   try {
     Leanplum.setUserAttributes({ [`community${communityId}`]: 'False' });
-    return true
+    return true;
   } catch (e) {
     throw new Error(e);
   }
@@ -102,7 +102,7 @@ export const unsubscribeCommunity = async (communityId) => {
 export const subscribeCommunity = async (communityId) => {
   try {
     Leanplum.setUserAttributes({ [`community${communityId}`]: 'True' });
-    return true
+    return true;
   } catch (e) {
     throw new Error(e);
   }
@@ -113,8 +113,8 @@ export const unsubscribeFromEmailNotifications = async (walletId) => {
     let response = await fetch(
       `https://www.leanplum.com/api?appId=${LEANPLUM_APP_ID}&clientKey=${LEANPLUM_CRO_KEY}&action=setUserAttributes&userId=${walletId}&unsubscribeCategoriesToAdd=${COMMUNITY_UPDATES_CATEGORY_ID}`,
       options
-    )
-    response = await response.json()  
+    );
+    response = await response.json();
     const data = response.response[0];
     if (!data.success) {
       throw new Error(data.error.message);
@@ -130,8 +130,8 @@ export const subscribeToEmailNotifications = async (walletId) => {
     let response = await fetch(
       `https://www.leanplum.com/api?appId=${LEANPLUM_APP_ID}&clientKey=${LEANPLUM_CRO_KEY}&action=setUserAttributes&userId=${walletId}&unsubscribeCategoriesToRemove=${COMMUNITY_UPDATES_CATEGORY_ID}`,
       options
-    )
-    response = await response.json()
+    );
+    response = await response.json();
     const data = response.response[0];
     if (!data.success) {
       throw new Error(data.error.message);
