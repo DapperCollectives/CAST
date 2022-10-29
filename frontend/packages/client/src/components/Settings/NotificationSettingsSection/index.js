@@ -1,4 +1,4 @@
-import { Fragment } from 'react';
+import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useNotificationServiceContext } from 'contexts/NotificationService';
 import CommunitiesList from './CommunitiesList';
 import EmailAddressInput from './EmailAddressInput';
@@ -13,6 +13,21 @@ export default function NotificationSettingsSection() {
   } = useNotificationServiceContext();
   const { communitySubscription, email, isSubscribedFromCommunityUpdates } =
     notificationSettings;
+  const { notifyError } = useErrorHandlerContext();
+
+  const handleError = (fn) => {
+    return async (...args) => {
+      try {
+        await fn(...args);
+      } catch {
+        const error = new Error(
+          'Something went wrong, and your action could not be completed. Please try again later.'
+        );
+        notifyError(error);
+        throw error;
+      }
+    };
+  };
   return (
     <section className={'column is-flex is-flex-direction-column mt-5'}>
       <h2 className="is-size-4 has-text-weight-bold">Notification Settings</h2>
@@ -27,19 +42,24 @@ export default function NotificationSettingsSection() {
       )}
       {communitySubscription.length > 0 && (
         <>
-          <EmailAddressInput email={email} setUserEmail={setUserEmail} />
+          <EmailAddressInput
+            defaultEmail={email}
+            setUserEmail={handleError(setUserEmail)}
+          />
           <hr />
           <ReceiveEmailNotificationsSwitch
             isSubscribedFromCommunityUpdates={isSubscribedFromCommunityUpdates}
-            updateAllEmailNotificationSubscription={
+            updateAllEmailNotificationSubscription={handleError(
               updateAllEmailNotificationSubscription
-            }
+            )}
           />
           <hr />
           {isSubscribedFromCommunityUpdates && (
             <CommunitiesList
               communitySubscription={communitySubscription}
-              updateCommunitySubscription={updateCommunitySubscription}
+              updateCommunitySubscription={handleError(
+                updateCommunitySubscription
+              )}
             />
           )}
           <p className="has-text-grey has-text-centered py-5">

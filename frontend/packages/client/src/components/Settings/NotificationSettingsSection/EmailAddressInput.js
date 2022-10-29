@@ -5,10 +5,10 @@ import { EMAIL_REGEX } from 'const';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 
-export default function EmailAddressInput({ email, setUserEmail }) {
-  const { register, handleSubmit, formState } = useForm({
+export default function EmailAddressInput({ defaultEmail, setUserEmail }) {
+  const { register, handleSubmit, formState, setValue } = useForm({
     defaultValues: {
-      email: email,
+      email: defaultEmail,
     },
     resolver: yupResolver(
       yup.object().shape({
@@ -20,8 +20,12 @@ export default function EmailAddressInput({ email, setUserEmail }) {
       })
     ),
   });
-  const onSubmit = ({ email }) => {
-    setUserEmail(email);
+  const onSubmit = async ({ email }) => {
+    try {
+      await setUserEmail(email);
+    } catch (e) {
+      setValue('email', defaultEmail);
+    }
   };
   const { isSubmitting, errors, isDirty } = formState;
 

@@ -38,9 +38,13 @@ function CommunityListItem({
   subscribed,
   handleUpdateCommunitySubscription,
 }) {
-  const { data: community, isLoading } = useCommunityDetails(communityId);
+  const {
+    data: community,
+    isLoading,
+    error,
+  } = useCommunityDetails(communityId);
   const { name, logo, slug } = community ?? {};
-  if (isLoading) return null;
+  if (isLoading || error) return null;
 
   return (
     <li className="my-1 is-flex is-flex-direction-row has-background-light-grey rounded p-2 ">

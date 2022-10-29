@@ -1,14 +1,22 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { subscribeNotificationIntentions } from 'const';
+import {
+  getUserSettings as getUser,
+  setUserEmail as setEmail,
+  startLeanplumForUser,
+  subscribeCommunity,
+  subscribeToEmailNotifications,
+  unsubscribeCommunity,
+  unsubscribeFromEmailNotifications,
+} from 'api/notificationService';
 import { useWebContext } from './Web3';
 
 const NotificationServiceContext = createContext({});
 
 const INIT_NOTIFICATION_SETTINGS = {
-  walletId: '',
   email: '',
-  communitySubscription: [{ communityId: '1', subscribed: true }],
-  isSubscribedFromCommunityUpdates: true,
+  communitySubscription: [],
+  isSubscribedFromCommunityUpdates: false,
 };
 
 const updateCommunitySubscriptionState = (
@@ -50,29 +58,21 @@ const NotificationServiceProvider = ({ children }) => {
   useEffect(() => {
     if (addr) {
       (async () => {
-        await setUserID(addr);
-        getUserSettings();
+        try {
+          await startLeanplumForUser(addr);
+          await getUserSettings();
+        } catch (e) {
+          console.log(e);
+        }
       })();
     } else {
       setNotificationSettings(INIT_NOTIFICATION_SETTINGS);
     }
   }, [addr]);
 
-  const setUserID = async (walletId) => {
-    try {
-      //here we call api to init the leanplum sdk
-      setNotificationSettings((prevState) => ({
-        ...prevState,
-        walletId,
-      }));
-    } catch {
-      throw new Error('cannot set user id for leanplum');
-    }
-  };
-
   const setUserEmail = async (email) => {
     try {
-      //here we call api
+      await setEmail(email);
       setNotificationSettings((prevState) => ({
         ...prevState,
         email,
@@ -84,13 +84,13 @@ const NotificationServiceProvider = ({ children }) => {
 
   const getUserSettings = async () => {
     try {
-      //here we call api
-      const { communitySubscription, isSubscribedFromCommunityUpdates } =
-        INIT_NOTIFICATION_SETTINGS;
+      const { communitySubscription, isSubscribedFromCommunityUpdates, email } =
+        await getUser(addr);
       setNotificationSettings((prevState) => ({
         ...prevState,
         communitySubscription,
         isSubscribedFromCommunityUpdates,
+        email,
       }));
     } catch {
       throw new Error('cannot get user settings');
@@ -103,11 +103,11 @@ const NotificationServiceProvider = ({ children }) => {
   ) => {
     try {
       if (subscribeIntention === subscribeNotificationIntentions.subscribe) {
-        //call api to subscribe community
+        await subscribeCommunity(communityId);
       } else if (
         subscribeIntention === subscribeNotificationIntentions.unsubscribe
       ) {
-        //call api to unsubscribe community
+        await unsubscribeCommunity(communityId);
       }
       setNotificationSettings((prevState) => {
         const newCommunitySubscription = updateCommunitySubscriptionState(
@@ -127,11 +127,11 @@ const NotificationServiceProvider = ({ children }) => {
 
   const updateAllEmailNotificationSubscription = async (subscribeIntention) => {
     if (subscribeIntention === subscribeNotificationIntentions.resubscribe) {
-      //call api to resubscribe all email notifications
+      subscribeToEmailNotifications(addr);
     } else if (
       subscribeIntention === subscribeNotificationIntentions.unsubscribe
     ) {
-      //call api to unsubscribe all email notifications
+      unsubscribeFromEmailNotifications(addr);
     }
     setNotificationSettings((prevState) => ({
       ...prevState,
@@ -142,7 +142,6 @@ const NotificationServiceProvider = ({ children }) => {
 
   const providerProps = {
     notificationSettings,
-    setUserID,
     setUserEmail,
     getUserSettings,
     updateCommunitySubscription,
