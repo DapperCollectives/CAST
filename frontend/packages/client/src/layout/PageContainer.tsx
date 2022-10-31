@@ -6,7 +6,7 @@ interface Props {
 
 const PageContainer: React.FC<Props> = ({ children }) => {
   return (
-    <Container maxW="1320px" pt="40px" px="20px" centerContent>
+    <Container maxW="1320px" py="40px" px="20px" centerContent>
       {children}
     </Container>
   );
