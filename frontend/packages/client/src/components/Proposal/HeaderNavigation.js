@@ -1,7 +1,7 @@
 import { JoinCommunityButton } from 'components';
 import { useMediaQuery, useVotesForAddress } from 'hooks';
 import BackButton from './BackButton';
-import ShareDropdown from './ShareDropdown';
+import ShareDropdown from './ShareProposalDropdown';
 
 const HeaderNavigation = ({
   communityId,

@@ -1,6 +1,8 @@
 import Blockies from 'react-blockies';
+import { useParams } from 'react-router-dom';
 import { useWebContext } from 'contexts/Web3';
 import { CommunityLinks } from 'components';
+import ShareDropdown from 'components/ShareDropdown';
 import WalletAddress from 'components/WalletAddress';
 import { useMediaQuery } from 'hooks';
 import { Box, Flex, Spacer } from '@chakra-ui/react';
@@ -15,6 +17,8 @@ const UserProfile: React.FC = () => {
   } = useWebContext();
 
   const isBiggerThanMobile = useMediaQuery();
+
+  const { addr: userAddres } = useParams<{ addr: string }>();
 
   return (
     <PageContainer>
@@ -33,8 +37,8 @@ const UserProfile: React.FC = () => {
               <WalletAddress addr={addr} />
             </Box>
           </Flex>
-          <Flex bg="blue" minW="100%">
-            Buttons
+          <Flex minW="100%">
+            <ShareDropdown twitterShareString={''} copyString={''} />
           </Flex>
           <Flex minW="100%">
             <CommunityLinks
@@ -46,7 +50,7 @@ const UserProfile: React.FC = () => {
             />
           </Flex>
         </Flex>
-        {/* <Spacer minWidth={[0, 0, '72px']} /> */}
+        <Spacer minWidth={[0, 0, '72px']} maxWidth={[0, 0, '72px']} />
         <Flex flexGrow={1}>
           <Tabs>
             <TabList>

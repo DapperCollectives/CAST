@@ -61,3 +61,4 @@ export { default as BrowseCommunityButton } from './BrowseCommunityButton';
 export * from './Proposal';
 export { Card } from './Card';
 export { default as Tooltip } from './Tooltip';
+export { default as ShareDropdown } from './ShareDropdown';

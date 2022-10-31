@@ -49,7 +49,7 @@ export default function AppPages() {
             <Route path="/community/:communityId">
               <Community />
             </Route>
-            <Route path="/profile">
+            <Route path="/profile/:addr">
               <UserProfile />
             </Route>
             <Route exact path="/debug-contract">

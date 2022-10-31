@@ -28,14 +28,21 @@ const WalletAddress: React.FC<{ addr: string }> = ({ addr }) => {
       enabled={addressCopied}
     >
       <CopyToClipboard text={addr} onCopy={markAddressCopied}>
-        <HStack height="32px" spacing={1} bg="grey.300" borderRadius="base">
-          <Flex alignItems="center" py={1}>
+        <HStack
+          height="32px"
+          spacing={1}
+          bg="grey.300"
+          borderRadius="base"
+          p={1}
+          cursor="pointer"
+        >
+          <Flex alignItems="center">
             <Text fontWeight="bold" color="grey.500" fontSize="md">
               {addr}
             </Text>
           </Flex>
-          <Flex alignItems="center" py={1} height="23px">
-            <Svg name="Copy" />
+          <Flex alignItems="center" height="23px">
+            <Svg name="Copy" width="16" height="17" bold={false} />
           </Flex>
         </HStack>
       </CopyToClipboard>

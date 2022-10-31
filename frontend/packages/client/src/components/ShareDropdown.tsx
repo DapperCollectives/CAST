@@ -51,7 +51,7 @@ const ShareDropdown: React.FC<ShareDropdownProps> = ({
               <Text
                 fontWeight="bold"
                 ml={3}
-                fontSize={isBiggerThanMobile ? 1 : 0.88}
+                fontSize={isBiggerThanMobile ? 'md' : 'sm'}
               >
                 Share
               </Text>
@@ -59,7 +59,7 @@ const ShareDropdown: React.FC<ShareDropdownProps> = ({
           </Flex>
         </MenuButton>
         <MenuList borderRadius="2xl" maxW="192px" minW="192px">
-          <MenuItem display="flex" alignItems="center" minHeight="48px">
+          <MenuItem display="flex" alignItems="center" minHeight="48px" pl={3}>
             <CopyToClipboard text={copyString} onCopy={() => {}}>
               <Flex alignItems="center">
                 <Svg name="Copy" />
@@ -70,7 +70,7 @@ const ShareDropdown: React.FC<ShareDropdownProps> = ({
             </CopyToClipboard>
           </MenuItem>
           <MenuDivider border="light" borderColor="grey.300" my={0} />
-          <MenuItem display="flex" alignItems="center" minHeight="48px" pl={2}>
+          <MenuItem display="flex" alignItems="center" minHeight="48px" pl={3}>
             <Svg name="Twitter" />
             <Link
               href={twitterPost}
