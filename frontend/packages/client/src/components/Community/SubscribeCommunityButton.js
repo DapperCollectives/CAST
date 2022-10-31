@@ -19,7 +19,7 @@ export default function SubscribeCommunityButton({
     useNotificationServiceContext();
   const subscribedToCommunity =
     notificationSettings?.communitySubscription.some(
-      (c) => c.communityId === communityId && c.subscribed
+      (c) => c.communityId === communityId?.toString() && c.subscribed
     );
   const subscribedToEmails =
     notificationSettings?.isSubscribedFromCommunityUpdates;

@@ -68,7 +68,6 @@ const NotificationServiceProvider = ({ children }) => {
     try {
       const { communitySubscription, isSubscribedFromCommunityUpdates, email } =
         await getUser(addr);
-      console.log(communitySubscription);
       setNotificationSettings((prevState) => ({
         ...prevState,
         communitySubscription,
