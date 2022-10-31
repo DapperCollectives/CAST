@@ -181,7 +181,6 @@ func TestUserProposals(t *testing.T) {
 			proposalPayload := otu.GenerateProposalPayload("account", proposal)
 
 			response = otu.CreateProposalAPI(proposalPayload)
-			fmt.Printf("For Loop Response: %v \n", response.Body)
 			checkResponseCode(t, http.StatusCreated, response.Code)
 			communityID += 1
 		}

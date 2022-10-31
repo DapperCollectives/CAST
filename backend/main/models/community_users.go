@@ -231,7 +231,6 @@ func GetCommunityProposalsForUser(
 
 	sql += `LIMIT $2 OFFSET $3`
 
-	fmt.Printf("pageParams %v \n", pageParams)
 	var proposals = []UserProposal{}
 	err = pgxscan.Select(
 		db.Context,
