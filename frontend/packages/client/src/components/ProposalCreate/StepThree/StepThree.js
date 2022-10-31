@@ -74,7 +74,7 @@ const StepThree = ({
     field === 'startTime' ? setStartTimeOpen(false) : setEndTimeOpen(false);
   };
 
-  const { errors, isValid } = formState;
+  const { errors, isValid, isDirty } = formState;
 
   const onSubmit = () => {
     onSubmitParam();
@@ -98,10 +98,13 @@ const StepThree = ({
   const { startDate, startTime, endDate, endTime } = allFields;
 
   useEffect(() => {
-    if (isStepValid !== isValid) {
-      setStepValid(isValid);
+    // setting is valid to allow move forward to trigger validation
+    // if form is not valid after trying to submit
+    // isValid will be set to false and will update here
+    if (isStepValid !== (isValid || isDirty)) {
+      setStepValid(isValid || isDirty);
     }
-  }, [isValid, isStepValid, setStepValid]);
+  }, [isValid, isStepValid, setStepValid, isDirty]);
 
   // pre saves data so when submit
   // is triggered onDataChange has been already executed
