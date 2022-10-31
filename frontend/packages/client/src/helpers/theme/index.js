@@ -19,6 +19,7 @@ import definitions from './definitions';
 //
 // Foundational style overrides
 import borders from './foundations/borders';
+import colors from './foundations/colors';
 // ***********************************
 //
 // ***********************************
@@ -31,6 +32,7 @@ const overrides = {
   ...definitions,
   styles,
   borders,
+  colors,
   // Other foundational style overrides go here
   components: {
     Input,
