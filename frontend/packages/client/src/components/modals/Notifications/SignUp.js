@@ -7,13 +7,13 @@ import Error from '../Error';
 import Modal from '../Modal';
 import { getSchema } from './FormConfig';
 
-const SignUpForm = ({ setErrorMessage, onSubscribe, onClose }) => {
+const SignUpForm = ({ setErrorMessage, onSubscribe, onClose, userEmail }) => {
   const [signupAll, setSignupAll] = useState(false);
 
   const { register, handleSubmit, formState } = useForm({
     resolver: yupResolver(getSchema()),
     defaultValues: {
-      email: '',
+      email: userEmail,
     },
   });
 

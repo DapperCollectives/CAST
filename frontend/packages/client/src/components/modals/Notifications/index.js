@@ -1,23 +1,37 @@
 import { useNotificationServiceContext } from 'contexts/NotificationService';
+import { useWebContext } from 'contexts/Web3';
+import { useUserCommunities } from 'hooks';
 import { subscribeNotificationIntentions } from 'const';
 import NotificationsSignUp from './SignUp';
 
 const NotificationsModal = ({ onClose, communityId }) => {
+  const { updateCommunitySubscription, notificationSettings } =
+    useNotificationServiceContext();
+  const { email } = notificationSettings;
   const {
-    updateCommunitySubscription,
-    updateAllEmailNotificationSubscription,
-  } = useNotificationServiceContext();
-
+    user: { addr },
+  } = useWebContext();
+  const { data: userCommunities } = useUserCommunities({
+    addr,
+    count: 100,
+    initialLoading: false,
+  });
   const handleSubscribeNotification = (signupAll) => {
-    updateCommunitySubscription(
-      communityId,
-      subscribeNotificationIntentions.subscribe
-    );
+    const intentions = [];
     if (signupAll) {
-      updateAllEmailNotificationSubscription(
-        subscribeNotificationIntentions.subscribe
-      );
+      userCommunities.forEach(({ id }) => {
+        intentions.push({
+          communityId: id.toString(),
+          subscribeIntention: subscribeNotificationIntentions.subscribe,
+        });
+      });
+    } else {
+      intentions.push({
+        communityId,
+        subscribeIntention: subscribeNotificationIntentions.subscribe,
+      });
     }
+    updateCommunitySubscription(intentions);
   };
 
   return (
@@ -25,6 +39,7 @@ const NotificationsModal = ({ onClose, communityId }) => {
       onSubscribe={handleSubscribeNotification}
       onClose={onClose}
       communityId={communityId}
+      userEmail={email}
     />
   );
 };

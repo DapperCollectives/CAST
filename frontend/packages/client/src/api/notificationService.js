@@ -5,6 +5,7 @@ import {
   LEANPLUM_EXPORT_KEY,
   LEANPLUM_PROD_KEY,
 } from 'api/constants';
+import { subscribeNotificationIntentions } from 'const';
 import Leanplum from 'leanplum-sdk';
 
 const COMMUNITY_UPDATES_CATEGORY_ID = 1;
@@ -13,6 +14,22 @@ const options = {
   headers: { accept: 'application/json' },
 };
 
+const getDesiredAttributes = (communitySubIntentions) => {
+  //subscribeUpdateIntentions = [{communityId:"1", subscribeIntention:"subscribe"},{communityId:"2",subscribeIntention:"unsubscribe"}]
+  return communitySubIntentions
+    .map(({ communityId, subscribeIntention }) => ({
+      key: `community${communityId}`,
+      value:
+        subscribeIntention === subscribeNotificationIntentions.subscribe
+          ? 'True'
+          : 'False',
+    }))
+    .reduce((acc, curr) => {
+      const { key, value } = curr;
+      acc[key] = value;
+      return acc;
+    }, {});
+};
 export const startLeanplumForUser = (walletId) => {
   const IS_LOCAL_DEV = process.env.REACT_APP_APP_ENV === 'development';
 
@@ -93,18 +110,10 @@ export const setUserEmail = async (email) => {
   }
 };
 
-export const unsubscribeCommunity = async (communityId) => {
+export const updateCommunitySubscription = async (communitySubIntentions) => {
+  const desiredAttributes = getDesiredAttributes(communitySubIntentions);
   try {
-    Leanplum.setUserAttributes({ [`community${communityId}`]: 'False' });
-    return true;
-  } catch (e) {
-    throw new Error(e);
-  }
-};
-
-export const subscribeCommunity = async (communityId) => {
-  try {
-    Leanplum.setUserAttributes({ [`community${communityId}`]: 'True' });
+    Leanplum.setUserAttributes(desiredAttributes);
     return true;
   } catch (e) {
     throw new Error(e);

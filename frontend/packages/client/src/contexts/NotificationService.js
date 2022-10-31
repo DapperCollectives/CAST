@@ -4,10 +4,9 @@ import {
   getUserSettings as getUser,
   setUserEmail as setEmail,
   startLeanplumForUser,
-  subscribeCommunity,
   subscribeToEmailNotifications,
-  unsubscribeCommunity,
   unsubscribeFromEmailNotifications,
+  updateCommunitySubscription as updateCommunity,
 } from 'api/notificationService';
 import { useWebContext } from './Web3';
 
@@ -17,23 +16,6 @@ const INIT_NOTIFICATION_SETTINGS = {
   email: '',
   communitySubscription: [],
   isSubscribedFromCommunityUpdates: false,
-};
-
-const updateCommunitySubscriptionState = (
-  communitySubscription,
-  communityId,
-  subscribedValue
-) => {
-  const newCommunitySubscription = [...communitySubscription];
-  const updateIndex = newCommunitySubscription.findIndex(
-    (communitySub) => communitySub.communityId === communityId
-  );
-  if (updateIndex === -1) {
-    newCommunitySubscription.push({ communityId, subscribed: subscribedValue });
-  } else {
-    newCommunitySubscription[updateIndex].subscribed = subscribedValue;
-  }
-  return newCommunitySubscription;
 };
 
 export const useNotificationServiceContext = () => {
@@ -86,6 +68,7 @@ const NotificationServiceProvider = ({ children }) => {
     try {
       const { communitySubscription, isSubscribedFromCommunityUpdates, email } =
         await getUser(addr);
+      console.log(communitySubscription);
       setNotificationSettings((prevState) => ({
         ...prevState,
         communitySubscription,
@@ -97,31 +80,12 @@ const NotificationServiceProvider = ({ children }) => {
     }
   };
 
-  const updateCommunitySubscription = async (
-    communityId,
-    subscribeIntention
-  ) => {
+  const updateCommunitySubscription = async (communitySubIntentions) => {
     try {
-      if (subscribeIntention === subscribeNotificationIntentions.subscribe) {
-        await subscribeCommunity(communityId);
-      } else if (
-        subscribeIntention === subscribeNotificationIntentions.unsubscribe
-      ) {
-        await unsubscribeCommunity(communityId);
-      }
-      setNotificationSettings((prevState) => {
-        const newCommunitySubscription = updateCommunitySubscriptionState(
-          prevState.communitySubscription,
-          communityId,
-          subscribeIntention === subscribeNotificationIntentions.subscribe
-        );
-        return {
-          ...prevState,
-          communitySubscription: newCommunitySubscription,
-        };
-      });
+      await updateCommunity(communitySubIntentions);
+      await getUserSettings();
     } catch {
-      throw new Error('cannot subscribe community');
+      throw new Error('cannot update community subscription');
     }
   };
 

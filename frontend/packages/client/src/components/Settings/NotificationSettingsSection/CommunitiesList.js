@@ -1,16 +1,37 @@
 import Blockies from 'react-blockies';
-import { useCommunityDetails } from 'hooks';
+import { useWebContext } from 'contexts/Web3';
+import { useCommunityDetails, useUserCommunities } from 'hooks';
 import { subscribeNotificationIntentions } from 'const';
 
 export default function CommunitiesList({
   communitySubscription,
   updateCommunitySubscription,
 }) {
+  const {
+    user: { addr },
+  } = useWebContext();
+  const { data: userCommunities, loading: isLoadingUserCommunities } =
+    useUserCommunities({
+      addr,
+      count: 100,
+      initialLoading: false,
+    });
+  const displayCommunities = isLoadingUserCommunities
+    ? []
+    : (userCommunities || []).map(({ id }) => {
+        const isSubscribed = communitySubscription.find(
+          ({ communityId }) => communityId === id.toString()
+        )?.subscribed;
+        return {
+          communityId: id.toString(),
+          subscribed: !!isSubscribed,
+        };
+      });
   const handleUpdateCommunitySubscription = (communityId, subscribed) => {
     const subscribeIntention = subscribed
       ? subscribeNotificationIntentions.unsubscribe
       : subscribeNotificationIntentions.subscribe;
-    updateCommunitySubscription(communityId, subscribeIntention);
+    updateCommunitySubscription([{ communityId, subscribeIntention }]);
   };
   return (
     <div className="py-5">
@@ -18,7 +39,7 @@ export default function CommunitiesList({
         Edit which communities you want notifications from:
       </h3>
       <ul className="my-3">
-        {communitySubscription.map(({ communityId, subscribed }) => (
+        {displayCommunities.map(({ communityId, subscribed }) => (
           <CommunityListItem
             key={communityId}
             communityId={communityId}
