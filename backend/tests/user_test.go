@@ -17,7 +17,6 @@ func TestUser(t *testing.T) {
 	t.Run("should be able to create a user", func(t *testing.T) {
 		userStruct := otu.GenerateUserStruct("account")
 		payload := otu.GenerateUserPayload("account", *userStruct)
-		fmt.Printf("payload: %+v \r", payload)
 		response := otu.CreateUserAPI(payload)
 		checkResponseCode(t, http.StatusCreated, response.Code)
 

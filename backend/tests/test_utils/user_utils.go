@@ -57,11 +57,8 @@ func (otu *OverflowTestUtils) GenerateUserStruct(signer string) *models.User {
 
 func (otu *OverflowTestUtils) GenerateUserPayload(signer string, user models.User) *models.User {
 	payload := user
-	fmt.Printf("payload: %+v \n", payload)
 	timestamp := fmt.Sprint(time.Now().UnixNano() / int64(time.Millisecond))
-	fmt.Printf("timestamp: %s \n", timestamp)
 	compositeSignatures := otu.GenerateCompositeSignatures(signer, timestamp)
-	fmt.Printf("compositeSignatures: %+v \n", compositeSignatures)
 	payload.Timestamp = &timestamp
 	payload.Composite_signatures = compositeSignatures
 	return &payload
