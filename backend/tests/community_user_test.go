@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"sort"
 	"strings"
@@ -187,7 +186,6 @@ func TestUserProposals(t *testing.T) {
 
 		response := otu.GetCommunityUserProposalsAPI(utils.AdminAddr)
 
-		fmt.Printf("Response: %v ", response.Body.String())
 		checkResponseCode(t, http.StatusOK, response.Code)
 
 		var p test_utils.PaginatedResponseWithProposal
