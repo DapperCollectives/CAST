@@ -309,8 +309,8 @@ func (h *Helpers) createVote(v models.Vote, p models.Proposal) (*models.VoteWith
 		return nil, errResponse
 	}
 
-	// check that proposal is live
-	if os.Getenv("APP_ENV") != "DEV" {
+	if os.Getenv("APP_ENV") == "PROD" {
+		fmt.Println("Checking proposal is live")
 		if !p.IsLive() {
 			return nil, errInactiveProposal
 		}
@@ -449,6 +449,53 @@ func (h *Helpers) validateVote(p models.Proposal, v models.Vote) errorResponse {
 	}
 
 	return nilErr
+}
+
+func (h *Helpers) fetchUserVotedProposals(
+	db *shared.Database,
+	addr string,
+	pageParams shared.PageParams,
+) (
+	[]models.UserProfileProposal,
+	int,
+	error,
+) {
+	proposals, totalRecords, err := models.GetUserVotedProposals(db, addr, pageParams)
+	if err != nil {
+		log.Error().Err(err).Msg("Error getting user profile votes.")
+		return nil, 0, err
+	}
+
+	var totalProposals []models.UserProfileProposal
+
+	for _, p := range proposals {
+		var tallyProposal models.Proposal
+		tallyProposal.ID = *p.Proposal_id
+
+		if err := tallyProposal.GetProposalById(db); err != nil {
+			log.Error().Err(err).Msg("Error getting proposal.")
+			return nil, 0, err
+		}
+
+		votes, err := models.GetAllVotesForProposal(db, *p.Proposal_id, *tallyProposal.Strategy)
+		if err != nil {
+			log.Error().Err(err).Msg("Error getting votes for proposal.")
+			return nil, 0, err
+		}
+
+		results, err := helpers.useStrategyTally(tallyProposal, votes)
+		if err != nil {
+			log.Error().Err(err).Msg("Error tallying votes.")
+			return nil, 0, err
+		}
+
+		totalProposals = append(totalProposals, models.UserProfileProposal{
+			Proposal: p,
+			Results:  results,
+		})
+	}
+
+	return totalProposals, totalRecords, nil
 }
 
 func (h *Helpers) fetchCommunity(id int) (models.Community, error) {
