@@ -1,3 +1,6 @@
+import { Card } from 'components/Card';
+import { Box, Heading } from '@chakra-ui/react';
+import { Text } from '@chakra-ui/react';
 import ChoiceOptionCreator from './ChoiceOptionCreator';
 import RankedVoteExample from './RankedVoteExample';
 import SingleVoteExample from './SingleVoteExample';
@@ -13,7 +16,9 @@ export default function VotingSelector({
   return (
     <>
       <div className="border-light-tablet rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 p-0-mobile mb-6">
-        <h4 className="title is-5 mb-2">Type of Voting</h4>
+        <Heading as="h4" fontSize="2xl" mb={2}>
+          Type of Voting
+        </Heading>
         <p className="has-text-grey mb-5">
           Select the type of voting you would like to use for this proposal. To
           learn more about these options,{' '}
@@ -27,12 +32,20 @@ export default function VotingSelector({
           </a>
           .
         </p>
-        <div>
-          <div
-            className={`border-light rounded-sm is-flex is-align-items-center m-0 p-0 mb-4 cursor-pointer ${
-              voteType === 'single-choice' ? 'border-grey' : 'border-light'
-            }`}
-            onClick={() => setValue('voteType', 'single-choice')}
+        <Box
+          sx={{
+            '.border-grey': {
+              borderColor: 'var(--chakra-colors-grey-400)',
+            },
+          }}
+        >
+          <Card
+            variant="votingType"
+            mb={4}
+            onClick={() =>
+              setValue('voteType', 'single-choice', { shouldValidate: true })
+            }
+            className={voteType === 'single-choice' ? 'border-grey' : ''}
           >
             <div className="p-4">
               <div className="is-flex is-align-items-center mr-2">
@@ -58,12 +71,14 @@ export default function VotingSelector({
             <div className="has-background-light-grey p-4 is-hidden-mobile rounded-sm-br rounded-sm-tr is-flex is-flex-direction-column is-align-self-stretch is-justify-content-center ">
               <SingleVoteExample />
             </div>
-          </div>
-          <div
-            className={`border-light rounded-sm is-flex is-align-items-center m-0 p-0 cursor-pointer ${
-              voteType === 'ranked-choice' ? 'border-grey' : 'border-light'
-            }`}
-            onClick={() => setValue('voteType', 'ranked-choice')}
+          </Card>
+          <Card
+            variant="votingType"
+            mb={4}
+            onClick={() =>
+              setValue('voteType', 'ranked-choice', { shouldValidate: true })
+            }
+            className={voteType === 'ranked-choice' ? 'border-grey' : ''}
           >
             <div className="p-4">
               <div className="is-flex is-align-items-center mr-2">
@@ -87,25 +102,30 @@ export default function VotingSelector({
             <div className="has-background-light-grey p-4 is-hidden-mobile rounded-sm-br rounded-sm-tr is-flex is-flex-direction-column is-align-self-stretch is-justify-content-center">
               <RankedVoteExample />
             </div>
-          </div>
-        </div>
+          </Card>
+        </Box>
       </div>
       <div className="border-light-tablet rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 p-0-mobile mb-6">
-        <h4 className="title is-5 mb-2">
+        <Heading as="h4" fontSize="2xl" mb={2}>
           Choices <span className="has-text-danger">*</span>
-        </h4>
+        </Heading>
         {voteType === 'single-choice' ? (
-          <p className="has-text-grey mb-4">
+          <Text color={'grey.500'} mb={4}>
             Provide the specific options you’d like to cast votes for. Use
             Text-based presentation for choices that are described in words. Use
             Visual for side-by-side visual options represented by images.
-          </p>
+          </Text>
         ) : (
-          <p className="has-text-grey mb-4">
-            Provide the specific options you’d like to cast votes for. Ranked
-            Choice Voting currently only supports Text-based presentation for
-            choices that are described in words.
-          </p>
+          <>
+            <Text color={'grey.500'} mb={4}>
+              Provide the specific options you’d like to cast votes for. Ranked
+              Choice Voting currently only supports Text-based presentation for
+              choices that are described in words.
+            </Text>
+            <Text color={'grey.500'} mb={4} fontWeight="bold" fontSize="sm">
+              All choices will be randomized for voters
+            </Text>
+          </>
         )}
         <ChoiceOptionCreator
           setValue={setValue}

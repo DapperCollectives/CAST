@@ -7,6 +7,7 @@ import Form from 'components/common/Form';
 import { useMediaQuery } from 'hooks';
 import { HAS_DELAY_ON_START_TIME } from 'const';
 import { formatTime } from 'utils';
+import { Heading } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import pick from 'lodash/pick';
 import { stepThree } from '../FormConfig';
@@ -32,6 +33,7 @@ const isToday = (date) => {
 const StepThree = ({
   stepData,
   setStepValid,
+  isStepValid,
   onDataChange,
   formId,
   onSubmit: onSubmitParam = () => {},
@@ -57,10 +59,13 @@ const StepThree = ({
     pick(stepData || {}, stepThree.formFields)
   );
 
-  const { handleSubmit, formState, control, setValue, clearErrors } = useForm({
-    defaultValues: fieldsObj,
-    resolver: yupResolver(stepThree.Schema),
-  });
+  const { handleSubmit, formState, control, setValue, clearErrors, trigger } =
+    useForm({
+      mode: 'onChange',
+      reValidateMode: 'onChange',
+      defaultValues: fieldsObj,
+      resolver: yupResolver(stepThree.Schema),
+    });
 
   const setTime = (field) => (itemValue) => (e) => {
     e.preventDefault();
@@ -69,7 +74,7 @@ const StepThree = ({
     field === 'startTime' ? setStartTimeOpen(false) : setEndTimeOpen(false);
   };
 
-  const { errors, isValid, isDirty, isSubmitting } = formState;
+  const { errors, isValid, isDirty } = formState;
 
   const onSubmit = () => {
     onSubmitParam();
@@ -89,19 +94,24 @@ const StepThree = ({
     setEndTimeOpen(true);
   };
 
-  const startDate = useWatch({ control, name: 'startDate' });
-  const startTime = useWatch({ control, name: 'startTime' });
-  const endDate = useWatch({ control, name: 'endDate' });
-  const endTime = useWatch({ control, name: 'endTime' });
+  const allFields = useWatch({ control });
+  const { startDate, startTime, endDate, endTime } = allFields;
 
   useEffect(() => {
-    setStepValid((isValid || isDirty) && !isSubmitting);
-  }, [isValid, isDirty, isSubmitting, setStepValid]);
+    // setting is valid to allow move forward to trigger validation
+    // if form is not valid after trying to submit
+    // isValid will be set to false and will update here
+    if (isStepValid !== (isValid || isDirty)) {
+      setStepValid(isValid || isDirty);
+    }
+  }, [isValid, isStepValid, setStepValid, isDirty]);
 
   // pre saves data so when submit
   // is triggered onDataChange has been already executed
+  // triggers validation on form to enable saving when all fields are completed
   useEffect(() => {
     if (startDate && startTime && endDate && endTime) {
+      trigger();
       onDataChange({ startDate, startTime, endDate, endTime });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -133,9 +143,9 @@ const StepThree = ({
       formClasses="mb-6-mobile"
     >
       <div className="border-light-tablet rounded-lg is-flex-direction-column is-mobile m-0 p-6 p-0-mobile mb-6">
-        <h4 className="title is-5 mb-5">
+        <Heading as="h4" fontSize="2xl" mb={6}>
           Start date and time <span className="has-text-danger">*</span>
-        </h4>
+        </Heading>
         <div className="columns p-0 m-0">
           <CustomDatePicker
             control={control}
@@ -202,9 +212,9 @@ const StepThree = ({
         </div>
       </div>
       <div className="border-light-tablet rounded-lg columns is-flex-direction-column is-mobile m-0 p-6 p-0-mobile mb-6">
-        <h4 className="title is-5 mb-5">
+        <Heading as="h4" fontSize="2xl" mb={6}>
           End date and time <span className="has-text-danger">*</span>
-        </h4>
+        </Heading>
         <div className="columns p-0 m-0">
           <CustomDatePicker
             placeholderText="Choose date"

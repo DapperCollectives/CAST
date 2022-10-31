@@ -1,27 +1,25 @@
 import { Svg } from '@cast/shared-components';
-import classnames from 'classnames';
+import { Flex } from '@chakra-ui/react';
 
 const StepNumber = ({ stepIdx, status }) => {
   // status can be active - pending - done
   if (status === 'done') {
-    return <Svg name="CheckMark" circleFill="#44C42F" />;
+    return <Svg name="CheckMark" circleFill="#2EAE4F" />;
   }
 
-  const classNames = classnames(
-    'rounded-full has-text-black is-flex is-align-items-center is-justify-content-center',
-    { 'has-background-yellow': status === 'active' },
-    { 'border-light': status === 'pending' }
-  );
   return (
-    <div
-      className={classNames}
-      style={{
-        width: 32,
-        height: 32,
-      }}
+    <Flex
+      width={8}
+      height={8}
+      alignItems="center"
+      justifyContent="center"
+      borderRadius="full"
+      border={status === 'pending' ? 'light' : ''}
+      bg={status === 'active' ? 'yellow.500' : ''}
+      fontWeight="bold"
     >
-      <b>{stepIdx + 1}</b>
-    </div>
+      {stepIdx + 1}
+    </Flex>
   );
 };
 

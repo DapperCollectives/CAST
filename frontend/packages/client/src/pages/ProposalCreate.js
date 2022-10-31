@@ -10,13 +10,35 @@ import {
   PropCreateStepOne,
   PropCreateStepThree,
   PropCreateStepTwo,
+  WarningMessage,
 } from 'components/ProposalCreate';
-import { useProposalCreateMutation } from 'hooks';
+import { useProposalCreateCheck, useProposalCreateMutation } from 'hooks';
 import { isStartTimeValid, parseDateToServer } from 'utils';
+
+const openModalFc = (modalContext) => {
+  modalContext.openModal(
+    <ErrorModal
+      message="Please connect a wallet to create a proposal."
+      title="Connect Wallet"
+      footerComponent={
+        <WalletConnect
+          closeModal={() => {
+            modalContext.closeModal();
+          }}
+          expandToContainer
+        />
+      }
+      onClose={modalContext.closeModal}
+    />,
+    { isErrorModal: true }
+  );
+};
 
 export default function ProposalCreatePage() {
   const { createProposal, data, loading, error } = useProposalCreateMutation();
+
   const [modalError, setModalError] = useState(null);
+
   const {
     user: { addr: creatorAddr },
   } = useWebContext();
@@ -27,6 +49,11 @@ export default function ProposalCreatePage() {
   const { notifyError } = useErrorHandlerContext();
 
   const { communityId } = useParams();
+
+  const { data: canCreateCheck } = useProposalCreateCheck({
+    communityId,
+    addr: creatorAddr,
+  });
 
   useEffect(() => {
     if (data?.id) {
@@ -39,26 +66,15 @@ export default function ProposalCreatePage() {
       setModalError(false);
       modalContext.closeModal();
     }
+    if (!modalContext.isOpen && !creatorAddr && !modalError) {
+      openModalFc(modalContext);
+      setModalError(true);
+    }
   }, [modalContext, creatorAddr, modalError]);
 
   const onSubmit = async (stepsData) => {
     if (!creatorAddr) {
-      modalContext.openModal(
-        <ErrorModal
-          message="Please connect a wallet to create a proposal."
-          title="Connect Wallet"
-          footerComponent={
-            <WalletConnect
-              closeModal={() => {
-                modalContext.closeModal();
-              }}
-              expandToContainer
-            />
-          }
-          onClose={modalContext.closeModal}
-        />,
-        { isErrorModal: true }
-      );
+      openModalFc(modalContext);
       setModalError(true);
       return;
     }
@@ -73,6 +89,7 @@ export default function ProposalCreatePage() {
     }
 
     const { name, body } = stepsData[0];
+
     const { strategy, minBalance, maxWeight, voteType } = stepsData[1];
 
     const hasValidStartTime = isStartTimeValid(
@@ -110,7 +127,7 @@ export default function ProposalCreatePage() {
       creatorAddr,
       endTime,
       startTime,
-      strategy: strategy,
+      strategy,
       voteType,
       ...(minBalance !== ''
         ? { minBalance: parseFloat(minBalance) }
@@ -136,6 +153,10 @@ export default function ProposalCreatePage() {
     passNextToComp: true,
     passSubmitToComp: true,
     previewComponent: <PreviewComponent />,
+    isBlocked: canCreateCheck.isBlocked || !creatorAddr,
+    warningBlockedComponent: canCreateCheck.isBlocked && (
+      <WarningMessage {...(canCreateCheck ?? {})} />
+    ),
     steps: [
       {
         label: 'Proposal',
