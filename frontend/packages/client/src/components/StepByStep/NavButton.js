@@ -6,6 +6,7 @@ const NavButton = ({
   onClick,
   text = '',
   formId: formIdParam,
+  styles = {},
 } = {}) => {
   const classes = classnames(
     'button transition-all is-flex is-align-items-center has-text-weight-bold py-2 px-5 rounded-xl',
@@ -19,7 +20,7 @@ const NavButton = ({
           className={classes}
           form={formIdParam}
           type="submit"
-          style={{ minWidth: '94px' }}
+          style={{ minWidth: '94px', ...styles }}
         >
           <span>{text}</span>
         </button>
@@ -27,7 +28,7 @@ const NavButton = ({
         <div
           className={classes}
           onClick={!disabled ? onClick : () => {}}
-          style={{ minWidth: '94px' }}
+          style={{ minWidth: '94px', ...styles }}
         >
           <span>{text}</span>
         </div>

@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useModalContext } from 'contexts/NotificationModal';
+import { useWebContext } from 'contexts/Web3';
+import { ErrorModal, WalletConnect } from 'components';
 import { useCommunityProposalsWithVotes, useMediaQuery } from 'hooks';
 import { FilterValues } from 'const';
 import CommunityProposalList from './CommunityProposalList';
@@ -13,6 +16,31 @@ const statusMap = {
 };
 export default function CommunityProposals({ communityId = 1, admins } = {}) {
   const notMobile = useMediaQuery();
+
+  const {
+    user: { addr },
+  } = useWebContext();
+
+  const { openModal, closeModal } = useModalContext();
+
+  const promptWalletConnect = () => {
+    openModal(
+      <ErrorModal
+        message="Please connect a wallet to create a proposal."
+        title="Connect Wallet"
+        footerComponent={
+          <WalletConnect
+            closeModal={() => {
+              closeModal();
+            }}
+            expandToContainer
+          />
+        }
+        onClose={closeModal}
+      />,
+      { isErrorModal: true }
+    );
+  };
 
   const proposalFilterValues = Object.entries(FilterValues)
     .filter(
@@ -88,14 +116,24 @@ export default function CommunityProposals({ communityId = 1, admins } = {}) {
         {notMobile && (
           <div className="columns m-0">
             <div className="column p-0 is-10">
-              <Link to={`/community/${communityId}/proposal/create`}>
+              {addr ? (
+                <Link to={`/community/${communityId}/proposal/create`}>
+                  <div
+                    className="button is-fullwidth rounded-sm is-flex small-text has-text-white has-background-black"
+                    style={{ minHeight: '40px' }}
+                  >
+                    Create Proposal
+                  </div>
+                </Link>
+              ) : (
                 <div
                   className="button is-fullwidth rounded-sm is-flex small-text has-text-white has-background-black"
                   style={{ minHeight: '40px' }}
+                  onClick={promptWalletConnect}
                 >
                   Create Proposal
                 </div>
-              </Link>
+              )}
             </div>
           </div>
         )}

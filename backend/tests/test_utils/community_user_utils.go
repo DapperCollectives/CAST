@@ -10,7 +10,21 @@ import (
 	"time"
 
 	"github.com/DapperCollectives/CAST/backend/main/models"
+	"github.com/DapperCollectives/CAST/backend/main/shared"
 )
+
+type PaginatedUserProposalsResponse struct {
+	Data         []UserProposalData `json:"data"`
+	Start        int                `json:"start"`
+	Count        int                `json:"count"`
+	TotalRecords int                `json:"totalRecords"`
+	Next         int                `json:"next"`
+}
+
+type UserProposalData struct {
+	Proposal models.Proposal        `json:"proposal"`
+	Result   shared.ProposalResults `json:"result"`
+}
 
 var DefaultAuthor = models.CommunityUser{
 	Community_id: 1,

@@ -17,8 +17,9 @@ export default function useVoteOnProposal() {
     error,
   } = useMutation(
     async ({ proposal, voteData }) => {
+      const { choices } = voteData;
       const timestamp = Date.now();
-      const choice = voteData.choices[0];
+      const choice = choices.length === 1 ? choices[0] : choices.join(',');
       const message = `${proposal.id}:${choice}:${timestamp}`;
 
       const [compositeSignatures, voucher] = await signMessageByWalletProvider(

@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/DapperCollectives/CAST/backend/main/models"
-	"github.com/DapperCollectives/CAST/backend/main/shared"
 	s "github.com/DapperCollectives/CAST/backend/main/shared"
 )
 
@@ -30,14 +29,6 @@ type PaginatedResponseWithCommunity struct {
 	Count        int                `json:"count"`
 	TotalRecords int                `json:"totalRecords"`
 	Next         int                `json:"next"`
-}
-
-type PaginatedResponseWithProposal struct {
-	Data         []models.Proposal `json:"data"`
-	Start        int               `json:"start"`
-	Count        int               `json:"count"`
-	TotalRecords int               `json:"totalRecords"`
-	Next         int               `json:"next"`
 }
 
 type PaginatedResponseWithUserCommunity struct {
@@ -65,7 +56,7 @@ type PaginatedResponseWithLeaderboardUser struct {
 }
 
 type PaginatedResponseWithUserProposal struct {
-	Data         []shared.UserProposal `json:"data"`
+	Data         []models.UserProposal `json:"data"`
 	Start        int                   `json:"start"`
 	Count        int                   `json:"count"`
 	TotalRecords int                   `json:"totalRecords"`

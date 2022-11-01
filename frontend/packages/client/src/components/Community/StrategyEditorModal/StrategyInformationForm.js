@@ -60,7 +60,7 @@ export default function StrategyInformationForm({
             register={register}
             error={errors[field]}
             disabled={isSubmitting}
-            classNames="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
+            classNames="is-full-mobile mt-4"
           />
         ))}
       </div>

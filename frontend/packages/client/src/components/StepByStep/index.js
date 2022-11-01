@@ -19,14 +19,34 @@ function StepByStep({
   blockNavigationText,
   useControlsOnTopBar = true,
   previewComponent,
+  isBlocked = false,
+  warningBlockedComponent,
 } = {}) {
   const notMobile = useMediaQuery();
   const [currentStep, setCurrentStep] = useState(0);
   const [previewMode, setPreviewMode] = useState(false);
   const [showPreStep, setShowPreStep] = useState(!!preStep);
-  const [isStepValid, setStepValid] = useState(false);
+  const [isMovingNextStep, setIsMovingNextStep] = useState(false);
+  const [validationStepMap, setValidationStepMap] = useState({});
+  const [stepStatusMap, setStepStatusMap] = useState({});
+
   const [stepsData, setStepsData] = useState({});
   const refs = useRef();
+
+  const updateStepValid = (currentStep) => (isValid) => {
+    setValidationStepMap((state) => ({
+      ...state,
+      ...{ [currentStep]: isValid },
+    }));
+  };
+
+  const setStepStatus = (currentStep) => (status) => {
+    // status: submitted | updated
+    setStepStatusMap((state) => ({
+      ...state,
+      ...{ [currentStep]: status },
+    }));
+  };
 
   const onStepAdvance = (direction = 'next') => {
     if (direction === 'next') {
@@ -36,6 +56,7 @@ function StepByStep({
           return;
         }
         setCurrentStep(currentStep + 1);
+        setStepStatus(currentStep)('submitted');
       }
     } else if (direction === 'prev') {
       if (currentStep - 1 >= 0) {
@@ -94,6 +115,11 @@ function StepByStep({
 
   const isPreviewModeVisible = currentStep > 0;
 
+  // if one step was updated after submitted then moving next is only enabled thru next button
+  const leftNavNavigationEnabled = Object.values(stepStatusMap).every(
+    (stepStatus) => stepStatus !== 'updated'
+  );
+
   return (
     <>
       {blockNavigationOut && (
@@ -108,7 +134,9 @@ function StepByStep({
           onClickBack={moveBackStep}
           isBackButtonEnabled={currentStep - 1 >= 0}
           onClickNext={moveToNextStep}
-          isStepValid={isStepValid}
+          isStepValid={
+            (validationStepMap?.[currentStep] ?? false) && !isMovingNextStep
+          }
           showSubmitOrNext={nextAction}
           formId={formId}
           finalLabel={finalLabel}
@@ -116,6 +144,7 @@ function StepByStep({
           onClickPreview={togglePreviewMode}
           previewMode={previewMode}
           isPreviewModeVisible={isPreviewModeVisible}
+          isBlocked={isBlocked}
         />
       )}
       <section
@@ -150,18 +179,21 @@ function StepByStep({
             name={useControlsOnTopBar ? stepsData?.[0]?.name ?? '' : null}
             previewMode={previewMode}
             moveToStep={moveToStep}
+            validatedSteps={validationStepMap}
+            navigationEnabled={leftNavNavigationEnabled}
           />
 
           {/* right panel */}
           <div
             className={`step-by-step-body flex-1 has-background-white px-4-mobile pt-0-mobile is-flex-mobile is-flex-direction-column-mobile`}
           >
+            {isBlocked && <div className="mb-5">{warningBlockedComponent}</div>}
             {isSubmitting && (
               <div
                 className="is-flex flex-1 is-flex-direction-column is-align-items-center is-justify-content-center"
                 style={{ height: '100%' }}
               >
-                <Loader className="mb-4" />
+                <Loader className="mb-5" />
                 <p className="has-text-grey">{submittingMessage}</p>
               </div>
             )}
@@ -177,8 +209,11 @@ function StepByStep({
                     },
                   });
                 },
-                setStepValid,
-                isStepValid,
+                setStepValid: updateStepValid(currentStep),
+                isStepValid: validationStepMap?.[currentStep],
+                setIsMovingNextStep,
+                stepStatus: stepStatusMap?.[currentStep],
+                setStepStatus: setStepStatus(currentStep),
                 stepData: stepsData[currentStep],
                 stepsData,
                 setPreCheckStepAdvance,

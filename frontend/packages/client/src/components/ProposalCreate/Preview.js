@@ -2,7 +2,7 @@ import { StyledStatusPill } from 'components';
 import { CommunityName } from 'components/ProposalInformation';
 import { FilterValues } from 'const';
 import { parseDateToServer } from 'utils';
-import { VoteOptions } from '../Proposal';
+import { SingleChoiceVote } from '../Proposal';
 
 const Preview = ({ stepsData }) => {
   const [
@@ -47,7 +47,7 @@ const Preview = ({ stepsData }) => {
         }}
       />
       {Boolean(proposal.choices) && (
-        <VoteOptions proposal={proposal} readOnly />
+        <SingleChoiceVote proposal={proposal} readOnly />
       )}
     </div>
   );

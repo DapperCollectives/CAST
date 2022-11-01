@@ -2,6 +2,7 @@ import { forwardRef, useEffect, useState } from 'react';
 import { Editor } from 'react-draft-wysiwyg';
 import { UploadImageModal } from 'components';
 import { customDraftToHTML, customHTMLtoDraft } from 'utils';
+import { Box } from '@chakra-ui/react';
 import {
   AtomicBlockUtils,
   ContentState,
@@ -211,18 +212,26 @@ const CustomEditor = forwardRef(({ onChange, value }, ref) => {
           onDone={addImagesToEditor}
         />
       )}
-      <Editor
-        toolbar={{ options, inline, list, link }}
-        editorState={localEditorState}
-        toolbarClassName="toolbarClassName"
-        wrapperClassName="border-light rounded-sm"
-        editorClassName="px-4 content"
-        onEditorStateChange={onEditorStateChange}
-        toolbarCustomButtons={[<AddImageOption addImage={addImage} />]}
-        customStyleMap={styleMap}
-        blockRenderMap={extendedBlockRenderMap}
-        ref={ref}
-      />
+      <Box
+        sx={{
+          '.editor-style': {
+            minHeight: 48,
+          },
+        }}
+      >
+        <Editor
+          toolbar={{ options, inline, list, link }}
+          editorState={localEditorState}
+          toolbarClassName="toolbarClassName"
+          wrapperClassName="border-light rounded-sm"
+          editorClassName="px-4 content editor-style"
+          onEditorStateChange={onEditorStateChange}
+          toolbarCustomButtons={[<AddImageOption addImage={addImage} />]}
+          customStyleMap={styleMap}
+          blockRenderMap={extendedBlockRenderMap}
+          ref={ref}
+        />
+      </Box>
     </>
   );
 });

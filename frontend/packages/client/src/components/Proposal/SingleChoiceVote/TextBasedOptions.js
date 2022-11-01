@@ -30,7 +30,7 @@ const TextBasedOptions = ({
         {choices.map((opt, i) => (
           <Wrapper
             key={`proposal-option-${i}`}
-            classNames="has-background-white border-light option-vote transition-all rounded py-5 px-4 has-text-justified word-break"
+            classNames="has-background-white border-light transition-all rounded py-5 px-4 has-text-justified word-break"
             extraClasses={choices?.length !== i + 1 ? 'mb-5' : {}}
             extraStylesMobile={
               choices?.length !== i + 1 ? { marginBottom: '14px' } : {}
@@ -41,9 +41,11 @@ const TextBasedOptions = ({
                 type="radio"
                 name={`${labelType}-${opt.value}`}
                 value={opt.value}
-                className={`mr-3`}
+                className={`yellow-radio mr-3`}
                 onChange={_onOptionSelect}
-                checked={currentOption === String(opt.value)}
+                checked={
+                  currentOption && currentOption[0] === String(opt.value)
+                }
                 disabled={readOnly}
               />
               <span />
@@ -65,7 +67,7 @@ const TextBasedOptions = ({
             className={`button vote-button transition-all is-flex has-background-yellow rounded-xl is-${
               currentOption && !readOnly ? 'enabled' : 'disabled'
             }`}
-            onClick={readOnly ? () => {} : onConfirmVote}
+            onClick={readOnly ? () => {} : () => onConfirmVote()}
           >
             Vote
           </button>
