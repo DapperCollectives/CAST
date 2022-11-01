@@ -9,6 +9,10 @@ const definitions = {
   lineHeights: {
     shorter: 1.2858,
   },
+  sizes: {
+    8: '2.125rem', // 34 px for button size small
+    11: '2.75rem', // 44 px for button size large
+  },
   // https://chakra-ui.com/docs/styled-system/responsive-styles
   breakpoints: {
     sm: '22.5em', // from 0 to 360px

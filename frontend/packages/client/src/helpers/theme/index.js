@@ -1,6 +1,7 @@
 //
 // ***********************************
 // Component style overrides for Chakra components
+import Button from './components/Button';
 import Input from './components/Input';
 import Link from './components/Link';
 import Text from './components/Text';
@@ -39,6 +40,7 @@ const overrides = {
     Card: CardStyle,
     Link,
     Text,
+    Button,
     // Other components go here
   },
 };

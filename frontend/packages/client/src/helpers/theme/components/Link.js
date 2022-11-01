@@ -3,6 +3,11 @@ const Link = {
     underlined: {
       textDecoration: 'underline',
     },
+    noHover: {
+      _hover: {
+        textDecoration: 'none',
+      },
+    },
   },
 };
 
