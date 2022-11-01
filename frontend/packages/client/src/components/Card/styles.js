@@ -35,7 +35,7 @@ const Card = {
       borderRadius: 'lg',
       cursor: 'pointer',
       _hover: {
-        border: '2px',
+        border: '1px',
       },
     },
   },

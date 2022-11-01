@@ -169,19 +169,21 @@ function StepByStep({
         />
         <div className="container is-flex is-flex-direction-column-mobile">
           {/* left panel */}
-          <LeftPanel
-            showBackButton={!useControlsOnTopBar}
-            currentStep={currentStep}
-            isSubmitting={isSubmitting}
-            steps={steps}
-            showPreStep={showPreStep}
-            moveBackStep={moveBackStep}
-            name={useControlsOnTopBar ? stepsData?.[0]?.name ?? '' : null}
-            previewMode={previewMode}
-            moveToStep={moveToStep}
-            validatedSteps={validationStepMap}
-            navigationEnabled={leftNavNavigationEnabled}
-          />
+          {!previewMode ? (
+            <LeftPanel
+              showBackButton={!useControlsOnTopBar}
+              currentStep={currentStep}
+              isSubmitting={isSubmitting}
+              steps={steps}
+              showPreStep={showPreStep}
+              moveBackStep={moveBackStep}
+              name={useControlsOnTopBar ? stepsData?.[0]?.name ?? '' : null}
+              previewMode={previewMode}
+              moveToStep={moveToStep}
+              validatedSteps={validationStepMap}
+              navigationEnabled={leftNavNavigationEnabled}
+            />
+          ) : null}
 
           {/* right panel */}
           <div
