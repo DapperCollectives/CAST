@@ -188,14 +188,14 @@ func TestUserProposals(t *testing.T) {
 
 		checkResponseCode(t, http.StatusOK, response.Code)
 
-		var p test_utils.PaginatedResponseWithProposal
+		var p test_utils.PaginatedResponseWithUserProposal
 		json.Unmarshal(response.Body.Bytes(), &p)
 
 		//all have the same community id
 		assert.Equal(t, 1, p.Data[0].Community_id)
 		assert.Equal(t, 1, p.Data[1].Community_id)
 		assert.Equal(t, 1, p.Data[2].Community_id)
-		assert.NotNil(t, p.Data[0].Name)
+		assert.NotNil(t, p.Data[0].Proposal_name)
 	})
 
 	clearTable("communities")
@@ -227,7 +227,7 @@ func TestUserProposals(t *testing.T) {
 		response := otu.GetCommunityUserProposalsAPIWithFilter(utils.AdminAddr, "draft")
 		checkResponseCode(t, http.StatusOK, response.Code)
 
-		var p test_utils.PaginatedResponseWithProposal
+		var p test_utils.PaginatedResponseWithUserProposal
 		json.Unmarshal(response.Body.Bytes(), &p)
 
 		assert.Equal(t, "draft", *p.Data[0].Status)

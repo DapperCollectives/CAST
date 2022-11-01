@@ -298,13 +298,13 @@ func TestGetProposalsByStatus(t *testing.T) {
 		for _, status := range statuses {
 			response := otu.GetProposalsForCommunityQueryParamsAPI(communityId, "order=asc&status="+status)
 
-			var proposalsResponse utils.PaginatedResponseWithProposal
+			var proposalsResponse utils.PaginatedResponseWithUserProposal
 			json.Unmarshal(response.Body.Bytes(), &proposalsResponse)
 
-			expectedStatus := idToStatus[proposalsResponse.Data[0].ID]
+			expectedStatus := idToStatus[*proposalsResponse.Data[0].Proposal_id]
 
 			assert.Equal(t, 1, proposalsResponse.Count)
-			assert.Equal(t, expectedStatus, *proposalsResponse.Data[0].Computed_status)
+			assert.Equal(t, expectedStatus, *proposalsResponse.Data[0].Status)
 		}
 	})
 
@@ -318,7 +318,7 @@ func TestGetProposalsByStatus(t *testing.T) {
 		for _, statuses := range combinations {
 			response := otu.GetProposalsForCommunityQueryParamsAPI(communityId, "order=asc&status="+strings.Join(statuses, ","))
 
-			var proposalsResponse utils.PaginatedResponseWithProposal
+			var proposalsResponse utils.PaginatedResponseWithUserProposal
 			json.Unmarshal(response.Body.Bytes(), &proposalsResponse)
 
 			// Assert correct number of proposals are returned.
@@ -327,8 +327,8 @@ func TestGetProposalsByStatus(t *testing.T) {
 
 			// Check each proposal ID has correct status
 			for _, proposal := range proposalsResponse.Data {
-				expectedStatus := idToStatus[proposal.ID]
-				assert.Equal(t, expectedStatus, *proposal.Computed_status)
+				expectedStatus := idToStatus[*proposal.Proposal_id]
+				assert.Equal(t, expectedStatus, *proposal.Status)
 			}
 		}
 	})
