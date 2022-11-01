@@ -47,7 +47,7 @@ const getStartTimeInterval = (startDateIsToday) => {
 
 const getStartTimeIntervalWithDelay = (date, startDateIsToday) => {
   if (startDateIsToday) {
-    return new Date(Date.now() + 60 * 60 * 1000);
+    return new Date(Date.now() + 10 * 60 * 1000);
   }
 
   const startDateIsTomorrow = date ? isTomorrow(date) : false;
