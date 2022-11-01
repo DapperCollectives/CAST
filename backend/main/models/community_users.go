@@ -201,6 +201,18 @@ func GetCommunitiesForUser(db *s.Database, addr string, pageParams shared.PagePa
 
 	mergedCommunities, totalCommunities := mergeUserRolesForCommunities(communities, pageParams.Start, pageParams.Count)
 
+	for i, community := range mergedCommunities {
+		var count int
+		err := db.Conn.QueryRow(
+			db.Context, `SELECT COUNT(*) FROM community_users WHERE community_id = $1`,
+			community.ID).
+			Scan(&count)
+		if err != nil {
+			log.Error().Err(err).Msg("Error getting count of members in community")
+		}
+
+		mergedCommunities[i].Member_count = &count
+	}
 	return mergedCommunities, totalCommunities, nil
 }
 
