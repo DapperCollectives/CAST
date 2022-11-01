@@ -74,6 +74,11 @@ const StepTwo = ({
   const defaultValueStrategy = useWatch({ control, name: 'strategy' });
   const voteType = useWatch({ control, name: 'voteType' });
 
+  // save vote type
+  useEffect(() => {
+    onDataChange({ voteType });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [voteType]);
   // **************************************************************
   //   This is to enable having choices when entering in preview mode
   //   fields are saved and validated when user hits on next
@@ -83,6 +88,7 @@ const StepTwo = ({
   //   but next will let the user know this needs to be updated
   const choicesTemp = useWatch({ control, name: 'choices' });
   const tabOption = useWatch({ control, name: 'tabOption' });
+
   useEffect(() => {
     let choices = choicesTemp;
     if (tabOption === 'visual') {
