@@ -212,7 +212,9 @@ func GetCommunities(db *s.Database, pageParams shared.PageParams) ([]*Community,
 	var communities []*Community
 	err := pgxscan.Select(db.Context, db.Conn, &communities,
 		`
-		SELECT * FROM communities
+		SELECT communities.*, users.profile_image AS creator_image 
+		FROM communities
+		JOIN users on users.addr = communities.creator_addr
 		LIMIT $1 OFFSET $2
 		`, pageParams.Count, pageParams.Start)
 

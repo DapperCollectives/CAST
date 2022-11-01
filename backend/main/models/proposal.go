@@ -26,6 +26,7 @@ type Proposal struct {
 	Max_weight           *float64                `json:"maxWeight,omitempty"`
 	Min_balance          *float64                `json:"minBalance,omitempty"`
 	Creator_addr         string                  `json:"creatorAddr" validate:"required"`
+	Creator_image        *string                 `json:"creatorImage,omitempty"`
 	Start_time           time.Time               `json:"startTime" validate:"required"`
 	Result               *string                 `json:"result,omitempty"`
 	End_time             time.Time               `json:"endTime" validate:"required"`
@@ -114,10 +115,12 @@ func GetProposalsForCommunity(
 
 func (p *Proposal) GetProposalById(db *s.Database) error {
 	sql := `
-	SELECT p.*, %s, count(v.id) as total_votes from proposals as p
+	SELECT p.*, %s, u.profile_image as creator_image, 
+	COUNT(v.id) as total_votes from proposals as p
 	left join votes as v on v.proposal_id = p.id
+	left join users as u on u.addr = p.creator_addr 
 	WHERE p.id = $1
-	GROUP BY p.id`
+	GROUP BY p.id, u.profile_image`
 	sql = fmt.Sprintf(sql, computedStatusSQL)
 	return pgxscan.Get(db.Context, db.Conn, p, sql, p.ID)
 }
