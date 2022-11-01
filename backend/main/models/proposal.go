@@ -88,7 +88,14 @@ func GetProposalsForCommunity(
 	var err error
 
 	// Get Proposals
-	sql := fmt.Sprintf(`SELECT *, %s FROM proposals WHERE community_id = $3`, computedStatusSQL)
+	sql := fmt.Sprintf(
+		`SELECT p.*, u.profile_image as creator_image, %s 
+		FROM proposals as p
+		left join users as u on u.addr = p.creator_addr
+		WHERE community_id = $3
+		`,
+		computedStatusSQL,
+	)
 
 	statusesFilterSql := generateStatusesFilterSQL(statuses)
 	orderBySql := fmt.Sprintf(` ORDER BY created_at %s`, params.Order)
