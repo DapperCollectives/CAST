@@ -45,7 +45,9 @@ export default function CommunityProposals({ communityId = 1, admins } = {}) {
   const proposalFilterValues = Object.entries(FilterValues)
     .filter(
       ([, value]) =>
-        FilterValues.inProgress !== value && FilterValues.terminated !== value
+        FilterValues.inProgress !== value &&
+        FilterValues.terminated !== value &&
+        FilterValues.draft !== value
     )
     .map(([key, value]) => ({ value: key, label: statusMap[value] ?? value }));
 
