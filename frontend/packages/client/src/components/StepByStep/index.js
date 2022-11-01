@@ -115,6 +115,8 @@ function StepByStep({
 
   const isPreviewModeVisible = currentStep > 0;
 
+  const previewModeFullWide = previewMode && notMobile;
+
   // if one step was updated after submitted then moving next is only enabled thru next button
   const leftNavNavigationEnabled = Object.values(stepStatusMap).every(
     (stepStatus) => stepStatus !== 'updated'
@@ -156,36 +158,42 @@ function StepByStep({
             : {}
         }
       >
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '50%',
-            height: '100vh',
-            zIndex: -1,
-          }}
-          className="has-background-white-ter is-hidden-mobile"
-        />
+        {!previewModeFullWide && (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '50%',
+              height: '100vh',
+              zIndex: -1,
+            }}
+            className="has-background-white-ter is-hidden-mobile"
+          />
+        )}
         <div className="container is-flex is-flex-direction-column-mobile">
           {/* left panel */}
-          <LeftPanel
-            showBackButton={!useControlsOnTopBar}
-            currentStep={currentStep}
-            isSubmitting={isSubmitting}
-            steps={steps}
-            showPreStep={showPreStep}
-            moveBackStep={moveBackStep}
-            name={useControlsOnTopBar ? stepsData?.[0]?.name ?? '' : null}
-            previewMode={previewMode}
-            moveToStep={moveToStep}
-            validatedSteps={validationStepMap}
-            navigationEnabled={leftNavNavigationEnabled}
-          />
+          {!previewModeFullWide ? (
+            <LeftPanel
+              showBackButton={!useControlsOnTopBar}
+              currentStep={currentStep}
+              isSubmitting={isSubmitting}
+              steps={steps}
+              showPreStep={showPreStep}
+              moveBackStep={moveBackStep}
+              name={useControlsOnTopBar ? stepsData?.[0]?.name ?? '' : null}
+              previewMode={previewMode}
+              moveToStep={moveToStep}
+              validatedSteps={validationStepMap}
+              navigationEnabled={leftNavNavigationEnabled}
+            />
+          ) : null}
 
           {/* right panel */}
           <div
-            className={`step-by-step-body flex-1 has-background-white px-4-mobile pt-0-mobile is-flex-mobile is-flex-direction-column-mobile`}
+            className={`step-by-step-body flex-1 has-background-white px-4-mobile pt-0-mobile is-flex-mobile is-flex-direction-column-mobile ${
+              previewModeFullWide ? 'preview-mode' : ''
+            }`}
           >
             {isBlocked && <div className="mb-5">{warningBlockedComponent}</div>}
             {isSubmitting && (
