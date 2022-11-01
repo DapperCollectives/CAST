@@ -35,7 +35,7 @@ var (
 		Strategy:     &tokenWeightedDefault,
 		Status:       &published,
 		Block_height: &blockHeight,
-		TallyMethod: "single-choice",
+		TallyMethod:  "single-choice",
 	}
 
 	DraftProposalStruct = models.Proposal{
@@ -44,6 +44,14 @@ var (
 		Status: &draft,
 	}
 )
+
+type PaginatedResponseWithProposal struct {
+	Data         []models.Proposal `json:"data"`
+	Start        int               `json:"start"`
+	Count        int               `json:"count"`
+	TotalRecords int               `json:"totalRecords"`
+	Next         string            `json:"next"`
+}
 
 func (otu *OverflowTestUtils) GetProposalsForCommunityAPI(communityId int) *httptest.ResponseRecorder {
 	req, _ := http.NewRequest("GET", "/communities/"+strconv.Itoa(communityId)+"/proposals", nil)
@@ -134,7 +142,20 @@ func (otu *OverflowTestUtils) GenerateCancelProposalStruct(
 
 	return &payload
 }
+func (otu *OverflowTestUtils) GenerateClosedProposalPayload(
+	signer string,
+) *models.UpdateProposalRequestPayload {
+	cancelled := "closed"
+	payload := models.UpdateProposalRequestPayload{Proposal: &models.Proposal{Status: &cancelled}}
+	timestamp := fmt.Sprint(time.Now().UnixNano() / int64(time.Millisecond))
+	compositeSignatures := otu.GenerateCompositeSignatures(signer, timestamp)
+	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", signer))
+	payload.Signing_addr = fmt.Sprintf("0x%s", account.Address().String())
+	payload.Timestamp = timestamp
+	payload.Composite_signatures = compositeSignatures
 
+	return &payload
+}
 func (otu *OverflowTestUtils) GenerateUpdatedDraftProposalPayload(
 	signer string,
 	strategy string,
@@ -156,11 +177,26 @@ func (otu *OverflowTestUtils) GenerateUpdatedDraftProposalPayload(
 	return &payload
 }
 
+func (otu *OverflowTestUtils) GenerateUpdateProposalStatusPayload(
+	signer string,
+	status string,
+) *models.UpdateProposalRequestPayload {
+	payload := models.UpdateProposalRequestPayload{Proposal: &models.Proposal{Status: &status}}
+	timestamp := fmt.Sprint(time.Now().UnixNano() / int64(time.Millisecond))
+	compositeSignatures := otu.GenerateCompositeSignatures(signer, timestamp)
+	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", signer))
+	payload.Signing_addr = fmt.Sprintf("0x%s", account.Address().String())
+	payload.Timestamp = timestamp
+	payload.Composite_signatures = compositeSignatures
+
+	return &payload
+}
+
 func (otu *OverflowTestUtils) GenerateUpdateProposalBodyPayload(
 	signer string,
-	updatedProposal *models.Proposal,
+	proposal *models.Proposal,
 ) *models.UpdateProposalRequestPayload {
-	payload := models.UpdateProposalRequestPayload{Proposal: updatedProposal}
+	payload := models.UpdateProposalRequestPayload{Proposal: proposal}
 	timestamp := fmt.Sprint(time.Now().UnixNano() / int64(time.Millisecond))
 	compositeSignatures := otu.GenerateCompositeSignatures(signer, timestamp)
 	account, _ := otu.O.State.Accounts().ByName(fmt.Sprintf("emulator-%s", signer))

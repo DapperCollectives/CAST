@@ -36,6 +36,7 @@ type Community struct {
 	Proposal_threshold       *string     `json:"proposalThreshold,omitempty"`
 	Slug                     *string     `json:"slug,omitempty"                  validate:"required"`
 	Is_featured              *bool       `json:"isFeatured,omitempty"`
+	Member_count             *int        `json:"memberCount,omitempty"`
 
 	Total *int `json:"total,omitempty"` // for search only
 
@@ -96,7 +97,7 @@ type CanUserCreateProposalResponse struct {
 	IsAuthor               bool     `json:"isAuthor"`
 	HasPermission          bool     `json:"hasPermission"`
 	Reason                 string   `json:"reason,omitempty"`
-	Contract_type          string  `json:"contractType,omitempty"`
+	Contract_type          string   `json:"contractType,omitempty"`
 	Error                  error    `json:"error,omitempty"`
 }
 

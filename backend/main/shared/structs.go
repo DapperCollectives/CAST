@@ -70,12 +70,13 @@ type Choice struct {
 	Choice_img_url *string `json:"choiceImgUrl"`
 }
 
-type UserProposal struct {
-	Community_id   int       `json:"communityId"`
-	Community_name string    `json:"communityName"`
-	Proposal_name  string    `json:"name"`
-	Start_time     time.Time `json:"startTime"`
-	Status         string    `json:"status"`
+type ProposalResults struct {
+	Proposal_id       int                `json:"proposalId" validate:"required"`
+	Results           map[string]int     `json:"results" validate:"required"`
+	Results_float     map[string]float64 `json:"resultsFloat" validate:"required"`
+	Updated_at        time.Time          `json:"updatedAt" validate:"required"`
+	Cid               *string            `json:"cid,omitempty"`
+	Achievements_done bool               `json:"achievementsDone"`
 }
 
 type MintParams struct {

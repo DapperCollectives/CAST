@@ -50,6 +50,19 @@ type UpdateProposalRequestPayload struct {
 	s.TimestampSignaturePayload
 }
 
+type UserProfileProposal struct {
+	Proposal UserProposal    `json:"proposal"`
+	Results  ProposalResults `json:"result"`
+}
+type UserProposal struct {
+	Community_id   *int       `json:"communityId,omitempty"`
+	Community_name *string    `json:"communityName,omitempty"`
+	Proposal_id    *int       `json:"proposalId,omitempty"`
+	Proposal_name  *string    `json:"name,omitempty"`
+	Start_time     *time.Time `json:"startTime,omitempty"`
+	Status         *string    `json:"status,omitempty"`
+}
+
 var computedStatusSQL = `
 	CASE
 		WHEN status = 'published' AND start_time > (now() at time zone 'utc') THEN 'pending'

@@ -99,10 +99,13 @@ const StepTwo = ({
   const { isSubmitting, isValid, errors, isDirty } = formState;
 
   useEffect(() => {
-    if (isStepValid !== isValid) {
-      setStepValid(isValid);
+    // setting is valid to allow move forward to trigger validation
+    // if form is not valid after trying to submit
+    // isValid will be set to false and will update here
+    if (isStepValid !== (isValid || isDirty)) {
+      setStepValid(isValid || isDirty);
     }
-  }, [isValid, isStepValid, setStepValid]);
+  }, [isValid, isStepValid, setStepValid, isDirty]);
 
   useEffect(() => {
     setIsMovingNextStep(isSubmitting);
