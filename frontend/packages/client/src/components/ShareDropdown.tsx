@@ -16,11 +16,15 @@ interface ShareDropdownProps {
   twitterShareString: string;
   copyString: string;
   isIconOnly?: boolean;
+  offset?: [number, number];
+  direction?: 'ltr' | 'rtl';
 }
 const ShareDropdown: React.FC<ShareDropdownProps> = ({
   isIconOnly = true,
   twitterShareString = '',
   copyString = '',
+  offset,
+  direction,
 }) => {
   const isBiggerThanMobile = useMediaQuery();
 
@@ -30,7 +34,7 @@ const ShareDropdown: React.FC<ShareDropdownProps> = ({
 
   return (
     <>
-      <Menu>
+      <Menu offset={offset} direction={direction}>
         <MenuButton
           transition="all 0.2s"
           borderWidth="1px"

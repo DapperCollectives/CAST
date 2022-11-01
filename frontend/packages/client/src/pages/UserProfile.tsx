@@ -1,10 +1,9 @@
 import Blockies from 'react-blockies';
-import { useParams } from 'react-router-dom';
 import { useWebContext } from 'contexts/Web3';
 import { CommunityLinks } from 'components';
 import ShareDropdown from 'components/ShareDropdown';
 import WalletAddress from 'components/WalletAddress';
-import { useMediaQuery } from 'hooks';
+import { useMediaQuery, useQueryParams } from 'hooks';
 import { Box, Flex, Spacer } from '@chakra-ui/react';
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from '@chakra-ui/react';
 import PageContainer from 'layout/PageContainer';
@@ -18,7 +17,15 @@ const UserProfile: React.FC = () => {
 
   const isBiggerThanMobile = useMediaQuery();
 
-  const { addr: userAddres } = useParams<{ addr: string }>();
+  const { userAddress }: { userAddress: string } = useQueryParams({
+    userAddress: 'addr',
+  });
+
+  // if there's an address provided in the query param then use it to get user information
+  const currentUserAddr =
+    userAddress === addr || !!userAddress ? addr : userAddress;
+
+  // Load here info for currentUserAddr with hook
 
   return (
     <PageContainer>
@@ -26,7 +33,7 @@ const UserProfile: React.FC = () => {
         <Flex maxWidth={[null, null, '400px']} width="100%" flexWrap="wrap">
           <Flex minW="100%">
             <Blockies
-              seed={addr}
+              seed={currentUserAddr}
               size={10}
               scale={isBiggerThanMobile ? 12.4 : 9.6}
               className="blockies"
@@ -34,7 +41,7 @@ const UserProfile: React.FC = () => {
           </Flex>
           <Flex pt="24px" minW="100%">
             <Box maxW="193px">
-              <WalletAddress addr={addr} />
+              <WalletAddress addr={currentUserAddr} />
             </Box>
           </Flex>
           <Flex minW="100%">
