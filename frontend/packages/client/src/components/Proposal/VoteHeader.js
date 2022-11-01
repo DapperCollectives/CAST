@@ -9,7 +9,7 @@ const Wrapper = ({ children }) => (
   </h3>
 );
 
-export default function VoteHeader({ status }) {
+export default function VoteHeader({ status, voteType = 'single-choice' }) {
   // Status: user-voted, invite-to-vote, is-closed
   const message = {
     'user-voted': (
@@ -20,7 +20,12 @@ export default function VoteHeader({ status }) {
         You successfully voted on this proposal!
       </div>
     ),
-    'invite-to-vote': <>Rank your vote &#10024;</>,
+    'invite-to-vote': (
+      <>
+        {voteType === 'single-choice' ? 'Cast your vote' : 'Rank your vote'}{' '}
+        &#10024;
+      </>
+    ),
     'is-closed': <>Voting has ended on this proposal.</>,
   };
 

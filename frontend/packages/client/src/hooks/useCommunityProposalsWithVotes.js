@@ -39,7 +39,7 @@ export default function useCommunityProposalsWithVotes({
           const userVotes = await fetchProposalUserVotes({ addr, proposalIds });
           const mergedMapResults = assign(
             {},
-            ...proposalIds.map((id) => ({ [id]: null })),
+            ...(proposalIds ?? []).map((id) => ({ [id]: null })),
             ...(userVotes?.data ?? []).map(({ proposalId, choices }) => ({
               [proposalId]: choices,
             }))

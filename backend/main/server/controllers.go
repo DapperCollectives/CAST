@@ -398,7 +398,6 @@ func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
 	var p models.Proposal
 	p.Community_id = communityId
 
-	
 	if err := validatePayload(r.Body, &p); err != nil {
 		log.Error().Err(err).Msg("Error validating payload")
 		respondWithError(w, errIncompleteRequest)

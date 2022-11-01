@@ -42,6 +42,7 @@ type Proposal struct {
 	Voucher              *shared.Voucher         `json:"voucher,omitempty"`
 	Achievements_done    bool                    `json:"achievementsDone"`
 	TallyMethod          string                  `json:"voteType" validate:"required"`
+	Quorum				 *float64				 `json:"quorum,omitempty"`
 }
 
 type UpdateProposalRequestPayload struct {
@@ -146,9 +147,10 @@ func (p *Proposal) CreateProposal(db *s.Database) error {
 	cid, 
 	composite_signatures,
 	voucher,
-	tally_method
+	tally_method,
+	quorum
 	)
-	VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+	VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
 	RETURNING id, created_at
 	`,
 		p.Community_id,
@@ -167,6 +169,7 @@ func (p *Proposal) CreateProposal(db *s.Database) error {
 		p.Composite_signatures,
 		p.Voucher,
 		p.TallyMethod,
+		p.Quorum,
 	).Scan(&p.ID, &p.Created_at)
 
 	return err
@@ -210,17 +213,19 @@ func (p *Proposal) UpdateDraftProposal(db *s.Database) error {
 		strategy = COALESCE($3, strategy),
 		min_balance = COALESCE($4, min_balance),
 		max_weight = COALESCE($5, max_weight),
-		start_time = COALESCE($6, start_time),
-		end_time = COALESCE($7, end_time),
-		body = COALESCE($8, body),
-		block_height = COALESCE($9, block_height),
-		cid = COALESCE($10, cid)
-		WHERE id = $11
+		quorum = COALESCE($6, quorum),
+		start_time = COALESCE($7, start_time),
+		end_time = COALESCE($8, end_time),
+		body = COALESCE($9, body),
+		block_height = COALESCE($10, block_height),
+		cid = COALESCE($11, cid)
+		WHERE id = $12
 	`, p.Name,
 		p.Choices,
 		p.Strategy,
 		p.Min_balance,
 		p.Max_weight,
+		p.Quorum,
 		p.Start_time,
 		p.End_time,
 		p.Body,

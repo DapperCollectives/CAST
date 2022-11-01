@@ -46,12 +46,21 @@ const StepTwoSchema = yup.object().shape({
         })
       ),
     })
-    .when('voteType', (voteType, schema) =>
-      voteType === 'single-choice'
+    .when('voteType', (voteType, schema) => {
+      if (voteType === 'basic') return;
+      return voteType === 'single-choice'
         ? schema.min(2, 'Please add a choice, minimum amount is two')
-        : schema.min(3, 'Please add a choice, minimum amount is three')
-    )
+        : schema.min(3, 'Please add a choice, minimum amount is three');
+    })
     .unique('value', 'Invalid duplicated option'),
+  quorum: yup
+    .string()
+    .trim()
+    .matches(/\s+$|^$|(^[0-9]+$)/, 'Quorum threshold must be a valid number')
+    .when('voteType', (voteType, schema) => {
+      if (voteType !== 'basic') return;
+      return schema.required('Quorum threshold is required');
+    }),
   maxWeight: yup
     .string()
     .trim()
