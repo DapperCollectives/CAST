@@ -17,50 +17,95 @@ export default function SubscribeCommunityButton({
   const { openModal, closeModal } = useModalContext();
   const { notificationSettings, updateCommunitySubscription } =
     useNotificationServiceContext();
-  const subscribedToCommunity =
-    notificationSettings?.communitySubscription.some(
-      (c) => c.communityId === communityId?.toString() && c.subscribed
-    );
-  const subscribedToEmails =
-    notificationSettings?.isSubscribedFromCommunityUpdates;
+  const { communitySubscription, isSubscribedFromCommunityUpdates, email } =
+    notificationSettings;
+
+  const subscribedToCommunity = communitySubscription.some(
+    (c) => c.communityId === communityId?.toString() && c.subscribed
+  );
+  const subscribedToEmails = isSubscribedFromCommunityUpdates;
   const isSubscribed = subscribedToCommunity && subscribedToEmails;
+
   const { popToast } = useToast();
   const { user } = useWebContext();
   const history = useHistory();
-
-  const onOpenModal = () => {
-    if (!user?.addr) {
-      openModal(
-        <ErrorModal
-          message="In order to subscribe to a community, you must first connect your Flow wallet."
-          title="Connect Wallet"
-          footerComponent={
-            <WalletConnect closeModal={closeModal} expandToContainer />
-          }
-          onClose={closeModal}
-        />,
-        { isErrorModal: true }
-      );
-    } else if (isSubscribed) {
-      updateCommunitySubscription(
-        communityId,
-        subscribeNotificationIntentions.unsubscribe
-      );
-      const emailNotificationsState = subscribedToEmails ? 'on' : 'off';
+  const openUpdateSubscriptionErorrModal = () => {
+    openModal(
+      <ErrorModal
+        message="Something went wrong, and your action could not be completed. Please try again later."
+        title="Error"
+        footerComponent={
+          <button
+            className="button subscribe-community-button p-0 is-fullwidth rounded-lg"
+            onClick={closeModal}
+          >
+            Close
+          </button>
+        }
+        onClose={closeModal}
+      />,
+      { isErrorModal: true }
+    );
+  };
+  const openWalletErrorModal = () => {
+    openModal(
+      <ErrorModal
+        message="In order to subscribe to a community, you must first connect your Flow wallet."
+        title="Connect Wallet"
+        footerComponent={
+          <WalletConnect closeModal={closeModal} expandToContainer />
+        }
+        onClose={closeModal}
+      />,
+      { isErrorModal: true }
+    );
+  };
+  const handleUpdateSubscription = async () => {
+    const subscribeIntention = isSubscribed
+      ? subscribeNotificationIntentions.unsubscribe
+      : subscribeNotificationIntentions.subscribe;
+    try {
+      await updateCommunitySubscription([
+        {
+          communityId,
+          subscribeIntention,
+        },
+      ]);
+      const emailNotificationsState =
+        subscribeIntention === subscribeNotificationIntentions.subscribe
+          ? 'on'
+          : 'off';
       popToast({
         message: `Email notifications are turned ${emailNotificationsState}`,
-        messageType: 'info',
+        messageType: 'success',
         actionFn: () => history.push('/settings'),
         actionText: 'Manage Settings',
       });
+    } catch {
+      openUpdateSubscriptionErorrModal();
+    }
+  };
+  const handleSignUp = () => {
+    openModal(
+      <NotificationsModal communityId={communityId} onClose={closeModal} />,
+      {
+        classNameModalContent: 'rounded modal-content-sm',
+        showCloseButton: false,
+      }
+    );
+  };
+  const handleBellButtonClick = () => {
+    //if user is not connect to wallet open error modal
+    if (!user?.addr) {
+      openWalletErrorModal();
+      return;
+    }
+    //if leanplum has user email handle the subscribe/unsubscribe and show toast
+    //if leanplumn doesn't have user email, show subscribe modal
+    if (email?.length > 0) {
+      handleUpdateSubscription();
     } else {
-      openModal(
-        <NotificationsModal communityId={communityId} onClose={closeModal} />,
-        {
-          classNameModalContent: 'rounded modal-content-sm',
-          showCloseButton: false,
-        }
-      );
+      handleSignUp();
     }
   };
 
@@ -88,7 +133,7 @@ export default function SubscribeCommunityButton({
       className={`column p-0 is-narrow-tablet is-full-mobile ${className}`}
       style={containerStyles}
     >
-      <button className={buttonClasses} onClick={onOpenModal}>
+      <button className={buttonClasses} onClick={handleBellButtonClick}>
         <Svg name={buttonIcon} style={{ minWidth: 24 }} />
         {size === 'full' && <span className="ml-2">{subscribeText}</span>}
       </button>

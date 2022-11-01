@@ -5,9 +5,7 @@ import { subscribeNotificationIntentions } from 'const';
 import NotificationsSignUp from './SignUp';
 
 const NotificationsModal = ({ onClose, communityId }) => {
-  const { updateCommunitySubscription, notificationSettings } =
-    useNotificationServiceContext();
-  const { email } = notificationSettings;
+  const { updateCommunitySubscription } = useNotificationServiceContext();
   const {
     user: { addr },
   } = useWebContext();
@@ -39,7 +37,6 @@ const NotificationsModal = ({ onClose, communityId }) => {
       onSubscribe={handleSubscribeNotification}
       onClose={onClose}
       communityId={communityId}
-      userEmail={email}
     />
   );
 };

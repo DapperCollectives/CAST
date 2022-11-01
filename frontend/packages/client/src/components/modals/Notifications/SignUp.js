@@ -7,13 +7,13 @@ import Error from '../Error';
 import Modal from '../Modal';
 import { getSchema } from './FormConfig';
 
-const SignUpForm = ({ setErrorMessage, onSubscribe, onClose, userEmail }) => {
+const SignUpForm = ({ setErrorMessage, onSubscribe, onClose }) => {
   const [signupAll, setSignupAll] = useState(false);
 
   const { register, handleSubmit, formState } = useForm({
     resolver: yupResolver(getSchema()),
     defaultValues: {
-      email: userEmail,
+      email: '',
     },
   });
 
@@ -83,6 +83,7 @@ const SignUpForm = ({ setErrorMessage, onSubscribe, onClose, userEmail }) => {
                 <b>Close</b>
               </button>
               <button
+                disabled={errors?.email}
                 className="button is-primary rounded-lg px-3 flex-1 ml-2"
                 onClick={handleSubmit(onSubmit)}
               >
