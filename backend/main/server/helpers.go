@@ -1177,7 +1177,6 @@ func (h *Helpers) validateTimestamp(timestamp string, expiry int) error {
 }
 
 func (h *Helpers) validateUser(addr, timestamp string, compositeSignatures *[]shared.CompositeSignature) error {
-
 	if err := h.validateTimestamp(timestamp, 60); err != nil {
 		return err
 	}
