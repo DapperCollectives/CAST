@@ -122,14 +122,14 @@ const StepThree = ({
       isToday(startDate) &&
       startTime &&
       new Date().setHours(startTime.getHours(), startTime.getMinutes(), 0, 0) <
-        new Date().setHours(1, 0, 0, 0)
+        new Date().setHours(0, 10, 0, 0)
     ) {
       setValue('startTime', '');
     }
   }, [startDate, startTime, setValue]);
 
   const minDateForStartDate = new Date(
-    HAS_DELAY_ON_START_TIME ? Date.now() + 60 * 60 * 1000 : Date.now()
+    HAS_DELAY_ON_START_TIME ? Date.now() + 10 * 60 * 1000 : Date.now()
   );
 
   const maxDateForStartDate = endDate
