@@ -90,7 +90,7 @@ export default function ProposalCreatePage() {
 
     const { name, body } = stepsData[0];
 
-    const { strategy, minBalance, maxWeight, voteType } = stepsData[1];
+    const { strategy, minBalance, maxWeight, voteType, quorum } = stepsData[1];
 
     const hasValidStartTime = isStartTimeValid(
       stepsData[2].startTime,
@@ -129,6 +129,7 @@ export default function ProposalCreatePage() {
       startTime,
       strategy,
       voteType,
+      ...(quorum !== '' ? { quorum: parseFloat(quorum) } : undefined),
       ...(minBalance !== ''
         ? { minBalance: parseFloat(minBalance) }
         : undefined),

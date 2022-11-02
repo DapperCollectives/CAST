@@ -606,7 +606,7 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorRespo
 
 	canUserCreateProposal := community.CanUserCreateProposal(h.A.DB, h.A.FlowAdapter, p.Creator_addr)
 
-	if err := handlePermissionErrorr(canUserCreateProposal); err != nilErr {
+	if err := handlePermissionError(canUserCreateProposal); err != nilErr {
 		return models.Proposal{}, err
 	}
 
@@ -652,7 +652,7 @@ func (h *Helpers) createDraftProposal(c models.Community, p models.Proposal) (mo
 		p.Creator_addr,
 	)
 
-	if err := handlePermissionErrorr(canUserCreateProposal); err != nilErr {
+	if err := handlePermissionError(canUserCreateProposal); err != nilErr {
 		return models.Proposal{}, err
 	}
 
@@ -729,7 +729,7 @@ func (h *Helpers) updateDraftProposal(p models.Proposal) (models.Proposal, error
 		p.Creator_addr,
 	)
 
-	if err := handlePermissionErrorr(canUserCreateProposal); err != nilErr {
+	if err := handlePermissionError(canUserCreateProposal); err != nilErr {
 		return models.Proposal{}, err
 	}
 
@@ -742,7 +742,7 @@ func (h *Helpers) updateDraftProposal(p models.Proposal) (models.Proposal, error
 	return p, nilErr
 }
 
-func handlePermissionErrorr(result models.CanUserCreateProposalResponse) errorResponse {
+func handlePermissionError(result models.CanUserCreateProposalResponse) errorResponse {
 	// If user doesn't have permission, populate errorResponse
 	// with reason and error.
 	if !result.HasPermission {

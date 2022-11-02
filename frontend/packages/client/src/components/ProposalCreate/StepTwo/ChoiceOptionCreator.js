@@ -20,7 +20,7 @@ export default function ChoiceOptionCreator({
     setValue('tabOption', option);
   };
 
-  if (voteType === 'ranked-choice') {
+  if (voteType === 'ranked-choice' || voteType === 'basic') {
     setTab('text-based');
   }
 

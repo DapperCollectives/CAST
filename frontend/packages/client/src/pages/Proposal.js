@@ -412,7 +412,8 @@ export default function ProposalPage() {
                         held in Balancer's liquidity pools.
                       </div>
                     )}
-                    {proposal.voteType === 'single-choice' ? (
+                    {proposal.voteType === 'single-choice' ||
+                    proposal.voteType === 'basic' ? (
                       <SingleChoiceVote
                         labelType="mobile"
                         addr={user?.addr}
@@ -559,7 +560,8 @@ export default function ProposalPage() {
                     Balancer's liquidity pools.
                   </div>
                 )}
-                {proposal.voteType === 'single-choice' ? (
+                {proposal.voteType === 'single-choice' ||
+                proposal.voteType === 'basic' ? (
                   <SingleChoiceVote
                     labelType="desktop"
                     loggedIn={user?.loggedIn}

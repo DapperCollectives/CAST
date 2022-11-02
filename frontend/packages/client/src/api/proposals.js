@@ -1,7 +1,7 @@
 import {
   API_BASE_URL,
   COMMUNITIES_URL,
-  IPFS_GETWAY,
+  IPFS_GATEWAY,
   PROPOSALS_URL,
 } from './constants';
 import { checkResponse } from 'utils';
@@ -20,9 +20,24 @@ export const fetchProposal = async ({ proposalId }) => {
   const response = await fetch(url);
   const proposal = await checkResponse(response);
 
-  const sortedProposalChoices =
+  let sortedProposalChoices =
     proposal.choices?.sort((a, b) => (a.choiceText > b.choiceText ? 1 : -1)) ??
     [];
+
+  if (proposal.voteType === 'basic') {
+    // Ensure choices are ordered as For/Against/Abstain for basic voting
+    const choices = [...sortedProposalChoices];
+    sortedProposalChoices.forEach((choice) => {
+      let index = 0;
+      if (choice.choiceText === 'Against') {
+        index = 1;
+      } else if (choice.choiceText === 'Abstain') {
+        index = 2;
+      }
+      choices[index] = choice;
+    });
+    sortedProposalChoices = choices;
+  }
 
   const proposalData = {
     ...proposal,
@@ -32,7 +47,7 @@ export const fetchProposal = async ({ proposalId }) => {
       choiceImgUrl: choice.choiceImgUrl,
     })),
     ipfs: proposal.cid,
-    ipfsUrl: `${IPFS_GETWAY}/${proposal.cid}`,
+    ipfsUrl: `${IPFS_GATEWAY}/${proposal.cid}`,
     totalVotes: proposal.total_votes,
     // this is coming as a string from db but there could be multiple based on design
     strategy: proposal.strategy || '-',
@@ -48,6 +63,15 @@ export const createProposalApiReq = async ({
   timestamp,
 } = {}) => {
   const { communityId, ...proposalData } = proposalPayload;
+
+  if (proposalData.voteType === 'basic') {
+    proposalData.choices = [
+      { choiceText: 'For', choiceImgUrl: null },
+      { choiceText: 'Against', choiceImgUrl: null },
+      { choiceText: 'Abstain', choiceImgUrl: null },
+    ];
+  }
+
   const url = `${COMMUNITIES_URL}/${communityId}/proposals`;
   const fetchOptions = {
     method: 'POST',

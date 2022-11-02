@@ -17,7 +17,7 @@ const TextBasedChoices = ({
     remove,
   } = useFieldArray({
     control,
-    name: 'choices',
+    name: fieldName,
     focusAppend: true,
   });
 

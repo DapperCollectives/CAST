@@ -33,6 +33,7 @@ const Preview = ({ stepsData }) => {
             }))
         : null,
   };
+  console.log(proposal.choices);
   return (
     <div>
       <h1 className="title mt-5 is-3">{name}</h1>
