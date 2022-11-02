@@ -1,6 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { ErrorModal } from 'components';
-import { Retry } from 'components/modals';
+import { ErrorModal, RetryModal } from 'components';
 import { subscribeNotificationIntentions } from 'const';
 import {
   getUserSettings as getUser,
@@ -67,7 +66,7 @@ const NotificationServiceProvider = ({ children }) => {
 
   const openRetryModal = () => {
     openModal(
-      <Retry
+      <RetryModal
         message="There is an issue getting your notifications settings, you can try again."
         closeModal={closeModal}
         onRetry={initUser}
