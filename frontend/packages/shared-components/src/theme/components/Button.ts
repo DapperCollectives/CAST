@@ -1,5 +1,6 @@
 const Button = {
   baseStyle: {
+    // adds rounded border
     borderRadius: '3xl',
     _hover: {
       textDecoration: 'none',
