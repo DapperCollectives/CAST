@@ -3,6 +3,7 @@ import { Link as RouterLink } from 'react-router-dom';
 import { useWebContext } from 'contexts/Web3';
 import {
   CommunityLinks,
+  CustomTab,
   ShareProfileDropdown,
   WalletAddress,
 } from 'components';
@@ -14,7 +15,6 @@ import {
   HStack,
   Link,
   Spacer,
-  Tab,
   TabList,
   TabPanel,
   TabPanels,
@@ -41,11 +41,22 @@ const UserProfile: React.FC = () => {
     userAddress === addr || !userAddress ? addr : userAddress;
 
   // Load here info for currentUserAddr with hook
+  const {
+    instagramUrl,
+    twitterUrl,
+    websiteUrl,
+    discordUrl,
+    githubUrl,
+  }: { [key: string]: string } = {};
 
   return (
     <PageContainer>
       <Flex width="100%" flexWrap={['wrap', null, 'nowrap']}>
-        <Flex maxWidth={[null, null, '400px']} width="100%" flexWrap="wrap">
+        <Flex
+          maxWidth={[null, null, '300px', '400px']}
+          width="100%"
+          flexWrap="wrap"
+        >
           <VStack spacing={5}>
             <Flex minW="100%">
               <Blockies
@@ -78,33 +89,37 @@ const UserProfile: React.FC = () => {
             </Flex>
             <Flex minW="100%">
               <CommunityLinks
-                instagramUrl="dfdf"
-                twitterUrl="dfdf"
-                websiteUrl="dfdf"
-                discordUrl="dfdf"
-                githubUrl="dfdf"
+                instagramUrl={instagramUrl}
+                twitterUrl={twitterUrl}
+                websiteUrl={websiteUrl}
+                discordUrl={discordUrl}
+                githubUrl={githubUrl}
               />
             </Flex>
           </VStack>
         </Flex>
-        <Spacer minWidth={[0, 0, '72px']} maxWidth={[0, 0, '72px']} />
+        <Spacer minWidth={[0, 0, 0, '72px']} maxWidth={[0, 0, 0, '72px']} />
         <Flex flexGrow={1}>
-          <Tabs>
+          <Tabs
+            minWidth="100%"
+            isFitted={!isBiggerThanMobile}
+            variant="profile"
+          >
             <TabList>
-              <Tab>Activity</Tab>
-              <Tab>Communities</Tab>
-              <Tab>Memberships</Tab>
+              <CustomTab>Activity</CustomTab>
+              <CustomTab>Communities</CustomTab>
+              <CustomTab>Memberships</CustomTab>
             </TabList>
 
             <TabPanels>
               <TabPanel>
-                <p>All Activities</p>
+                <p>Here Show all Activities</p>
               </TabPanel>
               <TabPanel>
-                <p>Communities!</p>
+                <p>Show Communities!</p>
               </TabPanel>
               <TabPanel>
-                <p>Memberships</p>
+                <p>Show Memberships</p>
               </TabPanel>
             </TabPanels>
           </Tabs>
