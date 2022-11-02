@@ -5,12 +5,12 @@ import Input from './components/Input';
 import Link from './components/Link';
 import Text from './components/Text';
 // ***********************************
+import { extendTheme } from '@chakra-ui/react';
+// ***********************************
 //
 // ***********************************
 // Custom components style definitions
-import { CardStyle } from 'components/Card';
-// ***********************************
-import { extendTheme } from '@chakra-ui/react';
+import { default as CardStyle } from '../Card/styles';
 //
 // ***********************************
 // Global definitions overrides
