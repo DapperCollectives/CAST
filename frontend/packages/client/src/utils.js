@@ -265,7 +265,8 @@ export const isStartTimeValid = (startTime, startDate) => {
 
   startDateAndTime.setHours(startTime.getHours(), startTime.getMinutes());
 
-  const dif = (startDateAndTime - dateNow) / (60 * 60 * 1000);
+  // difference for PROD is 10 min
+  const dif = (startDateAndTime - dateNow) / (10 * 60 * 1000);
 
   return HAS_DELAY_ON_START_TIME ? dif > 1 : true;
 };
