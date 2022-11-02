@@ -5,7 +5,22 @@ export default {
   component: Button,
   argTypes: {
     size: {
+      control: {
+        type: 'select',
+      },
       options: ['lg', 'md', 'sm'],
+    },
+    border: {
+      control: {
+        type: 'select',
+      },
+      options: ['', 'light'],
+    },
+    bgColor: {
+      control: {
+        type: 'select',
+      },
+      options: ['yellow.500', 'grey.300'],
     },
   },
 };

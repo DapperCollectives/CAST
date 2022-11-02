@@ -5,6 +5,9 @@ const Button = {
     _hover: {
       textDecoration: 'none',
     },
+    _focus: {
+      'box-shadow': 'none',
+    },
   },
   sizes: {
     lg: {

@@ -2,9 +2,9 @@
 // https://v1.chakra-ui.com/docs/styled-system/theming/theme
 const definitions = {
   fonts: {
-    body: 'DM Sans',
-    heading: 'DM Sans',
-    mono: 'DM Sans',
+    body: `'DM Sans', sans-serif`,
+    heading: `'DM Sans', sans-serif`,
+    mono: `'DM Sans', sans-serif`,
   },
   lineHeights: {
     shorter: 1.2858,
