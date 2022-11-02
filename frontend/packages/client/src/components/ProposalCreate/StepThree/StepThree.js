@@ -74,7 +74,7 @@ const StepThree = ({
     field === 'startTime' ? setStartTimeOpen(false) : setEndTimeOpen(false);
   };
 
-  const { errors, isValid } = formState;
+  const { errors, isValid, isDirty } = formState;
 
   const onSubmit = () => {
     onSubmitParam();
@@ -98,10 +98,13 @@ const StepThree = ({
   const { startDate, startTime, endDate, endTime } = allFields;
 
   useEffect(() => {
-    if (isStepValid !== isValid) {
-      setStepValid(isValid);
+    // setting is valid to allow move forward to trigger validation
+    // if form is not valid after trying to submit
+    // isValid will be set to false and will update here
+    if (isStepValid !== (isValid || isDirty)) {
+      setStepValid(isValid || isDirty);
     }
-  }, [isValid, isStepValid, setStepValid]);
+  }, [isValid, isStepValid, setStepValid, isDirty]);
 
   // pre saves data so when submit
   // is triggered onDataChange has been already executed
@@ -119,14 +122,14 @@ const StepThree = ({
       isToday(startDate) &&
       startTime &&
       new Date().setHours(startTime.getHours(), startTime.getMinutes(), 0, 0) <
-        new Date().setHours(1, 0, 0, 0)
+        new Date().setHours(0, 10, 0, 0)
     ) {
       setValue('startTime', '');
     }
   }, [startDate, startTime, setValue]);
 
   const minDateForStartDate = new Date(
-    HAS_DELAY_ON_START_TIME ? Date.now() + 60 * 60 * 1000 : Date.now()
+    HAS_DELAY_ON_START_TIME ? Date.now() + 10 * 60 * 1000 : Date.now()
   );
 
   const maxDateForStartDate = endDate

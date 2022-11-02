@@ -74,6 +74,11 @@ const StepTwo = ({
   const defaultValueStrategy = useWatch({ control, name: 'strategy' });
   const voteType = useWatch({ control, name: 'voteType' });
 
+  // save vote type
+  useEffect(() => {
+    onDataChange({ voteType });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [voteType]);
   // **************************************************************
   //   This is to enable having choices when entering in preview mode
   //   fields are saved and validated when user hits on next
@@ -83,6 +88,7 @@ const StepTwo = ({
   //   but next will let the user know this needs to be updated
   const choicesTemp = useWatch({ control, name: 'choices' });
   const tabOption = useWatch({ control, name: 'tabOption' });
+
   useEffect(() => {
     let choices = choicesTemp;
     if (tabOption === 'visual') {
@@ -99,10 +105,13 @@ const StepTwo = ({
   const { isSubmitting, isValid, errors, isDirty } = formState;
 
   useEffect(() => {
-    if (isStepValid !== isValid) {
-      setStepValid(isValid);
+    // setting is valid to allow move forward to trigger validation
+    // if form is not valid after trying to submit
+    // isValid will be set to false and will update here
+    if (isStepValid !== (isValid || isDirty)) {
+      setStepValid(isValid || isDirty);
     }
-  }, [isValid, isStepValid, setStepValid]);
+  }, [isValid, isStepValid, setStepValid, isDirty]);
 
   useEffect(() => {
     setIsMovingNextStep(isSubmitting);
