@@ -4,8 +4,10 @@ import { useUserCommunities } from 'hooks';
 import { subscribeNotificationIntentions } from 'const';
 import NotificationsSignUp from './SignUp';
 
-const NotificationsModal = ({ onClose, communityId }) => {
-  const { updateCommunitySubscription } = useNotificationServiceContext();
+const NotificationsModal = ({ onClose, onError, onSuccess, communityId }) => {
+  const { updateCommunitySubscription, setUserEmail } =
+    useNotificationServiceContext();
+
   const {
     user: { addr },
   } = useWebContext();
@@ -14,7 +16,7 @@ const NotificationsModal = ({ onClose, communityId }) => {
     count: 100,
     initialLoading: false,
   });
-  const handleSubscribeNotification = (signupAll) => {
+  const handleSubscribeNotification = async (email, signupAll) => {
     const intentions = [];
     if (signupAll) {
       userCommunities.forEach(({ id }) => {
@@ -29,9 +31,14 @@ const NotificationsModal = ({ onClose, communityId }) => {
         subscribeIntention: subscribeNotificationIntentions.subscribe,
       });
     }
-    updateCommunitySubscription(intentions);
+    try {
+      await setUserEmail(email);
+      await updateCommunitySubscription(intentions);
+      onSuccess(subscribeNotificationIntentions.subscribe);
+    } catch {
+      onError();
+    }
   };
-
   return (
     <NotificationsSignUp
       onSubscribe={handleSubscribeNotification}

@@ -82,10 +82,12 @@ const NotificationServiceProvider = ({ children }) => {
   const updateCommunitySubscription = async (communitySubIntentions) => {
     try {
       await updateCommunity(communitySubIntentions);
+      await new Promise((r) => setTimeout(r, 500));
       await getUserSettings();
     } catch {
       throw new Error('cannot update community subscription');
     }
+    // throw Error();
   };
 
   const updateAllEmailNotificationSubscription = async (subscribeIntention) => {

@@ -19,7 +19,7 @@ const SignUpForm = ({ setErrorMessage, onSubscribe, onClose }) => {
 
   const onSubmit = async (formData) => {
     try {
-      onSubscribe(signupAll);
+      onSubscribe(formData.email, signupAll);
       onClose();
     } catch (e) {
       setErrorMessage(e.message);

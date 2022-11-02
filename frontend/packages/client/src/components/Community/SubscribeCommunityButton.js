@@ -19,10 +19,10 @@ export default function SubscribeCommunityButton({
     useNotificationServiceContext();
   const { communitySubscription, isSubscribedFromCommunityUpdates, email } =
     notificationSettings;
-
   const subscribedToCommunity = communitySubscription.some(
     (c) => c.communityId === communityId?.toString() && c.subscribed
   );
+
   const subscribedToEmails = isSubscribedFromCommunityUpdates;
   const isSubscribed = subscribedToCommunity && subscribedToEmails;
 
@@ -60,6 +60,19 @@ export default function SubscribeCommunityButton({
       { isErrorModal: true }
     );
   };
+  const showUpdateSuccessToast = (subscribeIntention) => {
+    const emailNotificationsState =
+      subscribeIntention === subscribeNotificationIntentions.subscribe
+        ? 'on'
+        : 'off';
+
+    popToast({
+      message: `Email notifications are turned ${emailNotificationsState}`,
+      messageType: 'success',
+      actionFn: () => history.push('/settings'),
+      actionText: 'Manage Settings',
+    });
+  };
   const handleUpdateSubscription = async () => {
     const subscribeIntention = isSubscribed
       ? subscribeNotificationIntentions.unsubscribe
@@ -71,23 +84,19 @@ export default function SubscribeCommunityButton({
           subscribeIntention,
         },
       ]);
-      const emailNotificationsState =
-        subscribeIntention === subscribeNotificationIntentions.subscribe
-          ? 'on'
-          : 'off';
-      popToast({
-        message: `Email notifications are turned ${emailNotificationsState}`,
-        messageType: 'success',
-        actionFn: () => history.push('/settings'),
-        actionText: 'Manage Settings',
-      });
+      showUpdateSuccessToast(subscribeIntention);
     } catch {
       openUpdateSubscriptionErorrModal();
     }
   };
   const handleSignUp = () => {
     openModal(
-      <NotificationsModal communityId={communityId} onClose={closeModal} />,
+      <NotificationsModal
+        communityId={communityId}
+        onClose={closeModal}
+        onError={openUpdateSubscriptionErorrModal}
+        onSuccess={showUpdateSuccessToast}
+      />,
       {
         classNameModalContent: 'rounded modal-content-sm',
         showCloseButton: false,

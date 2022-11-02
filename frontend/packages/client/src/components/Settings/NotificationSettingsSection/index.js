@@ -1,5 +1,6 @@
-import { useErrorHandlerContext } from 'contexts/ErrorHandler';
+import { useModalContext } from 'contexts/NotificationModal';
 import { useNotificationServiceContext } from 'contexts/NotificationService';
+import { ErrorModal } from 'components';
 import CommunitiesList from './CommunitiesList';
 import EmailAddressInput from './EmailAddressInput';
 import ReceiveEmailNotificationsSwitch from './ReceiveEmailNotificationsSwitch';
@@ -13,18 +14,29 @@ export default function NotificationSettingsSection() {
   } = useNotificationServiceContext();
   const { communitySubscription, email, isSubscribedFromCommunityUpdates } =
     notificationSettings;
-  const { notifyError } = useErrorHandlerContext();
-
+  const { openModal, closeModal } = useModalContext();
   const handleError = (fn) => {
     return async (...args) => {
       try {
         await fn(...args);
       } catch {
-        const error = new Error(
-          'Something went wrong, and your action could not be completed. Please try again later.'
+        openModal(
+          <ErrorModal
+            message="Something went wrong, and your action could not be completed. Please try again later."
+            title="Error"
+            footerComponent={
+              <button
+                className="button subscribe-community-button p-0 is-fullwidth rounded-lg"
+                onClick={closeModal}
+              >
+                Close
+              </button>
+            }
+            onClose={closeModal}
+          />,
+          { isErrorModal: true }
         );
-        notifyError(error);
-        throw error;
+        throw new Error();
       }
     };
   };
