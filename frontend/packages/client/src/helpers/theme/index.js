@@ -4,6 +4,7 @@
 import Button from './components/Button';
 import Input from './components/Input';
 import Link from './components/Link';
+import Tabs from './components/Tabs';
 import Text from './components/Text';
 // ***********************************
 //
@@ -41,6 +42,7 @@ const overrides = {
     Link,
     Text,
     Button,
+    Tabs,
     // Other components go here
   },
 };
