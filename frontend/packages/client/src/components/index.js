@@ -50,6 +50,7 @@ export { default as TooltipMessage } from './TooltipMessage';
 export { default as FadeInOut } from './FadeInOut';
 export {
   Error as ErrorModal,
+  Retry as RetryModal,
   VoteConfirmation as VoteConfirmationModal,
   CastingVote as CastingVoteModal,
   VoteConfirmed as VoteConfirmedModal,

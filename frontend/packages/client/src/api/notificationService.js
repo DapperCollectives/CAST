@@ -5,6 +5,7 @@ import {
   LEANPLUM_EXPORT_KEY,
   LEANPLUM_PROD_KEY,
 } from 'api/constants';
+import { subscribeNotificationIntentions } from 'const';
 import Leanplum from 'leanplum-sdk';
 
 const COMMUNITY_UPDATES_CATEGORY_ID = 1;
@@ -12,8 +13,25 @@ const options = {
   method: 'GET',
   headers: { accept: 'application/json' },
 };
-
-export const startLeanplum = () => {
+/* @param: communitySubIntentions : [{communityId:"1", subscribeIntention:"subscribe"},{communityId:"2",subscribeIntention:"unsubscribe"}]
+ * @return: {communityId1:'True', communityId2:'False'}
+ */
+const getDesiredAttributes = (communitySubIntentions) => {
+  return communitySubIntentions
+    .map(({ communityId, subscribeIntention }) => ({
+      key: `community${communityId}`,
+      value:
+        subscribeIntention === subscribeNotificationIntentions.subscribe
+          ? 'True'
+          : 'False',
+    }))
+    .reduce((acc, curr) => {
+      const { key, value } = curr;
+      acc[key] = value;
+      return acc;
+    }, {});
+};
+export const startLeanplumForUser = (walletId) => {
   const IS_LOCAL_DEV = process.env.REACT_APP_APP_ENV === 'development';
 
   if (IS_LOCAL_DEV) {
@@ -21,16 +39,16 @@ export const startLeanplum = () => {
   } else {
     Leanplum.setAppIdForProductionMode(LEANPLUM_APP_ID, LEANPLUM_PROD_KEY);
   }
-
-  Leanplum.start();
-};
-
-export const setUserId = async (walletId) => {
-  try {
-    Leanplum.setUserId(walletId);
-  } catch (e) {
-    throw new Error(e);
-  }
+  return new Promise((resolve, reject) => {
+    Leanplum.start((success) => {
+      Leanplum.setUserId(walletId);
+      if (success) {
+        resolve('leanplum user set');
+      } else {
+        reject('leanplum user not set');
+      }
+    });
+  });
 };
 
 export const getUserSettings = async (walletId) => {
@@ -47,15 +65,16 @@ export const getUserSettings = async (walletId) => {
     if (!data.userAttributes) {
       throw new Error('User Not Found');
     }
-
     const communitySubscriptions = [];
     const res = {
       email: data.userAttributes.email,
     };
-    let isSubscribedToCommunityUpdates = true;
-
+    let isSubscribedFromCommunityUpdates = true;
     for (const property in data.userAttributes) {
-      if (property.includes('community')) {
+      if (
+        property.includes('community') &&
+        typeof data.userAttributes[property] == 'string'
+      ) {
         const communityId = property.split('community')[1];
         communitySubscriptions.push({
           communityId,
@@ -63,45 +82,32 @@ export const getUserSettings = async (walletId) => {
         });
       }
     }
-
     res.communitySubscription = communitySubscriptions;
-
     if (data.unsubscribeCategories) {
       data.unsubscribeCategories.forEach((category) => {
         if (parseInt(category.id) === COMMUNITY_UPDATES_CATEGORY_ID) {
-          isSubscribedToCommunityUpdates = false;
+          isSubscribedFromCommunityUpdates = false;
         }
       });
     }
-
-    res.isSubscribedToCommunityUpdates = isSubscribedToCommunityUpdates;
+    res.isSubscribedFromCommunityUpdates = isSubscribedFromCommunityUpdates;
     return res;
   } catch (e) {
     throw new Error(e);
   }
+  // setTimeout(() => {
+  //   throw new Error('get user setting error');
+  // }, 500);
 };
 
 export const setUserEmail = async (email) => {
-  try {
-    await Leanplum.setUserAttributes({ email });
-    return true;
-  } catch (e) {
-    throw new Error(e);
-  }
+  Leanplum.setUserAttributes({ email });
 };
 
-export const unsubscribeCommunity = async (communityId) => {
+export const updateCommunitySubscription = async (communitySubIntentions) => {
+  const desiredAttributes = getDesiredAttributes(communitySubIntentions);
   try {
-    Leanplum.setUserAttributes({ [`community${communityId}`]: 'False' });
-    return true;
-  } catch (e) {
-    throw new Error(e);
-  }
-};
-
-export const subscribeCommunity = async (communityId) => {
-  try {
-    Leanplum.setUserAttributes({ [`community${communityId}`]: 'True' });
+    Leanplum.setUserAttributes(desiredAttributes);
     return true;
   } catch (e) {
     throw new Error(e);

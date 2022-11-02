@@ -19,7 +19,7 @@ const SignUpForm = ({ setErrorMessage, onSubscribe, onClose }) => {
 
   const onSubmit = async (formData) => {
     try {
-      onSubscribe(signupAll);
+      onSubscribe(formData.email, signupAll);
       onClose();
     } catch (e) {
       setErrorMessage(e.message);
@@ -83,6 +83,7 @@ const SignUpForm = ({ setErrorMessage, onSubscribe, onClose }) => {
                 <b>Close</b>
               </button>
               <button
+                disabled={errors?.email}
                 className="button is-primary rounded-lg px-3 flex-1 ml-2"
                 onClick={handleSubmit(onSubmit)}
               >

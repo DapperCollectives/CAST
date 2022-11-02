@@ -10,7 +10,7 @@ export default function CommunitiesList({
     const subscribeIntention = subscribed
       ? subscribeNotificationIntentions.unsubscribe
       : subscribeNotificationIntentions.subscribe;
-    updateCommunitySubscription(communityId, subscribeIntention);
+    updateCommunitySubscription([{ communityId, subscribeIntention }]);
   };
   return (
     <div className="py-5">
@@ -38,9 +38,13 @@ function CommunityListItem({
   subscribed,
   handleUpdateCommunitySubscription,
 }) {
-  const { data: community, isLoading } = useCommunityDetails(communityId);
+  const {
+    data: community,
+    isLoading,
+    error,
+  } = useCommunityDetails(communityId);
   const { name, logo, slug } = community ?? {};
-  if (isLoading) return null;
+  if (isLoading || error) return null;
 
   return (
     <li className="my-1 is-flex is-flex-direction-row has-background-light-grey rounded p-2 ">

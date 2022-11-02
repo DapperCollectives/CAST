@@ -1,4 +1,3 @@
-import { Fragment } from 'react';
 import { useNotificationServiceContext } from 'contexts/NotificationService';
 import CommunitiesList from './CommunitiesList';
 import EmailAddressInput from './EmailAddressInput';
@@ -27,7 +26,7 @@ export default function NotificationSettingsSection() {
       )}
       {communitySubscription.length > 0 && (
         <>
-          <EmailAddressInput email={email} setUserEmail={setUserEmail} />
+          <EmailAddressInput defaultEmail={email} setUserEmail={setUserEmail} />
           <hr />
           <ReceiveEmailNotificationsSwitch
             isSubscribedFromCommunityUpdates={isSubscribedFromCommunityUpdates}

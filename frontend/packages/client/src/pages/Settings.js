@@ -1,4 +1,4 @@
-import { useNotificationServiceContext } from 'contexts/NotificationService';
+import { useWebContext } from 'contexts/Web3';
 import { HomeFooter } from 'components';
 import {
   ConnectWalletPrompt,
@@ -8,19 +8,20 @@ import {
 import SectionContainer from 'layout/SectionContainer';
 
 export default function Settings() {
-  const { notificationSettings } = useNotificationServiceContext();
-  const { walletId } = notificationSettings;
+  const {
+    user: { addr },
+  } = useWebContext();
 
   return (
     <SectionContainer>
       <div>
-        {walletId && (
+        {addr && (
           <div style={{ width: '50%', margin: 'auto' }}>
-            <SettingsSection walletId={walletId} />
+            <SettingsSection walletId={addr} />
             <NotificationSettingsSection />
           </div>
         )}
-        {!walletId && <ConnectWalletPrompt />}
+        {!addr && <ConnectWalletPrompt />}
       </div>
       <HomeFooter />
     </SectionContainer>

@@ -4,3 +4,4 @@ export { default as VoteConfirmation } from './VoteConfirmation';
 export { default as CastingVote } from './CastingVote';
 export { default as VoteConfirmed } from './VoteConfirmed';
 export { default as CancelProposal } from './CancelProposal';
+export { default as Retry } from './Retry';
