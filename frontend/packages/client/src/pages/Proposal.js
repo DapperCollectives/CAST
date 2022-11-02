@@ -325,7 +325,7 @@ export default function ProposalPage() {
           </div>
         </div>
       )}
-      {confirmingVote && castingVote && String(castVote) && (
+      {confirmingVote && castingVote && castVote !== null && (
         <div className="modal is-active">
           <div className="modal-background"></div>
           <div className="modal-content is-flex is-justify-content-center">

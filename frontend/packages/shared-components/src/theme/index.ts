@@ -7,12 +7,12 @@ import Link from './components/Link';
 import Tabs from './components/Tabs';
 import Text from './components/Text';
 // ***********************************
+import { extendTheme } from '@chakra-ui/react';
+// ***********************************
 //
 // ***********************************
 // Custom components style definitions
-import { CardStyle } from 'components/Card';
-// ***********************************
-import { extendTheme } from '@chakra-ui/react';
+import { default as CardStyle } from '../Card/styles';
 //
 // ***********************************
 // Global definitions overrides
