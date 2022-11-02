@@ -13,9 +13,10 @@ const options = {
   method: 'GET',
   headers: { accept: 'application/json' },
 };
-
+/* @param: communitySubIntentions : [{communityId:"1", subscribeIntention:"subscribe"},{communityId:"2",subscribeIntention:"unsubscribe"}]
+ * @return: {communityId1:'True', communityId2:'False'}
+ */
 const getDesiredAttributes = (communitySubIntentions) => {
-  //subscribeUpdateIntentions = [{communityId:"1", subscribeIntention:"subscribe"},{communityId:"2",subscribeIntention:"unsubscribe"}]
   return communitySubIntentions
     .map(({ communityId, subscribeIntention }) => ({
       key: `community${communityId}`,
