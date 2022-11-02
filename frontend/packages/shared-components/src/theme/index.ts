@@ -1,8 +1,10 @@
 //
 // ***********************************
 // Component style overrides for Chakra components
+import Button from './components/Button';
 import Input from './components/Input';
 import Link from './components/Link';
+import Tabs from './components/Tabs';
 import Text from './components/Text';
 // ***********************************
 import { extendTheme } from '@chakra-ui/react';
@@ -19,6 +21,7 @@ import definitions from './definitions';
 //
 // Foundational style overrides
 import borders from './foundations/borders';
+import colors from './foundations/colors';
 // ***********************************
 //
 // ***********************************
@@ -31,12 +34,15 @@ const overrides = {
   ...definitions,
   styles,
   borders,
+  colors,
   // Other foundational style overrides go here
   components: {
     Input,
     Card: CardStyle,
     Link,
     Text,
+    Button,
+    Tabs,
     // Other components go here
   },
 };

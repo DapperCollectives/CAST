@@ -60,3 +60,8 @@ export { default as FilterPill } from './FilterPill';
 export { default as BrowseCommunityButton } from './BrowseCommunityButton';
 export * from './Proposal';
 export { Card } from './Card';
+export { default as Tooltip } from './Tooltip';
+export { default as ShareDropdown } from './ShareDropdown';
+export { default as WalletAddress } from './WalletAddress';
+export { default as ShareProfileDropdown } from './UserProfile/ShareProfileDropdown';
+export { default as CustomTab } from './CustomTab';

@@ -4,6 +4,7 @@
   "private": true,
   "main": "src/index.js",
   "dependencies": {
+    "@fontsource/dm-sans": "^4.5.9",
     "@types/jest": "^29.1.2",
     "@types/node": "^18.8.5",
     "@types/react": "^18.0.21",

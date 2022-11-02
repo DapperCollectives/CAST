@@ -1,11 +1,19 @@
-export default function Tooltip({
+interface TooltipProps {
+  enabled: boolean;
+  position: 'left' | 'right' | 'top' | 'bottom';
+  text: string;
+  children?: React.ReactNode;
+  classNames: string;
+  alwaysVisible: boolean;
+}
+const Tooltip: React.FC<TooltipProps> = ({
   enabled = true,
   position,
   text,
   children,
   classNames = '',
   alwaysVisible = false,
-}) {
+}) => {
   const positionConfig = {
     left: 'has-tooltip-left',
     right: 'has-tooltip-right',
@@ -23,4 +31,6 @@ export default function Tooltip({
       {children}
     </span>
   );
-}
+};
+
+export default Tooltip;
