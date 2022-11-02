@@ -1,4 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
+import { ErrorModal } from 'components';
+import { Retry } from 'components/modals';
 import { subscribeNotificationIntentions } from 'const';
 import {
   getUserSettings as getUser,
@@ -8,6 +10,8 @@ import {
   unsubscribeFromEmailNotifications,
   updateCommunitySubscription as updateCommunity,
 } from 'api/notificationService';
+import { debounce } from 'lodash';
+import { useModalContext } from './NotificationModal';
 import { useWebContext } from './Web3';
 
 const NotificationServiceContext = createContext({});
@@ -36,34 +40,68 @@ const NotificationServiceProvider = ({ children }) => {
   const {
     user: { addr },
   } = useWebContext();
+  const { openModal, closeModal } = useModalContext();
 
   useEffect(() => {
     if (addr) {
-      (async () => {
-        try {
-          await startLeanplumForUser(addr);
-          await getUserSettings();
-        } catch (e) {
-          console.log(e);
-        }
-      })();
+      initUser();
     } else {
       setNotificationSettings(INIT_NOTIFICATION_SETTINGS);
     }
   }, [addr]);
 
-  const setUserEmail = async (email) => {
-    try {
-      await setEmail(email);
-      setNotificationSettings((prevState) => ({
-        ...prevState,
-        email,
-      }));
-    } catch {
-      throw new Error('cannot set user email');
-    }
-  };
+  const initUser = debounce(
+    async () => {
+      try {
+        console.log('init user called');
+        await startLeanplumForUser(addr);
+        await getUserSettings();
+      } catch (e) {
+        openRetryModal();
+      }
+    },
+    //Leanplum API rate limit is 1QPS
+    2000,
+    { leading: true, trailing: false }
+  );
 
+  const openRetryModal = () => {
+    openModal(
+      <Retry
+        message="There is an issue getting your notifications settings, you can try again."
+        closeModal={closeModal}
+        onRetry={initUser}
+      />,
+      {
+        isErrorModal: true,
+      }
+    );
+  };
+  const handleNotificationServiceError = (fn) => {
+    return async (...args) => {
+      try {
+        await fn(...args);
+      } catch {
+        openModal(
+          <ErrorModal
+            message="Something went wrong, and your action could not be completed. Please try again later."
+            title="Error"
+            footerComponent={
+              <button
+                className="button subscribe-community-button p-0 is-fullwidth rounded-lg"
+                onClick={closeModal}
+              >
+                Close
+              </button>
+            }
+            onClose={closeModal}
+          />,
+          { isErrorModal: true }
+        );
+        throw new Error();
+      }
+    };
+  };
   const getUserSettings = async () => {
     try {
       const { communitySubscription, isSubscribedFromCommunityUpdates, email } =
@@ -78,37 +116,51 @@ const NotificationServiceProvider = ({ children }) => {
       throw new Error('cannot get user settings');
     }
   };
-
-  const updateCommunitySubscription = async (communitySubIntentions) => {
+  const setUserEmail = handleNotificationServiceError(async (email) => {
     try {
-      await updateCommunity(communitySubIntentions);
-      await new Promise((r) => setTimeout(r, 500));
-      await getUserSettings();
+      await setEmail(email);
+      setNotificationSettings((prevState) => ({
+        ...prevState,
+        email,
+      }));
     } catch {
-      throw new Error('cannot update community subscription');
+      throw new Error('cannot set user email');
     }
-    // throw Error();
-  };
+  });
 
-  const updateAllEmailNotificationSubscription = async (subscribeIntention) => {
-    if (subscribeIntention === subscribeNotificationIntentions.resubscribe) {
-      subscribeToEmailNotifications(addr);
-    } else if (
-      subscribeIntention === subscribeNotificationIntentions.unsubscribe
-    ) {
-      unsubscribeFromEmailNotifications(addr);
+  const updateCommunitySubscription = handleNotificationServiceError(
+    async (communitySubIntentions) => {
+      try {
+        await updateCommunity(communitySubIntentions);
+        await new Promise((r) => setTimeout(r, 500));
+        await getUserSettings();
+      } catch {
+        throw new Error('cannot update community subscription');
+      }
+      // throw Error();
     }
-    setNotificationSettings((prevState) => ({
-      ...prevState,
-      isSubscribedFromCommunityUpdates:
-        subscribeIntention === subscribeNotificationIntentions.resubscribe,
-    }));
-  };
+  );
+
+  const updateAllEmailNotificationSubscription = handleNotificationServiceError(
+    async (subscribeIntention) => {
+      if (subscribeIntention === subscribeNotificationIntentions.resubscribe) {
+        subscribeToEmailNotifications(addr);
+      } else if (
+        subscribeIntention === subscribeNotificationIntentions.unsubscribe
+      ) {
+        unsubscribeFromEmailNotifications(addr);
+      }
+      setNotificationSettings((prevState) => ({
+        ...prevState,
+        isSubscribedFromCommunityUpdates:
+          subscribeIntention === subscribeNotificationIntentions.resubscribe,
+      }));
+    }
+  );
 
   const providerProps = {
     notificationSettings,
     setUserEmail,
-    getUserSettings,
     updateCommunitySubscription,
     updateAllEmailNotificationSubscription,
   };

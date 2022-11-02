@@ -65,13 +65,11 @@ export const getUserSettings = async (walletId) => {
     if (!data.userAttributes) {
       throw new Error('User Not Found');
     }
-
     const communitySubscriptions = [];
     const res = {
       email: data.userAttributes.email,
     };
     let isSubscribedFromCommunityUpdates = true;
-
     for (const property in data.userAttributes) {
       if (
         property.includes('community') &&
@@ -84,9 +82,7 @@ export const getUserSettings = async (walletId) => {
         });
       }
     }
-
     res.communitySubscription = communitySubscriptions;
-
     if (data.unsubscribeCategories) {
       data.unsubscribeCategories.forEach((category) => {
         if (parseInt(category.id) === COMMUNITY_UPDATES_CATEGORY_ID) {
@@ -94,21 +90,18 @@ export const getUserSettings = async (walletId) => {
         }
       });
     }
-
     res.isSubscribedFromCommunityUpdates = isSubscribedFromCommunityUpdates;
     return res;
   } catch (e) {
     throw new Error(e);
   }
+  // setTimeout(() => {
+  //   throw new Error('get user setting error');
+  // }, 500);
 };
 
 export const setUserEmail = async (email) => {
-  try {
-    await Leanplum.setUserAttributes({ email });
-    return true;
-  } catch (e) {
-    throw new Error(e);
-  }
+  Leanplum.setUserAttributes({ email });
 };
 
 export const updateCommunitySubscription = async (communitySubIntentions) => {

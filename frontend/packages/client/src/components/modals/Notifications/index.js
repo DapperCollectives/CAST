@@ -4,7 +4,7 @@ import { useUserCommunities } from 'hooks';
 import { subscribeNotificationIntentions } from 'const';
 import NotificationsSignUp from './SignUp';
 
-const NotificationsModal = ({ onClose, onError, onSuccess, communityId }) => {
+const NotificationsModal = ({ onClose, onSuccess, communityId }) => {
   const { updateCommunitySubscription, setUserEmail } =
     useNotificationServiceContext();
 
@@ -31,13 +31,9 @@ const NotificationsModal = ({ onClose, onError, onSuccess, communityId }) => {
         subscribeIntention: subscribeNotificationIntentions.subscribe,
       });
     }
-    try {
-      await setUserEmail(email);
-      await updateCommunitySubscription(intentions);
-      onSuccess(subscribeNotificationIntentions.subscribe);
-    } catch {
-      onError();
-    }
+    await setUserEmail(email);
+    await updateCommunitySubscription(intentions);
+    onSuccess(subscribeNotificationIntentions.subscribe);
   };
   return (
     <NotificationsSignUp

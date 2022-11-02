@@ -1,6 +1,4 @@
-import { useModalContext } from 'contexts/NotificationModal';
 import { useNotificationServiceContext } from 'contexts/NotificationService';
-import { ErrorModal } from 'components';
 import CommunitiesList from './CommunitiesList';
 import EmailAddressInput from './EmailAddressInput';
 import ReceiveEmailNotificationsSwitch from './ReceiveEmailNotificationsSwitch';
@@ -14,32 +12,6 @@ export default function NotificationSettingsSection() {
   } = useNotificationServiceContext();
   const { communitySubscription, email, isSubscribedFromCommunityUpdates } =
     notificationSettings;
-  const { openModal, closeModal } = useModalContext();
-  const handleError = (fn) => {
-    return async (...args) => {
-      try {
-        await fn(...args);
-      } catch {
-        openModal(
-          <ErrorModal
-            message="Something went wrong, and your action could not be completed. Please try again later."
-            title="Error"
-            footerComponent={
-              <button
-                className="button subscribe-community-button p-0 is-fullwidth rounded-lg"
-                onClick={closeModal}
-              >
-                Close
-              </button>
-            }
-            onClose={closeModal}
-          />,
-          { isErrorModal: true }
-        );
-        throw new Error();
-      }
-    };
-  };
   return (
     <section className={'column is-flex is-flex-direction-column mt-5'}>
       <h2 className="is-size-4 has-text-weight-bold">Notification Settings</h2>
@@ -54,24 +26,19 @@ export default function NotificationSettingsSection() {
       )}
       {communitySubscription.length > 0 && (
         <>
-          <EmailAddressInput
-            defaultEmail={email}
-            setUserEmail={handleError(setUserEmail)}
-          />
+          <EmailAddressInput defaultEmail={email} setUserEmail={setUserEmail} />
           <hr />
           <ReceiveEmailNotificationsSwitch
             isSubscribedFromCommunityUpdates={isSubscribedFromCommunityUpdates}
-            updateAllEmailNotificationSubscription={handleError(
+            updateAllEmailNotificationSubscription={
               updateAllEmailNotificationSubscription
-            )}
+            }
           />
           <hr />
           {isSubscribedFromCommunityUpdates && (
             <CommunitiesList
               communitySubscription={communitySubscription}
-              updateCommunitySubscription={handleError(
-                updateCommunitySubscription
-              )}
+              updateCommunitySubscription={updateCommunitySubscription}
             />
           )}
           <p className="has-text-grey has-text-centered py-5">

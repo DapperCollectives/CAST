@@ -29,24 +29,6 @@ export default function SubscribeCommunityButton({
   const { popToast } = useToast();
   const { user } = useWebContext();
   const history = useHistory();
-  const openUpdateSubscriptionErorrModal = () => {
-    openModal(
-      <ErrorModal
-        message="Something went wrong, and your action could not be completed. Please try again later."
-        title="Error"
-        footerComponent={
-          <button
-            className="button subscribe-community-button p-0 is-fullwidth rounded-lg"
-            onClick={closeModal}
-          >
-            Close
-          </button>
-        }
-        onClose={closeModal}
-      />,
-      { isErrorModal: true }
-    );
-  };
   const openWalletErrorModal = () => {
     openModal(
       <ErrorModal
@@ -77,24 +59,19 @@ export default function SubscribeCommunityButton({
     const subscribeIntention = isSubscribed
       ? subscribeNotificationIntentions.unsubscribe
       : subscribeNotificationIntentions.subscribe;
-    try {
-      await updateCommunitySubscription([
-        {
-          communityId,
-          subscribeIntention,
-        },
-      ]);
-      showUpdateSuccessToast(subscribeIntention);
-    } catch {
-      openUpdateSubscriptionErorrModal();
-    }
+    await updateCommunitySubscription([
+      {
+        communityId,
+        subscribeIntention,
+      },
+    ]);
+    showUpdateSuccessToast(subscribeIntention);
   };
   const handleSignUp = () => {
     openModal(
       <NotificationsModal
         communityId={communityId}
         onClose={closeModal}
-        onError={openUpdateSubscriptionErorrModal}
         onSuccess={showUpdateSuccessToast}
       />,
       {
