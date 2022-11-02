@@ -8,7 +8,9 @@ import { useCommunityDetails } from 'hooks';
 import { kebabToString } from 'utils';
 import { Heading } from '@chakra-ui/react';
 import { yupResolver } from '@hookform/resolvers/yup';
+import identity from 'lodash/identity';
 import pick from 'lodash/pick';
+import pickBy from 'lodash/pickBy';
 import { stepTwo } from '../FormConfig';
 import VotingSelector from './VotingSelector';
 
@@ -71,14 +73,17 @@ const StepTwo = ({
     moveToNextStep();
   };
 
-  const defaultValueStrategy = useWatch({ control, name: 'strategy' });
-  const voteType = useWatch({ control, name: 'voteType' });
+  // watching all fields
+  const fields = useWatch({ control });
+  const {
+    strategy: defaultValueStrategy,
+    voteType,
+    choices: choicesTemp,
+    tabOption,
+    maxWeight,
+    minBalance,
+  } = fields;
 
-  // save vote type
-  useEffect(() => {
-    onDataChange({ voteType });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [voteType]);
   // **************************************************************
   //   This is to enable having choices when entering in preview mode
   //   fields are saved and validated when user hits on next
@@ -86,9 +91,6 @@ const StepTwo = ({
   //   when user hits next fields will be validated and overwritten with valid values
   //   for example it's possible to enter in preview mode with duplicated voting options
   //   but next will let the user know this needs to be updated
-  const choicesTemp = useWatch({ control, name: 'choices' });
-  const tabOption = useWatch({ control, name: 'tabOption' });
-
   useEffect(() => {
     let choices = choicesTemp;
     if (tabOption === 'visual') {
@@ -101,6 +103,17 @@ const StepTwo = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [choicesTemp, tabOption]);
   // **************************************************************
+
+  // saving temp updates on fields
+  useEffect(() => {
+    // removes undefined values
+    const data = pickBy(
+      { voteType, strategy: defaultValueStrategy, maxWeight, minBalance },
+      identity
+    );
+    onDataChange(data);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [voteType, defaultValueStrategy, maxWeight, minBalance]);
 
   const { isSubmitting, isValid, errors, isDirty } = formState;
 
