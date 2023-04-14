@@ -44,6 +44,11 @@ type PageParams struct {
 	TotalRecords int
 }
 
+type SearchFilter struct {
+	Text   string `json:"text"`
+	Amount int    `json:"amount"`
+}
+
 type CompositeSignature struct {
 	Addr      string  `json:"addr"`
 	Key_id    uint    `json:"keyId"`
@@ -117,7 +122,7 @@ func GetPaginatedResponseWithPayload(payload interface{}, p PageParams) *Paginat
 
 	_count := reflect.ValueOf(payload).Len()
 	var next int
-	if p.Start+_count >= p.TotalRecords {
+	if p.Start+_count >= (p.TotalRecords - 1) {
 		next = -1
 	} else {
 		next = p.Start + _count

@@ -30,21 +30,23 @@ export default function WalletConnectModal({
   const listOfServices = useMemo(
     () =>
       sortBy(
-        services.map((service) => ({
-          connectToService: () => {
-            if (service.uid !== 'Lilico') {
-              fcl.config().put('discovery.wallet.method', service.method);
-            }
-            injectedProvider.authenticate(
-              !IS_LOCAL_DEV ? { service } : undefined
-            );
-            closeModal();
-          },
-          icon: IS_LOCAL_DEV
-            ? getWalletIcon(service.provider)
-            : service.provider.icon,
-          name: service.provider.name,
-        })),
+        services.map((service) => {
+          return {
+            connectToService: () => {
+              if (service.uid !== 'Lilico') {
+                fcl.config().put('discovery.wallet.method', service.method);
+              }
+              injectedProvider.authenticate(
+                !IS_LOCAL_DEV ? { service } : undefined
+              );
+              closeModal();
+            },
+            icon: IS_LOCAL_DEV
+              ? getWalletIcon(service.provider)
+              : service.provider.icon,
+            name: service.provider.name,
+          };
+        }),
         (service) => service.name
       ),
     [services, closeModal, injectedProvider]
@@ -55,7 +57,7 @@ export default function WalletConnectModal({
       <div className="modal-background" onClick={handleClickOnBackground}></div>
       <div
         className="modal-card rounded-sm has-background-white"
-        style={{ maxWidth: '375px', maxHeight: '420px' }}
+        style={{ maxWidth: '375px', maxHeight: '800px' }}
       >
         <header
           className="modal-card-head has-background-white columns is-mobile m-0 px-5 pt-5"

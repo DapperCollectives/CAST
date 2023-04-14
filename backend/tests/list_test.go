@@ -23,13 +23,13 @@ func TestGetLists(t *testing.T) {
 	clearTable("lists")
 
 	t.Run("API should return an empty set of lists if no lists exists", func(t *testing.T) {
-		communityId := otu.AddCommunities(1)[0]
+		communityId := otu.AddCommunities(1, "dao")[0]
 		response := otu.GetListsForCommunityAPI(communityId)
 		checkResponseCode(t, http.StatusOK, response.Code)
 	})
 
 	t.Run("API should return list of existing lists", func(t *testing.T) {
-		communityId := otu.AddCommunities(1)[0]
+		communityId := otu.AddCommunities(1, "dao")[0]
 		otu.AddLists(communityId, 1)
 
 		req, _ := http.NewRequest("GET", "/communities/"+strconv.Itoa(communityId)+"/lists", nil)
@@ -78,9 +78,12 @@ func TestCreateList(t *testing.T) {
 		response := otu.CreateListAPI(payload)
 		checkResponseCode(t, http.StatusForbidden, response.Code)
 
-		var m map[string]interface{}
-		json.Unmarshal(response.Body.Bytes(), &m)
-		assert.Equal(t, "ERR_1001", m["errorCode"])
+		expectedErr := errIncompleteRequest
+		expectedErr.StatusCode = http.StatusForbidden
+
+		var e errorResponse
+		json.Unmarshal(response.Body.Bytes(), &e)
+		assert.Equal(t, expectedErr, e)
 	})
 
 	t.Run("Should throw an error if timestamp is expired", func(t *testing.T) {
@@ -97,9 +100,13 @@ func TestCreateList(t *testing.T) {
 
 		checkResponseCode(t, http.StatusForbidden, response.Code)
 
-		var m map[string]interface{}
-		json.Unmarshal(response.Body.Bytes(), &m)
-		assert.Equal(t, "ERR_1001", m["errorCode"])
+		var e errorResponse
+		json.Unmarshal(response.Body.Bytes(), &e)
+
+		expectedErr := errIncompleteRequest
+		expectedErr.StatusCode = http.StatusForbidden
+
+		assert.Equal(t, expectedErr, e)
 	})
 }
 

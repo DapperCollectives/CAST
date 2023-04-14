@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/DapperCollectives/CAST/backend/main/models"
@@ -90,7 +91,7 @@ func (h *Helpers) useStrategyFetchBalance(
 	v models.Vote,
 	p models.Proposal,
 	s Strategy,
-) (models.VoteWithBalance, error) {
+) (models.VoteWithBalance, errorResponse) {
 
 	emptyBalance := &models.Balance{
 		Addr:        v.Addr,
@@ -101,17 +102,22 @@ func (h *Helpers) useStrategyFetchBalance(
 		emptyBalance.BlockHeight = *p.Block_height
 	}
 
-	//get the community
 	c := models.Community{ID: p.Community_id}
 	if err := c.GetCommunityByProposalId(h.A.DB, p.ID); err != nil {
-		return models.VoteWithBalance{}, err
+		return models.VoteWithBalance{}, errGetCommunity
+	}
+
+	strategy, err := c.GetStrategy(*p.Strategy)
+	if err != nil {
+		return models.VoteWithBalance{}, errStrategyNotFound
 	}
 
 	balance, err := s.FetchBalance(emptyBalance, &p)
 	if err != nil {
 		log.Error().Err(err).Msgf("User does not have the required balance %v.", v.Addr)
-
-		return models.VoteWithBalance{}, err
+		errResponse := errInsufficientBalance
+		errResponse.Details = fmt.Sprintf(errResponse.Details, *strategy.Threshold, *strategy.Contract.Name)
+		return models.VoteWithBalance{}, errResponse
 	}
 
 	vb := models.VoteWithBalance{
@@ -121,7 +127,7 @@ func (h *Helpers) useStrategyFetchBalance(
 		StakingBalance:          &balance.StakingBalance,
 	}
 
-	return vb, nil
+	return vb, nilErr
 }
 
 func (h *Helpers) fetchProposal(vars map[string]string, query string) (models.Proposal, error) {
@@ -292,11 +298,11 @@ func (h *Helpers) processVotes(
 	return votesWithBalances, pageParams, nil
 }
 
-func (h *Helpers) createVote(r *http.Request, p models.Proposal) (*models.VoteWithBalance, error) {
+func (h *Helpers) createVote(r *http.Request, p models.Proposal) (*models.VoteWithBalance, errorResponse) {
 	var v models.Vote
 	if err := validatePayload(r.Body, &v); err != nil {
 		log.Error().Err(err).Msg("Invalid request payload.")
-		return nil, err
+		return nil, errIncompleteRequest
 	}
 
 	v.Proposal_id = p.ID
@@ -304,52 +310,64 @@ func (h *Helpers) createVote(r *http.Request, p models.Proposal) (*models.VoteWi
 	// validate user hasn't already voted
 	existingVote := models.Vote{Proposal_id: v.Proposal_id, Addr: v.Addr}
 	if err := existingVote.GetVote(h.A.DB); err == nil {
-		log.Error().Msgf("Address %s has already voted for proposal %d.", v.Addr, v.Proposal_id)
-		return nil, err
+		errResponse := errAlreadyVoted
+		errResponse.Details = fmt.Sprintf(errResponse.Details, v.Addr, v.Proposal_id)
+		log.Error().Msgf(errResponse.Details)
+		return nil, errResponse
 	}
 
 	// check that proposal is live
 	if os.Getenv("APP_ENV") != "DEV" {
 		if !p.IsLive() {
-			return nil, errors.New("User cannot vote on inactive proposal.")
+			return nil, errInactiveProposal
 		}
 	}
 
-	if err := h.validateVote(p, v); err != nil {
-		return nil, err
+	if errResponse := h.validateVote(p, v); errResponse != nilErr {
+		return nil, errResponse
 	}
 
 	v.Proposal_id = p.ID
 
 	s := h.initStrategy(*p.Strategy)
 	if s == nil {
-		return nil, errors.New("Proposal strategy not found.")
+		return nil, errStrategyNotFound
 	}
 
-	voteWithBalance, err := h.useStrategyFetchBalance(v, p, s)
-	if err != nil {
-		return nil, err
+	voteWithBalance, errResponse := h.useStrategyFetchBalance(v, p, s)
+	if errResponse != nilErr {
+		return nil, errResponse
 	}
 
-	if err := h.insertVote(voteWithBalance, p); err != nil {
-		return nil, err
+	if errResponse := h.insertVote(voteWithBalance, p); errResponse != nilErr {
+		return nil, errResponse
 	}
 
-	return &voteWithBalance, nil
+	return &voteWithBalance, nilErr
 }
 
-func (h *Helpers) insertVote(v models.VoteWithBalance, p models.Proposal) error {
+func (h *Helpers) insertVote(v models.VoteWithBalance, p models.Proposal) errorResponse {
 	weight, err := h.useStrategyGetVoteWeight(p, &v)
 	if err != nil {
-		msg := fmt.Sprintf("Error getting vote weight for address %s.", v.Addr)
-		log.Error().Err(err).Msg(msg)
-		return errors.New(msg)
+		log.Error().Err(err).Msgf("Error getting vote weight for address %s.", v.Addr)
+		return errIncompleteRequest
+	}
+
+	c := models.Community{ID: p.Community_id}
+	if err := c.GetCommunityByProposalId(h.A.DB, p.ID); err != nil {
+		return errGetCommunity
+	}
+
+	strategy, err := c.GetStrategy(*p.Strategy)
+	if err != nil {
+		return errStrategyNotFound
 	}
 
 	if err = p.ValidateBalance(weight); err != nil {
-		msg := fmt.Sprintf("Account balance is too low to vote on this proposal.")
-		log.Error().Err(err).Msg(msg)
-		return errors.New(msg)
+		log.Error().Err(err).Msg("Account balance is too low to vote on this proposal.")
+		errResponse := errInsufficientBalance
+		errResponse.Details = fmt.Sprintf(errResponse.Details, *strategy.Threshold, *strategy.Contract.Name)
+		return errResponse
 	}
 
 	// Include voucher in vote data when pinning
@@ -358,33 +376,31 @@ func (h *Helpers) insertVote(v models.VoteWithBalance, p models.Proposal) error 
 	}
 	v.Cid, err = h.pinJSONToIpfs(ipfsVote)
 	if err != nil {
-		msg := fmt.Sprintf("Error pinning proposal to IPFS.")
-		log.Error().Err(err).Msg(msg)
-		return errors.New(msg)
+		log.Error().Err(err).Msg("Error pinning proposal to IPFS.")
+		return errCreateVote
 	}
 
 	if err := v.CreateVote(h.A.DB); err != nil {
 		msg := fmt.Sprintf("Error creating vote for address %s.", v.Addr)
 		log.Error().Err(err).Msg(msg)
-		return errors.New(msg)
+		return errCreateVote
 	}
 
-	return nil
+	return nilErr
 }
 
-func (h *Helpers) validateVote(p models.Proposal, v models.Vote) error {
+func (h *Helpers) validateVote(p models.Proposal, v models.Vote) errorResponse {
 
 	// validate the user is not on community's blocklist
 	if err := h.validateBlocklist(v.Addr, p.Community_id); err != nil {
 		log.Error().Err(err).Msgf(fmt.Sprintf("Address %v is on blocklist for community id %v.\n", v.Addr, p.Community_id))
-		msg := fmt.Sprintf("Address %v is on blocklist for community id %v.", v.Addr, p.Community_id)
-		return errors.New(msg)
+		return errForbidden
 	}
 
 	// validate choice exists on proposal
 	if err := v.ValidateChoice(p); err != nil {
 		log.Error().Err(err)
-		return err
+		return errIncompleteRequest
 	}
 
 	// If voucher is present
@@ -399,7 +415,7 @@ func (h *Helpers) validateVote(p models.Proposal, v models.Vote) error {
 		if authorizer != v.Addr || authorizer != (*v.Composite_signatures)[0].Addr {
 			err := errors.New("authorizer address must match voter address and envelope signer")
 			log.Error().Err(err)
-			return err
+			return errIncompleteRequest
 		}
 
 		message := voucher.Arguments[0]["value"]
@@ -407,14 +423,14 @@ func (h *Helpers) validateVote(p models.Proposal, v models.Vote) error {
 		messageBytes, err := hex.DecodeString(message)
 		if err != nil {
 			log.Error().Err(err)
-			return err
+			return errIncompleteRequest
 		}
 
 		// validate proper message format
 		//<proposalId>:<choice>:<timestamp>
 		if err := models.ValidateVoteMessage(string(messageBytes), p); err != nil {
 			log.Error().Err(err)
-			return err
+			return errIncompleteRequest
 		}
 
 		// re-build message & composite signatures for validation
@@ -424,22 +440,22 @@ func (h *Helpers) validateVote(p models.Proposal, v models.Vote) error {
 		v.Message = shared.EncodeMessageFromVoucher(voucher)
 
 		if err := h.validateTxSignature(v.Addr, v.Message, v.Composite_signatures); err != nil {
-			return err
+			return errIncompleteRequest
 		}
 	} else {
 		// validate proper message format
 		// hex decode before validating
 		if err := models.ValidateVoteMessage(v.Message, p); err != nil {
 			log.Error().Err(err)
-			return err
+			return errIncompleteRequest
 		}
 
 		if err := h.validateUserSignature(v.Addr, v.Message, v.Composite_signatures); err != nil {
-			return err
+			return errIncompleteRequest
 		}
 	}
 
-	return nil
+	return nilErr
 }
 
 func (h *Helpers) fetchCommunity(id int) (models.Community, error) {
@@ -453,35 +469,82 @@ func (h *Helpers) fetchCommunity(id int) (models.Community, error) {
 	return community, nil
 }
 
-func (h *Helpers) searchCommunities(query string) ([]models.Community, error) {
-	results, err := models.SearchForCommunity(h.A.DB, query)
-	if err != nil {
-		return []models.Community{}, err
-	}
+func (h *Helpers) searchCommunities(
+	searchText string,
+	filters string,
+	pageParams shared.PageParams,
+) (
+	[]*models.Community,
+	int,
+	map[string]int,
+	error,
+) {
+	filtersSlice := strings.Split(filters, ",")
+	if searchText == "" {
+		isSearch := true
 
-	return results, nil
+		results, totalRecords, err := models.GetDefaultCommunities(
+			h.A.DB,
+			pageParams,
+			filtersSlice,
+			isSearch,
+		)
+		if err != nil {
+			log.Error().Err(err)
+			return nil, 0, nil, err
+		}
+
+		categoryCount, err := models.GetCategoryCount(h.A.DB, searchText)
+		if err != nil {
+			return []*models.Community{}, 0, nil, err
+		}
+
+		return results, totalRecords, categoryCount, nil
+	} else {
+		results, totalRecords, err := models.SearchForCommunity(
+			h.A.DB,
+			searchText,
+			filtersSlice,
+			pageParams,
+		)
+		if err != nil {
+			return []*models.Community{}, 0, nil, err
+		}
+
+		categoryCount, err := models.GetCategoryCount(h.A.DB, searchText)
+		if err != nil {
+			return []*models.Community{}, 0, nil, err
+		}
+
+		return results, totalRecords, categoryCount, nil
+	}
 }
 
-func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, error) {
+func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorResponse) {
+	if err := h.validateStrategyName(*p.Strategy); err != nil {
+		fmt.Printf("Error validating strategy name: %v \n", err)
+		return models.Proposal{}, errStrategyNotFound
+	}
+
 	if p.Voucher != nil {
 		if err := h.validateUserViaVoucher(p.Creator_addr, p.Voucher); err != nil {
-			return models.Proposal{}, err
+			return models.Proposal{}, errForbidden
 		}
 	} else {
 		if err := h.validateUser(p.Creator_addr, p.Timestamp, p.Composite_signatures); err != nil {
-			return models.Proposal{}, err
+			return models.Proposal{}, errForbidden
 		}
 	}
 
 	community, err := h.fetchCommunity(p.Community_id)
 	if err != nil {
-		return models.Proposal{}, err
+		return models.Proposal{}, errIncompleteRequest
 	}
 
 	strategy, err := models.MatchStrategyByProposal(*community.Strategies, *p.Strategy)
 	if err != nil {
 		log.Error().Err(err).Msg("Community does not have this strategy available.")
-		return models.Proposal{}, err
+		return models.Proposal{}, errIncompleteRequest
 	}
 
 	// Set Min Balance/Max Weight to community defaults if not provided
@@ -493,7 +556,7 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, error) {
 	}
 
 	if err := h.enforceCommunityRestrictions(community, p, strategy); err != nil {
-		return models.Proposal{}, err
+		return models.Proposal{}, errIncompleteRequest
 	}
 
 	// Set Blockheight to latest sealed
@@ -501,28 +564,50 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, error) {
 	if err != nil {
 		errMsg := "couldn't fetch current blockheight"
 		log.Error().Err(err).Msg(errMsg)
-		return models.Proposal{}, errors.New(errMsg)
+		return models.Proposal{}, errIncompleteRequest
 	}
 	p.Block_height = &blockheight
 
 	p.Cid, err = h.pinJSONToIpfs(p)
 	if err != nil {
 		log.Error().Err(err).Msg("IPFS error: " + err.Error())
-		return models.Proposal{}, err
+		return models.Proposal{}, errIncompleteRequest
 	}
 
 	validate := validator.New()
 	vErr := validate.Struct(p)
 	if vErr != nil {
 		log.Error().Err(vErr)
-		return models.Proposal{}, errors.New("invalid proposal")
+		return models.Proposal{}, errIncompleteRequest
+	}
+
+	if os.Getenv("APP_ENV") == "PRODUCTION" {
+		if strategy.Contract.Name != nil && p.Start_time.Before(time.Now().UTC().Add(time.Hour)) {
+			p.Start_time = time.Now().UTC().Add(time.Hour)
+		}
 	}
 
 	if err := p.CreateProposal(h.A.DB); err != nil {
-		return models.Proposal{}, err
+		return models.Proposal{}, errIncompleteRequest
 	}
 
-	return p, nil
+	return p, nilErr
+}
+
+func (h *Helpers) validateStrategyName(name string) error {
+	if name == "" {
+		return errors.New("Strategy name is required.")
+	}
+
+	for k, _ := range strategyMap {
+		if name == k {
+			return nil
+		} else {
+			continue
+		}
+	}
+
+	return errors.New("Strategy not found.")
 }
 
 func (h *Helpers) enforceCommunityRestrictions(
@@ -1085,6 +1170,51 @@ func (h *Helpers) pinJSONToIpfs(data interface{}) (*string, error) {
 		return nil, err
 	}
 	return &pin.IpfsHash, nil
+}
+
+func (h *Helpers) appendFiltersToResponse(
+	results []*models.Community,
+	pageParams shared.PageParams,
+	count map[string]int,
+) (interface{}, error) {
+	var filters []shared.SearchFilter
+	var CATEGORIES = []string{
+		"all",
+		"dao",
+		"social",
+		"protocol",
+		"creator",
+		"nft",
+		"collector",
+	}
+
+	var totalCount int
+	for _, category := range CATEGORIES {
+		if category == "all" {
+			continue
+		}
+		filters = append(filters, shared.SearchFilter{
+			Text:   category,
+			Amount: count[category],
+		})
+		totalCount += count[category]
+	}
+
+	filters = append(filters, shared.SearchFilter{
+		Text:   "all",
+		Amount: totalCount,
+	})
+
+	paginatedResults := shared.GetPaginatedResponseWithPayload(results, pageParams)
+	appendedResponse := struct {
+		Filters []shared.SearchFilter    `json:"filters"`
+		Results shared.PaginatedResponse `json:"results"`
+	}{
+		Filters: filters,
+		Results: *paginatedResults,
+	}
+
+	return appendedResponse, nil
 }
 
 func validateContractThreshold(s []models.Strategy) error {

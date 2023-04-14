@@ -1,22 +1,27 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Link, useLocation, useParams } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useParams } from 'react-router-dom';
 import { useErrorHandlerContext } from 'contexts/ErrorHandler';
 import { useModalContext } from 'contexts/NotificationModal';
 import { useWebContext } from 'contexts/Web3';
 import { Svg } from '@cast/shared-components';
 import {
+  CastingVoteModal,
+  CommunityName,
   Loader,
   Message,
   ProposalInformation,
   StrategyModal,
+  StyledStatusPill,
   Tablink,
+  VoteConfirmationModal,
+  VoteConfirmedModal,
   VotesList,
   WalletConnect,
   WrapperResponsive,
 } from 'components';
 import {
   CancelProposalModalConfirmation,
-  ProposalStatus,
+  HeaderNavigation,
   VoteOptions,
 } from 'components/Proposal';
 import {
@@ -70,6 +75,8 @@ export default function ProposalPage() {
     proposal: true,
     summary: false,
   });
+  const [isCollapsed, setIsCollapsed] = useState(true);
+  const descriptionRef = useRef();
   const [isStrategyModalOpen, setIsStrategyModalOpen] = useState(false);
 
   // setting this manually for users that do not have a ledger device
@@ -98,6 +105,21 @@ export default function ProposalPage() {
   const { voteOnProposal } = useVoteOnProposal();
   const { updateProposal } = useProposalMutation();
 
+  // this is for existing proposals that have the target="_self" from the db
+  // bc we want all links to open in new tabs
+  const htmlBody = proposal?.body?.replace(
+    /target="_self"/g,
+    'target="_blank" rel="noopener noreferrer"'
+  );
+
+  // this hook calculates if body should be collapsed
+  useEffect(() => {
+    const { current } = descriptionRef;
+    if (current?.clientHeight < 300) {
+      setIsCollapsed(false);
+    }
+  }, [descriptionRef, htmlBody]);
+
   // we need to get all strategies to obtain
   // description text to display on modal
   const {
@@ -116,7 +138,7 @@ export default function ProposalPage() {
   const proposalStrategy =
     votingStrategies && !loadingStrategies && proposal && !loading
       ? votingStrategies.find(
-          (votStrategy) => votStrategy.key === proposal.strategy
+          (voteStrategy) => voteStrategy.key === proposal.strategy
         ) || {
           // fallback if no match
           description: proposal.strategy,
@@ -184,8 +206,7 @@ export default function ProposalPage() {
         proposalName={proposal.name}
       />,
       {
-        showCloseButton: false,
-        classNameModalContent: 'rounded-sm',
+        isErrorModal: true,
       }
     );
   };
@@ -207,12 +228,10 @@ export default function ProposalPage() {
       await voteOnProposal({ proposal, voteData });
     } catch (error) {
       setConfirmingVote(false);
-      notifyError(error);
       setCastingVote(false);
+      notifyError(error);
       return;
     }
-    setCastingVote(false);
-    setConfirmingVote(false);
     setCastVote(optionChosen);
   };
 
@@ -228,8 +247,6 @@ export default function ProposalPage() {
     return match?.label;
   };
 
-  const maxModalWidth = 400;
-
   const showCancelButton = ![
     FilterValues.cancelled.toLocaleLowerCase(),
     FilterValues.closed.toLocaleLowerCase(),
@@ -241,11 +258,6 @@ export default function ProposalPage() {
       summary: tab === 'summary',
     });
   };
-
-  // calculate what to show in vote options
-  const isClosed =
-    proposal?.computedStatus === FilterValues.closed.toLocaleLowerCase();
-
   if (error) {
     return null;
   }
@@ -258,107 +270,34 @@ export default function ProposalPage() {
     );
   }
 
-  // this is for existing proposals that have the target="_self" from the db
-  // bc we want all links to open in new tabs
-  const htmlBody = proposal?.body?.replace(
-    /target="_self"/g,
-    'target="_blank" rel="noopener noreferrer"'
-  );
-
   return (
     <>
+      {/* TODO: port this to use modal provider */}
       {confirmingVote && !castingVote && (
         <div className="modal is-active">
           <div className="modal-background"></div>
-          <div className="modal-card" style={{ maxWidth: maxModalWidth }}>
-            <header className="modal-card-head is-flex-direction-column has-background-white columns is-mobile m-0">
-              <div
-                className="column is-full has-text-right is-size-2 p-0 leading-tight cursor-pointer"
-                onClick={onCancelVote}
-              >
-                &times;
-              </div>
-              <div className="column is-full has-text-left px-4">
-                <p className="modal-card-title">Confirm Vote</p>
-              </div>
-            </header>
-            <section className="modal-card-body has-background-white-ter">
-              <div className="px-4">
-                <p>Are you sure this is your final vote?</p>
-                <p className="has-text-grey mb-4">
-                  This action cannot be undone.
-                </p>
-                <div className="py-4 px-5 rounded-sm has-background-white">
-                  {getVoteLabel(optionChosen)}
-                </div>
-              </div>
-            </section>
-            <footer className="modal-card-foot has-background-white pb-6">
-              <div className="columns is-mobile p-0 m-0 flex-1 pr-2">
-                <button
-                  className="button column is-full p-0"
-                  onClick={onCancelVote}
-                >
-                  Cancel
-                </button>
-              </div>
-              <div className="columns is-mobile p-0 m-0 flex-1 pl-2">
-                <button
-                  className="button column is-full p-0 has-background-yellow vote-button transition-all"
-                  onClick={onVote}
-                >
-                  Vote
-                </button>
-              </div>
-            </footer>
+          <div className="modal-content is-flex is-justify-content-center">
+            <VoteConfirmationModal
+              onCancelVote={onCancelVote}
+              onVote={onVote}
+              voteLabel={getVoteLabel(optionChosen)}
+            />
           </div>
         </div>
       )}
       {confirmingVote && castingVote && !castVote && (
         <div className="modal is-active">
           <div className="modal-background"></div>
-          <div
-            className="modal-card has-background-white"
-            style={{ maxWidth: maxModalWidth }}
-          >
-            <section
-              className="modal-card-body p-6 has-text-centered"
-              style={{
-                margin: '150px 0',
-              }}
-            >
-              <Loader className="mb-4" />
-              <p className="has-text-grey">Casting your vote...</p>
-            </section>
+          <div className="modal-content is-flex is-justify-content-center">
+            <CastingVoteModal />
           </div>
         </div>
       )}
       {confirmingVote && castingVote && castVote && (
         <div className="modal is-active">
           <div className="modal-background"></div>
-          <div className="modal-card" style={{ maxWidth: maxModalWidth }}>
-            <header className="modal-card-head is-flex-direction-column has-background-white columns is-mobile m-0">
-              <div
-                className="column is-full has-text-right is-size-2 p-0 leading-tight cursor-pointer"
-                onClick={onConfirmCastVote}
-              >
-                &times;
-              </div>
-              <div className="column is-full has-text-left px-4">
-                <p className="modal-card-title">Your voting was successful!</p>
-              </div>
-            </header>
-            <section className="modal-card-body">
-              <p className="px-4 has-text-grey">You voted for this proposal</p>
-            </section>
-            <footer className="modal-card-foot">
-              <button
-                className="button column is-full has-background-yellow is-uppercase"
-                onClick={onConfirmCastVote}
-              >
-                Got it
-              </button>
-            </footer>
+          <div className="modal-content is-flex is-justify-content-center">
+            <VoteConfirmedModal onConfirmCastVote={onConfirmCastVote} />
           </div>
         </div>
       )}
@@ -369,59 +308,36 @@ export default function ProposalPage() {
       />
       <section className="section">
         <div className="container">
-          <WrapperResponsive
-            classNames="is-flex"
-            extraClasses="mb-6"
-            extraClassesMobile="mb-3"
-          >
-            <Link to={`/community/${proposal.communityId}?tab=proposals`}>
-              <span className="has-text-grey is-flex is-align-items-center back-button transition-all">
-                <Svg name="ArrowLeft" /> <span className="ml-3">Back</span>
-              </span>
-            </Link>
-          </WrapperResponsive>
-          {castVote && (
-            <Message
-              messageText={`You successfully voted for ${getVoteLabel(
-                castVote
-              )}`}
-              icon={<Svg name="CheckMark" />}
-            />
-          )}
+          <HeaderNavigation
+            communityId={proposal.communityId}
+            proposalId={proposal.id}
+            proposalName={proposal.name}
+            addr={user?.addr}
+          />
           {cancelled && (
             <Message messageText={`This proposal has been cancelled`} />
           )}
-          <div className="is-flex is-justify-content-space-between column is-7 px-0">
-            <ProposalStatus
-              proposal={proposal}
-              className="is-flex is-align-items-center smaller-text"
-            />
-            {showCancelButton && canCancelProposal && (
-              <div className="is-flex is-align-items-center">
-                <button
-                  className="button is-white has-text-grey small-text"
-                  onClick={onCancelProposal}
-                >
-                  <div className="mr-2 is-flex is-align-items-center">
-                    <Svg name="Bin" />
-                  </div>
-                  <div className="is-flex is-align-items-center is-hidden-mobile">
-                    Cancel Proposal
-                  </div>
-                </button>
-              </div>
-            )}
-          </div>
           {/* Mobile version for tabs */}
           {!isNotMobile && (
             <div>
               <WrapperResponsive
                 as="h2"
-                classNames="title mt-5 is-4 has-text-black has-text-weight-normal"
-                extraStylesMobile={{ marginBottom: '30px' }}
+                classNames="title my-5 is-4 has-text-black has-text-weight-normal"
               >
                 {proposal.name}
               </WrapperResponsive>
+              <div
+                className="is-flex is-align-items-center"
+                style={{ marginBottom: '35px' }}
+              >
+                <CommunityName
+                  communityId={proposal.communityId}
+                  classNames="mr-3"
+                />
+                <StyledStatusPill
+                  status={FilterValues[proposal.computedStatus]}
+                />
+              </div>
               <div className="tabs is-medium">
                 <ul>
                   <li className={`${visibleTab.proposal ? 'is-active' : ''}`}>
@@ -466,7 +382,6 @@ export default function ProposalPage() {
                     )}
                     <VoteOptions
                       labelType="mobile"
-                      readOnly={isClosed}
                       addr={user?.addr}
                       proposal={proposal}
                       optionChosen={optionChosen}
@@ -507,6 +422,10 @@ export default function ProposalPage() {
                       computedStatus={proposal.computedStatus}
                       communityId={proposal.communityId}
                       openStrategyModal={openStrategyModal}
+                      proposalStrategy={proposalStrategy}
+                      votingStrategies={votingStrategies}
+                      proposalMaxWeight={proposal?.maxWeight}
+                      proposalMinBalance={proposal?.minBalance}
                     />
                   </div>
                 )}
@@ -519,14 +438,74 @@ export default function ProposalPage() {
               <div
                 className={`column is-7 p-0 is-flex is-flex-direction-column`}
               >
-                <h1 className="title mt-5 is-3">{proposal.name}</h1>
+                <h1 className="title is-3 mb-0">{proposal.name}</h1>
+                <div className="is-flex is-justify-content-space-between column px-0">
+                  <div className="is-flex is-align-items-center">
+                    <CommunityName
+                      communityId={proposal.communityId}
+                      classNames="mr-3"
+                    />
+                    <StyledStatusPill
+                      status={FilterValues[proposal.computedStatus]}
+                    />
+                  </div>
+                  {showCancelButton && canCancelProposal && (
+                    <div className="is-flex is-align-items-center">
+                      <button
+                        className="button is-white has-text-grey small-text"
+                        onClick={onCancelProposal}
+                      >
+                        <div className="mr-2 is-flex is-align-items-center">
+                          <Svg name="Bin" />
+                        </div>
+                        <div className="is-flex is-align-items-center is-hidden-mobile">
+                          Cancel Proposal
+                        </div>
+                      </button>
+                    </div>
+                  )}
+                </div>
+
                 {proposal.body && (
                   <div
-                    className="mt-6 mb-6 proposal-copy transition-all content"
-                    dangerouslySetInnerHTML={{
-                      __html: htmlBody,
-                    }}
-                  />
+                    style={
+                      isCollapsed
+                        ? { position: 'relative', marginBottom: '80px' }
+                        : {}
+                    }
+                  >
+                    <div
+                      className={`mt-5 ${
+                        !isCollapsed ? 'mb-6 ' : ''
+                      }proposal-copy transition-all content`}
+                      dangerouslySetInnerHTML={{
+                        __html: htmlBody,
+                      }}
+                      ref={descriptionRef}
+                      style={
+                        isCollapsed
+                          ? {
+                              maxHeight: '300px',
+                              overflow: 'hidden',
+                            }
+                          : {}
+                      }
+                    />
+                    {isCollapsed && (
+                      <>
+                        <div className="fade-proposal-description" />
+                        <div className="is-flex flex-1 is-justify-content-center">
+                          <div
+                            className="button rounded-xl is-flex has-text-weight-bold has-background-white px-6"
+                            style={{ minHeight: '48px', position: 'absolute' }}
+                            onClick={() => setIsCollapsed(false)}
+                          >
+                            View Full Proposal
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 )}
                 {proposal.strategy === 'bpt' && (
                   <div className="mt-6 mb-6 has-background-white-ter has-text-grey p-5 rounded-sm">
@@ -537,7 +516,6 @@ export default function ProposalPage() {
                 )}
                 <VoteOptions
                   labelType="desktop"
-                  readOnly={isClosed}
                   loggedIn={user?.loggedIn}
                   addr={user?.addr}
                   proposal={proposal}
@@ -553,17 +531,18 @@ export default function ProposalPage() {
                   proposalId={proposal.id}
                   creatorAddr={proposal.creatorAddr}
                   isCoreCreator={proposal.isCore}
-                  strategyName={proposalStrategy?.name}
+                  strategyName={proposalStrategy?.name || proposal.strategy}
                   ipfs={proposal.ipfs}
                   ipfsUrl={proposal.ipfsUrl}
                   startTime={proposal.startTime}
                   endTime={proposal.endTime}
                   computedStatus={proposal.computedStatus}
                   communityId={proposal.communityId}
-                  proposalStrategy={proposal.strategy}
+                  proposalStrategy={proposalStrategy}
                   proposalMaxWeight={proposal?.maxWeight}
                   proposalMinBalance={proposal?.minBalance}
                   openStrategyModal={openStrategyModal}
+                  votingStrategies={votingStrategies}
                 />
               </div>
             </div>

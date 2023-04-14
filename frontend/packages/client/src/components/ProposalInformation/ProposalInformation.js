@@ -21,6 +21,7 @@ const ProposalInformation = ({
   proposalStrategy,
   proposalMaxWeight,
   proposalMinBalance,
+  votingStrategies = [],
   openStrategyModal = () => {},
 }) => {
   // stores navbar height calculated after component is mounted
@@ -46,28 +47,32 @@ const ProposalInformation = ({
 
   const { data: votingResults } = useVotingResults(proposalId);
 
-  const { data: community } = useCommunityDetails(communityId);
-  const {
-    name: communityName,
-    logo: communityLogo,
-    slug: communitySlug,
-    strategies: commnunityStrategies,
-  } = community ?? {};
+  const { data: community, isLoading } = useCommunityDetails(communityId);
+  const { strategies: communityStrategies } = community ?? {};
 
   // Find contract information on community
   const contract =
-    commnunityStrategies?.find((st) => st.name === proposalStrategy)
+    communityStrategies?.find((st) => st.name === proposalStrategy.key)
       ?.contract ?? {};
 
   const {
     name: tokenName,
     maxWeight: maxWeightFromContract,
-    minBancale: minBalancefromContract,
+    minBalance: minBalanceFromContract,
+    script,
+    addr: contractAddr,
   } = contract;
+
+  let customStrategy;
+  if (proposalStrategy.key === 'custom-script') {
+    customStrategy = votingStrategies
+      .find((strategy) => strategy.key === proposalStrategy.key)
+      .scripts.find((strategy) => strategy.key === script);
+  }
 
   // get maxWeight and minBalance from proposal or default to community settings
   const maxWeight = proposalMaxWeight ?? maxWeightFromContract;
-  const minBalance = proposalMinBalance ?? minBalancefromContract;
+  const minBalance = proposalMinBalance ?? minBalanceFromContract;
 
   // this effect watches for user scroll to make info panel fixed to navbar
   useEffect(() => {
@@ -149,26 +154,28 @@ const ProposalInformation = ({
           <ResultsPanel
             results={votingResults?.results}
             endTime={endTime}
+            startTime={startTime}
             computedStatus={computedStatus}
           />
         </div>
-        <Information
-          creatorAddr={creatorAddr}
-          strategyName={strategyName}
-          isCoreCreator={isCoreCreator}
-          ipfs={ipfs}
-          ipfsUrl={ipfsUrl}
-          startTime={startTime}
-          endTime={endTime}
-          communityName={communityName}
-          communityLogo={communityLogo}
-          communitySlug={communitySlug}
-          communityId={communityId}
-          tokenName={tokenName}
-          maxWeight={maxWeight}
-          minBalance={minBalance}
-          openStrategyModal={openStrategyModal}
-        />
+        {!isLoading && (
+          <Information
+            creatorAddr={creatorAddr}
+            strategyName={strategyName}
+            isCoreCreator={isCoreCreator}
+            ipfs={ipfs}
+            ipfsUrl={ipfsUrl}
+            startTime={startTime}
+            endTime={endTime}
+            communityId={communityId}
+            tokenName={tokenName}
+            maxWeight={maxWeight}
+            minBalance={minBalance}
+            openStrategyModal={openStrategyModal}
+            customStrategy={customStrategy}
+            contractAddr={contractAddr}
+          />
+        )}
       </div>
     </div>
   );
