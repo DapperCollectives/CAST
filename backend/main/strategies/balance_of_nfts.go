@@ -8,8 +8,8 @@ import (
 
 type BalanceOfNfts struct {
 	shared.StrategyStruct
-	SC shared.SnapshotClient
-	DB *shared.Database
+	DPS shared.DpsAdapter
+	DB  *shared.Database
 }
 
 func (b *BalanceOfNfts) FetchBalance(
@@ -130,16 +130,12 @@ func (b *BalanceOfNfts) GetVotes(
 	return votes, nil
 }
 
-func (b *BalanceOfNfts) RequiresSnapshot() bool {
-	return false
-}
-
-func (b *BalanceOfNfts) InitStrategy(
-	f *shared.FlowAdapter,
+func (s *BalanceOfNfts) InitStrategy(
+	fa *shared.FlowAdapter,
 	db *shared.Database,
-	sc *shared.SnapshotClient,
+	dps *shared.DpsAdapter,
 ) {
-	b.FlowAdapter = f
-	b.DB = db
-	b.SC = *sc
+	s.FlowAdapter = fa
+	s.DB = db
+	s.DPS = *dps
 }

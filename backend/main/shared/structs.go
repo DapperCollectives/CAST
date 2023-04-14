@@ -104,7 +104,7 @@ type CustomScript struct {
 }
 
 func (b *FTBalanceResponse) NewFTBalance() {
-	if os.Getenv("APP_ENV") == "TEST" || os.Getenv("APP_ENV") == "DEV" {
+	if os.Getenv("FLOW_ENV") == "emulator" {
 		b.PrimaryAccountBalance = 11100000
 		b.SecondaryAccountBalance = 12300000
 		b.StakingBalance = 13500000

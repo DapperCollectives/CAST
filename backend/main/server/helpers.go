@@ -555,19 +555,18 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorRespo
 		p.Max_weight = strategy.Contract.MaxWeight
 	}
 
-	if err := h.snapshot(&strategy, &p); err != nil {
-		return models.Proposal{}, errIncompleteRequest
-	}
-
 	if err := h.enforceCommunityRestrictions(community, p, strategy); err != nil {
 		return models.Proposal{}, errIncompleteRequest
 	}
 
-	if err := h.processSnapshotStatus(&strategy, &p); err != nil {
-		errMsg := "Error processing snapshot status."
+	// Set Blockheight to latest sealed
+	blockheight, err := h.A.FlowAdapter.GetCurrentBlockHeight()
+	if err != nil {
+		errMsg := "couldn't fetch current blockheight"
 		log.Error().Err(err).Msg(errMsg)
 		return models.Proposal{}, errIncompleteRequest
 	}
+	p.Block_height = &blockheight
 
 	p.Cid, err = h.pinJSONToIpfs(p)
 	if err != nil {
@@ -650,23 +649,6 @@ func (h *Helpers) enforceCommunityRestrictions(
 			log.Error().Err(err).Msg(errMsg)
 			return errors.New(errMsg)
 		}
-	}
-
-	return nil
-}
-
-func (h *Helpers) snapshot(strategy *models.Strategy, p *models.Proposal) error {
-	s := h.initStrategy(*strategy.Name)
-
-	//var snapshotResponse *shared.SnapshotResponse
-	if s.RequiresSnapshot() {
-		snapshotResponse, err := h.A.SnapshotClient.TakeSnapshot(strategy.Contract)
-		if err != nil {
-			errMsg := "Error taking snapshot."
-			return errors.New(errMsg)
-		}
-		p.Block_height = &snapshotResponse.Data.BlockHeight
-		p.Snapshot_status = &snapshotResponse.Data.Status
 	}
 
 	return nil
@@ -1148,29 +1130,6 @@ func (h *Helpers) validateUserWithRoleViaVoucher(addr string, voucher *shared.Vo
 	return nil
 }
 
-func (h *Helpers) processSnapshotStatus(s *models.Strategy, p *models.Proposal) error {
-	var processing = "processing"
-
-	if s.Contract.Name != nil && p.Snapshot_status == &processing {
-		snapshotResponse, err := h.A.SnapshotClient.
-			GetSnapshotStatusAtBlockHeight(
-				s.Contract,
-				*p.Block_height,
-			)
-		if err != nil {
-			return err
-		}
-
-		p.Snapshot_status = &snapshotResponse.Data.Status
-
-		if err := p.UpdateSnapshotStatus(h.A.DB); err != nil {
-			return err
-		}
-	}
-	return nil
-
-}
-
 func (h *Helpers) processTokenThreshold(address string, c shared.Contract, contractType string) (bool, error) {
 	var scriptPath string
 
@@ -1194,7 +1153,7 @@ func (h *Helpers) initStrategy(name string) Strategy {
 		return nil
 	}
 
-	s.InitStrategy(h.A.FlowAdapter, h.A.DB, h.A.SnapshotClient)
+	s.InitStrategy(h.A.FlowAdapter, h.A.DB, h.A.DpsAdapter)
 
 	return s
 }
