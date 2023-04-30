@@ -48,6 +48,7 @@ type Community struct {
 	Timestamp            string                  `json:"timestamp"             validate:"required"`
 	Composite_signatures *[]s.CompositeSignature `json:"compositeSignatures"`
 	Creator_addr         string                  `json:"creatorAddr"           validate:"required"`
+	Creator_image        *string                 `json:"creatorImage,omitempty"`
 	Signing_addr         *string                 `json:"signingAddr,omitempty"`
 	Voucher              *shared.Voucher         `json:"voucher,omitempty"`
 	Created_at           *time.Time              `json:"createdAt,omitempty"`
@@ -202,15 +203,19 @@ func GetCommunityTypes(db *s.Database) ([]*CommunityType, error) {
 
 func (c *Community) GetCommunity(db *s.Database) error {
 	return pgxscan.Get(db.Context, db.Conn, c,
-		`SELECT * from communities WHERE id = $1`,
-		c.ID)
+		`SELECT communities.*, users.profile_image AS creator_image 
+			FROM communities 
+			JOIN users on users.addr = communities.creator_addr
+			WHERE id = $1`, c.ID)
 }
 
 func GetCommunities(db *s.Database, pageParams shared.PageParams) ([]*Community, int, error) {
 	var communities []*Community
 	err := pgxscan.Select(db.Context, db.Conn, &communities,
 		`
-		SELECT * FROM communities
+		SELECT communities.*, users.profile_image AS creator_image 
+		FROM communities
+		JOIN users on users.addr = communities.creator_addr
 		LIMIT $1 OFFSET $2
 		`, pageParams.Count, pageParams.Start)
 
