@@ -107,9 +107,9 @@ func NewFlowClient(flowEnv string, customScriptsMap map[string]CustomScript) *Fl
 		log.Panic().Msgf("Failed to connect to %s.", adapter.ArchiveURL)
 	}
 
+	adapter.Client = FlowClient
 	adapter.ArchiveClient = FlowClientArchive
 
-	adapter.Client = FlowClient
 	return &adapter
 }
 
@@ -133,7 +133,8 @@ func (fa *FlowAdapter) GetAddressBalanceAtBlockHeight(addr string, blockHeight u
 		return err
 	}
 	balanceResponse.PrimaryAccountBalance = uint64(balance * 100000000.0)
-
+	balanceResponse.SecondaryAccountBalance = 0
+	balanceResponse.StakingBalance = 0
 	return nil
 }
 
@@ -251,7 +252,7 @@ func (fa *FlowAdapter) EnforceTokenThreshold(scriptPath, creatorAddr string, c *
 				cadenceAddress,
 			})
 		if err != nil {
-			log.Error().Err(err).Msg("Error executing Funigble-Token Script.")
+			log.Error().Err(err).Msg("Error executing Fungible-Token Script.")
 			return false, err
 		}
 
@@ -290,8 +291,7 @@ func (fa *FlowAdapter) GetFTBalance(address string, blockHeight uint64, contract
 
 	script = fa.ReplaceContractPlaceholders(string(script[:]), &dummyContract, true)
 	cadencePath := cadence.Path{Domain: "public", Identifier: *dummyContract.Public_path}
-
-	cadenceValue, err := fa.Client.ExecuteScriptAtBlockHeight(
+	cadenceValue, err := fa.ArchiveClient.ExecuteScriptAtBlockHeight(
 		fa.Context,
 		blockHeight,
 		script,
