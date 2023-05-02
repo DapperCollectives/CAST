@@ -83,7 +83,7 @@ func NewFlowClient(flowEnv string, customScriptsMap map[string]CustomScript) *Fl
 
 	adapter.Config = config
 	adapter.URL = config.Networks[adapter.Env]
-	adapter.URL = config.Networks[fmt.Sprintf("%s_ARCHIVE", adapter.Env)]
+	adapter.ArchiveURL = config.Networks[fmt.Sprintf("%s_archive", adapter.Env)]
 
 	// Explicitly set when running test suite
 	if flag.Lookup("test.v") != nil {

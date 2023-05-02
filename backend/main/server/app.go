@@ -174,7 +174,6 @@ func (a *App) Initialize() {
 	a.FlowAdapter = shared.NewFlowClient(os.Getenv("FLOW_ENV"), customScriptsMap)
 
 	// Snapshot
-	log.Info().Msgf("SNAPSHOT_BASE_URL: %s", os.Getenv("SNAPSHOT_BASE_URL"))
 	a.TxOptionsAddresses = strings.Fields(os.Getenv("TX_OPTIONS_ADDRS"))
 
 	// Router

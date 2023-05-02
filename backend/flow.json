@@ -55,8 +55,11 @@
   },
   "networks": {
     "emulator": "127.0.0.1:3569",
+    "emulator_archive": "127.0.0.1:3569",
     "mainnet": "access.mainnet.nodes.onflow.org:9000",
-    "testnet": "access.devnet.nodes.onflow.org:9000"
+    "mainnet_archive": "archive.mainnet.nodes.onflow.org:9000",
+    "testnet": "access.devnet.nodes.onflow.org:9000",
+    "testnet_archive": "archive.devnet.nodes.onflow.org:9000"
   },
   "accounts": {
     "emulator-account": {
