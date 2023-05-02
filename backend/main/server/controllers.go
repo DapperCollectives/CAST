@@ -303,15 +303,9 @@ func (a *App) getProposal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	strategy, err := models.MatchStrategyByProposal(*c.Strategies, *p.Strategy)
+	_, err = models.MatchStrategyByProposal(*c.Strategies, *p.Strategy)
 	if err != nil {
 		log.Error().Err(err).Msg("error getting strategy by proposal")
-		respondWithError(w, errIncompleteRequest)
-		return
-	}
-
-	if err := helpers.processSnapshotStatus(&strategy, &p); err != nil {
-		log.Error().Err(err).Msg("error processing snapshot status")
 		respondWithError(w, errIncompleteRequest)
 		return
 	}
@@ -786,16 +780,18 @@ func (a *App) getAccountAtBlockHeight(w http.ResponseWriter, r *http.Request) {
 	}
 
 	flowToken := "FlowToken"
-	defaultFlowContract := shared.Contract{
-		Name: &flowToken,
-	}
 
 	b := shared.FTBalanceResponse{}
-	if err = a.SnapshotClient.GetAddressBalanceAtBlockHeight(addr, blockHeight, &b, &defaultFlowContract); err != nil {
+	acc, err := a.FlowAdapter.GetAccountAtBlockHeight(addr, blockHeight)
+	if err != nil {
 		log.Error().Err(err).Msgf("Error getting account %s at blockheight %d.", addr, blockHeight)
-		respondWithError(w, errFetchingBalance)
-		return
 	}
+
+	//TODO: @bluesign add locked tokens
+	b.Balance = acc.Balance
+	b.Addr = addr
+	b.BlockHeight = blockHeight
+	b.FungibleTokenID = flowToken
 
 	respondWithJSON(w, http.StatusOK, b)
 }
@@ -806,40 +802,6 @@ func (a *App) getAdminList(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) getCommunityBlocklist(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, a.CommunityBlocklist.Addresses)
-}
-
-func (a *App) getLatestSnapshot(w http.ResponseWriter, r *http.Request) {
-	snapshot, err := a.SnapshotClient.GetLatestFlowSnapshot()
-	if err != nil {
-		log.Error().Err(err).Msg("Error getting latest snapshot")
-		respondWithError(w, errIncompleteRequest)
-		return
-	}
-
-	respondWithJSON(w, http.StatusOK, snapshot)
-}
-
-func (a *App) addFungibleToken(w http.ResponseWriter, r *http.Request) {
-	payload := struct {
-		Addr string `json:"addr" validate:"required"`
-		Name string `json:"name" validate:"required"`
-		Path string `json:"path" validate:"required"`
-	}{}
-
-	if err := validatePayload(r.Body, &payload); err != nil {
-		log.Error().Err(err).Msg("Error validating payload")
-		respondWithError(w, errIncompleteRequest)
-		return
-	}
-
-	err := a.SnapshotClient.AddFungibleToken(payload.Addr, payload.Name, payload.Path)
-	if err != nil {
-		log.Error().Err(err).Msg("Error adding fungible token")
-		respondWithError(w, errIncompleteRequest)
-		return
-	}
-
-	respondWithJSON(w, http.StatusOK, "OK")
 }
 
 ///////////

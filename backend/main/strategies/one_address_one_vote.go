@@ -12,7 +12,6 @@ import (
 
 type OneAddressOneVote struct {
 	s.StrategyStruct
-	SC s.SnapshotClient
 	DB *s.Database
 }
 
@@ -87,9 +86,7 @@ func (s *OneAddressOneVote) RequiresSnapshot() bool {
 func (s *OneAddressOneVote) InitStrategy(
 	f *shared.FlowAdapter,
 	db *shared.Database,
-	sc *s.SnapshotClient,
 ) {
 	s.FlowAdapter = f
 	s.DB = db
-	s.SC = *sc
 }

@@ -12,7 +12,6 @@ import (
 
 type TokenWeightedDefault struct {
 	s.StrategyStruct
-	SC s.SnapshotClient
 	DB *s.Database
 }
 
@@ -54,7 +53,7 @@ func (s *TokenWeightedDefault) FetchBalanceFromSnapshot(
 	ftBalance.NewFTBalance()
 
 	if *strategy.Contract.Name == "FlowToken" {
-		if err := s.SC.GetAddressBalanceAtBlockHeight(
+		if err := s.FlowAdapter.GetAddressBalanceAtBlockHeight(
 			b.Addr,
 			b.BlockHeight,
 			ftBalance,
@@ -68,7 +67,7 @@ func (s *TokenWeightedDefault) FetchBalanceFromSnapshot(
 		b.StakingBalance = ftBalance.StakingBalance
 
 	} else {
-		if err := s.SC.GetAddressBalanceAtBlockHeight(
+		if err := s.FlowAdapter.GetAddressBalanceAtBlockHeight(
 			b.Addr,
 			b.BlockHeight,
 			ftBalance,
@@ -159,9 +158,7 @@ func (s *TokenWeightedDefault) RequiresSnapshot() bool {
 func (s *TokenWeightedDefault) InitStrategy(
 	f *shared.FlowAdapter,
 	db *shared.Database,
-	sc *s.SnapshotClient,
 ) {
 	s.FlowAdapter = f
 	s.DB = db
-	s.SC = *sc
 }

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -22,10 +23,12 @@ import (
 
 type FlowAdapter struct {
 	Config           FlowConfig
+	ArchiveClient    *client.Client
 	Client           *client.Client
 	Context          context.Context
 	CustomScriptsMap map[string]CustomScript
 	URL              string
+	ArchiveURL       string
 	Env              string
 }
 
@@ -80,11 +83,14 @@ func NewFlowClient(flowEnv string, customScriptsMap map[string]CustomScript) *Fl
 
 	adapter.Config = config
 	adapter.URL = config.Networks[adapter.Env]
+	adapter.URL = config.Networks[fmt.Sprintf("%s_ARCHIVE", adapter.Env)]
 
 	// Explicitly set when running test suite
 	if flag.Lookup("test.v") != nil {
 		adapter.URL = "127.0.0.1:3569"
+		adapter.ArchiveURL = "127.0.0.1:3569"
 	}
+
 	log.Info().Msgf("FLOW URL: %s", adapter.URL)
 
 	// create flow client
@@ -92,6 +98,17 @@ func NewFlowClient(flowEnv string, customScriptsMap map[string]CustomScript) *Fl
 	if err != nil {
 		log.Panic().Msgf("Failed to connect to %s.", adapter.URL)
 	}
+
+	log.Info().Msgf("FLOW Archive URL: %s", adapter.ArchiveURL)
+
+	//create archive client
+	FlowClientArchive, err := client.New(adapter.ArchiveURL, grpc.WithInsecure())
+	if err != nil {
+		log.Panic().Msgf("Failed to connect to %s.", adapter.ArchiveURL)
+	}
+
+	adapter.ArchiveClient = FlowClientArchive
+
 	adapter.Client = FlowClient
 	return &adapter
 }
@@ -107,6 +124,17 @@ func (fa *FlowAdapter) GetCurrentBlockHeight() (int, error) {
 		return 0, err
 	}
 	return int(block.Height), nil
+}
+
+func (fa *FlowAdapter) GetAddressBalanceAtBlockHeight(addr string, blockHeight uint64, balanceResponse *FTBalanceResponse, contract *Contract) error {
+	balance, err := fa.GetFTBalance(addr, blockHeight, *contract.Name, *contract.Addr, *contract.Public_path)
+	fmt.Println(balance)
+	if err != nil {
+		return err
+	}
+	balanceResponse.PrimaryAccountBalance = uint64(balance * 100000000.0)
+
+	return nil
 }
 
 func (fa *FlowAdapter) ValidateSignature(address, message string, sigs *[]CompositeSignature, messageType string) error {
@@ -243,8 +271,8 @@ func (fa *FlowAdapter) EnforceTokenThreshold(scriptPath, creatorAddr string, c *
 	return true, nil
 }
 
-//this function only gets called in local dev when snapshot is being overidden
-func (fa *FlowAdapter) GetFlowBalance(address string) (float64, error) {
+// @bluesign: this is called via archival node now
+func (fa *FlowAdapter) GetFTBalance(address string, blockHeight uint64, contractName string, contractAddress string, publicPath string) (float64, error) {
 	flowAddress := flow.HexToAddress(address)
 	cadenceAddress := cadence.NewAddress(flowAddress)
 
@@ -254,21 +282,18 @@ func (fa *FlowAdapter) GetFlowBalance(address string) (float64, error) {
 		return 0, err
 	}
 
-	contractName := "FlowToken"
-	publicPath := "flowTokenBalance"
-	contracAddress := "0x0ae53cb6e3f42a79"
-
 	dummyContract := Contract{
 		Name:        &contractName,
 		Public_path: &publicPath,
-		Addr:        &contracAddress,
+		Addr:        &contractAddress,
 	}
 
 	script = fa.ReplaceContractPlaceholders(string(script[:]), &dummyContract, true)
 	cadencePath := cadence.Path{Domain: "public", Identifier: *dummyContract.Public_path}
 
-	cadenceValue, err := fa.Client.ExecuteScriptAtLatestBlock(
+	cadenceValue, err := fa.Client.ExecuteScriptAtBlockHeight(
 		fa.Context,
+		blockHeight,
 		script,
 		[]cadence.Value{
 			cadencePath,

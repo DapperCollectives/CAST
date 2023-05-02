@@ -10,7 +10,6 @@ import (
 
 type FloatNFTs struct {
 	shared.StrategyStruct
-	SC shared.SnapshotClient
 	DB *shared.Database
 }
 
@@ -146,9 +145,7 @@ func (f *FloatNFTs) RequiresSnapshot() bool {
 func (f *FloatNFTs) InitStrategy(
 	fa *shared.FlowAdapter,
 	db *shared.Database,
-	sc *shared.SnapshotClient,
 ) {
 	f.FlowAdapter = fa
 	f.DB = db
-	f.SC = *sc
 }
