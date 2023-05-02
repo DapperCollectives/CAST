@@ -4,7 +4,7 @@ build:
 	GOARCH=amd64 GOOS=linux go build -o ${BINARY_NAME} ./main
 
 build_macos:
-	GOARCH=amd64 GOOS=darwin go build -o ${BINARY_NAME} ./main
+	GOARCH=arm64 GOOS=darwin go build -o ${BINARY_NAME} ./main
 
 run:
 	./${BINARY_NAME}
