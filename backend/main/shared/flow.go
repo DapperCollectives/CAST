@@ -127,15 +127,30 @@ func (fa *FlowAdapter) GetCurrentBlockHeight() (int, error) {
 }
 
 func (fa *FlowAdapter) GetAddressBalanceAtBlockHeight(addr string, blockHeight uint64, balanceResponse *FTBalanceResponse, contract *Contract) error {
-	balance, err := fa.GetFTBalance(addr, blockHeight, *contract.Name, *contract.Addr, *contract.Public_path)
-	fmt.Println(balance)
-	if err != nil {
-		return err
+
+	if *contract.Name == "FlowToken" {
+		balances, err := fa.GetFlowBalance(addr, blockHeight)
+		fmt.Println(balances)
+		if err != nil {
+			return err
+		}
+		balanceResponse.PrimaryAccountBalance = uint64(balances[0] * 100000000.0)
+		balanceResponse.SecondaryAccountBalance = uint64(balances[1] * 10000000.0)
+		balanceResponse.StakingBalance = uint64(balances[2] * 10000000.0)
+
+		return nil
+
+	} else {
+		balance, err := fa.GetFTBalance(addr, blockHeight, *contract.Name, *contract.Addr, *contract.Public_path)
+		fmt.Println(balance)
+		if err != nil {
+			return err
+		}
+		balanceResponse.PrimaryAccountBalance = uint64(balance * 100000000.0)
+		balanceResponse.SecondaryAccountBalance = 0
+		balanceResponse.StakingBalance = 0
+		return nil
 	}
-	balanceResponse.PrimaryAccountBalance = uint64(balance * 100000000.0)
-	balanceResponse.SecondaryAccountBalance = 0
-	balanceResponse.StakingBalance = 0
-	return nil
 }
 
 func (fa *FlowAdapter) ValidateSignature(address, message string, sigs *[]CompositeSignature, messageType string) error {
@@ -210,7 +225,7 @@ func (fa *FlowAdapter) EnforceTokenThreshold(scriptPath, creatorAddr string, c *
 	flowAddress := flow.HexToAddress(creatorAddr)
 	cadenceAddress := cadence.NewAddress(flowAddress)
 	cadencePath := cadence.Path{Domain: "public", Identifier: *c.Public_path}
-
+	fmt.Println(cadencePath)
 	script, err := ioutil.ReadFile(scriptPath)
 	if err != nil {
 		log.Error().Err(err).Msgf("Error reading cadence script file.")
@@ -270,6 +285,50 @@ func (fa *FlowAdapter) EnforceTokenThreshold(scriptPath, creatorAddr string, c *
 	}
 
 	return true, nil
+}
+
+func (fa *FlowAdapter) GetFlowBalance(address string, blockHeight uint64) ([]float64, error) {
+	flowAddress := flow.HexToAddress(address)
+	cadenceAddress := cadence.NewAddress(flowAddress)
+	script, err := ioutil.ReadFile("./main/cadence/scripts/get_total_balance.cdc")
+	if err != nil {
+		log.Error().Err(err).Msgf("Error reading cadence script file.")
+		return []float64{0, 0, 0}, err
+	}
+	cadenceValue, err := fa.ArchiveClient.ExecuteScriptAtBlockHeight(
+		fa.Context,
+		blockHeight,
+		script,
+		[]cadence.Value{
+			cadenceAddress,
+		},
+	)
+
+	if err != nil {
+		log.Error().Err(err).Msg("Error executing Total balance Script.")
+		return []float64{0, 0, 0}, err
+	}
+
+	var values []interface{} = CadenceValueToInterface(cadenceValue).([]interface{})
+
+	balancePrimary, err := strconv.ParseFloat(values[0].(string), 64)
+	if err != nil {
+		log.Error().Err(err).Msg("Error converting cadence value to float. (balancePrimary)")
+		return []float64{0, 0, 0}, err
+	}
+
+	balanceSecondary, err := strconv.ParseFloat(values[1].(string), 64)
+	if err != nil {
+		log.Error().Err(err).Msg("Error converting cadence value to float. (balanceSecondary)")
+		return []float64{0, 0, 0}, err
+	}
+
+	balanceStaked, err := strconv.ParseFloat(values[2].(string), 64)
+	if err != nil {
+		log.Error().Err(err).Msg("Error converting cadence value to float. (balanceStaked)")
+		return []float64{0, 0, 0}, err
+	}
+	return []float64{balancePrimary, balanceSecondary, balanceStaked}, nil
 }
 
 // @bluesign: this is called via archival node now
