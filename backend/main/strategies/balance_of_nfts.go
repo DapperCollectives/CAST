@@ -8,7 +8,6 @@ import (
 
 type BalanceOfNfts struct {
 	shared.StrategyStruct
-	SC shared.SnapshotClient
 	DB *shared.Database
 }
 
@@ -137,9 +136,7 @@ func (b *BalanceOfNfts) RequiresSnapshot() bool {
 func (b *BalanceOfNfts) InitStrategy(
 	f *shared.FlowAdapter,
 	db *shared.Database,
-	sc *shared.SnapshotClient,
 ) {
 	b.FlowAdapter = f
 	b.DB = db
-	b.SC = *sc
 }

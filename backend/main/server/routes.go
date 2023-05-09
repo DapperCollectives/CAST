@@ -54,8 +54,4 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/accounts/blocklist", a.getCommunityBlocklist).Methods("GET")
 	a.Router.HandleFunc("/accounts/{addr:0x[a-zA-Z0-9]{16}}/{blockHeight:[0-9]+}", a.getAccountAtBlockHeight).Methods("GET")
 
-	// Snapshotter
-	a.Router.HandleFunc("/latest-snapshot", a.getLatestSnapshot).Methods("GET")
-	a.Router.HandleFunc("/add-fungible-token", a.addFungibleToken).Methods("POST", "OPTIONS")
-
 }

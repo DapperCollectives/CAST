@@ -387,7 +387,7 @@ func TestSearchForCommunities(t *testing.T) {
 
 	t.Run("Search Pagination", func(t *testing.T) {
 		limit := 3
-		response := otu.GetSearchCommunitiesAPI([]string{"dao"}, "test", &limit)
+		response := otu.GetSearchCommunitiesAPI([]string{}, "test", &limit)
 
 		checkResponseCode(t, http.StatusOK, response.Code)
 
@@ -402,7 +402,8 @@ func TestSearchForCommunities(t *testing.T) {
 	})
 
 	t.Run("Total Records should be the same as all field of filters", func(t *testing.T) {
-		response := otu.GetSearchCommunitiesAPI([]string{"dao"}, "test", nil)
+		limit := 10
+		response := otu.GetSearchCommunitiesAPI([]string{}, "test", &limit)
 
 		checkResponseCode(t, http.StatusOK, response.Code)
 
