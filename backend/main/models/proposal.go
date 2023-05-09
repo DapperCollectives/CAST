@@ -23,8 +23,8 @@ type Proposal struct {
 	Community_id         int                     `json:"communityId"`
 	Choices              []s.Choice              `json:"choices" validate:"required"`
 	Strategy             *string                 `json:"strategy,omitempty"`
-	Max_weight           *float64                 `json:"maxWeight,omitempty"`
-	Min_balance          *float64                 `json:"minBalance,omitempty"`
+	Max_weight           *float64                `json:"maxWeight,omitempty"`
+	Min_balance          *float64                `json:"minBalance,omitempty"`
 	Creator_addr         string                  `json:"creatorAddr" validate:"required"`
 	Start_time           time.Time               `json:"startTime" validate:"required"`
 	Result               *string                 `json:"result,omitempty"`
@@ -40,7 +40,7 @@ type Proposal struct {
 	Computed_status      *string                 `json:"computedStatus,omitempty"`
 	Snapshot_status      *string                 `json:"snapshotStatus,omitempty"`
 	Voucher              *shared.Voucher         `json:"voucher,omitempty"`
-	Achievements_done	 bool					 `json:"achievementsDone"`
+	Achievements_done    bool                    `json:"achievementsDone"`
 }
 
 type UpdateProposalRequestPayload struct {
@@ -180,22 +180,6 @@ func (p *Proposal) UpdateProposal(db *s.Database) error {
 		if err != nil {
 			return err
 		}
-	}
-
-	err = p.GetProposalById(db)
-	return err
-}
-
-func (p *Proposal) UpdateSnapshotStatus(db *s.Database) error {
-	_, err := db.Conn.Exec(db.Context,
-		`
-	UPDATE proposals
-	SET snapshot_status = $1
-	WHERE id = $2
-	`, p.Snapshot_status, p.ID)
-
-	if err != nil {
-		return err
 	}
 
 	err = p.GetProposalById(db)

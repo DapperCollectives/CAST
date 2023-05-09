@@ -119,10 +119,7 @@ pub fun getStakesAndDelegations(_ account: PublicAccount) : {String:UFix64} {
 }
 
 
-pub fun main(addresses: [Address]): {Address: AccountInfo} {
-    let accountDict: {Address: AccountInfo} = {}
-
-    for address in addresses {
+pub fun main(address: Address): [AnyStruct] {
         var info: AccountInfo = AccountInfo()
 
         let account = getAccount(address)
@@ -167,8 +164,6 @@ pub fun main(addresses: [Address]): {Address: AccountInfo} {
                 info.hasVault = false
             }
         }
-        accountDict.insert(key: address, info)
-    }
 
-    return accountDict
+    return [info.primaryAcctBalance, info.secondaryAcctBalance, info.stakedBalance]
 }

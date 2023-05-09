@@ -10,7 +10,6 @@ import (
 
 type CustomScript struct {
 	shared.StrategyStruct
-	SC shared.SnapshotClient
 	DB *shared.Database
 }
 
@@ -148,9 +147,7 @@ func (cs *CustomScript) RequiresSnapshot() bool {
 func (cs *CustomScript) InitStrategy(
 	f *shared.FlowAdapter,
 	db *shared.Database,
-	sc *shared.SnapshotClient,
 ) {
 	cs.FlowAdapter = f
 	cs.DB = db
-	cs.SC = *sc
 }
