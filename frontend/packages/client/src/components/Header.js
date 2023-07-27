@@ -40,10 +40,10 @@ function Header(props) {
                 </span>
                 <NavLink to="/" className="navbar-item p-0 mr-2">
                   <div className="is-hidden-tablet is-flex is-align-items-center">
-                    <Svg name="Logo" width={104} height={24} />
+                    <Svg name="Flow" width={146} height={52} />
                   </div>
                   <div className="is-hidden-mobile is-flex is-align-items-center">
-                    <Svg name="Logo" />
+                    <Svg name="Flow" width={146} height={52} />
                   </div>
                 </NavLink>
                 <div className="is-flex is-align-items-center">

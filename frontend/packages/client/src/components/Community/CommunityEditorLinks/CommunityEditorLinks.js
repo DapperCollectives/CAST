@@ -50,7 +50,7 @@ export default function CommunityEditorLinks(props = {}) {
           label="Save"
           enabled={isValid && isDirty && !isSubmitting}
           loading={isSubmitting}
-          classNames="vote-button transition-all has-background-yellow mt-5"
+          classNames="vote-button transition-all has-background-green mt-5"
         />
       }
       errors={errors}

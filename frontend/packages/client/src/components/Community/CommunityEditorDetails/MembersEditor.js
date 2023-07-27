@@ -142,7 +142,7 @@ export default function MembersEditor({
           label="Save"
           enabled={isDirty && !isSubmitting}
           loading={isSubmitting}
-          classNames="vote-button transition-all has-background-yellow mt-5"
+          classNames="vote-button transition-all has-background-green mt-5"
         />
       }
       title={title}
