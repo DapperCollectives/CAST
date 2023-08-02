@@ -87,8 +87,8 @@
 		"testnet": "access.devnet.nodes.onflow.org:9000"
 	},
 	"networksDps": {
-		"testnet": "dps-001.devnet37.nodes.onflow.org:5005",
-		"mainnet": "dps-001.mainnet19.nodes.onflow.org:5005"
+		"testnet": "archive.devnet.nodes.onflow.org:9000",
+		"mainnet": "archive.mainnet.nodes.onflow.org:9000"
 	},
 	"accounts": {
 		"emulator-account": {
