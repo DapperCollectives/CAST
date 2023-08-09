@@ -40,7 +40,7 @@ export default function CancelProposal({
           </div>
           <div className="columns is-mobile p-0 m-0 flex-1 pl-2">
             <Modal.FooterButton
-              classNames={`has-background-yellow ${
+              classNames={`has-background-green ${
                 isCancelling && 'is-disabled'
               }`}
               onClick={isCancelling ? () => {} : onCancelProposal}

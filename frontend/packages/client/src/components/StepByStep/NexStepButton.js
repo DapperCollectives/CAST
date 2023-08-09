@@ -6,7 +6,7 @@ const NextButton = ({
   disabled = false,
 } = {}) => {
   const classNames = classnames(
-    'button is-block has-background-yellow rounded-sm py-2 px-4 has-text-centered',
+    'button is-block has-background-green rounded-sm py-2 px-4 has-text-centered',
     { 'is-disabled': disabled },
     { 'is-fullwidth': !!formIdParam }
   );

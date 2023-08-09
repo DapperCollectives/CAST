@@ -65,7 +65,7 @@ export default function StepThree({
               type="submit"
               label="Next: Voting Strategies"
               enabled={(isValid || isDirty) && !isSubmitting}
-              classNames="vote-button transition-all has-background-yellow mt-5"
+              classNames="vote-button transition-all has-background-green mt-5"
             />
           </div>
         </div>
