@@ -1,7 +1,6 @@
 package server
 
 import (
-	"context"
 	"encoding/hex"
 	"errors"
 	"flag"
@@ -558,16 +557,20 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorRespo
 		p.Max_weight = strategy.Contract.MaxWeight
 	}
 
-	header, err := h.A.FlowAdapter.Client.GetLatestBlockHeader(context.Background(), true)
-	if err != nil {
-		log.Error().Err(err).Msg("Couldn't get block header")
-		return models.Proposal{}, errIncompleteRequest
-	}
-	p.Block_height = &header.Height
+	canUserCreateProposal := community.CanUserCreateProposal(h.A.DB, h.A.FlowAdapter, p.Creator_addr)
 
 	if err := handlePermissionErrorr(canUserCreateProposal); err != nilErr {
 		return models.Proposal{}, err
 	}
+
+	// Get latest sealed blockheight to use as proposal snapshot
+	blockheight, err := h.A.FlowAdapter.GetCurrentBlockHeight()
+	if err != nil {
+		errMsg := "couldn't fetch current blockheight"
+		log.Error().Err(err).Msg(errMsg)
+		return models.Proposal{}, errIncompleteRequest
+	}
+	p.Block_height = &blockheight
 
 	p.Cid, err = h.pinJSONToIpfs(p)
 	if err != nil {
@@ -714,6 +717,22 @@ func (h *Helpers) validateUpdateProposalStatus(status string) error {
 	}
 
 	return errors.New("invalid status")
+}
+
+func (h *Helpers) validateStrategyName(name string) error {
+	if name == "" {
+		return errors.New("Strategy name is required.")
+	}
+
+	for k, _ := range strategyMap {
+		if name == k {
+			return nil
+		} else {
+			continue
+		}
+	}
+
+	return errors.New("Strategy not found.")
 }
 
 func (h *Helpers) createCommunity(payload models.CreateCommunityRequestPayload) (models.Community, error) {
@@ -1192,30 +1211,13 @@ func (h *Helpers) validateUserWithRoleViaVoucher(addr string, voucher *shared.Vo
 	return nil
 }
 
-func (h *Helpers) processTokenThreshold(address string, c shared.Contract, contractType string) (bool, error) {
-	var scriptPath string
-
-	if contractType == "nft" {
-		scriptPath = "./main/cadence/scripts/get_nfts_ids.cdc"
-	} else {
-		scriptPath = "./main/cadence/scripts/get_balance.cdc"
-	}
-
-	hasBalance, err := h.A.FlowAdapter.EnforceTokenThreshold(scriptPath, address, &c)
-	if err != nil {
-		return false, err
-	}
-
-	return hasBalance, nil
-}
-
 func (h *Helpers) initStrategy(name string) Strategy {
 	s := strategyMap[name]
 	if s == nil {
 		return nil
 	}
 
-	s.InitStrategy(h.A.FlowAdapter, h.A.DB)
+	s.InitStrategy(h.A.FlowAdapter, h.A.DB, h.A.DpsAdapter)
 
 	return s
 }

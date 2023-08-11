@@ -335,7 +335,9 @@ func (a *App) getProposal(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, p)
 }
 
-	_, err = models.MatchStrategyByProposal(*c.Strategies, *p.Strategy)
+func (a *App) getDraftProposal(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	p, err := helpers.fetchProposal(vars, "id")
 	if err != nil {
 		log.Error().Err(err).Msg("Invalid Proposal ID.")
 		respondWithError(w, errProposalNotFound)
@@ -343,6 +345,30 @@ func (a *App) getProposal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondWithJSON(w, http.StatusOK, p)
+}
+
+func (a *App) getUserProposals(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	addr := vars["addr"]
+	filter := r.FormValue("filter")
+
+	pageParams := getPageParams(*r, 25)
+
+	communities, totalRecords, err := models.GetCommunityProposalsForUser(
+		a.DB,
+		addr,
+		filter,
+		pageParams,
+	)
+	if err != nil {
+		log.Error().Err(err).Msg("Error getting user proposals.")
+		respondWithError(w, errIncompleteRequest)
+		return
+	}
+
+	pageParams.TotalRecords = totalRecords
+	response := shared.GetPaginatedResponseWithPayload(communities, pageParams)
+	respondWithJSON(w, http.StatusOK, response)
 }
 
 func (a *App) createProposal(w http.ResponseWriter, r *http.Request) {
@@ -827,34 +853,6 @@ func (a *App) removeAddressesFromList(w http.ResponseWriter, r *http.Request) {
 //////////////
 // Accounts //
 //////////////
-
-func (a *App) getAccountAtBlockHeight(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	addr := vars["addr"]
-	var blockHeight uint64
-	blockHeight, err := strconv.ParseUint(vars["blockHeight"], 10, 64)
-	if err != nil {
-		log.Error().Err(err).Msg("Error parsing blockHeight param.")
-		respondWithError(w, errFetchingBalance)
-		return
-	}
-
-	flowToken := "FlowToken"
-
-	b := shared.FTBalanceResponse{}
-	acc, err := a.FlowAdapter.GetAccountAtBlockHeight(addr, blockHeight)
-	if err != nil {
-		log.Error().Err(err).Msgf("Error getting account %s at blockheight %d.", addr, blockHeight)
-	}
-
-	//TODO: @bluesign add locked tokens
-	b.Balance = acc.Balance
-	b.Addr = addr
-	b.BlockHeight = blockHeight
-	b.FungibleTokenID = flowToken
-
-	respondWithJSON(w, http.StatusOK, b)
-}
 
 func (a *App) getAdminList(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, a.AdminAllowlist.Addresses)

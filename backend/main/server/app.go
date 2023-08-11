@@ -58,7 +58,7 @@ type Strategy interface {
 	TallyVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) (models.ProposalResults, error)
 	GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error)
 	GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error)
-	InitStrategy(f *shared.FlowAdapter, db *shared.Database)
+	InitStrategy(f *shared.FlowAdapter, db *shared.Database, sc *shared.DpsAdapter)
 	FetchBalance(b *models.Balance, p *models.Proposal) (*models.Balance, error)
 }
 
@@ -173,7 +173,9 @@ func (a *App) Initialize() {
 	}
 	a.FlowAdapter = shared.NewFlowClient(os.Getenv("FLOW_ENV"), customScriptsMap)
 
-	// Snapshot
+	a.DpsAdapter = shared.NewDpsClient(os.Getenv("FLOW_ENV"))
+	a.DpsAdapter.Config = a.FlowAdapter.Config
+
 	a.TxOptionsAddresses = strings.Fields(os.Getenv("TX_OPTIONS_ADDRS"))
 
 	// Router

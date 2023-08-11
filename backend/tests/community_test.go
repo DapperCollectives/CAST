@@ -396,7 +396,7 @@ func TestSearchForCommunities(t *testing.T) {
 
 	t.Run("Search Pagination", func(t *testing.T) {
 		limit := 3
-		response := otu.GetSearchCommunitiesAPI([]string{}, "test", &limit)
+		response := otu.GetSearchCommunitiesAPI([]string{"dao"}, "test", &limit, nil)
 
 		checkResponseCode(t, http.StatusOK, response.Code)
 
@@ -410,9 +410,61 @@ func TestSearchForCommunities(t *testing.T) {
 		assert.Equal(t, limit, len(p.Results.Data))             // limited to 3
 	})
 
-	t.Run("Total Records should be the same as all field of filters", func(t *testing.T) {
+}
+
+func TestSearchPagination(t *testing.T) {
+	//clear communities for new pagination cases
+	clearTable("communities")
+	clearTable("community_users")
+	var totalCommunityIds []int
+
+	communityIds := otu.AddCommunities(10, "dao")
+	totalCommunityIds = append(totalCommunityIds, communityIds...)
+	communityIds = otu.AddCommunities(10, "social")
+	totalCommunityIds = append(totalCommunityIds, communityIds...)
+	communityIds = otu.AddCommunities(5, "protocol")
+	totalCommunityIds = append(totalCommunityIds, communityIds...)
+
+	totalRecords := len(totalCommunityIds)
+
+	for _, communityId := range totalCommunityIds {
+		otu.MakeFeaturedCommunity(communityId)
+	}
+
+	t.Run("should have correct total records for 'default featured'", func(t *testing.T) {
+		start := 0
 		limit := 10
-		response := otu.GetSearchCommunitiesAPI([]string{}, "test", &limit)
+		emptyFilters := []string{}
+		response := otu.GetSearchCommunitiesAPI(emptyFilters, "", &limit, &start)
+
+		checkResponseCode(t, http.StatusOK, response.Code)
+
+		var p test_utils.PaginatedResponseSearch
+		json.Unmarshal(response.Body.Bytes(), &p)
+		assert.Equal(t, totalRecords, p.Results.TotalRecords)
+	})
+
+	t.Run("next should be '-1' when there are no more records for 'default featured'", func(t *testing.T) {
+
+		//when start is set to 20 it will be the last pagination as total records are 25
+		//and limit is 10, so next should be -1 as there are no more records
+		start := 20
+		limit := 10
+		emptyFilters := []string{}
+		response := otu.GetSearchCommunitiesAPI(emptyFilters, "", &limit, &start)
+
+		checkResponseCode(t, http.StatusOK, response.Code)
+
+		var p test_utils.PaginatedResponseSearch
+		json.Unmarshal(response.Body.Bytes(), &p)
+		assert.Equal(t, -1, p.Results.Next)
+	})
+
+	t.Run("should have correct total record for search term with no filters", func(t *testing.T) {
+		start := 0
+		limit := 10
+		emptyFilters := []string{}
+		response := otu.GetSearchCommunitiesAPI(emptyFilters, "test", &limit, &start)
 
 		checkResponseCode(t, http.StatusOK, response.Code)
 

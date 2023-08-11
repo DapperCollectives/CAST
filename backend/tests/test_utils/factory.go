@@ -39,7 +39,7 @@ func (otu *OverflowTestUtils) AddDummyVotesAndBalances(votes []*models.VoteWithB
 		_, err = otu.A.DB.Conn.Exec(otu.A.DB.Context, `
 			INSERT INTO balances(id, addr, primary_account_balance, secondary_address, secondary_account_balance, staking_balance, script_result, stakes, block_height)
 			VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)
-		`, uuid.New(), vote.Addr, vote.PrimaryAccountBalance, "0x0", 0, vote.StakingBalance, "SUCCESS", []string{}, 9)
+		`, uuid.New(), vote.Addr, vote.PrimaryAccountBalance, "0x0", 0, vote.StakingBalance, "SUCCESS", []string{}, 1)
 		if err != nil {
 			log.Error().Err(err).Msg("AddDummyVotesAndBalances database error - balances.")
 			return err
@@ -132,7 +132,7 @@ func (otu *OverflowTestUtils) AddCommunitiesWithUsers(count int, signer string) 
 	}
 	retIds := []int{}
 	for i := 0; i < count; i++ {
-
+		
 		community := otu.GenerateCommunityStruct(signer, "dao")
 		if err := community.CreateCommunity(otu.A.DB); err != nil {
 			fmt.Printf("Error in otu.AddCommunities.")
