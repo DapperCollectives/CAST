@@ -12,8 +12,7 @@ import (
 
 type OneAddressOneVote struct {
 	s.StrategyStruct
-	DPS s.DpsAdapter
-	DB  *s.Database
+	DB *s.Database
 }
 
 func (s *OneAddressOneVote) FetchBalance(
@@ -83,9 +82,7 @@ func (s *OneAddressOneVote) GetVotes(
 func (s *OneAddressOneVote) InitStrategy(
 	f *shared.FlowAdapter,
 	db *shared.Database,
-	dps *s.DpsAdapter,
 ) {
 	s.FlowAdapter = f
 	s.DB = db
-	s.DPS = *dps
 }

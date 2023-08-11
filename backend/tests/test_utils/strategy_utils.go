@@ -141,7 +141,7 @@ func (otu *OverflowTestUtils) GenerateListOfVotesWithNFTs(
 func createDummyBalance(balance int) dummyBalance {
 	primary := uint64(balance)
 	staking := uint64(balance * 5)
-	blockHeight := uint64(0)
+	blockHeight := uint64(9)
 
 	return dummyBalance{
 		Primary:     primary,

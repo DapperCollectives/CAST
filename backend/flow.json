@@ -1,134 +1,105 @@
 {
-	"emulators": {
-		"default": {
-			"port": 3569,
-			"serviceAccount": "emulator-account"
-		}
-	},
-	"contracts": {
-		"FungibleToken": {
-			"source": "./main/cadence/contracts/FungibleToken.cdc",
-			"aliases": {
-				"emulator": "0xee82856bf20e2aa6",
-				"testnet": "0x9a0766d93b6608b7",
-				"mainnet": "0xf233dcee88fe0abe"
-			}
-		},
-		"FlowToken": {
-			"source": "./main/cadence/contracts/FlowToken.cdc",
-			"aliases": {
-				"emulator": "0x0ae53cb6e3f42a79",
-				"testnet": "0x7e60df042a9c0868",
-				"mainnet": "0x1654653399040a61"
-			}
-		},
-		"NonFungibleToken": {
-			"source": "./main/cadence/contracts/NonFungibleToken.cdc",
-			"aliases": {
-				"emulator": "0xf8d6e0586b0a20c7",
-				"testnet": "0x631e88ae7f1d7c20",
-				"mainnet": "0x1d7e57aa55817448"
-			}
-		},
-		"ExampleNFT": {
-			"source": "./main/cadence/contracts/ExampleNFT.cdc",
-			"aliases": {
-				"emulator": "0xf8d6e0586b0a20c7"
-			}
-		},
-		"MetadataViews": {
-			"source": "./main/cadence/contracts/MetadataViews.cdc",
-			"aliases": {
-				"emulator": "0xf8d6e0586b0a20c7",
-				"testnet": "0x631e88ae7f1d7c20",
-				"mainnet": "0x1d7e57aa55817448"
-			}
-		},
-		"TopShot": {
-			"source": "./main/cadence/nba/Topshot.cdc",
-			"aliases": {
-			  "emulator": "0xf8d6e0586b0a20c7",
-			  "testnet": "0x877931736ee77cff",
-			  "mainnet": "0x0b2a3299cc857e29"
-			}
-		},
-		"FlowStorageFees": {
-			"aliases": {
-				"emulator": "0xf8d6e0586b0a20c7",
-				"testnet": "0x8c5303eaa26202d6",
-				"mainnet": "0xe467b9dd11fa00df"
-			}
-		},
-		"FlowIDTableStaking": {
-			"aliases": {
-				"emulator": "0xf8d6e0586b0a20c7",
-				"testnet": "0x9eca2b38b18b5dfe",
-				"mainnet": "0x8624b52f9ddcd04a"
-			}
-		},
-		"LockedTokens": {
-			"aliases": {
-				"emulator": "0xf8d6e0586b0a20c7",
-				"testnet": "0x95e019a17d0e23d7",
-				"mainnet": "0x8d0e87b65159ae63"
-			}
-		},
-		"FlowStakingCollection": {
-			"aliases": {
-				"emulator": "0xf8d6e0586b0a20c7",
-				"testnet": "0x95e019a17d0e23d7",
-				"mainnet": "0x8d0e87b65159ae63"
-			}
-		}
-	},
-	"networks": {
-		"emulator": "127.0.0.1:3569",
-		"mainnet": "access.mainnet.nodes.onflow.org:9000",
-		"testnet": "access.devnet.nodes.onflow.org:9000"
-	},
-	"networksDps": {
-		"testnet": "archive.devnet.nodes.onflow.org:9000",
-		"mainnet": "archive.mainnet.nodes.onflow.org:9000"
-	},
-	"accounts": {
-		"emulator-account": {
-			"address": "f8d6e0586b0a20c7",
-			"key": "63bff10bd6186b7d97c8e2898941c93d5d33a830b0ac9b758e216024b7bf7957"
-		},
-		"emulator-user1": {
-			"address": "01cf0e2f2f715450",
-			"key": "7bac14b66096f682a704b9d98d1fb66ae883b10acdec7caa252257ece87479d4"
-		},
-		"emulator-user2": {
-			"address": "179b6b1cb6755e31",
-			"key": "64e847c1c615c0d6e928f80c641a5974ead26293ac2a8623d6756c935be13630"
-		},
-		"emulator-user3": {
-			"address": "f3fcd2c1a78f5eee",
-			"key": "d774eb699bc67d07c8be7cbcee1acfa14e5139ac271ca697b25a081a19335efd"
-		},
-		"emulator-user4": {
-			"address": "e03daebed8ca0615",
-			"key": "843d964aefbc2b6311363551187b8241466ec02e8bc4ba5e000a8b2c02fca69f"
-		},
-		"emulator-user5": {
-			"address": "045a1763c93006ca",
-			"key": "843d964aefbc2b6311363551187b8241466ec02e8bc4ba5e000a8b2c02fca69f"
-		},
-		"emulator-user6": {
-			"address": "120e725050340cab",
-			"key": "843d964aefbc2b6311363551187b8241466ec02e8bc4ba5e000a8b2c02fca69f"
-		}
-	},
-	"deployments": {
-		"emulator": {
-			"emulator-account": ["NonFungibleToken", "MetadataViews", "ExampleNFT"],
-			"emulator-user1": [],
-			"emulator-user2": [],
-			"emulator-user3": [],
-			"emulator-user4": [],
-			"emulator-user5": [],
-			"emulator-user6": []
-		}
-	}
+  "emulators": {
+    "default": {
+      "port": 3569,
+      "serviceAccount": "emulator-account"
+    }
+  },
+  "contracts": {
+    "FungibleToken": {
+      "source": "./cadence/contracts/FungibleToken.cdc",
+      "aliases": {
+        "emulator": "0xee82856bf20e2aa6",
+        "testnet": "0x9a0766d93b6608b7",
+        "mainnet": "0xf233dcee88fe0abe"
+      }
+    },
+    "FlowToken": {
+      "source": "./cadence/contracts/FlowToken.cdc",
+      "aliases": {
+        "emulator": "0x0ae53cb6e3f42a79",
+        "testnet": "0x7e60df042a9c0868",
+        "mainnet": "0x1654653399040a61"
+      }
+    },
+    "NonFungibleToken": {
+      "source": "./cadence/contracts/NonFungibleToken.cdc",
+      "aliases": {
+        "emulator": "0xf8d6e0586b0a20c7",
+        "testnet": "0x631e88ae7f1d7c20",
+        "mainnet": "0x1d7e57aa55817448"
+      }
+    },
+    "ExampleNFT": {
+      "source": "./cadence/contracts/ExampleNFT.cdc",
+      "aliases": {
+        "emulator": "0xf8d6e0586b0a20c7"
+      }
+    },
+    "MetadataViews": {
+      "source": "./cadence/contracts/MetadataViews.cdc",
+      "aliases": {
+        "emulator": "0xf8d6e0586b0a20c7",
+        "testnet": "0x631e88ae7f1d7c20",
+        "mainnet": "0x1d7e57aa55817448"
+      }
+    },
+    "TopShot": {
+      "source": "./main/cadence/nba/Topshot.cdc",
+      "aliases": {
+        "emulator": "0xf8d6e0586b0a20c7",
+        "testnet": "0x877931736ee77cff",
+        "mainnet": "0x0b2a3299cc857e29"
+      }
+    }
+  },
+  "networks": {
+    "emulator": "127.0.0.1:3569",
+    "emulator_archive": "127.0.0.1:3569",
+    "mainnet": "access.mainnet.nodes.onflow.org:9000",
+    "mainnet_archive": "archive.mainnet.nodes.onflow.org:9000",
+    "testnet": "access.devnet.nodes.onflow.org:9000",
+    "testnet_archive": "archive.devnet.nodes.onflow.org:9000"
+  },
+  "accounts": {
+    "emulator-account": {
+      "address": "f8d6e0586b0a20c7",
+      "key": "63bff10bd6186b7d97c8e2898941c93d5d33a830b0ac9b758e216024b7bf7957"
+    },
+    "emulator-user1": {
+      "address": "01cf0e2f2f715450",
+      "key": "7bac14b66096f682a704b9d98d1fb66ae883b10acdec7caa252257ece87479d4"
+    },
+    "emulator-user2": {
+      "address": "179b6b1cb6755e31",
+      "key": "64e847c1c615c0d6e928f80c641a5974ead26293ac2a8623d6756c935be13630"
+    },
+    "emulator-user3": {
+      "address": "f3fcd2c1a78f5eee",
+      "key": "d774eb699bc67d07c8be7cbcee1acfa14e5139ac271ca697b25a081a19335efd"
+    },
+    "emulator-user4": {
+      "address": "e03daebed8ca0615",
+      "key": "843d964aefbc2b6311363551187b8241466ec02e8bc4ba5e000a8b2c02fca69f"
+    },
+    "emulator-user5": {
+      "address": "045a1763c93006ca",
+      "key": "843d964aefbc2b6311363551187b8241466ec02e8bc4ba5e000a8b2c02fca69f"
+    },
+    "emulator-user6": {
+      "address": "120e725050340cab",
+      "key": "843d964aefbc2b6311363551187b8241466ec02e8bc4ba5e000a8b2c02fca69f"
+    }
+  },
+  "deployments": {
+    "emulator": {
+      "emulator-account": ["NonFungibleToken", "MetadataViews", "ExampleNFT"],
+      "emulator-user1": [],
+      "emulator-user2": [],
+      "emulator-user3": [],
+      "emulator-user4": [],
+      "emulator-user5": [],
+      "emulator-user6": []
+    }
+  }
 }

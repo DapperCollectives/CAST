@@ -17,7 +17,7 @@ type Strategy interface {
 	TallyVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) (models.ProposalResults, error)
 	GetVotes(votes []*models.VoteWithBalance, proposal *models.Proposal) ([]*models.VoteWithBalance, error)
 	GetVoteWeightForBalance(vote *models.VoteWithBalance, proposal *models.Proposal) (float64, error)
-	InitStrategy(f *shared.FlowAdapter, db *shared.Database, dps *shared.DpsAdapter)
+	InitStrategy(f *shared.FlowAdapter, db *shared.Database)
 	FetchBalance(b *models.Balance, p *models.Proposal) (*models.Balance, error)
 }
 
@@ -146,8 +146,9 @@ func TestBalanceOfNFTsStrategy(t *testing.T) {
 		strategyName := "balance-of-nfts"
 
 		s := strategyMap[strategyName]
-		s.InitStrategy(otu.A.FlowAdapter, otu.A.DB, otu.A.DpsAdapter)
-		_results, err := s.TallyVotes(votes, proposals[0])
+		s.InitStrategy(otu.A.FlowAdapter, otu.A.DB)
+		proposalWithChoices := models.NewProposalResults(proposalId, choices)
+		_results, err := s.TallyVotes(votes, proposalWithChoices, proposals[0])
 		if err != nil {
 			t.Errorf("Error tallying votes: %v", err)
 		}

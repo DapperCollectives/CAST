@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -22,10 +23,12 @@ import (
 
 type FlowAdapter struct {
 	Config           FlowConfig
+	ArchiveClient    *client.Client
 	Client           *client.Client
 	Context          context.Context
 	CustomScriptsMap map[string]CustomScript
 	URL              string
+	ArchiveURL       string
 	Env              string
 }
 
@@ -91,11 +94,14 @@ func NewFlowClient(flowEnv string, customScriptsMap map[string]CustomScript) *Fl
 
 	adapter.Config = config
 	adapter.URL = config.Networks[adapter.Env]
+	adapter.ArchiveURL = config.Networks[fmt.Sprintf("%s_archive", adapter.Env)]
 
 	// Explicitly set when running test suite
 	if flag.Lookup("test.v") != nil {
 		adapter.URL = "127.0.0.1:3569"
+		adapter.ArchiveURL = "127.0.0.1:3569"
 	}
+
 	log.Info().Msgf("FLOW URL: %s", adapter.URL)
 
 	// create flow client
@@ -103,7 +109,18 @@ func NewFlowClient(flowEnv string, customScriptsMap map[string]CustomScript) *Fl
 	if err != nil {
 		log.Panic().Msgf("Failed to connect to %s.", adapter.URL)
 	}
+
+	log.Info().Msgf("FLOW Archive URL: %s", adapter.ArchiveURL)
+
+	//create archive client
+	FlowClientArchive, err := client.New(adapter.ArchiveURL, grpc.WithInsecure())
+	if err != nil {
+		log.Panic().Msgf("Failed to connect to %s.", adapter.ArchiveURL)
+	}
+
 	adapter.Client = FlowClient
+	adapter.ArchiveClient = FlowClientArchive
+
 	return &adapter
 }
 
@@ -118,6 +135,33 @@ func (fa *FlowAdapter) GetCurrentBlockHeight() (uint64, error) {
 		return 0, err
 	}
 	return block.Height, nil
+}
+
+func (fa *FlowAdapter) GetAddressBalanceAtBlockHeight(addr string, blockHeight uint64, balanceResponse *FTBalanceResponse, contract *Contract) error {
+
+	if *contract.Name == "FlowToken" {
+		balances, err := fa.GetFlowBalance(addr, blockHeight)
+		fmt.Println(balances)
+		if err != nil {
+			return err
+		}
+		balanceResponse.PrimaryAccountBalance = uint64(balances[0] * 100000000.0)
+		balanceResponse.SecondaryAccountBalance = uint64(balances[1] * 10000000.0)
+		balanceResponse.StakingBalance = uint64(balances[2] * 10000000.0)
+
+		return nil
+
+	} else {
+		balance, err := fa.GetFTBalance(addr, blockHeight, *contract.Name, *contract.Addr, *contract.Public_path)
+		fmt.Println(balance)
+		if err != nil {
+			return err
+		}
+		balanceResponse.PrimaryAccountBalance = uint64(balance * 100000000.0)
+		balanceResponse.SecondaryAccountBalance = 0
+		balanceResponse.StakingBalance = 0
+		return nil
+	}
 }
 
 func (fa *FlowAdapter) ValidateSignature(address, message string, sigs *[]CompositeSignature, messageType string) error {
@@ -200,8 +244,8 @@ func (fa *FlowAdapter) GetBalanceOfTokens(creatorAddr string, c *Contract, contr
 	flowAddress := flow.HexToAddress(creatorAddr)
 	cadenceAddress := cadence.NewAddress(flowAddress)
 	cadencePath := cadence.Path{Domain: "public", Identifier: *c.Public_path}
-
-	_script, err := ioutil.ReadFile(scriptPath)
+	fmt.Println(cadencePath)
+	script, err := ioutil.ReadFile(scriptPath)
 	if err != nil {
 		log.Error().Err(err).Msgf("Error reading cadence script file.")
 		return nil, err
@@ -247,8 +291,8 @@ func (fa *FlowAdapter) GetBalanceOfTokens(creatorAddr string, c *Contract, contr
 		// If script fails, its probably because the vault/collection doenst exist.
 		// Return 0 balance.
 		if err != nil {
-			log.Error().Err(err).Msg("Error executing Fungible Token Script.")
-			return &zero, err
+			log.Error().Err(err).Msg("Error executing Fungible-Token Script.")
+			return false, err
 		}
 
 		value := CadenceValueToInterface(cadenceValue)
@@ -262,8 +306,52 @@ func (fa *FlowAdapter) GetBalanceOfTokens(creatorAddr string, c *Contract, contr
 	return &balance, nil
 }
 
-//this function only gets called in local dev when snapshot is being overidden
-func (fa *FlowAdapter) GetFlowBalance(address string) (float64, error) {
+func (fa *FlowAdapter) GetFlowBalance(address string, blockHeight uint64) ([]float64, error) {
+	flowAddress := flow.HexToAddress(address)
+	cadenceAddress := cadence.NewAddress(flowAddress)
+	script, err := ioutil.ReadFile("./main/cadence/scripts/get_total_balance.cdc")
+	if err != nil {
+		log.Error().Err(err).Msgf("Error reading cadence script file.")
+		return []float64{0, 0, 0}, err
+	}
+	cadenceValue, err := fa.ArchiveClient.ExecuteScriptAtBlockHeight(
+		fa.Context,
+		blockHeight,
+		script,
+		[]cadence.Value{
+			cadenceAddress,
+		},
+	)
+
+	if err != nil {
+		log.Error().Err(err).Msg("Error executing Total balance Script.")
+		return []float64{0, 0, 0}, err
+	}
+
+	var values []interface{} = CadenceValueToInterface(cadenceValue).([]interface{})
+
+	balancePrimary, err := strconv.ParseFloat(values[0].(string), 64)
+	if err != nil {
+		log.Error().Err(err).Msg("Error converting cadence value to float. (balancePrimary)")
+		return []float64{0, 0, 0}, err
+	}
+
+	balanceSecondary, err := strconv.ParseFloat(values[1].(string), 64)
+	if err != nil {
+		log.Error().Err(err).Msg("Error converting cadence value to float. (balanceSecondary)")
+		return []float64{0, 0, 0}, err
+	}
+
+	balanceStaked, err := strconv.ParseFloat(values[2].(string), 64)
+	if err != nil {
+		log.Error().Err(err).Msg("Error converting cadence value to float. (balanceStaked)")
+		return []float64{0, 0, 0}, err
+	}
+	return []float64{balancePrimary, balanceSecondary, balanceStaked}, nil
+}
+
+// @bluesign: this is called via archival node now
+func (fa *FlowAdapter) GetFTBalance(address string, blockHeight uint64, contractName string, contractAddress string, publicPath string) (float64, error) {
 	flowAddress := flow.HexToAddress(address)
 	cadenceAddress := cadence.NewAddress(flowAddress)
 
@@ -273,24 +361,18 @@ func (fa *FlowAdapter) GetFlowBalance(address string) (float64, error) {
 		return 0, err
 	}
 
-	contractName := "FlowToken"
-	publicPath := "flowTokenBalance"
-	contracAddress := "0x0ae53cb6e3f42a79"
-
 	dummyContract := Contract{
 		Name:        &contractName,
 		Public_path: &publicPath,
-		Addr:        &contracAddress,
+		Addr:        &contractAddress,
 	}
 
-	// Set script contract addresses & paths
-	script := fa.Config.InsertCoreContractAddresses(string(_script))
-	script = fa.Config.InsertTokenContract(script, &dummyContract)
-
+	script = fa.ReplaceContractPlaceholders(string(script[:]), &dummyContract, true)
 	cadencePath := cadence.Path{Domain: "public", Identifier: *dummyContract.Public_path}
-	cadenceValue, err := fa.Client.ExecuteScriptAtLatestBlock(
+	cadenceValue, err := fa.ArchiveClient.ExecuteScriptAtBlockHeight(
 		fa.Context,
-		[]byte(script),
+		blockHeight,
+		script,
 		[]cadence.Value{
 			cadencePath,
 			cadenceAddress,

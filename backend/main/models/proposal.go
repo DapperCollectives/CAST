@@ -41,7 +41,6 @@ type Proposal struct {
 	Snapshot_status      *string                 `json:"snapshotStatus,omitempty"`
 	Voucher              *shared.Voucher         `json:"voucher,omitempty"`
 	Achievements_done    bool                    `json:"achievementsDone"`
-	TallyMethod          string                  `json:"voteType" validate:"required"`
 }
 
 type UpdateProposalRequestPayload struct {
@@ -183,56 +182,6 @@ func (p *Proposal) UpdateProposal(db *s.Database) error {
 		if err != nil {
 			return err
 		}
-	}
-
-	err = p.GetProposalById(db)
-	return err
-}
-
-func (p *Proposal) UpdateDraftProposal(db *s.Database) error {
-	_, err := db.Conn.Exec(db.Context, `
-		UPDATE proposals
-		SET name = COALESCE($1, name), 
-		choices = COALESCE($2, choices),
-		strategy = COALESCE($3, strategy),
-		min_balance = COALESCE($4, min_balance),
-		max_weight = COALESCE($5, max_weight),
-		start_time = COALESCE($6, start_time),
-		end_time = COALESCE($7, end_time),
-		body = COALESCE($8, body),
-		block_height = COALESCE($9, block_height),
-		cid = COALESCE($10, cid)
-		WHERE id = $11
-	`, p.Name,
-		p.Choices,
-		p.Strategy,
-		p.Min_balance,
-		p.Max_weight,
-		p.Start_time,
-		p.End_time,
-		p.Body,
-		p.Block_height,
-		p.Cid,
-		p.ID,
-	)
-
-	if err != nil {
-		return err
-	}
-
-	return err
-}
-
-func (p *Proposal) UpdateSnapshotStatus(db *s.Database) error {
-	_, err := db.Conn.Exec(db.Context,
-		`
-	UPDATE proposals
-	SET snapshot_status = $1
-	WHERE id = $2
-	`, p.Snapshot_status, p.ID)
-
-	if err != nil {
-		return err
 	}
 
 	err = p.GetProposalById(db)

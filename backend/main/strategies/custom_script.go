@@ -10,8 +10,7 @@ import (
 
 type CustomScript struct {
 	shared.StrategyStruct
-	DPS shared.DpsAdapter
-	DB  *shared.Database
+	DB *shared.Database
 }
 
 func (cs *CustomScript) FetchBalance(
@@ -139,9 +138,7 @@ func (cs *CustomScript) GetVotes(
 func (cs *CustomScript) InitStrategy(
 	fa *shared.FlowAdapter,
 	db *shared.Database,
-	dps *shared.DpsAdapter,
 ) {
 	cs.FlowAdapter = fa
 	cs.DB = db
-	cs.DPS = *dps
 }

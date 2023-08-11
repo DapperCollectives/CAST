@@ -22,7 +22,7 @@ var (
 	published                   = "published"
 	draft                       = "draft"
 	tokenWeightedDefault        = "token-weighted-default"
-	blockHeight          uint64 = 1
+	blockHeight          uint64 = 9
 
 	DefaultProposalStruct = models.Proposal{
 		Name: "Test Proposal",

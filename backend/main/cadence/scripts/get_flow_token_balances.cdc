@@ -119,10 +119,8 @@ pub fun getStakesAndDelegations(_ account: PublicAccount) : {String:UFix64} {
 }
 
 
-pub fun main(address: Address): AccountInfo {
-    var info: AccountInfo = AccountInfo()
-
-    let account = getAccount(address)
+pub fun main(address: Address): [AnyStruct] {
+        var info: AccountInfo = AccountInfo()
 
     // If the account is an unlocked account, lets collect its balances
     if account.getLinkTarget(/public/lockedFlowTokenReceiver) == nil {
@@ -163,7 +161,6 @@ pub fun main(address: Address): AccountInfo {
         } else {
             info.hasVault = false
         }
-    }
 
-    return info
+    return [info.primaryAcctBalance, info.secondaryAcctBalance, info.stakedBalance]
 }
