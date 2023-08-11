@@ -10,8 +10,9 @@ import (
 )
 
 type StakedTokenWeightedDefault struct {
-	s.StrategyStruct
-	DB *s.Database
+	shared.StrategyStruct
+	DPS shared.DpsAdapter
+	DB  *shared.Database
 }
 
 func (s *StakedTokenWeightedDefault) FetchBalance(
@@ -61,29 +62,11 @@ func (s *StakedTokenWeightedDefault) FetchBalanceFromSnapshot(
 	}
 
 	if *strategy.Contract.Name == "FlowToken" {
-		if err := s.FlowAdapter.GetAddressBalanceAtBlockHeight(
-			b.Addr,
-			b.BlockHeight,
-			ftBalance,
-			&strategy.Contract,
-		); err != nil {
-			log.Error().Err(err).Msg("Error fetching balance from snapshot client")
-			return err
-		}
 		b.PrimaryAccountBalance = ftBalance.PrimaryAccountBalance
 		b.SecondaryAccountBalance = ftBalance.SecondaryAccountBalance
 		b.StakingBalance = ftBalance.StakingBalance
 
 	} else {
-		if err := s.FlowAdapter.GetAddressBalanceAtBlockHeight(
-			b.Addr,
-			b.BlockHeight,
-			ftBalance,
-			&strategy.Contract,
-		); err != nil {
-			log.Error().Err(err).Msg("Error fetching balance.")
-			return err
-		}
 		b.PrimaryAccountBalance = ftBalance.Balance
 		b.SecondaryAccountBalance = 0
 		b.StakingBalance = 0
@@ -163,7 +146,9 @@ func (s *StakedTokenWeightedDefault) GetVotes(
 func (s *StakedTokenWeightedDefault) InitStrategy(
 	fa *shared.FlowAdapter,
 	db *shared.Database,
+	dps *shared.DpsAdapter,
 ) {
 	s.FlowAdapter = fa
 	s.DB = db
+	s.DPS = *dps
 }

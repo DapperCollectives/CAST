@@ -1,7 +1,6 @@
 package server
 
 import (
-	"context"
 	"encoding/hex"
 	"errors"
 	"flag"
@@ -564,14 +563,18 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorRespo
 		p.Max_weight = strategy.Contract.MaxWeight
 	}
 
-	header, err := h.A.FlowAdapter.Client.GetLatestBlockHeader(context.Background(), true)
-	if err != nil {
-		log.Error().Err(err).Msg("Couldn't get block header")
-		return models.Proposal{}, errIncompleteRequest
-	}
-	p.Block_height = &header.Height
+	canUserCreateProposal := community.CanUserCreateProposal(h.A.DB, h.A.FlowAdapter, p.Creator_addr)
 
 	if err := h.enforceCommunityRestrictions(community, p, strategy); err != nil {
+		return models.Proposal{}, errIncompleteRequest
+	}
+	p.Block_height = &blockheight
+
+	// Get latest sealed blockheight to use as proposal snapshot
+	blockheight, err := h.A.FlowAdapter.GetCurrentBlockHeight()
+	if err != nil {
+		errMsg := "couldn't fetch current blockheight"
+		log.Error().Err(err).Msg(errMsg)
 		return models.Proposal{}, errIncompleteRequest
 	}
 	p.Block_height = &blockheight
@@ -1221,7 +1224,7 @@ func (h *Helpers) initStrategy(name string) Strategy {
 		return nil
 	}
 
-	s.InitStrategy(h.A.FlowAdapter, h.A.DB)
+	s.InitStrategy(h.A.FlowAdapter, h.A.DB, h.A.DpsAdapter)
 
 	return s
 }
