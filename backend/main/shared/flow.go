@@ -24,7 +24,7 @@ import (
 type FlowAdapter struct {
 	Config           FlowConfig
 	ArchiveClient    *client.Client
-	Client           *client.Client
+	LiveClient       *client.Client
 	Context          context.Context
 	CustomScriptsMap map[string]CustomScript
 	URL              string
@@ -92,7 +92,6 @@ func NewFlowClient(flowEnv string, customScriptsMap map[string]CustomScript) *Fl
 	}
 
 	log.Info().Msgf("FLOW URL: %s", adapter.URL)
-
 	// create flow client
 	FlowClient, err := client.New(adapter.URL, grpc.WithInsecure())
 	if err != nil {
@@ -107,7 +106,7 @@ func NewFlowClient(flowEnv string, customScriptsMap map[string]CustomScript) *Fl
 		log.Panic().Msgf("Failed to connect to %s.", adapter.ArchiveURL)
 	}
 
-	adapter.Client = FlowClient
+	adapter.LiveClient = FlowClient
 	adapter.ArchiveClient = FlowClientArchive
 
 	return &adapter
@@ -115,11 +114,11 @@ func NewFlowClient(flowEnv string, customScriptsMap map[string]CustomScript) *Fl
 
 func (fa *FlowAdapter) GetAccountAtBlockHeight(addr string, blockheight uint64) (*flow.Account, error) {
 	hexAddr := flow.HexToAddress(addr)
-	return fa.Client.GetAccountAtBlockHeight(fa.Context, hexAddr, blockheight)
+	return fa.ArchiveClient.GetAccountAtBlockHeight(fa.Context, hexAddr, blockheight)
 }
 
 func (fa *FlowAdapter) GetCurrentBlockHeight() (int, error) {
-	block, err := fa.Client.GetLatestBlock(fa.Context, true)
+	block, err := fa.LiveClient.GetLatestBlock(fa.Context, true)
 	if err != nil {
 		return 0, err
 	}
@@ -185,7 +184,7 @@ func (fa *FlowAdapter) ValidateSignature(address, message string, sigs *[]Compos
 	}
 
 	// call the script to verify the signature on chain
-	value, err := fa.Client.ExecuteScriptAtLatestBlock(
+	value, err := fa.LiveClient.ExecuteScriptAtLatestBlock(
 		fa.Context,
 		script,
 		[]cadence.Value{
@@ -239,7 +238,7 @@ func (fa *FlowAdapter) EnforceTokenThreshold(scriptPath, creatorAddr string, c *
 		script = fa.ReplaceContractPlaceholders(string(script[:]), c, isFungible)
 
 		//call the non-fungible token script to verify balance
-		cadenceValue, err = fa.Client.ExecuteScriptAtLatestBlock(
+		cadenceValue, err = fa.LiveClient.ExecuteScriptAtLatestBlock(
 			fa.Context,
 			script,
 			[]cadence.Value{
@@ -259,7 +258,7 @@ func (fa *FlowAdapter) EnforceTokenThreshold(scriptPath, creatorAddr string, c *
 		script = fa.ReplaceContractPlaceholders(string(script[:]), c, isFungible)
 
 		//call the fungible-token script to verify balance
-		cadenceValue, err = fa.Client.ExecuteScriptAtLatestBlock(
+		cadenceValue, err = fa.LiveClient.ExecuteScriptAtLatestBlock(
 			fa.Context,
 			script,
 			[]cadence.Value{
@@ -385,7 +384,7 @@ func (fa *FlowAdapter) GetNFTIds(voterAddr string, c *Contract, path string) ([]
 
 	script = fa.ReplaceContractPlaceholders(string(script[:]), c, false)
 
-	cadenceValue, err := fa.Client.ExecuteScriptAtLatestBlock(
+	cadenceValue, err := fa.LiveClient.ExecuteScriptAtLatestBlock(
 		fa.Context,
 		script,
 		[]cadence.Value{
@@ -416,7 +415,7 @@ func (fa *FlowAdapter) GetFloatNFTIds(voterAddr string, c *Contract) ([]interfac
 
 	script = fa.ReplaceContractPlaceholders(string(script[:]), c, false)
 
-	cadenceValue, err := fa.Client.ExecuteScriptAtLatestBlock(
+	cadenceValue, err := fa.LiveClient.ExecuteScriptAtLatestBlock(
 		fa.Context,
 		script,
 		[]cadence.Value{
@@ -447,7 +446,7 @@ func (fa *FlowAdapter) CheckIfUserHasEvent(voterAddr string, c *Contract) (bool,
 
 	script = fa.ReplaceContractPlaceholders(string(script[:]), c, false)
 
-	cadenceValue, err := fa.Client.ExecuteScriptAtLatestBlock(
+	cadenceValue, err := fa.LiveClient.ExecuteScriptAtLatestBlock(
 		fa.Context,
 		script,
 		[]cadence.Value{
@@ -484,7 +483,7 @@ func (fa *FlowAdapter) GetEventNFT(voterAddr string, c *Contract) (interface{}, 
 
 	script = fa.ReplaceContractPlaceholders(string(script[:]), c, false)
 
-	cadenceValue, err := fa.Client.ExecuteScriptAtLatestBlock(
+	cadenceValue, err := fa.LiveClient.ExecuteScriptAtLatestBlock(
 		fa.Context,
 		script,
 		[]cadence.Value{
