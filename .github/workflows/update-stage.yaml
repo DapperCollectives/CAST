@@ -39,6 +39,7 @@ jobs:
     
     - name: Install and run migrations
       run: |
+        sudo apt-get update
         sudo apt install curl
         sudo apt install tar
         sudo curl -L https://github.com/golang-migrate/migrate/releases/download/v4.15.2/migrate.linux-amd64.tar.gz | tar xvz && sudo mv migrate /usr/local/bin && sudo chmod +x /usr/local/bin/migrate
