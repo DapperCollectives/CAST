@@ -345,7 +345,7 @@ export default function UploadImageModal({
         >
           <div className="columns is-flex p-0 m-0 flex-1 is-justify-content-end">
             <button
-              className={`button column is-12 transition-all has-background-yellow rounded-sm m-0 p-0 is-uppercase ${
+              className={`button column is-12 transition-all has-background-green rounded-sm m-0 p-0 is-uppercase ${
                 !enableDone && 'is-disabled'
               }`}
               onClick={_onDone}

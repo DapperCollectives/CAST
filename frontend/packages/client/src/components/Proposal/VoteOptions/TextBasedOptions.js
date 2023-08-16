@@ -62,7 +62,7 @@ const TextBasedOptions = ({
         >
           <button
             style={{ height: 48, width: '100%' }}
-            className={`button vote-button transition-all is-flex has-background-yellow rounded-xl is-${
+            className={`button vote-button transition-all is-flex has-background-green rounded-xl is-${
               currentOption && !readOnly ? 'enabled' : 'disabled'
             }`}
             onClick={readOnly ? () => {} : onConfirmVote}

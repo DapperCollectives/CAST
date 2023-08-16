@@ -14,7 +14,7 @@ const ButtonChoice = ({
   return (
     <button
       style={{ minHeight: '67px', height: 'auto', width: '100%' }}
-      className={`button vote-button transition-all is-flex has-background-yellow rounded-sm is-${
+      className={`button vote-button transition-all is-flex has-background-green rounded-sm is-${
         (choice.value === currentOption || !currentOption) && !readOnly
           ? 'enabled'
           : 'disabled'
