@@ -28,7 +28,7 @@ export default function StartSteps({ dismissPreStep }) {
       <div className="column is-12">
         <button
           style={{ height: 48, width: '100%' }}
-          className="button vote-button transition-all is-flex has-background-yellow rounded-sm is-enabled is-size-6"
+          className="button vote-button transition-all is-flex has-background-green rounded-sm is-enabled is-size-6"
           onClick={() => dismissPreStep()}
           autoFocus
         >

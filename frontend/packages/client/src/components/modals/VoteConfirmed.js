@@ -14,7 +14,7 @@ export default function VoteConfirmed({ onConfirmCastVote }) {
       </Modal.BodyContainer>
       <Modal.FooterContainer>
         <Modal.FooterButton
-          classNames="has-background-yellow"
+          classNames="has-background-green"
           onClick={onConfirmCastVote}
           text="Got it"
         />

@@ -56,7 +56,7 @@ export default function StepOne({ stepData, onDataChange, moveToNextStep }) {
             label="Next: Community Details"
             enabled={(isDirty || isValid) && !isSubmitting}
             loading={isSubmitting}
-            classNames="vote-button transition-all has-background-yellow mt-5 rounded-sm is-size-6"
+            classNames="vote-button transition-all has-background-green mt-5 rounded-sm is-size-6"
           />
         </div>
       </div>

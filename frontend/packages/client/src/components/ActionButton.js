@@ -14,7 +14,7 @@ export default function ActionButton({
   const clNames = classnames(
     'button is-flex is-align-items-centered ',
     'm-0 p-0',
-    'has-background-yellow',
+    'has-background-green',
     { 'is-enabled': enabled },
     { 'is-disabled': !enabled },
     { [roundedClass]: !!roundedClass },
