@@ -34,7 +34,7 @@ const FlipsContainer = () => {
 
   return (
     <div>
-      <h1 className={`is-uppercase has-text-weight-bold mb-5`}>Flips</h1>
+      <h1 className={`is-uppercase has-text-weight-bold mb-5`}>Flow Flip's</h1>
       <FlipsList proposals={updatedList} initialLoading={initialLoading} />
       <BrowseButton path={`/community/${COMMUNITY_ID}`} label={'Show more'} />
     </div>
