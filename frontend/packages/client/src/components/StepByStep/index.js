@@ -86,7 +86,7 @@ function StepByStep({
       return (
         <div className={`is-flex ${stepClasses.join(' ')}`} key={stepIdx}>
           <div
-            className="rounded-full has-text-black has-background-orange is-flex
+            className="rounded-full has-text-black has-background-green is-flex
               is-align-items-center is-justify-content-center"
             style={{
               width: 30,

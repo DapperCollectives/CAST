@@ -159,7 +159,7 @@ export default function StepTwo({ stepData, onDataChange, moveToNextStep }) {
             type="submit"
             label="Next: Proposal & Voting"
             enabled={(isValid || isDirty) && !isSubmitting}
-            classNames="vote-button transition-all has-background-yellow mt-5"
+            classNames="vote-button transition-all has-background-green mt-5"
           />
         </div>
       </div>

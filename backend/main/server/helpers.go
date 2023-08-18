@@ -556,7 +556,7 @@ func (h *Helpers) createProposal(p models.Proposal) (models.Proposal, errorRespo
 		p.Max_weight = strategy.Contract.MaxWeight
 	}
 
-	header, err := h.A.FlowAdapter.Client.GetLatestBlockHeader(context.Background(), true)
+	header, err := h.A.FlowAdapter.LiveClient.GetLatestBlockHeader(context.Background(), true)
 	if err != nil {
 		log.Error().Err(err).Msg("Couldn't get block header")
 		return models.Proposal{}, errIncompleteRequest
