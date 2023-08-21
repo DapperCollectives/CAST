@@ -1,4 +1,5 @@
 import { Svg } from '@cast/shared-components';
+import { StyledStatusPill } from 'components';
 import { FilterValues } from 'const';
 import { parseDateFromServer } from 'utils';
 
@@ -11,25 +12,19 @@ const STATUS_BUTTONS = {
     </button>
   ),
   [FilterValues.pending]: (
-    <button
-      class={`button is-rounded is-small has-text-weight-semibold has-background-orange has-border-orange`}
-    >
-      Upcoming...
-    </button>
+    <div className="pt-3">
+      <StyledStatusPill status={FilterValues.pending} />
+    </div>
   ),
   [FilterValues.closed]: (
-    <button
-      class={`button is-rounded is-small has-text-weight-semibold has-background-green has-border-green`}
-    >
-      Complete
-    </button>
+    <div className="pt-3">
+      <StyledStatusPill status={FilterValues.closed} />
+    </div>
   ),
   [FilterValues.cancelled]: (
-    <button
-      class={`button is-rounded is-small has-text-weight-semibold has-background-danger has-border-danger`}
-    >
-      Canceled
-    </button>
+    <div className="pt-3">
+      <StyledStatusPill status={FilterValues.cancelled} />
+    </div>
   ),
 };
 
