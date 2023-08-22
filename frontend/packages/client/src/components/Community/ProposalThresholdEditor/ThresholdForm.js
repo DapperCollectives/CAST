@@ -1,8 +1,48 @@
+import { Fragment, useEffect, useRef } from 'react';
+import { useWatch } from 'react-hook-form';
 import { WrapperResponsive } from 'components';
 import Checkbox from 'components/common/Checkbox';
 import Dropdown from 'components/common/Dropdown';
 import Form from 'components/common/Form';
 import Input from 'components/common/Input';
+import {
+  getContractsAndPathsDataWithKeyValue,
+  getContractsAndPathsDataWithType,
+} from '../../../data/dataServices.js';
+
+const styles = {
+  disableInputStyle: {
+    backgroundColor: '#f5f5f5',
+    color: '#777',
+    border: '1px solid #ccc',
+    cursor: 'not-allowed',
+  },
+};
+
+const CONTRACT_TYPES = [
+  {
+    label: 'Default',
+    value: '',
+  },
+  {
+    label: 'NFT',
+    value: 'nft',
+  },
+  {
+    label: 'Fungible Token',
+    value: 'ft',
+  },
+];
+
+const getContractOptions = (type) => {
+  const contractsData = getContractsAndPathsDataWithType(type);
+  return contractsData.map((item) => {
+    return {
+      label: item.name,
+      value: item.contractName,
+    };
+  });
+};
 
 export default function ThresholdForm({
   removeInnerForm = false,
@@ -12,7 +52,38 @@ export default function ThresholdForm({
   register = () => {},
   control = () => {},
   isSubmitting = false,
+  setValue,
 } = {}) {
+  const contractType = useWatch({ control, name: 'contractType' });
+  const contractSelected = useWatch({ control, name: 'contract' });
+
+  const isFirstRender = useRef(true);
+
+  // We are doing this because the on mounting we don't want this contract value to be set to empty.
+  // This will resolve the case where a user is editing the Proposal Threshold in community settings and he/she wants
+  // the pre-selected values to populate.
+  useEffect(() => {
+    if (!isFirstRender.current) {
+      // This is done to unSelect the contract if ther user selects another contractTypes
+      setValue('contract', '');
+    } else {
+      isFirstRender.current = false;
+    }
+  }, [contractType]);
+
+  // If the user selects any contract, the fields should auto populate
+  useEffect(() => {
+    const contractDetails = getContractsAndPathsDataWithKeyValue(
+      'contractName',
+      contractSelected
+    );
+    if (contractDetails) {
+      setValue('contractAddress', contractDetails.contractAddress);
+      setValue('contractName', contractDetails.contractName);
+      setValue('storagePath', contractDetails.publicPath);
+    }
+  }, [contractSelected]);
+
   return (
     <Form removeInnerForm={removeInnerForm} onSubmit={handleSubmit}>
       <WrapperResponsive
@@ -37,64 +108,76 @@ export default function ThresholdForm({
           label="Contract Type"
           name="contractType"
           margin="mt-4"
-          options={[
-            {
-              label: 'Default',
-              value: '',
-            },
-            {
-              label: 'NFT',
-              value: 'nft',
-            },
-            {
-              label: 'Fungible Token',
-              value: 'ft',
-            },
-          ]}
+          options={CONTRACT_TYPES}
           disabled={isSubmitting}
           control={control}
         />
-        <Input
-          placeholder="Contract Address"
-          register={register}
-          name="contractAddress"
-          disabled={isSubmitting}
-          error={errors['contractAddress']}
-          classNames="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
-        />
-        <Input
-          placeholder="Contract Name"
-          register={register}
-          name="contractName"
-          disabled={isSubmitting}
-          error={errors['contractName']}
-          classNames="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
-        />
-        <Input
-          placeholder="Collection Public Path"
-          name="storagePath"
-          register={register}
-          disabled={isSubmitting}
-          error={errors['storagePath']}
-          classNames="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
-        />
-        <Input
-          placeholder="Number of Tokens"
-          name="proposalThreshold"
-          register={register}
-          disabled={isSubmitting}
-          error={errors['proposalThreshold']}
-          classNames="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
-        />
-        <Checkbox
-          type="checkbox"
-          name="onlyAuthorsToSubmitProposals"
-          register={register}
-          disabled={isSubmitting}
-          error={errors['onlyAuthorsToSubmitProposals']}
-          label="Allow only designated authors to submit proposals"
-          labelClassNames="has-text-grey small-text"
-        />
+        {/* Render only if a contract type is selected */}
+        {contractType && (
+          <Dropdown
+            register={register}
+            label="Select Contract"
+            name="contract"
+            margin="mt-4"
+            options={getContractOptions(
+              contractType === 'ft' ? 'TOKEN' : 'NFT'
+            )}
+            disabled={isSubmitting}
+            control={control}
+          />
+        )}
+        {/* Render only if a particular contract is selected */}
+        {contractSelected && (
+          <Fragment>
+            <Input
+              placeholder="Contract Address"
+              register={register}
+              name="contractAddress"
+              disabled={isSubmitting}
+              readOnly={true}
+              style={styles.disableInputStyle}
+              error={errors['contractAddress']}
+              classNames="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
+            />
+            <Input
+              placeholder="Contract Name"
+              register={register}
+              name="contractName"
+              readOnly={true}
+              style={styles.disableInputStyle}
+              disabled={isSubmitting}
+              error={errors['contractName']}
+              classNames="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
+            />
+            <Input
+              placeholder="Collection Public Path"
+              name="storagePath"
+              register={register}
+              readOnly={true}
+              style={styles.disableInputStyle}
+              disabled={isSubmitting}
+              error={errors['storagePath']}
+              classNames="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
+            />
+            <Input
+              placeholder="Number of Tokens"
+              name="proposalThreshold"
+              register={register}
+              disabled={isSubmitting}
+              error={errors['proposalThreshold']}
+              classNames="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
+            />
+            <Checkbox
+              type="checkbox"
+              name="onlyAuthorsToSubmitProposals"
+              register={register}
+              disabled={isSubmitting}
+              error={errors['onlyAuthorsToSubmitProposals']}
+              label="Allow only designated authors to submit proposals"
+              labelClassNames="has-text-grey small-text"
+            />
+          </Fragment>
+        )}
       </WrapperResponsive>
       {submitComponent}
     </Form>
