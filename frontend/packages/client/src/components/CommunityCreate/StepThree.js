@@ -3,6 +3,7 @@ import { useWebContext } from 'contexts/Web3';
 import { ActionButton } from 'components';
 import { ThresholdForm } from 'components/Community/ProposalThresholdEditor';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { getContractsAndPathsDataWithKeyValue } from '../../data/dataServices.js';
 import { stepThree } from './FormConfig';
 
 const { Schema } = stepThree;
@@ -26,7 +27,9 @@ export default function StepThree({
   const { control, register, handleSubmit, formState, setValue } = useForm({
     resolver: yupResolver(Schema(isValidFlowAddress)),
     defaultValues: {
-      contract: '',
+      contract:
+        getContractsAndPathsDataWithKeyValue('contractAddress', contractAddress)
+          ?.contractName ?? '',
       proposalThreshold,
       contractAddress,
       contractName,

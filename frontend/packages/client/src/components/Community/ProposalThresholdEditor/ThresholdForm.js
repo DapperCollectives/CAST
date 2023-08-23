@@ -59,7 +59,7 @@ export default function ThresholdForm({
 
   const isFirstRender = useRef(true);
 
-  // We are doing this because the on mounting we don't want this contract value to be set to empty.
+  // We are doing this because on mounting we don't want this contract value to be set to empty.
   // This will resolve the case where a user is editing the Proposal Threshold in community settings and he/she wants
   // the pre-selected values to populate.
   useEffect(() => {
