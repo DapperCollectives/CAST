@@ -143,10 +143,10 @@ export default function StrategyInformationForm({
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="columns is-flex-direction-column is-mobile m-0">
-        <div className="small-text" style={{ color: '#757575' }}>
+        <div className="small-text has-text-grey">
           Need help finding this information?{' '}
           <a
-            href="https://docs.cast.fyi"
+            href="https://dapper-collectives-1.gitbook.io/cast-docs/working-with-contracts-and-paths"
             target="_blank"
             rel="noopener noreferrer"
           >

@@ -104,6 +104,16 @@ export default function ThresholdForm({
             </p>
           </div>
         </div>
+        <div className="small-text has-text-grey">
+          Need help finding this information?{' '}
+          <a
+            href="https://dapper-collectives-1.gitbook.io/cast-docs/working-with-contracts-and-paths"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Check our Getting Started Guide.
+          </a>
+        </div>
         <Dropdown
           label="Contract Type"
           name="contractType"
