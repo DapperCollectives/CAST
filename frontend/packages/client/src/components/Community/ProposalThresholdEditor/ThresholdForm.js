@@ -56,6 +56,7 @@ export default function ThresholdForm({
 } = {}) {
   const contractType = useWatch({ control, name: 'contractType' });
   const contractSelected = useWatch({ control, name: 'contract' });
+  const contractAddress = useWatch({ control, name: 'contractAddress' });
 
   const isFirstRender = useRef(true);
 
@@ -73,16 +74,30 @@ export default function ThresholdForm({
 
   // If the user selects any contract, the fields should auto populate
   useEffect(() => {
-    const contractDetails = getContractsAndPathsDataWithKeyValue(
-      'contractName',
-      contractSelected
-    );
-    if (contractDetails) {
-      setValue('contractAddress', contractDetails.contractAddress);
-      setValue('contractName', contractDetails.contractName);
-      setValue('storagePath', contractDetails.publicPath);
+    if (contractType !== '' && !contractSelected) {
+      setContractDetails({
+        contractAddress: '',
+        contractName: '',
+        publicPath: '',
+      });
+    } else {
+      const contractDetails = getContractsAndPathsDataWithKeyValue(
+        'contractName',
+        contractSelected ? contractSelected : 'FlowToken'
+      );
+      setContractDetails(contractDetails);
     }
-  }, [contractSelected]);
+  }, [contractSelected, contractType]);
+
+  const setContractDetails = ({
+    contractAddress,
+    contractName,
+    publicPath,
+  }) => {
+    setValue('contractAddress', contractAddress);
+    setValue('contractName', contractName);
+    setValue('storagePath', publicPath);
+  };
 
   return (
     <Form removeInnerForm={removeInnerForm} onSubmit={handleSubmit}>
@@ -115,7 +130,7 @@ export default function ThresholdForm({
           </a>
         </div>
         <Dropdown
-          label="Contract Type"
+          label="Default: $FLOW"
           name="contractType"
           margin="mt-4"
           options={CONTRACT_TYPES}
@@ -137,57 +152,55 @@ export default function ThresholdForm({
           />
         )}
         {/* Render only if a particular contract is selected */}
-        {contractSelected && (
-          <Fragment>
-            <Input
-              placeholder="Contract Address"
-              register={register}
-              name="contractAddress"
-              disabled={isSubmitting}
-              readOnly={true}
-              style={styles.disableInputStyle}
-              error={errors['contractAddress']}
-              classNames="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
-            />
-            <Input
-              placeholder="Contract Name"
-              register={register}
-              name="contractName"
-              readOnly={true}
-              style={styles.disableInputStyle}
-              disabled={isSubmitting}
-              error={errors['contractName']}
-              classNames="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
-            />
-            <Input
-              placeholder="Collection Public Path"
-              name="storagePath"
-              register={register}
-              readOnly={true}
-              style={styles.disableInputStyle}
-              disabled={isSubmitting}
-              error={errors['storagePath']}
-              classNames="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
-            />
-            <Input
-              placeholder="Number of Tokens"
-              name="proposalThreshold"
-              register={register}
-              disabled={isSubmitting}
-              error={errors['proposalThreshold']}
-              classNames="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
-            />
-            <Checkbox
-              type="checkbox"
-              name="onlyAuthorsToSubmitProposals"
-              register={register}
-              disabled={isSubmitting}
-              error={errors['onlyAuthorsToSubmitProposals']}
-              label="Allow only designated authors to submit proposals"
-              labelClassNames="has-text-grey small-text"
-            />
-          </Fragment>
-        )}
+        <Fragment>
+          <Input
+            placeholder="Contract Address"
+            register={register}
+            name="contractAddress"
+            disabled={isSubmitting}
+            readOnly={true}
+            style={styles.disableInputStyle}
+            error={errors['contractAddress']}
+            classNames="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
+          />
+          <Input
+            placeholder="Contract Name"
+            register={register}
+            name="contractName"
+            readOnly={true}
+            style={styles.disableInputStyle}
+            disabled={isSubmitting}
+            error={errors['contractName']}
+            classNames="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
+          />
+          <Input
+            placeholder="Collection Public Path"
+            name="storagePath"
+            register={register}
+            readOnly={true}
+            style={styles.disableInputStyle}
+            disabled={isSubmitting}
+            error={errors['storagePath']}
+            classNames="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
+          />
+          <Input
+            placeholder="Number of Tokens"
+            name="proposalThreshold"
+            register={register}
+            disabled={isSubmitting}
+            error={errors['proposalThreshold']}
+            classNames="rounded-sm border-light p-3 column is-full is-full-mobile mt-4"
+          />
+          <Checkbox
+            type="checkbox"
+            name="onlyAuthorsToSubmitProposals"
+            register={register}
+            disabled={isSubmitting}
+            error={errors['onlyAuthorsToSubmitProposals']}
+            label="Allow only designated authors to submit proposals"
+            labelClassNames="has-text-grey small-text"
+          />
+        </Fragment>
       </WrapperResponsive>
       {submitComponent}
     </Form>
