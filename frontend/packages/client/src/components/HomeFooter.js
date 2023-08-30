@@ -8,7 +8,7 @@ export default function HomeFooter() {
           <div className="column">
             <div className="is-flex">
               <p className="has-text-grey small-tex">
-                Made by
+                Maintained by
                 <a
                   href="https://buildsquad.net"
                   target="_blank"
