@@ -21,7 +21,7 @@ const styles = {
 
 const CONTRACT_TYPES = [
   {
-    label: 'Default: $FLOW',
+    label: 'Default: FLOW',
     value: '',
   },
   {
@@ -130,7 +130,7 @@ export default function ThresholdForm({
           </a>
         </div>
         <Dropdown
-          label="Default: $FLOW"
+          label="Default: FLOW"
           name="contractType"
           margin="mt-4"
           options={CONTRACT_TYPES}
