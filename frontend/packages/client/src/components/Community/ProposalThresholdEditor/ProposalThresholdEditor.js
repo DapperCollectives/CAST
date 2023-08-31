@@ -2,9 +2,9 @@ import { useForm } from 'react-hook-form';
 import { useWebContext } from 'contexts/Web3';
 import { ActionButton } from 'components';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { getContractsAndPathsDataWithKeyValue } from 'data/dataServices.js';
 import isEqual from 'lodash/isEqual';
 import networks from 'networks';
-import { getContractsAndPathsDataWithKeyValue } from '../../../data/dataServices.js';
 import { Schema } from './FormConfig';
 import ThresholdForm from './ThresholdForm';
 

@@ -8,7 +8,7 @@ import Input from 'components/common/Input';
 import {
   getContractsAndPathsDataWithKeyValue,
   getContractsAndPathsDataWithType,
-} from '../../../data/dataServices.js';
+} from 'data/dataServices.js';
 
 const styles = {
   disableInputStyle: {
@@ -21,7 +21,7 @@ const styles = {
 
 const CONTRACT_TYPES = [
   {
-    label: 'Default',
+    label: 'Default: $FLOW',
     value: '',
   },
   {

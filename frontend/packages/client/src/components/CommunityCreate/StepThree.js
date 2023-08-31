@@ -3,7 +3,7 @@ import { useWebContext } from 'contexts/Web3';
 import { ActionButton } from 'components';
 import { ThresholdForm } from 'components/Community/ProposalThresholdEditor';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { getContractsAndPathsDataWithKeyValue } from '../../data/dataServices.js';
+import { getContractsAndPathsDataWithKeyValue } from 'data/dataServices.js';
 import { stepThree } from './FormConfig';
 
 const { Schema } = stepThree;

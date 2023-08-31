@@ -9,7 +9,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import {
   getContractsAndPathsDataWithKeyValue,
   getContractsAndPathsDataWithType,
-} from '../../../data/dataServices.js';
+} from 'data/dataServices.js';
 import { getSchema } from './FormConfig';
 
 const AUTO_FILLED_FIELDS = ['addr', 'name', 'publicPath'];

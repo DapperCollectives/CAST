@@ -1,20 +1,20 @@
 [
     {
-        "name": "$FLOW",
+        "name": "FLOW",
         "contractAddress": "0x1654653399040a61",
         "contractName": "FlowToken",
         "publicPath": "flowTokenBalance",
         "type": "TOKEN"
     },
     {
-        "name": "$BLT",
+        "name": "BLT",
         "contractAddress": "0x0f9df91c9121c460",
         "contractName": "BloctoToken",
         "publicPath": "bloctoTokenBalance",
         "type": "TOKEN"
     },
     {
-        "name": "$STARLY",
+        "name": "STARLY",
         "contractAddress": "0x142fa6570b62fd97",
         "contractName": "StarlyToken",
         "publicPath": "starlyTokenBalance",
