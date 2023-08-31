@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
 import { useWebContext } from 'contexts/Web3';
 import {
-  BrowseCommunityButton,
+  BrowseButton,
   FadeIn,
+  FlipsContainer,
   HomeFooter,
   HomeHeader,
   Loader,
@@ -15,6 +16,7 @@ import {
   useLocalStorage,
   useUserCommunities,
 } from 'hooks';
+import classNames from 'classnames';
 import SectionContainer from 'layout/SectionContainer';
 
 export default function HomePage() {
@@ -56,6 +58,11 @@ export default function HomePage() {
 
   const showLoader = loading || loadingFeaturedCommunities;
 
+  const featureCommunitiesClasses = classNames({
+    'has-background-light-grey': !isMyCommunitiesVisible,
+    'pt-5': true,
+  });
+
   return (
     <>
       {showToolTip && (
@@ -74,6 +81,9 @@ export default function HomePage() {
       )}
       {!showLoader && (
         <FadeIn>
+          <SectionContainer classNames="pt-5">
+            <FlipsContainer />
+          </SectionContainer>
           {isMyCommunitiesVisible && (
             <SectionContainer classNames="has-background-light-grey">
               <CommunitiesPresenter
@@ -83,12 +93,15 @@ export default function HomePage() {
               />
             </SectionContainer>
           )}
-          <SectionContainer classNames="pt-5">
+          <SectionContainer classNames={featureCommunitiesClasses}>
             <CommunitiesPresenter
               title="Featured Communities"
               communities={featuredCommunities}
             />
-            <BrowseCommunityButton />
+            <BrowseButton
+              path={'/browse-communities'}
+              label={'Browse All Communities'}
+            />
           </SectionContainer>
         </FadeIn>
       )}
