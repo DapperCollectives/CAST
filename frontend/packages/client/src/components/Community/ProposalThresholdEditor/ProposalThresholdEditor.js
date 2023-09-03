@@ -153,7 +153,7 @@ export default function ProposalThresholdEditor({
               type="submit"
               label="Save"
               enabled={isDirty && !isSubmitting}
-              classNames="vote-button transition-all has-background-yellow mt-5"
+              classNames="vote-button transition-all has-background-green mt-5"
             />
           </div>
         </div>
