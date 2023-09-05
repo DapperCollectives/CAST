@@ -4,8 +4,7 @@ const Body = () => (
   <div className="content">
     <p>
       CAST is a voting tool application (the “App”) for communities in the Flow™
-      blockchain network (the “Flow Network”). Dapper Labs, Inc. ("DLI", "we",
-      or "us") is making the App available to you. Before you use the App,
+      blockchain network (the “Flow Network”). Before you use the App,
       however, you will need to agree to these Terms of Use and any terms and
       conditions incorporated herein by reference (collectively, these “Terms").
       PLEASE READ THESE TERMS CAREFULLY BEFORE USING THE APP. THESE TERMS GOVERN

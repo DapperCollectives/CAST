@@ -5,19 +5,6 @@ export default function HomeFooter() {
     <div className="section pt-6 mt-6">
       <div className="container">
         <div className="columns">
-          <div className="column">
-            <p className="has-text-grey small-text is-flex">
-              Built by
-              <a
-                target="_blank"
-                rel="noreferrer noopener"
-                href="https://dappercollectives.fyi"
-                className="pl-1 is-underlined has-text-grey"
-              >
-                Dapper Collectives
-              </a>
-            </p>
-          </div>
           <div className="column is-narrow px-4-desktop">
             <p className="has-text-grey small-text">
               <a
