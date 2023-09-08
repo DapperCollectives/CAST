@@ -14,6 +14,7 @@ import useCommunityMutation from 'hooks/useCommunityMutation';
 import { generateSlug } from 'utils';
 
 export default function CommunityCreate() {
+  const [selectedProposalContract, setSelectedProposalContract] = useState();
   const [modalError, setModalError] = useState(false);
   const {
     user: { addr: creatorAddr },
@@ -179,11 +180,17 @@ export default function CommunityCreate() {
       {
         label: 'Proposal & Voting',
         description: '',
-        component: <StepThree />,
+        component: (
+          <StepThree
+            setSelectedProposalContract={setSelectedProposalContract}
+          />
+        ),
       },
       {
         label: 'Voting Strategies',
-        component: <StepFour />,
+        component: (
+          <StepFour selectedProposalContract={selectedProposalContract} />
+        ),
       },
     ],
   };

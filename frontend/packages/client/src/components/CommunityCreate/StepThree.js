@@ -12,6 +12,7 @@ export default function StepThree({
   stepData = {},
   onDataChange,
   moveToNextStep,
+  setSelectedProposalContract,
 }) {
   const {
     proposalThreshold = '',
@@ -46,6 +47,7 @@ export default function StepThree({
   const { isDirty, isSubmitting, errors, isValid } = formState;
   return (
     <ThresholdForm
+      setSelectedContract={setSelectedProposalContract}
       setValue={setValue}
       handleSubmit={handleSubmit(onSubmit)}
       errors={errors}

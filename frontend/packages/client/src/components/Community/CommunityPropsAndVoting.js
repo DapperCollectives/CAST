@@ -11,6 +11,7 @@ export default function CommunityProposalsAndVoting({
   updateCommunity,
   updatingCommunity,
   activeStrategies,
+  communityProposalContract = {},
 } = {}) {
   const { isValidFlowAddress } = useWebContext();
 
@@ -86,6 +87,7 @@ export default function CommunityProposalsAndVoting({
 
   return (
     <StrategySelectorForm
+      selectedProposalContract={communityProposalContract}
       existingStrategies={communityVotingStrategies}
       activeStrategies={activeStrategies}
       disableAddButton={updatingCommunity}

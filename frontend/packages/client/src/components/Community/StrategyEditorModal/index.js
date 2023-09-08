@@ -38,6 +38,7 @@ export default function StrategyEditorModal({
   onDismiss = () => {},
   // callback to pass data collected and closed modal
   onDone = () => {},
+  selectedProposalContract = {},
 } = {}) {
   // handles two steps inside modal
   // 1 - strategy name
@@ -88,6 +89,18 @@ export default function StrategyEditorModal({
   const strategy = strategies.find((s) => s.key === strategyData.name);
   const strategyName = strategyData?.name && strategy.name;
 
+  const getUpdatedScript = (strategy) => {
+    // We know that only custom-script has the scripts so we filtering the data according to that.
+    // Refer contractsAndPaths.json for Data structure.
+    const allowedScripts = selectedProposalContract?.strategies.find(
+      (k) => k.strategyKey === 'custom-script'
+    )?.scripts;
+
+    return strategy.scripts.filter((eachscript) => {
+      return allowedScripts.includes(eachscript?.key);
+    });
+  };
+
   return (
     <div
       className="modal-card has-background-white m-0 p-5 p-1-mobile full-height"
@@ -128,13 +141,14 @@ export default function StrategyEditorModal({
         {step === ModalSteps[2] ? (
           strategy.key === 'custom-script' ? (
             <CustomScriptSelector
-              scripts={strategy.scripts}
+              scripts={getUpdatedScript(strategy)}
               formData={strategyData.contract}
               formFields={Object.keys(getFormFields(strategyData.name))}
               onSubmit={onConfirmDone}
             />
           ) : (
             <StrategyInformationForm
+              selectedProposalContract={selectedProposalContract}
               strategy={strategy}
               formData={strategyData.contract}
               formFields={Object.keys(getFormFields(strategyData.name))}

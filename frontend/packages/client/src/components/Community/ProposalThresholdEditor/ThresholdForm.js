@@ -53,10 +53,10 @@ export default function ThresholdForm({
   control = () => {},
   isSubmitting = false,
   setValue,
+  setSelectedContract = () => {},
 } = {}) {
   const contractType = useWatch({ control, name: 'contractType' });
   const contractSelected = useWatch({ control, name: 'contract' });
-  const contractAddress = useWatch({ control, name: 'contractAddress' });
 
   const isFirstRender = useRef(true);
 
@@ -86,6 +86,7 @@ export default function ThresholdForm({
         contractSelected ? contractSelected : 'FlowToken'
       );
       setContractDetails(contractDetails);
+      setSelectedContract(contractDetails);
     }
   }, [contractSelected, contractType]);
 

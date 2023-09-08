@@ -8,6 +8,7 @@ export default function StepFour({
   onDataChange,
   onSubmit,
   isStepValid,
+  selectedProposalContract = {},
 } = {}) {
   const { strategies } = stepData || {};
 
@@ -25,6 +26,7 @@ export default function StepFour({
 
   return (
     <StrategySelectorForm
+      selectedProposalContract={selectedProposalContract}
       existingStrategies={strategies}
       onStrategySelection={onStrategySelection}
       enableDelUniqueItem
