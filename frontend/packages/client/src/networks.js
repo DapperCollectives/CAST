@@ -22,7 +22,13 @@ const networksConfig = {
       // '0x9d2e44203cb13051', // Ledger
       '0x82ec283f88a62e65', // Dapper Wallet
     ],
-    strategiesConfig: {},
+    strategiesConfig: {
+      'one-address-one-vote': {
+        name: 'FlowToken',
+        addr: '0x7e60df042a9c0868',
+        publicPath: 'flowTokenBalance',
+      },
+    },
     flowAddress: {
       contractName: 'FlowToken',
       contractAddr: '0x7e60df042a9c0868',
@@ -38,7 +44,13 @@ const networksConfig = {
       // '0xe5cd26afebe62781', // Ledger
       '0xead892083b3e2c6c', // Dapper Wallet
     ],
-    strategiesConfig: {},
+    strategiesConfig: {
+      'one-address-one-vote': {
+        name: 'FlowToken',
+        addr: '0x1654653399040a61',
+        publicPath: 'flowTokenBalance',
+      },
+    },
     flowAddress: {
       contractName: 'FlowToken',
       contractAddr: '0x1654653399040a61',
