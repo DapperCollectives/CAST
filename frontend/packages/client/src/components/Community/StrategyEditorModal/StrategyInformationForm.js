@@ -44,7 +44,8 @@ const getDropDownData = ({ strategyKey }) => {
         }),
       };
     }
-    case 'token-weighted-default': {
+    case 'token-weighted-default':
+    case 'total-token-weighted-default': {
       return {
         dropDownData: getContractsAndPathsDataWithType('TOKEN')?.map((item) => {
           return {
