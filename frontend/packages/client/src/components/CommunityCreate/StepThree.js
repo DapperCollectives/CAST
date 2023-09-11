@@ -1,9 +1,9 @@
-import { useEffect } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { useWebContext } from 'contexts/Web3';
 import { ActionButton } from 'components';
 import { ThresholdForm } from 'components/Community/ProposalThresholdEditor';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { getContractsAndPathsDataWithKeyValue } from 'data/dataServices.js';
 import { stepThree } from './FormConfig';
 
 const { Schema } = stepThree;
@@ -24,9 +24,12 @@ export default function StepThree({
 
   const { isValidFlowAddress } = useWebContext();
 
-  const { control, register, handleSubmit, formState, setFocus } = useForm({
+  const { control, register, handleSubmit, formState, setValue } = useForm({
     resolver: yupResolver(Schema(isValidFlowAddress)),
     defaultValues: {
+      contract:
+        getContractsAndPathsDataWithKeyValue('contractAddress', contractAddress)
+          ?.contractName ?? '',
       proposalThreshold,
       contractAddress,
       contractName,
@@ -41,18 +44,9 @@ export default function StepThree({
   };
 
   const { isDirty, isSubmitting, errors, isValid } = formState;
-
-  const dropdownValue = useWatch({ control, name: 'contractType' });
-  const contractAddressValue = useWatch({ control, name: 'contractAddress' });
-
-  useEffect(() => {
-    if (dropdownValue && contractAddressValue === '') {
-      setFocus('contractAddress');
-    }
-  }, [dropdownValue, contractAddressValue, setFocus]);
-
   return (
     <ThresholdForm
+      setValue={setValue}
       handleSubmit={handleSubmit(onSubmit)}
       errors={errors}
       register={register}

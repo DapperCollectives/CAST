@@ -2,6 +2,7 @@ import { useForm } from 'react-hook-form';
 import { useWebContext } from 'contexts/Web3';
 import { ActionButton } from 'components';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { getContractsAndPathsDataWithKeyValue } from 'data/dataServices.js';
 import isEqual from 'lodash/isEqual';
 import networks from 'networks';
 import { Schema } from './FormConfig';
@@ -100,27 +101,33 @@ export default function ProposalThresholdEditor({
     onlyAuthorsToSubmitProposals,
   });
 
-  const { control, register, handleSubmit, formState, reset } = useForm({
-    resolver: yupResolver(Schema(isValidFlowAddress)),
-    defaultValues: {
-      ...(useEmptyFields
-        ? {
-            proposalThreshold: '',
-            contractAddress: '',
-            contractName: '',
-            contractType: '',
-            storagePath: '',
-          }
-        : {
-            proposalThreshold,
-            contractAddress,
-            contractName,
-            contractType,
-            storagePath,
-          }),
-      onlyAuthorsToSubmitProposals,
-    },
-  });
+  const { control, register, handleSubmit, formState, reset, setValue } =
+    useForm({
+      resolver: yupResolver(Schema(isValidFlowAddress)),
+      defaultValues: {
+        ...(useEmptyFields
+          ? {
+              proposalThreshold: '',
+              contractAddress: '',
+              contractName: '',
+              contractType: '',
+              storagePath: '',
+              contract: '',
+            }
+          : {
+              proposalThreshold,
+              contractAddress,
+              contractName,
+              contractType,
+              storagePath,
+              contract: getContractsAndPathsDataWithKeyValue(
+                'contractAddress',
+                contractAddress
+              )?.contractName,
+            }),
+        onlyAuthorsToSubmitProposals,
+      },
+    });
 
   const onSubmit = async (data) => {
     // check fields value and pupulate them
@@ -146,6 +153,7 @@ export default function ProposalThresholdEditor({
       register={register}
       control={control}
       isSubmitting={isSubmitting}
+      setValue={setValue}
       submitComponent={
         <div className="columns mb-5">
           <div className="column is-12">
