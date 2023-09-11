@@ -20,7 +20,6 @@ import {
 } from 'hooks';
 import useCommunityActiveVotingStrategies from 'hooks/useCommunityActiveStrategies';
 import { CommunityEditPageTabs } from 'const';
-import { getContractsAndPathsDataWithKeyValue } from 'data/dataServices.js';
 
 const MenuTabs = ({ tabs, communityId, onClickButtonTab = () => {} } = {}) => {
   return (
@@ -130,16 +129,6 @@ export default function CommunityEditorPage() {
     user: { addr },
   } = useWebContext();
   const { data: community, isLoading } = useCommunityDetails(communityId);
-
-  const [communityProposalContract, setCommunityProposalContract] = useState();
-
-  useEffect(() => {
-    const contract = getContractsAndPathsDataWithKeyValue(
-      'contractName',
-      community?.contractName
-    );
-    setCommunityProposalContract(contract);
-  }, [community]);
 
   const {
     updateCommunityDetailsAsync: updateCommunityDetails,
@@ -263,7 +252,6 @@ export default function CommunityEditorPage() {
                 updatingCommunity={isUpdating}
                 communityVotingStrategies={community.strategies}
                 activeStrategies={activeStrategies}
-                communityProposalContract={communityProposalContract}
               />
             )}
           </div>

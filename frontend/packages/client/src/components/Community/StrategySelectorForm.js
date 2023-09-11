@@ -18,22 +18,6 @@ const getStrategyName = (strategies, strategy) => {
   return kebabToString(strategy.name);
 };
 
-const getUpdatedStrategiesList = (
-  currentStrategies,
-  allVotingStrategies = [],
-  selectedProposalContract
-) => {
-  const updatedStrategies = allVotingStrategies.filter((st) => {
-    return (
-      !currentStrategies.find((currentSt) => currentSt.name === st.key) &&
-      selectedProposalContract?.strategies?.some(
-        (strategy) => strategy.strategyKey === st.key
-      )
-    );
-  });
-  return updatedStrategies;
-};
-
 export default function StrategySelectorForm({
   existingStrategies = [],
   activeStrategies = [],
@@ -43,7 +27,6 @@ export default function StrategySelectorForm({
   // callback to return strategies selected
   onStrategySelection,
   enableDelUniqueItem,
-  selectedProposalContract = {},
 } = {}) {
   // holds array of objects with strategy information
   const [strategies, setStrategies] = useState(existingStrategies);
@@ -61,10 +44,8 @@ export default function StrategySelectorForm({
   const { openModal, closeModal } = useModalContext();
 
   // filter strategies already added
-  const strategiesList = getUpdatedStrategiesList(
-    strategies,
-    allVotingStrategies,
-    selectedProposalContract
+  const strategiesList = (allVotingStrategies || []).filter(
+    (st) => !strategies.find((currentSt) => currentSt.name === st.key)
   );
 
   const addNewStrategy = (newStrategyInfo) => {
@@ -78,7 +59,6 @@ export default function StrategySelectorForm({
         onDismiss={() => closeModal()}
         strategies={strategiesList}
         onDone={addNewStrategy}
-        selectedProposalContract={selectedProposalContract}
       />,
       {
         classNameModalContent: 'rounded-sm',
