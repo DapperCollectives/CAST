@@ -11,7 +11,10 @@ export default function FlipsCard({ pr = {}, style }) {
       to={`/community/${pr.communityId}/proposal/${pr.id}`}
       className={`${classes.linkContainer} column is-4`}
     >
-      <div className="border-light rounded-sm transition-all" style={style}>
+      <div
+        className="border-light rounded-sm transition-all full-height is-flex is-flex-direction-column"
+        style={style}
+      >
         <FlipCardHeader address={creatorAddr} />
         <FlipCardBody name={name} body={body} />
         <FlipCardFooter
