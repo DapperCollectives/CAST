@@ -37,7 +37,7 @@ export default function HomeHeader({ isVisible = true } = {}) {
           </h1>
         </div>
         <h4 className="py-4 mb-4 is-size-4 has-text-centered">
-          CAST is a voting tool for token communities.{' '}
+          CAST is a voting tool for Flow FLIPs and token communities.{' '}
         </h4>
         {starArray.map((position, index) => (
           <div

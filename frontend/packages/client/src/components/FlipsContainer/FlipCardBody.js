@@ -15,7 +15,7 @@ export default function FlipCardBody({ body, name }) {
           style={{ height: '300px', width: '100%', objectFit: 'cover' }}
         />
       </div>
-      <div className="p-4">
+      <div className="p-4 is-flex-grow-1">
         <div className="is-size-4 line-clamp-1 has-text-weight-bold mb-2">
           {name}
         </div>

@@ -2,6 +2,7 @@ import { BrowseButton } from 'components';
 import { useCommunityProposalsWithVotes } from 'hooks';
 import { getUpdatedFlipsData } from '../../helpers';
 import FlipsList from './FlipsList';
+import classes from './index.module.scss';
 
 const COMMUNITY_ID = 1;
 
@@ -34,7 +35,19 @@ const FlipsContainer = () => {
 
   return (
     <div>
-      <h1 className={`is-uppercase has-text-weight-bold mb-5`}>Flow Flip's</h1>
+      <a
+        target="_blank"
+        rel="noreferrer noopener"
+        href="https://github.com/onflow/flips"
+        className={`${classes.linkContainer}`}
+      >
+        <h1
+          className={`is-uppercase has-text-weight-bold mb-5 ${classes.headingClass}`}
+        >
+          Flow Improvement Proposals
+        </h1>
+      </a>
+
       <FlipsList proposals={updatedList} initialLoading={initialLoading} />
       <BrowseButton path={`/community/${COMMUNITY_ID}`} label={'Show more'} />
     </div>
