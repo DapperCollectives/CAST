@@ -1,3 +1,6 @@
+
+# Active development for CAST is now on https://github.com/onflow/CAST
+
 # CAST
 
 ![stability-wip](https://img.shields.io/badge/stability-work_in_progress-lightgrey.svg)
