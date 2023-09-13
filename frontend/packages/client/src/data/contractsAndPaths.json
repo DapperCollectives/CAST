@@ -1,0 +1,86 @@
+[
+    {
+        "name": "FLOW",
+        "contractAddress": "0x1654653399040a61",
+        "contractName": "FlowToken",
+        "publicPath": "flowTokenBalance",
+        "type": "TOKEN"
+    },
+    {
+        "name": "BLT",
+        "contractAddress": "0x0f9df91c9121c460",
+        "contractName": "BloctoToken",
+        "publicPath": "bloctoTokenBalance",
+        "type": "TOKEN"
+    },
+    {
+        "name": "STARLY",
+        "contractAddress": "0x142fa6570b62fd97",
+        "contractName": "StarlyToken",
+        "publicPath": "starlyTokenBalance",
+        "type": "TOKEN"
+    },
+    {
+        "name": "FLOAT",
+        "contractAddress": "0x2d4c3caffbeab845",
+        "contractName": "FLOAT",
+        "publicPath": "FLOATCollectionPublicPath",
+        "type": "NFT"
+    },
+    {
+        "name": "Flunks",
+        "contractAddress": "0x807c3d470888cc48",
+        "contractName": "Flunks",
+        "publicPath": "FlunksCollection",
+        "type": "NFT"
+    },
+    {
+        "name": "NBA TopShot",
+        "contractAddress": "0x0b2a3299cc857e29",
+        "contractName": "TopShot",
+        "publicPath": "MomentCollection",
+        "type": "NFT"
+    },
+    {
+        "name": "NFL All Day",
+        "contractAddress": "0xe4cf4bdc1751c65d",
+        "contractName": "AllDay",
+        "publicPath": "AllDayNFTCollection",
+        "type": "NFT"
+    },
+    {
+        "name": "Ballerz",
+        "contractAddress": "0x8b148183c28ff88f",
+        "contractName": "Gaia",
+        "publicPath": "GaiaCollection001",
+        "type": "NFT"
+    },
+    {
+        "name": "RCRDSHP",
+        "contractAddress": "0x6c3ff40b90b928ab",
+        "contractName": "RCRDSHPNFT",
+        "publicPath": "RCRDSHPNFTCollection",
+        "type": "NFT"
+    },
+    {
+        "name": "Genies",
+        "contractAddress": "0x12450e4bb3b7666e",
+        "contractName": "Genies",
+        "publicPath": "GeniesNFTCollection",
+        "type": "NFT"
+    },
+    {
+        "name": "Goated Goats",
+        "contractAddress": "0x2068315349bdfce5",
+        "contractName": "GoatedGoats",
+        "publicPath": "GoatCollection",
+        "type": "NFT"
+    },
+    {
+        "name": "Flowns",
+        "contractAddress": "0x233eb012d34b0070",
+        "contractName": "Domains",
+        "publicPath": "fnsDomainCollection",
+        "type": "NFT"
+    }
+]

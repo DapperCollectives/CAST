@@ -49,7 +49,6 @@ export default function StrategySelectorForm({
   );
 
   const addNewStrategy = (newStrategyInfo) => {
-    const { contract } = newStrategyInfo;
     setStrategies((state) => [...state, newStrategyInfo]);
     closeModal();
   };

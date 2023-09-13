@@ -10,6 +10,7 @@ export default function Input({
   error,
   type = 'text',
   conatinerClassNames = '',
+  readOnly = false,
 } = {}) {
   return (
     <div
@@ -20,6 +21,7 @@ export default function Input({
         style={{ width: '100%', ...style }}
         placeholder={placeholder}
         className={classNames}
+        readOnly={readOnly}
         {...register(name, { disabled })}
       />
       {error && (

@@ -8,13 +8,14 @@ $yellow: #FBD84D
 $orange: #F4AF4A
 $light-grey: #F9F9F9
 $grey: #636363
+$light-green: #4CEF8B
 
 // Update Bulma's global variables
 $family-sans-serif: "DM Sans"
 $family-monospace: "DM Sans"
 $body-color: black
 $body-background-color: white
-$primary: $yellow
+$primary: $light-green
 $spacing-values: ("0": 0, "1": 0.25rem, "2": 0.5rem, "3": 0.75rem, "4": 1rem, "5": 1.5rem, "5_5": 2.5rem, "6": 3rem, "7": 4.5rem,"8": 6rem, "9": 9rem, "auto": auto) !default
 
 // Update some of Bulma's component variables
@@ -26,7 +27,7 @@ $button-border-color: black
 $button-color: black
 $button-border-width: 1px
 $title-size: 2.5rem
-$progress-bar-background-color: $yellow
+$progress-bar-background-color: $light-green
 $input-color: black
 $white-ter: #F9F9F9
 $border-color-light: #DBDBDB
@@ -115,7 +116,7 @@ $popover-max-width: 20rem
 .full-height
 	height: 100%
 .tx
-	border: 1px solid $yellow
+	border: 1px solid $light-green
 code
 	background: transparent
 .divider
@@ -156,8 +157,8 @@ code
 	background-color: $orange
 .has-background-light-grey
 	background-color: $light-grey
-.has-background-yellow
-	background-color: $yellow
+.has-background-green
+	background-color: $light-green
 	&.button
 		border: none !important
 		&:hover
@@ -208,10 +209,10 @@ label > input[type="radio"] + *::before
 	border-width: 0.1rem
 	border-color: gray
 label > input[type="radio"]:checked + *
-	color: $yellow
+	color: $light-green
 label > input[type="radio"]:checked + *::before
-	background: radial-gradient($yellow 0%, $yellow 40%, transparent 50%, transparent)
-	border-color: $yellow
+	background: radial-gradient($light-green 0%, $light-green 40%, transparent 50%, transparent)
+	border-color: $light-green
 label > input[type="radio"].is-chosen + *::before, .is-button-chosen
 	// green checkmark image
 	background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTIiIGZpbGw9IiMwRTVCMjAiLz4KPHBhdGggZD0iTTE4LjEyOTMgNy40NzkyOEMxNy45NjE1IDcuMzU5IDE3Ljc1MjkgNy4zMTAyOSAxNy41NDkyIDcuMzQzODZDMTcuMzQ1NSA3LjM3NzQ0IDE3LjE2MzUgNy40OTA1NCAxNy4wNDMyIDcuNjU4M0w5Ljc2MDE2IDE0LjY5OUw3LjMyOTAyIDEyLjI2NThDNy4xODMwNyAxMi4xMTk4IDYuOTg1MDkgMTIuMDM3NyA2Ljc3ODYzIDEyLjAzNzdDNi41NzIxNyAxMi4wMzc2IDYuMzc0MTUgMTIuMTE5NiA2LjIyODEzIDEyLjI2NTVDNi4wODIxMSAxMi40MTE1IDYuMDAwMDUgMTIuNjA5NSA2IDEyLjgxNTlDNS45OTk5NSAxMy4wMjI0IDYuMDgxOTIgMTMuMjIwNCA2LjIyNzg3IDEzLjM2NjRMOS4zMDc2NyAxNi40NDU3QzkuMzg4NTIgMTYuNTIzNSA5LjQ4NSAxNi41ODMyIDkuNTkwNyAxNi42MjA5QzkuNjk2NCAxNi42NTg2IDkuODA4OTEgMTYuNjczMyA5LjkyMDc1IDE2LjY2NDJDMTAuMDMyNiAxNi42NTUxIDEwLjE0MTIgMTYuNjIyMyAxMC4yMzk0IDE2LjU2OEMxMC4zMzc2IDE2LjUxMzYgMTAuNDIzMSAxNi40MzkxIDEwLjQ5MDMgMTYuMzQ5MkwxOC4zMDgzIDguNTY1MzhDMTguNDI4NiA4LjM5NzYxIDE4LjQ3NzMgOC4xODg5MyAxOC40NDM4IDcuOTg1MjVDMTguNDEwMiA3Ljc4MTU3IDE4LjI5NzEgNy41OTk1NyAxOC4xMjkzIDcuNDc5MjhaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K')
@@ -239,7 +240,7 @@ label > input[type="radio"].is-chosen + *::before
 	filter: opacity(0.7)
 	color: $link
 header#navbar
-	border-top: 4px solid $yellow
+	border-top: 4px solid $light-green
 .navbar
 	display: flex
 	justify-content: space-between
@@ -272,7 +273,7 @@ hr
 	.hide-eye
 		display: none
 	&:hover, &.is-active
-		background: $yellow
+		background: $light-green
 		border-color: $black
 	&.is-active:hover
 		.eye
@@ -286,26 +287,25 @@ hr
 	transition: all .3s
 	pointer-events: none
 .join-community-cta::after
-		position: absolute
-		content: ""
-		bottom: -15px
-		left: 50%
-		margin-left: -5px
-		border-style: solid
-		border-width: 10px 0 10px 10px
-		border-color: transparent transparent transparent $black
-		transform: rotate(90deg)
+	position: absolute
+	content: ""
+	bottom: -15px
+	left: 50%
+	margin-left: -5px
+	border-style: solid
+	border-width: 10px 0 10px 10px
+	border-color: transparent transparent transparent $black
+	transform: rotate(90deg)
 @include desktop
 	.join-community-button:hover .join-community-cta
 		opacity: 1
-	
+
 @media (min-width: 769px) and (max-width: 820px)
 	.is-hidden-connect
 		display: none
 @media (min-width: 1024px)
 	.container > .navbar .navbar-brand
 		margin-left: 0 !important
-
 
 @media (max-width: 769px)
 	.section
@@ -410,7 +410,7 @@ hr
 .proposal-status
 	padding-right: 0 !important
 	code span
-		margin-right: 0 !important
+	margin-right: 0 !important
 
 @include desktop
 	.spacing-left-panel
@@ -585,7 +585,7 @@ span[data-tooltip]
 	-moz-transition: opacity 0.3s ease-out
 	-ms-transition: opacity 0.3s ease-out
 	-o-transition: opacity 0.3s ease-out
-	opacity: 0	
+	opacity: 0
 
 .word-break
 	word-break: break-word
@@ -595,6 +595,11 @@ span[data-tooltip]
 	-webkit-box-orient: vertical
 	overflow: hidden
 
+.line-clamp-1
+	display: -webkit-box
+	-webkit-line-clamp: 1
+	-webkit-box-orient: vertical
+	overflow: hidden
 .mx-loader
 	margin-left: 0.1rem !important
 	margin-right: 0.1rem !important
@@ -671,7 +676,7 @@ span[data-tooltip]
 .form-error-input-icon
 	padding-right: 4.5rem !important
 .form-error-input-border
-	border-color: $danger  !important
+	border-color: $danger !important
 
 .form-checkbox
 	-webkit-appearance: none
@@ -749,21 +754,21 @@ span[data-tooltip]
 	z-index: 32
 
 .modal-content-image-crop
-	max-width: 400px !important	
-	max-height: unset !important	
+	max-width: 400px !important
+	max-height: unset !important
 	&.banner-crop
-		max-width: 474px !important	
+		max-width: 474px !important
 
 input[type=range]
-	-webkit-appearance: none // Hides the slider so that custom slider can be made 
+	-webkit-appearance: none // Hides the slider so that custom slider can be made
 	width: 100% // Specific width is required for Firefox.
-	background: transparent //  Otherwise white in Chrome 
+	background: transparent // Otherwise white in Chrome
 
 input[type=range].slider::-webkit-slider-thumb
 	-webkit-appearance: none
 
 input[type=range].slider:focus
-	outline: none // Removes the blue border. You should probably do some kind of focus styling for accessibility reasons though.
+	outline: none // Removes the blue border.You should probably do some kind of focus styling for accessibility reasons though.
 
 input[type=range].slider::-ms-track
 	width: 100%
@@ -774,7 +779,7 @@ input[type=range].slider::-ms-track
 	color: transparent
 
 // thumb styles
-input[type=range].slider::-webkit-slider-thumb 
+input[type=range].slider::-webkit-slider-thumb
 	-webkit-appearance: none
 	border: 1px solid #FBD84D
 	height: 19px
@@ -832,17 +837,17 @@ input[type=range].slider::-ms-fill-upper
 	border-radius: 10px
 
 @media screen and (min-width: 1408px)
-.container:not(.is-max-desktop):not(.is-max-widescreen) 
-	max-width: 1220px	
+.container:not(.is-max-desktop):not(.is-max-widescreen)
+	max-width: 1220px
 
-@media (max-width: 1300px)	
+@media (max-width: 1300px)
 	.commmunity-header-container
 		padding-top: 0px
 
-@media (min-width: 1300px)	
+@media (min-width: 1300px)
 	.commmunity-header-container
 		padding-top: 1rem
-	.community-header-wrapper	
+	.community-header-wrapper
 		border-radius: 16px
 		background-size: contain !important
 
@@ -859,7 +864,7 @@ input[type=range].slider::-ms-fill-upper
 		padding-left: 24px
 		padding-top: 15px
 	.spacing-footer
-		padding: 0px 24px 32px 24px		
+		padding: 0px 24px 32px 24px
 	.c-modal-header
 		display: flex
 		flex-grow: 1
@@ -879,12 +884,12 @@ input[type=range].slider::-ms-fill-upper
 		color: $grey
 	.c-modal-footer
 		display: flex
-		padding-top: 24px	
+		padding-top: 24px
 
 .search-container
 	min-height: 214px
 .search-input
-	width: 480px		
+	width: 480px
 .pill-border
 	border: 2px solid
 .pill-border-disabled
@@ -894,22 +899,21 @@ input[type=range].slider::-ms-fill-upper
 	border-color: $success
 .has-border-danger
 	border-color: $danger
-.has-border-yellow
-	border-color: $yellow
+.has-border-green
+	border-color: $light-green
 .has-border-orange
 	border-color: $orange
 
-@include mobile	
+@include mobile
 	.search-container
 		min-height: 249px
 	.search-input
-		width: 100%	
+		width: 100%
 
-.fade-proposal-description 
+.fade-proposal-description
 	position: absolute
 	bottom: 1.5rem
 	display: block
 	width: 100%
 	height: 200px
 	background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgb(255, 255, 255) 100%)
-

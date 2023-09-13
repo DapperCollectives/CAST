@@ -21,9 +21,13 @@ const Dropdown = forwardRef(
     ref
   ) => {
     const [isOpen, setIsOpen] = useState(false);
-    const [innerValue, setInnerValue] = useState(
-      defaultValue ? { value: defaultValue } : undefined
-    );
+    const [innerValue, setInnerValue] = useState();
+
+    // The case is introduced because it should update the component if the value is changed
+    // in a controlled way
+    useEffect(() => {
+      setInnerValue(defaultValue ? { value: defaultValue } : undefined);
+    }, [defaultValue]);
 
     useEffect(() => {
       if (!innerValue?.label && innerValue?.value && options.length) {

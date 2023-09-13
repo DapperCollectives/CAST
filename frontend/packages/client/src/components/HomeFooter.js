@@ -6,17 +6,27 @@ export default function HomeFooter() {
       <div className="container">
         <div className="columns">
           <div className="column">
-            <p className="has-text-grey small-text is-flex">
-              Built by
-              <a
-                target="_blank"
-                rel="noreferrer noopener"
-                href="https://dappercollectives.fyi"
-                className="pl-1 is-underlined has-text-grey"
-              >
-                Dapper Collectives
-              </a>
-            </p>
+            <div className="is-flex">
+              <p className="has-text-grey small-tex">
+                Maintained by
+                <a
+                  href="https://buildsquad.net"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="pl-1 is-underlined has-text-grey"
+                >
+                  BuildSquad
+                </a>{' '}
+                with
+              </p>
+              <img
+                src="Footer-heart.png"
+                width="25px"
+                height="25px"
+                alt="Footer"
+                className="ml-2"
+              />
+            </div>
           </div>
           <div className="column is-narrow px-4-desktop">
             <p className="has-text-grey small-text">
