@@ -60,16 +60,6 @@ const Schema = (isValidFlowAddress) =>
         is: false,
         then: yup.string().required('Please enter a contract name'),
       }),
-    contractType: yup
-      .string()
-      .trim()
-      .makeOtherFieldsRequired(
-        'Please select a contract type if other fields are not empty'
-      )
-      .when('onlyAuthorsToSubmitProposals', {
-        is: false,
-        then: yup.string().required('Please enter a contract type'),
-      }),
     storagePath: yup
       .string()
       .trim()
