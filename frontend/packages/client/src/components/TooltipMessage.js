@@ -50,7 +50,7 @@ export default function TooltipMesssage({
                 <a
                   target="_blank"
                   rel="noreferrer noopener"
-                  href="https://dapper-collectives-1.gitbook.io/cast-docs/getting-started#connecting-your-wallet"
+                  href="https://flowcast.gitbook.io/cast-docs/getting-started#connecting-your-wallet"
                   className="pl-1 is-underlined has-text-black"
                 >
                   Click here for important information about using Dapper Wallet
