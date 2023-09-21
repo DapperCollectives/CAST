@@ -67,7 +67,7 @@ const Sidenavbar = ({ showSidenav, closeSidenav }) => {
                 <a
                   target="_blank"
                   rel="noreferrer noopener"
-                  href="https://github.com/DapperCollectives/CAST"
+                  href="https://github.com/onflow/CAST"
                   className="navbar-item pl-0 py-4 is-size-5 has-text-black"
                   onClick={closeSidenav}
                 >
