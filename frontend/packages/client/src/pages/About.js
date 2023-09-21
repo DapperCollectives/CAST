@@ -70,7 +70,7 @@ const AboutPage = ({ location }) => {
                     <a
                       target="_blank"
                       rel="noreferrer noopener"
-                      href="https://dapper-collectives.gitbook.io/cast-docs/"
+                      href="https://flowcast.gitbook.io/cast-docs/"
                       className="pr-1 has-text-black is-underlined"
                       onClick={closeModal}
                     >
@@ -89,7 +89,7 @@ const AboutPage = ({ location }) => {
                     <a
                       target="_blank"
                       rel="noreferrer noopener"
-                      href="https://github.com/DapperCollectives/CAST"
+                      href="https://github.com/onflow/CAST"
                       className="pr-1 has-text-black is-underlined"
                       onClick={closeModal}
                     >
@@ -108,7 +108,7 @@ const AboutPage = ({ location }) => {
                     <a
                       target="_blank"
                       rel="noreferrer noopener"
-                      href="https://github.com/DapperCollectives/CAST/issues/new?assignees=markedconfidential&labels=bug&template=bug-report.md&title=%5BBUG%5D"
+                      href="https://github.com/onflow/CAST/issues/new?assignees=markedconfidential&labels=bug&template=bug-report.md&title=%5BBUG%5D"
                       className="pr-1 has-text-black is-underlined"
                       onClick={closeModal}
                     >
