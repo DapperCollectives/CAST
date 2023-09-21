@@ -122,7 +122,7 @@ export default function ThresholdForm({
         <div className="small-text has-text-grey">
           Need help finding this information?{' '}
           <a
-            href="https://dapper-collectives-1.gitbook.io/cast-docs/working-with-contracts-and-paths"
+            href="https://flowcast.gitbook.io/cast-docs/working-with-contracts-and-paths"
             target="_blank"
             rel="noopener noreferrer"
           >

@@ -112,7 +112,7 @@ export default function WalletConnectModal({
                 <a
                   target="_blank"
                   rel="noreferrer noopener"
-                  href="https://dapper-collectives.gitbook.io/cast-docs/"
+                  href="https://flowcast.gitbook.io/cast-docs/"
                   className="px-1 has-text-black is-underlined"
                   onClick={closeModal}
                 >
