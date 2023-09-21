@@ -1,3 +1,6 @@
+
+# Active development for CAST is now on https://github.com/onflow/CAST
+
 # CAST
 
 ![stability-wip](https://img.shields.io/badge/stability-work_in_progress-lightgrey.svg)
@@ -17,3 +20,4 @@ Flow has adopted a Code of Conduct that we expect project participants to adhere
 
 ### [Contributing Guide](https://github.com/onflow/CAST/blob/main/CONTRIBUTING.md)
 Read our [contributing guide](https://github.com/onflow/CAST/blob/main/CONTRIBUTING.md) to learn about our development process, how to propose bugfixes and improvements, and how to build and test your changes.
+
